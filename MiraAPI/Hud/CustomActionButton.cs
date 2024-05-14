@@ -28,8 +28,6 @@ public abstract class CustomActionButton
 
     protected ActionButton Button;
 
-    protected DeadBody DeadBodyTarget;
-
     public void CreateButton(Transform parent)
     {
         if (Button)
@@ -65,10 +63,10 @@ public abstract class CustomActionButton
         {
             OnEffectEnd();
         }
-
+        
         EffectActive = false;
     }
-
+    
     public void OverrideSprite(Sprite sprite)
     {
         Button.graphic.sprite = sprite;
@@ -87,14 +85,9 @@ public abstract class CustomActionButton
 
     public virtual void OnEffectEnd() { }
 
-    private bool CanUseHandler()
-    {
-        return Timer <= 0 && !EffectActive && (!LimitedUses || UsesLeft > 0) && CanUse();
-    }
-
     public virtual bool CanUse()
     {
-        return true;
+        return Timer <= 0 && !EffectActive && (!LimitedUses || UsesLeft > 0);
     }
 
     public virtual void SetActive(bool visible, RoleBehaviour role)
@@ -102,9 +95,9 @@ public abstract class CustomActionButton
         Button.ToggleVisible(visible && Enabled(role));
     }
 
-    private void ClickHandler()
+    public virtual void ClickHandler()
     {
-        if (!CanUseHandler())
+        if (!CanUse())
         {
             return;
         }
@@ -142,7 +135,7 @@ public abstract class CustomActionButton
             }
         }
 
-        if (CanUseHandler())
+        if (CanUse())
         {
             Button.SetEnabled();
         }
@@ -152,10 +145,9 @@ public abstract class CustomActionButton
         }
         Button.SetCoolDown(Timer, EffectActive ? EffectDuration : Cooldown);
 
-        playerControl.UpdateBodies(playerControl.Data.Role.TeamColor, ref DeadBodyTarget);
         FixedUpdate(playerControl);
     }
-
+    
     private void EffectEndHandler()
     {
         EffectActive = false;

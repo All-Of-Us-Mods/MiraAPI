@@ -98,7 +98,7 @@ public static class ToHudStringPatch
             var groupsWithoutRoles = CustomOptionsManager.CustomGroups.Where(group => group.AdvancedRole == null);
 
             var suffix = CustomGameModeManager.ActiveMode.CanAccessSettingsTab() ? "\nPress <b>Tab</b> to view Normal Options" :
-                $"\n<b>You can not access Normal Options on {Cus    tomGameModeManager.ActiveMode.Name} mode.</b>";
+                $"\n<b>You can not access Normal Options on {CustomGameModeManager.ActiveMode.Name} mode.</b>";
 
             AddOptions(sb,
                 CustomOptionsManager.CustomNumberOptions.Where(option => option.Group == null && !option.Hidden()),
