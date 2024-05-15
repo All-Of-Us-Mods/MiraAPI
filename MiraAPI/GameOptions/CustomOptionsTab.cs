@@ -1,4 +1,5 @@
-﻿using Reactor.Utilities.Extensions;
+﻿using MiraAPI.GameOptions;
+using Reactor.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using TMPro;
@@ -10,22 +11,21 @@ public static class CustomOptionsTab
 {
     public static List<GameObject> CustomTabs;
     public static List<GameObject> CustomScreens;
-    public static SpriteRenderer Rend;
 
-    public static GameObject Initialize(GameSettingMenu __instance)
+    public static GameObject InitializeForMod(IModOptions modOptions, GameSettingMenu __instance)
     {
         var gameBtn = __instance.transform.FindChild("Header/Tabs/GameTab").gameObject;
         var roleBtn = __instance.transform.FindChild("Header/Tabs/RoleTab").gameObject;
         var screen = CreateNewMenu(__instance);
-        var tab = CreateCustomTab(__instance, screen, gameBtn, roleBtn);
+        var tab = CreateCustomTab(modOptions, __instance, screen, gameBtn, roleBtn);
 
         CustomScreens.Add(screen);
         CustomTabs.Add(tab);
 
-        Rend = tab.transform.FindChild("Btn/Tab Background").GetComponent<SpriteRenderer>();
-        Rend.enabled = false;
+        SpriteRenderer rend = tab.transform.FindChild("Btn/Tab Background").GetComponent<SpriteRenderer>();
+        rend.enabled = false;
 
-        UpdateListeners(__instance, gameBtn.GetComponentInChildren<PassiveButton>(), roleBtn.GetComponentInChildren<PassiveButton>(), Rend);
+        UpdateListeners(__instance, gameBtn.GetComponentInChildren<PassiveButton>(), roleBtn.GetComponentInChildren<PassiveButton>(), rend);
 
         var container = screen.transform.FindChild("GameGroup/SliderInner");
         container.DestroyChildren();
@@ -33,6 +33,7 @@ public static class CustomOptionsTab
 
         return container.gameObject;
     }
+
 
     /*private static void CreateNewResetButton(GameSettingMenu __instance, Transform container)
     {
@@ -111,7 +112,7 @@ public static class CustomOptionsTab
         return header.gameObject;
     }
 
-    public static GameObject CreateCustomTab(GameSettingMenu __instance, GameObject newSettings,
+    public static GameObject CreateCustomTab(IModOptions options, GameSettingMenu __instance, GameObject newSettings,
         GameObject gameTab, GameObject roleTab)
     {
         var newTab = Object.Instantiate(gameTab, gameTab.transform.parent);
@@ -128,7 +129,7 @@ public static class CustomOptionsTab
         btn.OnClick.AddListener((Action)TabAction);
 
         var spriteRend = inside.GetComponentInChildren<SpriteRenderer>();
-        //spriteRend.sprite = LaunchpadAssets.HackButton.LoadAsset();
+        spriteRend.sprite = options.OptionsTabIcon.LoadAsset();
         spriteRend.gameObject.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
 
         return newTab;

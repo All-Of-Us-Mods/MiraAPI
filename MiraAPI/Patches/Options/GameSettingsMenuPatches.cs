@@ -25,41 +25,44 @@ public static class GameSettingsMenuPatches
 
         CustomOptionsTab.CustomTabs = new();
 
-        __instance.Tabs.transform.position += new Vector3(0.5f, 0, 0);
         _gameBtn = __instance.transform.FindChild("Header/Tabs/GameTab").gameObject;
         _roleBtn = __instance.transform.FindChild("Header/Tabs/RoleTab").gameObject;
 
         var numberOpt = __instance.RegularGameSettings.GetComponentInChildren<NumberOption>();
         var toggleOpt = Object.FindObjectOfType<ToggleOption>();
         var stringOpt = __instance.RegularGameSettings.GetComponentInChildren<StringOption>();
-        var container = GameManager.Instance.IsNormal() ? CustomOptionsTab.Initialize(__instance).transform : __instance.HideAndSeekScroller.Inner;
 
-        foreach (var group in CustomOptionsManager.CustomGroups.Where(group => group.AdvancedRole == null))
+        foreach (var pair in CustomOptionsManager.RegisteredMods)
         {
-            if (GameManager.Instance.IsNormal())
+            var container = CustomOptionsTab.InitializeForMod(pair.Value, __instance).transform;
+
+            foreach (var group in CustomOptionsManager.CustomGroups.Where(group => group.AdvancedRole == null && group.ParentMod == pair.Key))
             {
+                if (GameManager.Instance.IsNormal())
+                {
+                    group.Header = CustomOptionsTab.CreateHeader(toggleOpt, container, group.Title);
+                    CreateOptionsFor(__instance, toggleOpt, numberOpt, stringOpt, container,
+                        group.CustomToggleOptions, group.CustomNumberOptions, group.CustomStringOptions);
+                    continue;
+                }
+
+                if (!group.Options.Any(x => x.ShowInHideNSeek))
+                {
+                    continue;
+                }
+
                 group.Header = CustomOptionsTab.CreateHeader(toggleOpt, container, group.Title);
+                __instance.AllHideAndSeekItems = __instance.AllHideAndSeekItems.Append(group.Header.transform).ToArray();
+
                 CreateOptionsFor(__instance, toggleOpt, numberOpt, stringOpt, container,
                     group.CustomToggleOptions, group.CustomNumberOptions, group.CustomStringOptions);
-                continue;
             }
-
-            if (!group.Options.Any(x => x.ShowInHideNSeek))
-            {
-                continue;
-            }
-
-            group.Header = CustomOptionsTab.CreateHeader(toggleOpt, container, group.Title);
-            __instance.AllHideAndSeekItems = __instance.AllHideAndSeekItems.Append(group.Header.transform).ToArray();
 
             CreateOptionsFor(__instance, toggleOpt, numberOpt, stringOpt, container,
-                group.CustomToggleOptions, group.CustomNumberOptions, group.CustomStringOptions);
+                CustomOptionsManager.CustomToggleOptions.Where(option => option.Group == null && option.ParentMod == pair.Key),
+                CustomOptionsManager.CustomNumberOptions.Where(option => option.Group == null && option.ParentMod == pair.Key),
+                CustomOptionsManager.CustomStringOptions.Where(option => option.Group == null && option.ParentMod == pair.Key));
         }
-
-        CreateOptionsFor(__instance, toggleOpt, numberOpt, stringOpt, container,
-            CustomOptionsManager.CustomToggleOptions.Where(option => option.Group == null),
-            CustomOptionsManager.CustomNumberOptions.Where(option => option.Group == null),
-            CustomOptionsManager.CustomStringOptions.Where(option => option.Group == null));
 
         if (!numberOpt || !toggleOpt || !stringOpt)
         {
@@ -84,7 +87,6 @@ public static class GameSettingsMenuPatches
             __instance.RolesSettings.gameObject.SetActive(false);
 
             //CustomOptionsTab.CustomScreen.gameObject.SetActive(true);
-            CustomOptionsTab.Rend.enabled = true;
 
             __instance.GameSettingsHightlight.enabled = false;
             __instance.RolesSettingsHightlight.enabled = false;

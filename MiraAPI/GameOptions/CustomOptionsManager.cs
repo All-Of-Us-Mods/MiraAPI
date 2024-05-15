@@ -4,7 +4,6 @@ using MiraAPI.GameOptions;
 using MiraAPI.Networking.Options;
 using Reactor.Networking.Rpc;
 using Reactor.Utilities;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -19,15 +18,10 @@ public static class CustomOptionsManager
     public static readonly List<CustomToggleOption> CustomToggleOptions = [];
     public static readonly List<CustomStringOption> CustomStringOptions = [];
     public static readonly List<CustomOptionGroup> CustomGroups = [];
-    public static readonly List<PluginInfo> RegisteredMods = [];
+    public static readonly Dictionary<PluginInfo, IModOptions> RegisteredMods = [];
 
-    public static void RegisterOptionsForMod(Type type, List<FieldInfo> fields, string modId)
+    public static void RegisterOptionsForMod(IModOptions type, List<FieldInfo> fields, string modId)
     {
-        if (!typeof(IModOptions).IsAssignableFrom(type))
-        {
-            Debug.LogError($"Cannot register options for {modId}! Missing IModOptions interface.");
-            return;
-        }
         PluginInfo info = IL2CPPChainloader.Instance.Plugins[modId];
 
         if (info == null)
@@ -37,7 +31,8 @@ public static class CustomOptionsManager
 
         Debug.Log($"Registering Options for {modId}");
 
-        RegisteredMods.Add(info);
+        RegisteredMods.Add(info, type);
+
         foreach (FieldInfo field in fields)
         {
             AbstractGameOption option = (AbstractGameOption)field.GetValue(null);

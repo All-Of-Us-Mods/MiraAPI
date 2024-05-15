@@ -89,7 +89,7 @@ public static class ToHudStringPatch
 
         if (CurrentPage != 0)
         {
-            PluginInfo currentPlugin = CustomOptionsManager.RegisteredMods[CurrentPage - 1];
+            PluginInfo currentPlugin = CustomOptionsManager.RegisteredMods.Keys.ToArray()[CurrentPage - 1];
             if (currentPlugin == null)
             {
                 CurrentPage = 0;
