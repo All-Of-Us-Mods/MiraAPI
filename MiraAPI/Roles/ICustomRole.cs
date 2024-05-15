@@ -11,8 +11,6 @@ public interface ICustomRole
 {
     string RoleName { get; }
 
-    ushort RoleId { get; }
-
     string RoleDescription { get; }
 
     string RoleLongDescription { get; }

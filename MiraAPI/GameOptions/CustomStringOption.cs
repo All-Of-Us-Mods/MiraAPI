@@ -22,7 +22,6 @@ public class CustomStringOption : AbstractGameOption
         Options = options;
         Default = defaultValue;
 
-        CustomOptionsManager.CustomStringOptions.Add(this);
         if (Save)
         {
             try

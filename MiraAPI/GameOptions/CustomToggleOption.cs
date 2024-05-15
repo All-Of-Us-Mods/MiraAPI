@@ -27,7 +27,6 @@ public class CustomToggleOption : AbstractGameOption
                 Logger<MiraAPIPlugin>.Warning(e.ToString());
             }
         }
-        CustomOptionsManager.CustomToggleOptions.Add(this);
     }
 
     public void SetValue(bool newValue)

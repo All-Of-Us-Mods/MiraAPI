@@ -1,8 +1,14 @@
-﻿using MiraAPI.Networking.Options;
+﻿using BepInEx;
+using BepInEx.Unity.IL2CPP;
+using MiraAPI.GameOptions;
+using MiraAPI.Networking.Options;
 using Reactor.Networking.Rpc;
 using Reactor.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using UnityEngine;
 
 namespace MiraAPI.API.GameOptions;
 
@@ -13,6 +19,56 @@ public static class CustomOptionsManager
     public static readonly List<CustomToggleOption> CustomToggleOptions = [];
     public static readonly List<CustomStringOption> CustomStringOptions = [];
     public static readonly List<CustomOptionGroup> CustomGroups = [];
+    public static readonly List<PluginInfo> RegisteredMods = [];
+
+    public static void RegisterOptionsForMod(Type type, List<FieldInfo> fields, string modId)
+    {
+        if (!typeof(IModOptions).IsAssignableFrom(type))
+        {
+            Debug.LogError($"Cannot register options for {modId}! Missing IModOptions interface.");
+            return;
+        }
+        PluginInfo info = IL2CPPChainloader.Instance.Plugins[modId];
+
+        if (info == null)
+        {
+            return;
+        }
+
+        Debug.Log($"Registering Options for {modId}");
+
+        RegisteredMods.Add(info);
+        foreach (FieldInfo field in fields)
+        {
+            AbstractGameOption option = (AbstractGameOption)field.GetValue(null);
+            if (option == null)
+            {
+                CustomOptionGroup group = (CustomOptionGroup)field.GetValue(null);
+                group.ParentMod = info;
+                CustomGroups.Add(group);
+            }
+
+            option.ParentMod = info;
+
+            CustomOptions.Add(option);
+            switch (field.FieldType.Name)
+            {
+                case nameof(CustomNumberOption):
+                    CustomNumberOptions.Add((CustomNumberOption)option);
+                    break;
+
+                case nameof(CustomToggleOption):
+                    CustomToggleOptions.Add((CustomToggleOption)option);
+                    break;
+
+                case nameof(CustomStringOption):
+                    CustomStringOptions.Add((CustomStringOption)option);
+                    break;
+
+            }
+        }
+    }
+
     public static void SyncOptions()
     {
         if (!AmongUsClient.Instance.AmHost)

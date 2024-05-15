@@ -42,8 +42,6 @@ public class CustomNumberOption : AbstractGameOption
                 Logger<MiraAPIPlugin>.Warning(e.ToString());
             }
         }
-
-        CustomOptionsManager.CustomNumberOptions.Add(this);
     }
 
     public void SetValue(float newValue)

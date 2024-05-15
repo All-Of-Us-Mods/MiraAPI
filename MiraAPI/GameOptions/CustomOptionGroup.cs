@@ -1,4 +1,5 @@
-﻿using MiraAPI.Roles;
+﻿using BepInEx;
+using MiraAPI.Roles;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,6 +12,7 @@ public class CustomOptionGroup
 
     public GameObject Header;
     public Type AdvancedRole { get; set; }
+    public PluginInfo ParentMod { get; set; }
 
     public readonly List<AbstractGameOption> Options = [];
     public readonly List<CustomNumberOption> CustomNumberOptions;
@@ -40,7 +42,5 @@ public class CustomOptionGroup
         {
             option.Group = this;
         }
-
-        CustomOptionsManager.CustomGroups.Add(this);
     }
 }

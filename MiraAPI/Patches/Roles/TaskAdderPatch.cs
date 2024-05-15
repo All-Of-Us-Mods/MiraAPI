@@ -13,6 +13,7 @@ namespace MiraAPI.Patches.Roles;
 public static class TaskAdderPatch
 {
     public static TaskFolder RolesFolder;
+    public static System.Collections.Generic.Dictionary<string, string> ModsFolders = new System.Collections.Generic.Dictionary<string, string>();
 
     [HarmonyPostfix, HarmonyPatch(typeof(TaskAdderGame), nameof(TaskAdderGame.Begin))]
     public static void AddRolesFolder(TaskAdderGame __instance)
@@ -21,7 +22,22 @@ public static class TaskAdderPatch
         RolesFolder.gameObject.SetActive(false);
         RolesFolder.FolderName = "Roles";
         RolesFolder.name = "RolesFolder";
+        foreach (var pair in CustomRoleManager.ModRoles)
+        {
+            var newFolder = Object.Instantiate(__instance.RootFolderPrefab, __instance.transform);
+            newFolder.FolderName = pair.Key.Metadata.Name;
+            newFolder.name = pair.Key.Metadata.Name;
+            newFolder.gameObject.SetActive(false);
+            RolesFolder.SubFolders.Add(newFolder);
+
+            if (!ModsFolders.ContainsKey(pair.Key.Metadata.Name))
+            {
+                ModsFolders.Add(pair.Key.Metadata.Name, pair.Key.Metadata.GUID);
+            }
+        }
+
         __instance.Root.SubFolders.Add(RolesFolder);
+
         __instance.GoToRoot();
     }
 
@@ -134,11 +150,11 @@ public static class TaskAdderPatch
             }
         }
 
-        if (taskFolder.FolderName == "Roles") // idk why only this works???
+        if (ModsFolders.TryGetValue(taskFolder.FolderName, out string guid))
         {
-            for (var m = 0; m < DestroyableSingleton<RoleManager>.Instance.AllRoles.Length; m++)
+            for (var m = 0; m < CustomRoleManager.GetRolesRegistered(guid).Count; m++)
             {
-                var roleBehaviour = DestroyableSingleton<RoleManager>.Instance.AllRoles[m];
+                var roleBehaviour = CustomRoleManager.GetRolesRegistered(guid)[m];
                 if (roleBehaviour.Role != RoleTypes.ImpostorGhost && roleBehaviour.Role != RoleTypes.CrewmateGhost && !roleBehaviour.IsDead)
                 {
                     var taskAddButton2 = Object.Instantiate(__instance.RoleButton);

@@ -1,4 +1,5 @@
-﻿using MiraAPI.Roles;
+﻿using BepInEx;
+using MiraAPI.Roles;
 using Reactor.Localization.Utilities;
 using System;
 
@@ -14,6 +15,7 @@ public abstract class AbstractGameOption
     public CustomOptionGroup Group { get; set; }
     public Func<bool> Hidden { get; set; }
     public OptionBehaviour OptionBehaviour { get; protected set; }
+    public PluginInfo ParentMod { get; set; }
     public void ValueChanged(OptionBehaviour optionBehaviour)
     {
         OnValueChanged(optionBehaviour);
@@ -33,6 +35,5 @@ public abstract class AbstractGameOption
 
         Save = save;
         Hidden = () => false;
-        CustomOptionsManager.CustomOptions.Add(this);
     }
 }

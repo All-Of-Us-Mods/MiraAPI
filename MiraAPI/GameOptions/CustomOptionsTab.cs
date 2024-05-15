@@ -1,38 +1,40 @@
 ﻿using Reactor.Utilities.Extensions;
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 using Object = UnityEngine.Object;
 
 namespace MiraAPI.API.GameOptions;
 public static class CustomOptionsTab
 {
-    public static GameObject CustomTab;
-    public static GameObject CustomScreen;
+    public static List<GameObject> CustomTabs;
+    public static List<GameObject> CustomScreens;
     public static SpriteRenderer Rend;
 
     public static GameObject Initialize(GameSettingMenu __instance)
     {
         var gameBtn = __instance.transform.FindChild("Header/Tabs/GameTab").gameObject;
         var roleBtn = __instance.transform.FindChild("Header/Tabs/RoleTab").gameObject;
+        var screen = CreateNewMenu(__instance);
+        var tab = CreateCustomTab(__instance, screen, gameBtn, roleBtn);
 
-        CustomScreen = CreateNewMenu(__instance);
-        CustomTab = CreateCustomTab(__instance, CustomScreen, gameBtn, roleBtn);
+        CustomScreens.Add(screen);
+        CustomTabs.Add(tab);
 
-        Rend = CustomTab.transform.FindChild("LaunchpadBtn/Tab Background").GetComponent<SpriteRenderer>();
+        Rend = tab.transform.FindChild("Btn/Tab Background").GetComponent<SpriteRenderer>();
         Rend.enabled = false;
 
         UpdateListeners(__instance, gameBtn.GetComponentInChildren<PassiveButton>(), roleBtn.GetComponentInChildren<PassiveButton>(), Rend);
 
-        var container = CustomScreen.transform.FindChild("GameGroup/SliderInner");
+        var container = screen.transform.FindChild("GameGroup/SliderInner");
         container.DestroyChildren();
-        CreateNewResetButton(__instance, container);
+        //CreateNewResetButton(__instance, container);
 
         return container.gameObject;
     }
 
-    private static void CreateNewResetButton(GameSettingMenu __instance, Transform container)
+    /*private static void CreateNewResetButton(GameSettingMenu __instance, Transform container)
     {
         var resetBtn = __instance.RegularGameSettings.transform.FindChild("GameGroup/SliderInner/ResetToDefault");
         var newResetBtn = Object.Instantiate(resetBtn.gameObject, container);
@@ -54,35 +56,35 @@ public static class CustomOptionsTab
         toggle.OnClick.AddListener((UnityAction)(() => { CustomOptionsManager.ResetToDefault(); }));
         toggle.OnMouseOver.AddListener((UnityAction)(() => { tmp.text = "<b>Reset Options</b>"; }));
         toggle.OnMouseOut.AddListener((UnityAction)(() => { tmp.text = "Reset Options"; }));
-    }
+    }*/
 
     private static void UpdateListeners(GameSettingMenu __instance, PassiveButton gameB, PassiveButton roleB, SpriteRenderer rend)
     {
         gameB.OnClick.RemoveAllListeners();
-        gameB.OnClick.AddListener((UnityAction)(() =>
-        {
-            __instance.RegularGameSettings.SetActive(true);
-            __instance.RolesSettings.gameObject.SetActive(false);
+        /*        gameB.OnClick.AddListener((UnityAction)(() =>
+                {
+                    __instance.RegularGameSettings.SetActive(true);
+                    __instance.RolesSettings.gameObject.SetActive(false);
 
-            CustomScreen.gameObject.SetActive(false);
-            rend.enabled = false;
+                    CustomScreen.gameObject.SetActive(false);
+                    rend.enabled = false;
 
-            __instance.GameSettingsHightlight.enabled = true;
-            __instance.RolesSettingsHightlight.enabled = false;
-        }));
+                    __instance.GameSettingsHightlight.enabled = true;
+                    __instance.RolesSettingsHightlight.enabled = false;
+                }));
 
-        roleB.OnClick.RemoveAllListeners();
-        roleB.OnClick.AddListener((UnityAction)(() =>
-        {
-            __instance.RegularGameSettings.SetActive(false);
-            __instance.RolesSettings.gameObject.SetActive(true);
+                roleB.OnClick.RemoveAllListeners();
+                roleB.OnClick.AddListener((UnityAction)(() =>
+                {
+                    __instance.RegularGameSettings.SetActive(false);
+                    __instance.RolesSettings.gameObject.SetActive(true);
 
-            CustomScreen.gameObject.SetActive(false);
-            rend.enabled = false;
+                    CustomScreen.gameObject.SetActive(false);
+                    rend.enabled = false;
 
-            __instance.GameSettingsHightlight.enabled = false;
-            __instance.RolesSettingsHightlight.enabled = true;
-        }));
+                    __instance.GameSettingsHightlight.enabled = false;
+                    __instance.RolesSettingsHightlight.enabled = true;
+                }));*/
     }
 
     public static GameObject CreateHeader(ToggleOption toggleOpt, Transform container, string title)
@@ -113,11 +115,11 @@ public static class CustomOptionsTab
         GameObject gameTab, GameObject roleTab)
     {
         var newTab = Object.Instantiate(gameTab, gameTab.transform.parent);
-        newTab.name = "LaunchpadTab";
+        newTab.name = "Tab";
         gameTab.transform.position += new Vector3(-1, 0, 0);
 
         var inside = newTab.transform.FindChild("ColorButton");
-        inside.name = "LaunchpadBtn";
+        inside.name = "Btn";
 
         var btn = inside.GetComponentInChildren<PassiveButton>();
 
@@ -135,6 +137,12 @@ public static class CustomOptionsTab
         {
             __instance.RegularGameSettings.SetActive(false);
             __instance.RolesSettings.gameObject.SetActive(false);
+
+            foreach (var screen in CustomScreens)
+            {
+                screen.gameObject.SetActive(false);
+            }
+
             newSettings.gameObject.SetActive(true);
 
             var rend = inside.transform.FindChild("Tab Background").GetComponent<SpriteRenderer>();
@@ -142,6 +150,11 @@ public static class CustomOptionsTab
 
             gameTab.transform.FindChild("ColorButton/Tab Background").gameObject.GetComponent<SpriteRenderer>().enabled = false;
             roleTab.transform.FindChild("Hat Button/Tab Background").gameObject.GetComponent<SpriteRenderer>().enabled = false;
+
+            foreach (var tab in CustomTabs)
+            {
+                tab.transform.FindChild("Btn/Tab Background").gameObject.GetComponent<SpriteRenderer>().enabled = false;
+            }
         }
     }
 
@@ -149,13 +162,13 @@ public static class CustomOptionsTab
     {
         var gameSettings = __instance.RegularGameSettings;
         var newSettings = Object.Instantiate(gameSettings, gameSettings.transform.parent);
-        newSettings.name = "Launchpad Settings";
+        newSettings.name = "Settings";
         newSettings.SetActive(false);
 
         var launchpadGroup = newSettings.transform.FindChild("GameGroup").gameObject;
         var text = launchpadGroup.transform.FindChild("Text").gameObject.GetComponent<TextMeshPro>();
         text.gameObject.GetComponent<TextTranslatorTMP>().Destroy();
-        text.text = "Launchpad Settings";
+        text.text = "Settings";
 
         return newSettings;
     }

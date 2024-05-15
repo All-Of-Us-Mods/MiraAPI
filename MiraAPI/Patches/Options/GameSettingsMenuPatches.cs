@@ -18,10 +18,12 @@ public static class GameSettingsMenuPatches
     [HarmonyPrefix, HarmonyPatch("Start")]
     public static void StartPrefix(GameSettingMenu __instance)
     {
-        if (CustomOptionsTab.CustomTab)
+        if (CustomOptionsTab.CustomTabs != null)
         {
             return;
         }
+
+        CustomOptionsTab.CustomTabs = new();
 
         __instance.Tabs.transform.position += new Vector3(0.5f, 0, 0);
         _gameBtn = __instance.transform.FindChild("Header/Tabs/GameTab").gameObject;
@@ -81,7 +83,7 @@ public static class GameSettingsMenuPatches
             __instance.RegularGameSettings.SetActive(false);
             __instance.RolesSettings.gameObject.SetActive(false);
 
-            CustomOptionsTab.CustomScreen.gameObject.SetActive(true);
+            //CustomOptionsTab.CustomScreen.gameObject.SetActive(true);
             CustomOptionsTab.Rend.enabled = true;
 
             __instance.GameSettingsHightlight.enabled = false;

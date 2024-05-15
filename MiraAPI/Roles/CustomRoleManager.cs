@@ -1,4 +1,6 @@
 ﻿using AmongUs.GameOptions;
+using BepInEx;
+using BepInEx.Unity.IL2CPP;
 using Il2CppInterop.Runtime;
 using MiraAPI.Networking.Options;
 using Reactor.Localization.Utilities;
@@ -17,14 +19,21 @@ namespace MiraAPI.Roles;
 public static class CustomRoleManager
 {
     public static readonly Dictionary<ushort, RoleBehaviour> CustomRoles = [];
+    public static readonly Dictionary<PluginInfo, List<RoleBehaviour>> ModRoles = [];
 
     public static void RegisterInRoleManager()
     {
         RoleManager.Instance.AllRoles = RoleManager.Instance.AllRoles.Concat(CustomRoles.Values).ToArray();
     }
 
-    internal static void RegisterRole(Type roleType)
+    internal static void RegisterRole(Type roleType, ushort roleId, string modId)
     {
+        if (!IL2CPPChainloader.Instance.Plugins.TryGetValue(modId, out PluginInfo info))
+        {
+            Debug.LogError($"{modId} is not a valid mod!");
+            return;
+        }
+
         if (!(typeof(RoleBehaviour).IsAssignableFrom(roleType) && typeof(ICustomRole).IsAssignableFrom(roleType)))
         {
             return;
@@ -42,7 +51,13 @@ public static class CustomRoleManager
             return;
         }
 
-        roleBehaviour.Role = (RoleTypes)customRole.RoleId;
+        if (CustomRoles.ContainsKey(roleId))
+        {
+            Debug.LogError($"Role ID conflict for {customRole.RoleName}. Use a different ID.");
+            return;
+        }
+
+        roleBehaviour.Role = (RoleTypes)roleId;
         roleBehaviour.TeamType = customRole.Team;
         roleBehaviour.NameColor = customRole.RoleColor;
         roleBehaviour.StringName = CustomStringName.CreateAndRegister(customRole.RoleName);
@@ -61,7 +76,16 @@ public static class CustomRoleManager
             RoleManager.GhostRoles.Add(roleBehaviour.Role);
         }
 
-        CustomRoles.Add(customRole.RoleId, roleBehaviour);
+        if (ModRoles.TryGetValue(info, out List<RoleBehaviour> roles))
+        {
+            roles.Add(roleBehaviour);
+        }
+        else
+        {
+            ModRoles.TryAdd(info, new List<RoleBehaviour>() { roleBehaviour });
+        }
+
+        CustomRoles.Add(roleId, roleBehaviour);
 
         if (customRole.HideSettings)
         {
@@ -74,6 +98,19 @@ public static class CustomRoleManager
 
     }
 
+    public static List<RoleBehaviour> GetRolesRegistered(string modId)
+    {
+        PluginInfo info = ModRoles.Keys.First(key => key.Metadata.GUID == modId);
+        if (ModRoles.TryGetValue(info, out List<RoleBehaviour> roles))
+        {
+            return roles;
+        }
+        else
+        {
+            Debug.LogError($"{modId} has no roles registered.");
+            return null;
+        }
+    }
     public static bool GetCustomRoleBehaviour(RoleTypes roleType, out ICustomRole result)
     {
         CustomRoles.TryGetValue((ushort)roleType, out var temp);
@@ -123,33 +160,35 @@ public static class CustomRoleManager
 
     public static void SyncRoleSettings()
     {
-        foreach (var role in CustomRoles.Values.Select(x => (ICustomRole)x))
+        foreach (var role in CustomRoles.Values)
         {
-            if (role.HideSettings)
+            ICustomRole customRole = role as ICustomRole;
+            if (customRole.HideSettings)
             {
                 continue;
             }
 
-            PluginSingleton<MiraAPIPlugin>.Instance.Config.TryGetEntry<int>(role.NumConfigDefinition, out var numEntry);
-            PluginSingleton<MiraAPIPlugin>.Instance.Config.TryGetEntry<int>(role.ChanceConfigDefinition, out var chanceEntry);
+            PluginSingleton<MiraAPIPlugin>.Instance.Config.TryGetEntry<int>(customRole.NumConfigDefinition, out var numEntry);
+            PluginSingleton<MiraAPIPlugin>.Instance.Config.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var chanceEntry);
 
-            Rpc<SyncRoleOptionsRpc>.Instance.Send(new SyncRoleOptionsRpc.Data(role.RoleId, numEntry.Value, chanceEntry.Value));
+            Rpc<SyncRoleOptionsRpc>.Instance.Send(new SyncRoleOptionsRpc.Data((ushort)role.Role, numEntry.Value, chanceEntry.Value));
         }
     }
 
     public static void SyncRoleSettings(int targetId)
     {
-        foreach (var role in CustomRoles.Values.Select(x => (ICustomRole)x))
+        foreach (var role in CustomRoles.Values)
         {
-            if (role.HideSettings)
+            ICustomRole customRole = role as ICustomRole;
+            if (customRole.HideSettings)
             {
                 continue;
             }
 
-            PluginSingleton<MiraAPIPlugin>.Instance.Config.TryGetEntry<int>(role.NumConfigDefinition, out var numEntry);
-            PluginSingleton<MiraAPIPlugin>.Instance.Config.TryGetEntry<int>(role.ChanceConfigDefinition, out var chanceEntry);
+            PluginSingleton<MiraAPIPlugin>.Instance.Config.TryGetEntry<int>(customRole.NumConfigDefinition, out var numEntry);
+            PluginSingleton<MiraAPIPlugin>.Instance.Config.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var chanceEntry);
 
-            Rpc<SyncRoleOptionsRpc>.Instance.SendTo(targetId, new SyncRoleOptionsRpc.Data(role.RoleId, numEntry.Value, chanceEntry.Value));
+            Rpc<SyncRoleOptionsRpc>.Instance.SendTo(targetId, new SyncRoleOptionsRpc.Data((ushort)role.Role, numEntry.Value, chanceEntry.Value));
         }
     }
 }

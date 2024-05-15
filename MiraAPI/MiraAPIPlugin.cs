@@ -2,6 +2,7 @@
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
 using MiraAPI.GameModes;
+using MiraAPI.GameOptions.Attributes;
 using MiraAPI.Hud;
 using MiraAPI.Roles;
 using Reactor;
@@ -11,7 +12,7 @@ using System.Reflection;
 
 namespace MiraAPI;
 
-[BepInAutoPlugin("dev.xtracube.launchpad", "MiraAPI")]
+[BepInAutoPlugin("mira.api", "MiraAPI")]
 [BepInProcess("Among Us.exe")]
 [BepInDependency(ReactorPlugin.Id)]
 [ReactorModFlags(ModFlags.RequireOnAllClients)]
@@ -25,8 +26,10 @@ public partial class MiraAPIPlugin : BasePlugin
         Instance = this;
         Harmony.PatchAll();
 
-        RegisterGameModeAttribute.Register(Assembly.GetExecutingAssembly());
-        RegisterCustomRoleAttribute.Register(Assembly.GetExecutingAssembly());
+        RegisterCustomRoleAttribute.Initialize();
+        RegisterCustomOptionsAttribute.Initialize();
+
+        RegisterGameModeAttribute.Register(Assembly.GetCallingAssembly());
         RegisterButtonAttribute.Register(Assembly.GetExecutingAssembly());
     }
 }

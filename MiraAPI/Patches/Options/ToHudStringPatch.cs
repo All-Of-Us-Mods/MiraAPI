@@ -1,7 +1,7 @@
 using AmongUs.GameOptions;
+using BepInEx;
 using HarmonyLib;
 using MiraAPI.API.GameOptions;
-using MiraAPI.GameModes;
 using MiraAPI.Roles;
 using MiraAPI.Utilities;
 using System.Collections.Generic;
@@ -13,11 +13,7 @@ namespace MiraAPI.Patches.Options;
 [HarmonyPatch(typeof(IGameOptionsExtensions), "ToHudString")]
 public static class ToHudStringPatch
 {
-    /// <summary>
-    /// Show custom Launchpad options or vanilla game options
-    /// </summary>
-    public static bool ShowCustom = false;
-
+    public static int CurrentPage = 0;
     /// <summary>
     /// Generic method to add options 
     /// </summary>
@@ -82,28 +78,32 @@ public static class ToHudStringPatch
             return;
         }
 
-        foreach (var role in CustomRoleManager.CustomRoles.Values)
+        foreach (var pair in CustomRoleManager.CustomRoles)
         {
-            var customRole = role as ICustomRole;
+            var customRole = pair.Value as ICustomRole;
             if (customRole.IsGhostRole)
             {
-                role.Role = (RoleTypes)customRole.RoleId;
+                pair.Value.Role = (RoleTypes)pair.Key;
             }
         }
 
-        if (ShowCustom || !CustomGameModeManager.ActiveMode.CanAccessSettingsTab())
+        if (CurrentPage != 0)
         {
-            var sb = new StringBuilder("<size=180%><b>Launchpad Options:</b></size>\n<size=130%>");
-            var groupsWithRoles = CustomOptionsManager.CustomGroups.Where(group => group.AdvancedRole != null);
-            var groupsWithoutRoles = CustomOptionsManager.CustomGroups.Where(group => group.AdvancedRole == null);
+            PluginInfo currentPlugin = CustomOptionsManager.RegisteredMods[CurrentPage - 1];
+            if (currentPlugin == null)
+            {
+                CurrentPage = 0;
+                return;
+            }
 
-            var suffix = CustomGameModeManager.ActiveMode.CanAccessSettingsTab() ? "\nPress <b>Tab</b> to view Normal Options" :
-                $"\n<b>You can not access Normal Options on {CustomGameModeManager.ActiveMode.Name} mode.</b>";
+            var sb = new StringBuilder($"<size=180%><b>{currentPlugin.Metadata.Name} Options:</b></size>\n<size=130%>");
+            var groupsWithRoles = CustomOptionsManager.CustomGroups.Where(group => group.AdvancedRole != null && group.ParentMod == currentPlugin);
+            var groupsWithoutRoles = CustomOptionsManager.CustomGroups.Where(group => group.AdvancedRole == null && group.ParentMod == currentPlugin);
 
             AddOptions(sb,
-                CustomOptionsManager.CustomNumberOptions.Where(option => option.Group == null && !option.Hidden()),
-                CustomOptionsManager.CustomStringOptions.Where(option => option.Group == null && !option.Hidden()),
-                CustomOptionsManager.CustomToggleOptions.Where(option => option.Group == null && !option.Hidden())
+                CustomOptionsManager.CustomNumberOptions.Where(option => option.Group == null && option.ParentMod == currentPlugin && !option.Hidden()),
+                CustomOptionsManager.CustomStringOptions.Where(option => option.Group == null && option.ParentMod == currentPlugin && !option.Hidden()),
+                CustomOptionsManager.CustomToggleOptions.Where(option => option.Group == null && option.ParentMod == currentPlugin && !option.Hidden())
                 );
 
             foreach (var group in groupsWithoutRoles)
@@ -117,14 +117,8 @@ public static class ToHudStringPatch
                 AddOptions(sb, group.CustomNumberOptions, group.CustomStringOptions, group.CustomToggleOptions);
             }
 
-            if (GameManager.Instance.IsHideAndSeek())
-            {
-                __result = sb + suffix;
-                return;
-            }
-
             var customOptionGroups = groupsWithRoles as CustomOptionGroup[] ?? groupsWithRoles.ToArray();
-            if (customOptionGroups.Any() && CustomGameModeManager.ActiveMode.CanAccessRolesTab())
+            if (customOptionGroups.Any())
             {
                 sb.AppendLine("\n<size=160%><b>Roles</b></size>");
 
@@ -141,10 +135,13 @@ public static class ToHudStringPatch
                 }
             }
 
-            __result = sb + suffix;
-            return;
+            __result = sb.ToString();
         }
 
-        __result = "<size=160%><b>Normal Options:</b></size>\n<size=130%>" + __result + "\nPress <b>Tab</b> to view Launchpad Options</size>";
+        if (CurrentPage == 0)
+        {
+            __result = "<size=160%><b>Normal Options:</b></size>\n<size=130%>" + __result;
+        }
+        __result += $"\nUse <b>TAB</b> to switch pages (Page {CurrentPage}/{CustomOptionsManager.RegisteredMods.Count})</size>";
     }
 }
