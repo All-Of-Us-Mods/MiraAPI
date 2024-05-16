@@ -1,8 +1,6 @@
 ﻿using AmongUs.GameOptions;
 using HarmonyLib;
 using Il2CppInterop.Runtime;
-using Il2CppSystem;
-using MiraAPI.API.GameOptions;
 using MiraAPI.Networking.Options;
 using MiraAPI.Roles;
 using Reactor.Networking.Rpc;
@@ -54,26 +52,26 @@ public static class RolesSettingsMenuPatches
 
             var startOffset = 0.5f;
 
-            foreach (var customOption in CustomOptionsManager.CustomOptions)
-            {
-                if (customOption.AdvancedRole is not null && customOption.AdvancedRole == role.GetType())
-                {
-                    startOffset -= 0.5f;
+            /*            foreach (var customOption in CustomOptionsManager.CustomOptions)
+                        {
+                            if (customOption.AdvancedRole is not null && customOption.AdvancedRole == role.GetType())
+                            {
+                                startOffset -= 0.5f;
 
-                    switch (customOption)
-                    {
-                        case CustomNumberOption numberOption:
-                            var numOpt = numberOption.CreateNumberOption(numberSet, newTab.transform);
-                            numOpt.transform.localPosition = new Vector3(-1.25f, startOffset, 0);
-                            break;
+                                switch (customOption)
+                                {
+                                    case CustomNumberOption numberOption:
+                                        var numOpt = numberOption.CreateNumberOption(numberSet, newTab.transform);
+                                        numOpt.transform.localPosition = new Vector3(-1.25f, startOffset, 0);
+                                        break;
 
-                        case CustomToggleOption toggleOption:
-                            var togOpt = toggleOption.CreateToggleOption(toggleSet, newTab.transform);
-                            togOpt.transform.localPosition = new Vector3(-1.25f, startOffset, 0);
-                            break;
-                    }
-                }
-            }
+                                    case CustomToggleOption toggleOption:
+                                        var togOpt = toggleOption.CreateToggleOption(toggleSet, newTab.transform);
+                                        togOpt.transform.localPosition = new Vector3(-1.25f, startOffset, 0);
+                                        break;
+                                }
+                            }
+                        }*/
 
             var tmp = newTab.GetComponentInChildren<TextTranslatorTMP>();
             tmp.defaultStr = role.NiceName;
@@ -98,13 +96,13 @@ public static class RolesSettingsMenuPatches
     [HarmonyPostfix, HarmonyPatch("Start")]
     public static void StartPostfix(RolesSettingsMenu __instance)
     {
-        foreach (var customOption in CustomOptionsManager.CustomOptions)
-        {
-            if (customOption.AdvancedRole is not null)
-            {
-                customOption.OptionBehaviour.OnValueChanged = (Action<OptionBehaviour>)customOption.ValueChanged;
-            }
-        }
+        /*        foreach (var customOption in CustomOptionsManager.CustomOptions)
+                {
+                    if (customOption.AdvancedRole is not null)
+                    {
+                        customOption.OptionBehaviour.OnValueChanged = (Action<OptionBehaviour>)customOption.ValueChanged;
+                    }
+                }*/
 
         var scroll = __instance.GetComponentInChildren<Scroller>();
         scroll.active = true;

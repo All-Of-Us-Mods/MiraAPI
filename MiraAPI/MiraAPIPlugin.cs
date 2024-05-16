@@ -27,7 +27,7 @@ public partial class MiraAPIPlugin : BasePlugin
         Harmony.PatchAll();
 
         RegisterCustomRoleAttribute.Initialize();
-        RegisterCustomOptionsAttribute.Initialize();
+        RegisterModdedOptionAttribute.Initialize();
 
         RegisterGameModeAttribute.Register(Assembly.GetCallingAssembly());
         RegisterButtonAttribute.Register(Assembly.GetExecutingAssembly());

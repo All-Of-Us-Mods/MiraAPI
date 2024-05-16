@@ -1,5 +1,4 @@
 ﻿using Hazel;
-using MiraAPI.API.GameOptions;
 using Reactor.Networking.Attributes;
 using Reactor.Networking.Rpc;
 
@@ -77,6 +76,6 @@ public class SyncOptionsRpc(MiraAPIPlugin plugin, uint id) : PlayerCustomRpc<Mir
             return;
         }
 
-        CustomOptionsManager.HandleOptionsSync(data.Toggles, data.Numbers, data.StringIDs);
+        //CustomOptionsManager.HandleOptionsSync(data.Toggles, data.Numbers, data.StringIDs);
     }
 }
