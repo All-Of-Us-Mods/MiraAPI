@@ -46,7 +46,7 @@ public static class TaskAdderPatch
     {
         if (__instance.role is ICustomRole lpRole)
         {
-            if (lpRole.IsOutcast)
+            if (lpRole.IsNeutral)
             {
                 __instance.FileImage.color = Color.gray;
             }

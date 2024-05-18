@@ -17,7 +17,7 @@ public interface ICustomRole
 
     Color RoleColor { get; }
 
-    RoleTeamTypes Team { get; }
+    ModdedRoleTeams Team { get; }
 
     LoadableAsset<Sprite> Icon => MiraAssets.Empty;
 
@@ -25,17 +25,17 @@ public interface ICustomRole
 
     ConfigDefinition ChanceConfigDefinition => new("Roles", $"Chance{RoleName}");
 
-    bool AffectedByLight => Team == RoleTeamTypes.Crewmate;
+    bool AffectedByLight => Team == ModdedRoleTeams.Crewmate;
 
-    bool CanGetKilled => Team == RoleTeamTypes.Crewmate;
+    bool CanGetKilled => Team == ModdedRoleTeams.Crewmate;
 
-    bool IsOutcast => false;
+    bool IsNeutral => Team == ModdedRoleTeams.Neutral;
 
-    bool CanKill => Team == RoleTeamTypes.Impostor;
+    bool CanKill => Team == ModdedRoleTeams.Impostor;
 
-    bool CanUseVent => Team == RoleTeamTypes.Impostor;
+    bool CanUseVent => Team == ModdedRoleTeams.Impostor;
 
-    bool TasksCount => Team == RoleTeamTypes.Crewmate;
+    bool TasksCount => Team == ModdedRoleTeams.Crewmate;
 
     bool IsGhostRole => false;
 
@@ -45,7 +45,7 @@ public interface ICustomRole
 
     bool HideSettings => IsGhostRole;
 
-    RoleTypes GhostRole => Team == RoleTeamTypes.Crewmate ? RoleTypes.CrewmateGhost : RoleTypes.ImpostorGhost;
+    RoleTypes GhostRole => Team == ModdedRoleTeams.Crewmate ? RoleTypes.CrewmateGhost : RoleTypes.ImpostorGhost;
 
     void CreateOptions() { }
 
@@ -55,7 +55,7 @@ public interface ICustomRole
 
     string GetCustomEjectionMessage(GameData.PlayerInfo player)
     {
-        return Team == RoleTeamTypes.Impostor ? $"{player.PlayerName} was The {RoleName}" : null;
+        return Team == ModdedRoleTeams.Impostor ? $"{player.PlayerName} was The {RoleName}" : null;
     }
 
     StringBuilder SetTabText()

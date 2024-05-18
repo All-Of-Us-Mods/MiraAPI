@@ -1,7 +1,6 @@
 ﻿using MiraAPI.GameOptions.OptionTypes;
 using System;
 using System.Reflection;
-using UnityEngine;
 
 namespace MiraAPI.GameOptions.Attributes
 {
@@ -13,7 +12,6 @@ namespace MiraAPI.GameOptions.Attributes
 
         public override IModdedOption CreateOption(object value, PropertyInfo property)
         {
-            Debug.LogError(value.ToString());
             var toggleOpt = new ModdedToggleOption(Title, (bool)value, RoleType);
             return toggleOpt;
         }
