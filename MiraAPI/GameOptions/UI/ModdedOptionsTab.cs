@@ -65,12 +65,13 @@ public static class ModdedOptionsTab
         }));
     }
 
-    public static GameObject CreateHeader(ToggleOption toggleOpt, Transform container, string title)
+    public static GameObject CreateHeader(ToggleOption toggleOpt, Transform container, string title, Color color)
     {
         var header = Object.Instantiate(toggleOpt, container);
 
         header.Title = StringNames.None;
         header.TitleText.text = title;
+        header.TitleText.color = color;
         header.name = "Header";
 
         var checkBox = header.transform.FindChild("CheckBox")?.gameObject;
@@ -146,7 +147,7 @@ public static class ModdedOptionsTab
         var launchpadGroup = newSettings.transform.FindChild("GameGroup").gameObject;
         var text = launchpadGroup.transform.FindChild("Text").gameObject.GetComponent<TextMeshPro>();
         text.gameObject.GetComponent<TextTranslatorTMP>().Destroy();
-        text.text = $"{config.TabSettings.Title}";
+        text.text = $"{config.TabSettings.Title} Options";
 
         return newSettings;
     }

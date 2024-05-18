@@ -38,7 +38,7 @@ public static class GameSettingsMenuPatches
 
             foreach (var group in ModdedOptionsManager.Groups.Where(group => group.AdvancedRole == null && group.ParentMod == pair.Value))
             {
-                group.Header = ModdedOptionsTab.CreateHeader(toggleOpt, container, group.GroupName);
+                group.Header = ModdedOptionsTab.CreateHeader(toggleOpt, container, group.GroupName, group.GroupColor);
                 CreateOptionsFor(__instance, toggleOpt, numberOpt, stringOpt, container, ModdedOptionsManager.Options.Where(x => x.Group == group).ToList());
             }
 

@@ -18,7 +18,7 @@ public partial class ExamplePlugin : BasePlugin, IMiraConfig
     public static ExamplePlugin Instance { get; private set; }
     public ModdedOptionTabSettings TabSettings => new ModdedOptionTabSettings()
     {
-        Title = "Example Mod",
+        Title = "MiraAPI Example Mod",
         TabIcon = MiraAssets.Empty
     };
 

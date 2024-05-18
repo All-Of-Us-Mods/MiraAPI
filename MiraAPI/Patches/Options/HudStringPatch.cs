@@ -69,7 +69,7 @@ public static class ToHudStringPatch
                 return;
             }
 
-            var sb = new StringBuilder($"<size=180%><b>{currentPlugin.TabSettings.Title}:</b></size>\n<size=130%>");
+            var sb = new StringBuilder($"<size=180%><b>{currentPlugin.TabSettings.Title} Options:</b></size>\n<size=130%>");
             var groupsWithRoles = ModdedOptionsManager.Groups.Where(group => group.AdvancedRole != null && group.ParentMod == currentPlugin);
             var groupsWithoutRoles = ModdedOptionsManager.Groups.Where(group => group.AdvancedRole == null && group.ParentMod == currentPlugin);
 
@@ -84,7 +84,7 @@ public static class ToHudStringPatch
                     continue;
                 }
 
-                sb.AppendLine($"\n<size=160%><b>{group.GroupName}</b></size>");
+                sb.AppendLine($"\n<size=160%><b>{group.GroupColor.ToTextColor()}{group.GroupName}</color></b></size>");
                 AddOptions(sb, ModdedOptionsManager.Options.Where(x => x.Group == group).ToList());
             }
 
@@ -100,7 +100,7 @@ public static class ToHudStringPatch
                         continue;
                     }
 
-                    sb.AppendLine($"<size=140%><b>{group.GroupName}</b></size><size=120%>");
+                    sb.AppendLine($"<size=140%><b>{group.GroupColor.ToTextColor()}{group.GroupName}</color></b></size><size=120%>");
                     AddOptions(sb, ModdedOptionsManager.Options.Where(x => x.Group == group).ToList());
                     sb.Append("</size>\n");
                 }
