@@ -1,6 +1,6 @@
-﻿using HarmonyLib;
+﻿using BepInEx.Unity.IL2CPP;
+using HarmonyLib;
 using MiraAPI.GameOptions.Attributes;
-using MiraAPI.GameOptions.OptionTypes;
 using Reactor.Utilities;
 using System;
 using System.Collections.Generic;
@@ -12,62 +12,101 @@ namespace MiraAPI.GameOptions
 {
     public class ModdedOptionsManager
     {
-        public static ModdedOptionsManager Instance;
-        public List<IModdedOption> Options = new List<IModdedOption>();
+        public static List<IModdedOption> Options = new();
+        public static List<ModdedOptionGroup> Groups = new();
+        private static Dictionary<PropertyInfo, ModdedOptionAttribute> OptionAttributes = new();
+        private static Dictionary<Type, ModdedOptionGroup> OriginalTypes = new();
+        public static Dictionary<Assembly, IMiraConfig> RegisteredMods = new();
 
-        private Dictionary<PropertyInfo, IModdedOption> PatchedOptions = new Dictionary<PropertyInfo, IModdedOption>();
-
-        public void CreateOption(Type type, RegisterModdedOptionAttribute attribute, PropertyInfo property)
+        public static void Initialize()
         {
-            Debug.LogError(property.GetConstantValue().GetType().ToString());
-
-            switch (property.GetConstantValue())
+            IL2CPPChainloader.Instance.PluginLoad += (_, assembly, plugin) =>
             {
-                case bool:
-                    CreateToggleOption(type, attribute, property);
-                    break;
-                default:
-                    Debug.LogError($"Mira API does not support type {property.GetConstantValue().GetType()}");
-                    break;
-            }
+                if (plugin.GetType().GetInterfaces().Contains(typeof(IMiraConfig)))
+                {
+                    IMiraConfig config = (IMiraConfig)Activator.CreateInstance(plugin.GetType());
+                    RegisteredMods.Add(assembly, config);
+                }
+
+                RegisterOptionGroups(assembly);
+
+                ModdedOptionAttribute.Register(assembly);
+            };
         }
 
-        public static void PropertySetterPatch(MethodBase __originalMethod, object[] args)
+        private static void RegisterOptionGroups(Assembly assembly)
         {
-            IModdedOption opt = Instance.PatchedOptions.First(pair => pair.Key.GetSetMethod().Equals(__originalMethod)).Value;
-
-            if (opt != null)
+            foreach (var type in assembly.GetTypes())
             {
-                object value = args[0];
-                switch (value)
+                if (typeof(IModdedOptionGroup).IsAssignableFrom(type))
                 {
-                    case bool:
-                        ModdedToggleOption toggleOpt = opt as ModdedToggleOption;
-                        toggleOpt.SetValue((bool)value);
-                        break;
+                    IModdedOptionGroup group = (IModdedOptionGroup)Activator.CreateInstance(type);
+                    ModdedOptionGroup newGroup = new ModdedOptionGroup()
+                    {
+                        AdvancedRole = group.AdvancedRole,
+                        GroupColor = group.GroupColor,
+                        GroupName = group.GroupName,
+                        GroupVisible = group.GroupVisible
+                    };
+
+                    Groups.Add(newGroup);
+                    OriginalTypes.Add(type, newGroup);
+
+                    newGroup.ParentMod = RegisteredMods[assembly];
                 }
             }
         }
 
-        public ModdedToggleOption CreateToggleOption(Type type, RegisterModdedOptionAttribute attribute, PropertyInfo property)
+        public static void RegisterOption(Assembly assembly, Type type, ModdedOptionAttribute attribute, PropertyInfo property)
         {
-            var toggleOpt = new ModdedToggleOption(attribute.Title, (bool)property.GetValue(type));
-            Options.Add(toggleOpt);
+            if (OptionAttributes.ContainsKey(property)) return;
+            object newObj = Activator.CreateInstance(type);
+            IModdedOption result = attribute.CreateOption(property.GetValue(newObj), property);
 
-            var setterOriginal = property.GetSetMethod();
-            var setterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertySetterPatch));
-            PluginSingleton<MiraAPIPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: new HarmonyMethod(setterPatch));
-            /*
-                        var getterOriginal = property.GetGetMethod();
-                        var getterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyGetterPatch));
-                        PluginSingleton<MiraAPIPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: new HarmonyMethod(getterPatch));*/
+            if (result != null)
+            {
+                var setterOriginal = property.GetSetMethod();
+                var setterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertySetterPatch));
+                PluginSingleton<MiraAPIPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: new HarmonyMethod(setterPatch));
 
-            toggleOpt.PropertyInfo = property;
+                var getterOriginal = property.GetGetMethod();
+                var getterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyGetterPatch));
+                PluginSingleton<MiraAPIPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: new HarmonyMethod(getterPatch));
 
-            if (!PatchedOptions.ContainsKey(property))
-                PatchedOptions.Add(property, toggleOpt);
+                attribute.HolderOption = result;
+                result.ParentMod = RegisteredMods[assembly];
 
-            return toggleOpt;
+                Options.Add(result);
+                OptionAttributes.Add(property, attribute);
+
+                if (OriginalTypes.ContainsKey(type))
+                {
+                    Debug.LogError($"grouping {attribute.Title} with {OriginalTypes[type].GroupName}");
+                    result.Group = OriginalTypes[type];
+                }
+            }
+        }
+
+        public static void PropertySetterPatch(MethodBase __originalMethod, object value)
+        {
+            ModdedOptionAttribute attribute = OptionAttributes.First(pair => pair.Key.GetSetMethod().Equals(__originalMethod)).Value;
+
+            if (attribute != null)
+            {
+                attribute.SetValue(value);
+            }
+        }
+
+        public static bool PropertyGetterPatch(MethodBase __originalMethod, ref object __result)
+        {
+            ModdedOptionAttribute attribute = OptionAttributes.First(pair => pair.Key.GetGetMethod().Equals(__originalMethod)).Value;
+
+            if (attribute != null)
+            {
+                __result = attribute.GetValue();
+                return false;
+            }
+            return true;
         }
     }
 }

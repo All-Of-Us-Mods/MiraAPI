@@ -1,6 +1,7 @@
-﻿using Reactor.Localization.Utilities;
+﻿using MiraAPI.Roles;
+using Reactor.Localization.Utilities;
 using System;
-using System.Reflection;
+using UnityEngine;
 
 namespace MiraAPI.GameOptions.OptionTypes
 {
@@ -9,20 +10,26 @@ namespace MiraAPI.GameOptions.OptionTypes
         public T Value { get; set; }
         public T DefaultValue { get; set; }
         public Action<T> ChangedEvent { get; private set; }
-
-        public PropertyInfo PropertyInfo;
         public string Title { get; }
         public StringNames StringName { get; }
-        public Func<bool> Hidden { get; set; }
-        public OptionBehaviour OptionBehaviour { get; protected set; }
+        public Func<bool> Visible { get; set; }
+        public Type AdvancedRole { get; }
+        public OptionBehaviour OptionBehaviour { get; set; }
+        public ModdedOptionGroup Group { get; set; } = null;
+        public IMiraConfig ParentMod { get; set; } = null;
 
-        public ModdedOption(string title, T defaultValue)
+        public ModdedOption(string title, T defaultValue, Type roleType)
         {
             Title = title;
             DefaultValue = defaultValue;
             Value = defaultValue;
             StringName = CustomStringName.CreateAndRegister(Title);
-            Hidden = () => false;
+            Visible = () => true;
+
+            if (roleType is not null && roleType.IsAssignableTo(typeof(ICustomRole)))
+            {
+                AdvancedRole = roleType;
+            }
         }
 
         public void ValueChanged(OptionBehaviour optionBehaviour)
@@ -39,9 +46,15 @@ namespace MiraAPI.GameOptions.OptionTypes
                 ChangedEvent.Invoke(Value);
             }
 
-            PropertyInfo.SetValue(null, newValue);
+            OnValueChanged(newValue);
         }
 
+        public abstract void OnValueChanged(T newValue);
+
         public abstract T GetValueFromOptionBehaviour(OptionBehaviour optionBehaviour);
+
+        public abstract OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container);
+
+        public abstract string GetHudStringText();
     }
 }

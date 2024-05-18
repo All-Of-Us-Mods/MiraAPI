@@ -2,7 +2,7 @@
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
 using MiraAPI.GameModes;
-using MiraAPI.GameOptions.Attributes;
+using MiraAPI.GameOptions;
 using MiraAPI.Hud;
 using MiraAPI.Roles;
 using Reactor;
@@ -27,7 +27,7 @@ public partial class MiraAPIPlugin : BasePlugin
         Harmony.PatchAll();
 
         RegisterCustomRoleAttribute.Initialize();
-        RegisterModdedOptionAttribute.Initialize();
+        ModdedOptionsManager.Initialize();
 
         RegisterGameModeAttribute.Register(Assembly.GetCallingAssembly());
         RegisterButtonAttribute.Register(Assembly.GetExecutingAssembly());
