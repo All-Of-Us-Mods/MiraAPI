@@ -1,7 +1,8 @@
-using HarmonyLib;
+﻿using HarmonyLib;
 using MiraAPI.API.GameOptions;
-using MiraAPI.GameModes;
+using MiraAPI.GameOptions;
 using Reactor.Utilities;
+using Reactor.Utilities.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -18,12 +19,11 @@ public static class GameSettingsMenuPatches
     [HarmonyPrefix, HarmonyPatch("Start")]
     public static void StartPrefix(GameSettingMenu __instance)
     {
-        if (CustomOptionsTab.CustomTabs != null)
-        {
-            return;
-        }
+        foreach (var tab in ModdedOptionsTab.CustomTabs) tab.gameObject.Destroy();
+        foreach (var screen in ModdedOptionsTab.CustomScreens) screen.gameObject.Destroy();
 
-        CustomOptionsTab.CustomTabs = new();
+        ModdedOptionsTab.CustomScreens.Clear();
+        ModdedOptionsTab.CustomTabs.Clear();
 
         _gameBtn = __instance.transform.FindChild("Header/Tabs/GameTab").gameObject;
         _roleBtn = __instance.transform.FindChild("Header/Tabs/RoleTab").gameObject;
@@ -32,36 +32,17 @@ public static class GameSettingsMenuPatches
         var toggleOpt = Object.FindObjectOfType<ToggleOption>();
         var stringOpt = __instance.RegularGameSettings.GetComponentInChildren<StringOption>();
 
-        foreach (var pair in CustomOptionsManager.RegisteredMods)
+        foreach (var pair in ModdedOptionsManager.RegisteredMods)
         {
-            var container = CustomOptionsTab.InitializeForMod(pair.Value, __instance).transform;
+            var container = ModdedOptionsTab.InitializeForMod(pair.Value, __instance).transform;
 
-            foreach (var group in CustomOptionsManager.CustomGroups.Where(group => group.AdvancedRole == null && group.ParentMod == pair.Key))
+            foreach (var group in ModdedOptionsManager.Groups.Where(group => group.AdvancedRole == null && group.ParentMod == pair.Value))
             {
-                if (GameManager.Instance.IsNormal())
-                {
-                    group.Header = CustomOptionsTab.CreateHeader(toggleOpt, container, group.Title);
-                    CreateOptionsFor(__instance, toggleOpt, numberOpt, stringOpt, container,
-                        group.CustomToggleOptions, group.CustomNumberOptions, group.CustomStringOptions);
-                    continue;
-                }
-
-                if (!group.Options.Any(x => x.ShowInHideNSeek))
-                {
-                    continue;
-                }
-
-                group.Header = CustomOptionsTab.CreateHeader(toggleOpt, container, group.Title);
-                __instance.AllHideAndSeekItems = __instance.AllHideAndSeekItems.Append(group.Header.transform).ToArray();
-
-                CreateOptionsFor(__instance, toggleOpt, numberOpt, stringOpt, container,
-                    group.CustomToggleOptions, group.CustomNumberOptions, group.CustomStringOptions);
+                group.Header = ModdedOptionsTab.CreateHeader(toggleOpt, container, group.GroupName, group.GroupColor);
+                CreateOptionsFor(__instance, toggleOpt, numberOpt, stringOpt, container, ModdedOptionsManager.Options.Where(x => x.Group == group).ToList());
             }
 
-            CreateOptionsFor(__instance, toggleOpt, numberOpt, stringOpt, container,
-                CustomOptionsManager.CustomToggleOptions.Where(option => option.Group == null && option.ParentMod == pair.Key),
-                CustomOptionsManager.CustomNumberOptions.Where(option => option.Group == null && option.ParentMod == pair.Key),
-                CustomOptionsManager.CustomStringOptions.Where(option => option.Group == null && option.ParentMod == pair.Key));
+            CreateOptionsFor(__instance, toggleOpt, numberOpt, stringOpt, container, ModdedOptionsManager.Options.Where(x => x.Group is null).ToList());
         }
 
         if (!numberOpt || !toggleOpt || !stringOpt)
@@ -70,106 +51,18 @@ public static class GameSettingsMenuPatches
         }
     }
 
-    [HarmonyPostfix, HarmonyPatch("Update")]
-    public static void UpdatePatch(GameSettingMenu __instance)
-    {
-        if (CustomGameModeManager.ActiveMode == null)
-        {
-            return;
-        }
-
-        _gameBtn.SetActive(CustomGameModeManager.ActiveMode.CanAccessSettingsTab());
-        _roleBtn.SetActive(CustomGameModeManager.ActiveMode.CanAccessRolesTab());
-
-        if (!CustomGameModeManager.ActiveMode.CanAccessSettingsTab())
-        {
-            __instance.RegularGameSettings.SetActive(false);
-            __instance.RolesSettings.gameObject.SetActive(false);
-
-            //CustomOptionsTab.CustomScreen.gameObject.SetActive(true);
-
-            __instance.GameSettingsHightlight.enabled = false;
-            __instance.RolesSettingsHightlight.enabled = false;
-        }
-    }
-
     public static void CreateOptionsFor(GameSettingMenu __instance, ToggleOption togglePrefab, NumberOption numberPrefab, StringOption stringPrefab, Transform container,
-        IEnumerable<CustomToggleOption> toggles, IEnumerable<CustomNumberOption> numbers, IEnumerable<CustomStringOption> strings)
+        List<IModdedOption> options)
     {
-        foreach (var customToggleOption in toggles)
+        foreach (IModdedOption option in options)
         {
-            if (customToggleOption.AdvancedRole is not null || customToggleOption.OptionBehaviour)
+            if (option.AdvancedRole is not null || option.OptionBehaviour)
             {
                 continue;
             }
 
-            ToggleOption toggleOption;
-
-            if (GameManager.Instance.IsNormal())
-            {
-                toggleOption = customToggleOption.CreateToggleOption(togglePrefab, container);
-                __instance.AllItems = __instance.AllItems.AddItem(toggleOption.transform).ToArray();
-                continue;
-            }
-
-            if (!customToggleOption.ShowInHideNSeek)
-            {
-                continue;
-            }
-
-            toggleOption = customToggleOption.CreateToggleOption(togglePrefab, container);
-            __instance.AllHideAndSeekItems = __instance.AllHideAndSeekItems.AddItem(toggleOption.transform).ToArray();
-
-        }
-
-        foreach (var customNumberOption in numbers)
-        {
-            if (customNumberOption.AdvancedRole is not null || customNumberOption.OptionBehaviour)
-            {
-                continue;
-            }
-
-            NumberOption numberOption;
-
-            if (GameManager.Instance.IsNormal())
-            {
-                numberOption = customNumberOption.CreateNumberOption(numberPrefab, container);
-                __instance.AllItems = __instance.AllItems.AddItem(numberOption.transform).ToArray();
-                continue;
-            }
-
-            if (!customNumberOption.ShowInHideNSeek)
-            {
-                continue;
-            }
-
-            numberOption = customNumberOption.CreateNumberOption(numberPrefab, container);
-            __instance.AllHideAndSeekItems = __instance.AllHideAndSeekItems.AddItem(numberOption.transform).ToArray();
-        }
-
-        foreach (var customStringOption in strings)
-        {
-            if (customStringOption.AdvancedRole is not null || customStringOption.OptionBehaviour)
-            {
-                continue;
-            }
-
-            StringOption stringOption;
-
-            if (GameManager.Instance.IsNormal())
-            {
-                stringOption = customStringOption.CreateStringOption(stringPrefab, container);
-                __instance.AllItems = __instance.AllItems.AddItem(stringOption.transform).ToArray();
-                continue;
-            }
-
-            if (!customStringOption.ShowInHideNSeek)
-            {
-                continue;
-            }
-
-            stringOption = customStringOption.CreateStringOption(stringPrefab, container);
-            __instance.AllHideAndSeekItems = __instance.AllHideAndSeekItems.AddItem(stringOption.transform).ToArray();
+            OptionBehaviour newOption = option.CreateOption(togglePrefab, numberPrefab, stringPrefab, container);
+            __instance.AllItems = __instance.AllItems.AddItem(newOption.transform).ToArray();
         }
     }
 }

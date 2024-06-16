@@ -1,23 +1,23 @@
-﻿using MiraAPI.GameOptions;
-using Reactor.Utilities.Extensions;
+﻿using Reactor.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using Object = UnityEngine.Object;
 
 namespace MiraAPI.API.GameOptions;
-public static class CustomOptionsTab
+public static class ModdedOptionsTab
 {
-    public static List<GameObject> CustomTabs;
-    public static List<GameObject> CustomScreens;
+    public static List<GameObject> CustomTabs = new List<GameObject>();
+    public static List<GameObject> CustomScreens = new List<GameObject>();
 
-    public static GameObject InitializeForMod(IModOptions modOptions, GameSettingMenu __instance)
+    public static GameObject InitializeForMod(IMiraConfig config, GameSettingMenu __instance)
     {
         var gameBtn = __instance.transform.FindChild("Header/Tabs/GameTab").gameObject;
         var roleBtn = __instance.transform.FindChild("Header/Tabs/RoleTab").gameObject;
-        var screen = CreateNewMenu(__instance);
-        var tab = CreateCustomTab(modOptions, __instance, screen, gameBtn, roleBtn);
+        var screen = CreateNewMenu(config, __instance);
+        var tab = CreateCustomTab(config, __instance, screen, gameBtn, roleBtn);
 
         CustomScreens.Add(screen);
         CustomTabs.Add(tab);
@@ -34,66 +34,44 @@ public static class CustomOptionsTab
         return container.gameObject;
     }
 
-
-    /*private static void CreateNewResetButton(GameSettingMenu __instance, Transform container)
-    {
-        var resetBtn = __instance.RegularGameSettings.transform.FindChild("GameGroup/SliderInner/ResetToDefault");
-        var newResetBtn = Object.Instantiate(resetBtn.gameObject, container);
-        newResetBtn.gameObject.name = "LaunchpadReset";
-
-        var tmp = newResetBtn.GetComponentInChildren<TextMeshPro>();
-        tmp.text = "Reset Options";
-        tmp.alignment = TextAlignmentOptions.Center;
-        tmp.gameObject.transform.localPosition = new Vector3(0, 0, 0);
-
-        newResetBtn.GetComponent<ToggleOption>().Destroy();
-        newResetBtn.transform.FindChild("CheckBox").gameObject.Destroy();
-
-        var toggle = newResetBtn.GetComponent<PassiveButton>();
-
-        toggle.OnClick.RemoveAllListeners();
-        toggle.OnMouseOver.RemoveAllListeners();
-        toggle.OnMouseOut.RemoveAllListeners();
-        toggle.OnClick.AddListener((UnityAction)(() => { CustomOptionsManager.ResetToDefault(); }));
-        toggle.OnMouseOver.AddListener((UnityAction)(() => { tmp.text = "<b>Reset Options</b>"; }));
-        toggle.OnMouseOut.AddListener((UnityAction)(() => { tmp.text = "Reset Options"; }));
-    }*/
-
     private static void UpdateListeners(GameSettingMenu __instance, PassiveButton gameB, PassiveButton roleB, SpriteRenderer rend)
     {
         gameB.OnClick.RemoveAllListeners();
-        /*        gameB.OnClick.AddListener((UnityAction)(() =>
-                {
-                    __instance.RegularGameSettings.SetActive(true);
-                    __instance.RolesSettings.gameObject.SetActive(false);
+        gameB.OnClick.AddListener((UnityAction)(() =>
+        {
+            __instance.RegularGameSettings.SetActive(true);
+            __instance.RolesSettings.gameObject.SetActive(false);
 
-                    CustomScreen.gameObject.SetActive(false);
-                    rend.enabled = false;
+            foreach (var screen in CustomScreens) screen.gameObject.SetActive(false);
 
-                    __instance.GameSettingsHightlight.enabled = true;
-                    __instance.RolesSettingsHightlight.enabled = false;
-                }));
+            rend.enabled = false;
 
-                roleB.OnClick.RemoveAllListeners();
-                roleB.OnClick.AddListener((UnityAction)(() =>
-                {
-                    __instance.RegularGameSettings.SetActive(false);
-                    __instance.RolesSettings.gameObject.SetActive(true);
+            __instance.GameSettingsHightlight.enabled = true;
+            __instance.RolesSettingsHightlight.enabled = false;
+        }));
 
-                    CustomScreen.gameObject.SetActive(false);
-                    rend.enabled = false;
+        roleB.OnClick.RemoveAllListeners();
+        roleB.OnClick.AddListener((UnityAction)(() =>
+        {
+            __instance.RegularGameSettings.SetActive(false);
+            __instance.RolesSettings.gameObject.SetActive(true);
 
-                    __instance.GameSettingsHightlight.enabled = false;
-                    __instance.RolesSettingsHightlight.enabled = true;
-                }));*/
+            foreach (var screen in CustomScreens) screen.gameObject.SetActive(false);
+
+            rend.enabled = false;
+
+            __instance.GameSettingsHightlight.enabled = false;
+            __instance.RolesSettingsHightlight.enabled = true;
+        }));
     }
 
-    public static GameObject CreateHeader(ToggleOption toggleOpt, Transform container, string title)
+    public static GameObject CreateHeader(ToggleOption toggleOpt, Transform container, string title, Color color)
     {
         var header = Object.Instantiate(toggleOpt, container);
 
         header.Title = StringNames.None;
         header.TitleText.text = title;
+        header.TitleText.color = color;
         header.name = "Header";
 
         var checkBox = header.transform.FindChild("CheckBox")?.gameObject;
@@ -112,12 +90,14 @@ public static class CustomOptionsTab
         return header.gameObject;
     }
 
-    public static GameObject CreateCustomTab(IModOptions options, GameSettingMenu __instance, GameObject newSettings,
+    public static GameObject CreateCustomTab(IMiraConfig options, GameSettingMenu __instance, GameObject newSettings,
         GameObject gameTab, GameObject roleTab)
     {
         var newTab = Object.Instantiate(gameTab, gameTab.transform.parent);
         newTab.name = "Tab";
-        gameTab.transform.position += new Vector3(-1, 0, 0);
+        newTab.transform.position = roleTab.transform.position;
+        newTab.transform.position += new Vector3(CustomTabs.Count + 1, 0, 0);
+        __instance.Tabs.transform.position -= new Vector3(0.5f, 0, 0);
 
         var inside = newTab.transform.FindChild("ColorButton");
         inside.name = "Btn";
@@ -129,8 +109,7 @@ public static class CustomOptionsTab
         btn.OnClick.AddListener((Action)TabAction);
 
         var spriteRend = inside.GetComponentInChildren<SpriteRenderer>();
-        spriteRend.sprite = options.OptionsTabIcon.LoadAsset();
-        spriteRend.gameObject.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
+        // if (options.TabSettings.TabIcon != null) spriteRend.sprite = options.TabSettings.TabIcon.LoadAsset();
 
         return newTab;
 
@@ -143,10 +122,9 @@ public static class CustomOptionsTab
             {
                 screen.gameObject.SetActive(false);
             }
-
             newSettings.gameObject.SetActive(true);
 
-            var rend = inside.transform.FindChild("Tab Background").GetComponent<SpriteRenderer>();
+            SpriteRenderer rend = newTab.transform.FindChild("Btn/Tab Background").GetComponent<SpriteRenderer>();
             rend.enabled = true;
 
             gameTab.transform.FindChild("ColorButton/Tab Background").gameObject.GetComponent<SpriteRenderer>().enabled = false;
@@ -159,7 +137,7 @@ public static class CustomOptionsTab
         }
     }
 
-    public static GameObject CreateNewMenu(GameSettingMenu __instance)
+    public static GameObject CreateNewMenu(IMiraConfig config, GameSettingMenu __instance)
     {
         var gameSettings = __instance.RegularGameSettings;
         var newSettings = Object.Instantiate(gameSettings, gameSettings.transform.parent);
@@ -169,7 +147,7 @@ public static class CustomOptionsTab
         var launchpadGroup = newSettings.transform.FindChild("GameGroup").gameObject;
         var text = launchpadGroup.transform.FindChild("Text").gameObject.GetComponent<TextMeshPro>();
         text.gameObject.GetComponent<TextTranslatorTMP>().Destroy();
-        text.text = "Settings";
+        text.text = $"{config.TabSettings.Title} Options";
 
         return newSettings;
     }

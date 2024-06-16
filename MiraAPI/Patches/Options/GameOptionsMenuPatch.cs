@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
 using Il2CppSystem;
-using MiraAPI.API.GameOptions;
+using MiraAPI.GameOptions;
 using System.Linq;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -16,7 +16,7 @@ public static class GameOptionsMenuPatch
     [HarmonyPostfix, HarmonyPatch("Start")]
     public static void StartPostfix(GameOptionsMenu __instance)
     {
-        foreach (var customOption in CustomOptionsManager.CustomOptions)
+        foreach (var customOption in ModdedOptionsManager.Options)
         {
             if (customOption.AdvancedRole is not null || !customOption.OptionBehaviour)
             {
@@ -46,17 +46,17 @@ public static class GameOptionsMenuPatch
             return;
         }
 
-        var startOffset = 2.15f;
+        var startOffset = 2.5f;
         __instance.GetComponentInParent<Scroller>().ContentYBounds.max = startOffset + __instance.Children.Count * 0.5f;
 
-        foreach (var option in CustomOptionsManager.CustomOptions.Where(option => option.Group == null))
+        foreach (var option in ModdedOptionsManager.Options.Where(option => option.Group == null))
         {
             if (!option.OptionBehaviour) continue;
 
-            option.OptionBehaviour.enabled = !option.Hidden();
-            option.OptionBehaviour.gameObject.SetActive(!option.Hidden());
+            option.OptionBehaviour.enabled = option.Visible();
+            option.OptionBehaviour.gameObject.SetActive(option.Visible());
 
-            if (!option.Hidden())
+            if (option.Visible())
             {
                 startOffset -= 0.55f;
             }
@@ -66,16 +66,16 @@ public static class GameOptionsMenuPatch
             transform.localPosition = new Vector3(optionPosition.x, startOffset, optionPosition.z);
         }
 
-        foreach (var group in CustomOptionsManager.CustomGroups.Where(group => group.AdvancedRole == null))
+        foreach (var group in ModdedOptionsManager.Groups.Where(group => group.AdvancedRole == null))
         {
             if (group.Header == null)
             {
                 continue;
             }
 
-            group.Header.SetActive(!group.Hidden());
+            group.Header.SetActive(group.GroupVisible());
 
-            if (!group.Hidden())
+            if (group.GroupVisible())
             {
                 startOffset -= 0.5f;
             }
@@ -83,19 +83,19 @@ public static class GameOptionsMenuPatch
             var position = group.Header.transform.localPosition;
             group.Header.transform.localPosition = new Vector3(position.x, startOffset, position.z);
 
-            foreach (var option in group.Options)
+            foreach (var option in ModdedOptionsManager.Options.Where(x => x.Group == group))
             {
                 if (!option.OptionBehaviour)
                 {
                     continue;
                 }
 
-                var enabled = !group.Hidden() && !option.Hidden();
+                var enabled = group.GroupVisible() && option.Visible();
 
                 option.OptionBehaviour.enabled = enabled;
                 option.OptionBehaviour.gameObject.SetActive(enabled);
 
-                if (!group.Hidden() && !option.Hidden())
+                if (group.GroupVisible() && option.Visible())
                 {
                     startOffset -= 0.5f;
                 }

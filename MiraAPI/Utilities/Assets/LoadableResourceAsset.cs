@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace MiraAPI.Utilities.Assets
 {
@@ -12,8 +11,15 @@ namespace MiraAPI.Utilities.Assets
                 return _loadedAsset;
             }
 
-            return _loadedAsset = SpriteTools.LoadSpriteFromPath(resourcesFolder + name);
-            throw new Exception($"INVALID ASSET: {name}");
+            try
+            {
+                return _loadedAsset = SpriteTools.LoadSpriteFromPath(resourcesFolder + name);
+            }
+            catch
+            {
+                Debug.LogError($"Not loading, invalid asset: {name}");
+                return null;
+            }
         }
     }
 }

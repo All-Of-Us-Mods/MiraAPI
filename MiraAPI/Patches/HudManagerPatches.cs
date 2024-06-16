@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
 using InnerNet;
-using MiraAPI.API.GameOptions;
+using MiraAPI.GameOptions;
 using MiraAPI.Hud;
 using MiraAPI.Patches.Options;
 using MiraAPI.Roles;
@@ -31,7 +31,7 @@ namespace MiraAPI.Patches
         {
             if (Input.GetKeyDown(KeyCode.Tab))
             {
-                if (ToHudStringPatch.CurrentPage >= CustomOptionsManager.RegisteredMods.Count)
+                if (ToHudStringPatch.CurrentPage >= ModdedOptionsManager.RegisteredMods.Count)
                 {
                     ToHudStringPatch.CurrentPage = 0;
                 }
@@ -85,6 +85,7 @@ namespace MiraAPI.Patches
             }
 
             //CustomGameModeManager.ActiveMode.HudUpdate(__instance);
+            if (local.Data.Role is null) return;
 
             if (local.Data.Role is ICustomRole customRole)
             {
