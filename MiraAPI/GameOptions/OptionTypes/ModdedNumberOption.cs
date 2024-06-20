@@ -21,9 +21,9 @@ namespace MiraAPI.GameOptions.OptionTypes
             Value = Mathf.Clamp(defaultValue, min, max);
         }
 
-        public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container)
+        public override OptionBehaviour CreateOption(OptionBehaviour optionBehaviour, Transform container)
         {
-            var numberOption = Object.Instantiate(numberOpt, container);
+            var numberOption = (NumberOption)Object.Instantiate(optionBehaviour, container);
 
             numberOption.name = Title;
             numberOption.Title = StringName;
@@ -34,7 +34,7 @@ namespace MiraAPI.GameOptions.OptionTypes
             numberOption.ValidRange = new FloatRange(Min, Max);
             numberOption.ZeroIsInfinity = ZeroInfinity;
             numberOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
-            numberOption.OnEnable();
+            numberOption.Initialize();
 
             OptionBehaviour = numberOption;
 
@@ -57,7 +57,7 @@ namespace MiraAPI.GameOptions.OptionTypes
 
             if (OptionBehaviour is null) return;
 
-            NumberOption opt = OptionBehaviour as NumberOption;
+            var opt = OptionBehaviour as NumberOption;
             opt.Value = newValue;
         }
     }

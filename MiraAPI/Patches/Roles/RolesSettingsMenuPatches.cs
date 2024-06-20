@@ -1,11 +1,11 @@
 ﻿using AmongUs.GameOptions;
 using HarmonyLib;
 using Il2CppInterop.Runtime;
-using MiraAPI.Networking.Options;
 using MiraAPI.Roles;
 using Reactor.Networking.Rpc;
 using Reactor.Utilities.Extensions;
 using System.Linq;
+using MiraAPI.Networking;
 using UnityEngine;
 using Object = UnityEngine.Object;
 

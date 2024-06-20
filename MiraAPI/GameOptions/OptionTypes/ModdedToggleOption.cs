@@ -8,15 +8,15 @@ namespace MiraAPI.GameOptions.OptionTypes
         {
         }
 
-        public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container)
+        public override OptionBehaviour CreateOption(OptionBehaviour optionBehaviour, Transform container)
         {
-            var toggleOption = UnityEngine.Object.Instantiate(toggleOpt, container);
+            var toggleOption = (ToggleOption)Object.Instantiate(optionBehaviour, container);
 
             toggleOption.name = Title;
             toggleOption.Title = StringName;
             toggleOption.CheckMark.enabled = Value;
             toggleOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
-            toggleOption.OnEnable();
+            toggleOption.Initialize();
             OptionBehaviour = toggleOption;
             return toggleOption;
         }
@@ -35,7 +35,7 @@ namespace MiraAPI.GameOptions.OptionTypes
         {
             if (OptionBehaviour is null) return;
 
-            ToggleOption toggleOpt = OptionBehaviour as ToggleOption;
+            var toggleOpt = OptionBehaviour as ToggleOption;
             toggleOpt.CheckMark.enabled = newValue;
         }
     }

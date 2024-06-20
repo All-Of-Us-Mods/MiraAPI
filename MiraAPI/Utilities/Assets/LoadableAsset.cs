@@ -1,4 +1,4 @@
-﻿namespace MiraAPI.Utilities
+﻿namespace MiraAPI.Utilities.Assets
 {
     public abstract class LoadableAsset<T> where T : UnityEngine.Object
     {

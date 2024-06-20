@@ -12,8 +12,8 @@ namespace MiraAPI.GameOptions
 {
     public class ModdedOptionsManager
     {
-        public static List<IModdedOption> Options = new();
-        public static List<ModdedOptionGroup> Groups = new();
+        public static List<IModdedOption> Options = [];
+        public static List<ModdedOptionGroup> Groups = [];
         private static Dictionary<PropertyInfo, ModdedOptionAttribute> OptionAttributes = new();
         private static Dictionary<Type, ModdedOptionGroup> OriginalTypes = new();
         public static Dictionary<Assembly, IMiraConfig> RegisteredMods = new();

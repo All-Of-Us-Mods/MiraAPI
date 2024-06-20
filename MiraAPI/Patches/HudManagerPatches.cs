@@ -18,66 +18,10 @@ namespace MiraAPI.Patches
         /// Custom role tab
         private static TaskPanelBehaviour _roleTab;
 
-        /// Scrolling increment
-        private const float Increment = 0.3f;
-
-        /// Bounds for scrolling 
-        private static FloatRange _bounds = new FloatRange(2.9f, 4.6f);
-
-        /// <summary>
-        /// Add options scrolling (on the hud text)
-        /// </summary>
-        public static void OptionsScrollingLogic(HudManager __instance)
-        {
-            if (Input.GetKeyDown(KeyCode.Tab))
-            {
-                if (ToHudStringPatch.CurrentPage >= ModdedOptionsManager.RegisteredMods.Count)
-                {
-                    ToHudStringPatch.CurrentPage = 0;
-                }
-                else
-                {
-                    ToHudStringPatch.CurrentPage += 1;
-                }
-            }
-
-            var numPlayers = GameData.Instance ? GameData.Instance.PlayerCount : 10;
-            HudManager.Instance.GameSettings.text = GameOptionsManager.Instance.CurrentGameOptions.ToHudString(numPlayers);
-            var pos = __instance.GameSettings.transform.localPosition;
-
-            if (!PlayerControl.LocalPlayer.CanMove)
-            {
-                return;
-            }
-
-            if (ToHudStringPatch.CurrentPage == 0)
-            {
-                __instance.GameSettings.transform.localPosition = new Vector3(pos.x, _bounds.min, pos.z);
-                return;
-            }
-
-            _bounds.max = __instance.GameSettings.rectTransform.sizeDelta.y + _bounds.min;
-
-            var delta = Input.mouseScrollDelta.y switch
-            {
-                > 0f => -Increment,
-                < 0f => Increment,
-                _ => 0f
-            };
-
-            pos = new Vector3(pos.x, Mathf.Clamp(pos.y + delta, _bounds.min, _bounds.max), pos.z);
-
-            __instance.GameSettings.transform.localPosition = pos;
-        }
-
         [HarmonyPostfix, HarmonyPatch("Update")]
         public static void UpdatePostfix(HudManager __instance)
         {
             var local = PlayerControl.LocalPlayer;
-            if (LobbyBehaviour.Instance)
-            {
-                OptionsScrollingLogic(__instance);
-            }
 
             if (AmongUsClient.Instance.GameState != InnerNetClient.GameStates.Started && !ShipStatus.Instance)
             {

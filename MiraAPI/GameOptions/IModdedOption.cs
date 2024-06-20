@@ -14,6 +14,6 @@ namespace MiraAPI.GameOptions
         public IMiraConfig ParentMod { get; set; }
         public void ValueChanged(OptionBehaviour optionBehaviour);
         public string GetHudStringText();
-        public OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container);
+        public OptionBehaviour CreateOption(OptionBehaviour optionBehaviour, Transform container);
     }
 }

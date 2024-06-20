@@ -2,7 +2,7 @@
 using Reactor.Networking.Attributes;
 using Reactor.Networking.Rpc;
 
-namespace MiraAPI.Networking.Options;
+namespace MiraAPI.Networking;
 
 // METHOD RPC DOESNT WORK WITH THE ARRAYS AND STUFF SO THIS IS HOW WE WILL DO IT FOR NOW
 [RegisterCustomRpc((uint)MiraRpc.SyncGameOptions)]

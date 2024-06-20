@@ -1,16 +1,16 @@
-﻿using Reactor.Utilities.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Reactor.Utilities.Extensions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using Object = UnityEngine.Object;
 
-namespace MiraAPI.API.GameOptions;
+namespace MiraAPI.GameOptions.UI;
 public static class ModdedOptionsTab
 {
-    public static List<GameObject> CustomTabs = new List<GameObject>();
-    public static List<GameObject> CustomScreens = new List<GameObject>();
+    public static readonly List<GameObject> CustomTabs = [];
+    public static readonly List<GameObject> CustomScreens = [];
 
     public static GameObject InitializeForMod(IMiraConfig config, GameSettingMenu __instance)
     {

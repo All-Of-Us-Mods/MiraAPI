@@ -2,7 +2,6 @@
 using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using Il2CppInterop.Runtime;
-using MiraAPI.Networking.Options;
 using Reactor.Localization.Utilities;
 using Reactor.Networking.Rpc;
 using Reactor.Utilities;
@@ -10,6 +9,7 @@ using Reactor.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MiraAPI.Networking;
 using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -82,7 +82,7 @@ public static class CustomRoleManager
         }
         else
         {
-            ModRoles.TryAdd(info, new List<RoleBehaviour>() { roleBehaviour });
+            ModRoles.TryAdd(info, [roleBehaviour]);
         }
 
         CustomRoles.Add(roleId, roleBehaviour);

@@ -1,10 +1,10 @@
 ﻿using HarmonyLib;
-using MiraAPI.API.GameOptions;
 using MiraAPI.GameOptions;
 using Reactor.Utilities;
 using Reactor.Utilities.Extensions;
 using System.Collections.Generic;
 using System.Linq;
+using MiraAPI.GameOptions.UI;
 using UnityEngine;
 using Object = UnityEngine.Object;
 

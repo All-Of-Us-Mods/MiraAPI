@@ -9,21 +9,21 @@ namespace MiraAPI.GameOptions.OptionTypes
     {
         public string[] Values;
 
-        public ModdedEnumOption(string title, int defaultValue, Type enumType, System.Type roleType) : base(title, defaultValue, roleType)
+        public ModdedEnumOption(string title, int defaultValue, Type enumType, Type roleType) : base(title, defaultValue, roleType)
         {
             Values = Enum.GetNames(enumType);
         }
 
-        public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container)
+        public override OptionBehaviour CreateOption(OptionBehaviour optionBehaviour, Transform container)
         {
-            var stringOption = UnityEngine.Object.Instantiate(stringOpt, container);
+            var stringOption = (StringOption)UnityEngine.Object.Instantiate(optionBehaviour, container);
 
             stringOption.name = Title;
             stringOption.Title = StringName;
             stringOption.Value = Value;
             stringOption.Values = Values.Select(CustomStringName.CreateAndRegister).ToArray();
             stringOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
-            stringOption.OnEnable();
+            stringOption.Initialize();
 
             OptionBehaviour = stringOption;
 
@@ -44,7 +44,7 @@ namespace MiraAPI.GameOptions.OptionTypes
         {
             if (OptionBehaviour is null) return;
 
-            StringOption opt = OptionBehaviour as StringOption;
+            var opt = OptionBehaviour as StringOption;
             opt.Value = newValue;
         }
     }

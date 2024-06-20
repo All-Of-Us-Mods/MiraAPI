@@ -39,7 +39,7 @@ namespace MiraAPI.GameOptions.OptionTypes
 
         public void SetValue(T newValue)
         {
-            T oldVal = Value;
+            var oldVal = Value;
             Value = newValue;
             if (!Value.Equals(oldVal) && ChangedEvent != null)
             {
@@ -53,7 +53,7 @@ namespace MiraAPI.GameOptions.OptionTypes
 
         public abstract T GetValueFromOptionBehaviour(OptionBehaviour optionBehaviour);
 
-        public abstract OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container);
+        public abstract OptionBehaviour CreateOption(OptionBehaviour optionBehaviour, Transform container);
 
         public abstract string GetHudStringText();
     }

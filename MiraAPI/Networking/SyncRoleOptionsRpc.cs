@@ -1,11 +1,11 @@
-﻿using Hazel;
+﻿using System;
+using Hazel;
 using MiraAPI.Roles;
 using Reactor.Networking.Attributes;
 using Reactor.Networking.Rpc;
 using Reactor.Utilities;
-using System;
 
-namespace MiraAPI.Networking.Options;
+namespace MiraAPI.Networking;
 
 [RegisterCustomRpc((uint)MiraRpc.SyncRoleOptions)]
 public class SyncRoleOptionsRpc(MiraAPIPlugin plugin, uint id) : PlayerCustomRpc<MiraAPIPlugin, SyncRoleOptionsRpc.Data>(plugin, id)

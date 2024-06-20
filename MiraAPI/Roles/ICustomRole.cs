@@ -53,7 +53,7 @@ public interface ICustomRole
 
     void HudUpdate(HudManager hudManager) { }
 
-    string GetCustomEjectionMessage(GameData.PlayerInfo player)
+    string GetCustomEjectionMessage(NetworkedPlayerInfo player)
     {
         return Team == ModdedRoleTeams.Impostor ? $"{player.PlayerName} was The {RoleName}" : null;
     }

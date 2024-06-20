@@ -12,16 +12,16 @@ namespace MiraAPI.GameOptions.OptionTypes
             Values = values;
         }
 
-        public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container)
+        public override OptionBehaviour CreateOption(OptionBehaviour optionBehaviour, Transform container)
         {
-            var stringOption = Object.Instantiate(stringOpt, container);
+            var stringOption = (StringOption)Object.Instantiate(optionBehaviour, container);
 
             stringOption.name = Title;
             stringOption.Title = StringName;
             stringOption.Value = Value;
             stringOption.Values = Values.Select(CustomStringName.CreateAndRegister).ToArray();
             stringOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
-            stringOption.OnEnable();
+            stringOption.Initialize();
 
             OptionBehaviour = stringOption;
 
@@ -42,7 +42,7 @@ namespace MiraAPI.GameOptions.OptionTypes
         {
             if (OptionBehaviour is null) return;
 
-            StringOption opt = OptionBehaviour as StringOption;
+            var opt = OptionBehaviour as StringOption;
             opt.Value = newValue;
         }
     }
