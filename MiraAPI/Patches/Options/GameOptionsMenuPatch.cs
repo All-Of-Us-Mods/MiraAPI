@@ -7,13 +7,14 @@ using Object = UnityEngine.Object;
 
 namespace MiraAPI.Patches.Options;
 
+/*
 [HarmonyPatch(typeof(GameOptionsMenu))]
 public static class GameOptionsMenuPatch
 {
     /// <summary>
     /// Change the OnValueChanged action for all custom game options
     /// </summary>
-    [HarmonyPostfix, HarmonyPatch("Start")]
+    [HarmonyPostfix, HarmonyPatch(nameof(GameOptionsMenu.Start))]
     public static void StartPostfix(GameOptionsMenu __instance)
     {
         foreach (var customOption in ModdedOptionsManager.Options)
@@ -26,26 +27,25 @@ public static class GameOptionsMenuPatch
             customOption.OptionBehaviour.OnValueChanged = (Action<OptionBehaviour>)customOption.ValueChanged;
         }
     }
-
-    private static GameSettingMenu menu;
-
+    
 
     /// <summary>
     /// Set the position and offset of all custom game options
     /// </summary>
-    [HarmonyPostfix, HarmonyPatch("Update")]
+    [HarmonyPostfix, HarmonyPatch(nameof(GameOptionsMenu.Update))]
     public static void UpdatePostfix(GameOptionsMenu __instance)
     {
-        if (!menu)
-        {
-            menu = Object.FindObjectsOfType<GameSettingMenu>().First();
-        }
-
-        if (menu.RegularGameSettings.active || menu.RolesSettings.gameObject.active || menu.HideNSeekSettings.active)
+        if (!GameSettingMenu.Instance)
         {
             return;
         }
 
+        if (GameSettingMenu.Instance.GameSettingsTab.gameObject.active || GameSettingMenu.Instance.RoleSettingsTab.gameObject.active)
+        {
+            return;
+        }
+
+        
         var startOffset = 2.5f;
         __instance.GetComponentInParent<Scroller>().ContentYBounds.max = startOffset + __instance.Children.Count * 0.5f;
 
@@ -106,4 +106,4 @@ public static class GameOptionsMenuPatch
             }
         }
     }
-}
+}*/

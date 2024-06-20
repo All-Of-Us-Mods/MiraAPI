@@ -5,13 +5,14 @@ using Reactor.Utilities;
 
 namespace MiraAPI.Patches.Roles;
 
-[HarmonyPatch(typeof(RoleOptionsCollectionV07))]
+[HarmonyPatch(typeof(RoleOptionsCollectionV08))]
 public static class RoleOptionsCollectionPatch
 {
     /// <summary>
     /// Set the role chance for custom Launchpad roles based on config
     /// </summary>
-    [HarmonyPrefix, HarmonyPatch("GetChancePerGame")]
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(RoleOptionsCollectionV08.GetChancePerGame))]
     public static bool GetChancePrefix([HarmonyArgument(0)] RoleTypes roleType, ref int __result)
     {
         if (CustomRoleManager.GetCustomRoleBehaviour(roleType, out var customRole))
@@ -32,7 +33,8 @@ public static class RoleOptionsCollectionPatch
     /// <summary>
     /// Set the amount for custom Launchpad roles based on config
     /// </summary>
-    [HarmonyPrefix, HarmonyPatch("GetNumPerGame")]
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(RoleOptionsCollectionV08.GetNumPerGame))]
     public static bool GetNumPrefix([HarmonyArgument(0)] RoleTypes roleType, ref int __result)
     {
         if (CustomRoleManager.GetCustomRoleBehaviour(roleType, out var customRole))

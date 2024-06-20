@@ -2,7 +2,7 @@
 using MiraAPI.Roles;
 
 namespace MiraAPI.Patches.Roles;
-
+/*
 [HarmonyPatch(typeof(RoleOptionSetting))]
 public static class RoleOptionSettingPatch
 {
@@ -21,4 +21,4 @@ public static class RoleOptionSettingPatch
         }
         return true;
     }
-}
+}*/

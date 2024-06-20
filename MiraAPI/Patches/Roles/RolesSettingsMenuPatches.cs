@@ -10,7 +10,7 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace MiraAPI.Patches.Roles;
-
+/*
 [HarmonyPatch(typeof(RolesSettingsMenu))]
 public static class RolesSettingsMenuPatches
 {
@@ -71,7 +71,7 @@ public static class RolesSettingsMenuPatches
                                         break;
                                 }
                             }
-                        }*/
+                        }*\/
 
             var tmp = newTab.GetComponentInChildren<TextTranslatorTMP>();
             tmp.defaultStr = role.NiceName;
@@ -102,7 +102,7 @@ public static class RolesSettingsMenuPatches
                     {
                         customOption.OptionBehaviour.OnValueChanged = (Action<OptionBehaviour>)customOption.ValueChanged;
                     }
-                }*/
+                }*\/
 
         var scroll = __instance.GetComponentInChildren<Scroller>();
         scroll.active = true;
@@ -145,3 +145,4 @@ public static class RolesSettingsMenuPatches
         return false;
     }
 }
+*/

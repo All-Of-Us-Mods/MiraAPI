@@ -56,7 +56,8 @@ public static class TaskAdderPatch
     }
 
     // yes it might be crazy patching the entire method, but i tried so many other methods and only this works :cry:
-    [HarmonyPrefix, HarmonyPatch(typeof(TaskAdderGame), nameof(TaskAdderGame.ShowFolder))]
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(TaskAdderGame), nameof(TaskAdderGame.ShowFolder))]
     public static bool ShowPatch(TaskAdderGame __instance, [HarmonyArgument(0)] TaskFolder taskFolder)
     {
         var stringBuilder = new StringBuilder(64);

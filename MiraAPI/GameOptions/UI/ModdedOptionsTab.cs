@@ -7,6 +7,8 @@ using UnityEngine.Events;
 using Object = UnityEngine.Object;
 
 namespace MiraAPI.GameOptions.UI;
+
+/*
 public static class ModdedOptionsTab
 {
     public static readonly List<GameObject> CustomTabs = [];
@@ -151,4 +153,4 @@ public static class ModdedOptionsTab
 
         return newSettings;
     }
-}
+}*/

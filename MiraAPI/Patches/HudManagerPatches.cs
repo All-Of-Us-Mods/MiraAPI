@@ -18,7 +18,8 @@ namespace MiraAPI.Patches
         /// Custom role tab
         private static TaskPanelBehaviour _roleTab;
 
-        [HarmonyPostfix, HarmonyPatch("Update")]
+        [HarmonyPostfix]
+        [HarmonyPatch(nameof(HudManager.Update))]
         public static void UpdatePostfix(HudManager __instance)
         {
             var local = PlayerControl.LocalPlayer;
@@ -69,7 +70,8 @@ namespace MiraAPI.Patches
         /// <summary>
         /// Create custom buttons parent
         /// </summary>
-        [HarmonyPostfix, HarmonyPatch("Start")]
+        [HarmonyPostfix]
+        [HarmonyPatch(nameof(HudManager.Start))]
         public static void StartPostfix(HudManager __instance)
         {
             if (!_bottomLeft)
@@ -104,7 +106,8 @@ namespace MiraAPI.Patches
         /// <summary>
         /// Make sure all launchpad hud elements are inactive/active when appropriate
         /// </summary>
-        [HarmonyPostfix, HarmonyPatch("SetHudActive", typeof(PlayerControl), typeof(RoleBehaviour), typeof(bool))]
+        [HarmonyPostfix]
+        [HarmonyPatch(nameof(HudManager.SetHudActive), typeof(PlayerControl), typeof(RoleBehaviour), typeof(bool))]
         public static void SetHudActivePostfix(HudManager __instance, [HarmonyArgument(0)] PlayerControl player, [HarmonyArgument(1)] RoleBehaviour roleBehaviour, [HarmonyArgument(2)] bool isActive)
         {
             if (player.Data == null)

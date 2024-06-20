@@ -9,7 +9,8 @@ namespace MiraAPI.Patches.Roles;
 [HarmonyPatch(typeof(PlayerNameColor))]
 public static class NameTagPatch
 {
-    [HarmonyPrefix, HarmonyPatch("Get", typeof(RoleBehaviour))]
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(PlayerNameColor.Get), typeof(RoleBehaviour))]
     public static bool GetPatch([HarmonyArgument(0)] RoleBehaviour otherPlayerRole, ref Color __result)
     {
         if (PlayerControl.LocalPlayer.Data.IsDead)
