@@ -1,5 +1,4 @@
-﻿using MiraAPI.Utilities;
-using MiraAPI.Utilities.Assets;
+﻿using MiraAPI.Utilities.Assets;
 using UnityEngine;
 
 namespace MiraAPI

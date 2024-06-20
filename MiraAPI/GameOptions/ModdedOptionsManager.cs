@@ -18,21 +18,6 @@ namespace MiraAPI.GameOptions
         private static Dictionary<Type, ModdedOptionGroup> OriginalTypes = new();
         public static Dictionary<Assembly, IMiraConfig> RegisteredMods = new();
 
-        public static void Initialize()
-        {
-            IL2CPPChainloader.Instance.PluginLoad += (_, assembly, plugin) =>
-            {
-                if (plugin.GetType().GetInterfaces().Contains(typeof(IMiraConfig)))
-                {
-                    IMiraConfig config = (IMiraConfig)Activator.CreateInstance(plugin.GetType());
-                    RegisteredMods.Add(assembly, config);
-                }
-
-                RegisterOptionGroups(assembly);
-
-                ModdedOptionAttribute.Register(assembly);
-            };
-        }
 
         private static void RegisterOptionGroups(Assembly assembly)
         {

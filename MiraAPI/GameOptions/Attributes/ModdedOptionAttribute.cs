@@ -19,7 +19,7 @@ namespace MiraAPI.GameOptions.Attributes
         {
             foreach (var type in assembly.GetTypes())
             {
-                foreach (PropertyInfo property in type.GetProperties())
+                foreach (var property in type.GetProperties())
                 {
                     foreach (var attribute in property.GetCustomAttributes())
                     {

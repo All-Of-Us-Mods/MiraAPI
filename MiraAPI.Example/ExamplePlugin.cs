@@ -15,8 +15,8 @@ namespace MiraAPI.Example;
 public partial class ExamplePlugin : BasePlugin, IMiraConfig
 {
     public Harmony Harmony { get; } = new(Id);
-    public static ExamplePlugin Instance { get; private set; }
-    public ModdedOptionTabSettings TabSettings => new ModdedOptionTabSettings()
+
+    public ModdedOptionTabSettings TabSettings => new()
     {
         Title = "MiraAPI Example Mod",
         TabIcon = MiraAssets.Empty
@@ -24,7 +24,6 @@ public partial class ExamplePlugin : BasePlugin, IMiraConfig
 
     public override void Load()
     {
-        Instance = this;
         Harmony.PatchAll();
     }
 }

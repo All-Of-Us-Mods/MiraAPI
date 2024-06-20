@@ -6,6 +6,7 @@ using MiraAPI.Patches.Options;
 using MiraAPI.Roles;
 using Reactor.Utilities.Extensions;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace MiraAPI.Patches
 {
