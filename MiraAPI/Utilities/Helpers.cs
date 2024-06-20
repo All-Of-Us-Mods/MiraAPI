@@ -17,7 +17,7 @@ namespace MiraAPI.Utilities
             return ShipStatus.Instance.AllRooms.ToList().Find(room => room.roomArea.OverlapPoint(pos));
         }
 
-        public static void RegisterIl2CppType(Type type)
+        public static void RegisterType(Type type)
         {
             if (ClassInjector.IsTypeRegisteredInIl2Cpp(type))
             {

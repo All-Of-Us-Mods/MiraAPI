@@ -8,6 +8,7 @@ using Reactor.Utilities;
 using Reactor.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using MiraAPI.Networking;
 using TMPro;
 using UnityEngine;
@@ -17,35 +18,46 @@ namespace MiraAPI.Roles;
 
 public static class CustomRoleManager
 {
-    public static Dictionary<ushort, ICustomRole> CustomRoles = new();
-    
-    public static int GetNextRoleId(ushort requestedId)
-    {
-        while (CustomRoles.ContainsKey(requestedId))
-        {
-            requestedId++;
-        }
+    public static readonly Dictionary<ushort, RoleBehaviour> CustomRoles = [];
+    public static readonly Dictionary<PluginInfo, List<RoleBehaviour>> ModRoles = [];
 
-        return requestedId;
+    public static void RegisterInRoleManager()
+    {
+        RoleManager.Instance.AllRoles = RoleManager.Instance.AllRoles.Concat(CustomRoles.Values).ToArray();
     }
 
-    internal static RoleBehaviour RegisterRole(Type roleType, ushort roleId)
+    internal static void RegisterRole(Type roleType, ushort roleId, string modId)
     {
+        if (!IL2CPPChainloader.Instance.Plugins.TryGetValue(modId, out PluginInfo info))
+        {
+            Debug.LogError($"{modId} is not a valid mod!");
+            return;
+        }
+
         if (!(typeof(RoleBehaviour).IsAssignableFrom(roleType) && typeof(ICustomRole).IsAssignableFrom(roleType)))
         {
-            Debug.LogError($"{roleType?.Name} does not inherit from RoleBehaviour or ICustomRole.");
-            return null;
+            return;
+        }
+
+        if (CustomRoles.Any(behaviour => behaviour.GetType() == roleType))
+        {
+            return;
         }
 
         var roleBehaviour = (RoleBehaviour)new GameObject(roleType.Name).DontDestroy().AddComponent(Il2CppType.From(roleType));
 
         if (roleBehaviour is not ICustomRole customRole)
         {
-            roleBehaviour.gameObject.Destroy();
-            return null;
+            return;
         }
 
-        roleBehaviour.Role = (RoleTypes)GetNextRoleId(roleId);
+        if (CustomRoles.ContainsKey(roleId))
+        {
+            Debug.LogError($"Role ID conflict for {customRole.RoleName}. Use a different ID.");
+            return;
+        }
+
+        roleBehaviour.Role = (RoleTypes)roleId;
         roleBehaviour.TeamType = customRole.Team == ModdedRoleTeams.Neutral ? RoleTeamTypes.Crewmate : (RoleTeamTypes)customRole.Team;
         roleBehaviour.NameColor = customRole.RoleColor;
         roleBehaviour.StringName = CustomStringName.CreateAndRegister(customRole.RoleName);
@@ -63,27 +75,48 @@ public static class CustomRoleManager
         {
             RoleManager.GhostRoles.Add(roleBehaviour.Role);
         }
-        
-        CustomRoles.Add(roleId, customRole);
+
+        if (ModRoles.TryGetValue(info, out List<RoleBehaviour> roles))
+        {
+            roles.Add(roleBehaviour);
+        }
+        else
+        {
+            ModRoles.TryAdd(info, [roleBehaviour]);
+        }
+
+        CustomRoles.Add(roleId, roleBehaviour);
 
         if (customRole.HideSettings)
         {
-            return roleBehaviour;
+            return;
         }
 
         var config = PluginSingleton<MiraAPIPlugin>.Instance.Config;
         config.Bind(customRole.NumConfigDefinition, 1);
         config.Bind(customRole.ChanceConfigDefinition, 100);
 
-        return roleBehaviour;
     }
 
+    public static List<RoleBehaviour> GetRolesRegistered(string modId)
+    {
+        PluginInfo info = ModRoles.Keys.First(key => key.Metadata.GUID == modId);
+        if (ModRoles.TryGetValue(info, out List<RoleBehaviour> roles))
+        {
+            return roles;
+        }
+        else
+        {
+            Debug.LogError($"{modId} has no roles registered.");
+            return null;
+        }
+    }
     public static bool GetCustomRoleBehaviour(RoleTypes roleType, out ICustomRole result)
     {
         CustomRoles.TryGetValue((ushort)roleType, out var temp);
-        if (temp != null)
+        if (temp is ICustomRole role)
         {
-            result = temp;
+            result = role;
             return true;
         }
 
