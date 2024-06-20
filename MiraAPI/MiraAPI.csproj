@@ -14,6 +14,16 @@
         <GamePlatform Condition="'$(GamePlatform)' == ''">Steam</GamePlatform>
         <GameVersion Condition="'$(GamePlatform)' == 'Steam'">2024.3.5</GameVersion>
     </PropertyGroup>
+
+    <ItemGroup>
+      <None Remove="Resources\NextButton.png" />
+      <None Remove="Resources\NextButtonActive.png" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="Resources\NextButton.png" />
+      <EmbeddedResource Include="Resources\NextButtonActive.png" />
+    </ItemGroup>
 	
     <ItemGroup>
         <PackageReference Include="Reactor" Version="2.2.0" />
