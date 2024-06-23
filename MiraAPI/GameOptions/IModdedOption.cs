@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MiraAPI.PluginLoading;
+using System;
 using UnityEngine;
 
 namespace MiraAPI.GameOptions
@@ -11,9 +12,8 @@ namespace MiraAPI.GameOptions
         public StringNames StringName { get; }
         public Func<bool> Visible { get; set; }
         public ModdedOptionGroup Group { get; set; }
-        public IMiraConfig ParentMod { get; set; }
+        public IMiraPlugin ParentMod { get; set; }
         public void ValueChanged(OptionBehaviour optionBehaviour);
-        public string GetHudStringText();
-        public OptionBehaviour CreateOption(OptionBehaviour optionBehaviour, Transform container);
+        public OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container);
     }
 }

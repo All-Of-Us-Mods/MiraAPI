@@ -21,22 +21,25 @@ namespace MiraAPI.GameOptions.OptionTypes
             Value = Mathf.Clamp(defaultValue, min, max);
         }
 
-        public override OptionBehaviour CreateOption(OptionBehaviour optionBehaviour, Transform container)
+        public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container)
         {
-            var numberOption = (NumberOption)Object.Instantiate(optionBehaviour, container);
+            var numberOption = Object.Instantiate(numberOpt, Vector3.zero, Quaternion.identity, container);
+            var data = ScriptableObject.CreateInstance<FloatGameSetting>();
+            data.Title = StringName;
+            data.Type = global::OptionTypes.Float;
+            data.Increment = Increment;
+            data.SuffixType = SuffixType;
+            data.FormatString = "0";
+            data.ValidRange = new FloatRange(Min, Max);
+            data.ZeroIsInfinity = ZeroInfinity;
+            data.Value = Value;
 
-            numberOption.name = Title;
-            numberOption.Title = StringName;
-            numberOption.Value = Value;
-            numberOption.Increment = Increment;
-            numberOption.SuffixType = SuffixType;
-            numberOption.FormatString = "0";
-            numberOption.ValidRange = new FloatRange(Min, Max);
-            numberOption.ZeroIsInfinity = ZeroInfinity;
+            numberOption.data = data;
+            numberOption.SetUpFromData(numberOption.data, 20);
             numberOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
-            numberOption.Initialize();
-
             OptionBehaviour = numberOption;
+
+            numberOption.Value = Value;
 
             return numberOption;
         }
@@ -59,6 +62,8 @@ namespace MiraAPI.GameOptions.OptionTypes
 
             var opt = OptionBehaviour as NumberOption;
             opt.Value = newValue;
+
+            DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, OptionBehaviour.GetValueString(Value), false);
         }
     }
 }

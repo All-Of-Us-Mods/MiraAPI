@@ -8,16 +8,23 @@ namespace MiraAPI.GameOptions.OptionTypes
         {
         }
 
-        public override OptionBehaviour CreateOption(OptionBehaviour optionBehaviour, Transform container)
+        public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container)
         {
-            var toggleOption = (ToggleOption)Object.Instantiate(optionBehaviour, container);
+            var toggleOption = Object.Instantiate(toggleOpt, Vector3.zero, Quaternion.identity, container);
+            var data = ScriptableObject.CreateInstance<CheckboxGameSetting>();
+            data.Title = StringName;
+            data.Type = global::OptionTypes.Checkbox;
 
-            toggleOption.name = Title;
-            toggleOption.Title = StringName;
+            toggleOption.data = data;
+
+            toggleOption.TitleText.text = Title;
             toggleOption.CheckMark.enabled = Value;
             toggleOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
-            toggleOption.Initialize();
+
             OptionBehaviour = toggleOption;
+
+            toggleOption.SetUpFromData(toggleOption.data, 20);
+
             return toggleOption;
         }
 
@@ -37,6 +44,8 @@ namespace MiraAPI.GameOptions.OptionTypes
 
             var toggleOpt = OptionBehaviour as ToggleOption;
             toggleOpt.CheckMark.enabled = newValue;
+
+            DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, Value ? "On" : "Off", false);
         }
     }
 }

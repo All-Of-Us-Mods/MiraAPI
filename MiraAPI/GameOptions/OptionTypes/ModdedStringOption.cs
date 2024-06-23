@@ -1,6 +1,7 @@
 ﻿using Reactor.Localization.Utilities;
 using System.Linq;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace MiraAPI.GameOptions.OptionTypes
 {
@@ -12,18 +13,25 @@ namespace MiraAPI.GameOptions.OptionTypes
             Values = values;
         }
 
-        public override OptionBehaviour CreateOption(OptionBehaviour optionBehaviour, Transform container)
+        public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container)
         {
-            var stringOption = (StringOption)Object.Instantiate(optionBehaviour, container);
+            var stringOption = Object.Instantiate(stringOpt, container);
+            var vals = Values.Select(CustomStringName.CreateAndRegister).ToArray();
+            var data = ScriptableObject.CreateInstance<StringGameSetting>();
 
-            stringOption.name = Title;
-            stringOption.Title = StringName;
-            stringOption.Value = Value;
-            stringOption.Values = Values.Select(CustomStringName.CreateAndRegister).ToArray();
+            data.Title = StringName;
+            data.Type = global::OptionTypes.String;
+            data.Values = vals;
+            data.Index = Value;
+
+            stringOption.data = data;
             stringOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
-            stringOption.Initialize();
 
             OptionBehaviour = stringOption;
+
+            stringOption.SetUpFromData(stringOption.data, 20);
+
+            stringOption.Value = Value;
 
             return stringOption;
         }
@@ -44,6 +52,8 @@ namespace MiraAPI.GameOptions.OptionTypes
 
             var opt = OptionBehaviour as StringOption;
             opt.Value = newValue;
+
+            DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, OptionBehaviour.GetValueString(Value), false);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using MiraAPI.Roles;
+﻿using MiraAPI.GameOptions;
+using MiraAPI.Roles;
 using Reactor.Utilities.Extensions;
 using System.Linq;
 using UnityEngine;
@@ -7,6 +8,13 @@ namespace MiraAPI.Utilities
 {
     public static class Extensions
     {
+        public static bool IsCustom(this OptionBehaviour optionBehaviour)
+        {
+            if (ModdedOptionsManager.Options.Any(opt => opt.OptionBehaviour == optionBehaviour)) return true;
+
+            return false;
+        }
+
         public static void UpdateBodies(this PlayerControl playerControl, Color outlineColor, ref DeadBody target)
         {
             foreach (var body in Object.FindObjectsOfType<DeadBody>())

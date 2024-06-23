@@ -1,4 +1,5 @@
-﻿using MiraAPI.Roles;
+﻿using MiraAPI.PluginLoading;
+using MiraAPI.Roles;
 using Reactor.Localization.Utilities;
 using System;
 using UnityEngine;
@@ -16,7 +17,7 @@ namespace MiraAPI.GameOptions.OptionTypes
         public Type AdvancedRole { get; }
         public OptionBehaviour OptionBehaviour { get; set; }
         public ModdedOptionGroup Group { get; set; } = null;
-        public IMiraConfig ParentMod { get; set; } = null;
+        public IMiraPlugin ParentMod { get; set; } = null;
 
         public ModdedOption(string title, T defaultValue, Type roleType)
         {
@@ -53,7 +54,7 @@ namespace MiraAPI.GameOptions.OptionTypes
 
         public abstract T GetValueFromOptionBehaviour(OptionBehaviour optionBehaviour);
 
-        public abstract OptionBehaviour CreateOption(OptionBehaviour optionBehaviour, Transform container);
+        public abstract OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container);
 
         public abstract string GetHudStringText();
     }

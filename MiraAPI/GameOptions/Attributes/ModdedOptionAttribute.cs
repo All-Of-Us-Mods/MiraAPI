@@ -15,23 +15,6 @@ namespace MiraAPI.GameOptions.Attributes
             RoleType = roleType;
         }
 
-        public static void Register(Assembly assembly)
-        {
-            foreach (var type in assembly.GetTypes())
-            {
-                foreach (PropertyInfo property in type.GetProperties())
-                {
-                    foreach (var attribute in property.GetCustomAttributes())
-                    {
-                        if (attribute.GetType().BaseType == typeof(ModdedOptionAttribute))
-                        {
-                            ModdedOptionsManager.RegisterOption(assembly, type, (ModdedOptionAttribute)attribute, property);
-                        }
-                    }
-                }
-            }
-        }
-
         public abstract void SetValue(object val);
         public abstract object GetValue();
         public abstract IModdedOption CreateOption(object value, PropertyInfo property);

@@ -1,7 +1,4 @@
-﻿using HarmonyLib;
-using Il2CppInterop.Runtime.Injection;
-using MiraAPI.Roles;
-using System;
+﻿using MiraAPI.Roles;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -16,24 +13,6 @@ namespace MiraAPI.Utilities
         {
             return ShipStatus.Instance.AllRooms.ToList().Find(room => room.roomArea.OverlapPoint(pos));
         }
-
-        public static void RegisterType(Type type)
-        {
-            if (ClassInjector.IsTypeRegisteredInIl2Cpp(type))
-            {
-                return;
-            }
-
-            try
-            {
-                ClassInjector.RegisterTypeInIl2Cpp(type);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"Failed to register {type.FullDescription()}: {e}");
-            }
-        }
-
 
         public static string GetSuffix(NumberSuffixes suffix)
         {

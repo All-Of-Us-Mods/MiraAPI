@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MiraAPI.Example
 {
-    [RegisterCustomRole(ExamplePlugin.Id)]
+    [RegisterCustomRole]
     public class CustomRole : CrewmateRole, ICustomRole
     {
         public string RoleName => "Test Role";

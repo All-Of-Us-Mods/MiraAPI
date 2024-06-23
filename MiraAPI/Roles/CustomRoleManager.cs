@@ -1,7 +1,6 @@
 ﻿using AmongUs.GameOptions;
-using BepInEx;
-using BepInEx.Unity.IL2CPP;
 using Il2CppInterop.Runtime;
+using MiraAPI.Networking;
 using Reactor.Localization.Utilities;
 using Reactor.Networking.Rpc;
 using Reactor.Utilities;
@@ -9,7 +8,6 @@ using Reactor.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MiraAPI.Networking;
 using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -18,46 +16,40 @@ namespace MiraAPI.Roles;
 
 public static class CustomRoleManager
 {
-    public static readonly Dictionary<ushort, RoleBehaviour> CustomRoles = [];
-    public static readonly Dictionary<PluginInfo, List<RoleBehaviour>> ModRoles = [];
+    public static Dictionary<ushort, RoleBehaviour> CustomRoles = new();
+
+    public static int GetNextRoleId(ushort requestedId)
+    {
+        while (CustomRoles.ContainsKey(requestedId))
+        {
+            requestedId++;
+        }
+
+        return requestedId;
+    }
 
     public static void RegisterInRoleManager()
     {
         RoleManager.Instance.AllRoles = RoleManager.Instance.AllRoles.Concat(CustomRoles.Values).ToArray();
     }
 
-    internal static void RegisterRole(Type roleType, ushort roleId, string modId)
+    internal static RoleBehaviour RegisterRole(Type roleType, ushort roleId)
     {
-        if (!IL2CPPChainloader.Instance.Plugins.TryGetValue(modId, out PluginInfo info))
-        {
-            Debug.LogError($"{modId} is not a valid mod!");
-            return;
-        }
-
         if (!(typeof(RoleBehaviour).IsAssignableFrom(roleType) && typeof(ICustomRole).IsAssignableFrom(roleType)))
         {
-            return;
-        }
-
-        if (CustomRoles.Any(behaviour => behaviour.GetType() == roleType))
-        {
-            return;
+            Logger<MiraAPIPlugin>.Error($"{roleType?.Name} does not inherit from RoleBehaviour or ICustomRole.");
+            return null;
         }
 
         var roleBehaviour = (RoleBehaviour)new GameObject(roleType.Name).DontDestroy().AddComponent(Il2CppType.From(roleType));
 
         if (roleBehaviour is not ICustomRole customRole)
         {
-            return;
+            roleBehaviour.gameObject.Destroy();
+            return null;
         }
 
-        if (CustomRoles.ContainsKey(roleId))
-        {
-            Debug.LogError($"Role ID conflict for {customRole.RoleName}. Use a different ID.");
-            return;
-        }
-
-        roleBehaviour.Role = (RoleTypes)roleId;
+        roleBehaviour.Role = (RoleTypes)GetNextRoleId(roleId);
         roleBehaviour.TeamType = customRole.Team == ModdedRoleTeams.Neutral ? RoleTeamTypes.Crewmate : (RoleTeamTypes)customRole.Team;
         roleBehaviour.NameColor = customRole.RoleColor;
         roleBehaviour.StringName = CustomStringName.CreateAndRegister(customRole.RoleName);
@@ -76,47 +68,27 @@ public static class CustomRoleManager
             RoleManager.GhostRoles.Add(roleBehaviour.Role);
         }
 
-        if (ModRoles.TryGetValue(info, out List<RoleBehaviour> roles))
-        {
-            roles.Add(roleBehaviour);
-        }
-        else
-        {
-            ModRoles.TryAdd(info, [roleBehaviour]);
-        }
-
         CustomRoles.Add(roleId, roleBehaviour);
 
         if (customRole.HideSettings)
         {
-            return;
+            return roleBehaviour;
         }
 
         var config = PluginSingleton<MiraAPIPlugin>.Instance.Config;
         config.Bind(customRole.NumConfigDefinition, 1);
         config.Bind(customRole.ChanceConfigDefinition, 100);
 
+        return roleBehaviour;
     }
 
-    public static List<RoleBehaviour> GetRolesRegistered(string modId)
-    {
-        PluginInfo info = ModRoles.Keys.First(key => key.Metadata.GUID == modId);
-        if (ModRoles.TryGetValue(info, out List<RoleBehaviour> roles))
-        {
-            return roles;
-        }
-        else
-        {
-            Debug.LogError($"{modId} has no roles registered.");
-            return null;
-        }
-    }
+
     public static bool GetCustomRoleBehaviour(RoleTypes roleType, out ICustomRole result)
     {
         CustomRoles.TryGetValue((ushort)roleType, out var temp);
-        if (temp is ICustomRole role)
+        if (temp != null)
         {
-            result = role;
+            result = temp as ICustomRole;
             return true;
         }
 

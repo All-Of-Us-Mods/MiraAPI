@@ -1,8 +1,6 @@
 ﻿using HarmonyLib;
 using InnerNet;
-using MiraAPI.GameOptions;
 using MiraAPI.Hud;
-using MiraAPI.Patches.Options;
 using MiraAPI.Roles;
 using Reactor.Utilities.Extensions;
 using UnityEngine;
@@ -30,7 +28,7 @@ namespace MiraAPI.Patches
             }
 
             //CustomGameModeManager.ActiveMode.HudUpdate(__instance);
-            if (local.Data.Role is null) return;
+            if (local is null || local.Data is null || local.Data.Role is null) return;
 
             if (local.Data.Role is ICustomRole customRole)
             {
