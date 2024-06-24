@@ -103,9 +103,8 @@ public static class GameOptionsMenuPatch
             __instance.Children.Add(__instance.MapPicker);
             __instance.CreateSettings();
             __instance.cachedData = GameOptionsManager.Instance.CurrentGameOptions;
-            for (int i = 0; i < __instance.Children.Count; i++)
+            foreach (var optionBehaviour in __instance.Children)
             {
-                OptionBehaviour optionBehaviour = __instance.Children[i];
                 if (AmongUsClient.Instance && !AmongUsClient.Instance.AmHost)
                 {
                     optionBehaviour.SetAsPlayer();

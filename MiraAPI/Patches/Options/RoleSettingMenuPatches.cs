@@ -92,9 +92,9 @@ namespace MiraAPI.Patches.Options
 
         private static void CreateAdvancedSettings(RolesSettingsMenu __instance, RoleBehaviour role)
         {
-            for (int i = 0; i < __instance.advancedSettingChildren.Count; i++)
+            foreach (var option in __instance.advancedSettingChildren) 
             {
-                Object.Destroy(__instance.advancedSettingChildren[i].gameObject);
+                Object.Destroy(option.gameObject);
             }
 
             __instance.advancedSettingChildren.Clear();
@@ -138,9 +138,8 @@ namespace MiraAPI.Patches.Options
 
             CreateAdvancedSettings(__instance, role);
 
-            for (int i = 0; i < __instance.advancedSettingChildren.Count; i++)
+            foreach (var optionBehaviour in __instance.advancedSettingChildren)
             {
-                OptionBehaviour optionBehaviour = __instance.advancedSettingChildren[i];
                 optionBehaviour.OnValueChanged = new Action<OptionBehaviour>(__instance.ValueChanged);
                 if (AmongUsClient.Instance && !AmongUsClient.Instance.AmHost)
                 {
