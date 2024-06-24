@@ -29,7 +29,7 @@ public static class GameOptionsMenuPatch
             categoryHeaderMasked.transform.localPosition = new Vector3(-0.903f, num, -2f);
             num -= 0.63f;
 
-            foreach (var opt in ModdedOptionsManager.Options.Where(opt => opt.Group is not null && opt.Group.GroupName == group.GroupName))
+            foreach (var opt in ModdedOptionsManager.Options.Where(opt => opt.Group is not null && opt.AdvancedRole is null && opt.Group.GroupName == group.GroupName))
             {
                 OptionBehaviour newOpt = opt.CreateOption(__instance.checkboxOrigin, __instance.numberOptionOrigin, __instance.stringOptionOrigin, __instance.settingsContainer);
                 newOpt.transform.localPosition = new Vector3(0.952f, num, -2f);
@@ -60,7 +60,7 @@ public static class GameOptionsMenuPatch
 
         num -= 0.63f;
 
-        foreach (var opt in ModdedOptionsManager.Options.Where(opt => opt.Group is null))
+        foreach (var opt in ModdedOptionsManager.Options.Where(opt => opt.Group is null && opt.AdvancedRole is null))
         {
             OptionBehaviour newOpt = opt.CreateOption(__instance.checkboxOrigin, __instance.numberOptionOrigin, __instance.stringOptionOrigin, __instance.settingsContainer);
             newOpt.transform.localPosition = new Vector3(0.952f, num, -2f);

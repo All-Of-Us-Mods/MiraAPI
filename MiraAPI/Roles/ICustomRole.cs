@@ -18,6 +18,7 @@ public interface ICustomRole
     Color RoleColor { get; }
 
     ModdedRoleTeams Team { get; }
+    LoadableAsset<Sprite> OptionsScreenshot { get; }
 
     LoadableAsset<Sprite> Icon => MiraAssets.Empty;
 

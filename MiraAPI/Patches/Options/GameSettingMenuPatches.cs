@@ -7,6 +7,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
+using static UnityEngine.UI.Button;
 
 namespace MiraAPI.Patches.Options;
 
@@ -42,14 +43,9 @@ public static class GameSettingMenuPatches
         nextButton.transform.FindChild("Inactive").gameObject.GetComponent<SpriteRenderer>().sprite = MiraAssets.NextButton.LoadAsset();
         nextButton.transform.FindChild("Active").gameObject.GetComponent<SpriteRenderer>().sprite = MiraAssets.NextButtonActive.LoadAsset();
         nextButton.gameObject.GetComponent<CloseButtonConsoleBehaviour>().DestroyImmediate();
-        nextButton.gameObject.GetComponent<PassiveButton>().DestroyImmediate();
 
-        PassiveButton passiveButton = nextButton.gameObject.AddComponent<PassiveButton>();
-        passiveButton.HoverSound = __instance.BackButton.GetComponent<PassiveButton>().HoverSound;
-        passiveButton.ClickSound = __instance.BackButton.GetComponent<PassiveButton>().ClickSound;
-
-        passiveButton.activeSprites = nextButton.transform.FindChild("Active").gameObject;
-        passiveButton.inactiveSprites = nextButton.transform.FindChild("Inactive").gameObject;
+        PassiveButton passiveButton = nextButton.gameObject.GetComponent<PassiveButton>();
+        passiveButton.OnClick = new ButtonClickedEvent();
         passiveButton.OnClick.AddListener((UnityAction)(() =>
         {
             if (currentSelectedMod != MiraPluginManager.Instance.RegisteredPlugins.Count)
