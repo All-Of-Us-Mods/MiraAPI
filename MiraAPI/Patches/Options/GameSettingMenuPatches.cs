@@ -33,7 +33,7 @@ public static class GameSettingMenuPatches
 
         text = tmpText.GetComponent<TextMeshPro>();
         text.fontSizeMax = 3.2f;
-        UpdateText(__instance.GameSettingsTab);
+        UpdateText(__instance.GameSettingsTab, __instance.RoleSettingsTab);
 
         text.alignment = TextAlignmentOptions.Center;
 
@@ -51,8 +51,8 @@ public static class GameSettingMenuPatches
             if (currentSelectedMod != MiraPluginManager.Instance.RegisteredPlugins.Count)
             {
                 currentSelectedMod += 1;
+                UpdateText(__instance.GameSettingsTab, __instance.RoleSettingsTab);
             }
-            UpdateText(__instance.GameSettingsTab);
         }));
 
         GameObject backButton = GameObject.Instantiate(nextButton, __instance.BackButton.transform.parent).gameObject;
@@ -65,12 +65,12 @@ public static class GameSettingMenuPatches
             if (currentSelectedMod != 0)
             {
                 currentSelectedMod -= 1;
+                UpdateText(__instance.GameSettingsTab, __instance.RoleSettingsTab);
             }
-            UpdateText(__instance.GameSettingsTab);
         }));
     }
 
-    public static void UpdateText(GameOptionsMenu settings)
+    public static void UpdateText(GameOptionsMenu settings, RolesSettingsMenu roles)
     {
         if (currentSelectedMod == 0)
         {
@@ -84,31 +84,62 @@ public static class GameSettingMenuPatches
             if (selectedMod == null)
             {
                 currentSelectedMod = 0;
-                UpdateText(settings);
+                UpdateText(settings, roles);
             }
 
             string name = selectedMod.PluginInfo.Metadata.Name;
             text.text = name.Substring(0, Math.Min(name.Length, 15));
         }
 
-        if (settings.Children is null || settings is null) return;
-
-        foreach (var child in settings.Children)
+        if (roles is not null && roles.roleChances is not null)
         {
-            if (child.TryCast<GameOptionsMapPicker>()) continue;
-            if (child.gameObject is null) continue;
+            if (roles.advancedSettingChildren is not null)
+            {
+                foreach (var child in roles.advancedSettingChildren)
+                {
+                    child.gameObject.DestroyImmediate();
+                }
+                roles.advancedSettingChildren.Clear();
+                roles.advancedSettingChildren = null;
+            }
 
-            child.gameObject.DestroyImmediate();
+            foreach (var header in roles.RoleChancesSettings.transform.GetComponentsInChildren<CategoryHeaderEditRole>())
+            {
+                header.gameObject.DestroyImmediate();
+            }
+
+            foreach (var roleChance in roles.roleChances)
+            {
+                roleChance.gameObject.DestroyImmediate();
+            }
+
+
+            roles.roleChances.Clear();
+            roles.roleChances = null;
+            roles.AdvancedRolesSettings.gameObject.SetActive(false);
+            roles.RoleChancesSettings.gameObject.SetActive(true);
+            roles.SetQuotaTab();
         }
 
-        foreach (var header in settings.settingsContainer.GetComponentsInChildren<CategoryHeaderMasked>())
+        if (settings is not null && settings.Children is not null)
         {
-            header.gameObject.DestroyImmediate();
+            foreach (var child in settings.Children)
+            {
+                if (child.TryCast<GameOptionsMapPicker>()) continue;
+                if (child.gameObject is null) continue;
+
+                child.gameObject.DestroyImmediate();
+            }
+
+            foreach (var header in settings.settingsContainer.GetComponentsInChildren<CategoryHeaderMasked>())
+            {
+                header.gameObject.DestroyImmediate();
+            }
+
+            settings.Children.Clear();
+            settings.Children = null;
+
+            settings.Initialize();
         }
-
-        settings.Children.Clear();
-        settings.Children = null;
-
-        settings.Initialize();
     }
 }

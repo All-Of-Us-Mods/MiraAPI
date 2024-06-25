@@ -1,6 +1,7 @@
 ﻿using AmongUs.GameOptions;
 using Il2CppInterop.Runtime;
 using MiraAPI.Networking;
+using MiraAPI.PluginLoading;
 using Reactor.Localization.Utilities;
 using Reactor.Networking.Rpc;
 using Reactor.Utilities;
@@ -83,6 +84,10 @@ public static class CustomRoleManager
         return roleBehaviour;
     }
 
+    public static MiraPluginInfo FindParentMod(ICustomRole role)
+    {
+        return MiraPluginManager.Instance.RegisteredPlugins.First(plugin => plugin.Value.CustomRoles.Values.Contains(role as RoleBehaviour)).Value;
+    }
 
     public static bool GetCustomRoleBehaviour(RoleTypes roleType, out ICustomRole result)
     {

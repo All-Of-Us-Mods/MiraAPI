@@ -1,4 +1,5 @@
 ﻿using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
 using MiraAPI.PluginLoading;
@@ -15,6 +16,7 @@ namespace MiraAPI.Example;
 public partial class ExamplePlugin : BasePlugin, IMiraPlugin
 {
     public Harmony Harmony { get; } = new(Id);
+    public ConfigFile GetConfigFile() => Config;
     public override void Load()
     {
         Harmony.PatchAll();

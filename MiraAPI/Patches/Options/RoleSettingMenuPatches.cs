@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using MiraAPI.Roles;
+using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities.Extensions;
 using System;
@@ -18,8 +19,13 @@ namespace MiraAPI.Patches.Options
         [HarmonyPrefix, HarmonyPatch(nameof(RolesSettingsMenu.SetQuotaTab))]
         public static bool PatchStart(RolesSettingsMenu __instance)
         {
+            __instance.roleChances = new Il2CppSystem.Collections.Generic.List<RoleOptionSetting>();
+            __instance.advancedSettingChildren = new Il2CppSystem.Collections.Generic.List<OptionBehaviour>();
+
             if (GameSettingMenuPatches.currentSelectedMod == 0)
             {
+                __instance.AllButton.transform.parent.gameObject.SetActive(true);
+                __instance.AllButton.gameObject.SetActive(true);
                 __instance.scrollBar.transform.localPosition = new Vector3(-1.4957f, 0.657f, -4);
                 return true;
             }
@@ -134,7 +140,7 @@ namespace MiraAPI.Patches.Options
             __instance.roleScreenshot.sprite = Sprite.Create(role.RoleScreenshot.texture, new Rect(0, 0, 370, 230), Vector2.one / 2, 100);
             __instance.roleScreenshot.drawMode = SpriteDrawMode.Sliced;
             __instance.roleHeaderSprite.color = customRole.RoleColor;
-            __instance.roleHeaderText.color = new Color(customRole.RoleColor.r - 0.3f, customRole.RoleColor.g - 0.3f, customRole.RoleColor.b - 0.3f);
+            __instance.roleHeaderText.color = customRole.RoleColor.DarkenColor();
 
             CreateAdvancedSettings(__instance, role);
 
@@ -154,10 +160,12 @@ namespace MiraAPI.Patches.Options
 
         public static void CreateQuotaOption(RolesSettingsMenu __instance, RoleBehaviour role, ref float yPos, int index)
         {
+            ICustomRole customRole = role as ICustomRole;
             RoleOptionSetting roleOptionSetting = Object.Instantiate(__instance.roleOptionSettingOrigin, Vector3.zero, Quaternion.identity, __instance.RoleChancesSettings.transform);
             roleOptionSetting.transform.localPosition = new Vector3(-0.15f, yPos, -2f);
             roleOptionSetting.SetRole(GameOptionsManager.Instance.CurrentGameOptions.RoleOptions, role, 20);
-            roleOptionSetting.labelSprite.color = (role as ICustomRole).RoleColor;
+            roleOptionSetting.labelSprite.color = customRole.RoleColor;
+            roleOptionSetting.titleText.color = customRole.RoleColor.DarkenColor();
             roleOptionSetting.OnValueChanged = new Action<OptionBehaviour>(ValueChanged);
             roleOptionSetting.titleText.horizontalAlignment = TMPro.HorizontalAlignmentOptions.Left;
             roleOptionSetting.SetClickMask(__instance.ButtonClickMask);
