@@ -15,6 +15,10 @@ namespace MiraAPI.Utilities
             return false;
         }
 
+        public static Color DarkenColor(this Color color)
+        {
+            return new Color(color.r - 0.3f, color.g - 0.3f, color.b - 0.3f);
+        }
         public static void UpdateBodies(this PlayerControl playerControl, Color outlineColor, ref DeadBody target)
         {
             foreach (var body in Object.FindObjectsOfType<DeadBody>())

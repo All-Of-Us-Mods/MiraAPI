@@ -25,6 +25,11 @@ public static class GameOptionsMenuPatch
         {
             CategoryHeaderMasked categoryHeaderMasked = UnityEngine.Object.Instantiate(__instance.categoryHeaderOrigin, Vector3.zero, Quaternion.identity, __instance.settingsContainer);
             categoryHeaderMasked.SetHeader(CustomStringName.CreateAndRegister(group.GroupName), 20);
+            if (group.GroupColor != Color.clear)
+            {
+                categoryHeaderMasked.Background.color = group.GroupColor;
+                categoryHeaderMasked.Title.color = group.GroupColor.DarkenColor();
+            }
             categoryHeaderMasked.transform.localScale = Vector3.one * 0.63f;
             categoryHeaderMasked.transform.localPosition = new Vector3(-0.903f, num, -2f);
             num -= 0.63f;
@@ -38,10 +43,13 @@ public static class GameOptionsMenuPatch
                 SpriteRenderer[] componentsInChildren = newOpt.GetComponentsInChildren<SpriteRenderer>(true);
                 for (int i = 0; i < componentsInChildren.Length; i++)
                 {
+                    if (group.GroupColor != Color.clear) componentsInChildren[i].color = group.GroupColor;
                     componentsInChildren[i].material.SetInt(PlayerMaterial.MaskLayer, 20);
                 }
+
                 foreach (TextMeshPro textMeshPro in newOpt.GetComponentsInChildren<TextMeshPro>(true))
                 {
+                    if (group.GroupColor != Color.clear) textMeshPro.color = group.GroupColor.DarkenColor();
                     textMeshPro.fontMaterial.SetFloat("_StencilComp", 3f);
                     textMeshPro.fontMaterial.SetFloat("_Stencil", 20);
                 }
