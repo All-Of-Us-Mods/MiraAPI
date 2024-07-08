@@ -1,5 +1,8 @@
-﻿using MiraAPI.Utilities;
+﻿using System;
+using MiraAPI.Networking;
+using MiraAPI.Utilities;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace MiraAPI.GameOptions.OptionTypes
 {
@@ -44,6 +47,16 @@ namespace MiraAPI.GameOptions.OptionTypes
             return numberOption;
         }
 
+        public override NetData GetNetData()
+        {
+            return new NetData(Id, BitConverter.GetBytes(Value));
+        }
+
+        public override void HandleNetData(byte[] data)
+        {
+            SetValue(BitConverter.ToSingle(data));
+        }
+
         public override string GetHudStringText()
         {
             return Title + ": " + Value + Helpers.GetSuffix(SuffixType);
@@ -61,7 +74,10 @@ namespace MiraAPI.GameOptions.OptionTypes
             if (OptionBehaviour is null) return;
 
             var opt = OptionBehaviour as NumberOption;
-            opt.Value = newValue;
+            if (opt)
+            {
+                opt.Value = newValue;
+            }
 
             DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, OptionBehaviour.GetValueString(Value), false);
         }

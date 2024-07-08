@@ -5,6 +5,7 @@ using MiraAPI.Utilities.Assets;
 using Reactor.Utilities.Extensions;
 using System;
 using System.Linq;
+using Reactor.Utilities;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -80,10 +81,10 @@ namespace MiraAPI.Patches.Options
             var role = roleSetting.Role as ICustomRole;
             if (role.HideSettings) return;
 
-            MiraAPIPlugin.Instance.Config.TryGetEntry<int>(role.NumConfigDefinition, out var numEntry);
+            PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(role.NumConfigDefinition, out var numEntry);
             numEntry.Value = roleSetting.RoleMaxCount;
 
-            MiraAPIPlugin.Instance.Config.TryGetEntry<int>(role.ChanceConfigDefinition, out var chanceEntry);
+            PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(role.ChanceConfigDefinition, out var chanceEntry);
             chanceEntry.Value = roleSetting.RoleChance;
 
             roleSetting.UpdateValuesAndText(GameOptionsManager.Instance.CurrentGameOptions.RoleOptions);

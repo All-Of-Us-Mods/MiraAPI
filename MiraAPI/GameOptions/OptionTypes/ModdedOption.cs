@@ -2,15 +2,18 @@
 using MiraAPI.Roles;
 using Reactor.Localization.Utilities;
 using System;
+using MiraAPI.Networking;
+using Reactor.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.GameOptions.OptionTypes
 {
     public abstract class ModdedOption<T> : IModdedOption
     {
-        public T Value { get; set; }
-        public T DefaultValue { get; set; }
-        public Action<T> ChangedEvent { get; private set; }
+        public uint Id { get; }
+        public T Value { get; protected set; }
+        public T DefaultValue { get; init; }
+        public Action<T> ChangedEvent { get; set; }
         public string Title { get; }
         public StringNames StringName { get; }
         public Func<bool> Visible { get; set; }
@@ -19,7 +22,7 @@ namespace MiraAPI.GameOptions.OptionTypes
         public ModdedOptionGroup Group { get; set; } = null;
         public IMiraPlugin ParentMod { get; set; } = null;
 
-        public ModdedOption(string title, T defaultValue, Type roleType)
+        public ModdedOption(string title, T defaultValue, Type roleType) : this()
         {
             Title = title;
             DefaultValue = defaultValue;
@@ -31,6 +34,14 @@ namespace MiraAPI.GameOptions.OptionTypes
             {
                 AdvancedRole = roleType;
             }
+        }
+        
+        public ModdedOption()
+        {
+            Logger<MiraApiPlugin>.Error("created modded option");
+            Id = ModdedOptionsManager.NextId++;
+            ModdedOptionsManager.Options.Add(this);
+            ModdedOptionsManager.ModdedOptions.Add(Id, this);
         }
 
         public void ValueChanged(OptionBehaviour optionBehaviour)
@@ -49,6 +60,9 @@ namespace MiraAPI.GameOptions.OptionTypes
 
             OnValueChanged(newValue);
         }
+
+        public abstract NetData GetNetData();
+        public abstract void HandleNetData(byte[] data);
 
         public abstract void OnValueChanged(T newValue);
 

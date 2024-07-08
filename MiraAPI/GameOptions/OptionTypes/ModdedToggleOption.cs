@@ -1,13 +1,12 @@
-﻿using UnityEngine;
+﻿using System;
+using MiraAPI.Networking;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace MiraAPI.GameOptions.OptionTypes
 {
-    public class ModdedToggleOption : ModdedOption<bool>
+    public class ModdedToggleOption(string title, bool defaultValue, System.Type roleType) : ModdedOption<bool>(title, defaultValue, roleType)
     {
-        public ModdedToggleOption(string title, bool defaultValue, System.Type roleType) : base(title, defaultValue, roleType)
-        {
-        }
-
         public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container)
         {
             var toggleOption = Object.Instantiate(toggleOpt, Vector3.zero, Quaternion.identity, container);
@@ -28,6 +27,16 @@ namespace MiraAPI.GameOptions.OptionTypes
             return toggleOption;
         }
 
+        public override NetData GetNetData()
+        {
+            return new NetData(Id, BitConverter.GetBytes(Value));
+        }
+
+        public override void HandleNetData(byte[] data)
+        {
+            SetValue(BitConverter.ToBoolean(data));
+        }
+
         public override string GetHudStringText()
         {
             return Title + ": " + (Value ? "On" : "Off");
@@ -43,7 +52,10 @@ namespace MiraAPI.GameOptions.OptionTypes
             if (OptionBehaviour is null) return;
 
             var toggleOpt = OptionBehaviour as ToggleOption;
-            toggleOpt.CheckMark.enabled = newValue;
+            if (toggleOpt)
+            {
+                toggleOpt.CheckMark.enabled = newValue;
+            }
 
             DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, Value ? "On" : "Off", false);
         }

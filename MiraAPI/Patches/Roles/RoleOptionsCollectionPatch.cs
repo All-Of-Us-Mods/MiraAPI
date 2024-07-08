@@ -22,7 +22,7 @@ public static class RoleOptionsCollectionPatch
                 return false;
             }
 
-            PluginSingleton<MiraAPIPlugin>.Instance.Config.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var entry);
+            PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var entry);
             __result = entry.Value;
             return false;
         }
@@ -44,7 +44,7 @@ public static class RoleOptionsCollectionPatch
                 return false;
             }
 
-            PluginSingleton<MiraAPIPlugin>.Instance.Config.TryGetEntry<int>(customRole.NumConfigDefinition, out var entry);
+            PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.NumConfigDefinition, out var entry);
             __result = entry.Value;
             return false;
         }

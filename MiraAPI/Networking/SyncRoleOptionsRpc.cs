@@ -8,7 +8,7 @@ using Reactor.Utilities;
 namespace MiraAPI.Networking;
 
 [RegisterCustomRpc((uint)MiraRpc.SyncRoleOptions)]
-public class SyncRoleOptionsRpc(MiraAPIPlugin plugin, uint id) : PlayerCustomRpc<MiraAPIPlugin, SyncRoleOptionsRpc.Data>(plugin, id)
+public class SyncRoleOptionsRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<MiraApiPlugin, SyncRoleOptionsRpc.Data>(plugin, id)
 {
 
     public struct Data(ushort roleId, int number, int chance)
@@ -42,8 +42,8 @@ public class SyncRoleOptionsRpc(MiraAPIPlugin plugin, uint id) : PlayerCustomRpc
         if (!CustomRoleManager.CustomRoles.TryGetValue(data.RoleId, out var roleBehaviour) ||
             !CustomRoleManager.GetCustomRoleBehaviour(roleBehaviour.Role, out var role)) return;
 
-        PluginSingleton<MiraAPIPlugin>.Instance.Config.TryGetEntry<int>(role.NumConfigDefinition, out var numEntry);
-        PluginSingleton<MiraAPIPlugin>.Instance.Config.TryGetEntry<int>(role.ChanceConfigDefinition, out var chanceEntry);
+        PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(role.NumConfigDefinition, out var numEntry);
+        PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(role.ChanceConfigDefinition, out var chanceEntry);
 
         try
         {
@@ -52,7 +52,7 @@ public class SyncRoleOptionsRpc(MiraAPIPlugin plugin, uint id) : PlayerCustomRpc
         }
         catch (Exception e)
         {
-            Logger<MiraAPIPlugin>.Warning(e.ToString());
+            Logger<MiraApiPlugin>.Warning(e.ToString());
         }
     }
 }

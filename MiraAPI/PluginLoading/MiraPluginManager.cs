@@ -39,7 +39,7 @@ public class MiraPluginManager
 
             RegisteredPlugins.Add(assembly, info);
 
-            Logger<MiraAPIPlugin>.Info($"Registering mod {id} with Mira API.");
+            Logger<MiraApiPlugin>.Info($"Registering mod {id} with Mira API.");
         };
     }
 

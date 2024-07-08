@@ -17,11 +17,11 @@ namespace MiraAPI.Roles;
 
 public static class CustomRoleManager
 {
-    public static Dictionary<ushort, RoleBehaviour> CustomRoles = new();
+    public static readonly Dictionary<ushort, RoleBehaviour> CustomRoles = new();
 
-    public static int GetNextRoleId(ushort requestedId)
+    private static int GetNextRoleId(ushort requestedId)
     {
-        while (CustomRoles.ContainsKey(requestedId))
+        while (CustomRoles.ContainsKey(requestedId) || requestedId <= Enum.GetNames<RoleTypes>().Length)
         {
             requestedId++;
         }
@@ -38,7 +38,7 @@ public static class CustomRoleManager
     {
         if (!(typeof(RoleBehaviour).IsAssignableFrom(roleType) && typeof(ICustomRole).IsAssignableFrom(roleType)))
         {
-            Logger<MiraAPIPlugin>.Error($"{roleType?.Name} does not inherit from RoleBehaviour or ICustomRole.");
+            Logger<MiraApiPlugin>.Error($"{roleType?.Name} does not inherit from RoleBehaviour or ICustomRole.");
             return null;
         }
 
@@ -77,7 +77,7 @@ public static class CustomRoleManager
             return roleBehaviour;
         }
 
-        var config = PluginSingleton<MiraAPIPlugin>.Instance.Config;
+        var config = PluginSingleton<MiraApiPlugin>.Instance.Config;
         config.Bind(customRole.NumConfigDefinition, 1);
         config.Bind(customRole.ChanceConfigDefinition, 100);
 
@@ -141,13 +141,13 @@ public static class CustomRoleManager
         foreach (var role in CustomRoles.Values)
         {
             ICustomRole customRole = role as ICustomRole;
-            if (customRole.HideSettings)
+            if (customRole is null or { HideSettings: true })
             {
                 continue;
             }
 
-            PluginSingleton<MiraAPIPlugin>.Instance.Config.TryGetEntry<int>(customRole.NumConfigDefinition, out var numEntry);
-            PluginSingleton<MiraAPIPlugin>.Instance.Config.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var chanceEntry);
+            PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.NumConfigDefinition, out var numEntry);
+            PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var chanceEntry);
 
             Rpc<SyncRoleOptionsRpc>.Instance.Send(new SyncRoleOptionsRpc.Data((ushort)role.Role, numEntry.Value, chanceEntry.Value));
         }
@@ -158,13 +158,13 @@ public static class CustomRoleManager
         foreach (var role in CustomRoles.Values)
         {
             ICustomRole customRole = role as ICustomRole;
-            if (customRole.HideSettings)
+            if (customRole is null or { HideSettings: true })
             {
                 continue;
             }
 
-            PluginSingleton<MiraAPIPlugin>.Instance.Config.TryGetEntry<int>(customRole.NumConfigDefinition, out var numEntry);
-            PluginSingleton<MiraAPIPlugin>.Instance.Config.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var chanceEntry);
+            PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.NumConfigDefinition, out var numEntry);
+            PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var chanceEntry);
 
             Rpc<SyncRoleOptionsRpc>.Instance.SendTo(targetId, new SyncRoleOptionsRpc.Data((ushort)role.Role, numEntry.Value, chanceEntry.Value));
         }
