@@ -37,9 +37,9 @@ public class MiraPluginManager
         };
     }
 
-    public MiraPluginInfo GetPluginByGUID(string guid)
+    public MiraPluginInfo GetPluginByGuid(string guid)
     {
-        return RegisteredPlugins.Values.Where(plugin => plugin.PluginId == guid).First();
+        return RegisteredPlugins.Values.First(plugin => plugin.PluginId == guid);
     }
 
 
