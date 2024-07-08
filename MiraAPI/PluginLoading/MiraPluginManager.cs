@@ -73,7 +73,7 @@ public class MiraPluginManager
             if (typeof(IModdedOptionGroup).IsAssignableFrom(type))
             {
                 IModdedOptionGroup group = (IModdedOptionGroup)Activator.CreateInstance(type);
-                ModdedOptionGroup newGroup = new ModdedOptionGroup()
+                ModdedOptionGroup newGroup = new ModdedOptionGroup
                 {
                     AdvancedRole = group.AdvancedRole,
                     GroupColor = group.GroupColor,
