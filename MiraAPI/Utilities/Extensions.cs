@@ -10,9 +10,7 @@ namespace MiraAPI.Utilities
     {
         public static bool IsCustom(this OptionBehaviour optionBehaviour)
         {
-            if (ModdedOptionsManager.Options.Any(opt => opt.OptionBehaviour == optionBehaviour)) return true;
-
-            return false;
+            return ModdedOptionsManager.Options.Any(opt => opt.OptionBehaviour && opt.OptionBehaviour.Equals(optionBehaviour));
         }
 
         public static Color DarkenColor(this Color color)
