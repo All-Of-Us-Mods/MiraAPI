@@ -14,8 +14,14 @@ namespace MiraAPI.PluginLoading;
 
 public class MiraPluginManager
 {
-    public Dictionary<Assembly, MiraPluginInfo> RegisteredPlugins = [];
-    public static MiraPluginManager Instance;
+    public readonly Dictionary<Assembly, MiraPluginInfo> RegisteredPlugins = [];
+    
+    private static MiraPluginManager _instance;
+    
+    public static MiraPluginManager Instance { 
+        get => _instance ??= new MiraPluginManager();
+        private set => _instance = value; 
+    }
 
     public void Initialize()
     {
