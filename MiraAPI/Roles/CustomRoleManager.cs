@@ -9,6 +9,7 @@ using Reactor.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using HarmonyLib;
 using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -135,9 +136,11 @@ public static class CustomRoleManager
 
         panel.SetTaskText(role.SetTabText().ToString());
     }
-
-    public static void SyncRoleSettings()
+    
+    public static void SyncAllRoleSettings(int targetId=-1)
     {
+        List<NetData> data = [];
+        int count = 0;
         foreach (var role in CustomRoles.Values)
         {
             ICustomRole customRole = role as ICustomRole;
@@ -145,28 +148,49 @@ public static class CustomRoleManager
             {
                 continue;
             }
-
+            
             PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.NumConfigDefinition, out var numEntry);
             PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var chanceEntry);
-
-            Rpc<SyncRoleOptionsRpc>.Instance.Send(new SyncRoleOptionsRpc.Data((ushort)role.Role, numEntry.Value, chanceEntry.Value));
+            
+            var netData = new NetData((uint)role.Role, BitConverter.GetBytes(numEntry.Value).AddRangeToArray(BitConverter.GetBytes(chanceEntry.Value)));
+            
+            data.Add(netData);
+            count += netData.GetLength();
+                
+            if (count > 1000)
+            {
+                Rpc<SyncRoleOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.ToArray());
+                data.Clear();
+                count = 0;
+            }
+        }
+        if (data.Count > 0)
+        {
+            Rpc<SyncRoleOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.ToArray());
         }
     }
 
-    public static void SyncRoleSettings(int targetId)
+    public static void HandleSyncRoleOptions(NetData[] data)
     {
-        foreach (var role in CustomRoles.Values)
+        foreach (var netData in data)
         {
-            ICustomRole customRole = role as ICustomRole;
-            if (customRole is null or { HideSettings: true })
+            if (CustomRoles.TryGetValue((ushort)netData.Id, out var role))
             {
-                continue;
+                var customRole = role as ICustomRole;
+                if (customRole is null or { HideSettings: true })
+                {
+                    continue;
+                }
+                
+                var num = BitConverter.ToInt32(netData.Data, 0);
+                var chance = BitConverter.ToInt32(netData.Data, 4);
+                
+                PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.NumConfigDefinition, out var numEntry);
+                PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var chanceEntry);
+                
+                numEntry.Value = num;
+                chanceEntry.Value = chance;
             }
-
-            PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.NumConfigDefinition, out var numEntry);
-            PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var chanceEntry);
-
-            Rpc<SyncRoleOptionsRpc>.Instance.SendTo(targetId, new SyncRoleOptionsRpc.Data((ushort)role.Role, numEntry.Value, chanceEntry.Value));
         }
     }
 }

@@ -49,17 +49,15 @@ namespace MiraAPI.GameOptions
             return result;
         }
 
-        public static void SyncAllOptions(int targetId)
+        public static void SyncAllOptions(int targetId=-1)
         {
             List<NetData> data = [];
             int count = 0;
-            Logger<MiraApiPlugin>.Error("num options: " + ModdedOptions.Count);
             foreach (var option in ModdedOptions.Values)
             {
                 var netData = option.GetNetData();
                 data.Add(netData);
                 count += netData.GetLength();
-                Logger<MiraApiPlugin>.Error($"syncing data for {netData.Id}");
                 
                 if (count > 1000)
                 {
@@ -74,15 +72,13 @@ namespace MiraAPI.GameOptions
             }
         }
         
+        
         public static void HandleSyncOptions(NetData[] data)
         {
             foreach (var netData in data)
             {
-                Logger<MiraApiPlugin>.Error($"syncing data for {netData.Id}");
-                
                 if (ModdedOptions.TryGetValue(netData.Id, out var option))
                 {
-                    Logger<MiraApiPlugin>.Error($"syncing data for {option.Title}");
                     option.HandleNetData(netData.Data);
                 }
             }

@@ -21,6 +21,6 @@ public static class AmongUsClientSyncPatch
         }
 
         ModdedOptionsManager.SyncAllOptions(clientData.Id);
-        CustomRoleManager.SyncRoleSettings(clientData.Id);
+        CustomRoleManager.SyncAllRoleSettings(clientData.Id);
     }
 }

@@ -8,51 +8,42 @@ using Reactor.Utilities;
 namespace MiraAPI.Networking;
 
 [RegisterCustomRpc((uint)MiraRpc.SyncRoleOptions)]
-public class SyncRoleOptionsRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<MiraApiPlugin, SyncRoleOptionsRpc.Data>(plugin, id)
+public class SyncRoleOptionsRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<MiraApiPlugin, NetData[]>(plugin, id)
 {
-
-    public struct Data(ushort roleId, int number, int chance)
-    {
-        public readonly ushort RoleId = roleId;
-        public readonly int Number = number;
-        public readonly int Chance = chance;
-    }
 
     public override RpcLocalHandling LocalHandling => RpcLocalHandling.None;
 
-    public override void Write(MessageWriter writer, Data data)
+    public override void Write(MessageWriter writer, NetData[] data)
     {
-        writer.Write(data.RoleId);
-        writer.WritePacked(data.Number);
-        writer.WritePacked(data.Chance);
+        writer.WritePacked((uint)data.Length);
+        foreach (var netData in data)
+        {
+            writer.WritePacked(netData.Id);
+            writer.WriteBytesAndSize(netData.Data);
+        }
     }
 
-    public override Data Read(MessageReader reader)
+    public override NetData[] Read(MessageReader reader)
     {
-        return new Data(reader.ReadUInt16(), reader.ReadPackedInt32(), reader.ReadPackedInt32());
+        var length = reader.ReadPackedUInt32();
+        var data = new NetData[length];
+        for (var i = 0; i < length; i++)
+        {
+            var id = reader.ReadPackedUInt32();
+            var bytes = reader.ReadBytesAndSize();
+            data[i] = new NetData(id, bytes);
+        }
+
+        return data;
     }
 
-    public override void Handle(PlayerControl playerControl, Data data)
+    public override void Handle(PlayerControl playerControl, NetData[] data)
     {
         if (AmongUsClient.Instance.HostId != playerControl.OwnerId)
         {
             return;
         }
 
-        if (!CustomRoleManager.CustomRoles.TryGetValue(data.RoleId, out var roleBehaviour) ||
-            !CustomRoleManager.GetCustomRoleBehaviour(roleBehaviour.Role, out var role)) return;
-
-        PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(role.NumConfigDefinition, out var numEntry);
-        PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(role.ChanceConfigDefinition, out var chanceEntry);
-
-        try
-        {
-            numEntry.Value = data.Number;
-            chanceEntry.Value = data.Chance;
-        }
-        catch (Exception e)
-        {
-            Logger<MiraApiPlugin>.Warning(e.ToString());
-        }
+        CustomRoleManager.HandleSyncRoleOptions(data);
     }
 }
