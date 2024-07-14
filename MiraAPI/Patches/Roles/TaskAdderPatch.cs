@@ -17,7 +17,8 @@ public static class TaskAdderPatch
     public static TaskFolder RolesFolder;
     public static System.Collections.Generic.Dictionary<string, string> ModsFolders = new System.Collections.Generic.Dictionary<string, string>();
 
-    [HarmonyPostfix, HarmonyPatch(typeof(TaskAdderGame), nameof(TaskAdderGame.Begin))]
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(TaskAdderGame), nameof(TaskAdderGame.Begin))]
     public static void AddRolesFolder(TaskAdderGame __instance)
     {
         RolesFolder = Object.Instantiate(__instance.RootFolderPrefab, __instance.transform);
@@ -42,7 +43,8 @@ public static class TaskAdderPatch
         __instance.GoToRoot();
     }
 
-    [HarmonyPostfix, HarmonyPatch(typeof(TaskAddButton), "Role", MethodType.Setter)]
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(TaskAddButton), "Role", MethodType.Setter)]
     public static void RoleGetterPatch(TaskAddButton __instance)
     {
         if (__instance.role is ICustomRole lpRole)

@@ -13,7 +13,8 @@ namespace MiraAPI.Patches.Options;
 [HarmonyPatch(typeof(GameOptionsMenu))]
 public static class GameOptionsMenuPatch
 {
-    [HarmonyPrefix, HarmonyPatch(nameof(GameOptionsMenu.CreateSettings))]
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(GameOptionsMenu.CreateSettings))]
     public static bool SettingsPatch(GameOptionsMenu __instance)
     {
         if (GameSettingMenuPatches.currentSelectedMod == 0) return true;
@@ -98,7 +99,8 @@ public static class GameOptionsMenuPatch
         return false;
     }
 
-    [HarmonyPrefix, HarmonyPatch(nameof(GameOptionsMenu.Initialize))]
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(GameOptionsMenu.Initialize))]
     public static bool InitPatch(GameOptionsMenu __instance)
     {
         if (__instance.Children == null || __instance.Children.Count == 0)

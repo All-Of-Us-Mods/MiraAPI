@@ -19,7 +19,8 @@ namespace MiraAPI.Patches.Options
     [HarmonyPatch(typeof(RolesSettingsMenu))]
     public static class RoleSettingMenuPatches
     {
-        [HarmonyPrefix, HarmonyPatch(nameof(RolesSettingsMenu.SetQuotaTab))]
+        [HarmonyPrefix]
+        [HarmonyPatch(nameof(RolesSettingsMenu.SetQuotaTab))]
         public static bool PatchStart(RolesSettingsMenu __instance)
         {
             __instance.roleChances = new Il2CppSystem.Collections.Generic.List<RoleOptionSetting>();
@@ -66,7 +67,8 @@ namespace MiraAPI.Patches.Options
             return false;
         }
 
-        [HarmonyPrefix, HarmonyPatch(nameof(RolesSettingsMenu.Update))]
+        [HarmonyPrefix]
+        [HarmonyPatch(nameof(RolesSettingsMenu.Update))]
         public static bool UpdatePatch()
         {
             if (GameSettingMenuPatches.currentSelectedMod == 0)

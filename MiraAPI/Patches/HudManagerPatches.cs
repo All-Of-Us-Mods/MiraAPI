@@ -59,7 +59,8 @@ namespace MiraAPI.Patches
         /*        /// <summary>
                 /// Trigger hudstart on current custom gamemode
                 /// </summary>
-                [HarmonyPostfix, HarmonyPatch("OnGameStart")]
+                [HarmonyPostfix]
+                [HarmonyPatch("OnGameStart")]
                 public static void GameStartPatch(HudManager __instance)
                 {
                     CustomGameModeManager.ActiveMode.HudStart(__instance);
