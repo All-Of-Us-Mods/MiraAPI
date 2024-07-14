@@ -1,8 +1,12 @@
-﻿using AmongUs.GameOptions;
+﻿using System;
+using AmongUs.GameOptions;
 using BepInEx.Configuration;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using System.Text;
+using HarmonyLib;
+using MiraAPI.Networking;
+using Reactor.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.Roles;
@@ -63,5 +67,13 @@ public interface ICustomRole
     {
         var taskStringBuilder = Helpers.CreateForRole(this);
         return taskStringBuilder;
+    }
+    
+    NetData GetNetData(RoleBehaviour roleBehaviour)
+    {
+        PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(NumConfigDefinition, out var numEntry);
+        PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(ChanceConfigDefinition, out var chanceEntry);
+            
+        return new NetData((uint)roleBehaviour.Role, BitConverter.GetBytes(numEntry.Value).AddRangeToArray(BitConverter.GetBytes(chanceEntry.Value)));
     }
 }

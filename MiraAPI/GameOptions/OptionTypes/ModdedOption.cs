@@ -3,6 +3,7 @@ using MiraAPI.Roles;
 using Reactor.Localization.Utilities;
 using System;
 using MiraAPI.Networking;
+using Reactor.Networking.Rpc;
 using Reactor.Utilities;
 using UnityEngine;
 
@@ -58,10 +59,16 @@ namespace MiraAPI.GameOptions.OptionTypes
                 ChangedEvent.Invoke(Value);
             }
 
+            if (AmongUsClient.Instance.AmHost)
+            {
+                Rpc<SyncOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, [GetNetData()], true);
+            }
+            
             OnValueChanged(newValue);
         }
 
         public abstract NetData GetNetData();
+        
         public abstract void HandleNetData(byte[] data);
 
         public abstract void OnValueChanged(T newValue);

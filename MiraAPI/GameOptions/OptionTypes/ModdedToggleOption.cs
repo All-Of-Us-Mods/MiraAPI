@@ -49,6 +49,7 @@ namespace MiraAPI.GameOptions.OptionTypes
 
         public override void OnValueChanged(bool newValue)
         {
+            DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, newValue ? "On" : "Off", false);
             if (OptionBehaviour is null) return;
 
             var toggleOpt = OptionBehaviour as ToggleOption;
@@ -56,8 +57,6 @@ namespace MiraAPI.GameOptions.OptionTypes
             {
                 toggleOpt.CheckMark.enabled = newValue;
             }
-
-            DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, Value ? "On" : "Off", false);
         }
     }
 }

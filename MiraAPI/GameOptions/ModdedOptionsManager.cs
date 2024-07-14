@@ -79,6 +79,7 @@ namespace MiraAPI.GameOptions
             {
                 if (ModdedOptions.TryGetValue(netData.Id, out var option))
                 {
+                    Logger<MiraApiPlugin>.Error("Handling option " + option.Title);
                     option.HandleNetData(netData.Data);
                 }
             }

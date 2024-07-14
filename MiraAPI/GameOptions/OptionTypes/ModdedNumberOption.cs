@@ -72,14 +72,13 @@ namespace MiraAPI.GameOptions.OptionTypes
             Value = Mathf.Clamp(newValue, Min, Max);
 
             if (OptionBehaviour is null) return;
+            DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, OptionBehaviour.GetValueString(newValue), false);
 
             var opt = OptionBehaviour as NumberOption;
             if (opt)
             {
                 opt.Value = newValue;
             }
-
-            DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, OptionBehaviour.GetValueString(Value), false);
         }
     }
 }

@@ -5,6 +5,8 @@ using MiraAPI.Utilities.Assets;
 using Reactor.Utilities.Extensions;
 using System;
 using System.Linq;
+using MiraAPI.Networking;
+using Reactor.Networking.Rpc;
 using Reactor.Utilities;
 using TMPro;
 using UnityEngine;
@@ -79,7 +81,7 @@ namespace MiraAPI.Patches.Options
         {
             var roleSetting = obj.Cast<RoleOptionSetting>();
             var role = roleSetting.Role as ICustomRole;
-            if (role.HideSettings) return;
+            if (role is null or { HideSettings: true }) return;
 
             PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(role.NumConfigDefinition, out var numEntry);
             numEntry.Value = roleSetting.RoleMaxCount;
@@ -88,13 +90,13 @@ namespace MiraAPI.Patches.Options
             chanceEntry.Value = roleSetting.RoleChance;
 
             roleSetting.UpdateValuesAndText(GameOptionsManager.Instance.CurrentGameOptions.RoleOptions);
+            DestroyableSingleton<HudManager>.Instance.Notifier.AddRoleSettingsChangeMessage(roleSetting.Role.StringName, roleSetting.RoleMaxCount, roleSetting.RoleChance, roleSetting.Role.TeamType, false);
 
-            /*            if (AmongUsClient.Instance.AmHost)
-                        {
-                            Rpc<SyncRoleOptionsRpc>.Instance.Send(new SyncRoleOptionsRpc.Data((ushort)roleSetting.Role.Role, numEntry.Value, chanceEntry.Value));
-                        }*/
+            if (AmongUsClient.Instance.AmHost)
+            {
+                Rpc<SyncRoleOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, [role.GetNetData(roleSetting.Role)], true);
+            }
             GameOptionsManager.Instance.GameHostOptions = GameOptionsManager.Instance.CurrentGameOptions;
-            return;
         }
 
         private static void CreateAdvancedSettings(RolesSettingsMenu __instance, RoleBehaviour role)

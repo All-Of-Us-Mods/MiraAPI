@@ -56,6 +56,7 @@ namespace MiraAPI.GameOptions.OptionTypes
 
         public override void OnValueChanged(int newValue)
         {
+            DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, OptionBehaviour.GetValueString(newValue), false);
             if (OptionBehaviour is null) return;
 
             var opt = OptionBehaviour as StringOption;
@@ -63,8 +64,6 @@ namespace MiraAPI.GameOptions.OptionTypes
             {
                 opt.Value = newValue;
             }
-
-            DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, OptionBehaviour.GetValueString(Value), false);
         }
     }
 }
