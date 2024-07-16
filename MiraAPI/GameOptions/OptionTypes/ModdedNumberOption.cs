@@ -1,4 +1,5 @@
 ﻿using System;
+using AmongUs.GameOptions;
 using MiraAPI.Networking;
 using MiraAPI.Utilities;
 using UnityEngine;
@@ -22,27 +23,30 @@ namespace MiraAPI.GameOptions.OptionTypes
             ZeroInfinity = zeroInfinity;
 
             Value = Mathf.Clamp(defaultValue, min, max);
+            
+            Data = ScriptableObject.CreateInstance<FloatGameSetting>();
+            
+            var data = (FloatGameSetting)Data;
+            data.Type = global::OptionTypes.Float;
+            data.Title = StringName;
+            data.Value = Value;
+            data.Increment = Increment;
+            data.ValidRange = new FloatRange(Min, Max);
+            data.FormatString = "0";
+            data.ZeroIsInfinity = ZeroInfinity;
+            data.SuffixType = SuffixType;
+            data.OptionName = FloatOptionNames.Invalid;
         }
 
         public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container)
         {
             var numberOption = Object.Instantiate(numberOpt, Vector3.zero, Quaternion.identity, container);
-            var data = ScriptableObject.CreateInstance<FloatGameSetting>();
-            data.Title = StringName;
-            data.Type = global::OptionTypes.Float;
-            data.Increment = Increment;
-            data.SuffixType = SuffixType;
-            data.FormatString = "0";
-            data.ValidRange = new FloatRange(Min, Max);
-            data.ZeroIsInfinity = ZeroInfinity;
-            data.Value = Value;
 
-            numberOption.data = data;
-            numberOption.SetUpFromData(numberOption.data, 20);
+            numberOption.SetUpFromData(Data, 20);
             numberOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
-            OptionBehaviour = numberOption;
-
             numberOption.Value = Value;
+            
+            OptionBehaviour = numberOption;
 
             return numberOption;
         }
@@ -70,9 +74,9 @@ namespace MiraAPI.GameOptions.OptionTypes
         public override void OnValueChanged(float newValue)
         {
             Value = Mathf.Clamp(newValue, Min, Max);
+            DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, Data.GetValueString(Value), false);
 
             if (OptionBehaviour is null) return;
-            DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, OptionBehaviour.GetValueString(newValue), false);
 
             var opt = OptionBehaviour as NumberOption;
             if (opt)

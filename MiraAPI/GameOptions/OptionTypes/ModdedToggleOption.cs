@@ -5,24 +5,30 @@ using Object = UnityEngine.Object;
 
 namespace MiraAPI.GameOptions.OptionTypes
 {
-    public class ModdedToggleOption(string title, bool defaultValue, System.Type roleType) : ModdedOption<bool>(title, defaultValue, roleType)
+    public class ModdedToggleOption : ModdedOption<bool>
     {
+        public ModdedToggleOption(string title, bool defaultValue, System.Type roleType) : base(title, defaultValue, roleType)
+        {
+            Value = defaultValue;
+
+            Data = ScriptableObject.CreateInstance<CheckboxGameSetting>();
+
+            var data = (CheckboxGameSetting)Data;
+            data.Title = StringName;
+            data.Type = global::OptionTypes.Checkbox;
+        }
+
         public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container)
         {
             var toggleOption = Object.Instantiate(toggleOpt, Vector3.zero, Quaternion.identity, container);
-            var data = ScriptableObject.CreateInstance<CheckboxGameSetting>();
-            data.Title = StringName;
-            data.Type = global::OptionTypes.Checkbox;
 
-            toggleOption.data = data;
+            toggleOption.SetUpFromData(Data, 20);
 
             toggleOption.TitleText.text = Title;
             toggleOption.CheckMark.enabled = Value;
             toggleOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
 
             OptionBehaviour = toggleOption;
-
-            toggleOption.SetUpFromData(toggleOption.data, 20);
 
             return toggleOption;
         }

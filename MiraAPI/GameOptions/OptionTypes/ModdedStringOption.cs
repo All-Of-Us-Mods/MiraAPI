@@ -7,30 +7,36 @@ using Object = UnityEngine.Object;
 
 namespace MiraAPI.GameOptions.OptionTypes
 {
-    public class ModdedStringOption(string title, int defaultValue, string[] values, Type roleType) : ModdedOption<int>(title, defaultValue, roleType)
+    public class ModdedStringOption : ModdedOption<int>
     {
-        public string[] Values { get; private set; } = values;
+        public ModdedStringOption(string title, int defaultValue, string[] values, Type roleType) : base(title, defaultValue, roleType)
+        {
+            Values = values;
+            Data = ScriptableObject.CreateInstance<StringGameSetting>();
+            var data = (StringGameSetting)Data;
+            
+            data.Title = StringName;
+            data.Type = global::OptionTypes.String;
+            data.Values = Values.Select(CustomStringName.CreateAndRegister).ToArray();
+            data.Index = Value;
+        }
+
+        public string[] Values { get; set; }
 
         public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container)
         {
             var stringOption = Object.Instantiate(stringOpt, container);
-            var vals = Values.Select(CustomStringName.CreateAndRegister).ToArray();
-            var data = ScriptableObject.CreateInstance<StringGameSetting>();
 
-            data.Title = StringName;
-            data.Type = global::OptionTypes.String;
-            data.Values = vals;
-            data.Index = Value;
-
-            stringOption.data = data;
+            stringOption.SetUpFromData(Data, 20);
             stringOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
 
+            // SetUpFromData method doesnt work correctly so we must set the values manually
+            stringOption.Title = StringName;
+            stringOption.Values = ((StringGameSetting)Data).Values;
+            stringOption.Value = DefaultValue;
+            
             OptionBehaviour = stringOption;
-
-            stringOption.SetUpFromData(stringOption.data, 20);
-
-            stringOption.Value = Value;
-
+            
             return stringOption;
         }
 
@@ -56,7 +62,7 @@ namespace MiraAPI.GameOptions.OptionTypes
 
         public override void OnValueChanged(int newValue)
         {
-            DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, OptionBehaviour.GetValueString(newValue), false);
+            DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, Data.GetValueString(newValue), false);
             if (OptionBehaviour is null) return;
 
             var opt = OptionBehaviour as StringOption;

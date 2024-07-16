@@ -12,6 +12,7 @@ namespace MiraAPI.GameOptions.OptionTypes
     public abstract class ModdedOption<T> : IModdedOption
     {
         public uint Id { get; }
+        public BaseGameSetting Data { get; protected init; }
         public T Value { get; protected set; }
         public T DefaultValue { get; init; }
         public Action<T> ChangedEvent { get; set; }
