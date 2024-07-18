@@ -9,8 +9,6 @@ namespace MiraAPI.GameOptions.OptionTypes
     {
         public ModdedToggleOption(string title, bool defaultValue, System.Type roleType) : base(title, defaultValue, roleType)
         {
-            Value = defaultValue;
-
             Data = ScriptableObject.CreateInstance<CheckboxGameSetting>();
 
             var data = (CheckboxGameSetting)Data;
@@ -24,6 +22,7 @@ namespace MiraAPI.GameOptions.OptionTypes
 
             toggleOption.SetUpFromData(Data, 20);
 
+            toggleOption.Title = StringName;
             toggleOption.TitleText.text = Title;
             toggleOption.CheckMark.enabled = Value;
             toggleOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;

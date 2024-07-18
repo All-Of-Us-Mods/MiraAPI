@@ -33,7 +33,7 @@ namespace MiraAPI.GameOptions.OptionTypes
             // SetUpFromData method doesnt work correctly so we must set the values manually
             stringOption.Title = StringName;
             stringOption.Values = ((StringGameSetting)Data).Values;
-            stringOption.Value = DefaultValue;
+            stringOption.Value = Value;
             
             OptionBehaviour = stringOption;
             

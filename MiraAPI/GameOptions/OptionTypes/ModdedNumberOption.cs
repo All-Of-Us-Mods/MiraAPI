@@ -44,7 +44,16 @@ namespace MiraAPI.GameOptions.OptionTypes
 
             numberOption.SetUpFromData(Data, 20);
             numberOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
+            
+            numberOption.Title = StringName;
             numberOption.Value = Value;
+            numberOption.Increment = Increment;
+            numberOption.ValidRange = new FloatRange(Min, Max);
+            numberOption.FormatString = "0";
+            numberOption.ZeroIsInfinity = ZeroInfinity;
+            numberOption.SuffixType = SuffixType;
+            numberOption.floatOptionName = FloatOptionNames.Invalid;
+            
             
             OptionBehaviour = numberOption;
 
