@@ -65,7 +65,7 @@ namespace MiraAPI.Patches.Options
                 num3++;
             }
 
-            num -= 0.4f;
+            num -= 0.8f;
             CategoryHeaderEditRole categoryHeaderEditRole3 = Object.Instantiate(__instance.categoryHeaderEditRoleOrigin, Vector3.zero, Quaternion.identity, __instance.RoleChancesSettings.transform);
             categoryHeaderEditRole3.SetHeader(StringNames.None, 20);
             categoryHeaderEditRole3.Title.text = "Neutral Roles";
@@ -193,9 +193,8 @@ namespace MiraAPI.Patches.Options
             PassiveButton newButton = Object.Instantiate(roleOptionSetting.buttons[0], roleOptionSetting.transform);
             newButton.name = "ConfigButton";
             newButton.transform.localPosition = new Vector3(0.2419f, -0.2582f, -2f);
-            newButton.transform.FindChild("Plus_TMP").gameObject.DestroyImmediate();
-            newButton.transform.FindChild("InactiveSprite").GetComponent<SpriteRenderer>().sprite = MiraAssets.Cog.LoadAsset();
-            newButton.transform.FindChild("ActiveSprite").GetComponent<SpriteRenderer>().sprite = MiraAssets.CogActive.LoadAsset();
+            newButton.transform.GetComponentInChildren<TextMeshPro>().gameObject.DestroyImmediate();
+            newButton.transform.FindChild("ButtonSprite").GetComponent<SpriteRenderer>().sprite = MiraAssets.CogActive.LoadAsset();
 
             PassiveButton passiveButton = newButton.GetComponent<PassiveButton>();
             passiveButton.OnClick = new ButtonClickedEvent();
