@@ -186,7 +186,7 @@ namespace MiraAPI.Patches.Options
             roleOptionSetting.labelSprite.color = customRole.RoleColor;
             roleOptionSetting.titleText.color = customRole.RoleColor.DarkenColor();
             roleOptionSetting.OnValueChanged = new Action<OptionBehaviour>(ValueChanged);
-            roleOptionSetting.titleText.horizontalAlignment = TMPro.HorizontalAlignmentOptions.Left;
+            roleOptionSetting.titleText.horizontalAlignment = HorizontalAlignmentOptions.Left;
             roleOptionSetting.SetClickMask(__instance.ButtonClickMask);
             __instance.roleChances.Add(roleOptionSetting);
 

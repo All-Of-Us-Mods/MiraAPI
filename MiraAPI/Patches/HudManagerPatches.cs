@@ -76,7 +76,7 @@ namespace MiraAPI.Patches
             if (!_bottomLeft)
             {
                 var buttons = __instance.transform.Find("Buttons");
-                _bottomLeft = UnityEngine.Object.Instantiate(buttons.Find("BottomRight").gameObject, buttons);
+                _bottomLeft = Object.Instantiate(buttons.Find("BottomRight").gameObject, buttons);
             }
 
             foreach (var t in _bottomLeft.GetComponentsInChildren<ActionButton>(true))

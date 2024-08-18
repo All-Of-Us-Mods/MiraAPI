@@ -14,7 +14,7 @@ namespace MiraAPI.GameOptions.OptionTypes
         public float Increment { get; private set; }
         public NumberSuffixes SuffixType { get; private set; }
         public bool ZeroInfinity { get; private set; }
-        public ModdedNumberOption(string title, float defaultValue, float min, float max, float increment, NumberSuffixes suffixType, bool zeroInfinity, System.Type roleType) : base(title, defaultValue, roleType)
+        public ModdedNumberOption(string title, float defaultValue, float min, float max, float increment, NumberSuffixes suffixType, bool zeroInfinity, Type roleType) : base(title, defaultValue, roleType)
         {
             Min = min;
             Max = max;

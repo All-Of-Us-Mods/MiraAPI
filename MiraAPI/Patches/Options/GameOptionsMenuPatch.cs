@@ -24,7 +24,7 @@ public static class GameOptionsMenuPatch
         float num = 2.1f;
         foreach (IModdedOptionGroup group in GameSettingMenuPatches.selectedMod.OptionGroups)
         {
-            CategoryHeaderMasked categoryHeaderMasked = UnityEngine.Object.Instantiate(__instance.categoryHeaderOrigin, Vector3.zero, Quaternion.identity, __instance.settingsContainer);
+            CategoryHeaderMasked categoryHeaderMasked = Object.Instantiate(__instance.categoryHeaderOrigin, Vector3.zero, Quaternion.identity, __instance.settingsContainer);
             categoryHeaderMasked.SetHeader(CustomStringName.CreateAndRegister(group.GroupName), 20);
             if (group.GroupColor != Color.clear)
             {
@@ -62,7 +62,7 @@ public static class GameOptionsMenuPatch
             }
         }
 
-        CategoryHeaderMasked ungroupedHeader = UnityEngine.Object.Instantiate(__instance.categoryHeaderOrigin, Vector3.zero, Quaternion.identity, __instance.settingsContainer);
+        CategoryHeaderMasked ungroupedHeader = Object.Instantiate(__instance.categoryHeaderOrigin, Vector3.zero, Quaternion.identity, __instance.settingsContainer);
         ungroupedHeader.SetHeader(CustomStringName.CreateAndRegister("Ungrouped Options"), 20);
         ungroupedHeader.transform.localScale = Vector3.one * 0.63f;
         ungroupedHeader.transform.localPosition = new Vector3(-0.903f, num, -2f);
