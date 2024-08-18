@@ -1,9 +1,24 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace MiraAPI.Utilities;
 
 public static class ShaderID
 {
+    private static readonly Dictionary<string, int> _cache = new();
+    
+    public static int Get(string name)
+    {
+        if (_cache.TryGetValue(name, out var id))
+        {
+            return id;
+        }
+
+        id = Shader.PropertyToID(name);
+        _cache[name] = id;
+        return id;
+    }
+    
     // For player shader
     public static readonly int _BodyColor = Shader.PropertyToID("_BodyColor");
     public static readonly int _BackColor = Shader.PropertyToID("_BackColor");
