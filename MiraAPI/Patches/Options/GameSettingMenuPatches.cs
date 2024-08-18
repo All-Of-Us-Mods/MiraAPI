@@ -8,6 +8,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using static UnityEngine.UI.Button;
+using Object = UnityEngine.Object;
 
 namespace MiraAPI.Patches.Options;
 
@@ -25,7 +26,7 @@ public static class GameSettingMenuPatches
         __instance.transform.FindChild("GameSettingsLabel").gameObject.SetActive(false);
 
         Transform helpThing = __instance.transform.FindChild("What Is This?");
-        GameObject tmpText = GameObject.Instantiate(helpThing.transform.FindChild("InfoText"), helpThing.parent).gameObject;
+        GameObject tmpText = Object.Instantiate(helpThing.transform.FindChild("InfoText"), helpThing.parent).gameObject;
 
         tmpText.GetComponent<TextTranslatorTMP>().Destroy();
         tmpText.name = "SelectedMod";
@@ -37,7 +38,7 @@ public static class GameSettingMenuPatches
 
         text.alignment = TextAlignmentOptions.Center;
 
-        GameObject nextButton = GameObject.Instantiate(__instance.BackButton, __instance.BackButton.transform.parent).gameObject;
+        GameObject nextButton = Object.Instantiate(__instance.BackButton, __instance.BackButton.transform.parent).gameObject;
         nextButton.transform.localPosition = new Vector3(-2.2663f, 1.5272f, -25f);
         nextButton.name = "RightArrowButton";
         nextButton.transform.FindChild("Inactive").gameObject.GetComponent<SpriteRenderer>().sprite = MiraAssets.NextButton.LoadAsset();
@@ -55,7 +56,7 @@ public static class GameSettingMenuPatches
             }
         }));
 
-        GameObject backButton = GameObject.Instantiate(nextButton, __instance.BackButton.transform.parent).gameObject;
+        GameObject backButton = Object.Instantiate(nextButton, __instance.BackButton.transform.parent).gameObject;
         backButton.transform.localPosition = new Vector3(-4.4209f, 1.5272f, -25f);
         backButton.name = "LeftArrowButton";
         backButton.gameObject.GetComponent<CloseButtonConsoleBehaviour>().Destroy();
