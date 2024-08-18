@@ -1,65 +1,27 @@
-﻿using BepInEx.Unity.IL2CPP;
-using HarmonyLib;
+﻿using HarmonyLib;
 using MiraAPI.GameOptions.Attributes;
 using Reactor.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using UnityEngine;
+using MiraAPI.Networking;
+using Reactor.Networking.Rpc;
 
 namespace MiraAPI.GameOptions
 {
     public class ModdedOptionsManager
     {
-        public static List<IModdedOption> Options = new();
-        public static List<ModdedOptionGroup> Groups = new();
-        private static Dictionary<PropertyInfo, ModdedOptionAttribute> OptionAttributes = new();
-        private static Dictionary<Type, ModdedOptionGroup> OriginalTypes = new();
-        public static Dictionary<Assembly, IMiraConfig> RegisteredMods = new();
+        public static readonly Dictionary<uint, IModdedOption> ModdedOptions = new();
+        public static readonly List<IModdedOption> Options = [];
+        public static readonly List<ModdedOptionGroup> Groups = [];
+        private static readonly Dictionary<PropertyInfo, ModdedOptionAttribute> OptionAttributes = new();
+        public static readonly Dictionary<Type, ModdedOptionGroup> OriginalTypes = new();
+        public static uint NextId = 1;
 
-        public static void Initialize()
+        public static IModdedOption RegisterOption(Type type, ModdedOptionAttribute attribute, PropertyInfo property)
         {
-            IL2CPPChainloader.Instance.PluginLoad += (_, assembly, plugin) =>
-            {
-                if (plugin.GetType().GetInterfaces().Contains(typeof(IMiraConfig)))
-                {
-                    IMiraConfig config = (IMiraConfig)Activator.CreateInstance(plugin.GetType());
-                    RegisteredMods.Add(assembly, config);
-                }
-
-                RegisterOptionGroups(assembly);
-
-                ModdedOptionAttribute.Register(assembly);
-            };
-        }
-
-        private static void RegisterOptionGroups(Assembly assembly)
-        {
-            foreach (var type in assembly.GetTypes())
-            {
-                if (typeof(IModdedOptionGroup).IsAssignableFrom(type))
-                {
-                    IModdedOptionGroup group = (IModdedOptionGroup)Activator.CreateInstance(type);
-                    ModdedOptionGroup newGroup = new ModdedOptionGroup()
-                    {
-                        AdvancedRole = group.AdvancedRole,
-                        GroupColor = group.GroupColor,
-                        GroupName = group.GroupName,
-                        GroupVisible = group.GroupVisible
-                    };
-
-                    Groups.Add(newGroup);
-                    OriginalTypes.Add(type, newGroup);
-
-                    newGroup.ParentMod = RegisteredMods[assembly];
-                }
-            }
-        }
-
-        public static void RegisterOption(Assembly assembly, Type type, ModdedOptionAttribute attribute, PropertyInfo property)
-        {
-            if (OptionAttributes.ContainsKey(property)) return;
+            if (OptionAttributes.ContainsKey(property)) return null;
             object newObj = Activator.CreateInstance(type);
             IModdedOption result = attribute.CreateOption(property.GetValue(newObj), property);
 
@@ -67,26 +29,63 @@ namespace MiraAPI.GameOptions
             {
                 var setterOriginal = property.GetSetMethod();
                 var setterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertySetterPatch));
-                PluginSingleton<MiraAPIPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: new HarmonyMethod(setterPatch));
+                PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: new HarmonyMethod(setterPatch));
 
                 var getterOriginal = property.GetGetMethod();
                 var getterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyGetterPatch));
-                PluginSingleton<MiraAPIPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: new HarmonyMethod(getterPatch));
+                PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: new HarmonyMethod(getterPatch));
 
                 attribute.HolderOption = result;
-                result.ParentMod = RegisteredMods[assembly];
-
-                Options.Add(result);
+                
                 OptionAttributes.Add(property, attribute);
 
                 if (OriginalTypes.ContainsKey(type))
                 {
-                    Debug.LogError($"grouping {attribute.Title} with {OriginalTypes[type].GroupName}");
+                    Logger<MiraApiPlugin>.Error($"Grouping {attribute.Title} with {OriginalTypes[type].GroupName}");
                     result.Group = OriginalTypes[type];
                 }
             }
+
+            return result;
         }
 
+        public static void SyncAllOptions(int targetId=-1)
+        {
+            List<NetData> data = [];
+            int count = 0;
+            foreach (var option in ModdedOptions.Values)
+            {
+                var netData = option.GetNetData();
+                data.Add(netData);
+                count += netData.GetLength();
+                
+                if (count > 1000)
+                {
+                    Rpc<SyncOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.ToArray());
+                    data.Clear();
+                    count = 0;
+                }
+            }
+            if (data.Count > 0)
+            {
+                Rpc<SyncOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.ToArray());
+            }
+        }
+        
+        
+        public static void HandleSyncOptions(NetData[] data)
+        {
+            foreach (var netData in data)
+            {
+                if (ModdedOptions.TryGetValue(netData.Id, out var option))
+                {
+                    Logger<MiraApiPlugin>.Error("Handling option " + option.Title);
+                    option.HandleNetData(netData.Data);
+                }
+            }
+        }
+        
+        
         public static void PropertySetterPatch(MethodBase __originalMethod, object value)
         {
             ModdedOptionAttribute attribute = OptionAttributes.First(pair => pair.Key.GetSetMethod().Equals(__originalMethod)).Value;

@@ -1,109 +1,131 @@
 ﻿using HarmonyLib;
-using Il2CppSystem;
+using Il2CppSystem.Collections.Generic;
 using MiraAPI.GameOptions;
+using MiraAPI.Utilities;
+using Reactor.Localization.Utilities;
 using System.Linq;
+using TMPro;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.Patches.Options;
+
 
 [HarmonyPatch(typeof(GameOptionsMenu))]
 public static class GameOptionsMenuPatch
 {
-    /// <summary>
-    /// Change the OnValueChanged action for all custom game options
-    /// </summary>
-    [HarmonyPostfix, HarmonyPatch("Start")]
-    public static void StartPostfix(GameOptionsMenu __instance)
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(GameOptionsMenu.CreateSettings))]
+    public static bool SettingsPatch(GameOptionsMenu __instance)
     {
-        foreach (var customOption in ModdedOptionsManager.Options)
+        if (GameSettingMenuPatches.currentSelectedMod == 0) return true;
+
+        __instance.MapPicker.gameObject.SetActive(false);
+
+        float num = 2.1f;
+        foreach (IModdedOptionGroup group in GameSettingMenuPatches.selectedMod.OptionGroups)
         {
-            if (customOption.AdvancedRole is not null || !customOption.OptionBehaviour)
+            CategoryHeaderMasked categoryHeaderMasked = UnityEngine.Object.Instantiate(__instance.categoryHeaderOrigin, Vector3.zero, Quaternion.identity, __instance.settingsContainer);
+            categoryHeaderMasked.SetHeader(CustomStringName.CreateAndRegister(group.GroupName), 20);
+            if (group.GroupColor != Color.clear)
             {
-                continue;
+                categoryHeaderMasked.Background.color = group.GroupColor;
+                categoryHeaderMasked.Title.color = group.GroupColor.DarkenColor();
+            }
+            categoryHeaderMasked.transform.localScale = Vector3.one * 0.63f;
+            categoryHeaderMasked.transform.localPosition = new Vector3(-0.903f, num, -2f);
+            num -= 0.63f;
+
+            foreach (var opt in ModdedOptionsManager.Options.Where(opt => opt.Group is not null && opt.AdvancedRole is null && opt.Group.GroupName == group.GroupName))
+            {
+                OptionBehaviour newOpt = opt.CreateOption(__instance.checkboxOrigin, __instance.numberOptionOrigin, __instance.stringOptionOrigin, __instance.settingsContainer);
+                newOpt.transform.localPosition = new Vector3(0.952f, num, -2f);
+                newOpt.SetClickMask(__instance.ButtonClickMask);
+
+                SpriteRenderer[] componentsInChildren = newOpt.GetComponentsInChildren<SpriteRenderer>(true);
+                for (int i = 0; i < componentsInChildren.Length; i++)
+                {
+                    if (group.GroupColor != Color.clear) componentsInChildren[i].color = group.GroupColor;
+                    componentsInChildren[i].material.SetInt(PlayerMaterial.MaskLayer, 20);
+                }
+
+                foreach (TextMeshPro textMeshPro in newOpt.GetComponentsInChildren<TextMeshPro>(true))
+                {
+                    if (group.GroupColor != Color.clear) textMeshPro.color = group.GroupColor.DarkenColor();
+                    textMeshPro.fontMaterial.SetFloat("_StencilComp", 3f);
+                    textMeshPro.fontMaterial.SetFloat("_Stencil", 20);
+                }
+
+                __instance.Children.Add(newOpt);
+
+                num -= 0.45f;
+                newOpt.Initialize();
+            }
+        }
+
+        CategoryHeaderMasked ungroupedHeader = UnityEngine.Object.Instantiate(__instance.categoryHeaderOrigin, Vector3.zero, Quaternion.identity, __instance.settingsContainer);
+        ungroupedHeader.SetHeader(CustomStringName.CreateAndRegister("Ungrouped Options"), 20);
+        ungroupedHeader.transform.localScale = Vector3.one * 0.63f;
+        ungroupedHeader.transform.localPosition = new Vector3(-0.903f, num, -2f);
+
+        num -= 0.63f;
+
+        foreach (var opt in ModdedOptionsManager.Options.Where(opt => opt.Group is null && opt.AdvancedRole is null))
+        {
+            OptionBehaviour newOpt = opt.CreateOption(__instance.checkboxOrigin, __instance.numberOptionOrigin, __instance.stringOptionOrigin, __instance.settingsContainer);
+            newOpt.transform.localPosition = new Vector3(0.952f, num, -2f);
+            newOpt.SetClickMask(__instance.ButtonClickMask);
+            newOpt.SetUpFromData(newOpt.data, 20);
+
+            SpriteRenderer[] componentsInChildren = newOpt.GetComponentsInChildren<SpriteRenderer>(true);
+            for (int i = 0; i < componentsInChildren.Length; i++)
+            {
+                componentsInChildren[i].material.SetInt(PlayerMaterial.MaskLayer, 20);
+            }
+            foreach (TextMeshPro textMeshPro in newOpt.GetComponentsInChildren<TextMeshPro>(true))
+            {
+                textMeshPro.fontMaterial.SetFloat("_StencilComp", 3f);
+                textMeshPro.fontMaterial.SetFloat("_Stencil", 20);
             }
 
-            customOption.OptionBehaviour.OnValueChanged = (Action<OptionBehaviour>)customOption.ValueChanged;
+            __instance.Children.Add(newOpt);
+
+            num -= 0.45f;
+
+            newOpt.Initialize();
         }
+
+        __instance.scrollBar.SetYBoundsMax(-num - 1.65f);
+
+        return false;
     }
 
-    private static GameSettingMenu menu;
-
-
-    /// <summary>
-    /// Set the position and offset of all custom game options
-    /// </summary>
-    [HarmonyPostfix, HarmonyPatch("Update")]
-    public static void UpdatePostfix(GameOptionsMenu __instance)
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(GameOptionsMenu.Initialize))]
+    public static bool InitPatch(GameOptionsMenu __instance)
     {
-        if (!menu)
+        if (__instance.Children == null || __instance.Children.Count == 0)
         {
-            menu = Object.FindObjectsOfType<GameSettingMenu>().First();
-        }
-
-        if (menu.RegularGameSettings.active || menu.RolesSettings.gameObject.active || menu.HideNSeekSettings.active)
-        {
-            return;
-        }
-
-        var startOffset = 2.5f;
-        __instance.GetComponentInParent<Scroller>().ContentYBounds.max = startOffset + __instance.Children.Count * 0.5f;
-
-        foreach (var option in ModdedOptionsManager.Options.Where(option => option.Group == null))
-        {
-            if (!option.OptionBehaviour) continue;
-
-            option.OptionBehaviour.enabled = option.Visible();
-            option.OptionBehaviour.gameObject.SetActive(option.Visible());
-
-            if (option.Visible())
+            __instance.MapPicker.gameObject.SetActive(true);
+            __instance.MapPicker.Initialize(20);
+            BaseGameSetting mapNameSetting = GameManager.Instance.GameSettingsList.MapNameSetting;
+            __instance.MapPicker.SetUpFromData(mapNameSetting, 20);
+            __instance.Children = new List<OptionBehaviour>();
+            __instance.Children.Add(__instance.MapPicker);
+            __instance.CreateSettings();
+            __instance.cachedData = GameOptionsManager.Instance.CurrentGameOptions;
+            foreach (var optionBehaviour in __instance.Children)
             {
-                startOffset -= 0.55f;
-            }
-
-            var transform = option.OptionBehaviour.transform;
-            var optionPosition = transform.localPosition;
-            transform.localPosition = new Vector3(optionPosition.x, startOffset, optionPosition.z);
-        }
-
-        foreach (var group in ModdedOptionsManager.Groups.Where(group => group.AdvancedRole == null))
-        {
-            if (group.Header == null)
-            {
-                continue;
-            }
-
-            group.Header.SetActive(group.GroupVisible());
-
-            if (group.GroupVisible())
-            {
-                startOffset -= 0.5f;
-            }
-
-            var position = group.Header.transform.localPosition;
-            group.Header.transform.localPosition = new Vector3(position.x, startOffset, position.z);
-
-            foreach (var option in ModdedOptionsManager.Options.Where(x => x.Group == group))
-            {
-                if (!option.OptionBehaviour)
+                if (AmongUsClient.Instance && !AmongUsClient.Instance.AmHost)
                 {
-                    continue;
+                    optionBehaviour.SetAsPlayer();
                 }
 
-                var enabled = group.GroupVisible() && option.Visible();
+                if (optionBehaviour.IsCustom()) continue;
 
-                option.OptionBehaviour.enabled = enabled;
-                option.OptionBehaviour.gameObject.SetActive(enabled);
-
-                if (group.GroupVisible() && option.Visible())
-                {
-                    startOffset -= 0.5f;
-                }
-
-                var transform = option.OptionBehaviour.transform;
-                var optionPosition = transform.localPosition;
-                transform.localPosition = new Vector3(optionPosition.x, startOffset, optionPosition.z);
+                optionBehaviour.OnValueChanged = new System.Action<OptionBehaviour>(__instance.ValueChanged);
             }
         }
+
+        return false;
     }
 }

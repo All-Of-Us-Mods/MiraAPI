@@ -3,7 +3,9 @@ using HarmonyLib;
 using Il2CppSystem;
 using Il2CppSystem.Collections.Generic;
 using Il2CppSystem.Text;
+using MiraAPI.PluginLoading;
 using MiraAPI.Roles;
+using System.Linq;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -15,24 +17,24 @@ public static class TaskAdderPatch
     public static TaskFolder RolesFolder;
     public static System.Collections.Generic.Dictionary<string, string> ModsFolders = new System.Collections.Generic.Dictionary<string, string>();
 
-    [HarmonyPostfix, HarmonyPatch(typeof(TaskAdderGame), nameof(TaskAdderGame.Begin))]
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(TaskAdderGame), nameof(TaskAdderGame.Begin))]
     public static void AddRolesFolder(TaskAdderGame __instance)
     {
         RolesFolder = Object.Instantiate(__instance.RootFolderPrefab, __instance.transform);
         RolesFolder.gameObject.SetActive(false);
         RolesFolder.FolderName = "Roles";
         RolesFolder.name = "RolesFolder";
-        foreach (var pair in CustomRoleManager.ModRoles)
+        foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins.Values)
         {
             var newFolder = Object.Instantiate(__instance.RootFolderPrefab, __instance.transform);
-            newFolder.FolderName = pair.Key.Metadata.Name;
-            newFolder.name = pair.Key.Metadata.Name;
+            newFolder.FolderName = newFolder.name = plugin.PluginInfo.Metadata.Name;
             newFolder.gameObject.SetActive(false);
             RolesFolder.SubFolders.Add(newFolder);
 
-            if (!ModsFolders.ContainsKey(pair.Key.Metadata.Name))
+            if (!ModsFolders.ContainsKey(plugin.PluginInfo.Metadata.Name))
             {
-                ModsFolders.Add(pair.Key.Metadata.Name, pair.Key.Metadata.GUID);
+                ModsFolders.Add(plugin.PluginInfo.Metadata.Name, plugin.PluginId);
             }
         }
 
@@ -41,7 +43,8 @@ public static class TaskAdderPatch
         __instance.GoToRoot();
     }
 
-    [HarmonyPostfix, HarmonyPatch(typeof(TaskAddButton), "Role", MethodType.Setter)]
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(TaskAddButton), "Role", MethodType.Setter)]
     public static void RoleGetterPatch(TaskAddButton __instance)
     {
         if (__instance.role is ICustomRole lpRole)
@@ -56,7 +59,8 @@ public static class TaskAdderPatch
     }
 
     // yes it might be crazy patching the entire method, but i tried so many other methods and only this works :cry:
-    [HarmonyPrefix, HarmonyPatch(typeof(TaskAdderGame), nameof(TaskAdderGame.ShowFolder))]
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(TaskAdderGame), nameof(TaskAdderGame.ShowFolder))]
     public static bool ShowPatch(TaskAdderGame __instance, [HarmonyArgument(0)] TaskFolder taskFolder)
     {
         var stringBuilder = new StringBuilder(64);
@@ -149,12 +153,42 @@ public static class TaskAdderPatch
                 }
             }
         }
+        if (taskFolder.FolderName == "Roles")
+        {
+            for (int m = 0; m < DestroyableSingleton<RoleManager>.Instance.AllRoles.Length; m++)
+            {
+                RoleBehaviour roleBehaviour = DestroyableSingleton<RoleManager>.Instance.AllRoles[m];
+                if (roleBehaviour.Role != RoleTypes.ImpostorGhost && roleBehaviour.Role != RoleTypes.CrewmateGhost && !CustomRoleManager.CustomRoles.ContainsKey((ushort)roleBehaviour.Role))
+                {
+                    TaskAddButton taskAddButton2 = Object.Instantiate<TaskAddButton>(__instance.RoleButton);
+                    taskAddButton2.SafePositionWorld = __instance.SafePositionWorld;
+                    taskAddButton2.Text.text = "Be_" + roleBehaviour.NiceName + ".exe";
+                    __instance.AddFileAsChild(RolesFolder, taskAddButton2, ref num, ref num2, ref num3);
+                    taskAddButton2.Role = roleBehaviour;
+                    if (taskAddButton2 != null && taskAddButton2.Button != null)
+                    {
+                        ControllerManager.Instance.AddSelectableUiElement(taskAddButton2.Button, false);
+                        if (m == 0 && __instance.restorePreviousSelectionFound != null)
+                        {
+                            ControllerManager.Instance.SetDefaultSelection(__instance.restorePreviousSelectionFound, null);
+                            __instance.restorePreviousSelectionByFolderName = string.Empty;
+                            __instance.restorePreviousSelectionFound = null;
+                        }
+                        else if (m == 0)
+                        {
+                            ControllerManager.Instance.SetDefaultSelection(taskAddButton2.Button, null);
+                        }
+                    }
+                }
+            }
+        }
 
         if (ModsFolders.TryGetValue(taskFolder.FolderName, out string guid))
         {
-            for (var m = 0; m < CustomRoleManager.GetRolesRegistered(guid).Count; m++)
+            MiraPluginInfo plugin = MiraPluginManager.Instance.GetPluginByGuid(guid);
+            for (var m = 0; m < plugin.CustomRoles.Count; m++)
             {
-                var roleBehaviour = CustomRoleManager.GetRolesRegistered(guid)[m];
+                var roleBehaviour = plugin.CustomRoles.ElementAt(m).Value;
                 if (roleBehaviour.Role != RoleTypes.ImpostorGhost && roleBehaviour.Role != RoleTypes.CrewmateGhost && !roleBehaviour.IsDead)
                 {
                     var taskAddButton2 = Object.Instantiate(__instance.RoleButton);

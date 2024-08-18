@@ -1,8 +1,8 @@
-﻿using Reactor.Utilities.Extensions;
-using System;
+﻿using System;
+using Reactor.Utilities.Extensions;
 using UnityEngine;
 
-namespace MiraAPI.Utilities
+namespace MiraAPI.Utilities.Assets
 {
     public class LoadableBundleAsset<T>(string name, AssetBundle bundle) : LoadableAsset<T> where T : UnityEngine.Object
     {

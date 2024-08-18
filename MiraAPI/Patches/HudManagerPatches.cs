@@ -1,8 +1,6 @@
 ﻿using HarmonyLib;
 using InnerNet;
-using MiraAPI.GameOptions;
 using MiraAPI.Hud;
-using MiraAPI.Patches.Options;
 using MiraAPI.Roles;
 using Reactor.Utilities.Extensions;
 using UnityEngine;
@@ -18,66 +16,11 @@ namespace MiraAPI.Patches
         /// Custom role tab
         private static TaskPanelBehaviour _roleTab;
 
-        /// Scrolling increment
-        private const float Increment = 0.3f;
-
-        /// Bounds for scrolling 
-        private static FloatRange _bounds = new FloatRange(2.9f, 4.6f);
-
-        /// <summary>
-        /// Add options scrolling (on the hud text)
-        /// </summary>
-        public static void OptionsScrollingLogic(HudManager __instance)
-        {
-            if (Input.GetKeyDown(KeyCode.Tab))
-            {
-                if (ToHudStringPatch.CurrentPage >= ModdedOptionsManager.RegisteredMods.Count)
-                {
-                    ToHudStringPatch.CurrentPage = 0;
-                }
-                else
-                {
-                    ToHudStringPatch.CurrentPage += 1;
-                }
-            }
-
-            var numPlayers = GameData.Instance ? GameData.Instance.PlayerCount : 10;
-            HudManager.Instance.GameSettings.text = GameOptionsManager.Instance.CurrentGameOptions.ToHudString(numPlayers);
-            var pos = __instance.GameSettings.transform.localPosition;
-
-            if (!PlayerControl.LocalPlayer.CanMove)
-            {
-                return;
-            }
-
-            if (ToHudStringPatch.CurrentPage == 0)
-            {
-                __instance.GameSettings.transform.localPosition = new Vector3(pos.x, _bounds.min, pos.z);
-                return;
-            }
-
-            _bounds.max = __instance.GameSettings.rectTransform.sizeDelta.y + _bounds.min;
-
-            var delta = Input.mouseScrollDelta.y switch
-            {
-                > 0f => -Increment,
-                < 0f => Increment,
-                _ => 0f
-            };
-
-            pos = new Vector3(pos.x, Mathf.Clamp(pos.y + delta, _bounds.min, _bounds.max), pos.z);
-
-            __instance.GameSettings.transform.localPosition = pos;
-        }
-
-        [HarmonyPostfix, HarmonyPatch("Update")]
+        [HarmonyPostfix]
+        [HarmonyPatch(nameof(HudManager.Update))]
         public static void UpdatePostfix(HudManager __instance)
         {
             var local = PlayerControl.LocalPlayer;
-            if (LobbyBehaviour.Instance)
-            {
-                OptionsScrollingLogic(__instance);
-            }
 
             if (AmongUsClient.Instance.GameState != InnerNetClient.GameStates.Started && !ShipStatus.Instance)
             {
@@ -85,7 +28,7 @@ namespace MiraAPI.Patches
             }
 
             //CustomGameModeManager.ActiveMode.HudUpdate(__instance);
-            if (local.Data.Role is null) return;
+            if (local is null || local.Data is null || local.Data.Role is null) return;
 
             if (local.Data.Role is ICustomRole customRole)
             {
@@ -116,7 +59,8 @@ namespace MiraAPI.Patches
         /*        /// <summary>
                 /// Trigger hudstart on current custom gamemode
                 /// </summary>
-                [HarmonyPostfix, HarmonyPatch("OnGameStart")]
+                [HarmonyPostfix]
+                [HarmonyPatch("OnGameStart")]
                 public static void GameStartPatch(HudManager __instance)
                 {
                     CustomGameModeManager.ActiveMode.HudStart(__instance);
@@ -125,7 +69,8 @@ namespace MiraAPI.Patches
         /// <summary>
         /// Create custom buttons parent
         /// </summary>
-        [HarmonyPostfix, HarmonyPatch("Start")]
+        [HarmonyPostfix]
+        [HarmonyPatch(nameof(HudManager.Start))]
         public static void StartPostfix(HudManager __instance)
         {
             if (!_bottomLeft)
@@ -160,7 +105,8 @@ namespace MiraAPI.Patches
         /// <summary>
         /// Make sure all launchpad hud elements are inactive/active when appropriate
         /// </summary>
-        [HarmonyPostfix, HarmonyPatch("SetHudActive", typeof(PlayerControl), typeof(RoleBehaviour), typeof(bool))]
+        [HarmonyPostfix]
+        [HarmonyPatch(nameof(HudManager.SetHudActive), typeof(PlayerControl), typeof(RoleBehaviour), typeof(bool))]
         public static void SetHudActivePostfix(HudManager __instance, [HarmonyArgument(0)] PlayerControl player, [HarmonyArgument(1)] RoleBehaviour roleBehaviour, [HarmonyArgument(2)] bool isActive)
         {
             if (player.Data == null)

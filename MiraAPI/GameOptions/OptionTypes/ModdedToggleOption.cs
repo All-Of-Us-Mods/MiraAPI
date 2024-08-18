@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using MiraAPI.Networking;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace MiraAPI.GameOptions.OptionTypes
 {
@@ -6,19 +9,37 @@ namespace MiraAPI.GameOptions.OptionTypes
     {
         public ModdedToggleOption(string title, bool defaultValue, System.Type roleType) : base(title, defaultValue, roleType)
         {
+            Data = ScriptableObject.CreateInstance<CheckboxGameSetting>();
+
+            var data = (CheckboxGameSetting)Data;
+            data.Title = StringName;
+            data.Type = global::OptionTypes.Checkbox;
         }
 
         public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container)
         {
-            var toggleOption = UnityEngine.Object.Instantiate(toggleOpt, container);
+            var toggleOption = Object.Instantiate(toggleOpt, Vector3.zero, Quaternion.identity, container);
 
-            toggleOption.name = Title;
+            toggleOption.SetUpFromData(Data, 20);
+
             toggleOption.Title = StringName;
+            toggleOption.TitleText.text = Title;
             toggleOption.CheckMark.enabled = Value;
             toggleOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
-            toggleOption.OnEnable();
+
             OptionBehaviour = toggleOption;
+
             return toggleOption;
+        }
+
+        public override NetData GetNetData()
+        {
+            return new NetData(Id, BitConverter.GetBytes(Value));
+        }
+
+        public override void HandleNetData(byte[] data)
+        {
+            SetValue(BitConverter.ToBoolean(data));
         }
 
         public override string GetHudStringText()
@@ -33,10 +54,14 @@ namespace MiraAPI.GameOptions.OptionTypes
 
         public override void OnValueChanged(bool newValue)
         {
+            DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, newValue ? "On" : "Off", false);
             if (OptionBehaviour is null) return;
 
-            ToggleOption toggleOpt = OptionBehaviour as ToggleOption;
-            toggleOpt.CheckMark.enabled = newValue;
+            var toggleOpt = OptionBehaviour as ToggleOption;
+            if (toggleOpt)
+            {
+                toggleOpt.CheckMark.enabled = newValue;
+            }
         }
     }
 }

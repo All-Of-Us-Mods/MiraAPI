@@ -10,7 +10,8 @@ public static class RoleBehaviourPatches
     /// <summary>
     /// Update TeamColor text for Launchpad roles
     /// </summary>
-    [HarmonyPrefix, HarmonyPatch("TeamColor", MethodType.Getter)]
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(RoleBehaviour.TeamColor), MethodType.Getter)]
     public static bool PrefixTeamColorGetter(RoleBehaviour __instance, ref Color __result)
     {
         if (__instance is not ICustomRole behaviour)

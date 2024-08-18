@@ -91,7 +91,7 @@ public abstract class CustomGameMode
     /// Custom winner selection
     /// </summary>
     /// <returns>List of winners</returns>
-    public virtual List<GameData.PlayerInfo> CalculateWinners() => null;
+    public virtual List<NetworkedPlayerInfo> CalculateWinners() => null;
 
     /// <summary>
     /// Show gamemode in Intro Cutscene
@@ -133,6 +133,6 @@ public abstract class CustomGameMode
     /// </summary>
     /// <param name="vent">Target vent</param>
     /// <param name="playerInfo">Player attempting to vent</param>
-    public virtual bool CanVent(Vent vent, GameData.PlayerInfo playerInfo) => true;
+    public virtual bool CanVent(Vent vent, NetworkedPlayerInfo playerInfo) => true;
 
 }

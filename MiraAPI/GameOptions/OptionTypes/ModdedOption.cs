@@ -1,24 +1,30 @@
-﻿using MiraAPI.Roles;
+﻿using MiraAPI.PluginLoading;
+using MiraAPI.Roles;
 using Reactor.Localization.Utilities;
 using System;
+using MiraAPI.Networking;
+using Reactor.Networking.Rpc;
+using Reactor.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.GameOptions.OptionTypes
 {
     public abstract class ModdedOption<T> : IModdedOption
     {
-        public T Value { get; set; }
-        public T DefaultValue { get; set; }
-        public Action<T> ChangedEvent { get; private set; }
+        public uint Id { get; }
+        public BaseGameSetting Data { get; protected init; }
+        public T Value { get; protected set; }
+        public T DefaultValue { get; init; }
+        public Action<T> ChangedEvent { get; set; }
         public string Title { get; }
         public StringNames StringName { get; }
         public Func<bool> Visible { get; set; }
         public Type AdvancedRole { get; }
         public OptionBehaviour OptionBehaviour { get; set; }
         public ModdedOptionGroup Group { get; set; } = null;
-        public IMiraConfig ParentMod { get; set; } = null;
+        public IMiraPlugin ParentMod { get; set; } = null;
 
-        public ModdedOption(string title, T defaultValue, Type roleType)
+        public ModdedOption(string title, T defaultValue, Type roleType) : this()
         {
             Title = title;
             DefaultValue = defaultValue;
@@ -31,6 +37,14 @@ namespace MiraAPI.GameOptions.OptionTypes
                 AdvancedRole = roleType;
             }
         }
+        
+        public ModdedOption()
+        {
+            Logger<MiraApiPlugin>.Error("created modded option");
+            Id = ModdedOptionsManager.NextId++;
+            ModdedOptionsManager.Options.Add(this);
+            ModdedOptionsManager.ModdedOptions.Add(Id, this);
+        }
 
         public void ValueChanged(OptionBehaviour optionBehaviour)
         {
@@ -39,15 +53,24 @@ namespace MiraAPI.GameOptions.OptionTypes
 
         public void SetValue(T newValue)
         {
-            T oldVal = Value;
+            var oldVal = Value;
             Value = newValue;
             if (!Value.Equals(oldVal) && ChangedEvent != null)
             {
                 ChangedEvent.Invoke(Value);
             }
 
+            if (AmongUsClient.Instance.AmHost)
+            {
+                Rpc<SyncOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, [GetNetData()], true);
+            }
+            
             OnValueChanged(newValue);
         }
+
+        public abstract NetData GetNetData();
+        
+        public abstract void HandleNetData(byte[] data);
 
         public abstract void OnValueChanged(T newValue);
 

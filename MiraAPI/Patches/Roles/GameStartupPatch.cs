@@ -12,7 +12,7 @@ public static class GameStartupPatch
     /// This is used for registering roles when the game opens, might be a janky solution, but it works
     /// </summary>
     [HarmonyPostfix]
-    [HarmonyPatch("Start")]
+    [HarmonyPatch(nameof(MainMenuManager.Start))]
     public static void StartPostfix()
     {
         if (_runOnce)

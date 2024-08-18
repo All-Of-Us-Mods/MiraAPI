@@ -7,7 +7,7 @@ namespace MiraAPI.GameOptions
     {
         public string GroupName { get; }
         public Func<bool> GroupVisible => () => true;
-        public Color GroupColor => Color.white;
+        public Color GroupColor => Color.clear;
         public Type AdvancedRole => null;
     }
 }

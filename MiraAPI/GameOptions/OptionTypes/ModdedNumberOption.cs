@@ -1,5 +1,9 @@
-﻿using MiraAPI.Utilities;
+﻿using System;
+using AmongUs.GameOptions;
+using MiraAPI.Networking;
+using MiraAPI.Utilities;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace MiraAPI.GameOptions.OptionTypes
 {
@@ -19,26 +23,51 @@ namespace MiraAPI.GameOptions.OptionTypes
             ZeroInfinity = zeroInfinity;
 
             Value = Mathf.Clamp(defaultValue, min, max);
+            
+            Data = ScriptableObject.CreateInstance<FloatGameSetting>();
+            
+            var data = (FloatGameSetting)Data;
+            data.Type = global::OptionTypes.Float;
+            data.Title = StringName;
+            data.Value = Value;
+            data.Increment = Increment;
+            data.ValidRange = new FloatRange(Min, Max);
+            data.FormatString = "0";
+            data.ZeroIsInfinity = ZeroInfinity;
+            data.SuffixType = SuffixType;
+            data.OptionName = FloatOptionNames.Invalid;
         }
 
         public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container)
         {
-            var numberOption = Object.Instantiate(numberOpt, container);
+            var numberOption = Object.Instantiate(numberOpt, Vector3.zero, Quaternion.identity, container);
 
-            numberOption.name = Title;
+            numberOption.SetUpFromData(Data, 20);
+            numberOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
+            
             numberOption.Title = StringName;
             numberOption.Value = Value;
             numberOption.Increment = Increment;
-            numberOption.SuffixType = SuffixType;
-            numberOption.FormatString = "0";
             numberOption.ValidRange = new FloatRange(Min, Max);
+            numberOption.FormatString = "0";
             numberOption.ZeroIsInfinity = ZeroInfinity;
-            numberOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
-            numberOption.OnEnable();
-
+            numberOption.SuffixType = SuffixType;
+            numberOption.floatOptionName = FloatOptionNames.Invalid;
+            
+            
             OptionBehaviour = numberOption;
 
             return numberOption;
+        }
+
+        public override NetData GetNetData()
+        {
+            return new NetData(Id, BitConverter.GetBytes(Value));
+        }
+
+        public override void HandleNetData(byte[] data)
+        {
+            SetValue(BitConverter.ToSingle(data));
         }
 
         public override string GetHudStringText()
@@ -54,11 +83,15 @@ namespace MiraAPI.GameOptions.OptionTypes
         public override void OnValueChanged(float newValue)
         {
             Value = Mathf.Clamp(newValue, Min, Max);
+            DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, Data.GetValueString(Value), false);
 
             if (OptionBehaviour is null) return;
 
-            NumberOption opt = OptionBehaviour as NumberOption;
-            opt.Value = newValue;
+            var opt = OptionBehaviour as NumberOption;
+            if (opt)
+            {
+                opt.Value = newValue;
+            }
         }
     }
 }

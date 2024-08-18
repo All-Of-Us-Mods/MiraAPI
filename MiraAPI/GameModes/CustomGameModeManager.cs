@@ -37,7 +37,7 @@ public static class CustomGameModeManager
             return;
         }
 
-        Logger<MiraAPIPlugin>.Error($"No gamemode with id {id} found!");
+        Logger<MiraApiPlugin>.Error($"No gamemode with id {id} found!");
     }
 
     /// <summary>
@@ -48,7 +48,7 @@ public static class CustomGameModeManager
     {
         if (!typeof(CustomGameMode).IsAssignableFrom(gameModeType))
         {
-            Logger<MiraAPIPlugin>.Warning($"{gameModeType?.Name} does not inherit CustomGameMode!");
+            Logger<MiraApiPlugin>.Warning($"{gameModeType?.Name} does not inherit CustomGameMode!");
             return;
         }
 
@@ -56,13 +56,13 @@ public static class CustomGameModeManager
 
         if (GameModes.Any(x => x.Key == gameMode?.Id))
         {
-            Logger<MiraAPIPlugin>.Error($"ID for gamemode {gameMode?.Name} already exists!");
+            Logger<MiraApiPlugin>.Error($"ID for gamemode {gameMode?.Name} already exists!");
             return;
         }
 
         if (gameMode == null)
         {
-            Logger<MiraAPIPlugin>.Error($"GAMEMODE WITH TYPE {gameModeType.Name} IS NULL");
+            Logger<MiraApiPlugin>.Error($"GAMEMODE WITH TYPE {gameModeType.Name} IS NULL");
             return;
         }
 
