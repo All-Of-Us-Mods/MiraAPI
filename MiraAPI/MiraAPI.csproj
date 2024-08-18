@@ -16,14 +16,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <None Remove="Resources\Cog.png" />
-      <None Remove="Resources\CogActive.png" />
-      <None Remove="Resources\FortniteBanner.jpeg" />
-      <None Remove="Resources\NextButton.png" />
-      <None Remove="Resources\NextButtonActive.png" />
-    </ItemGroup>
-
-    <ItemGroup>
       <EmbeddedResource Include="Resources\Cog.png" />
       <EmbeddedResource Include="Resources\CogActive.png" />
       <EmbeddedResource Include="Resources\FortniteBanner.jpeg" />
