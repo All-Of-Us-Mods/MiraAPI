@@ -32,7 +32,7 @@ public static class TaskAdderPatch
             newFolder.gameObject.SetActive(false);
             RolesFolder.SubFolders.Add(newFolder);
 
-            if (!ModsFolders.ContainsKey(plugin.PluginId))
+            if (!ModsFolders.ContainsKey(plugin.PluginInfo.Metadata.Name))
             {
                 ModsFolders.Add(plugin.PluginInfo.Metadata.Name, plugin.PluginId);
             }

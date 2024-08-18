@@ -34,7 +34,7 @@ namespace MiraAPI.Patches.Options
                 return true;
             }
 
-            float num = 0.662f;
+            float num = 0.522f;
 
             __instance.AllButton.transform.parent.gameObject.SetActive(false);
             __instance.AllButton.gameObject.SetActive(false);
@@ -46,9 +46,9 @@ namespace MiraAPI.Patches.Options
             num -= 0.522f;
             int num3 = 0;
 
-            foreach (var role in GameSettingMenuPatches.selectedMod.CustomRoles.Where(role => role.Value.TeamType == RoleTeamTypes.Crewmate))
+            foreach (var role in GameSettingMenuPatches.selectedMod.CustomRoles.Values.OfType<ICustomRole>().Where(role => role.Team == ModdedRoleTeams.Crewmate))
             {
-                CreateQuotaOption(__instance, role.Value, ref num, num3);
+                CreateQuotaOption(__instance, role as RoleBehaviour, ref num, num3);
                 num3++;
             }
 
@@ -58,9 +58,24 @@ namespace MiraAPI.Patches.Options
             categoryHeaderEditRole2.transform.localPosition = new Vector3(4.986f, num, -2f);
             num -= 0.522f;
 
-            foreach (var role in GameSettingMenuPatches.selectedMod.CustomRoles.Where(role => role.Value.TeamType == RoleTeamTypes.Impostor))
+
+            foreach (var role in GameSettingMenuPatches.selectedMod.CustomRoles.Values.OfType<ICustomRole>().Where(role => role.Team == ModdedRoleTeams.Impostor))
             {
-                CreateQuotaOption(__instance, role.Value, ref num, num3);
+                CreateQuotaOption(__instance, role as RoleBehaviour, ref num, num3);
+                num3++;
+            }
+
+            num -= 0.4f;
+            CategoryHeaderEditRole categoryHeaderEditRole3 = Object.Instantiate(__instance.categoryHeaderEditRoleOrigin, Vector3.zero, Quaternion.identity, __instance.RoleChancesSettings.transform);
+            categoryHeaderEditRole3.SetHeader(StringNames.None, 20);
+            categoryHeaderEditRole3.Title.text = "Neutral Roles";
+            categoryHeaderEditRole3.transform.localPosition = new Vector3(4.986f, num, -2f);
+            num -= 0.522f;
+
+
+            foreach (var role in GameSettingMenuPatches.selectedMod.CustomRoles.Values.OfType<ICustomRole>().Where(role => role.Team == ModdedRoleTeams.Neutral))
+            {
+                CreateQuotaOption(__instance, role as RoleBehaviour, ref num, num3);
                 num3++;
             }
 
