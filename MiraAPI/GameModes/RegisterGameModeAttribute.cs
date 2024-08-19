@@ -4,6 +4,7 @@ using System.Reflection;
 
 namespace MiraAPI.GameModes;
 
+[AttributeUsage(AttributeTargets.Class)]
 public class RegisterGameModeAttribute : Attribute
 {
     private static readonly HashSet<Assembly> RegisteredAssemblies = [];
