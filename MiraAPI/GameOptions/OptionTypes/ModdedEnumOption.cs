@@ -11,7 +11,7 @@ public class ModdedEnumOption : ModdedOption<int>
 {
     public string[] Values { get; }
 
-    public ModdedEnumOption(string title, int defaultValue, Type enumType, Type roleType) : base(title, defaultValue, roleType)
+    public ModdedEnumOption(string title, int defaultValue, Type enumType, Type roleType=null) : base(title, defaultValue, roleType)
     {
         Values = Enum.GetNames(enumType);
         Data = ScriptableObject.CreateInstance<StringGameSetting>();

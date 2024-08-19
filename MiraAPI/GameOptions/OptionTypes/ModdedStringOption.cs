@@ -11,7 +11,7 @@ public class ModdedStringOption : ModdedOption<int>
 {
     public string[] Values { get; }
     
-    public ModdedStringOption(string title, int defaultValue, string[] values, Type roleType) : base(title, defaultValue, roleType)
+    public ModdedStringOption(string title, int defaultValue, string[] values, Type roleType=null) : base(title, defaultValue, roleType)
     {
         Values = values;
         Data = ScriptableObject.CreateInstance<StringGameSetting>();

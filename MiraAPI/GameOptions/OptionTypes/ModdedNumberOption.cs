@@ -19,7 +19,7 @@ public class ModdedNumberOption : ModdedOption<float>
     
     public bool ZeroInfinity { get; }
     
-    public ModdedNumberOption(string title, float defaultValue, float min, float max, float increment, NumberSuffixes suffixType, bool zeroInfinity, Type roleType) : base(title, defaultValue, roleType)
+    public ModdedNumberOption(string title, float defaultValue, float min, float max, float increment, NumberSuffixes suffixType, bool zeroInfinity, Type roleType=null) : base(title, defaultValue, roleType)
     {
         Min = min;
         Max = max;
