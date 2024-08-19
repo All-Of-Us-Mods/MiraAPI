@@ -6,14 +6,14 @@ namespace MiraAPI.Utilities.Assets
     {
         public override Sprite LoadAsset()
         {
-            if (_loadedAsset != null)
+            if (LoadedAsset != null)
             {
-                return _loadedAsset;
+                return LoadedAsset;
             }
 
             try
             {
-                return _loadedAsset = SpriteTools.LoadSpriteFromPath(path);
+                return LoadedAsset = SpriteTools.LoadSpriteFromPath(path);
             }
             catch
             {
