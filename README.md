@@ -1,4 +1,4 @@
-![Discord Invite](https://discord.com/api/guilds/794950428756410429/widget.png?style=banner2)
+[![](https://dcbadge.limes.pink/api/server/all-of-us-launchpad-794950428756410429)](https://discord.gg/all-of-us-launchpad-794950428756410429)
 
 # Mira API
 
