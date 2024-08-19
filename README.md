@@ -1,4 +1,4 @@
-![https://discord.gg/all-of-us-launchpad-794950428756410429](https://img.shields.io/discord/794950428756410429?style=for-the-badge&logo=discord&logoColor=white)
+![Discord Invite](https://discord.com/api/guilds/794950428756410429/widget.png?style=banner2)
 
 # Mira API
 
