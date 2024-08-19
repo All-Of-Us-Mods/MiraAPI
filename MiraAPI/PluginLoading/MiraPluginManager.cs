@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using MiraAPI.Hud;
 
 namespace MiraAPI.PluginLoading;
 
@@ -36,6 +37,7 @@ public class MiraPluginManager
             RegisterRoleAttribute(assembly, info);
             RegisterOptionsGroups(assembly, info);
             RegisterOptionsAttributes(assembly, info);
+            RegisterButtonAttribute(assembly);
 
             RegisteredPlugins.Add(assembly, info);
 
@@ -47,7 +49,6 @@ public class MiraPluginManager
     {
         return RegisteredPlugins.Values.First(plugin => plugin.PluginId == guid);
     }
-
 
     private static void RegisterOptionsAttributes(Assembly assembly, MiraPluginInfo pluginInfo)
     {
@@ -100,6 +101,18 @@ public class MiraPluginManager
             var role = CustomRoleManager.RegisterRole(type, attribute.RoleId);
 
             pluginInfo.CustomRoles.Add((ushort)role.Role, role);
+        }
+    }
+    
+    private static void RegisterButtonAttribute(Assembly assembly)
+    {
+        foreach (var type in assembly.GetTypes())
+        {
+            var attribute = type.GetCustomAttribute<RegisterButtonAttribute>();
+            if (attribute != null)
+            {
+                CustomButtonManager.RegisterButton(type);
+            }
         }
     }
 }

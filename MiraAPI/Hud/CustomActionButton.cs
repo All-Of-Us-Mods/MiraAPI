@@ -127,12 +127,11 @@ public abstract class CustomActionButton
         {
             Timer -= Time.deltaTime;
         }
-        else
+        else if (HasEffect && EffectActive)
         {
-            if (HasEffect && EffectActive)
-            {
-                EffectEndHandler();
-            }
+            EffectActive = false;
+            Timer = Cooldown;
+            OnEffectEnd();
         }
 
         if (CanUse())
@@ -143,15 +142,9 @@ public abstract class CustomActionButton
         {
             Button.SetDisabled();
         }
+        
         Button.SetCoolDown(Timer, EffectActive ? EffectDuration : Cooldown);
 
         FixedUpdate(playerControl);
-    }
-    
-    private void EffectEndHandler()
-    {
-        EffectActive = false;
-        Timer = Cooldown;
-        OnEffectEnd();
     }
 }

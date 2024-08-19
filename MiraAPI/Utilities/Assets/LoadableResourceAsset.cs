@@ -2,7 +2,7 @@
 
 namespace MiraAPI.Utilities.Assets
 {
-    public class LoadableResourceAsset(string name, string resourcesFolder) : LoadableAsset<Sprite>
+    public class LoadableResourceAsset(string path) : LoadableAsset<Sprite>
     {
         public override Sprite LoadAsset()
         {
@@ -13,11 +13,11 @@ namespace MiraAPI.Utilities.Assets
 
             try
             {
-                return _loadedAsset = SpriteTools.LoadSpriteFromPath(resourcesFolder + name);
+                return _loadedAsset = SpriteTools.LoadSpriteFromPath(path);
             }
             catch
             {
-                Debug.LogError($"Not loading, invalid asset: {name}");
+                Debug.LogError($"Not loading, invalid asset: {path}");
                 return null;
             }
         }
