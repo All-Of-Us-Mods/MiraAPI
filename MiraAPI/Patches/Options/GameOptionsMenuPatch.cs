@@ -51,8 +51,8 @@ public static class GameOptionsMenuPatch
                 foreach (TextMeshPro textMeshPro in newOpt.GetComponentsInChildren<TextMeshPro>(true))
                 {
                     if (group.GroupColor != Color.clear) textMeshPro.color = group.GroupColor.DarkenColor();
-                    textMeshPro.fontMaterial.SetFloat("_StencilComp", 3f);
-                    textMeshPro.fontMaterial.SetFloat("_Stencil", 20);
+                    textMeshPro.fontMaterial.SetFloat(ShaderID._StencilComp, 3f);
+                    textMeshPro.fontMaterial.SetFloat(ShaderID._Stencil, 20);
                 }
 
                 __instance.Children.Add(newOpt);
@@ -83,8 +83,8 @@ public static class GameOptionsMenuPatch
             }
             foreach (TextMeshPro textMeshPro in newOpt.GetComponentsInChildren<TextMeshPro>(true))
             {
-                textMeshPro.fontMaterial.SetFloat("_StencilComp", 3f);
-                textMeshPro.fontMaterial.SetFloat("_Stencil", 20);
+                textMeshPro.fontMaterial.SetFloat(ShaderID._StencilComp, 3f);
+                textMeshPro.fontMaterial.SetFloat(ShaderID._Stencil, 20);
             }
 
             __instance.Children.Add(newOpt);
