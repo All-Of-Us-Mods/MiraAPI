@@ -3,6 +3,7 @@ using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Reactor.Utilities.Extensions;
 using System;
 using System.Reflection;
+using Reactor.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.Utilities.Assets
@@ -43,7 +44,7 @@ namespace MiraAPI.Utilities.Assets
             }
             else
             {
-                throw new Exception($"Resource not found: {resourcePath}");
+                Logger<MiraApiPlugin>.Error($"Resource not found: {resourcePath}\nReturning empty sprite!");
             }
 
             return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
