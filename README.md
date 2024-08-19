@@ -6,10 +6,11 @@ A thorough, but simple, Among Us modding API that covers:
 - Roles
 - Options
 - Gamemodes
+- Assets
 - HUD Elements
 - Compatibility
   
-Mira API striv  es to be simple and easy to use, while also using as many base game elements as possible. The result is a less intrusive, better modding API that covers general use cases.
+Mira API strives to be simple and easy to use, while also using as many base game elements as possible. The result is a less intrusive, better modding API that covers general use cases.
 
 # Usage
 
@@ -54,7 +55,39 @@ Options can also be used within a Role class to show up in that Role's settings.
 
 An example can be found [here](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/CustomRole2.cs).
 
+## Buttons
 
-## Disclaimer
+Mira API provides a simple interface for adding ability buttons to the game. There is only 2 steps:
+1. Create a class that inherits from the `CustomActionButton` class and implement the properties and methods.
+2. Add the `[RegisterCustomButton]` attribute to the class.
+
+The button API is simple, but provides a lot of flexibility. There are various methods you can override to customize the behaviour of your button. See [this file](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI/Hud/CustomActionButton.cs) for a full list of methods you can override.
+
+An example button can be found [here](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/ExampleButton.cs).
+
+## Assets
+
+Mira API provides a simple, but expandable asset system. The core of the system is the `LoadableAsset<T>` class. This is a generic abstract class that provides a pattern for loading assets. 
+
+Mira API comes with two asset loaders:
+1. `LoadableBundleAsset<T>`: This is used for loading assets from AssetBundles.
+2. `LoadableResourceAsset`: This is used for loading **only sprites** from the Embedded Resources within a mod.
+
+The code below shows how to use these asset loaders:
+```csharp
+// Load a sprite from an AssetBundle
+AssetBundle bundle = AssetBundleManager.Load("MyBundle"); // AssetBundleManager is a utility provided by Reactor
+LoadableAsset<Sprite> mySpriteAsset = new LoadableBundleAsset<Sprite>("MySprite", bundle);
+Sprite sprite = mySpriteAsset.LoadAsset();
+
+// Load a sprite from an Embedded Resource
+// Make sure to set the Build Action of your image to Embedded Resource!
+LoadableAsset<Sprite> buttonAsset = new LoadableResourceAsset("ExampleMod.Resources.MyButton.png");
+Sprite button = buttonSpriteAsset.LoadAsset();
+```
+
+You can create your own asset loaders by inheriting from `LoadableAsset<T>` and implementing the `LoadAsset` method.
+
+# Disclaimer
 
 > This mod is not affiliated with Among Us or Innersloth LLC, and the content contained therein is not endorsed or otherwise sponsored by Innersloth LLC. Portions of the materials contained herein are property of Innersloth LLC. © Innersloth LLC.
