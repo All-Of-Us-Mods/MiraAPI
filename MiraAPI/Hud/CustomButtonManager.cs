@@ -7,8 +7,7 @@ namespace MiraAPI.Hud;
 public static class CustomButtonManager
 {
     public static readonly List<CustomActionButton> CustomButtons = [];
-
-
+    
     public static void RegisterButton(Type buttonType)
     {
         if (!typeof(CustomActionButton).IsAssignableFrom(buttonType))
