@@ -9,6 +9,8 @@ namespace MiraAPI.GameOptions.OptionTypes;
 
 public class ModdedEnumOption : ModdedOption<int>
 {
+    public string[] Values { get; }
+
     public ModdedEnumOption(string title, int defaultValue, Type enumType, Type roleType) : base(title, defaultValue, roleType)
     {
         Values = Enum.GetNames(enumType);
@@ -20,8 +22,6 @@ public class ModdedEnumOption : ModdedOption<int>
         data.Values = Values.Select(CustomStringName.CreateAndRegister).ToArray();
         data.Index = Value;
     }
-        
-    public string[] Values { get; set; }
 
     public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container)
     {

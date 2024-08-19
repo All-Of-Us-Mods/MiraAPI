@@ -4,17 +4,12 @@ using System.Reflection;
 
 namespace MiraAPI.GameOptions.Attributes;
 
-public class ModdedStringOptionAttribute : ModdedOptionAttribute
+public class ModdedStringOptionAttribute(string title, string[] values, Type roleType = null)
+    : ModdedOptionAttribute(title, roleType)
 {
-    public string[] Values;
-    public ModdedStringOptionAttribute(string title, string[] strings, Type roleType = null) : base(title, roleType)
-    {
-        Values = strings;
-    }
-
     public override IModdedOption CreateOption(object value, PropertyInfo property)
     {
-        var opt = new ModdedStringOption(Title, (int)value, Values, RoleType);
+        var opt = new ModdedStringOption(Title, (int)value, values, RoleType);
         return opt;
     }
 

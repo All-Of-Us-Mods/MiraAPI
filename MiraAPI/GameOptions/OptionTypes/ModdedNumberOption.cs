@@ -9,11 +9,16 @@ namespace MiraAPI.GameOptions.OptionTypes;
 
 public class ModdedNumberOption : ModdedOption<float>
 {
-    public float Min { get; private set; }
-    public float Max { get; private set; }
-    public float Increment { get; private set; }
-    public NumberSuffixes SuffixType { get; private set; }
-    public bool ZeroInfinity { get; private set; }
+    public float Min { get;}
+    
+    public float Max { get; }
+    
+    public float Increment { get; }
+    
+    public NumberSuffixes SuffixType { get; }
+    
+    public bool ZeroInfinity { get; }
+    
     public ModdedNumberOption(string title, float defaultValue, float min, float max, float increment, NumberSuffixes suffixType, bool zeroInfinity, Type roleType) : base(title, defaultValue, roleType)
     {
         Min = min;

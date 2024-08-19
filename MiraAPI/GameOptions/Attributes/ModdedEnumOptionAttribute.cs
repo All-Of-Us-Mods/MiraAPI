@@ -4,17 +4,13 @@ using System.Reflection;
 
 namespace MiraAPI.GameOptions.Attributes;
 
-public class ModdedEnumOptionAttribute : ModdedOptionAttribute
+public class ModdedEnumOptionAttribute(string title, Type enumType, Type roleType = null)
+    : ModdedOptionAttribute(title, roleType)
 {
-    public Type EnumType;
-    public ModdedEnumOptionAttribute(string title, Type enumType, Type roleType = null) : base(title, roleType)
-    {
-        EnumType = enumType;
-    }
 
     public override IModdedOption CreateOption(object value, PropertyInfo property)
     {
-        var opt = new ModdedEnumOption(Title, (int)value, EnumType, RoleType);
+        var opt = new ModdedEnumOption(Title, (int)value, enumType, RoleType);
         return opt;
     }
 
@@ -27,6 +23,6 @@ public class ModdedEnumOptionAttribute : ModdedOptionAttribute
     public override object GetValue()
     {
         ModdedEnumOption opt = HolderOption as ModdedEnumOption;
-        return Enum.ToObject(EnumType.GetType(), opt.Value);
+        return Enum.ToObject(enumType, opt.Value);
     }
 }

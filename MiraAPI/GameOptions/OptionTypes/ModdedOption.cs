@@ -24,7 +24,7 @@ public abstract class ModdedOption<T> : IModdedOption
     public ModdedOptionGroup Group { get; set; } = null;
     public IMiraPlugin ParentMod { get; set; } = null;
 
-    public ModdedOption(string title, T defaultValue, Type roleType) : this()
+    protected ModdedOption(string title, T defaultValue, Type roleType) : this()
     {
         Title = title;
         DefaultValue = defaultValue;
@@ -37,8 +37,8 @@ public abstract class ModdedOption<T> : IModdedOption
             AdvancedRole = roleType;
         }
     }
-        
-    public ModdedOption()
+
+    private ModdedOption()
     {
         Logger<MiraApiPlugin>.Error("created modded option");
         Id = ModdedOptionsManager.NextId++;
