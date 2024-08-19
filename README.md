@@ -1,3 +1,5 @@
+![Discord](https://img.shields.io/discord/794950428756410429?style=for-the-badge&logo=discord&logoColor=white)
+
 # Mira API
 
 A thorough, but simple, Among Us modding API that covers:
