@@ -25,12 +25,16 @@ namespace MiraAPI.Patches.Options
         {
             __instance.roleChances = new Il2CppSystem.Collections.Generic.List<RoleOptionSetting>();
             __instance.advancedSettingChildren = new Il2CppSystem.Collections.Generic.List<OptionBehaviour>();
+            
+            var maskBg = __instance.scrollBar.transform.FindChild("MaskBg");
 
             if (GameSettingMenuPatches.currentSelectedMod == 0)
             {
                 __instance.AllButton.transform.parent.gameObject.SetActive(true);
                 __instance.AllButton.gameObject.SetActive(true);
                 __instance.scrollBar.transform.localPosition = new Vector3(-1.4957f, 0.657f, -4);
+                maskBg.localPosition = new Vector3(1.5353f, -.5734f, -.1f);
+                maskBg.localScale = new Vector3(6.6811f, 3.3563f, 0.5598f);
                 return true;
             }
 
@@ -39,6 +43,8 @@ namespace MiraAPI.Patches.Options
             __instance.AllButton.transform.parent.gameObject.SetActive(false);
             __instance.AllButton.gameObject.SetActive(false);
             __instance.scrollBar.transform.localPosition = new Vector3(-1.4957f, 1.5261f, -4);
+            maskBg.localPosition = new Vector3(1.5353f, -1.0607f, -.1f);
+            maskBg.localScale = new Vector3(6.6811f, 4.1563f, 0.5598f);
 
             CategoryHeaderEditRole categoryHeaderEditRole = Object.Instantiate(__instance.categoryHeaderEditRoleOrigin, Vector3.zero, Quaternion.identity, __instance.RoleChancesSettings.transform);
             categoryHeaderEditRole.SetHeader(StringNames.CrewmateRolesHeader, 20);
@@ -65,7 +71,7 @@ namespace MiraAPI.Patches.Options
                 num3++;
             }
 
-            num -= 0.4f;
+            num -= 0.8f;
             CategoryHeaderEditRole categoryHeaderEditRole3 = Object.Instantiate(__instance.categoryHeaderEditRoleOrigin, Vector3.zero, Quaternion.identity, __instance.RoleChancesSettings.transform);
             categoryHeaderEditRole3.SetHeader(StringNames.None, 20);
             categoryHeaderEditRole3.Title.text = "Neutral Roles";
@@ -139,8 +145,8 @@ namespace MiraAPI.Patches.Options
                 }
                 foreach (TextMeshPro textMeshPro in newOpt.GetComponentsInChildren<TextMeshPro>(true))
                 {
-                    textMeshPro.fontMaterial.SetFloat("_StencilComp", 3f);
-                    textMeshPro.fontMaterial.SetFloat("_Stencil", 20);
+                    textMeshPro.fontMaterial.SetFloat(ShaderID._StencilComp, 3f);
+                    textMeshPro.fontMaterial.SetFloat(ShaderID._Stencil, 20);
                 }
 
                 newOpt.LabelBackground.enabled = false;
