@@ -14,14 +14,12 @@ public static class LobbyViewPanePatches
     [HarmonyPatch(nameof(LobbyViewSettingsPane.Awake))]
     public static void AwakePatch(LobbyViewSettingsPane __instance)
     {
-        __instance.gameModeText.transform.localPosition = new Vector3(-4.3f, 2.4f, -2);
-        __instance.gameModeText.horizontalAlignment = HorizontalAlignmentOptions.Center;
-        __instance.gameModeText.fontSizeMax = 10f;
-        __instance.gameModeText.margin = new Vector4(1,0,1,0);
+        __instance.gameModeText.transform.localPosition = new Vector3(-2.3f, 2.4f, -2);
 
         // Create the next button
         GameObject nextButton = Object.Instantiate(__instance.BackButton, __instance.BackButton.transform.parent).gameObject;
-        nextButton.transform.localPosition = new Vector3(-2.3f, 2.4f, -2f);
+        nextButton.GetComponent<BoxCollider2D>().size = new Vector2(0.2f, 0.3f);
+        nextButton.transform.localPosition = new Vector3(-5.4f, 2.4f, -2f);
         nextButton.transform.localScale = new Vector3(3, 3, 2);
         nextButton.name = "RightArrowButton";
         
