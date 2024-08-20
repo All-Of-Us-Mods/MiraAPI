@@ -182,15 +182,25 @@ public static class CustomRoleManager
                 {
                     continue;
                 }
-                
-                var num = BitConverter.ToInt32(netData.Data, 0);
-                var chance = BitConverter.ToInt32(netData.Data, 4);
-                
-                customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.NumConfigDefinition, out var numEntry);
-                customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var chanceEntry);
-                
-                numEntry.Value = num;
-                chanceEntry.Value = chance;
+
+                try
+                {
+
+                    var num = BitConverter.ToInt32(netData.Data, 0);
+                    var chance = BitConverter.ToInt32(netData.Data, 4);
+
+                    customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.NumConfigDefinition,
+                        out var numEntry);
+                    customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.ChanceConfigDefinition,
+                        out var chanceEntry);
+
+                    numEntry.Value = num;
+                    chanceEntry.Value = chance;
+                }
+                catch (Exception e)
+                {
+                    Logger<MiraApiPlugin>.Error(e);
+                }
             }
         }
     }
