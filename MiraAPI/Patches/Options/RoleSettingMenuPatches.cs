@@ -145,8 +145,8 @@ public static class RoleSettingMenuPatches
             }
             foreach (TextMeshPro textMeshPro in newOpt.GetComponentsInChildren<TextMeshPro>(true))
             {
-                textMeshPro.fontMaterial.SetFloat(ShaderID._StencilComp, 3f);
-                textMeshPro.fontMaterial.SetFloat(ShaderID._Stencil, 20);
+                textMeshPro.fontMaterial.SetFloat(ShaderID.StencilComp, 3f);
+                textMeshPro.fontMaterial.SetFloat(ShaderID.Stencil, 20);
             }
 
             newOpt.LabelBackground.enabled = false;
