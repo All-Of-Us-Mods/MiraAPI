@@ -84,6 +84,7 @@ public class MiraPluginManager
                     if (typeof(IModdedOption).IsAssignableFrom(property.PropertyType))
                     {
                         IModdedOption option = (IModdedOption)property.GetValue(group);
+                        group.Options.Add(option);
                         option.Group = group;
                         option.AdvancedRole = group.AdvancedRole;
                     }
@@ -101,7 +102,7 @@ public class MiraPluginManager
 
             ClassInjector.RegisterTypeInIl2Cpp(type);
 
-            var role = CustomRoleManager.RegisterRole(type, attribute.RoleId);
+            var role = CustomRoleManager.RegisterRole(type, attribute.RoleId, pluginInfo);
 
             try
             {

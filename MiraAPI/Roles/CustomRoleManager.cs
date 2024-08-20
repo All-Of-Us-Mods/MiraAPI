@@ -36,7 +36,7 @@ public static class CustomRoleManager
         RoleManager.Instance.AllRoles = RoleManager.Instance.AllRoles.Concat(CustomRoles.Values).ToArray();
     }
 
-    internal static RoleBehaviour RegisterRole(Type roleType, ushort roleId)
+    internal static RoleBehaviour RegisterRole(Type roleType, ushort roleId, MiraPluginInfo parentMod)
     {
         if (!(typeof(RoleBehaviour).IsAssignableFrom(roleType) && typeof(ICustomRole).IsAssignableFrom(roleType)))
         {
@@ -79,7 +79,7 @@ public static class CustomRoleManager
             return roleBehaviour;
         }
 
-        var config = PluginSingleton<MiraApiPlugin>.Instance.Config;
+        var config = parentMod.PluginConfig;
         config.Bind(customRole.NumConfigDefinition, 1);
         config.Bind(customRole.ChanceConfigDefinition, 100);
 
@@ -88,7 +88,7 @@ public static class CustomRoleManager
 
     public static MiraPluginInfo FindParentMod(ICustomRole role)
     {
-        return MiraPluginManager.Instance.RegisteredPlugins.First(plugin => plugin.Value.CustomRoles.Values.Contains(role as RoleBehaviour)).Value;
+        return MiraPluginManager.Instance.RegisteredPlugins.First(plugin => plugin.Value.CustomRoles.ContainsValue(role as RoleBehaviour)).Value;
     }
 
     public static bool GetCustomRoleBehaviour(RoleTypes roleType, out ICustomRole result)
@@ -150,8 +150,8 @@ public static class CustomRoleManager
                 continue;
             }
             
-            PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.NumConfigDefinition, out var numEntry);
-            PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var chanceEntry);
+            customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.NumConfigDefinition, out var numEntry);
+            customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var chanceEntry);
             
             var netData = new NetData((uint)role.Role, BitConverter.GetBytes(numEntry.Value).AddRangeToArray(BitConverter.GetBytes(chanceEntry.Value)));
             
@@ -186,8 +186,8 @@ public static class CustomRoleManager
                 var num = BitConverter.ToInt32(netData.Data, 0);
                 var chance = BitConverter.ToInt32(netData.Data, 4);
                 
-                PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.NumConfigDefinition, out var numEntry);
-                PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var chanceEntry);
+                customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.NumConfigDefinition, out var numEntry);
+                customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var chanceEntry);
                 
                 numEntry.Value = num;
                 chanceEntry.Value = chance;

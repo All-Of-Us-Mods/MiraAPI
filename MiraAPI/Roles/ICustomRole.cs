@@ -6,7 +6,7 @@ using MiraAPI.Utilities.Assets;
 using System.Text;
 using HarmonyLib;
 using MiraAPI.Networking;
-using Reactor.Utilities;
+using MiraAPI.PluginLoading;
 using UnityEngine;
 
 namespace MiraAPI.Roles;
@@ -22,8 +22,8 @@ public interface ICustomRole
     Color RoleColor { get; }
 
     ModdedRoleTeams Team { get; }
-    
-    LoadableAsset<Sprite> OptionsScreenshot { get; }
+
+    LoadableAsset<Sprite> OptionsScreenshot => MiraAssets.Empty;
 
     LoadableAsset<Sprite> Icon => MiraAssets.Empty;
 
@@ -53,6 +53,8 @@ public interface ICustomRole
 
     RoleTypes GhostRole => Team == ModdedRoleTeams.Crewmate ? RoleTypes.CrewmateGhost : RoleTypes.ImpostorGhost;
 
+    MiraPluginInfo ParentMod => CustomRoleManager.FindParentMod(this);
+    
     void CreateOptions() { }
 
     void PlayerControlFixedUpdate(PlayerControl playerControl) { }
@@ -72,8 +74,8 @@ public interface ICustomRole
     
     NetData GetNetData(RoleBehaviour roleBehaviour)
     {
-        PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(NumConfigDefinition, out var numEntry);
-        PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(ChanceConfigDefinition, out var chanceEntry);
+        ParentMod.PluginConfig.TryGetEntry<int>(NumConfigDefinition, out var numEntry);
+        ParentMod.PluginConfig.TryGetEntry<int>(ChanceConfigDefinition, out var chanceEntry);
             
         return new NetData((uint)roleBehaviour.Role, BitConverter.GetBytes(numEntry.Value).AddRangeToArray(BitConverter.GetBytes(chanceEntry.Value)));
     }

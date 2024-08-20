@@ -106,11 +106,18 @@ public static class RoleSettingMenuPatches
         var role = roleSetting.Role as ICustomRole;
         if (role is null or { HideSettings: true }) return;
 
-        PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(role.NumConfigDefinition, out var numEntry);
-        numEntry.Value = roleSetting.RoleMaxCount;
+        try
+        {
+            role.ParentMod.PluginConfig.TryGetEntry<int>(role.NumConfigDefinition, out var numEntry);
+            numEntry.Value = roleSetting.RoleMaxCount;
 
-        PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(role.ChanceConfigDefinition, out var chanceEntry);
-        chanceEntry.Value = roleSetting.RoleChance;
+            role.ParentMod.PluginConfig.TryGetEntry<int>(role.ChanceConfigDefinition, out var chanceEntry);
+            chanceEntry.Value = roleSetting.RoleChance;
+        }
+        catch (Exception e)
+        {
+            Logger<MiraApiPlugin>.Warning(e);
+        }
 
         roleSetting.UpdateValuesAndText(GameOptionsManager.Instance.CurrentGameOptions.RoleOptions);
         DestroyableSingleton<HudManager>.Instance.Notifier.AddRoleSettingsChangeMessage(roleSetting.Role.StringName, roleSetting.RoleMaxCount, roleSetting.RoleChance, roleSetting.Role.TeamType, false);
@@ -156,14 +163,14 @@ public static class RoleSettingMenuPatches
             newOpt.Initialize();
         }
 
-        __instance.scrollBar.CalculateAndSetYBounds((float)(__instance.advancedSettingChildren.Count + 3), 1f, 6f, 0.45f);
+        __instance.scrollBar.CalculateAndSetYBounds(__instance.advancedSettingChildren.Count + 3, 1f, 6f, 0.45f);
     }
     private static void ChangeTab(RoleBehaviour role, RolesSettingsMenu __instance)
     {
         ICustomRole customRole = role as ICustomRole;
         __instance.roleDescriptionText.text = customRole.RoleLongDescription;
-        __instance.roleTitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(role.StringName, Array.Empty<Il2CppSystem.Object>());
-        __instance.roleScreenshot.sprite = Sprite.Create(role.RoleScreenshot.texture, new Rect(0, 0, 370, 230), Vector2.one / 2, 100);
+        __instance.roleTitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(role.StringName, []);
+        __instance.roleScreenshot.sprite = Sprite.Create(customRole.OptionsScreenshot.LoadAsset().texture, new Rect(0, 0, 370, 230), Vector2.one / 2, 100);
         __instance.roleScreenshot.drawMode = SpriteDrawMode.Sliced;
         __instance.roleHeaderSprite.color = customRole.RoleColor;
         __instance.roleHeaderText.color = customRole.RoleColor.DarkenColor();
