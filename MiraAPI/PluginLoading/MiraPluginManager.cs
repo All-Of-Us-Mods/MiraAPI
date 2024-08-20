@@ -13,7 +13,7 @@ using MiraAPI.Hud;
 
 namespace MiraAPI.PluginLoading;
 
-public class MiraPluginManager
+internal class MiraPluginManager
 {
     public readonly Dictionary<Assembly, MiraPluginInfo> RegisteredPlugins = [];
     
@@ -24,7 +24,7 @@ public class MiraPluginManager
         private set => _instance = value; 
     }
 
-    public void Initialize()
+    internal void Initialize()
     {
         Instance = this;
         IL2CPPChainloader.Instance.PluginLoad += (_, assembly, plugin) =>
@@ -127,7 +127,7 @@ public class MiraPluginManager
             }
         }
     }
-    
+
     private static void RegisterButtonAttribute(Assembly assembly)
     {
         foreach (var type in assembly.GetTypes())

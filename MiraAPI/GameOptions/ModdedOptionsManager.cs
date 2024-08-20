@@ -23,7 +23,7 @@ public class ModdedOptionsManager
     public static uint NextId => _nextId++;
     private static uint _nextId = 1;
 
-    public static IModdedOption RegisterOption(Type type, ModdedOptionAttribute attribute, PropertyInfo property)
+    internal static IModdedOption RegisterOption(Type type, ModdedOptionAttribute attribute, PropertyInfo property)
     {
         if (OptionAttributes.ContainsKey(property)) return null;
         object newObj = Activator.CreateInstance(type);
@@ -66,7 +66,7 @@ public class ModdedOptionsManager
         return result;
     }
 
-    public static void SyncAllOptions(int targetId=-1)
+    internal static void SyncAllOptions(int targetId=-1)
     {
         List<NetData> data = [];
         int count = 0;
@@ -88,9 +88,9 @@ public class ModdedOptionsManager
             Rpc<SyncOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.ToArray());
         }
     }
-        
-        
-    public static void HandleSyncOptions(NetData[] data)
+
+
+    internal static void HandleSyncOptions(NetData[] data)
     {
         foreach (var netData in data)
         {

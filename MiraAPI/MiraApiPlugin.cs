@@ -19,7 +19,8 @@ namespace MiraAPI;
 public partial class MiraApiPlugin : BasePlugin
 {
     public Harmony Harmony { get; } = new(Id);
-    public static MiraPluginManager PluginManager { get; private set; }
+    private static MiraPluginManager PluginManager { get; set; }
+    
     public static Color MiraColor = new Color32(238, 154, 112, 255);
 
     public override void Load()

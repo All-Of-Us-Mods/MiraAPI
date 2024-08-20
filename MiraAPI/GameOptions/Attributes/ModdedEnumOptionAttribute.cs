@@ -7,8 +7,7 @@ namespace MiraAPI.GameOptions.Attributes;
 public class ModdedEnumOptionAttribute(string title, Type enumType, Type roleType = null)
     : ModdedOptionAttribute(title, roleType)
 {
-
-    public override IModdedOption CreateOption(object value, PropertyInfo property)
+    internal override IModdedOption CreateOption(object value, PropertyInfo property)
     {
         var opt = new ModdedEnumOption(Title, (int)value, enumType, RoleType);
         return opt;
