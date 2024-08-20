@@ -63,7 +63,10 @@ public class ModdedEnumOption : ModdedOption<int>
     public override void OnValueChanged(int newValue)
     {
         DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, Data.GetValueString(newValue), false);
-        if (OptionBehaviour is null) return;
+        if (OptionBehaviour is null)
+        {
+            return;
+        }
 
         var opt = OptionBehaviour as StringOption;
         if (opt)

@@ -29,8 +29,11 @@ public static class HudManagerPatches
         
         //CustomGameModeManager.ActiveMode?.HudUpdate(__instance);
 
-        if (local?.Data?.Role is null) return;
-        
+        if (local?.Data?.Role is null)
+        {
+            return;
+        }
+
         if (local.Data.Role is ICustomRole customRole)
         {
             customRole.HudUpdate(__instance);

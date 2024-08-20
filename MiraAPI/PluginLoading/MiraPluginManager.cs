@@ -29,7 +29,10 @@ internal class MiraPluginManager
         Instance = this;
         IL2CPPChainloader.Instance.PluginLoad += (_, assembly, plugin) =>
         {
-            if (!plugin.GetType().GetInterfaces().Contains(typeof(IMiraPlugin))) return;
+            if (!plugin.GetType().GetInterfaces().Contains(typeof(IMiraPlugin)))
+            {
+                return;
+            }
 
             var id = MetadataHelper.GetMetadata(plugin.GetType()).GUID;
             var info = new MiraPluginInfo(id, plugin as IMiraPlugin, IL2CPPChainloader.Instance.Plugins[id]);
@@ -74,7 +77,10 @@ internal class MiraPluginManager
             if (typeof(IModdedOptionGroup).IsAssignableFrom(type))
             {
                 IModdedOptionGroup group = (IModdedOptionGroup)Activator.CreateInstance(type);
-                if (group == null) continue;
+                if (group == null)
+                {
+                    continue;
+                }
 
                 ModdedOptionsManager.Groups.Add(group);
                 ModdedOptionsManager.TypeToGroup.Add(type, group);
@@ -86,8 +92,11 @@ internal class MiraPluginManager
                     if (typeof(IModdedOption).IsAssignableFrom(property.PropertyType))
                     {
                         IModdedOption option = (IModdedOption)property.GetValue(group);
-                        if (option == null) continue;
-                        
+                        if (option == null)
+                        {
+                            continue;
+                        }
+
                         option.HasGroup = true;
                         option.AdvancedRole = group.AdvancedRole;
                         
@@ -104,7 +113,10 @@ internal class MiraPluginManager
         foreach (var type in assembly.GetTypes())
         {
             var attribute = type.GetCustomAttribute<RegisterCustomRoleAttribute>();
-            if (attribute == null) continue;
+            if (attribute == null)
+            {
+                continue;
+            }
 
             ClassInjector.RegisterTypeInIl2Cpp(type);
 

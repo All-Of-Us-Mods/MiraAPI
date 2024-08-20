@@ -11,7 +11,10 @@ public class RegisterGameModeAttribute : Attribute
 
     internal static void Register(Assembly assembly)
     {
-        if (!RegisteredAssemblies.Add(assembly)) return;
+        if (!RegisteredAssemblies.Add(assembly))
+        {
+            return;
+        }
 
         foreach (var type in assembly.GetTypes())
         {

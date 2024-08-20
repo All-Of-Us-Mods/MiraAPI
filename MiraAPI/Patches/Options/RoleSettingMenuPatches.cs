@@ -104,7 +104,10 @@ public static class RoleSettingMenuPatches
     {
         var roleSetting = obj.Cast<RoleOptionSetting>();
         var role = roleSetting.Role as ICustomRole;
-        if (role is null or { HideSettings: true }) return;
+        if (role is null or { HideSettings: true })
+        {
+            return;
+        }
 
         try
         {
@@ -144,8 +147,11 @@ public static class RoleSettingMenuPatches
         
         foreach (var option in filteredOptions)
         {
-            if (option.AdvancedRole is not null && option.AdvancedRole != role.GetType()) continue;
-            
+            if (option.AdvancedRole is not null && option.AdvancedRole != role.GetType())
+            {
+                continue;
+            }
+
             OptionBehaviour newOpt = option.CreateOption(__instance.checkboxOrigin, __instance.numberOptionOrigin, __instance.stringOptionOrigin, __instance.AdvancedRolesSettings.transform);
             newOpt.transform.localPosition = new Vector3(2.17f, num, -2f);
             newOpt.SetClickMask(__instance.ButtonClickMask);

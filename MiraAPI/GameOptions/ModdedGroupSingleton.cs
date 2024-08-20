@@ -12,7 +12,11 @@ public class ModdedGroupSingleton<T> where T : IModdedOptionGroup
         get => _instance ??= ModdedOptionsManager.Groups.OfType<T>().Single();
         set
         {
-            if (_instance != null) throw new InvalidOperationException($"Instance for {typeof(T)} is already set");
+            if (_instance != null)
+            {
+                throw new InvalidOperationException($"Instance for {typeof(T)} is already set");
+            }
+
             _instance = value;
         }
     }

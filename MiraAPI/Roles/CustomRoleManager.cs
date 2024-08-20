@@ -175,32 +175,35 @@ public static class CustomRoleManager
     {
         foreach (var netData in data)
         {
-            if (CustomRoles.TryGetValue((ushort)netData.Id, out var role))
+            if (!CustomRoles.TryGetValue((ushort)netData.Id, out var role))
             {
-                var customRole = role as ICustomRole;
-                if (customRole is null or { HideSettings: true })
-                {
-                    continue;
-                }
+                continue;
+            }
 
-                try
-                {
+            var customRole = role as ICustomRole;
+            if (customRole is null or { HideSettings: true })
+            {
+                continue;
+            }
 
-                    var num = BitConverter.ToInt32(netData.Data, 0);
-                    var chance = BitConverter.ToInt32(netData.Data, 4);
+            var num = BitConverter.ToInt32(netData.Data, 0);
+            var chance = BitConverter.ToInt32(netData.Data, 4);
+                    
+            DestroyableSingleton<HudManager>.Instance.Notifier.AddRoleSettingsChangeMessage(role.StringName, num, chance, role.TeamType, false);
 
-                    customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.NumConfigDefinition,
-                        out var numEntry);
-                    customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.ChanceConfigDefinition,
-                        out var chanceEntry);
+            try
+            {
+                customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.NumConfigDefinition,
+                    out var numEntry);
+                customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.ChanceConfigDefinition,
+                    out var chanceEntry);
 
-                    numEntry.Value = num;
-                    chanceEntry.Value = chance;
-                }
-                catch (Exception e)
-                {
-                    Logger<MiraApiPlugin>.Error(e);
-                }
+                numEntry.Value = num;
+                chanceEntry.Value = chance;
+            }
+            catch (Exception e)
+            {
+                Logger<MiraApiPlugin>.Error(e);
             }
         }
     }

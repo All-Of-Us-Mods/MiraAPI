@@ -17,7 +17,10 @@ public static class GameOptionsMenuPatch
     [HarmonyPatch(nameof(GameOptionsMenu.CreateSettings))]
     public static bool SettingsPatch(GameOptionsMenu __instance)
     {
-        if (GameSettingMenuPatches.CurrentSelectedMod == 0) return true;
+        if (GameSettingMenuPatches.CurrentSelectedMod == 0)
+        {
+            return true;
+        }
 
         __instance.MapPicker.gameObject.SetActive(false);
 
@@ -49,13 +52,21 @@ public static class GameOptionsMenuPatch
                 SpriteRenderer[] componentsInChildren = newOpt.GetComponentsInChildren<SpriteRenderer>(true);
                 for (int i = 0; i < componentsInChildren.Length; i++)
                 {
-                    if (group.GroupColor != Color.clear) componentsInChildren[i].color = group.GroupColor;
+                    if (group.GroupColor != Color.clear)
+                    {
+                        componentsInChildren[i].color = group.GroupColor;
+                    }
+
                     componentsInChildren[i].material.SetInt(PlayerMaterial.MaskLayer, 20);
                 }
 
                 foreach (TextMeshPro textMeshPro in newOpt.GetComponentsInChildren<TextMeshPro>(true))
                 {
-                    if (group.GroupColor != Color.clear) textMeshPro.color = group.GroupColor.DarkenColor();
+                    if (group.GroupColor != Color.clear)
+                    {
+                        textMeshPro.color = group.GroupColor.DarkenColor();
+                    }
+
                     textMeshPro.fontMaterial.SetFloat(ShaderID.StencilComp, 3f);
                     textMeshPro.fontMaterial.SetFloat(ShaderID.Stencil, 20);
                 }
@@ -135,7 +146,10 @@ public static class GameOptionsMenuPatch
                     optionBehaviour.SetAsPlayer();
                 }
 
-                if (optionBehaviour.IsCustom()) continue;
+                if (optionBehaviour.IsCustom())
+                {
+                    continue;
+                }
 
                 optionBehaviour.OnValueChanged = new System.Action<OptionBehaviour>(__instance.ValueChanged);
             }

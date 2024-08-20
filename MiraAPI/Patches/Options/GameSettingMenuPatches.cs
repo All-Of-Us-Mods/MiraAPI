@@ -73,7 +73,7 @@ public static class GameSettingMenuPatches
         }));
     }
 
-    public static void UpdateText(GameOptionsMenu settings, RolesSettingsMenu roles)
+    private static void UpdateText(GameOptionsMenu settings, RolesSettingsMenu roles)
     {
         if (CurrentSelectedMod == 0)
         {
@@ -90,11 +90,11 @@ public static class GameSettingMenuPatches
                 UpdateText(settings, roles);
             }
 
-            string name = SelectedMod.PluginInfo.Metadata.Name;
-            _text.text = name.Substring(0, Math.Min(name.Length, 15));
+            string name = SelectedMod?.PluginInfo.Metadata.Name;
+            _text.text = name?[..Math.Min(name.Length, 15)];
         }
 
-        if (roles is not null && roles.roleChances is not null)
+        if (roles?.roleChances != null)
         {
             if (roles.advancedSettingChildren is not null)
             {
@@ -124,12 +124,19 @@ public static class GameSettingMenuPatches
             roles.SetQuotaTab();
         }
 
-        if (settings is not null && settings.Children is not null)
+        if (settings?.Children != null)
         {
             foreach (var child in settings.Children)
             {
-                if (child.TryCast<GameOptionsMapPicker>()) continue;
-                if (child.gameObject is null) continue;
+                if (child.TryCast<GameOptionsMapPicker>())
+                {
+                    continue;
+                }
+
+                if (!child.gameObject)
+                {
+                    continue;
+                }
 
                 child.gameObject.DestroyImmediate();
             }

@@ -90,7 +90,10 @@ public class ModdedNumberOption : ModdedOption<float>
         Value = Mathf.Clamp(newValue, Min, Max);
         DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, Data.GetValueString(Value), false);
 
-        if (OptionBehaviour is null) return;
+        if (OptionBehaviour is null)
+        {
+            return;
+        }
 
         var opt = OptionBehaviour as NumberOption;
         if (opt)

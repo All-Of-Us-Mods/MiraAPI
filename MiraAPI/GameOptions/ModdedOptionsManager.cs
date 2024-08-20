@@ -25,7 +25,11 @@ public class ModdedOptionsManager
 
     internal static IModdedOption RegisterOption(Type type, ModdedOptionAttribute attribute, PropertyInfo property)
     {
-        if (OptionAttributes.ContainsKey(property)) return null;
+        if (OptionAttributes.ContainsKey(property))
+        {
+            return null;
+        }
+
         object newObj = Activator.CreateInstance(type);
         
         IModdedOption result;

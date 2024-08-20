@@ -55,7 +55,10 @@ public class ModdedToggleOption : ModdedOption<bool>
     public override void OnValueChanged(bool newValue)
     {
         DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, newValue ? "On" : "Off", false);
-        if (OptionBehaviour is null) return;
+        if (OptionBehaviour is null)
+        {
+            return;
+        }
 
         var toggleOpt = OptionBehaviour as ToggleOption;
         if (toggleOpt)
