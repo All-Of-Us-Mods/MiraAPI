@@ -21,7 +21,7 @@ public abstract class ModdedOption<T> : IModdedOption
     public Func<bool> Visible { get; set; }
     public Type AdvancedRole { get; }
     public OptionBehaviour OptionBehaviour { get; set; }
-    public ModdedOptionGroup Group { get; set; } = null;
+    public IModdedOptionGroup Group { get; set; } = null;
     public IMiraPlugin ParentMod { get; set; } = null;
 
     protected ModdedOption(string title, T defaultValue, Type roleType) : this()

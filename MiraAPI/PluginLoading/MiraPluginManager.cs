@@ -74,17 +74,19 @@ public class MiraPluginManager
             if (typeof(IModdedOptionGroup).IsAssignableFrom(type))
             {
                 IModdedOptionGroup group = (IModdedOptionGroup)Activator.CreateInstance(type);
-                ModdedOptionGroup newGroup = new ModdedOptionGroup
-                {
-                    AdvancedRole = group.AdvancedRole,
-                    GroupColor = group.GroupColor,
-                    GroupName = group.GroupName,
-                    GroupVisible = group.GroupVisible
-                };
 
-                ModdedOptionsManager.Groups.Add(newGroup);
-                ModdedOptionsManager.OriginalTypes.Add(type, newGroup);
+                ModdedOptionsManager.Groups.Add(group);
+                ModdedOptionsManager.OriginalTypes.Add(type, group);
                 pluginInfo.OptionGroups.Add(group);
+
+                foreach (var property in type.GetProperties())
+                {
+                    if (typeof(IModdedOption).IsAssignableFrom(property.PropertyType))
+                    {
+                        IModdedOption option = (IModdedOption)property.GetValue(group);
+                        option.Group = group;
+                    }
+                }
             }
         }
     }

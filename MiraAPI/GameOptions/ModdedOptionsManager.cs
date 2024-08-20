@@ -14,9 +14,9 @@ public class ModdedOptionsManager
 {
     public static readonly Dictionary<uint, IModdedOption> ModdedOptions = new();
     public static readonly List<IModdedOption> Options = [];
-    public static readonly List<ModdedOptionGroup> Groups = [];
+    public static readonly List<IModdedOptionGroup> Groups = [];
     private static readonly Dictionary<PropertyInfo, ModdedOptionAttribute> OptionAttributes = new();
-    public static readonly Dictionary<Type, ModdedOptionGroup> OriginalTypes = new();
+    public static readonly Dictionary<Type, IModdedOptionGroup> OriginalTypes = new();
     public static uint NextId = 1;
 
     public static IModdedOption RegisterOption(Type type, ModdedOptionAttribute attribute, PropertyInfo property)

@@ -9,7 +9,7 @@ public interface IModdedOption
 {
     public uint Id { get; }
     public BaseGameSetting Data { get; }
-    public ModdedOptionGroup Group { get; set; }
+    public IModdedOptionGroup Group { get; set; }
     public IMiraPlugin ParentMod { get; set; }
     public Type AdvancedRole { get; }
     public OptionBehaviour OptionBehaviour { get; protected set; }

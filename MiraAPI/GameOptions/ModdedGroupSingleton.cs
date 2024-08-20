@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace MiraAPI.GameOptions;
 
-public class ModdedGroupSingleton<T> where T : ModdedOptionGroup
+public class ModdedGroupSingleton<T> where T : IModdedOptionGroup
 {
     private static T _instance;
 

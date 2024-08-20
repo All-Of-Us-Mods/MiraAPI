@@ -28,7 +28,7 @@ public static class RoleSettingMenuPatches
             
         var maskBg = __instance.scrollBar.transform.FindChild("MaskBg");
 
-        if (GameSettingMenuPatches.currentSelectedMod == 0)
+        if (GameSettingMenuPatches.CurrentSelectedMod == 0)
         {
             __instance.AllButton.transform.parent.gameObject.SetActive(true);
             __instance.AllButton.gameObject.SetActive(true);
@@ -52,7 +52,7 @@ public static class RoleSettingMenuPatches
         num -= 0.522f;
         int num3 = 0;
 
-        foreach (var role in GameSettingMenuPatches.selectedMod.CustomRoles.Values.OfType<ICustomRole>().Where(role => role.Team == ModdedRoleTeams.Crewmate))
+        foreach (var role in GameSettingMenuPatches.SelectedMod.CustomRoles.Values.OfType<ICustomRole>().Where(role => role.Team == ModdedRoleTeams.Crewmate))
         {
             CreateQuotaOption(__instance, role as RoleBehaviour, ref num, num3);
             num3++;
@@ -65,7 +65,7 @@ public static class RoleSettingMenuPatches
         num -= 0.522f;
 
 
-        foreach (var role in GameSettingMenuPatches.selectedMod.CustomRoles.Values.OfType<ICustomRole>().Where(role => role.Team == ModdedRoleTeams.Impostor))
+        foreach (var role in GameSettingMenuPatches.SelectedMod.CustomRoles.Values.OfType<ICustomRole>().Where(role => role.Team == ModdedRoleTeams.Impostor))
         {
             CreateQuotaOption(__instance, role as RoleBehaviour, ref num, num3);
             num3++;
@@ -79,7 +79,7 @@ public static class RoleSettingMenuPatches
         num -= 0.522f;
 
 
-        foreach (var role in GameSettingMenuPatches.selectedMod.CustomRoles.Values.OfType<ICustomRole>().Where(role => role.Team == ModdedRoleTeams.Neutral))
+        foreach (var role in GameSettingMenuPatches.SelectedMod.CustomRoles.Values.OfType<ICustomRole>().Where(role => role.Team == ModdedRoleTeams.Neutral))
         {
             CreateQuotaOption(__instance, role as RoleBehaviour, ref num, num3);
             num3++;
@@ -92,7 +92,7 @@ public static class RoleSettingMenuPatches
     [HarmonyPatch(nameof(RolesSettingsMenu.Update))]
     public static bool UpdatePatch()
     {
-        if (GameSettingMenuPatches.currentSelectedMod == 0)
+        if (GameSettingMenuPatches.CurrentSelectedMod == 0)
         {
             return true;
         }
@@ -132,7 +132,7 @@ public static class RoleSettingMenuPatches
         __instance.advancedSettingChildren.Clear();
 
         float num = -0.872f;
-        foreach (var option in GameSettingMenuPatches.selectedMod.Options.Where(option => option.AdvancedRole == role.GetType()))
+        foreach (var option in GameSettingMenuPatches.SelectedMod.Options.Where(option => option.AdvancedRole == role.GetType()))
         {
             OptionBehaviour newOpt = option.CreateOption(__instance.checkboxOrigin, __instance.numberOptionOrigin, __instance.stringOptionOrigin, __instance.AdvancedRolesSettings.transform);
             newOpt.transform.localPosition = new Vector3(2.17f, num, -2f);
@@ -210,7 +210,7 @@ public static class RoleSettingMenuPatches
             ChangeTab(role, __instance);
         }));
 
-        if (index < GameSettingMenuPatches.selectedMod.CustomRoles.Count - 1)
+        if (index < GameSettingMenuPatches.SelectedMod.CustomRoles.Count - 1)
         {
             yPos += -0.43f;
         }

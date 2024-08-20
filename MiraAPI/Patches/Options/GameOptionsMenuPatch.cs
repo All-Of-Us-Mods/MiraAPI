@@ -17,12 +17,12 @@ public static class GameOptionsMenuPatch
     [HarmonyPatch(nameof(GameOptionsMenu.CreateSettings))]
     public static bool SettingsPatch(GameOptionsMenu __instance)
     {
-        if (GameSettingMenuPatches.currentSelectedMod == 0) return true;
+        if (GameSettingMenuPatches.CurrentSelectedMod == 0) return true;
 
         __instance.MapPicker.gameObject.SetActive(false);
 
         float num = 2.1f;
-        foreach (IModdedOptionGroup group in GameSettingMenuPatches.selectedMod.OptionGroups)
+        foreach (IModdedOptionGroup group in GameSettingMenuPatches.SelectedMod.OptionGroups)
         {
             CategoryHeaderMasked categoryHeaderMasked = Object.Instantiate(__instance.categoryHeaderOrigin, Vector3.zero, Quaternion.identity, __instance.settingsContainer);
             categoryHeaderMasked.SetHeader(CustomStringName.CreateAndRegister(group.GroupName), 20);
