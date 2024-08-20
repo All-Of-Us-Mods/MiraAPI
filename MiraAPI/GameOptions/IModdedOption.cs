@@ -11,7 +11,7 @@ public interface IModdedOption
     public BaseGameSetting Data { get; }
     public IModdedOptionGroup Group { get; set; }
     public IMiraPlugin ParentMod { get; set; }
-    public Type AdvancedRole { get; }
+    public Type AdvancedRole { get; set; }
     public OptionBehaviour OptionBehaviour { get; protected set; }
     public string Title { get; }
     public StringNames StringName { get; }

@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using InnerNet;
+using MiraAPI.GameModes;
 using MiraAPI.Hud;
 using MiraAPI.Roles;
 using Reactor.Utilities.Extensions;
@@ -56,15 +57,15 @@ public static class HudManagerPatches
         }
     }
 
-    /*        /// <summary>
-            /// Trigger hudstart on current custom gamemode
-            /// </summary>
-            [HarmonyPostfix]
-            [HarmonyPatch("OnGameStart")]
-            public static void GameStartPatch(HudManager __instance)
-            {
-                CustomGameModeManager.ActiveMode.HudStart(__instance);
-            }*/
+    /// <summary>
+    /// Trigger hudstart on current custom gamemode
+    /// </summary>
+    [HarmonyPostfix]
+    [HarmonyPatch(nameof(HudManager.OnGameStart))]
+    public static void GameStartPatch(HudManager __instance)
+    {
+        CustomGameModeManager.ActiveMode?.HudStart(__instance);
+    }
 
     /// <summary>
     /// Create custom buttons parent

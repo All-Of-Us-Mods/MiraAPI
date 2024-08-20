@@ -19,7 +19,7 @@ public abstract class ModdedOption<T> : IModdedOption
     public string Title { get; }
     public StringNames StringName { get; }
     public Func<bool> Visible { get; set; }
-    public Type AdvancedRole { get; }
+    public Type AdvancedRole { get; set; }
     public OptionBehaviour OptionBehaviour { get; set; }
     public IModdedOptionGroup Group { get; set; } = null;
     public IMiraPlugin ParentMod { get; set; } = null;
@@ -40,7 +40,6 @@ public abstract class ModdedOption<T> : IModdedOption
 
     private ModdedOption()
     {
-        Logger<MiraApiPlugin>.Error("created modded option");
         Id = ModdedOptionsManager.NextId++;
         ModdedOptionsManager.Options.Add(this);
         ModdedOptionsManager.ModdedOptions.Add(Id, this);

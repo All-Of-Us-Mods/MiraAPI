@@ -1,4 +1,5 @@
-﻿using Reactor.Utilities;
+﻿#nullable enable
+using Reactor.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,13 +18,13 @@ public static class CustomGameModeManager
 
     public static bool IsDefault()
     {
-        return ActiveMode.Id == 0;
+        return ActiveMode?.Id == 0;
     }
 
     /// <summary>
     /// Current gamemode
     /// </summary>
-    public static CustomGameMode ActiveMode;
+    public static CustomGameMode? ActiveMode;
 
     /// <summary>
     /// Set current gamemode
@@ -52,17 +53,17 @@ public static class CustomGameModeManager
             return;
         }
 
-        var gameMode = (CustomGameMode)Activator.CreateInstance(gameModeType);
+        var modeObj = Activator.CreateInstance(gameModeType);
 
-        if (GameModes.Any(x => x.Key == gameMode?.Id))
+        if (modeObj is not CustomGameMode gameMode)
         {
-            Logger<MiraApiPlugin>.Error($"ID for gamemode {gameMode?.Name} already exists!");
+            Logger<MiraApiPlugin>.Error($"Failed to create instance of {gameModeType.Name}");
             return;
         }
-
-        if (gameMode == null)
+        
+        if (GameModes.Any(x => x.Key == gameMode.Id))
         {
-            Logger<MiraApiPlugin>.Error($"GAMEMODE WITH TYPE {gameModeType.Name} IS NULL");
+            Logger<MiraApiPlugin>.Error($"ID for gamemode {gameMode.Name} already exists!");
             return;
         }
 

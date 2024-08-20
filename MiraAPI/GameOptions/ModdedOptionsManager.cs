@@ -23,7 +23,18 @@ public class ModdedOptionsManager
     {
         if (OptionAttributes.ContainsKey(property)) return null;
         object newObj = Activator.CreateInstance(type);
-        IModdedOption result = attribute.CreateOption(property.GetValue(newObj), property);
+        
+        IModdedOption result;
+        
+        try
+        { 
+            result = attribute.CreateOption(property.GetValue(newObj), property);
+        }
+        catch (Exception e)
+        {
+            Logger<MiraApiPlugin>.Error(e);
+            return null;
+        }
 
         if (result != null)
         {
@@ -43,6 +54,7 @@ public class ModdedOptionsManager
             {
                 Logger<MiraApiPlugin>.Error($"Grouping {attribute.Title} with {OriginalTypes[type].GroupName}");
                 result.Group = OriginalTypes[type];
+                result.AdvancedRole = OriginalTypes[type].AdvancedRole;
             }
         }
 

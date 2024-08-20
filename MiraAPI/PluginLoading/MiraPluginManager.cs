@@ -85,6 +85,7 @@ public class MiraPluginManager
                     {
                         IModdedOption option = (IModdedOption)property.GetValue(group);
                         option.Group = group;
+                        option.AdvancedRole = group.AdvancedRole;
                     }
                 }
             }
