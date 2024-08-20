@@ -49,7 +49,7 @@ public static class CustomGameModeManager
     {
         if (!typeof(CustomGameMode).IsAssignableFrom(gameModeType))
         {
-            Logger<MiraApiPlugin>.Warning($"{gameModeType?.Name} does not inherit CustomGameMode!");
+            Logger<MiraApiPlugin>.Warning($"{gameModeType.Name} does not inherit CustomGameMode!");
             return;
         }
 

@@ -160,23 +160,23 @@ public static class TaskAdderPatch
                 RoleBehaviour roleBehaviour = DestroyableSingleton<RoleManager>.Instance.AllRoles[m];
                 if (roleBehaviour.Role != RoleTypes.ImpostorGhost && roleBehaviour.Role != RoleTypes.CrewmateGhost && !CustomRoleManager.CustomRoles.ContainsKey((ushort)roleBehaviour.Role))
                 {
-                    TaskAddButton taskAddButton2 = Object.Instantiate<TaskAddButton>(__instance.RoleButton);
+                    TaskAddButton taskAddButton2 = Object.Instantiate(__instance.RoleButton);
                     taskAddButton2.SafePositionWorld = __instance.SafePositionWorld;
                     taskAddButton2.Text.text = "Be_" + roleBehaviour.NiceName + ".exe";
                     __instance.AddFileAsChild(RolesFolder, taskAddButton2, ref num, ref num2, ref num3);
                     taskAddButton2.Role = roleBehaviour;
                     if (taskAddButton2 != null && taskAddButton2.Button != null)
                     {
-                        ControllerManager.Instance.AddSelectableUiElement(taskAddButton2.Button, false);
+                        ControllerManager.Instance.AddSelectableUiElement(taskAddButton2.Button);
                         if (m == 0 && __instance.restorePreviousSelectionFound != null)
                         {
-                            ControllerManager.Instance.SetDefaultSelection(__instance.restorePreviousSelectionFound, null);
+                            ControllerManager.Instance.SetDefaultSelection(__instance.restorePreviousSelectionFound);
                             __instance.restorePreviousSelectionByFolderName = string.Empty;
                             __instance.restorePreviousSelectionFound = null;
                         }
                         else if (m == 0)
                         {
-                            ControllerManager.Instance.SetDefaultSelection(taskAddButton2.Button, null);
+                            ControllerManager.Instance.SetDefaultSelection(taskAddButton2.Button);
                         }
                     }
                 }

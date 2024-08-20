@@ -15,6 +15,6 @@ public class CustomRole : ImpostorRole, ICustomRole
     public ModdedRoleTeams Team => ModdedRoleTeams.Impostor;
     public LoadableAsset<Sprite> OptionsScreenshot => MiraAssets.Banner;
 
-    [ModdedNumberOption("Testing level", min: 3, max: 9, roleType: typeof(CustomRole))] public float testingLevel { get; set; } = 4;
+    [ModdedNumberOption("Testing level", min: 3, max: 9, roleType: typeof(CustomRole))] public float TestingLevel { get; set; } = 4;
 
 }

@@ -15,6 +15,6 @@ public class CustomRole2 : CrewmateRole, ICustomRole
     public ModdedRoleTeams Team => ModdedRoleTeams.Crewmate;
     public LoadableAsset<Sprite> OptionsScreenshot => MiraAssets.Banner;
 
-    [ModdedToggleOption("Teleportation ability", roleType: typeof(CustomRole2))] public bool teleport { get; set; } = true;
+    [ModdedToggleOption("Teleportation ability", roleType: typeof(CustomRole2))] public bool Teleport { get; set; } = true;
 
 }

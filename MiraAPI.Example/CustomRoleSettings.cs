@@ -11,9 +11,9 @@ public class CustomRoleSettings : IModdedOptionGroup
 
     public Type AdvancedRole => typeof(CustomRole);
 
-    [ModdedNumberOption("amogus", min: 3, max: 9)] public float amogus { get; set; } = 1;
+    [ModdedNumberOption("amogus", min: 3, max: 9)] public float Amogus { get; set; } = 1;
     
-    [ModdedEnumOption("dwayne the rock johnson", typeof(TestEnum))] public TestEnum dwayneTheRockJohnson { get; set; } = TestEnum.Hello;
+    [ModdedEnumOption("dwayne the rock johnson", typeof(TestEnum))] public TestEnum DwayneTheRockJohnson { get; set; } = TestEnum.Hello;
     
-    public ModdedToggleOption testToggle { get; } = new ("test toggle", false);
+    public ModdedToggleOption TestToggle { get; } = new ("test toggle", false);
 }

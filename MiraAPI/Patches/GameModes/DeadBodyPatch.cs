@@ -1,7 +1,4 @@
-﻿using HarmonyLib;
-using MiraAPI.GameModes;
-
-namespace MiraAPI.Patches.GameModes;
+﻿
 
 /*
 [HarmonyPatch(typeof(DeadBody))]
