@@ -37,7 +37,7 @@ public class ModdedNumberOption : ModdedOption<float>
         data.Value = Value;
         data.Increment = Increment;
         data.ValidRange = new FloatRange(Min, Max);
-        data.FormatString = "0";
+        data.FormatString = Increment % 1 == 0 ? "0" : "0.0";
         data.ZeroIsInfinity = ZeroInfinity;
         data.SuffixType = SuffixType;
         data.OptionName = FloatOptionNames.Invalid;
