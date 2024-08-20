@@ -24,6 +24,7 @@ public static class CustomRoleManager
     {
         while (CustomRoles.ContainsKey(requestedId) || requestedId <= Enum.GetNames<RoleTypes>().Length)
         {
+            Logger<MiraApiPlugin>.Error(requestedId + ", " + (requestedId+1));
             requestedId++;
         }
 

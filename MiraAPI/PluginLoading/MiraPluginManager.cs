@@ -34,9 +34,9 @@ public class MiraPluginManager
             var id = MetadataHelper.GetMetadata(plugin.GetType()).GUID;
             var info = new MiraPluginInfo(id, plugin as IMiraPlugin, IL2CPPChainloader.Instance.Plugins[id]);
 
-            RegisterRoleAttribute(assembly, info);
             RegisterOptionsGroups(assembly, info);
             RegisterOptionsAttributes(assembly, info);
+            RegisterRoleAttribute(assembly, info);
             RegisterButtonAttribute(assembly);
 
             RegisteredPlugins.Add(assembly, info);
@@ -103,7 +103,21 @@ public class MiraPluginManager
 
             var role = CustomRoleManager.RegisterRole(type, attribute.RoleId);
 
-            pluginInfo.CustomRoles.Add((ushort)role.Role, role);
+            try
+            {
+                pluginInfo.CustomRoles.Add((ushort)role.Role, role);
+            }
+            catch (Exception e)
+            {
+                Logger<MiraApiPlugin>.Error("Failed to register role: " + type.Name);
+
+                foreach (var (k, v) in pluginInfo.CustomRoles)
+                {
+                    Logger<MiraApiPlugin>.Error($"{k}: {v}");
+                }
+                
+                Logger<MiraApiPlugin>.Error(e);
+            }
         }
     }
     
