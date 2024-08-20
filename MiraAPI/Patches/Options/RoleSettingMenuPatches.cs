@@ -139,7 +139,10 @@ public static class RoleSettingMenuPatches
         __instance.advancedSettingChildren.Clear();
 
         float num = -0.872f;
-        foreach (var option in GameSettingMenuPatches.SelectedMod.Options)
+
+        var filteredOptions = GameSettingMenuPatches.SelectedMod.Options.Where(x => x.AdvancedRole == role.GetType());
+        
+        foreach (var option in filteredOptions)
         {
             if (option.AdvancedRole is not null && option.AdvancedRole != role.GetType()) continue;
             

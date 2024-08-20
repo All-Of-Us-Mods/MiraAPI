@@ -55,8 +55,6 @@ public interface ICustomRole
 
     MiraPluginInfo ParentMod => CustomRoleManager.FindParentMod(this);
     
-    void CreateOptions() { }
-
     void PlayerControlFixedUpdate(PlayerControl playerControl) { }
 
     void HudUpdate(HudManager hudManager) { }

@@ -9,7 +9,7 @@ public class RegisterGameModeAttribute : Attribute
 {
     private static readonly HashSet<Assembly> RegisteredAssemblies = [];
 
-    public static void Register(Assembly assembly)
+    internal static void Register(Assembly assembly)
     {
         if (!RegisteredAssemblies.Add(assembly)) return;
 

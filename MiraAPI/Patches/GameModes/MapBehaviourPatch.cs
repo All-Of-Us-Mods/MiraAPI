@@ -3,8 +3,9 @@ using MiraAPI.GameModes;
 
 namespace MiraAPI.Patches.GameModes;
 
+/*
 [HarmonyPatch(typeof(MapBehaviour))]
-public class MapBehaviourPatch
+public static class MapBehaviourPatch
 {
     [HarmonyPrefix]
     [HarmonyPatch(nameof(MapBehaviour.ShowSabotageMap))]
@@ -19,4 +20,4 @@ public class MapBehaviourPatch
 
         return true;
     }
-}
+}*/

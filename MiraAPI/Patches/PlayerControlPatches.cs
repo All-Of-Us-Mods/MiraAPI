@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using MiraAPI.Hud;
+using MiraAPI.Roles;
 
 namespace MiraAPI.Patches;
 
@@ -12,6 +13,11 @@ public static class PlayerControlPatches
     public static void PlayerControlFixedUpdatePostfix(PlayerControl __instance)
     {
         if (!__instance.AmOwner) return;
+        
+        if (__instance.Data?.Role is ICustomRole customRole)
+        {
+            customRole.PlayerControlFixedUpdate(__instance);
+        }
         
         foreach (var button in CustomButtonManager.CustomButtons)
         {

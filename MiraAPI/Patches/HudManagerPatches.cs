@@ -27,10 +27,11 @@ public static class HudManagerPatches
         {
             return;
         }
+        
+        //CustomGameModeManager.ActiveMode?.HudUpdate(__instance);
 
-        //CustomGameModeManager.ActiveMode.HudUpdate(__instance);
-        if (local is null || local.Data is null || local.Data.Role is null) return;
-
+        if (local?.Data?.Role is null) return;
+        
         if (local.Data.Role is ICustomRole customRole)
         {
             customRole.HudUpdate(__instance);
@@ -57,6 +58,7 @@ public static class HudManagerPatches
         }
     }
 
+    /*
     /// <summary>
     /// Trigger hudstart on current custom gamemode
     /// </summary>
@@ -65,7 +67,7 @@ public static class HudManagerPatches
     public static void GameStartPatch(HudManager __instance)
     {
         CustomGameModeManager.ActiveMode?.HudStart(__instance);
-    }
+    }*/
 
     /// <summary>
     /// Create custom buttons parent

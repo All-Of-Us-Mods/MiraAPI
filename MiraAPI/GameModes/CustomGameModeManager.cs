@@ -45,7 +45,7 @@ public static class CustomGameModeManager
     /// Register gamemode from type 
     /// </summary>
     /// <param name="gameModeType">Type of gamemode class, should inherit from <see cref="CustomGameMode"/></param>
-    public static void RegisterGameMode(Type gameModeType)
+    internal static void RegisterGameMode(Type gameModeType)
     {
         if (!typeof(CustomGameMode).IsAssignableFrom(gameModeType))
         {
