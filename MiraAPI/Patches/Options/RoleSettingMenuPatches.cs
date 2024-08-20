@@ -139,8 +139,10 @@ public static class RoleSettingMenuPatches
         __instance.advancedSettingChildren.Clear();
 
         float num = -0.872f;
-        foreach (var option in GameSettingMenuPatches.SelectedMod.Options.Where(option => option.AdvancedRole != null && option.AdvancedRole == role.GetType()))
+        foreach (var option in GameSettingMenuPatches.SelectedMod.Options)
         {
+            if (option.AdvancedRole is not null && option.AdvancedRole != role.GetType()) continue;
+            
             OptionBehaviour newOpt = option.CreateOption(__instance.checkboxOrigin, __instance.numberOptionOrigin, __instance.stringOptionOrigin, __instance.AdvancedRolesSettings.transform);
             newOpt.transform.localPosition = new Vector3(2.17f, num, -2f);
             newOpt.SetClickMask(__instance.ButtonClickMask);

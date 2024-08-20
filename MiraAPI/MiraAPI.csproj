@@ -22,6 +22,7 @@
         <EmbeddedResource Include="Resources\NextButton.png" />
         <EmbeddedResource Include="Resources\NextButtonActive.png" />
         <EmbeddedResource Include="Resources\ExampleButton.png" />
+        <EmbeddedResource Include="Resources\Empty.png" />
     </ItemGroup>
 	
     <ItemGroup>

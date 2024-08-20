@@ -10,7 +10,7 @@ public static class Extensions
 {
     public static bool IsCustom(this OptionBehaviour optionBehaviour)
     {
-        return ModdedOptionsManager.Options.Any(opt => opt.OptionBehaviour && opt.OptionBehaviour.Equals(optionBehaviour));
+        return ModdedOptionsManager.ModdedOptions.Values.Any(opt => opt.OptionBehaviour && opt.OptionBehaviour.Equals(optionBehaviour));
     }
 
     public static Color DarkenColor(this Color color)

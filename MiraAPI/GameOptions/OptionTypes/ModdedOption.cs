@@ -4,7 +4,6 @@ using Reactor.Localization.Utilities;
 using System;
 using MiraAPI.Networking;
 using Reactor.Networking.Rpc;
-using Reactor.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.GameOptions.OptionTypes;
@@ -13,6 +12,8 @@ public abstract class ModdedOption<T> : IModdedOption
 {
     public uint Id { get; }
     public BaseGameSetting Data { get; protected init; }
+    public bool HasGroup { get; set; } = false;
+    public IMiraPlugin ParentMod { get; set; } = null;
     public T Value { get; protected set; }
     public T DefaultValue { get; init; }
     public Action<T> ChangedEvent { get; set; }
@@ -21,8 +22,6 @@ public abstract class ModdedOption<T> : IModdedOption
     public Func<bool> Visible { get; set; }
     public Type AdvancedRole { get; set; }
     public OptionBehaviour OptionBehaviour { get; set; }
-    public IModdedOptionGroup Group { get; set; } = null;
-    public IMiraPlugin ParentMod { get; set; } = null;
 
     protected ModdedOption(string title, T defaultValue, Type roleType) : this()
     {
@@ -40,8 +39,7 @@ public abstract class ModdedOption<T> : IModdedOption
 
     private ModdedOption()
     {
-        Id = ModdedOptionsManager.NextId++;
-        ModdedOptionsManager.Options.Add(this);
+        Id = ModdedOptionsManager.NextId;
         ModdedOptionsManager.ModdedOptions.Add(Id, this);
     }
 

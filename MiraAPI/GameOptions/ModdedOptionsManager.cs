@@ -12,12 +12,16 @@ namespace MiraAPI.GameOptions;
 
 public class ModdedOptionsManager
 {
-    public static readonly Dictionary<uint, IModdedOption> ModdedOptions = new();
-    public static readonly List<IModdedOption> Options = [];
-    public static readonly List<IModdedOptionGroup> Groups = [];
     private static readonly Dictionary<PropertyInfo, ModdedOptionAttribute> OptionAttributes = new();
-    public static readonly Dictionary<Type, IModdedOptionGroup> OriginalTypes = new();
-    public static uint NextId = 1;
+
+    public static readonly Dictionary<uint, IModdedOption> ModdedOptions = new();
+    public static readonly Dictionary<IModdedOptionGroup, List<IModdedOption>> GroupedOptions = new();
+
+    public static readonly List<IModdedOptionGroup> Groups = [];
+    public static readonly Dictionary<Type, IModdedOptionGroup> TypeToGroup = new();
+    
+    public static uint NextId => _nextId++;
+    private static uint _nextId = 1;
 
     public static IModdedOption RegisterOption(Type type, ModdedOptionAttribute attribute, PropertyInfo property)
     {
@@ -50,11 +54,12 @@ public class ModdedOptionsManager
                 
             OptionAttributes.Add(property, attribute);
 
-            if (OriginalTypes.ContainsKey(type))
+            if (TypeToGroup.ContainsKey(type))
             {
-                Logger<MiraApiPlugin>.Error($"Grouping {attribute.Title} with {OriginalTypes[type].GroupName}");
-                result.Group = OriginalTypes[type];
-                result.AdvancedRole = OriginalTypes[type].AdvancedRole;
+                Logger<MiraApiPlugin>.Error($"Grouping {attribute.Title} with {TypeToGroup[type].GroupName}");
+                GroupedOptions[TypeToGroup[type]].Add(result);
+                result.HasGroup = true;
+                result.AdvancedRole = TypeToGroup[type].AdvancedRole;
             }
         }
 

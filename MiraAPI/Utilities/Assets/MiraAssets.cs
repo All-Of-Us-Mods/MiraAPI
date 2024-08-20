@@ -2,7 +2,7 @@
 
 public static class MiraAssets
 {
-    public static readonly LoadableResourceAsset Empty = new("");
+    public static readonly LoadableResourceAsset Empty = new("MiraAPI.Resources.Empty.png");
 
     public static readonly LoadableResourceAsset NextButton = new("MiraAPI.Resources.NextButton.png");
     public static readonly LoadableResourceAsset NextButtonActive = new("MiraAPI.Resources.NextButtonActive.png");
