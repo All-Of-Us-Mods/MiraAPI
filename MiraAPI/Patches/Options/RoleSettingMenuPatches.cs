@@ -51,8 +51,13 @@ public static class RoleSettingMenuPatches
         categoryHeaderEditRole.transform.localPosition = new Vector3(4.986f, num, -2f);
         num -= 0.522f;
         int num3 = 0;
+        
+        var crewRoles = GameSettingMenuPatches.SelectedMod.CustomRoles.Values
+            .OfType<ICustomRole>()
+            .Where(role => role.Team == ModdedRoleTeams.Crewmate && !role.HideSettings)
+            .ToList();
 
-        foreach (var role in GameSettingMenuPatches.SelectedMod.CustomRoles.Values.OfType<ICustomRole>().Where(role => role.Team == ModdedRoleTeams.Crewmate))
+        foreach (var role in crewRoles)
         {
             CreateQuotaOption(__instance, role as RoleBehaviour, ref num, num3);
             num3++;
@@ -64,8 +69,12 @@ public static class RoleSettingMenuPatches
         categoryHeaderEditRole2.transform.localPosition = new Vector3(4.986f, num, -2f);
         num -= 0.522f;
 
+        var impRoles = GameSettingMenuPatches.SelectedMod.CustomRoles.Values
+            .OfType<ICustomRole>()
+            .Where(role => role.Team == ModdedRoleTeams.Impostor && !role.HideSettings)
+            .ToList();
 
-        foreach (var role in GameSettingMenuPatches.SelectedMod.CustomRoles.Values.OfType<ICustomRole>().Where(role => role.Team == ModdedRoleTeams.Impostor))
+        foreach (var role in impRoles)
         {
             CreateQuotaOption(__instance, role as RoleBehaviour, ref num, num3);
             num3++;
@@ -77,9 +86,13 @@ public static class RoleSettingMenuPatches
         categoryHeaderEditRole3.Title.text = "Neutral Roles";
         categoryHeaderEditRole3.transform.localPosition = new Vector3(4.986f, num, -2f);
         num -= 0.522f;
-
-
-        foreach (var role in GameSettingMenuPatches.SelectedMod.CustomRoles.Values.OfType<ICustomRole>().Where(role => role.Team == ModdedRoleTeams.Neutral))
+        
+        var neutRoles = GameSettingMenuPatches.SelectedMod.CustomRoles.Values
+            .OfType<ICustomRole>()
+            .Where(role => role.Team == ModdedRoleTeams.Neutral && !role.HideSettings)
+            .ToList();
+        
+        foreach (var role in neutRoles)
         {
             CreateQuotaOption(__instance, role as RoleBehaviour, ref num, num3);
             num3++;
