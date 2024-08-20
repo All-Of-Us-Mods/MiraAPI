@@ -24,7 +24,7 @@ public static class CustomGameModeManager
     /// <summary>
     /// Current gamemode
     /// </summary>
-    public static CustomGameMode? ActiveMode;
+    public static CustomGameMode? ActiveMode = new DefaultMode();
 
     /// <summary>
     /// Set current gamemode

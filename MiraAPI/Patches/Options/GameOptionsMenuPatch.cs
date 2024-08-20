@@ -23,7 +23,7 @@ public static class GameOptionsMenuPatch
 
         float num = 2.1f;
         
-        var filteredGroups = GameSettingMenuPatches.SelectedMod.OptionGroups.Where(x => x.AdvancedRole is null);
+        var filteredGroups = GameSettingMenuPatches.SelectedMod.OptionGroups.Where(x => x.GroupVisible.Invoke() && x.AdvancedRole is null);
         
         foreach (IModdedOptionGroup group in filteredGroups)
         {
@@ -38,7 +38,9 @@ public static class GameOptionsMenuPatch
             categoryHeaderMasked.transform.localPosition = new Vector3(-0.903f, num, -2f);
             num -= 0.63f;
 
-            foreach (var opt in ModdedOptionsManager.GroupedOptions[group])
+            var filteredOpts = ModdedOptionsManager.GroupedOptions[group].Where(x=>x.Visible.Invoke()).ToList();
+            
+            foreach (var opt in filteredOpts)
             {
                 OptionBehaviour newOpt = opt.CreateOption(__instance.checkboxOrigin, __instance.numberOptionOrigin, __instance.stringOptionOrigin, __instance.settingsContainer);
                 newOpt.transform.localPosition = new Vector3(0.952f, num, -2f);
