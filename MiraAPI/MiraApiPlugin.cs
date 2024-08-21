@@ -3,11 +3,11 @@ using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
 using MiraAPI.PluginLoading;
 using Reactor;
+using Reactor.Networking;
+using Reactor.Networking.Attributes;
 using Reactor.Patches;
 using System;
 using System.Text;
-using Reactor.Networking;
-using Reactor.Networking.Attributes;
 using UnityEngine;
 
 namespace MiraAPI;

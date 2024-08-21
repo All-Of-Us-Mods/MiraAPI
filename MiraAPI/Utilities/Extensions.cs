@@ -1,4 +1,5 @@
 ﻿using MiraAPI.GameOptions;
+using MiraAPI.Modifiers;
 using MiraAPI.Roles;
 using Reactor.Utilities.Extensions;
 using System.Linq;
@@ -11,6 +12,20 @@ public static class Extensions
     public static bool IsCustom(this OptionBehaviour optionBehaviour)
     {
         return ModdedOptionsManager.Options.Any(opt => opt.OptionBehaviour && opt.OptionBehaviour.Equals(optionBehaviour));
+    }
+
+    public static ModifierManager GetModifierManager(this PlayerControl player)
+    {
+        return player.gameObject.GetComponent<ModifierManager>();
+    }
+
+    public static void AddModifier<T>(this PlayerControl player) where T : BaseModifier
+    {
+        player.GetModifierManager().AddModifier<T>();
+    }
+
+    public static void RemoveModifier<T>(this PlayerControl player) where T : BaseModifier
+    {
     }
 
     public static Color DarkenColor(this Color color)

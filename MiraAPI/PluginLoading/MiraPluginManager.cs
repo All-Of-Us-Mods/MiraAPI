@@ -3,25 +3,27 @@ using BepInEx.Unity.IL2CPP;
 using Il2CppInterop.Runtime.Injection;
 using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.Attributes;
+using MiraAPI.Hud;
+using MiraAPI.Modifiers;
 using MiraAPI.Roles;
 using Reactor.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using MiraAPI.Hud;
 
 namespace MiraAPI.PluginLoading;
 
 public class MiraPluginManager
 {
     public readonly Dictionary<Assembly, MiraPluginInfo> RegisteredPlugins = [];
-    
+
     private static MiraPluginManager _instance;
-    
-    public static MiraPluginManager Instance { 
+
+    public static MiraPluginManager Instance
+    {
         get => _instance ??= new MiraPluginManager();
-        private set => _instance = value; 
+        private set => _instance = value;
     }
 
     public void Initialize()
@@ -34,6 +36,7 @@ public class MiraPluginManager
             var id = MetadataHelper.GetMetadata(plugin.GetType()).GUID;
             var info = new MiraPluginInfo(id, plugin as IMiraPlugin, IL2CPPChainloader.Instance.Plugins[id]);
 
+            RegisterModifierAttribute(assembly);
             RegisterOptionsGroups(assembly, info);
             RegisterOptionsAttributes(assembly, info);
             RegisterRoleAttribute(assembly, info);
@@ -115,12 +118,24 @@ public class MiraPluginManager
                 {
                     Logger<MiraApiPlugin>.Error($"{k}: {v}");
                 }
-                
+
                 Logger<MiraApiPlugin>.Error(e);
             }
         }
     }
-    
+
+    private static void RegisterModifierAttribute(Assembly assembly)
+    {
+        foreach (var type in assembly.GetTypes())
+        {
+            var attribute = type.GetCustomAttribute<RegisterModifierAttribute>();
+            if (attribute != null)
+            {
+                ModifierManager.RegisterModifier(type);
+            }
+        }
+    }
+
     private static void RegisterButtonAttribute(Assembly assembly)
     {
         foreach (var type in assembly.GetTypes())
