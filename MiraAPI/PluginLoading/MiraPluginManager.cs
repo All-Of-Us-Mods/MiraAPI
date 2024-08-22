@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using MiraAPI.Hud;
+using Reactor.Networking;
 
 namespace MiraAPI.PluginLoading;
 
@@ -27,15 +28,14 @@ internal class MiraPluginManager
     internal void Initialize()
     {
         Instance = this;
-        IL2CPPChainloader.Instance.PluginLoad += (_, assembly, plugin) =>
+        IL2CPPChainloader.Instance.PluginLoad += (pluginInfo, assembly, plugin) =>
         {
             if (!plugin.GetType().GetInterfaces().Contains(typeof(IMiraPlugin)))
             {
                 return;
             }
 
-            var id = MetadataHelper.GetMetadata(plugin.GetType()).GUID;
-            var info = new MiraPluginInfo(id, plugin as IMiraPlugin, IL2CPPChainloader.Instance.Plugins[id]);
+            var info = new MiraPluginInfo(plugin as IMiraPlugin, pluginInfo);
 
             RegisterAllOptions(assembly, info);
             
@@ -44,7 +44,7 @@ internal class MiraPluginManager
 
             RegisteredPlugins.Add(assembly, info);
 
-            Logger<MiraApiPlugin>.Info($"Registering mod {id} with Mira API.");
+            Logger<MiraApiPlugin>.Info($"Registering mod {pluginInfo.Metadata.GUID} with Mira API.");
         };
     }
 
@@ -92,10 +92,16 @@ internal class MiraPluginManager
             {
                 continue;
             }
+            
+            if (!ModList.GetById(pluginInfo.PluginId).IsRequiredOnAllClients)
+            {
+                Logger<MiraApiPlugin>.Error("Custom roles are only supported on all clients.");
+                return;
+            }
 
             ClassInjector.RegisterTypeInIl2Cpp(type);
 
-            var role = CustomRoleManager.RegisterRole(type, attribute.RoleId, pluginInfo);
+            var role = CustomRoleManager.RegisterRole(type, pluginInfo);
 
             try
             {
