@@ -32,28 +32,43 @@ See [this file](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Ex
 ## Options
 Options are also very simple in Mira API. Options are split up into Groups and Options. Every Option needs to be in a Group.
 
-To create a group, you need to create a class that implements the `IModdedOptionGroup` interface. Groups contain two properties, the `GroupName` and `GroupColor`.
+To create a group, you need to create a class that implements the `IModdedOptionGroup` interface. Groups contain 4 properties, `GroupName`, `GroupColor`, `GroupVisible`, and `AdvancedRole`. Only the `GroupName` is required.
 
-The easiest way to create an option within this group is to make a property within a class and assign one of the various Options Attributes listed below:
+You can access any group class using the `ModdedGroupSingleton` class like this:
+```
+// MyOptionsGroup is a class that implements IModdedOptionGroup
+var myGroup = ModdedGroupSingleton<MyOptionsGroup>.Instance;
+```
+
+There are two ways to make options inside a group:
+- Use an Option Attribute with a property.  
+- Create a ModdedOption property.
+
+This is an example of using an Option Attribute on a property:
+```csharp
+// The first parameter is always the name of the option. The rest are dependent on the type of option.
+[ModdedNumberOption("Sussy level", min: 0, max: 10)]
+public float SussyLevel { get; set; } = 4f; // You can set a default value here.
+```
+
+And this is an example of a ModdedOption property:
+```csharp
+public ModdedToggleOption YeezusAbility { get; } = new ModdedToggleOption("Yeezus Ability", false);
+```
+
+Here is a full list of ModdedOption classes you can use: 
 - `ModdedEnumOption`
 - `ModdedNumberOption`
 - `ModdedStringOption`
 - `ModdedToggleOption`
 
-They are used like this:
-```csharp
-// The first parameter is always the name of the option. The rest are dependent on the type of option.
-[ModdedNumberOption("Sussy level", min: 0, max: 10)]
-public float sussyLevel { get; set; } = 4f; // You can set a default value here.
-```
-
-To see a full example, see [this file](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/ExampleOptions.cs).
+To see a full example of an options class, see [this file](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/ExampleOptions.cs).
 
 ### Role Options
 
-Options can also be used within a Role class to show up in that Role's settings. To do this, simply add your option property to the Role class and specify the `roleType` parameter in the Option attribute.
+Options can also be used within a Role class to show up in that Role's settings. To set the role for an entire group, set the `AdvancedRole` property on that group. To set the role for individual options, specify the `roleType` parameter in the option.
 
-An example can be found [here](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/CustomRole2.cs).
+An example can be found [here](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/Options/Roles/CustomRoleSettings.cs).
 
 ## Buttons
 
