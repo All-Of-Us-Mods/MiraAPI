@@ -41,7 +41,7 @@ public static class GameOptionsMenuPatch
             categoryHeaderMasked.transform.localPosition = new Vector3(-0.903f, num, -2f);
             num -= 0.63f;
 
-            var filteredOpts = ModdedOptionsManager.GroupedOptions[group].Where(x=>x.Visible.Invoke()).ToList();
+            var filteredOpts = ModdedOptionsManager.Groups[group].Where(x=>x.Visible.Invoke()).ToList();
             
             foreach (var opt in filteredOpts)
             {
@@ -74,48 +74,6 @@ public static class GameOptionsMenuPatch
                 __instance.Children.Add(newOpt);
 
                 num -= 0.45f;
-                newOpt.Initialize();
-            }
-        }
-
-        var filteredOptions = GameSettingMenuPatches.SelectedMod.Options.Where(x => x.AdvancedRole is null && !x.HasGroup).ToList();
-
-        if (filteredOptions.Count > 0)
-        {
-
-            CategoryHeaderMasked ungroupedHeader = Object.Instantiate(__instance.categoryHeaderOrigin, Vector3.zero,
-                Quaternion.identity, __instance.settingsContainer);
-            ungroupedHeader.SetHeader(CustomStringName.CreateAndRegister("Ungrouped Options"), 20);
-            ungroupedHeader.transform.localScale = Vector3.one * 0.63f;
-            ungroupedHeader.transform.localPosition = new Vector3(-0.903f, num, -2f);
-
-            num -= 0.63f;
-
-
-            foreach (var opt in filteredOptions)
-            {
-                OptionBehaviour newOpt = opt.CreateOption(__instance.checkboxOrigin, __instance.numberOptionOrigin,
-                    __instance.stringOptionOrigin, __instance.settingsContainer);
-                newOpt.transform.localPosition = new Vector3(0.952f, num, -2f);
-                newOpt.SetClickMask(__instance.ButtonClickMask);
-                newOpt.SetUpFromData(newOpt.data, 20);
-
-                SpriteRenderer[] componentsInChildren = newOpt.GetComponentsInChildren<SpriteRenderer>(true);
-                for (int i = 0; i < componentsInChildren.Length; i++)
-                {
-                    componentsInChildren[i].material.SetInt(PlayerMaterial.MaskLayer, 20);
-                }
-
-                foreach (TextMeshPro textMeshPro in newOpt.GetComponentsInChildren<TextMeshPro>(true))
-                {
-                    textMeshPro.fontMaterial.SetFloat(ShaderID.StencilComp, 3f);
-                    textMeshPro.fontMaterial.SetFloat(ShaderID.Stencil, 20);
-                }
-
-                __instance.Children.Add(newOpt);
-
-                num -= 0.45f;
-
                 newOpt.Initialize();
             }
         }

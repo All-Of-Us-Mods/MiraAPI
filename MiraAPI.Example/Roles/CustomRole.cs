@@ -1,9 +1,8 @@
-﻿using MiraAPI.GameOptions.Attributes;
-using MiraAPI.Roles;
+﻿using MiraAPI.Roles;
 using MiraAPI.Utilities.Assets;
 using UnityEngine;
 
-namespace MiraAPI.Example;
+namespace MiraAPI.Example.Roles;
 
 [RegisterCustomRole]
 public class CustomRole : ImpostorRole, ICustomRole
@@ -14,7 +13,5 @@ public class CustomRole : ImpostorRole, ICustomRole
     public Color RoleColor => Palette.Orange;
     public ModdedRoleTeams Team => ModdedRoleTeams.Impostor;
     public LoadableAsset<Sprite> OptionsScreenshot => MiraAssets.Banner;
-
-    [ModdedNumberOption("Testing level", min: 3, max: 9, roleType: typeof(CustomRole))] public float TestingLevel { get; set; } = 4;
-
+    
 }

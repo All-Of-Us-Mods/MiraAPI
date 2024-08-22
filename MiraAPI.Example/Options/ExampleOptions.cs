@@ -2,7 +2,7 @@
 using MiraAPI.GameOptions.Attributes;
 using UnityEngine;
 
-namespace MiraAPI.Example;
+namespace MiraAPI.Example.Options;
 
 public class ExampleOptions : IModdedOptionGroup
 {

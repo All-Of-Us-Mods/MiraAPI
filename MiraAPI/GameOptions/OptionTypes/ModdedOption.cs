@@ -12,7 +12,6 @@ public abstract class ModdedOption<T> : IModdedOption
 {
     public uint Id { get; }
     public BaseGameSetting Data { get; protected init; }
-    public bool HasGroup { get; set; } = false;
     public IMiraPlugin ParentMod { get; set; } = null;
     public T Value { get; protected set; }
     public T DefaultValue { get; init; }

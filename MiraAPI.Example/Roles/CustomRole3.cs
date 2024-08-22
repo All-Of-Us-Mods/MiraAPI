@@ -2,7 +2,7 @@
 using MiraAPI.Utilities.Assets;
 using UnityEngine;
 
-namespace MiraAPI.Example;
+namespace MiraAPI.Example.Roles;
 
 [RegisterCustomRole]
 public class CustomRole3 : CrewmateRole, ICustomRole

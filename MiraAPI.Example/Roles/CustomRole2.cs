@@ -1,9 +1,8 @@
-﻿using MiraAPI.GameOptions.Attributes;
-using MiraAPI.Roles;
+﻿using MiraAPI.Roles;
 using MiraAPI.Utilities.Assets;
 using UnityEngine;
 
-namespace MiraAPI.Example;
+namespace MiraAPI.Example.Roles;
 
 [RegisterCustomRole]
 public class CustomRole2 : CrewmateRole, ICustomRole
@@ -14,7 +13,5 @@ public class CustomRole2 : CrewmateRole, ICustomRole
     public Color RoleColor => Palette.AcceptedGreen;
     public ModdedRoleTeams Team => ModdedRoleTeams.Crewmate;
     public LoadableAsset<Sprite> OptionsScreenshot => MiraAssets.Banner;
-
-    [ModdedToggleOption("Teleportation ability", roleType: typeof(CustomRole2))] public bool Teleport { get; set; } = true;
-
+    
 }

@@ -3,7 +3,7 @@ using MiraAPI.Utilities.Assets;
 using Reactor.Utilities;
 using UnityEngine;
 
-namespace MiraAPI.Example;
+namespace MiraAPI.Example.Buttons;
 
 [RegisterButton]
 public class ExampleButton : CustomActionButton

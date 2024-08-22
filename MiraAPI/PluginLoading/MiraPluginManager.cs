@@ -37,8 +37,8 @@ internal class MiraPluginManager
             var id = MetadataHelper.GetMetadata(plugin.GetType()).GUID;
             var info = new MiraPluginInfo(id, plugin as IMiraPlugin, IL2CPPChainloader.Instance.Plugins[id]);
 
-            RegisterOptionsGroups(assembly, info);
-            RegisterOptionsAttributes(assembly, info);
+            RegisterAllOptions(assembly, info);
+            
             RegisterRoleAttribute(assembly, info);
             RegisterButtonAttribute(assembly);
 
@@ -53,57 +53,32 @@ internal class MiraPluginManager
         return RegisteredPlugins.Values.First(plugin => plugin.PluginId == guid);
     }
 
-    private static void RegisterOptionsAttributes(Assembly assembly, MiraPluginInfo pluginInfo)
+    private static void RegisterAllOptions(Assembly assembly, MiraPluginInfo pluginInfo)
     {
-        foreach (var type in assembly.GetTypes())
+        var filteredTypes = assembly.GetTypes().Where(type => type.IsAssignableTo(typeof(IModdedOptionGroup)));
+        
+        foreach (var type in filteredTypes)
         {
-            foreach (PropertyInfo property in type.GetProperties())
+            if (!ModdedOptionsManager.RegisterGroup(type, pluginInfo))
             {
-                foreach (var attribute in property.GetCustomAttributes())
-                {
-                    if (attribute.GetType().BaseType == typeof(ModdedOptionAttribute))
-                    {
-                        pluginInfo.Options.Add(ModdedOptionsManager.RegisterOption(type, (ModdedOptionAttribute)attribute, property));
-                    }
-                }
+                continue;
             }
-        }
-    }
-
-    private static void RegisterOptionsGroups(Assembly assembly, MiraPluginInfo pluginInfo)
-    {
-        foreach (var type in assembly.GetTypes())
-        {
-            if (typeof(IModdedOptionGroup).IsAssignableFrom(type))
+            
+            foreach (var property in type.GetProperties())
             {
-                IModdedOptionGroup group = (IModdedOptionGroup)Activator.CreateInstance(type);
-                if (group == null)
+                if (property.PropertyType.IsAssignableTo(typeof(IModdedOption)))
+                {
+                    ModdedOptionsManager.RegisterPropertyOption(type, property, pluginInfo);
+                    continue;
+                }
+                
+                var attribute = property.GetCustomAttribute<ModdedOptionAttribute>();
+                if (attribute == null)
                 {
                     continue;
                 }
 
-                ModdedOptionsManager.Groups.Add(group);
-                ModdedOptionsManager.TypeToGroup.Add(type, group);
-                ModdedOptionsManager.GroupedOptions.Add(group, []);
-                pluginInfo.OptionGroups.Add(group);
-
-                foreach (var property in type.GetProperties())
-                {
-                    if (typeof(IModdedOption).IsAssignableFrom(property.PropertyType))
-                    {
-                        IModdedOption option = (IModdedOption)property.GetValue(group);
-                        if (option == null)
-                        {
-                            continue;
-                        }
-
-                        option.HasGroup = true;
-                        option.AdvancedRole = group.AdvancedRole;
-                        
-                        ModdedOptionsManager.GroupedOptions[group].Add(option);
-                        pluginInfo.Options.Add(option);
-                    }
-                }
+                ModdedOptionsManager.RegisterAttributeOption(type, attribute, property, pluginInfo);
             }
         }
     }

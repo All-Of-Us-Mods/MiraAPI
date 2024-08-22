@@ -1,7 +1,7 @@
 ﻿using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.OptionTypes;
 
-namespace MiraAPI.Example;
+namespace MiraAPI.Example.Options;
 
 public class ExampleOptions2 : IModdedOptionGroup
 {

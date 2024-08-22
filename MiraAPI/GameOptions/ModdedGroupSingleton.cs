@@ -9,7 +9,7 @@ public class ModdedGroupSingleton<T> where T : IModdedOptionGroup
 
     public static T Instance
     {
-        get => _instance ??= ModdedOptionsManager.Groups.OfType<T>().Single();
+        get => _instance ??= ModdedOptionsManager.Groups.Keys.OfType<T>().Single();
         set
         {
             if (_instance != null)
