@@ -11,16 +11,16 @@ public static class EjectionPatches
     [HarmonyPatch(nameof(ExileController.Begin))]
     public static void Begin(ExileController __instance)
     {
-        if (!__instance.exiled?.Role || __instance.exiled.Role is not ICustomRole role)
+        if (!__instance.initData.networkedPlayer.Role || __instance.initData.networkedPlayer.Role is not ICustomRole role)
         {
             return;
         }
 
-        if (role.GetCustomEjectionMessage(__instance.exiled) == null)
+        if (role.GetCustomEjectionMessage(__instance.initData.networkedPlayer) == null)
         {
             return;
         }
         
-        __instance.completeString = role.GetCustomEjectionMessage(__instance.exiled);
+        __instance.completeString = role.GetCustomEjectionMessage(__instance.initData.networkedPlayer);
     }
 }
