@@ -2,7 +2,6 @@
 using MiraAPI.Example.Roles;
 using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.Attributes;
-using MiraAPI.GameOptions.OptionTypes;
 
 namespace MiraAPI.Example.Options.Roles;
 
