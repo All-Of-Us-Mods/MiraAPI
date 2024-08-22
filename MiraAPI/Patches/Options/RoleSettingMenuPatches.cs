@@ -45,57 +45,71 @@ public static class RoleSettingMenuPatches
         __instance.scrollBar.transform.localPosition = new Vector3(-1.4957f, 1.5261f, -4);
         maskBg.localPosition = new Vector3(1.5353f, -1.0607f, -.1f);
         maskBg.localScale = new Vector3(6.6811f, 4.1563f, 0.5598f);
-
-        CategoryHeaderEditRole categoryHeaderEditRole = Object.Instantiate(__instance.categoryHeaderEditRoleOrigin, Vector3.zero, Quaternion.identity, __instance.RoleChancesSettings.transform);
-        categoryHeaderEditRole.SetHeader(StringNames.CrewmateRolesHeader, 20);
-        categoryHeaderEditRole.transform.localPosition = new Vector3(4.986f, num, -2f);
-        num -= 0.522f;
-        int num3 = 0;
         
+        int num3 = 0;
+
         var crewRoles = GameSettingMenuPatches.SelectedMod.CustomRoles.Values
             .OfType<ICustomRole>()
             .Where(role => role.Team == ModdedRoleTeams.Crewmate && !role.HideSettings)
             .ToList();
-
-        foreach (var role in crewRoles)
+        
+        if (crewRoles.Count > 0)
         {
-            CreateQuotaOption(__instance, role as RoleBehaviour, ref num, num3);
-            num3++;
+        
+            CategoryHeaderEditRole categoryHeaderEditRole = Object.Instantiate(__instance.categoryHeaderEditRoleOrigin, Vector3.zero, Quaternion.identity, __instance.RoleChancesSettings.transform);
+            categoryHeaderEditRole.SetHeader(StringNames.CrewmateRolesHeader, 20);
+            categoryHeaderEditRole.transform.localPosition = new Vector3(4.986f, num, -2f);
+            num -= 0.522f;
+
+            foreach (var role in crewRoles)
+            {
+                CreateQuotaOption(__instance, role as RoleBehaviour, ref num, num3);
+                num3++;
+            }
         }
-
-        num -= 0.4f;
-        CategoryHeaderEditRole categoryHeaderEditRole2 = Object.Instantiate(__instance.categoryHeaderEditRoleOrigin, Vector3.zero, Quaternion.identity, __instance.RoleChancesSettings.transform);
-        categoryHeaderEditRole2.SetHeader(StringNames.ImpostorRolesHeader, 20);
-        categoryHeaderEditRole2.transform.localPosition = new Vector3(4.986f, num, -2f);
-        num -= 0.522f;
-
+        
         var impRoles = GameSettingMenuPatches.SelectedMod.CustomRoles.Values
             .OfType<ICustomRole>()
             .Where(role => role.Team == ModdedRoleTeams.Impostor && !role.HideSettings)
             .ToList();
 
-        foreach (var role in impRoles)
+        if (impRoles.Count > 0)
         {
-            CreateQuotaOption(__instance, role as RoleBehaviour, ref num, num3);
-            num3++;
-        }
+            num -= 0.4f;
+            CategoryHeaderEditRole categoryHeaderEditRole2 = Object.Instantiate(__instance.categoryHeaderEditRoleOrigin,
+                Vector3.zero, Quaternion.identity, __instance.RoleChancesSettings.transform);
+            categoryHeaderEditRole2.SetHeader(StringNames.ImpostorRolesHeader, 20);
+            categoryHeaderEditRole2.transform.localPosition = new Vector3(4.986f, num, -2f);
+            num -= 0.522f;
 
-        num -= 0.8f;
-        CategoryHeaderEditRole categoryHeaderEditRole3 = Object.Instantiate(__instance.categoryHeaderEditRoleOrigin, Vector3.zero, Quaternion.identity, __instance.RoleChancesSettings.transform);
-        categoryHeaderEditRole3.SetHeader(StringNames.None, 20);
-        categoryHeaderEditRole3.Title.text = "Neutral Roles";
-        categoryHeaderEditRole3.transform.localPosition = new Vector3(4.986f, num, -2f);
-        num -= 0.522f;
+
+            foreach (var role in impRoles)
+            {
+                CreateQuotaOption(__instance, role as RoleBehaviour, ref num, num3);
+                num3++;
+            }
+        }
         
         var neutRoles = GameSettingMenuPatches.SelectedMod.CustomRoles.Values
             .OfType<ICustomRole>()
             .Where(role => role.Team == ModdedRoleTeams.Neutral && !role.HideSettings)
             .ToList();
-        
-        foreach (var role in neutRoles)
+
+        if (neutRoles.Count > 0)
         {
-            CreateQuotaOption(__instance, role as RoleBehaviour, ref num, num3);
-            num3++;
+            num -= 0.8f;
+            CategoryHeaderEditRole categoryHeaderEditRole3 = Object.Instantiate(__instance.categoryHeaderEditRoleOrigin,
+                Vector3.zero, Quaternion.identity, __instance.RoleChancesSettings.transform);
+            categoryHeaderEditRole3.SetHeader(StringNames.None, 20);
+            categoryHeaderEditRole3.Title.text = "Neutral Roles";
+            categoryHeaderEditRole3.transform.localPosition = new Vector3(4.986f, num, -2f);
+            num -= 0.522f;
+            
+            foreach (var role in neutRoles)
+            {
+                CreateQuotaOption(__instance, role as RoleBehaviour, ref num, num3);
+                num3++;
+            }
         }
 
         return false;

@@ -30,6 +30,12 @@ public static class GameOptionsMenuPatch
         
         foreach (IModdedOptionGroup group in filteredGroups)
         {
+            var filteredOpts = ModdedOptionsManager.Groups[group].Where(x=>x.Visible.Invoke()).ToList();
+            if (filteredOpts.Count == 0)
+            {
+                continue;
+            }
+            
             CategoryHeaderMasked categoryHeaderMasked = Object.Instantiate(__instance.categoryHeaderOrigin, Vector3.zero, Quaternion.identity, __instance.settingsContainer);
             categoryHeaderMasked.SetHeader(CustomStringName.CreateAndRegister(group.GroupName), 20);
             if (group.GroupColor != Color.clear)
@@ -40,8 +46,6 @@ public static class GameOptionsMenuPatch
             categoryHeaderMasked.transform.localScale = Vector3.one * 0.63f;
             categoryHeaderMasked.transform.localPosition = new Vector3(-0.903f, num, -2f);
             num -= 0.63f;
-
-            var filteredOpts = ModdedOptionsManager.Groups[group].Where(x=>x.Visible.Invoke()).ToList();
             
             foreach (var opt in filteredOpts)
             {
