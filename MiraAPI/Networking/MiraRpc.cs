@@ -1,8 +1,7 @@
-﻿namespace MiraAPI.Networking
+﻿namespace MiraAPI.Networking;
+
+public enum MiraRpc : uint
 {
-    public enum MiraRpc : uint
-    {
-        SyncGameOptions,
-        SyncRoleOptions
-    }
+    SyncGameOptions,
+    SyncRoleOptions
 }

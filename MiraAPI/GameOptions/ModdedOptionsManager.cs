@@ -6,106 +6,170 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using MiraAPI.Networking;
+using MiraAPI.PluginLoading;
 using Reactor.Networking.Rpc;
 
-namespace MiraAPI.GameOptions
+namespace MiraAPI.GameOptions;
+
+public class ModdedOptionsManager
 {
-    public class ModdedOptionsManager
+    private static readonly Dictionary<PropertyInfo, ModdedOptionAttribute> OptionAttributes = new();
+    private static readonly Dictionary<Type, IModdedOptionGroup> TypeToGroup = new();
+
+    public static readonly Dictionary<uint, IModdedOption> ModdedOptions = new();
+    public static readonly Dictionary<IModdedOptionGroup, List<IModdedOption>> Groups = new();
+
+    
+    public static uint NextId => _nextId++;
+    private static uint _nextId = 1;
+    
+    internal static bool RegisterGroup(Type type, MiraPluginInfo pluginInfo)
     {
-        public static readonly Dictionary<uint, IModdedOption> ModdedOptions = new();
-        public static readonly List<IModdedOption> Options = [];
-        public static readonly List<ModdedOptionGroup> Groups = [];
-        private static readonly Dictionary<PropertyInfo, ModdedOptionAttribute> OptionAttributes = new();
-        public static readonly Dictionary<Type, ModdedOptionGroup> OriginalTypes = new();
-        public static uint NextId = 1;
-
-        public static IModdedOption RegisterOption(Type type, ModdedOptionAttribute attribute, PropertyInfo property)
+        var group = (IModdedOptionGroup)Activator.CreateInstance(type);
+            
+        if (group == null)
         {
-            if (OptionAttributes.ContainsKey(property)) return null;
-            object newObj = Activator.CreateInstance(type);
-            IModdedOption result = attribute.CreateOption(property.GetValue(newObj), property);
-
-            if (result != null)
-            {
-                var setterOriginal = property.GetSetMethod();
-                var setterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertySetterPatch));
-                PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: new HarmonyMethod(setterPatch));
-
-                var getterOriginal = property.GetGetMethod();
-                var getterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyGetterPatch));
-                PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: new HarmonyMethod(getterPatch));
-
-                attribute.HolderOption = result;
-                
-                OptionAttributes.Add(property, attribute);
-
-                if (OriginalTypes.ContainsKey(type))
-                {
-                    Logger<MiraApiPlugin>.Error($"Grouping {attribute.Title} with {OriginalTypes[type].GroupName}");
-                    result.Group = OriginalTypes[type];
-                }
-            }
-
-            return result;
+            Logger<MiraApiPlugin>.Error($"Failed to create group from {type.Name}");
+            return false;
         }
 
-        public static void SyncAllOptions(int targetId=-1)
+        if (TypeToGroup.ContainsKey(type))
         {
-            List<NetData> data = [];
-            int count = 0;
-            foreach (var option in ModdedOptions.Values)
-            {
-                var netData = option.GetNetData();
-                data.Add(netData);
-                count += netData.GetLength();
-                
-                if (count > 1000)
-                {
-                    Rpc<SyncOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.ToArray());
-                    data.Clear();
-                    count = 0;
-                }
-            }
-            if (data.Count > 0)
-            {
-                Rpc<SyncOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.ToArray());
-            }
-        }
-        
-        
-        public static void HandleSyncOptions(NetData[] data)
-        {
-            foreach (var netData in data)
-            {
-                if (ModdedOptions.TryGetValue(netData.Id, out var option))
-                {
-                    Logger<MiraApiPlugin>.Error("Handling option " + option.Title);
-                    option.HandleNetData(netData.Data);
-                }
-            }
-        }
-        
-        
-        public static void PropertySetterPatch(MethodBase __originalMethod, object value)
-        {
-            ModdedOptionAttribute attribute = OptionAttributes.First(pair => pair.Key.GetSetMethod().Equals(__originalMethod)).Value;
-
-            if (attribute != null)
-            {
-                attribute.SetValue(value);
-            }
+            Logger<MiraApiPlugin>.Error($"Group {type.Name} already exists.");
+            return false;
         }
 
-        public static bool PropertyGetterPatch(MethodBase __originalMethod, ref object __result)
+        Groups.Add(group, []);
+        TypeToGroup.Add(type, group);
+        pluginInfo.OptionGroups.Add(group);
+        
+        return true;
+    }
+    
+    internal static void RegisterPropertyOption(Type type, PropertyInfo property, MiraPluginInfo pluginInfo)
+    {
+        if (!TypeToGroup.TryGetValue(type, out var group))
         {
-            ModdedOptionAttribute attribute = OptionAttributes.First(pair => pair.Key.GetGetMethod().Equals(__originalMethod)).Value;
+            Logger<MiraApiPlugin>.Error($"Failed to get group for {type.Name}");
+            return;
+        }
+        
+        var option = (IModdedOption) property.GetValue(group);
+        
+        if (option == null)
+        {
+            Logger<MiraApiPlugin>.Error($"Failed to get option for {property.Name}");
+            return;
+        }
+        
+        RegisterOption(option, group, pluginInfo);
+    }
+    
+    internal static void RegisterAttributeOption(Type type, ModdedOptionAttribute attribute, PropertyInfo property, MiraPluginInfo pluginInfo)
+    {
+        if (OptionAttributes.ContainsKey(property))
+        {
+            Logger<MiraApiPlugin>.Error($"Property {property.Name} already has an attribute registered.");
+            return;
+        }
 
-            if (attribute != null)
+        if (!TypeToGroup.TryGetValue(type, out var group))
+        {
+            Logger<MiraApiPlugin>.Error($"Failed to get group for {type.Name}");
+            return;
+        }
+
+        var option = attribute.CreateOption(property.GetValue(group), property);
+        
+        if (option == null)
+        {
+            Logger<MiraApiPlugin>.Error($"Failed to get option for {property.Name}");
+            return;
+        }
+        
+        var setterOriginal = property.GetSetMethod();
+        var setterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertySetterPatch));
+        PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: new HarmonyMethod(setterPatch));
+
+        var getterOriginal = property.GetGetMethod();
+        var getterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyGetterPatch));
+        PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: new HarmonyMethod(getterPatch));
+
+        OptionAttributes.Add(property, attribute);
+        attribute.HolderOption = option;
+        
+        RegisterOption(option, group, pluginInfo);
+    }
+
+    private static void RegisterOption(IModdedOption option, IModdedOptionGroup group, MiraPluginInfo pluginInfo)
+    {
+        option.ParentMod = pluginInfo.MiraPlugin;
+        option.AdvancedRole = group.AdvancedRole;
+        pluginInfo.Options.Add(option);
+        
+        ModdedOptions.Add(option.Id, option);
+        Groups[group].Add(option);
+    }
+    
+    internal static void SyncAllOptions(int targetId=-1)
+    {
+        List<NetData> data = [];
+        
+        var count = 0;
+        foreach (var netData in ModdedOptions.Values.Select(option => option.GetNetData()))
+        {
+            data.Add(netData);
+            count += netData.GetLength();
+
+            if (count <= 1000)
             {
-                __result = attribute.GetValue();
-                return false;
+                continue;
             }
+            
+            Rpc<SyncOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.ToArray());
+            data.Clear();
+            count = 0;
+        }
+        
+        if (data.Count > 0)
+        {
+            Rpc<SyncOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.ToArray());
+        }
+    }
+
+
+    internal static void HandleSyncOptions(NetData[] data)
+    {
+        foreach (var netData in data)
+        {
+            if (!ModdedOptions.TryGetValue(netData.Id, out var option))
+            {
+                continue;
+            }
+            
+            Logger<MiraApiPlugin>.Error("Handling option " + option.Title);
+            option.HandleNetData(netData.Data);
+        }
+    }
+        
+        
+    public static void PropertySetterPatch(MethodBase __originalMethod, object value)
+    {
+        ModdedOptionAttribute attribute = OptionAttributes.First(pair => pair.Key.GetSetMethod().Equals(__originalMethod)).Value;
+
+        attribute?.SetValue(value);
+    }
+
+    public static bool PropertyGetterPatch(MethodBase __originalMethod, ref object __result)
+    {
+        ModdedOptionAttribute attribute = OptionAttributes.First(pair => pair.Key.GetGetMethod().Equals(__originalMethod)).Value;
+
+        if (attribute == null)
+        {
             return true;
         }
+        
+        __result = attribute.GetValue();
+        return false;
     }
 }

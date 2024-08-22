@@ -2,32 +2,26 @@
 using System;
 using System.Reflection;
 
-namespace MiraAPI.GameOptions.Attributes
+namespace MiraAPI.GameOptions.Attributes;
+
+public class ModdedStringOptionAttribute(string title, string[] values, Type roleType = null)
+    : ModdedOptionAttribute(title, roleType)
 {
-    public class ModdedStringOptionAttribute : ModdedOptionAttribute
+    internal override IModdedOption CreateOption(object value, PropertyInfo property)
     {
-        public string[] Values;
-        public ModdedStringOptionAttribute(string title, string[] strings, Type roleType = null) : base(title, roleType)
-        {
-            Values = strings;
-        }
+        var opt = new ModdedStringOption(Title, (int)value, values, RoleType);
+        return opt;
+    }
 
-        public override IModdedOption CreateOption(object value, PropertyInfo property)
-        {
-            var opt = new ModdedStringOption(Title, (int)value, Values, RoleType);
-            return opt;
-        }
+    public override void SetValue(object value)
+    {
+        ModdedStringOption opt = HolderOption as ModdedStringOption;
+        opt.SetValue((int)value);
+    }
 
-        public override void SetValue(object value)
-        {
-            ModdedStringOption opt = HolderOption as ModdedStringOption;
-            opt.SetValue((int)value);
-        }
-
-        public override object GetValue()
-        {
-            ModdedStringOption opt = HolderOption as ModdedStringOption;
-            return opt.Value;
-        }
+    public override object GetValue()
+    {
+        ModdedStringOption opt = HolderOption as ModdedStringOption;
+        return opt.Value;
     }
 }

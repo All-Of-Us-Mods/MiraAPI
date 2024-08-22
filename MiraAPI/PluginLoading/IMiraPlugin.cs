@@ -1,9 +1,8 @@
 ﻿using BepInEx.Configuration;
 
-namespace MiraAPI.PluginLoading
+namespace MiraAPI.PluginLoading;
+
+public interface IMiraPlugin
 {
-    public interface IMiraPlugin
-    {
-        public ConfigFile GetConfigFile();
-    }
+    public ConfigFile GetConfigFile();
 }

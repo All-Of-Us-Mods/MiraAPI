@@ -1,25 +1,27 @@
-﻿using UnityEngine;
+﻿using System.Reflection;
+using UnityEngine;
 
-namespace MiraAPI.Utilities.Assets
+namespace MiraAPI.Utilities.Assets;
+
+public class LoadableResourceAsset(string path) : LoadableAsset<Sprite>
 {
-    public class LoadableResourceAsset(string name, string resourcesFolder) : LoadableAsset<Sprite>
-    {
-        public override Sprite LoadAsset()
-        {
-            if (_loadedAsset != null)
-            {
-                return _loadedAsset;
-            }
+    private readonly Assembly _assembly = Assembly.GetCallingAssembly();
 
-            try
-            {
-                return _loadedAsset = SpriteTools.LoadSpriteFromPath(resourcesFolder + name);
-            }
-            catch
-            {
-                Debug.LogError($"Not loading, invalid asset: {name}");
-                return null;
-            }
+    public override Sprite LoadAsset()
+    {
+        if (LoadedAsset != null)
+        {
+            return LoadedAsset;
+        }
+
+        try
+        {
+            return LoadedAsset = SpriteTools.LoadSpriteFromPath(path, _assembly);
+        }
+        catch
+        {
+            Debug.LogError($"Not loading, invalid asset: {path}");
+            return null;
         }
     }
 }

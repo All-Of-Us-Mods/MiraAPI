@@ -12,6 +12,7 @@ namespace MiraAPI.Example;
 [BepInAutoPlugin("mira.example", "MiraAPIExample")]
 [BepInProcess("Among Us.exe")]
 [BepInDependency(ReactorPlugin.Id)]
+[BepInDependency(MiraApiPlugin.Id)]
 [ReactorModFlags(ModFlags.RequireOnAllClients)]
 public partial class ExamplePlugin : BasePlugin, IMiraPlugin
 {

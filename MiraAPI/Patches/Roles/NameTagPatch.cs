@@ -13,13 +13,12 @@ public static class NameTagPatch
     [HarmonyPatch(nameof(PlayerNameColor.Get), typeof(RoleBehaviour))]
     public static bool GetPatch([HarmonyArgument(0)] RoleBehaviour otherPlayerRole, ref Color __result)
     {
-        if (PlayerControl.LocalPlayer.Data.IsDead)
+        if (PlayerControl.LocalPlayer.Data.Role.IsImpostor && otherPlayerRole.IsImpostor)
         {
-            __result = otherPlayerRole.NameColor;
-            return false;
+            return true;
         }
 
-        if (PlayerControl.LocalPlayer.Data.Role.IsImpostor && otherPlayerRole.IsImpostor)
+        if (GameManager.Instance.IsHideAndSeek())
         {
             return true;
         }

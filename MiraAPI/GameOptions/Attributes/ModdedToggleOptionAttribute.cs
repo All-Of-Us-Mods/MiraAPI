@@ -2,30 +2,25 @@
 using System;
 using System.Reflection;
 
-namespace MiraAPI.GameOptions.Attributes
+namespace MiraAPI.GameOptions.Attributes;
+
+public class ModdedToggleOptionAttribute(string title, Type roleType = null) : ModdedOptionAttribute(title, roleType)
 {
-    public class ModdedToggleOptionAttribute : ModdedOptionAttribute
+    internal override IModdedOption CreateOption(object value, PropertyInfo property)
     {
-        public ModdedToggleOptionAttribute(string title, Type roleType = null) : base(title, roleType)
-        {
-        }
+        var toggleOpt = new ModdedToggleOption(Title, (bool)value, RoleType);
+        return toggleOpt;
+    }
 
-        public override IModdedOption CreateOption(object value, PropertyInfo property)
-        {
-            var toggleOpt = new ModdedToggleOption(Title, (bool)value, RoleType);
-            return toggleOpt;
-        }
+    public override void SetValue(object value)
+    {
+        ModdedToggleOption toggleOpt = HolderOption as ModdedToggleOption;
+        toggleOpt.SetValue((bool)value);
+    }
 
-        public override void SetValue(object value)
-        {
-            ModdedToggleOption toggleOpt = HolderOption as ModdedToggleOption;
-            toggleOpt.SetValue((bool)value);
-        }
-
-        public override object GetValue()
-        {
-            ModdedToggleOption toggleOpt = HolderOption as ModdedToggleOption;
-            return toggleOpt.Value;
-        }
+    public override object GetValue()
+    {
+        ModdedToggleOption toggleOpt = HolderOption as ModdedToggleOption;
+        return toggleOpt.Value;
     }
 }

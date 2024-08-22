@@ -1,3 +1,7 @@
-.vs
-obj
-bin
+.git/
+.idea/
+.vs/
+obj/
+bin/
+
+*.user

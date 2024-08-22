@@ -8,15 +8,18 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using static UnityEngine.UI.Button;
+using Object = UnityEngine.Object;
 
 namespace MiraAPI.Patches.Options;
 
 [HarmonyPatch(typeof(GameSettingMenu))]
 public static class GameSettingMenuPatches
 {
-    public static int currentSelectedMod = 0;
-    public static MiraPluginInfo selectedMod = null;
-    public static TextMeshPro text;
+    public static int CurrentSelectedMod { get; private set; }
+    
+    public static MiraPluginInfo SelectedMod { get; private set; }
+
+    private static TextMeshPro _text;
 
     [HarmonyPrefix]
     [HarmonyPatch(nameof(GameSettingMenu.Start))]
@@ -25,19 +28,19 @@ public static class GameSettingMenuPatches
         __instance.transform.FindChild("GameSettingsLabel").gameObject.SetActive(false);
 
         Transform helpThing = __instance.transform.FindChild("What Is This?");
-        GameObject tmpText = GameObject.Instantiate(helpThing.transform.FindChild("InfoText"), helpThing.parent).gameObject;
+        GameObject tmpText = Object.Instantiate(helpThing.transform.FindChild("InfoText"), helpThing.parent).gameObject;
 
         tmpText.GetComponent<TextTranslatorTMP>().Destroy();
         tmpText.name = "SelectedMod";
         tmpText.transform.localPosition = new Vector3(-3.3382f, 1.5399f, -2);
 
-        text = tmpText.GetComponent<TextMeshPro>();
-        text.fontSizeMax = 3.2f;
+        _text = tmpText.GetComponent<TextMeshPro>();
+        _text.fontSizeMax = 3.2f;
         UpdateText(__instance.GameSettingsTab, __instance.RoleSettingsTab);
 
-        text.alignment = TextAlignmentOptions.Center;
+        _text.alignment = TextAlignmentOptions.Center;
 
-        GameObject nextButton = GameObject.Instantiate(__instance.BackButton, __instance.BackButton.transform.parent).gameObject;
+        GameObject nextButton = Object.Instantiate(__instance.BackButton, __instance.BackButton.transform.parent).gameObject;
         nextButton.transform.localPosition = new Vector3(-2.2663f, 1.5272f, -25f);
         nextButton.name = "RightArrowButton";
         nextButton.transform.FindChild("Inactive").gameObject.GetComponent<SpriteRenderer>().sprite = MiraAssets.NextButton.LoadAsset();
@@ -48,50 +51,50 @@ public static class GameSettingMenuPatches
         passiveButton.OnClick = new ButtonClickedEvent();
         passiveButton.OnClick.AddListener((UnityAction)(() =>
         {
-            if (currentSelectedMod != MiraPluginManager.Instance.RegisteredPlugins.Count)
+            if (CurrentSelectedMod != MiraPluginManager.Instance.RegisteredPlugins.Count)
             {
-                currentSelectedMod += 1;
+                CurrentSelectedMod += 1;
                 UpdateText(__instance.GameSettingsTab, __instance.RoleSettingsTab);
             }
         }));
 
-        GameObject backButton = GameObject.Instantiate(nextButton, __instance.BackButton.transform.parent).gameObject;
+        GameObject backButton = Object.Instantiate(nextButton, __instance.BackButton.transform.parent).gameObject;
         backButton.transform.localPosition = new Vector3(-4.4209f, 1.5272f, -25f);
         backButton.name = "LeftArrowButton";
         backButton.gameObject.GetComponent<CloseButtonConsoleBehaviour>().Destroy();
         backButton.transform.FindChild("Active").gameObject.GetComponent<SpriteRenderer>().flipX = backButton.transform.FindChild("Inactive").gameObject.GetComponent<SpriteRenderer>().flipX = true;
         backButton.gameObject.GetComponent<PassiveButton>().OnClick.AddListener((UnityAction)(() =>
         {
-            if (currentSelectedMod != 0)
+            if (CurrentSelectedMod != 0)
             {
-                currentSelectedMod -= 1;
+                CurrentSelectedMod -= 1;
                 UpdateText(__instance.GameSettingsTab, __instance.RoleSettingsTab);
             }
         }));
     }
 
-    public static void UpdateText(GameOptionsMenu settings, RolesSettingsMenu roles)
+    private static void UpdateText(GameOptionsMenu settings, RolesSettingsMenu roles)
     {
-        if (currentSelectedMod == 0)
+        if (CurrentSelectedMod == 0)
         {
-            text.text = "Default";
-            text.fontSizeMax = 3.2f;
+            _text.text = "Default";
+            _text.fontSizeMax = 3.2f;
         }
         else
         {
-            text.fontSizeMax = 2f;
-            selectedMod = MiraPluginManager.Instance.RegisteredPlugins.ElementAt(currentSelectedMod - 1).Value;
-            if (selectedMod == null)
+            _text.fontSizeMax = 2f;
+            SelectedMod = MiraPluginManager.Instance.RegisteredPlugins.ElementAt(CurrentSelectedMod - 1).Value;
+            if (SelectedMod == null)
             {
-                currentSelectedMod = 0;
+                CurrentSelectedMod = 0;
                 UpdateText(settings, roles);
             }
 
-            string name = selectedMod.PluginInfo.Metadata.Name;
-            text.text = name.Substring(0, Math.Min(name.Length, 15));
+            string name = SelectedMod?.PluginInfo.Metadata.Name;
+            _text.text = name?[..Math.Min(name.Length, 15)];
         }
 
-        if (roles is not null && roles.roleChances is not null)
+        if (roles?.roleChances != null)
         {
             if (roles.advancedSettingChildren is not null)
             {
@@ -121,12 +124,19 @@ public static class GameSettingMenuPatches
             roles.SetQuotaTab();
         }
 
-        if (settings is not null && settings.Children is not null)
+        if (settings?.Children != null)
         {
             foreach (var child in settings.Children)
             {
-                if (child.TryCast<GameOptionsMapPicker>()) continue;
-                if (child.gameObject is null) continue;
+                if (child.TryCast<GameOptionsMapPicker>())
+                {
+                    continue;
+                }
+
+                if (!child.gameObject)
+                {
+                    continue;
+                }
 
                 child.gameObject.DestroyImmediate();
             }

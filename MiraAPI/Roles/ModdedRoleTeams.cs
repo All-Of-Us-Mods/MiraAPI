@@ -1,9 +1,8 @@
-﻿namespace MiraAPI.Roles
+﻿namespace MiraAPI.Roles;
+
+public enum ModdedRoleTeams
 {
-    public enum ModdedRoleTeams
-    {
-        Crewmate,
-        Impostor,
-        Neutral
-    }
+    Crewmate,
+    Impostor,
+    Neutral
 }
