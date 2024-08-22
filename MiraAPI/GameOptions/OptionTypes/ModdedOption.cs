@@ -39,7 +39,6 @@ public abstract class ModdedOption<T> : IModdedOption
     private ModdedOption()
     {
         Id = ModdedOptionsManager.NextId;
-        ModdedOptionsManager.ModdedOptions.Add(Id, this);
     }
 
     public void ValueChanged(OptionBehaviour optionBehaviour)

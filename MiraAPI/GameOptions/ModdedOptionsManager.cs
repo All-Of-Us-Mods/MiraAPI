@@ -62,11 +62,7 @@ public class ModdedOptionsManager
             return;
         }
         
-        option.ParentMod = pluginInfo.MiraPlugin;
-        option.AdvancedRole = group.AdvancedRole;
-        pluginInfo.Options.Add(option);
-        
-        Groups[group].Add(option);
+        RegisterOption(option, group, pluginInfo);
     }
     
     internal static void RegisterAttributeOption(Type type, ModdedOptionAttribute attribute, PropertyInfo property, MiraPluginInfo pluginInfo)
@@ -102,13 +98,19 @@ public class ModdedOptionsManager
         OptionAttributes.Add(property, attribute);
         attribute.HolderOption = option;
         
+        RegisterOption(option, group, pluginInfo);
+    }
+
+    private static void RegisterOption(IModdedOption option, IModdedOptionGroup group, MiraPluginInfo pluginInfo)
+    {
         option.ParentMod = pluginInfo.MiraPlugin;
         option.AdvancedRole = group.AdvancedRole;
         pluginInfo.Options.Add(option);
         
+        ModdedOptions.Add(option.Id, option);
         Groups[group].Add(option);
     }
-
+    
     internal static void SyncAllOptions(int targetId=-1)
     {
         List<NetData> data = [];
