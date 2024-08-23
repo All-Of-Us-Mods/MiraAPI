@@ -244,9 +244,8 @@ public static class RoleSettingMenuPatches
         PassiveButton newButton = Object.Instantiate(roleOptionSetting.buttons[0], roleOptionSetting.transform);
         newButton.name = "ConfigButton";
         newButton.transform.localPosition = new Vector3(0.2419f, -0.2582f, -2f);
-        newButton.transform.FindChild("Plus_TMP").gameObject.DestroyImmediate();
-        newButton.transform.FindChild("InactiveSprite").GetComponent<SpriteRenderer>().sprite = MiraAssets.Cog.LoadAsset();
-        newButton.transform.FindChild("ActiveSprite").GetComponent<SpriteRenderer>().sprite = MiraAssets.CogActive.LoadAsset();
+        newButton.transform.FindChild("Text_TMP").gameObject.DestroyImmediate();
+        newButton.transform.FindChild("ButtonSprite").GetComponent<SpriteRenderer>().sprite = MiraAssets.Cog.LoadAsset();
 
         PassiveButton passiveButton = newButton.GetComponent<PassiveButton>();
         passiveButton.OnClick = new ButtonClickedEvent();
