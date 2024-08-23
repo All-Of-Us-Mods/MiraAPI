@@ -63,7 +63,7 @@ public class ModdedStringOption : ModdedOption<int>
     public override void OnValueChanged(int newValue)
     {
         DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, Data.GetValueString(newValue), false);
-        if (OptionBehaviour is null)
+        if (!OptionBehaviour)
         {
             return;
         }

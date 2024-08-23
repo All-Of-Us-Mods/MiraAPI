@@ -40,7 +40,7 @@ public static class HudManagerPatches
 
             if (customRole.SetTabText() != null)
             {
-                if (_roleTab == null)
+                if (!_roleTab)
                 {
                     _roleTab = CustomRoleManager.CreateRoleTab(customRole);
                 }
@@ -114,7 +114,7 @@ public static class HudManagerPatches
     [HarmonyPatch(nameof(HudManager.SetHudActive), typeof(PlayerControl), typeof(RoleBehaviour), typeof(bool))]
     public static void SetHudActivePostfix(HudManager __instance, [HarmonyArgument(0)] PlayerControl player, [HarmonyArgument(1)] RoleBehaviour roleBehaviour, [HarmonyArgument(2)] bool isActive)
     {
-        if (player.Data == null)
+        if (!player.Data)
         {
             return;
         }
