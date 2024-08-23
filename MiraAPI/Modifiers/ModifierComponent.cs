@@ -1,6 +1,8 @@
 ﻿using Reactor.Utilities.Attributes;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using MiraAPI.Modifiers.Types;
 using MiraAPI.Networking;
 using MiraAPI.Utilities;
 using Reactor.Networking.Attributes;
@@ -19,6 +21,14 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
     public void Start()
     {
         player = GetComponent<PlayerControl>();
+    }
+    
+    public void Update()
+    {
+        foreach (var modifier in activeModifiers)
+        {
+            modifier.Update();
+        }
     }
 
     public bool HasModifier<T>() where T : BaseModifier
@@ -93,5 +103,12 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
         modifierComponent.activeModifiers.Add(modifier);
         modifier.Player = modifierComponent.player; 
         modifier.OnActivate();
+    }
+
+    public static IEnumerator ModifierTimer(TimedModifier modifier)
+    {
+        yield return new WaitForSeconds(modifier.Duration);
+        modifier.TimerActive = false;
+        modifier.OnTimerComplete();
     }
 }

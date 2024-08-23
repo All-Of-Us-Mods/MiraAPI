@@ -6,17 +6,17 @@ public abstract class TimedModifier : BaseModifier
     public abstract float Duration { get; }
     public abstract void OnTimerComplete();
 
-    internal bool timerOngoing = false;
+    internal bool TimerActive;
 
-    public void StartTimer(ModifierManager manager)
+    public void StartTimer()
     {
-        if (!timerOngoing)
+        if (TimerActive)
         {
-            Logger<MiraApiPlugin>.Error("Can't start a timer that is already ongoing.");
+            Logger<MiraApiPlugin>.Error("Can't start a timer that is already started.");
             return;
         }
 
-        timerOngoing = true;
-        Coroutines.Start(manager.ModifierTimer(this));
+        TimerActive = true;
+        Coroutines.Start(ModifierComponent.ModifierTimer(this));
     }
 }
