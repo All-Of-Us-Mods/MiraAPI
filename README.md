@@ -78,9 +78,9 @@ To see a full example of an options class, see [this file](https://github.com/Al
 
 ### Role Options
 
-Options can also be used within a Role class to show up in that Role's settings.
+You can also specify a role type for an option or option group.
 
-To set the role for an entire group, set the `AdvancedRole` property on that group like this: 
+To set the role type for an entire group, set the `AdvancedRole` property on that group like this: 
 ```csharp
 public class MyOptionsGroup : IModdedOptionGroup
 {
@@ -92,7 +92,7 @@ public class MyOptionsGroup : IModdedOptionGroup
 }
 ```
 
-To set the role for individual options, specify the `roleType` parameter in the option like this:
+To set the role type for individual options, specify the `roleType` parameter in the option like this:
 ```csharp
 // this group doesnt specify a role, so it will show up in the global settings
 public class MyOptionsGroup : IModdedOptionGroup
