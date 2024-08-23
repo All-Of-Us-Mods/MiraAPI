@@ -4,7 +4,6 @@ using Reactor.Localization.Utilities;
 using System;
 using MiraAPI.Networking;
 using Reactor.Networking.Rpc;
-using Reactor.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.GameOptions.OptionTypes;

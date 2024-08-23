@@ -12,7 +12,7 @@ public static class PlayerControlPatches
     [HarmonyPatch(nameof(PlayerControl.Start))]
     public static void PlayerControlStartPostfix(PlayerControl __instance)
     {
-        __instance.gameObject.AddComponent<ModifierManager>();
+        __instance.gameObject.AddComponent<ModifierComponent>();
     }
 
     [HarmonyPostfix]

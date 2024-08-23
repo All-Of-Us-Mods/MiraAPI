@@ -14,14 +14,14 @@ public static class Extensions
         return ModdedOptionsManager.Options.Any(opt => opt.OptionBehaviour && opt.OptionBehaviour.Equals(optionBehaviour));
     }
 
-    public static ModifierManager GetModifierManager(this PlayerControl player)
+    public static ModifierComponent GetModifierComponent(this PlayerControl player)
     {
-        return player.gameObject.GetComponent<ModifierManager>();
+        return player.gameObject.GetComponent<ModifierComponent>();
     }
 
     public static void AddModifier<T>(this PlayerControl player) where T : BaseModifier
     {
-        player.GetModifierManager().AddModifier<T>();
+        player.GetModifierComponent().AddModifier<T>();
     }
 
     public static void RemoveModifier<T>(this PlayerControl player) where T : BaseModifier
