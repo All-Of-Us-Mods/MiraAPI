@@ -1,9 +1,11 @@
-﻿using MiraAPI.Networking;
+﻿using MiraAPI.Modifiers.Types;
+using MiraAPI.Networking;
 using MiraAPI.Utilities;
 using Reactor.Networking.Attributes;
 using Reactor.Utilities;
 using Reactor.Utilities.Attributes;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,7 +14,7 @@ namespace MiraAPI.Modifiers;
 [RegisterInIl2Cpp]
 public class ModifierManager(IntPtr ptr) : MonoBehaviour(ptr)
 {
-    public List<uint> activeModifiersIds = new();
+    public Dictionary<uint, BaseModifier> activeModifiers = new();
     public static List<BaseModifier> registeredModifiers = new();
 
     public static void RegisterModifier(Type modifierType)
@@ -27,11 +29,25 @@ public class ModifierManager(IntPtr ptr) : MonoBehaviour(ptr)
         registeredModifiers.Add(newMod);
     }
 
+    public void Update()
+    {
+        foreach (var modifier in activeModifiers.Values)
+        {
+            modifier.Update();
+        }
+    }
+
+    public IEnumerator ModifierTimer(TimedModifier modifier)
+    {
+        yield return new WaitForSeconds(modifier.Duration);
+        modifier.timerOngoing = false;
+        modifier.OnTimerComplete();
+    }
 
     public bool HasModifier<T>(PlayerControl target) where T : BaseModifier
     {
         uint id = registeredModifiers.Find(mod => mod.GetType() == typeof(T)).ModifierId;
-        return target.GetModifierManager().activeModifiersIds.Contains(id);
+        return target.GetModifierManager().activeModifiers.ContainsKey(id);
     }
 
     public void AddModifier<T>(PlayerControl target) where T : BaseModifier
@@ -43,7 +59,7 @@ public class ModifierManager(IntPtr ptr) : MonoBehaviour(ptr)
     public void RemoveModifier<T>(PlayerControl target) where T : BaseModifier
     {
         uint id = registeredModifiers.Find(mod => mod.GetType() == typeof(T)).ModifierId;
-        if (!activeModifiersIds.Contains(id))
+        if (!activeModifiers.ContainsKey(id))
         {
             Logger<MiraApiPlugin>.Error($"Cannot remove modifier {typeof(T).Name} because it is not active.");
             return;
@@ -59,7 +75,7 @@ public class ModifierManager(IntPtr ptr) : MonoBehaviour(ptr)
         if (modifier is null) return;
 
         modifier.OnDeactivate();
-        target.GetModifierManager().activeModifiersIds.Remove(modifierId);
+        target.GetModifierManager().activeModifiers.Remove(modifierId);
     }
 
     [MethodRpc((uint)MiraRpc.AddModifier)]
@@ -68,7 +84,8 @@ public class ModifierManager(IntPtr ptr) : MonoBehaviour(ptr)
         BaseModifier modifier = registeredModifiers.Find(mod => mod.ModifierId == modifierId);
         if (modifier is null) return;
 
-        target.GetModifierManager().activeModifiersIds.Add(modifierId);
+        target.GetModifierManager().activeModifiers.Add(modifierId, modifier);
+        modifier.Player = target;
         modifier.OnActivate();
     }
 }

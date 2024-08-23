@@ -1,8 +1,15 @@
-﻿namespace MiraAPI.Example;
+﻿using MiraAPI.Modifiers.Types;
 
-public class ModifierExample
+namespace MiraAPI.Example;
+
+[RegisterModifier]
+public class ModifierExample : TimedModifier
 {
-    //name, role specific, etc
+    public override string ModifierName => "Timed modifier example";
+    public override float Duration => 10;
 
-    // mono behaviour stuff here (ModdedPlayerModifier inherits monobehaviour)
+    public override void OnTimerComplete()
+    {
+
+    }
 }

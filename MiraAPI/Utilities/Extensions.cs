@@ -21,11 +21,12 @@ public static class Extensions
 
     public static void AddModifier<T>(this PlayerControl player) where T : BaseModifier
     {
-        player.GetModifierManager().AddModifier<T>();
+        player.GetModifierManager().AddModifier<T>(player);
     }
 
     public static void RemoveModifier<T>(this PlayerControl player) where T : BaseModifier
     {
+        player.GetModifierManager().RemoveModifier<T>(player);
     }
 
     public static Color DarkenColor(this Color color)
