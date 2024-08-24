@@ -27,6 +27,7 @@ public static class RoleSettingMenuPatches
         __instance.advancedSettingChildren = new Il2CppSystem.Collections.Generic.List<OptionBehaviour>();
 
         var maskBg = __instance.scrollBar.transform.FindChild("MaskBg");
+        var hitbox = __instance.scrollBar.transform.FindChild("Hitbox");
 
         if (GameSettingMenuPatches.CurrentSelectedMod == 0)
         {
@@ -35,6 +36,8 @@ public static class RoleSettingMenuPatches
             __instance.scrollBar.transform.localPosition = new Vector3(-1.4957f, 0.657f, -4);
             maskBg.localPosition = new Vector3(1.5353f, -.5734f, -.1f);
             maskBg.localScale = new Vector3(6.6811f, 3.3563f, 0.5598f);
+            hitbox.localPosition = new Vector3(0.3297f, -.2333f, 4f);
+            hitbox.localScale = new Vector3(1, 1, 1);
             return true;
         }
 
@@ -45,6 +48,8 @@ public static class RoleSettingMenuPatches
         __instance.scrollBar.transform.localPosition = new Vector3(-1.4957f, 1.5261f, -4);
         maskBg.localPosition = new Vector3(1.5353f, -1.0607f, -.1f);
         maskBg.localScale = new Vector3(6.6811f, 4.1563f, 0.5598f);
+        hitbox.localPosition = new Vector3(0.3297f, -.6333f, 4f);
+        hitbox.localScale = new Vector3(1, 1.2f, 1);
 
         int num3 = 0;
 
@@ -97,7 +102,7 @@ public static class RoleSettingMenuPatches
 
         if (neutRoles.Count > 0)
         {
-            num -= 0.8f;
+            num -= 0.4f;
             CategoryHeaderEditRole categoryHeaderEditRole3 = Object.Instantiate(__instance.categoryHeaderEditRoleOrigin,
                 Vector3.zero, Quaternion.identity, __instance.RoleChancesSettings.transform);
             categoryHeaderEditRole3.SetHeader(StringNames.None, 20);
@@ -126,7 +131,15 @@ public static class RoleSettingMenuPatches
 
         return false;
     }
-
+    
+    [HarmonyPostfix]
+    [HarmonyPatch(nameof(RolesSettingsMenu.OpenChancesTab))]
+    public static void OpenChancesTabPostfix(RolesSettingsMenu __instance)
+    {
+        __instance.scrollBar.CalculateAndSetYBounds(__instance.roleChances.Count + 5, 1f, 6f, 0.43f);
+        __instance.scrollBar.ScrollToTop();
+    }
+    
     private static void ValueChanged(OptionBehaviour obj)
     {
         var roleSetting = obj.Cast<RoleOptionSetting>();
@@ -202,6 +215,7 @@ public static class RoleSettingMenuPatches
         }
 
         __instance.scrollBar.CalculateAndSetYBounds(__instance.advancedSettingChildren.Count + 3, 1f, 6f, 0.45f);
+        __instance.scrollBar.ScrollToTop();
     }
     private static void ChangeTab(RoleBehaviour role, RolesSettingsMenu __instance)
     {
