@@ -11,14 +11,14 @@ namespace MiraAPI.GameOptions.OptionTypes;
 
 public abstract class ModdedOption<T> : IModdedOption
 {
-    private readonly IMiraPlugin _parentMod;
+    private IMiraPlugin _parentMod;
     
     public uint Id { get; }
     public BaseGameSetting Data { get; protected init; }
     public IMiraPlugin ParentMod
     {
         get => _parentMod;
-        init
+        set
         {
             _parentMod = value;
             var entry = _parentMod.GetConfigFile().Bind(ConfigDefinition, DefaultValue);
