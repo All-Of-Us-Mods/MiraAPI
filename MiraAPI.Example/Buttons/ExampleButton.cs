@@ -12,7 +12,7 @@ public class ExampleButton : CustomActionButton
     public override float Cooldown => 5f;
     public override float EffectDuration => 0f;
     public override int MaxUses => 5;
-    public override LoadableAsset<Sprite> Sprite { get; } = new LoadableResourceAsset("MiraAPI.Resources.ExampleButton.png");
+    public override LoadableAsset<Sprite> Sprite { get; } = ExampleAssets.ExampleButton;
     
     protected override void OnClick()
     {

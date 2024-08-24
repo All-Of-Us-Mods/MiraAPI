@@ -12,6 +12,6 @@ public class CustomRole : ImpostorRole, ICustomRole
     public string RoleDescription => RoleLongDescription;
     public Color RoleColor => Palette.Orange;
     public ModdedRoleTeams Team => ModdedRoleTeams.Impostor;
-    public LoadableAsset<Sprite> OptionsScreenshot => MiraAssets.Banner;
+    public LoadableAsset<Sprite> OptionsScreenshot => ExampleAssets.Banner;
     
 }

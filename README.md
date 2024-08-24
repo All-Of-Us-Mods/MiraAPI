@@ -27,28 +27,28 @@ Roles are very simple in Mira API. There are 3 things you need to do to create a
 2. Implement the `ICustomRole` interface from Mira API.
 3. Add the `[RegisterCustomRole]` attribute to the class.
 
-See [this file](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/CustomRole.cs) for a code example.
+See [this file](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/Roles/CustomRole.cs) for a code example.
 
 ## Options
 Options are also very simple in Mira API. Options are split up into Groups and Options. Every Option needs to be in a Group.
 
-To create a group, you need to create a class that implements the `IModdedOptionGroup` interface. Groups contain 4 properties, `GroupName`, `GroupColor`, `GroupVisible`, and `AdvancedRole`. Only the `GroupName` is required.
+To create a group, you need to create a class that inherits from the `AbstractOptionGroup` abstract class. Groups contain 4 properties, `GroupName`, `GroupColor`, `GroupVisible`, and `AdvancedRole`. Only the `GroupName` is required.
 
 Here is an example of a group class:
 ```csharp
-public class MyOptionsGroup : IModdedOptionGroup
+public class MyOptionsGroup : AbstractOptionGroup
 {
-    public string GroupName => "My Options"; // this is required
+    public override string GroupName => "My Options"; // this is required
     
     [ModdedNumberOption("My Number Option", min: 0, max: 10)]
     public float MyNumberOption { get; set; } = 5f;
 }
 ```
 
-You can access any group class using the `ModdedGroupSingleton` class like this:
+You can access any group class using the `OptionGroupSingleton` class like this:
 ```
-// MyOptionsGroup is a class that implements IModdedOptionGroup
-var myGroup = ModdedGroupSingleton<MyOptionsGroup>.Instance; // gets the instance of the group
+// MyOptionsGroup is a class that inherits from AbstractOptionGroup
+var myGroup = OptionGroupSingleton<MyOptionsGroup>.Instance; // gets the instance of the group
 System.Out.Console.WriteLine(myGroup.MyNumberOption); // prints the value of the option to the console
 ```
 
@@ -74,7 +74,7 @@ Here is a full list of ModdedOption classes you can use:
 - `ModdedStringOption`
 - `ModdedToggleOption`
 
-To see a full example of an options class, see [this file](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/ExampleOptions.cs).
+To see a full example of an options class, see [this file](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/Options/ExampleOptions.cs).
 
 ### Role Options
 
@@ -82,10 +82,10 @@ You can also specify a role type for an option or option group.
 
 To set the role type for an entire group, set the `AdvancedRole` property on that group like this: 
 ```csharp
-public class MyOptionsGroup : IModdedOptionGroup
+public class MyOptionsGroup : AbstractOptionGroup
 {
-    public string GroupName => "My Options";
-    public Type AdvancedRole => typeof(MyRole); // this is the role that will have these options
+    public override string GroupName => "My Options";
+    public override Type AdvancedRole => typeof(MyRole); // this is the role that will have these options
     
     [ModdedNumberOption("Ability Uses", min: 0, max: 10)]
     public float AbilityUses { get; set; } = 5f;
@@ -95,9 +95,9 @@ public class MyOptionsGroup : IModdedOptionGroup
 To set the role type for individual options, specify the `roleType` parameter in the option like this:
 ```csharp
 // this group doesnt specify a role, so it will show up in the global settings
-public class MyOptionsGroup : IModdedOptionGroup
+public class MyOptionsGroup : AbstractOptionGroup
 {
-    public string GroupName => "My Options";
+    public override string GroupName => "My Options";
     
     // this option will only show up in the settings for MyRole
     [ModdedNumberOption("Ability Uses", min: 0, max: 10, roleType: typeof(MyRole))]
@@ -115,7 +115,7 @@ Mira API provides a simple interface for adding ability buttons to the game. The
 
 The button API is simple, but provides a lot of flexibility. There are various methods you can override to customize the behaviour of your button. See [this file](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI/Hud/CustomActionButton.cs) for a full list of methods you can override.
 
-An example button can be found [here](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/ExampleButton.cs).
+An example button can be found [here](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/Buttons/ExampleButton.cs).
 
 ## Assets
 
@@ -137,6 +137,8 @@ Sprite sprite = mySpriteAsset.LoadAsset();
 LoadableAsset<Sprite> buttonAsset = new LoadableResourceAsset("ExampleMod.Resources.MyButton.png");
 Sprite button = buttonSpriteAsset.LoadAsset();
 ```
+
+You can view an example file [here](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/ExampleAssets.cs).
 
 You can create your own asset loaders by inheriting from `LoadableAsset<T>` and implementing the `LoadAsset` method.
 
