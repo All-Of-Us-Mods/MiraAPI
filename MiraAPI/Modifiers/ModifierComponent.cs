@@ -13,7 +13,7 @@ namespace MiraAPI.Modifiers;
 [RegisterInIl2Cpp]
 public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
 {
-    public List<BaseModifier> activeModifiers = [];
+    public readonly List<BaseModifier> ActiveModifiers = [];
 
     public PlayerControl player;
 
@@ -24,7 +24,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
 
     public void Update()
     {
-        foreach (var modifier in activeModifiers)
+        foreach (var modifier in ActiveModifiers)
         {
             modifier.Update();
         }
@@ -40,7 +40,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
 
         var modifierComponent = target.GetModifierComponent();
 
-        var modifier = modifierComponent.activeModifiers.Find(x => x.GetType() == type);
+        var modifier = modifierComponent.ActiveModifiers.Find(x => x.GetType() == type);
 
         if (modifier is null)
         {
@@ -49,7 +49,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
         }
 
         modifier.OnDeactivate();
-        modifierComponent.activeModifiers.Remove(modifier);
+        modifierComponent.ActiveModifiers.Remove(modifier);
     }
 
     public static void AddModifier(PlayerControl target, uint modifierId)
@@ -70,11 +70,11 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
             return;
         }
 
-        modifierComponent.activeModifiers.Add(modifier);
+        modifierComponent.ActiveModifiers.Add(modifier);
         modifier.Player = modifierComponent.player;
         modifier.OnActivate();
 
-        if (modifier is TimedModifier timer && timer.AutoStart && target.AmOwner)
+        if (modifier is TimedModifier { AutoStart: true } timer && target.AmOwner)
         {
             timer.StartTimer();
         }

@@ -1,10 +1,12 @@
-﻿using MiraAPI.GameOptions;
+﻿using System;
+using MiraAPI.GameOptions;
 using MiraAPI.Modifiers;
 using MiraAPI.Roles;
 using Reactor.Utilities;
 using Reactor.Utilities.Extensions;
 using System.Linq;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace MiraAPI.Utilities;
 
@@ -22,7 +24,7 @@ public static class Extensions
 
     public static bool HasModifier<T>(this PlayerControl player) where T : BaseModifier
     {
-        return player.GetModifierComponent().activeModifiers.Exists(x => x is T);
+        return player.GetModifierComponent().ActiveModifiers.Exists(x => x is T);
     }
 
     public static void AddModifier<T>(this PlayerControl player) where T : BaseModifier
