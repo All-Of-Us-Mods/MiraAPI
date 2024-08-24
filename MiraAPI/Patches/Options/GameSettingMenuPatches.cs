@@ -16,7 +16,7 @@ namespace MiraAPI.Patches.Options;
 public static class GameSettingMenuPatches
 {
     public static int CurrentSelectedMod { get; private set; }
-    
+
     public static MiraPluginInfo SelectedMod { get; private set; }
 
     private static TextMeshPro _text;
@@ -116,12 +116,14 @@ public static class GameSettingMenuPatches
                 roleChance.gameObject.DestroyImmediate();
             }
 
-
             roles.roleChances.Clear();
             roles.roleChances = null;
             roles.AdvancedRolesSettings.gameObject.SetActive(false);
             roles.RoleChancesSettings.gameObject.SetActive(true);
             roles.SetQuotaTab();
+
+            roles.scrollBar.CalculateAndSetYBounds(roles.roleChances.Count + 3, 1f, 6f, 0.43f);
+            roles.scrollBar.ScrollToTop();
         }
 
         if (settings?.Children != null)
@@ -150,6 +152,7 @@ public static class GameSettingMenuPatches
             settings.Children = null;
 
             settings.Initialize();
+            settings.scrollBar.ScrollToTop();
         }
     }
 }

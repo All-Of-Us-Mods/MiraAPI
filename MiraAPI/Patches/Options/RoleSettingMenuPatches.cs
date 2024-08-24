@@ -1,13 +1,13 @@
 ﻿using HarmonyLib;
+using MiraAPI.Networking;
 using MiraAPI.Roles;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
+using Reactor.Networking.Rpc;
+using Reactor.Utilities;
 using Reactor.Utilities.Extensions;
 using System;
 using System.Linq;
-using MiraAPI.Networking;
-using Reactor.Networking.Rpc;
-using Reactor.Utilities;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -25,7 +25,7 @@ public static class RoleSettingMenuPatches
     {
         __instance.roleChances = new Il2CppSystem.Collections.Generic.List<RoleOptionSetting>();
         __instance.advancedSettingChildren = new Il2CppSystem.Collections.Generic.List<OptionBehaviour>();
-            
+
         var maskBg = __instance.scrollBar.transform.FindChild("MaskBg");
 
         if (GameSettingMenuPatches.CurrentSelectedMod == 0)
@@ -45,17 +45,17 @@ public static class RoleSettingMenuPatches
         __instance.scrollBar.transform.localPosition = new Vector3(-1.4957f, 1.5261f, -4);
         maskBg.localPosition = new Vector3(1.5353f, -1.0607f, -.1f);
         maskBg.localScale = new Vector3(6.6811f, 4.1563f, 0.5598f);
-        
+
         int num3 = 0;
 
         var crewRoles = GameSettingMenuPatches.SelectedMod.CustomRoles.Values
             .OfType<ICustomRole>()
             .Where(role => role.Team == ModdedRoleTeams.Crewmate && !role.HideSettings)
             .ToList();
-        
+
         if (crewRoles.Count > 0)
         {
-        
+
             CategoryHeaderEditRole categoryHeaderEditRole = Object.Instantiate(__instance.categoryHeaderEditRoleOrigin, Vector3.zero, Quaternion.identity, __instance.RoleChancesSettings.transform);
             categoryHeaderEditRole.SetHeader(StringNames.CrewmateRolesHeader, 20);
             categoryHeaderEditRole.transform.localPosition = new Vector3(4.986f, num, -2f);
@@ -67,7 +67,7 @@ public static class RoleSettingMenuPatches
                 num3++;
             }
         }
-        
+
         var impRoles = GameSettingMenuPatches.SelectedMod.CustomRoles.Values
             .OfType<ICustomRole>()
             .Where(role => role.Team == ModdedRoleTeams.Impostor && !role.HideSettings)
@@ -89,7 +89,7 @@ public static class RoleSettingMenuPatches
                 num3++;
             }
         }
-        
+
         var neutRoles = GameSettingMenuPatches.SelectedMod.CustomRoles.Values
             .OfType<ICustomRole>()
             .Where(role => role.Team == ModdedRoleTeams.Neutral && !role.HideSettings)
@@ -104,7 +104,7 @@ public static class RoleSettingMenuPatches
             categoryHeaderEditRole3.Title.text = "Neutral Roles";
             categoryHeaderEditRole3.transform.localPosition = new Vector3(4.986f, num, -2f);
             num -= 0.522f;
-            
+
             foreach (var role in neutRoles)
             {
                 CreateQuotaOption(__instance, role as RoleBehaviour, ref num, num3);
@@ -161,7 +161,7 @@ public static class RoleSettingMenuPatches
 
     private static void CreateAdvancedSettings(RolesSettingsMenu __instance, RoleBehaviour role)
     {
-        foreach (var option in __instance.advancedSettingChildren) 
+        foreach (var option in __instance.advancedSettingChildren)
         {
             Object.Destroy(option.gameObject);
         }
@@ -171,7 +171,7 @@ public static class RoleSettingMenuPatches
         float num = -0.872f;
 
         var filteredOptions = GameSettingMenuPatches.SelectedMod.Options.Where(x => x.AdvancedRole == role.GetType());
-        
+
         foreach (var option in filteredOptions)
         {
             if (option.AdvancedRole is not null && option.AdvancedRole != role.GetType())
@@ -207,7 +207,7 @@ public static class RoleSettingMenuPatches
     {
         ICustomRole customRole = role as ICustomRole;
         __instance.roleDescriptionText.text = customRole.RoleLongDescription;
-        __instance.roleTitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(role.StringName, []);
+        __instance.roleTitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(role.StringName, Array.Empty<Il2CppSystem.Object>());
         __instance.roleScreenshot.sprite = Sprite.Create(customRole.OptionsScreenshot.LoadAsset().texture, new Rect(0, 0, 370, 230), Vector2.one / 2, 100);
         __instance.roleScreenshot.drawMode = SpriteDrawMode.Sliced;
         __instance.roleHeaderSprite.color = customRole.RoleColor;

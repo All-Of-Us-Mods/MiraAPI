@@ -25,17 +25,17 @@ public static class GameOptionsMenuPatch
         __instance.MapPicker.gameObject.SetActive(false);
 
         float num = 2.1f;
-        
+
         var filteredGroups = GameSettingMenuPatches.SelectedMod.OptionGroups.Where(x => x.GroupVisible.Invoke() && x.AdvancedRole is null);
-        
+
         foreach (IModdedOptionGroup group in filteredGroups)
         {
-            var filteredOpts = ModdedOptionsManager.Groups[group].Where(x=>x.Visible.Invoke()).ToList();
+            var filteredOpts = ModdedOptionsManager.Groups[group].Where(x => x.Visible.Invoke()).ToList();
             if (filteredOpts.Count == 0)
             {
                 continue;
             }
-            
+
             CategoryHeaderMasked categoryHeaderMasked = Object.Instantiate(__instance.categoryHeaderOrigin, Vector3.zero, Quaternion.identity, __instance.settingsContainer);
             categoryHeaderMasked.SetHeader(CustomStringName.CreateAndRegister(group.GroupName), 20);
             if (group.GroupColor != Color.clear)
@@ -46,7 +46,7 @@ public static class GameOptionsMenuPatch
             categoryHeaderMasked.transform.localScale = Vector3.one * 0.63f;
             categoryHeaderMasked.transform.localPosition = new Vector3(-0.903f, num, -2f);
             num -= 0.63f;
-            
+
             foreach (var opt in filteredOpts)
             {
                 OptionBehaviour newOpt = opt.CreateOption(__instance.checkboxOrigin, __instance.numberOptionOrigin, __instance.stringOptionOrigin, __instance.settingsContainer);
@@ -83,7 +83,6 @@ public static class GameOptionsMenuPatch
         }
 
         __instance.scrollBar.SetYBoundsMax(-num - 1.65f);
-
         return false;
     }
 
