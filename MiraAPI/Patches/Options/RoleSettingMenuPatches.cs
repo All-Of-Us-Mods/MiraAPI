@@ -131,7 +131,7 @@ public static class RoleSettingMenuPatches
 
         return false;
     }
-    
+
     [HarmonyPostfix]
     [HarmonyPatch(nameof(RolesSettingsMenu.OpenChancesTab))]
     public static void OpenChancesTabPostfix(RolesSettingsMenu __instance)
@@ -139,7 +139,7 @@ public static class RoleSettingMenuPatches
         __instance.scrollBar.CalculateAndSetYBounds(__instance.roleChances.Count + 5, 1f, 6f, 0.43f);
         __instance.scrollBar.ScrollToTop();
     }
-    
+
     private static void ValueChanged(OptionBehaviour obj)
     {
         var roleSetting = obj.Cast<RoleOptionSetting>();
@@ -225,7 +225,7 @@ public static class RoleSettingMenuPatches
         __instance.roleScreenshot.sprite = Sprite.Create(customRole.OptionsScreenshot.LoadAsset().texture, new Rect(0, 0, 370, 230), Vector2.one / 2, 100);
         __instance.roleScreenshot.drawMode = SpriteDrawMode.Sliced;
         __instance.roleHeaderSprite.color = customRole.RoleColor;
-        __instance.roleHeaderText.color = customRole.RoleColor.DarkenColor();
+        __instance.roleHeaderText.color = customRole.RoleColor.GetAlternateColor();
 
         CreateAdvancedSettings(__instance, role);
 
@@ -249,11 +249,13 @@ public static class RoleSettingMenuPatches
         roleOptionSetting.transform.localPosition = new Vector3(-0.15f, yPos, -2f);
         roleOptionSetting.SetRole(GameOptionsManager.Instance.CurrentGameOptions.RoleOptions, role, 20);
         roleOptionSetting.labelSprite.color = customRole.RoleColor;
-        roleOptionSetting.titleText.color = customRole.RoleColor.DarkenColor();
         roleOptionSetting.OnValueChanged = new Action<OptionBehaviour>(ValueChanged);
-        roleOptionSetting.titleText.horizontalAlignment = HorizontalAlignmentOptions.Left;
         roleOptionSetting.SetClickMask(__instance.ButtonClickMask);
         __instance.roleChances.Add(roleOptionSetting);
+
+        roleOptionSetting.titleText.transform.localPosition = new Vector3(-0.5376f, -0.2923f, 0f);
+        roleOptionSetting.titleText.color = customRole.RoleColor.GetAlternateColor();
+        roleOptionSetting.titleText.horizontalAlignment = HorizontalAlignmentOptions.Left;
 
         PassiveButton newButton = Object.Instantiate(roleOptionSetting.buttons[0], roleOptionSetting.transform);
         newButton.name = "ConfigButton";
@@ -263,12 +265,11 @@ public static class RoleSettingMenuPatches
 
         SpriteRenderer btnRend = newButton.transform.FindChild("ButtonSprite").GetComponent<SpriteRenderer>();
         btnRend.sprite = MiraAssets.Cog.LoadAsset();
-        btnRend.color = customRole.RoleColor.DarkenColor();
 
-        PassiveButton passiveButton = newButton.GetComponent<PassiveButton>();
+        GameOptionButton passiveButton = newButton.GetComponent<GameOptionButton>();
         passiveButton.OnClick = new ButtonClickedEvent();
-        passiveButton.disabledTextColor = customRole.RoleColor.DarkenColor();
-        passiveButton.selectedTextColor = customRole.RoleColor.DarkenColor().DarkenColor();
+        passiveButton.interactableColor = btnRend.color = customRole.RoleColor.GetAlternateColor();
+        passiveButton.interactableHoveredColor = Color.white;
 
         passiveButton.OnClick.AddListener((UnityAction)(() =>
         {

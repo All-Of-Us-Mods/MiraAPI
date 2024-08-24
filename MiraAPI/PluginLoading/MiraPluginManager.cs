@@ -3,25 +3,27 @@ using BepInEx.Unity.IL2CPP;
 using Il2CppInterop.Runtime.Injection;
 using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.Attributes;
+using MiraAPI.Hud;
 using MiraAPI.Roles;
+using MiraAPI.Utilities.Colors;
 using Reactor.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using MiraAPI.Hud;
 
 namespace MiraAPI.PluginLoading;
 
 internal class MiraPluginManager
 {
     public readonly Dictionary<Assembly, MiraPluginInfo> RegisteredPlugins = [];
-    
+
     private static MiraPluginManager _instance;
-    
-    public static MiraPluginManager Instance { 
+
+    public static MiraPluginManager Instance
+    {
         get => _instance ??= new MiraPluginManager();
-        private set => _instance = value; 
+        private set => _instance = value;
     }
 
     internal void Initialize()
@@ -38,9 +40,11 @@ internal class MiraPluginManager
             var info = new MiraPluginInfo(id, plugin as IMiraPlugin, IL2CPPChainloader.Instance.Plugins[id]);
 
             RegisterAllOptions(assembly, info);
-            
+
             RegisterRoleAttribute(assembly, info);
             RegisterButtonAttribute(assembly);
+
+            RegisterAllColors(assembly);
 
             RegisteredPlugins.Add(assembly, info);
 
@@ -56,14 +60,14 @@ internal class MiraPluginManager
     private static void RegisterAllOptions(Assembly assembly, MiraPluginInfo pluginInfo)
     {
         var filteredTypes = assembly.GetTypes().Where(type => type.IsAssignableTo(typeof(AbstractOptionGroup)));
-        
+
         foreach (var type in filteredTypes)
         {
             if (!ModdedOptionsManager.RegisterGroup(type, pluginInfo))
             {
                 continue;
             }
-            
+
             foreach (var property in type.GetProperties())
             {
                 if (property.PropertyType.IsAssignableTo(typeof(IModdedOption)))
@@ -71,7 +75,7 @@ internal class MiraPluginManager
                     ModdedOptionsManager.RegisterPropertyOption(type, property, pluginInfo);
                     continue;
                 }
-                
+
                 var attribute = property.GetCustomAttribute<ModdedOptionAttribute>();
                 if (attribute == null)
                 {
@@ -109,8 +113,27 @@ internal class MiraPluginManager
                 {
                     Logger<MiraApiPlugin>.Error($"{k}: {v}");
                 }
-                
+
                 Logger<MiraApiPlugin>.Error(e);
+            }
+        }
+    }
+
+    private static void RegisterAllColors(Assembly assembly)
+    {
+        foreach (var type in assembly.GetTypes())
+        {
+            foreach (FieldInfo field in type.GetFields())
+            {
+                foreach (var attribute in field.GetCustomAttributes())
+                {
+                    if (attribute.GetType().BaseType == typeof(RegisterColorAttribute))
+                    {
+                        /*                        Palette.PlayerColors = Palette.PlayerColors.ToArray().AddToArray();
+                                                Palette.ShadowColors = Palette.ShadowColors.ToArray().AddToArray();
+                                                Palette.ColorNames = Palette.ColorNames.ToArray().AddToArray();*/
+                    }
+                }
             }
         }
     }

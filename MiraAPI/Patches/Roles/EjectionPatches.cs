@@ -6,12 +6,12 @@ namespace MiraAPI.Patches.Roles;
 [HarmonyPatch(typeof(ExileController))]
 public static class EjectionPatches
 {
-    
+
     [HarmonyPostfix]
     [HarmonyPatch(nameof(ExileController.Begin))]
     public static void Begin(ExileController __instance)
     {
-        if (!__instance.initData.networkedPlayer.Role || __instance.initData.networkedPlayer.Role is not ICustomRole role)
+        if (!__instance.initData.networkedPlayer || !__instance.initData.networkedPlayer.Role || __instance.initData.networkedPlayer.Role is not ICustomRole role)
         {
             return;
         }
@@ -20,7 +20,7 @@ public static class EjectionPatches
         {
             return;
         }
-        
+
         __instance.completeString = role.GetCustomEjectionMessage(__instance.initData.networkedPlayer);
     }
 }

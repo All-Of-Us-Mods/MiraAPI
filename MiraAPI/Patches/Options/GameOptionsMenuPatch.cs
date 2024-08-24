@@ -41,7 +41,7 @@ public static class GameOptionsMenuPatch
             if (group.GroupColor != Color.clear)
             {
                 categoryHeaderMasked.Background.color = group.GroupColor;
-                categoryHeaderMasked.Title.color = group.GroupColor.DarkenColor();
+                categoryHeaderMasked.Title.color = group.GroupColor.GetAlternateColor();
             }
             categoryHeaderMasked.transform.localScale = Vector3.one * 0.63f;
             categoryHeaderMasked.transform.localPosition = new Vector3(-0.903f, num, -2f);
@@ -58,7 +58,12 @@ public static class GameOptionsMenuPatch
                 {
                     if (group.GroupColor != Color.clear)
                     {
-                        componentsInChildren[i].color = group.GroupColor;
+                        componentsInChildren[i].color = group.GroupColor.GetAlternateColor();
+                        if (componentsInChildren[i].transform.parent.TryGetComponent<GameOptionButton>(out var btn))
+                        {
+                            btn.interactableColor = group.GroupColor.GetAlternateColor();
+                            btn.interactableHoveredColor = Color.white;
+                        }
                     }
 
                     componentsInChildren[i].material.SetInt(PlayerMaterial.MaskLayer, 20);
@@ -68,7 +73,7 @@ public static class GameOptionsMenuPatch
                 {
                     if (group.GroupColor != Color.clear)
                     {
-                        textMeshPro.color = group.GroupColor.DarkenColor();
+                        textMeshPro.color = group.GroupColor;
                     }
 
                     textMeshPro.fontMaterial.SetFloat(ShaderID.StencilComp, 3f);

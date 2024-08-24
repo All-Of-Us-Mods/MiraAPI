@@ -17,6 +17,21 @@ public static class Extensions
     {
         return new Color(color.r - 0.3f, color.g - 0.3f, color.b - 0.3f);
     }
+    public static Color GetAlternateColor(this Color color)
+    {
+        return color.IsColorDark() ? LightenColor(color) : DarkenColor(color);
+    }
+
+    public static Color LightenColor(this Color color)
+    {
+        return new Color(color.r + 0.3f, color.g + 0.3f, color.b + 0.3f);
+    }
+
+    public static bool IsColorDark(this Color color)
+    {
+        return color.r < 0.5f && color.g < 0.5f && color.b < 0.5f;
+    }
+
     public static void UpdateBodies(this PlayerControl playerControl, Color outlineColor, ref DeadBody target)
     {
         foreach (var body in Object.FindObjectsOfType<DeadBody>())

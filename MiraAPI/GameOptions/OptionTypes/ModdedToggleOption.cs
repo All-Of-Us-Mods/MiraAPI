@@ -1,5 +1,5 @@
-﻿using System;
-using MiraAPI.Networking;
+﻿using MiraAPI.Networking;
+using System;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -7,7 +7,7 @@ namespace MiraAPI.GameOptions.OptionTypes;
 
 public class ModdedToggleOption : ModdedOption<bool>
 {
-    public ModdedToggleOption(string title, bool defaultValue, Type roleType=null) : base(title, defaultValue, roleType)
+    public ModdedToggleOption(string title, bool defaultValue, Type roleType = null) : base(title, defaultValue, roleType)
     {
         Data = ScriptableObject.CreateInstance<CheckboxGameSetting>();
 
