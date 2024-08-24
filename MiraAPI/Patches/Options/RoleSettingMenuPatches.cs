@@ -243,12 +243,19 @@ public static class RoleSettingMenuPatches
 
         PassiveButton newButton = Object.Instantiate(roleOptionSetting.buttons[0], roleOptionSetting.transform);
         newButton.name = "ConfigButton";
-        newButton.transform.localPosition = new Vector3(0.2419f, -0.2582f, -2f);
+        newButton.transform.localPosition = new Vector3(0.4473f, -0.3f, -2f);
         newButton.transform.FindChild("Text_TMP").gameObject.DestroyImmediate();
-        newButton.transform.FindChild("ButtonSprite").GetComponent<SpriteRenderer>().sprite = MiraAssets.Cog.LoadAsset();
+        newButton.activeSprites.Destroy();
+
+        SpriteRenderer btnRend = newButton.transform.FindChild("ButtonSprite").GetComponent<SpriteRenderer>();
+        btnRend.sprite = MiraAssets.Cog.LoadAsset();
+        btnRend.color = customRole.RoleColor.DarkenColor();
 
         PassiveButton passiveButton = newButton.GetComponent<PassiveButton>();
         passiveButton.OnClick = new ButtonClickedEvent();
+        passiveButton.disabledTextColor = customRole.RoleColor.DarkenColor();
+        passiveButton.selectedTextColor = customRole.RoleColor.DarkenColor().DarkenColor();
+
         passiveButton.OnClick.AddListener((UnityAction)(() =>
         {
             ChangeTab(role, __instance);
