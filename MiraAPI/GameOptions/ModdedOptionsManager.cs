@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using MiraAPI.Networking;
 using MiraAPI.PluginLoading;
+using MiraAPI.Utilities;
 using Reactor.Networking.Rpc;
 
 namespace MiraAPI.GameOptions;
@@ -109,30 +110,13 @@ public class ModdedOptionsManager
     
     internal static void SyncAllOptions(int targetId=-1)
     {
-        List<NetData> data = [];
+        var chunks = ModdedOptions.Values.Select(option => option.GetNetData()).ChunkNetData(1000);
         
-        var count = 0;
-        foreach (var netData in ModdedOptions.Values.Select(option => option.GetNetData()))
+        while (chunks.Count > 0)
         {
-            data.Add(netData);
-            count += netData.GetLength();
-
-            if (count <= 1000)
-            {
-                continue;
-            }
-            
-            Rpc<SyncOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.ToArray());
-            data.Clear();
-            count = 0;
-        }
-        
-        if (data.Count > 0)
-        {
-            Rpc<SyncOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.ToArray());
+            Rpc<SyncOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, chunks.Dequeue());
         }
     }
-
 
     internal static void HandleSyncOptions(NetData[] data)
     {

@@ -1,13 +1,49 @@
-﻿using MiraAPI.GameOptions;
-using MiraAPI.Roles;
-using Reactor.Utilities.Extensions;
+﻿using System.Collections.Generic;
+using MiraAPI.GameOptions;
 using System.Linq;
+using MiraAPI.Networking;
+using Reactor.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.Utilities;
 
 public static class Extensions
 {
+    public static Queue<NetData[]> ChunkNetData(this IEnumerable<NetData> dataCollection, int chunkSize)
+    {
+        Queue<NetData[]> chunks = [];
+        List<NetData> current = [];
+        
+        var count = 0;
+        foreach (var netData in dataCollection)
+        {
+            var length = netData.GetLength();
+            
+            if (length > chunkSize)
+            {
+                Logger<MiraApiPlugin>.Error($"NetData length is greater than chunk size: {length} > {chunkSize}");
+                continue;
+            }
+            
+            if (count + length > chunkSize)
+            {
+                chunks.Enqueue(current.ToArray());
+                current.Clear();
+                count = 0;
+            }
+            
+            current.Add(netData);
+        }
+        
+        if (current.Count > 0)
+        {
+            chunks.Enqueue(current.ToArray());
+        }
+
+        return chunks;
+    }
+    
+    
     public static bool IsCustom(this OptionBehaviour optionBehaviour)
     {
         return ModdedOptionsManager.ModdedOptions.Values.Any(opt => opt.OptionBehaviour && opt.OptionBehaviour.Equals(optionBehaviour));
@@ -32,37 +68,10 @@ public static class Extensions
         return color.r < 0.5f && color.g < 0.5f && color.b < 0.5f;
     }
 
-    public static void UpdateBodies(this PlayerControl playerControl, Color outlineColor, ref DeadBody target)
-    {
-        foreach (var body in Object.FindObjectsOfType<DeadBody>())
-        {
-            foreach (var bodyRenderer in body.bodyRenderers)
-            {
-                bodyRenderer.SetOutline(null);
-            }
-        }
-
-        if (playerControl.Data.Role is not ICustomRole { TargetsBodies: true })
-        {
-            return;
-        }
-
-        target = playerControl.NearestDeadBody();
-        if (!target)
-        {
-            return;
-        }
-
-        foreach (var renderer in target.bodyRenderers)
-        {
-            renderer.SetOutline(outlineColor);
-        }
-    }
-
-    public static DeadBody NearestDeadBody(this PlayerControl playerControl)
+    public static DeadBody NearestDeadBody(this PlayerControl playerControl, float radius)
     {
         var results = new Il2CppSystem.Collections.Generic.List<Collider2D>();
-        Physics2D.OverlapCircle(playerControl.GetTruePosition(), playerControl.MaxReportDistance / 4f, Helpers.Filter, results);
+        Physics2D.OverlapCircle(playerControl.GetTruePosition(), radius, Helpers.Filter, results);
         return results.ToArray()
             .Where(collider2D => collider2D.CompareTag("DeadBody"))
             .Select(collider2D => collider2D.GetComponent<DeadBody>())

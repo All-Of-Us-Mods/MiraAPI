@@ -167,7 +167,7 @@ public static class RoleSettingMenuPatches
 
         if (AmongUsClient.Instance.AmHost)
         {
-            Rpc<SyncRoleOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, [role.GetNetData(roleSetting.Role)], true);
+            Rpc<SyncRoleOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, [role.GetNetData()], true);
         }
         GameOptionsManager.Instance.GameHostOptions = GameOptionsManager.Instance.CurrentGameOptions;
     }

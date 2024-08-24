@@ -69,8 +69,7 @@ public abstract class ModdedOption<T> : IModdedOption
             Rpc<SyncOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, [GetNetData()], true);
         }
         
-        if (ParentMod is not null &&
-            ParentMod.GetConfigFile().TryGetEntry<T>(ConfigDefinition, out var entry))
+        if (ParentMod?.GetConfigFile().TryGetEntry<T>(ConfigDefinition, out var entry) == true)
         {
             entry.Value = Value;
         }

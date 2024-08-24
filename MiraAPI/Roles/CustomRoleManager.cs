@@ -9,7 +9,7 @@ using Reactor.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using HarmonyLib;
+using MiraAPI.Utilities;
 using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -94,7 +94,7 @@ public static class CustomRoleManager
     public static bool GetCustomRoleBehaviour(RoleTypes roleType, out ICustomRole result)
     {
         CustomRoles.TryGetValue((ushort)roleType, out var temp);
-        if (temp != null)
+        if (temp)
         {
             result = temp as ICustomRole;
             return true;
@@ -104,7 +104,7 @@ public static class CustomRoleManager
         return false;
     }
 
-    public static TaskPanelBehaviour CreateRoleTab(ICustomRole role)
+    internal static TaskPanelBehaviour CreateRoleTab(ICustomRole role)
     {
         var ogPanel = HudManager.Instance.TaskStuff.transform.FindChild("TaskPanel").gameObject.GetComponent<TaskPanelBehaviour>();
         var clonePanel = Object.Instantiate(ogPanel.gameObject, ogPanel.transform.parent);
@@ -122,7 +122,7 @@ public static class CustomRoleManager
         return newPanel;
     }
 
-    public static void UpdateRoleTab(TaskPanelBehaviour panel, ICustomRole role)
+    internal static void UpdateRoleTab(TaskPanelBehaviour panel, ICustomRole role)
     {
         var tabText = panel.tab.gameObject.GetComponentInChildren<TextMeshPro>();
         var ogPanel = HudManager.Instance.TaskStuff.transform.FindChild("TaskPanel").gameObject.GetComponent<TaskPanelBehaviour>();
@@ -138,40 +138,20 @@ public static class CustomRoleManager
         panel.SetTaskText(role.SetTabText().ToString());
     }
     
-    public static void SyncAllRoleSettings(int targetId=-1)
+    internal static void SyncAllRoleSettings(int targetId=-1)
     {
-        List<NetData> data = [];
-        int count = 0;
-        foreach (var role in CustomRoles.Values)
+        var data = CustomRoles.Values
+            .Where(x => x is ICustomRole { HideSettings: false })
+            .Select(x => ((ICustomRole)x).GetNetData())
+            .ChunkNetData(1000);
+
+        while (data.Count > 0)
         {
-            ICustomRole customRole = role as ICustomRole;
-            if (customRole is null or { HideSettings: true })
-            {
-                continue;
-            }
-            
-            customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.NumConfigDefinition, out var numEntry);
-            customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var chanceEntry);
-            
-            var netData = new NetData((uint)role.Role, BitConverter.GetBytes(numEntry.Value).AddRangeToArray(BitConverter.GetBytes(chanceEntry.Value)));
-            
-            data.Add(netData);
-            count += netData.GetLength();
-                
-            if (count > 1000)
-            {
-                Rpc<SyncRoleOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.ToArray());
-                data.Clear();
-                count = 0;
-            }
-        }
-        if (data.Count > 0)
-        {
-            Rpc<SyncRoleOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.ToArray());
+            Rpc<SyncRoleOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.Dequeue());
         }
     }
 
-    public static void HandleSyncRoleOptions(NetData[] data)
+    internal static void HandleSyncRoleOptions(NetData[] data)
     {
         foreach (var netData in data)
         {

@@ -12,14 +12,14 @@ public static class PlayerControlPatches
     [HarmonyPatch(nameof(PlayerControl.FixedUpdate))]
     public static void PlayerControlFixedUpdatePostfix(PlayerControl __instance)
     {
-        if (!__instance.AmOwner)
-        {
-            return;
-        }
-
         if (__instance.Data?.Role is ICustomRole customRole)
         {
             customRole.PlayerControlFixedUpdate(__instance);
+        }
+        
+        if (!__instance.AmOwner)
+        {
+            return;
         }
         
         foreach (var button in CustomButtonManager.CustomButtons)
