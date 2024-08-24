@@ -2,14 +2,15 @@
 
 # Mira API
 
-A thorough, but simple, Among Us modding API that covers:
+A thorough, but simple, Among Us modding API and utility library that covers:
 - Roles
 - Options
-- Gamemodes
+- Modifiers
+- Game Modes
 - Assets
 - HUD Elements
 - Compatibility
-  
+
 Mira API strives to be simple and easy to use, while also using as many base game elements as possible. The result is a less intrusive, better modding API that covers general use cases.
 
 # Usage
@@ -46,7 +47,7 @@ public class MyOptionsGroup : AbstractOptionGroup
 ```
 
 You can access any group class using the `OptionGroupSingleton` class like this:
-```
+```csharp
 // MyOptionsGroup is a class that inherits from AbstractOptionGroup
 var myGroup = OptionGroupSingleton<MyOptionsGroup>.Instance; // gets the instance of the group
 System.Out.Console.WriteLine(myGroup.MyNumberOption); // prints the value of the option to the console
