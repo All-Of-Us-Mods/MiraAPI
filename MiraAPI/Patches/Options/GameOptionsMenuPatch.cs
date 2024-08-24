@@ -28,9 +28,9 @@ public static class GameOptionsMenuPatch
 
         var filteredGroups = GameSettingMenuPatches.SelectedMod.OptionGroups.Where(x => x.GroupVisible.Invoke() && x.AdvancedRole is null);
 
-        foreach (IModdedOptionGroup group in filteredGroups)
+        foreach (AbstractOptionGroup group in filteredGroups)
         {
-            var filteredOpts = ModdedOptionsManager.Groups[group].Where(x => x.Visible.Invoke()).ToList();
+            var filteredOpts = group.Options.Where(x => x.Visible.Invoke()).ToList();
             if (filteredOpts.Count == 0)
             {
                 continue;

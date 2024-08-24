@@ -3,9 +3,9 @@ using MiraAPI.GameOptions.OptionTypes;
 
 namespace MiraAPI.Example.Options;
 
-public class ExampleOptions2 : IModdedOptionGroup
+public class ExampleOptions2 : AbstractOptionGroup
 {
-    public string GroupName => "Example 2";
+    public override string GroupName => "Example 2";
     
     public ModdedToggleOption UseThing { get; } = new("Use Thingy 5", false);
     

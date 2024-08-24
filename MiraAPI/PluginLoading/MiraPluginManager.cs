@@ -55,7 +55,7 @@ internal class MiraPluginManager
 
     private static void RegisterAllOptions(Assembly assembly, MiraPluginInfo pluginInfo)
     {
-        var filteredTypes = assembly.GetTypes().Where(type => type.IsAssignableTo(typeof(IModdedOptionGroup)));
+        var filteredTypes = assembly.GetTypes().Where(type => type.IsAssignableTo(typeof(AbstractOptionGroup)));
         
         foreach (var type in filteredTypes)
         {
