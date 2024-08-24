@@ -1,13 +1,13 @@
 ﻿using HarmonyLib;
+using MiraAPI.Networking;
 using MiraAPI.Roles;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
+using Reactor.Networking.Rpc;
+using Reactor.Utilities;
 using Reactor.Utilities.Extensions;
 using System;
 using System.Linq;
-using MiraAPI.Networking;
-using Reactor.Networking.Rpc;
-using Reactor.Utilities;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -25,7 +25,7 @@ public static class RoleSettingMenuPatches
     {
         __instance.roleChances = new Il2CppSystem.Collections.Generic.List<RoleOptionSetting>();
         __instance.advancedSettingChildren = new Il2CppSystem.Collections.Generic.List<OptionBehaviour>();
-            
+
         var maskBg = __instance.scrollBar.transform.FindChild("MaskBg");
 
         if (GameSettingMenuPatches.CurrentSelectedMod == 0)
@@ -124,7 +124,7 @@ public static class RoleSettingMenuPatches
 
     private static void CreateAdvancedSettings(RolesSettingsMenu __instance, RoleBehaviour role)
     {
-        foreach (var option in __instance.advancedSettingChildren) 
+        foreach (var option in __instance.advancedSettingChildren)
         {
             Object.Destroy(option.gameObject);
         }
@@ -162,7 +162,7 @@ public static class RoleSettingMenuPatches
     {
         ICustomRole customRole = role as ICustomRole;
         __instance.roleDescriptionText.text = customRole.RoleLongDescription;
-        __instance.roleTitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(role.StringName, []);
+        __instance.roleTitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(role.StringName, Array.Empty<Il2CppSystem.Object>());
         __instance.roleScreenshot.sprite = Sprite.Create(role.RoleScreenshot.texture, new Rect(0, 0, 370, 230), Vector2.one / 2, 100);
         __instance.roleScreenshot.drawMode = SpriteDrawMode.Sliced;
         __instance.roleHeaderSprite.color = customRole.RoleColor;

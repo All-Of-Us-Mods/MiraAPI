@@ -1,6 +1,7 @@
 ﻿using MiraAPI.GameOptions;
 using MiraAPI.Modifiers;
 using MiraAPI.Roles;
+using Reactor.Utilities;
 using Reactor.Utilities.Extensions;
 using System.Linq;
 using UnityEngine;
@@ -19,13 +20,31 @@ public static class Extensions
         return player.gameObject.GetComponent<ModifierComponent>();
     }
 
+    public static bool HasModifier<T>(this PlayerControl player) where T : BaseModifier
+    {
+        return player.GetModifierComponent().activeModifiers.Exists(x => x is T);
+    }
+
     public static void AddModifier<T>(this PlayerControl player) where T : BaseModifier
     {
-        player.GetModifierComponent().AddModifier<T>();
+        if (!ModifierManager.TypeToIdModifiers.TryGetValue(typeof(T), out var id))
+        {
+            Logger<MiraApiPlugin>.Error($"Cannot add modifier {typeof(T).Name} because it is not registered.");
+            return;
+        }
+
+        ModifierComponent.RpcAddModifier(player, id);
     }
 
     public static void RemoveModifier<T>(this PlayerControl player) where T : BaseModifier
     {
+        if (!ModifierManager.TypeToIdModifiers.TryGetValue(typeof(T), out var id))
+        {
+            Logger<MiraApiPlugin>.Error($"Cannot add modifier {typeof(T).Name} because it is not registered.");
+            return;
+        }
+
+        ModifierComponent.RpcRemoveModifier(player, id);
     }
 
     public static Color DarkenColor(this Color color)

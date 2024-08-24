@@ -1,22 +1,41 @@
 ﻿using Reactor.Utilities;
+using UnityEngine;
 
 namespace MiraAPI.Modifiers.Types;
 public abstract class TimedModifier : BaseModifier
 {
     public abstract float Duration { get; }
+    public virtual bool AutoStart => false;
     public abstract void OnTimerComplete();
 
-    internal bool TimerActive;
+    public bool TimerActive = false;
+    public float TimeRemaining;
+
+    public override void Update()
+    {
+        if (!Player.AmOwner) return;
+
+        if (TimeRemaining > 0 && TimerActive)
+        {
+            TimeRemaining -= Time.deltaTime;
+        }
+        else
+        {
+            TimerActive = false;
+            TimeRemaining = Duration;
+            OnTimerComplete();
+        }
+    }
 
     public void StartTimer()
     {
         if (TimerActive)
         {
-            Logger<MiraApiPlugin>.Error("Can't start a timer that is already started.");
+            Logger<MiraApiPlugin>.Error("Can't start a timer that has already been started.");
             return;
         }
 
         TimerActive = true;
-        Coroutines.Start(ModifierComponent.ModifierTimer(this));
+        TimeRemaining = Duration;
     }
 }

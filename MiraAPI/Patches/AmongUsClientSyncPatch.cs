@@ -14,7 +14,7 @@ public static class AmongUsClientSyncPatch
         {
             return;
         }
-        
+
         if (clientData.Id == AmongUsClient.Instance.HostId)
         {
             return;
@@ -22,5 +22,6 @@ public static class AmongUsClientSyncPatch
 
         ModdedOptionsManager.SyncAllOptions(clientData.Id);
         CustomRoleManager.SyncAllRoleSettings(clientData.Id);
+        // ModifierManager.SyncAllModifiers(clientData.Id);
     }
 }
