@@ -20,7 +20,9 @@ public abstract class CustomGameMode
     /// <summary>
     /// Game mode ID
     /// </summary>
-    public abstract int Id { get; }
+    public int Id { get; internal set; }
+
+    internal virtual bool Modded => true;
 
     /// <summary>
     /// Called when Intro Cutscene is destroyed

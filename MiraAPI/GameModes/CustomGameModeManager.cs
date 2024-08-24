@@ -16,15 +16,22 @@ public static class CustomGameModeManager
     /// </summary>
     public static readonly Dictionary<int, CustomGameMode> GameModes = [];
 
+    private static int _nextId = 10;
+    
+    public static int GetNextId()
+    {
+        return _nextId++;
+    }
+    
     public static bool IsDefault()
     {
-        return ActiveMode?.Id == 0;
+        return ActiveMode is DefaultMode;
     }
 
     /// <summary>
     /// Current gamemode
     /// </summary>
-    public static CustomGameMode? ActiveMode = new DefaultMode();
+    public static CustomGameMode ActiveMode = new DefaultMode();
 
     /// <summary>
     /// Set current gamemode
@@ -60,13 +67,10 @@ public static class CustomGameModeManager
             Logger<MiraApiPlugin>.Error($"Failed to create instance of {gameModeType.Name}");
             return;
         }
-        
-        if (GameModes.Any(x => x.Key == gameMode.Id))
-        {
-            Logger<MiraApiPlugin>.Error($"ID for gamemode {gameMode.Name} already exists!");
-            return;
-        }
 
-        GameModes.Add(gameMode.Id, gameMode);
+        var id = GetNextId();
+        
+        gameMode.Id = id;
+        GameModes.Add(id, gameMode);
     }
 }
