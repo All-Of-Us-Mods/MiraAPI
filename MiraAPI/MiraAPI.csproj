@@ -13,10 +13,8 @@
     <ItemGroup>
         <EmbeddedResource Include="Resources\Cog.png" />
         <EmbeddedResource Include="Resources\CogActive.png" />
-        <EmbeddedResource Include="Resources\FortniteBanner.jpeg" />
         <EmbeddedResource Include="Resources\NextButton.png" />
         <EmbeddedResource Include="Resources\NextButtonActive.png" />
-        <EmbeddedResource Include="Resources\ExampleButton.png" />
         <EmbeddedResource Include="Resources\Empty.png" />
     </ItemGroup>
 	

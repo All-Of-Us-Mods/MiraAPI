@@ -23,7 +23,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\MiraAPI\MiraAPI.csproj" />
+		<ProjectReference Include="..\MiraAPI\MiraAPI.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Resources\ExampleButton.png" />
+		<EmbeddedResource Include="Resources\FortniteBanner.jpeg" />
 	</ItemGroup>
 
 	<Target Name="Copy" AfterTargets="Build" Condition="'$(AmongUs)' != ''">
