@@ -8,6 +8,7 @@ using System;
 using System.Text;
 using Reactor.Networking;
 using Reactor.Networking.Attributes;
+using Reactor.Utilities;
 using UnityEngine;
 
 namespace MiraAPI;
@@ -26,24 +27,10 @@ public partial class MiraApiPlugin : BasePlugin
     public override void Load()
     {
         Harmony.PatchAll();
+        
+        ReactorCredits.Register("Mira API", Version[..15], true, ReactorCredits.AlwaysShow);
 
         PluginManager = new MiraPluginManager();
         PluginManager.Initialize();
-
-        ReactorVersionShower.TextUpdated += text =>
-        {
-            text.text = new StringBuilder($"{MiraColor.ToTextColor()}Mira API</color> ")
-            .Append(GetShortHashVersion(Version))
-            .Append('\n')
-            .Append(text.text)
-            .ToString();
-        };
-    }
-
-    private static string GetShortHashVersion(string version)
-    {
-        var index = version.IndexOf("+", StringComparison.Ordinal);
-
-        return index < 0 ? version : version[..(index + 3)];
     }
 }
