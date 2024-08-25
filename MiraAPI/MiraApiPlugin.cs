@@ -6,6 +6,7 @@ using Reactor;
 using Reactor.Patches;
 using System;
 using System.Text;
+using MiraAPI.Utilities;
 using Reactor.Networking;
 using Reactor.Networking.Attributes;
 using Reactor.Utilities;
@@ -28,7 +29,7 @@ public partial class MiraApiPlugin : BasePlugin
     {
         Harmony.PatchAll();
         
-        ReactorCredits.Register("Mira API", Version[..15], true, ReactorCredits.AlwaysShow);
+        ReactorCredits.Register("Mira API", Version.Truncate(15, "") ?? Version, true, ReactorCredits.AlwaysShow);
 
         PluginManager = new MiraPluginManager();
         PluginManager.Initialize();

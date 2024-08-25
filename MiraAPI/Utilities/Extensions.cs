@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+using System.Collections.Generic;
 using MiraAPI.GameOptions;
 using System.Linq;
 using MiraAPI.Networking;
@@ -9,6 +10,13 @@ namespace MiraAPI.Utilities;
 
 public static class Extensions
 {
+    public static string? Truncate(this string? value, int maxLength, string truncationSuffix = "…")
+    {
+        return value?.Length > maxLength
+            ? value.Substring(0, maxLength) + truncationSuffix
+            : value;
+    }
+    
     public static Queue<NetData[]> ChunkNetData(this IEnumerable<NetData> dataCollection, int chunkSize)
     {
         Queue<NetData[]> chunks = [];
@@ -68,7 +76,7 @@ public static class Extensions
         return color.r < 0.5f && color.g < 0.5f && color.b < 0.5f;
     }
 
-    public static DeadBody NearestDeadBody(this PlayerControl playerControl, float radius)
+    public static DeadBody? NearestDeadBody(this PlayerControl playerControl, float radius)
     {
         var results = new Il2CppSystem.Collections.Generic.List<Collider2D>();
         Physics2D.OverlapCircle(playerControl.GetTruePosition(), radius, Helpers.Filter, results);
@@ -78,9 +86,9 @@ public static class Extensions
             .FirstOrDefault(component => component && !component.Reported);
     }
 
-    public static PlayerControl GetClosestPlayer(this PlayerControl playerControl, bool includeImpostors, float distance)
+    public static PlayerControl? GetClosestPlayer(this PlayerControl playerControl, bool includeImpostors, float distance)
     {
-        PlayerControl result = null;
+        PlayerControl? result = null;
         if (!ShipStatus.Instance)
         {
             return null;
