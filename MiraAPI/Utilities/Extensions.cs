@@ -23,12 +23,6 @@ public static class Extensions
                 (byte)Mathf.Clamp(color.b - darknessAmount, 0, 255), byte.MaxValue);
     }
     
-    public static void SetOutline(this SpriteRenderer spriteRenderer, bool active, Color color)
-    {
-        spriteRenderer.material.SetFloat(ShaderID.Outline, active ? 1f : 0f);
-        spriteRenderer.material.SetColor(ShaderID.OutlineColor, color);
-    }
-    
     public static string? Truncate(this string? value, int maxLength, string truncationSuffix = "…")
     {
         return value?.Length > maxLength
