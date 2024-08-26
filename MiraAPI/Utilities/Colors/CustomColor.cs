@@ -3,6 +3,10 @@
 namespace MiraAPI.Utilities.Colors;
 public sealed class CustomColor
 {
+    public Color32 MainColor { get; }
+    public Color32 ShadowColor { get; }
+    public StringNames Name { get; }
+    
     public CustomColor(Color32 mainColor, StringNames name)
     {
         MainColor = mainColor;
@@ -16,8 +20,4 @@ public sealed class CustomColor
         ShadowColor = shadowColor;
         Name = name;
     }
-
-    public Color32 MainColor { get; }
-    public Color32 ShadowColor { get; }
-    public StringNames Name { get; }
 }
