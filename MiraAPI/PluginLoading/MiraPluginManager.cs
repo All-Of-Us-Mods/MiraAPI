@@ -45,7 +45,7 @@ internal class MiraPluginManager
             RegisterRoleAttribute(assembly, info);
             RegisterButtonAttribute(assembly);
 
-            RegisterAllColors(assembly);
+            RegisterColorClasses(assembly);
 
             RegisteredPlugins.Add(assembly, info);
 
@@ -120,7 +120,7 @@ internal class MiraPluginManager
         }
     }
 
-    private static void RegisterAllColors(Assembly assembly)
+    private static void RegisterColorClasses(Assembly assembly)
     {
         foreach (var type in assembly.GetTypes())
         {
@@ -152,7 +152,6 @@ internal class MiraPluginManager
                 PaletteManager.CustomColors.Add(color);
             }
         }
-        PaletteManager.RegisterAllColors();
     }
 
     private static void RegisterButtonAttribute(Assembly assembly)
