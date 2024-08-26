@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
 
-namespace MiraAPI.Utilities;
-public class CustomColor
+namespace MiraAPI.Utilities.Colors;
+public sealed class CustomColor
 {
     public CustomColor(Color32 mainColor, StringNames name)
     {
         MainColor = mainColor;
-        ShadowColor = GetShadowColor(mainColor, 60);
+        ShadowColor = mainColor.GetShadowColor(60);
         Name = name;
     }
 
@@ -20,11 +20,4 @@ public class CustomColor
     public Color32 MainColor { get; }
     public Color32 ShadowColor { get; }
     public StringNames Name { get; }
-
-    public static Color32 GetShadowColor(Color32 c, byte darknessAmount)
-    {
-        return
-            new Color32((byte)Mathf.Clamp(c.r - darknessAmount, 0, 255), (byte)Mathf.Clamp(c.g - darknessAmount, 0, 255),
-            (byte)Mathf.Clamp(c.b - darknessAmount, 0, 255), byte.MaxValue);
-    }
 }

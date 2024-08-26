@@ -11,6 +11,18 @@ namespace MiraAPI.Utilities;
 
 public static class Extensions
 {
+    public static bool IsStatic(this Type type)
+    {
+        return type is { IsClass: true, IsAbstract: true, IsSealed: true };
+    }
+    
+    public static Color32 GetShadowColor(this Color32 color, byte darknessAmount)
+    {
+        return
+            new Color32((byte)Mathf.Clamp(color.r - darknessAmount, 0, 255), (byte)Mathf.Clamp(color.g - darknessAmount, 0, 255),
+                (byte)Mathf.Clamp(color.b - darknessAmount, 0, 255), byte.MaxValue);
+    }
+    
     public static void SetOutline(this SpriteRenderer spriteRenderer, bool active, Color color)
     {
         spriteRenderer.material.SetFloat(ShaderID.Outline, active ? 1f : 0f);

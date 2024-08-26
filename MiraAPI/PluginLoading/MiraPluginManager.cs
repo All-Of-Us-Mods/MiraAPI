@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using MiraAPI.Utilities;
 
 namespace MiraAPI.PluginLoading;
 
@@ -123,19 +124,35 @@ internal class MiraPluginManager
     {
         foreach (var type in assembly.GetTypes())
         {
-            foreach (FieldInfo field in type.GetFields())
+            if (type.GetCustomAttribute<RegisterColorsAttribute>() == null)
             {
-                foreach (var attribute in field.GetCustomAttributes())
+                continue;
+            }
+
+            if (!type.IsStatic())
+            {
+                Logger<MiraApiPlugin>.Error($"Color class {type.Name} must be static.");
+                continue;
+            }
+
+            foreach (var property in type.GetProperties())
+            {
+                if (property.PropertyType != typeof(CustomColor))
                 {
-                    if (attribute.GetType().BaseType == typeof(RegisterColorAttribute))
-                    {
-                        /*                        Palette.PlayerColors = Palette.PlayerColors.ToArray().AddToArray();
-                                                Palette.ShadowColors = Palette.ShadowColors.ToArray().AddToArray();
-                                                Palette.ColorNames = Palette.ColorNames.ToArray().AddToArray();*/
-                    }
+                    continue;
                 }
+                
+                var color = (CustomColor)property.GetValue(null);
+                if (color == null)
+                {
+                    Logger<MiraApiPlugin>.Error($"Color property {property.Name} in {type.Name} is null.");
+                    continue;
+                }
+                
+                PaletteManager.CustomColors.Add(color);
             }
         }
+        PaletteManager.RegisterAllColors();
     }
 
     private static void RegisterButtonAttribute(Assembly assembly)
