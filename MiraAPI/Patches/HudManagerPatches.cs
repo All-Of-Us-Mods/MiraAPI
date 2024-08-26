@@ -1,9 +1,11 @@
-﻿using HarmonyLib;
+﻿using System;
+using HarmonyLib;
 using InnerNet;
 using MiraAPI.Hud;
 using MiraAPI.Roles;
 using Reactor.Utilities.Extensions;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace MiraAPI.Patches;
 
@@ -78,10 +80,12 @@ public static class HudManagerPatches
     [HarmonyPatch(nameof(HudManager.Start))]
     public static void StartPostfix(HudManager __instance)
     {
+        var buttons = __instance.transform.Find("Buttons");
+        var bottomRight = buttons.Find("BottomRight");
+        
         if (!_bottomLeft)
         {
-            var buttons = __instance.transform.Find("Buttons");
-            _bottomLeft = Object.Instantiate(buttons.Find("BottomRight").gameObject, buttons);
+            _bottomLeft = Object.Instantiate(bottomRight.gameObject, buttons);
         }
 
         foreach (var t in _bottomLeft.GetComponentsInChildren<ActionButton>(true))
@@ -98,7 +102,14 @@ public static class HudManagerPatches
 
         foreach (var button in CustomButtonManager.CustomButtons)
         {
-            button.CreateButton(_bottomLeft.transform);
+            Transform location = button.Location switch
+            {
+                ButtonLocation.BottomLeft => _bottomLeft.transform,
+                ButtonLocation.BottomRight => bottomRight,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
+            button.CreateButton(location);
         }
 
         gridArrange.Start();

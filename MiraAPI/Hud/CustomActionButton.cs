@@ -37,6 +37,11 @@ public abstract class CustomActionButton
     public abstract LoadableAsset<Sprite> Sprite { get; }
 
     /// <summary>
+    /// The location of the button on the screen
+    /// </summary>
+    public virtual ButtonLocation Location => ButtonLocation.BottomLeft;
+
+    /// <summary>
     /// Returns true if the button has an effect ability.
     /// </summary>
     public bool HasEffect => EffectDuration > 0;
