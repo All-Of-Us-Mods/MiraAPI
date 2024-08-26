@@ -6,6 +6,9 @@ using UnityEngine.Events;
 
 namespace MiraAPI.Hud;
 
+/// <summary>
+/// Class for making custom action buttons. More customizable than the default Action/Ability buttons in the base game
+/// </summary>
 public abstract class CustomActionButton
 {
     /// <summary>
@@ -237,26 +240,49 @@ public abstract class CustomActionButton
     }
 }
 
-
+/// <summary>
+/// Custom action button that has a target object.
+/// </summary>
+/// <typeparam name="T">The type of the target object.</typeparam>
 public abstract class CustomActionButton<T> : CustomActionButton where T : MonoBehaviour
 {
+    /// <summary>
+    /// The target object of the button.
+    /// </summary>
     public T? Target { get; private set; }
     
+    /// <summary>
+    /// The distance the player must be from the target object to use the button.
+    /// </summary>
     public virtual float Distance => PlayerControl.LocalPlayer.Data.Role.GetAbilityDistance();
     
-    public virtual string ColliderTag => null;
+    /// <summary>
+    /// An optional collider tag to filter the target object by.
+    /// </summary>
+    public virtual string? ColliderTag => null;
 
+    /// <summary>
+    /// Determines if the target object is valid.
+    /// </summary>
     public virtual bool IsTargetValid(T target)
     {
         return target;
     }
     
+    /// <summary>
+    /// The method used to get the target object.
+    /// </summary>
     public virtual T? GetTarget()
     {
         return PlayerControl.LocalPlayer.GetNearestObjectOfType<T>(Distance, ColliderTag, IsTargetValid);
     }
 
+    /// <summary>
+    /// Sets the outline of the target object.
+    /// </summary>
+    /// <param name="active">Should the outline be active</param>
     public abstract void SetOutline(bool active);
+    
     
     public override bool CanUse()
     {
