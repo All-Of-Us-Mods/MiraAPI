@@ -124,7 +124,7 @@ internal class MiraPluginManager
     {
         foreach (var type in assembly.GetTypes())
         {
-            if (type.GetCustomAttribute<RegisterPalette>() == null)
+            if (type.GetCustomAttribute<RegisterCustomColorsAttribute>() == null)
             {
                 continue;
             }

@@ -1,23 +1,22 @@
-﻿using UnityEngine;
+﻿using Reactor.Localization.Utilities;
+using UnityEngine;
 
 namespace MiraAPI.Utilities.Colors;
-public sealed class CustomColor
+public sealed class CustomColor(Color32 mainColor, Color32 shadowColor, StringNames name)
 {
-    public Color32 MainColor { get; }
-    public Color32 ShadowColor { get; }
-    public StringNames Name { get; }
-    
-    public CustomColor(Color32 mainColor, StringNames name)
+    public Color32 MainColor { get; } = mainColor;
+    public Color32 ShadowColor { get; } = shadowColor;
+    public StringNames Name { get; } = name;
+
+    public CustomColor(Color32 mainColor, StringNames name) : this(mainColor, mainColor.GetShadowColor(60), name)
     {
-        MainColor = mainColor;
-        ShadowColor = mainColor.GetShadowColor(60);
-        Name = name;
     }
 
-    public CustomColor(Color32 mainColor, Color32 shadowColor, StringNames name)
+    public CustomColor(Color32 mainColor, string name) : this(mainColor, mainColor.GetShadowColor(60), name)
     {
-        MainColor = mainColor;
-        ShadowColor = shadowColor;
-        Name = name;
+    }
+
+    public CustomColor(Color32 mainColor, Color32 shadowColor, string name) : this(mainColor, shadowColor, CustomStringName.CreateAndRegister(name))
+    {
     }
 }

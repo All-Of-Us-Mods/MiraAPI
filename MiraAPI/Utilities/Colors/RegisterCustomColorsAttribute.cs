@@ -3,4 +3,4 @@
 namespace MiraAPI.Utilities.Colors;
 
 [AttributeUsage(AttributeTargets.Class)]
-public class RegisterPalette : Attribute;
+public class RegisterCustomColorsAttribute : Attribute;
