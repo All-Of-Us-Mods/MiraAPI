@@ -1,4 +1,6 @@
-﻿using MiraAPI.Utilities.Assets;
+﻿#nullable enable
+using MiraAPI.Utilities;
+using MiraAPI.Utilities.Assets;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -59,7 +61,7 @@ public abstract class CustomActionButton
     /// <summary>
     /// The button object in game. This is created by Mira API automatically.
     /// </summary>
-    protected ActionButton Button { get; private set; }
+    protected ActionButton? Button { get; private set; }
     
     internal void CreateButton(Transform parent)
     {
@@ -109,7 +111,10 @@ public abstract class CustomActionButton
     /// <param name="sprite">The new sprite to override with</param>
     public void OverrideSprite(Sprite sprite)
     {
-        Button.graphic.sprite = sprite;
+        if (Button != null)
+        {
+            Button.graphic.sprite = sprite;
+        }
     }
 
     /// <summary>
@@ -118,7 +123,7 @@ public abstract class CustomActionButton
     /// <param name="name">The new name to override with</param>
     public void OverrideName(string name)
     {
-        Button.OverrideText(name);
+        Button?.OverrideText(name);
     }
 
     /// <summary>
@@ -164,7 +169,7 @@ public abstract class CustomActionButton
     /// <param name="role">Passed in from HudManager.SetHudActive, the current role of the player.</param>
     public virtual void SetActive(bool visible, RoleBehaviour role)
     {
-        Button.ToggleVisible(visible && Enabled(role));
+        Button?.ToggleVisible(visible && Enabled(role));
     }
 
     /// <summary>
@@ -172,7 +177,7 @@ public abstract class CustomActionButton
     /// This method takes into account cooldowns, effects, and uses, before calling the <see cref="OnClick"/> method.
     /// It can be overridden for custom behavior.
     /// </summary>
-    public virtual void ClickHandler()
+    protected virtual void ClickHandler()
     {
         if (!CanUse())
         {
@@ -182,11 +187,11 @@ public abstract class CustomActionButton
         if (LimitedUses)
         {
             UsesLeft--;
-            Button.SetUsesRemaining(UsesLeft);
+            Button?.SetUsesRemaining(UsesLeft);
         }
 
         OnClick();
-        Button.SetDisabled();
+        Button?.SetDisabled();
         if (HasEffect)
         {
             EffectActive = true;
@@ -219,15 +224,51 @@ public abstract class CustomActionButton
 
         if (CanUse())
         {
-            Button.SetEnabled();
+            Button?.SetEnabled();
         }
         else
         {
-            Button.SetDisabled();
+            Button?.SetDisabled();
         }
         
-        Button.SetCoolDown(Timer, EffectActive ? EffectDuration : Cooldown);
+        Button?.SetCoolDown(Timer, EffectActive ? EffectDuration : Cooldown);
 
         FixedUpdate(playerControl);
+    }
+}
+
+
+public abstract class CustomActionButton<T> : CustomActionButton where T : MonoBehaviour
+{
+    public T? Target { get; private set; }
+    
+    public virtual float Distance => PlayerControl.LocalPlayer.Data.Role.GetAbilityDistance();
+    
+    public virtual string ColliderTag => null;
+
+    public virtual bool IsTargetValid(T target)
+    {
+        return target;
+    }
+    
+    public virtual T? GetTarget()
+    {
+        return PlayerControl.LocalPlayer.GetNearestObjectOfType<T>(Distance, ColliderTag, IsTargetValid);
+    }
+
+    public abstract void SetOutline(bool active);
+    
+    public override bool CanUse()
+    {
+        var newTarget = GetTarget();
+        if (newTarget != Target)
+        {
+            SetOutline(false);
+        }
+
+        Target = newTarget;
+        SetOutline(true);
+        
+        return base.CanUse() && Target;
     }
 }

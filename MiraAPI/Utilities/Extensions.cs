@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using MiraAPI.GameOptions;
 using System.Linq;
@@ -10,10 +11,16 @@ namespace MiraAPI.Utilities;
 
 public static class Extensions
 {
+    public static void SetOutline(this SpriteRenderer spriteRenderer, bool active, Color color)
+    {
+        spriteRenderer.material.SetFloat(ShaderID.Outline, active ? 1f : 0f);
+        spriteRenderer.material.SetColor(ShaderID.OutlineColor, color);
+    }
+    
     public static string? Truncate(this string? value, int maxLength, string truncationSuffix = "…")
     {
         return value?.Length > maxLength
-            ? value.Substring(0, maxLength) + truncationSuffix
+            ? value[..maxLength] + truncationSuffix
             : value;
     }
     
@@ -73,7 +80,7 @@ public static class Extensions
 
     public static bool IsColorDark(this Color color)
     {
-        return color.r < 0.5f && color.g < 0.5f && color.b < 0.5f;
+        return color.r < 0.5f && color is { g: < 0.5f, b: < 0.5f };
     }
 
     public static DeadBody? NearestDeadBody(this PlayerControl playerControl, float radius)
@@ -86,6 +93,16 @@ public static class Extensions
             .FirstOrDefault(component => component && !component.Reported);
     }
 
+    public static T? GetNearestObjectOfType<T>(this PlayerControl playerControl, float radius, string? colliderTag=null, Func<T, bool>? predicate=null) where T : Component
+    {
+        var results = new Il2CppSystem.Collections.Generic.List<Collider2D>();
+        Physics2D.OverlapCircle(playerControl.GetTruePosition(), radius, Helpers.Filter, results);
+        return results.ToArray()
+            .Where(collider2D => colliderTag == null || collider2D.CompareTag(colliderTag))
+            .Select(collider2D => collider2D.GetComponent<T>())
+            .FirstOrDefault(predicate ?? (component => component));
+    }
+
     public static PlayerControl? GetClosestPlayer(this PlayerControl playerControl, bool includeImpostors, float distance)
     {
         PlayerControl? result = null;
@@ -96,14 +113,12 @@ public static class Extensions
 
         var truePosition = playerControl.GetTruePosition();
 
-        foreach (var playerInfo in GameData.Instance.AllPlayers)
+        var filteredPlayers = GameData.Instance.AllPlayers.ToArray()
+            .Where(playerInfo => !playerInfo.Disconnected && playerInfo.PlayerId != playerControl.PlayerId && !playerInfo.IsDead &&
+                                 (includeImpostors || !playerInfo.Role.IsImpostor));
+        
+        foreach (var playerInfo in filteredPlayers)
         {
-            if (playerInfo.Disconnected || playerInfo.PlayerId == playerControl.PlayerId ||
-                playerInfo.IsDead || !includeImpostors && playerInfo.Role.IsImpostor)
-            {
-                continue;
-            }
-
             var @object = playerInfo.Object;
             if (!@object)
             {
