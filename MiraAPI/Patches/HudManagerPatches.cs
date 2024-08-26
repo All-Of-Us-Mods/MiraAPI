@@ -136,7 +136,9 @@ public static class HudManagerPatches
         }
 
         foreach (var button in CustomButtonManager.CustomButtons)
+        {
             button.SetActive(isActive, roleBehaviour);
+        }
 
         if (roleBehaviour is ICustomRole role)
         {
