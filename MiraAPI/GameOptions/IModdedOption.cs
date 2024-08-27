@@ -19,6 +19,7 @@ public interface IModdedOption
     public ConfigDefinition ConfigDefinition { get; }
     public void ValueChanged(OptionBehaviour optionBehaviour);
     public OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container);
+    public abstract float GetFloatData();
     public NetData GetNetData();
     public void HandleNetData(byte[] data);
 }

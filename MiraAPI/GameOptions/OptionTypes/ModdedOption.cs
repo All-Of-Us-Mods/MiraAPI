@@ -77,6 +77,8 @@ public abstract class ModdedOption<T> : IModdedOption
         OnValueChanged(newValue);
     }
 
+    public abstract float GetFloatData();
+    
     public abstract NetData GetNetData();
         
     public abstract void HandleNetData(byte[] data);
