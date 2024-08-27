@@ -8,7 +8,13 @@
         <Description>Simple and easy to use Among Us modding API.</Description>
         <Authors>Angxl, XtraCube</Authors>
         <Company>All Of Us</Company>
+        <PackageLicenseExpression>LGPL-2.1-or-later</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
+    
+    <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
     
     <ItemGroup>
         <EmbeddedResource Include="Resources\Checkmark.png" />
