@@ -91,11 +91,11 @@ public static class Extensions
 
     public static bool HasModifier<T>(this PlayerControl? player) where T : BaseModifier
     {
-        return player?.GetModifierComponent() != null && player.GetModifierComponent().ActiveModifiers.Exists(x => x is T);
+        return player?.GetModifierComponent() != null && player.GetModifierComponent()!.ActiveModifiers.Exists(x => x is T);
     }
     public static bool HasModifier(this PlayerControl? player, uint id)
     {
-        return player?.GetModifierComponent() != null && player.GetModifierComponent().ActiveModifiers.Exists(x => x.ModifierId == id);
+        return player?.GetModifierComponent() != null && player.GetModifierComponent()!.ActiveModifiers.Exists(x => x.ModifierId == id);
     }
 
     public static void AddModifier<T>(this PlayerControl player) where T : BaseModifier

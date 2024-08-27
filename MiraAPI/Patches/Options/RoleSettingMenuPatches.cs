@@ -8,6 +8,7 @@ using Reactor.Utilities;
 using Reactor.Utilities.Extensions;
 using System;
 using System.Linq;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -218,7 +219,7 @@ public static class RoleSettingMenuPatches
     {
         var customRole = role as ICustomRole;
         __instance.roleDescriptionText.text = customRole.RoleLongDescription;
-        __instance.roleTitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(role.StringName, []);
+        __instance.roleTitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(role.StringName, new Il2CppReferenceArray<Il2CppSystem.Object>(0));
         __instance.roleScreenshot.sprite = Sprite.Create(customRole.OptionsScreenshot.LoadAsset().texture, new Rect(0, 0, 370, 230), Vector2.one / 2, 100);
         __instance.roleScreenshot.drawMode = SpriteDrawMode.Sliced;
         __instance.roleHeaderSprite.color = customRole.RoleColor;
