@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using MiraAPI.GameModes;
 using MiraAPI.Roles;
 using MiraAPI.Utilities;
 using UnityEngine;
@@ -9,6 +8,7 @@ namespace MiraAPI.Patches;
 [HarmonyPatch(typeof(IntroCutscene))]
 public static class IntroCutscenePatches
 {
+    /*
     [HarmonyPostfix]
     [HarmonyPatch(nameof(IntroCutscene.BeginImpostor))]
     public static void BeginImpostorPatch(IntroCutscene __instance)
@@ -18,7 +18,7 @@ public static class IntroCutscenePatches
             var mode = CustomGameModeManager.ActiveMode;
             __instance.TeamTitle.text = $"<size=70%>{mode.Name}</size>\n<size=20%>{mode.Description}</size>";
         }
-    }
+    }*/
     
     [HarmonyPrefix]
     [HarmonyPatch(nameof(IntroCutscene.BeginCrewmate))]
@@ -48,10 +48,11 @@ public static class IntroCutscenePatches
         return true;
     }
 
+    /*
     [HarmonyPostfix]
     [HarmonyPatch(nameof(IntroCutscene.OnDestroy))]
     public static void GameBeginPatch()
     {
         CustomGameModeManager.ActiveMode?.Initialize();
-    }
+    }*/
 }

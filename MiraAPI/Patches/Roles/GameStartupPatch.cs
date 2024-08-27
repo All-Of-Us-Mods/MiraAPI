@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using MiraAPI.Roles;
+using MiraAPI.Utilities.Colors;
 
 namespace MiraAPI.Patches.Roles;
 
@@ -22,5 +23,6 @@ public static class GameStartupPatch
 
         _runOnce = true;
         CustomRoleManager.RegisterInRoleManager();
+        PaletteManager.RegisterAllColors();
     }
 }

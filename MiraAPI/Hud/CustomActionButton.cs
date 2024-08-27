@@ -1,9 +1,14 @@
-﻿using MiraAPI.Utilities.Assets;
+﻿#nullable enable
+using MiraAPI.Utilities;
+using MiraAPI.Utilities.Assets;
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace MiraAPI.Hud;
 
+/// <summary>
+/// Class for making custom action buttons. More customizable than the default Action/Ability buttons in the base game
+/// </summary>
 public abstract class CustomActionButton
 {
     /// <summary>
@@ -30,6 +35,11 @@ public abstract class CustomActionButton
     /// The sprite of the button. Use <see cref="LoadableResourceAsset"/> to load a sprite from a resource path. Use <see cref="LoadableBundleAsset{T}"/> to load a sprite from an asset bundle.
     /// </summary>
     public abstract LoadableAsset<Sprite> Sprite { get; }
+
+    /// <summary>
+    /// The location of the button on the screen
+    /// </summary>
+    public virtual ButtonLocation Location => ButtonLocation.BottomLeft;
 
     /// <summary>
     /// Returns true if the button has an effect ability.
@@ -59,8 +69,8 @@ public abstract class CustomActionButton
     /// <summary>
     /// The button object in game. This is created by Mira API automatically.
     /// </summary>
-    protected ActionButton Button { get; private set; }
-
+    protected ActionButton? Button { get; private set; }
+    
     internal void CreateButton(Transform parent)
     {
         if (Button)
@@ -99,17 +109,20 @@ public abstract class CustomActionButton
         {
             OnEffectEnd();
         }
-
+        
         EffectActive = false;
     }
-
+    
     /// <summary>
     /// A utility function to override the sprite of the button.
     /// </summary>
     /// <param name="sprite">The new sprite to override with</param>
     public void OverrideSprite(Sprite sprite)
     {
-        Button.graphic.sprite = sprite;
+        if (Button != null)
+        {
+            Button.graphic.sprite = sprite;
+        }
     }
 
     /// <summary>
@@ -118,7 +131,7 @@ public abstract class CustomActionButton
     /// <param name="name">The new name to override with</param>
     public void OverrideName(string name)
     {
-        Button.OverrideText(name);
+        Button?.OverrideText(name);
     }
 
     /// <summary>
@@ -164,7 +177,7 @@ public abstract class CustomActionButton
     /// <param name="role">Passed in from HudManager.SetHudActive, the current role of the player.</param>
     public virtual void SetActive(bool visible, RoleBehaviour role)
     {
-        Button.ToggleVisible(visible && Enabled(role));
+        Button?.ToggleVisible(visible && Enabled(role));
     }
 
     /// <summary>
@@ -172,7 +185,7 @@ public abstract class CustomActionButton
     /// This method takes into account cooldowns, effects, and uses, before calling the <see cref="OnClick"/> method.
     /// It can be overridden for custom behavior.
     /// </summary>
-    public virtual void ClickHandler()
+    protected virtual void ClickHandler()
     {
         if (!CanUse())
         {
@@ -182,11 +195,11 @@ public abstract class CustomActionButton
         if (LimitedUses)
         {
             UsesLeft--;
-            Button.SetUsesRemaining(UsesLeft);
+            Button?.SetUsesRemaining(UsesLeft);
         }
 
         OnClick();
-        Button.SetDisabled();
+        Button?.SetDisabled();
         if (HasEffect)
         {
             EffectActive = true;
@@ -219,15 +232,74 @@ public abstract class CustomActionButton
 
         if (CanUse())
         {
-            Button.SetEnabled();
+            Button?.SetEnabled();
         }
         else
         {
-            Button.SetDisabled();
+            Button?.SetDisabled();
         }
-
-        Button.SetCoolDown(Timer, EffectActive ? EffectDuration : Cooldown);
+        
+        Button?.SetCoolDown(Timer, EffectActive ? EffectDuration : Cooldown);
 
         FixedUpdate(playerControl);
+    }
+}
+
+/// <summary>
+/// Custom action button that has a target object.
+/// </summary>
+/// <typeparam name="T">The type of the target object.</typeparam>
+public abstract class CustomActionButton<T> : CustomActionButton where T : MonoBehaviour
+{
+    /// <summary>
+    /// The target object of the button.
+    /// </summary>
+    public T? Target { get; private set; }
+    
+    /// <summary>
+    /// The distance the player must be from the target object to use the button.
+    /// </summary>
+    public virtual float Distance => PlayerControl.LocalPlayer.Data.Role.GetAbilityDistance();
+    
+    /// <summary>
+    /// An optional collider tag to filter the target object by.
+    /// </summary>
+    public virtual string? ColliderTag => null;
+
+    /// <summary>
+    /// Determines if the target object is valid.
+    /// </summary>
+    public virtual bool IsTargetValid(T target)
+    {
+        return target;
+    }
+    
+    /// <summary>
+    /// The method used to get the target object.
+    /// </summary>
+    public virtual T? GetTarget()
+    {
+        return PlayerControl.LocalPlayer.GetNearestObjectOfType<T>(Distance, ColliderTag, IsTargetValid);
+    }
+
+    /// <summary>
+    /// Sets the outline of the target object.
+    /// </summary>
+    /// <param name="active">Should the outline be active</param>
+    public abstract void SetOutline(bool active);
+    
+    
+    public override bool CanUse()
+    {
+        var newTarget = GetTarget();
+        if (newTarget != Target)
+        {
+            SetOutline(false);
+        }
+
+        Target = newTarget;
+        SetOutline(true);
+        
+        return base.CanUse() && Target;
     }
 }

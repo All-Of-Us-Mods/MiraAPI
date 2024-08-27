@@ -9,7 +9,8 @@ using Reactor.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using HarmonyLib;
+using Il2CppInterop.Runtime.Injection;
+using MiraAPI.Utilities;
 using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -19,24 +20,40 @@ namespace MiraAPI.Roles;
 public static class CustomRoleManager
 {
     public static readonly Dictionary<ushort, RoleBehaviour> CustomRoles = new();
-
-    private static int GetNextRoleId(ushort requestedId)
+    
+    public static readonly Dictionary<Type, ushort> RoleIds = new();
+    
+    private static ushort _roleId = 100;
+    
+    private static ushort GetNextRoleId()
     {
-        while (CustomRoles.ContainsKey(requestedId) || requestedId <= Enum.GetNames<RoleTypes>().Length)
-        {
-            Logger<MiraApiPlugin>.Error(requestedId + ", " + (requestedId+1));
-            requestedId++;
-        }
-
-        return requestedId;
+        return _roleId++;
     }
 
-    public static void RegisterInRoleManager()
+    internal static void RegisterInRoleManager()
     {
         RoleManager.Instance.AllRoles = RoleManager.Instance.AllRoles.Concat(CustomRoles.Values).ToArray();
     }
 
-    internal static RoleBehaviour RegisterRole(Type roleType, ushort roleId)
+    public static void RegisterRoleTypes(List<Type> roles, MiraPluginInfo pluginInfo)
+    {
+        roles.ForEach(x=>RoleIds.Add(x, GetNextRoleId()));
+        
+        foreach (var roleType in roles)
+        {
+            ClassInjector.RegisterTypeInIl2Cpp(roleType);
+
+            var role = RegisterRole(roleType, pluginInfo);
+            if (role is null)
+            {
+                continue;
+            }
+
+            pluginInfo.CustomRoles.Add((ushort)role.Role, role);
+        }
+    }
+
+    private static RoleBehaviour RegisterRole(Type roleType, MiraPluginInfo parentMod)
     {
         if (!(typeof(RoleBehaviour).IsAssignableFrom(roleType) && typeof(ICustomRole).IsAssignableFrom(roleType)))
         {
@@ -51,8 +68,10 @@ public static class CustomRoleManager
             roleBehaviour.gameObject.Destroy();
             return null;
         }
+        
+        var roleId = RoleIds[roleType];
 
-        roleBehaviour.Role = (RoleTypes)GetNextRoleId(roleId);
+        roleBehaviour.Role = (RoleTypes)roleId;
         roleBehaviour.TeamType = customRole.Team == ModdedRoleTeams.Neutral ? RoleTeamTypes.Crewmate : (RoleTeamTypes)customRole.Team;
         roleBehaviour.NameColor = customRole.RoleColor;
         roleBehaviour.StringName = CustomStringName.CreateAndRegister(customRole.RoleName);
@@ -79,22 +98,22 @@ public static class CustomRoleManager
             return roleBehaviour;
         }
 
-        var config = PluginSingleton<MiraApiPlugin>.Instance.Config;
+        var config = parentMod.PluginConfig;
         config.Bind(customRole.NumConfigDefinition, 1);
         config.Bind(customRole.ChanceConfigDefinition, 100);
-
+        
         return roleBehaviour;
     }
 
     public static MiraPluginInfo FindParentMod(ICustomRole role)
     {
-        return MiraPluginManager.Instance.RegisteredPlugins.First(plugin => plugin.Value.CustomRoles.Values.Contains(role as RoleBehaviour)).Value;
+        return MiraPluginManager.Instance.RegisteredPlugins.First(plugin => plugin.Value.CustomRoles.ContainsValue(role as RoleBehaviour)).Value;
     }
 
     public static bool GetCustomRoleBehaviour(RoleTypes roleType, out ICustomRole result)
     {
         CustomRoles.TryGetValue((ushort)roleType, out var temp);
-        if (temp != null)
+        if (temp)
         {
             result = temp as ICustomRole;
             return true;
@@ -104,7 +123,7 @@ public static class CustomRoleManager
         return false;
     }
 
-    public static TaskPanelBehaviour CreateRoleTab(ICustomRole role)
+    internal static TaskPanelBehaviour CreateRoleTab(ICustomRole role)
     {
         var ogPanel = HudManager.Instance.TaskStuff.transform.FindChild("TaskPanel").gameObject.GetComponent<TaskPanelBehaviour>();
         var clonePanel = Object.Instantiate(ogPanel.gameObject, ogPanel.transform.parent);
@@ -122,7 +141,7 @@ public static class CustomRoleManager
         return newPanel;
     }
 
-    public static void UpdateRoleTab(TaskPanelBehaviour panel, ICustomRole role)
+    internal static void UpdateRoleTab(TaskPanelBehaviour panel, ICustomRole role)
     {
         var tabText = panel.tab.gameObject.GetComponentInChildren<TextMeshPro>();
         var ogPanel = HudManager.Instance.TaskStuff.transform.FindChild("TaskPanel").gameObject.GetComponent<TaskPanelBehaviour>();
@@ -138,59 +157,52 @@ public static class CustomRoleManager
         panel.SetTaskText(role.SetTabText().ToString());
     }
     
-    public static void SyncAllRoleSettings(int targetId=-1)
+    internal static void SyncAllRoleSettings(int targetId=-1)
     {
-        List<NetData> data = [];
-        int count = 0;
-        foreach (var role in CustomRoles.Values)
+        var data = CustomRoles.Values
+            .Where(x => x is ICustomRole { HideSettings: false })
+            .Select(x => ((ICustomRole)x).GetNetData())
+            .ChunkNetData(1000);
+
+        while (data.Count > 0)
         {
-            ICustomRole customRole = role as ICustomRole;
+            Rpc<SyncRoleOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.Dequeue());
+        }
+    }
+
+    internal static void HandleSyncRoleOptions(NetData[] data)
+    {
+        foreach (var netData in data)
+        {
+            if (!CustomRoles.TryGetValue((ushort)netData.Id, out var role))
+            {
+                continue;
+            }
+
+            var customRole = role as ICustomRole;
             if (customRole is null or { HideSettings: true })
             {
                 continue;
             }
-            
-            PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.NumConfigDefinition, out var numEntry);
-            PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var chanceEntry);
-            
-            var netData = new NetData((uint)role.Role, BitConverter.GetBytes(numEntry.Value).AddRangeToArray(BitConverter.GetBytes(chanceEntry.Value)));
-            
-            data.Add(netData);
-            count += netData.GetLength();
-                
-            if (count > 1000)
-            {
-                Rpc<SyncRoleOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.ToArray());
-                data.Clear();
-                count = 0;
-            }
-        }
-        if (data.Count > 0)
-        {
-            Rpc<SyncRoleOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.ToArray());
-        }
-    }
 
-    public static void HandleSyncRoleOptions(NetData[] data)
-    {
-        foreach (var netData in data)
-        {
-            if (CustomRoles.TryGetValue((ushort)netData.Id, out var role))
+            var num = BitConverter.ToInt32(netData.Data, 0);
+            var chance = BitConverter.ToInt32(netData.Data, 4);
+                    
+            DestroyableSingleton<HudManager>.Instance.Notifier.AddRoleSettingsChangeMessage(role.StringName, num, chance, role.TeamType, false);
+
+            try
             {
-                var customRole = role as ICustomRole;
-                if (customRole is null or { HideSettings: true })
-                {
-                    continue;
-                }
-                
-                var num = BitConverter.ToInt32(netData.Data, 0);
-                var chance = BitConverter.ToInt32(netData.Data, 4);
-                
-                PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.NumConfigDefinition, out var numEntry);
-                PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var chanceEntry);
-                
+                customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.NumConfigDefinition,
+                    out var numEntry);
+                customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.ChanceConfigDefinition,
+                    out var chanceEntry);
+
                 numEntry.Value = num;
                 chanceEntry.Value = chance;
+            }
+            catch (Exception e)
+            {
+                Logger<MiraApiPlugin>.Error(e);
             }
         }
     }

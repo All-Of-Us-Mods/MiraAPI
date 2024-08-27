@@ -11,7 +11,11 @@ public static class OptionsPatches
     [HarmonyPatch(typeof(ToggleOption), nameof(ToggleOption.Initialize))]
     public static bool ToggleInit(ToggleOption __instance)
     {
-        if (!__instance.IsCustom()) return true;
+        if (!__instance.IsCustom())
+        {
+            return true;
+        }
+
         __instance.TitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(__instance.Title, Array.Empty<Object>());
 
         return false;
@@ -28,7 +32,11 @@ public static class OptionsPatches
     [HarmonyPatch(typeof(NumberOption), nameof(NumberOption.Initialize))]
     public static bool NumberInit(NumberOption __instance)
     {
-        if (!__instance.IsCustom()) return true;
+        if (!__instance.IsCustom())
+        {
+            return true;
+        }
+
         __instance.TitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(__instance.Title, Array.Empty<Object>());
 
         return false;
@@ -45,7 +53,11 @@ public static class OptionsPatches
     [HarmonyPatch(typeof(StringOption), nameof(StringOption.Initialize))]
     public static bool StringInit(StringOption __instance)
     {
-        if (!__instance.IsCustom()) return true;
+        if (!__instance.IsCustom())
+        {
+            return true;
+        }
+
         __instance.TitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(__instance.Title, Array.Empty<Object>());
         __instance.ValueText.text = DestroyableSingleton<TranslationController>.Instance.GetString(__instance.Values[__instance.Value], Array.Empty<Object>());
 

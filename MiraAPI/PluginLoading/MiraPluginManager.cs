@@ -1,20 +1,23 @@
-﻿using BepInEx;
-using BepInEx.Unity.IL2CPP;
+﻿using BepInEx.Unity.IL2CPP;
 using Il2CppInterop.Runtime.Injection;
 using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.Attributes;
 using MiraAPI.Hud;
+using MiraAPI.Hud;
 using MiraAPI.Modifiers;
 using MiraAPI.Roles;
+using MiraAPI.Utilities.Colors;
 using Reactor.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using MiraAPI.Utilities;
+using Reactor.Networking;
 
 namespace MiraAPI.PluginLoading;
 
-public class MiraPluginManager
+internal class MiraPluginManager
 {
     public readonly Dictionary<Assembly, MiraPluginInfo> RegisteredPlugins = [];
 
@@ -26,25 +29,29 @@ public class MiraPluginManager
         private set => _instance = value;
     }
 
-    public void Initialize()
+    internal void Initialize()
     {
         Instance = this;
-        IL2CPPChainloader.Instance.PluginLoad += (_, assembly, plugin) =>
+        IL2CPPChainloader.Instance.PluginLoad += (pluginInfo, assembly, plugin) =>
         {
-            if (!plugin.GetType().GetInterfaces().Contains(typeof(IMiraPlugin))) return;
+            if (!plugin.GetType().GetInterfaces().Contains(typeof(IMiraPlugin)))
+            {
+                return;
+            }
 
-            var id = MetadataHelper.GetMetadata(plugin.GetType()).GUID;
-            var info = new MiraPluginInfo(id, plugin as IMiraPlugin, IL2CPPChainloader.Instance.Plugins[id]);
+            var info = new MiraPluginInfo(plugin as IMiraPlugin, pluginInfo);
 
             RegisterModifierAttribute(assembly);
-            RegisterOptionsGroups(assembly, info);
-            RegisterOptionsAttributes(assembly, info);
+            RegisterAllOptions(assembly, info);
+            
             RegisterRoleAttribute(assembly, info);
             RegisterButtonAttribute(assembly);
 
+            RegisterColorClasses(assembly);
+
             RegisteredPlugins.Add(assembly, info);
 
-            Logger<MiraApiPlugin>.Info($"Registering mod {id} with Mira API.");
+            Logger<MiraApiPlugin>.Info($"Registering mod {pluginInfo.Metadata.GUID} with Mira API.");
         };
     }
 
@@ -53,73 +60,95 @@ public class MiraPluginManager
         return RegisteredPlugins.Values.First(plugin => plugin.PluginId == guid);
     }
 
-    private static void RegisterOptionsAttributes(Assembly assembly, MiraPluginInfo pluginInfo)
+    private static void RegisterAllOptions(Assembly assembly, MiraPluginInfo pluginInfo)
     {
-        foreach (var type in assembly.GetTypes())
+        var filteredTypes = assembly.GetTypes().Where(type => type.IsAssignableTo(typeof(AbstractOptionGroup)));
+
+        foreach (var type in filteredTypes)
         {
-            foreach (PropertyInfo property in type.GetProperties())
+            if (!ModdedOptionsManager.RegisterGroup(type, pluginInfo))
             {
-                foreach (var attribute in property.GetCustomAttributes())
-                {
-                    if (attribute.GetType().BaseType == typeof(ModdedOptionAttribute))
-                    {
-                        pluginInfo.Options.Add(ModdedOptionsManager.RegisterOption(type, (ModdedOptionAttribute)attribute, property));
-                    }
-                }
+                continue;
             }
-        }
-    }
-
-    private static void RegisterOptionsGroups(Assembly assembly, MiraPluginInfo pluginInfo)
-    {
-        foreach (var type in assembly.GetTypes())
-        {
-            if (typeof(IModdedOptionGroup).IsAssignableFrom(type))
+            
+            foreach (var property in type.GetProperties())
             {
-                IModdedOptionGroup group = (IModdedOptionGroup)Activator.CreateInstance(type);
-
-                ModdedOptionsManager.Groups.Add(group);
-                ModdedOptionsManager.OriginalTypes.Add(type, group);
-                pluginInfo.OptionGroups.Add(group);
-
-                foreach (var property in type.GetProperties())
+                if (property.PropertyType.IsAssignableTo(typeof(IModdedOption)))
                 {
-                    if (typeof(IModdedOption).IsAssignableFrom(property.PropertyType))
-                    {
-                        IModdedOption option = (IModdedOption)property.GetValue(group);
-                        option.Group = group;
-                        option.AdvancedRole = group.AdvancedRole;
-                    }
+                    ModdedOptionsManager.RegisterPropertyOption(type, property, pluginInfo);
+                    continue;
                 }
+                
+                var attribute = property.GetCustomAttribute<ModdedOptionAttribute>();
+                if (attribute == null)
+                {
+                    continue;
+                }
+
+                ModdedOptionsManager.RegisterAttributeOption(type, attribute, property, pluginInfo);
             }
         }
     }
 
     private static void RegisterRoleAttribute(Assembly assembly, MiraPluginInfo pluginInfo)
     {
+        List<Type> roles = [];
         foreach (var type in assembly.GetTypes())
         {
             var attribute = type.GetCustomAttribute<RegisterCustomRoleAttribute>();
-            if (attribute == null) continue;
-
-            ClassInjector.RegisterTypeInIl2Cpp(type);
-
-            var role = CustomRoleManager.RegisterRole(type, attribute.RoleId);
-
-            try
+            if (attribute == null)
             {
-                pluginInfo.CustomRoles.Add((ushort)role.Role, role);
+                continue;
             }
-            catch (Exception e)
+            
+            if (!(typeof(RoleBehaviour).IsAssignableFrom(type) && typeof(ICustomRole).IsAssignableFrom(type)))
             {
-                Logger<MiraApiPlugin>.Error("Failed to register role: " + type.Name);
+                Logger<MiraApiPlugin>.Error($"{type.Name} does not inherit from RoleBehaviour or ICustomRole.");
+                continue;
+            }
+            
+            if (!ModList.GetById(pluginInfo.PluginId).IsRequiredOnAllClients)
+            {
+                Logger<MiraApiPlugin>.Error("Custom roles are only supported on all clients.");
+                return;
+            }
+            
+            roles.Add(type);
+        }
+        
+        CustomRoleManager.RegisterRoleTypes(roles, pluginInfo);
+    }
 
-                foreach (var (k, v) in pluginInfo.CustomRoles)
+    private static void RegisterColorClasses(Assembly assembly)
+    {
+        foreach (var type in assembly.GetTypes())
+        {
+            if (type.GetCustomAttribute<RegisterCustomColorsAttribute>() == null)
+            {
+                continue;
+            }
+
+            if (!type.IsStatic())
+            {
+                Logger<MiraApiPlugin>.Error($"Color class {type.Name} must be static.");
+                continue;
+            }
+
+            foreach (var property in type.GetProperties())
+            {
+                if (property.PropertyType != typeof(CustomColor))
                 {
-                    Logger<MiraApiPlugin>.Error($"{k}: {v}");
+                    continue;
                 }
-
-                Logger<MiraApiPlugin>.Error(e);
+                
+                var color = (CustomColor)property.GetValue(null);
+                if (color == null)
+                {
+                    Logger<MiraApiPlugin>.Error($"Color property {property.Name} in {type.Name} is null.");
+                    continue;
+                }
+                
+                PaletteManager.CustomColors.Add(color);
             }
         }
     }
@@ -135,6 +164,7 @@ public class MiraPluginManager
             }
         }
     }
+
 
     private static void RegisterButtonAttribute(Assembly assembly)
     {

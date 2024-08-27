@@ -32,10 +32,9 @@ public static class SpriteTools
     /// <param name="resourcePath">The path to the resource.</param>
     /// <returns>A sprite made from the resource</returns>
     /// <exception cref="Exception">The resource cannot be found.</exception>
-    public static Sprite LoadSpriteFromPath(string resourcePath)
+    public static Sprite LoadSpriteFromPath(string resourcePath, Assembly assembly)
     {
         var tex = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-        var assembly = Assembly.GetExecutingAssembly();
         var myStream = assembly.GetManifestResourceStream(resourcePath);
         if (myStream != null)
         {

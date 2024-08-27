@@ -40,6 +40,11 @@ public class ModdedStringOption : ModdedOption<int>
         return stringOption;
     }
 
+    public override float GetFloatData()
+    {
+        return Value;
+    }
+
     public override NetData GetNetData()
     {
         return new NetData(Id, BitConverter.GetBytes(Value));
@@ -63,7 +68,10 @@ public class ModdedStringOption : ModdedOption<int>
     public override void OnValueChanged(int newValue)
     {
         DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, Data.GetValueString(newValue), false);
-        if (OptionBehaviour is null) return;
+        if (!OptionBehaviour)
+        {
+            return;
+        }
 
         var opt = OptionBehaviour as StringOption;
         if (opt)

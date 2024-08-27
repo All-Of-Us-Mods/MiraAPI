@@ -15,6 +15,6 @@ public abstract class ModdedOptionAttribute(string title, Type roleType = null) 
     public abstract void SetValue(object val);
     
     public abstract object GetValue();
-    
-    public abstract IModdedOption CreateOption(object value, PropertyInfo property);
+
+    internal abstract IModdedOption CreateOption(object value, PropertyInfo property);
 }

@@ -1,9 +1,5 @@
-﻿using HarmonyLib;
-using InnerNet;
-using MiraAPI.GameModes;
-
-namespace MiraAPI.Patches.GameModes;
-
+﻿
+/*
 [HarmonyPatch]
 public static class ConsolePatches
 {
@@ -73,4 +69,4 @@ public static class ConsolePatches
         canUse = couldUse = true;
         return true;
     }
-}
+}*/

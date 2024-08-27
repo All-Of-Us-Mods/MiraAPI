@@ -23,7 +23,7 @@ public static class NameTagPatch
             return true;
         }
 
-        if (PlayerControl.LocalPlayer == null || PlayerControl.LocalPlayer.Data == null || PlayerControl.LocalPlayer.Data.Role == null || otherPlayerRole == null)
+        if (!PlayerControl.LocalPlayer || !PlayerControl.LocalPlayer.Data || !PlayerControl.LocalPlayer.Data.Role || !otherPlayerRole)
         {
             __result = Color.white;
         }

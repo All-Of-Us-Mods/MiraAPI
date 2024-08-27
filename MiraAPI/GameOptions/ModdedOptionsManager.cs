@@ -6,94 +6,129 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using MiraAPI.Networking;
+using MiraAPI.PluginLoading;
+using MiraAPI.Utilities;
 using Reactor.Networking.Rpc;
 
 namespace MiraAPI.GameOptions;
 
 public static class ModdedOptionsManager
 {
-    public static readonly Dictionary<uint, IModdedOption> ModdedOptions = new();
-    public static readonly List<IModdedOption> Options = [];
-    public static readonly List<IModdedOptionGroup> Groups = [];
     private static readonly Dictionary<PropertyInfo, ModdedOptionAttribute> OptionAttributes = new();
-    public static readonly Dictionary<Type, IModdedOptionGroup> OriginalTypes = new();
-    public static uint NextId = 1;
+    private static readonly Dictionary<Type, AbstractOptionGroup> TypeToGroup = new();
 
-    public static IModdedOption RegisterOption(Type type, ModdedOptionAttribute attribute, PropertyInfo property)
+    public static readonly Dictionary<uint, IModdedOption> ModdedOptions = new();
+    public static readonly List<AbstractOptionGroup> Groups = [];
+    
+    public static uint NextId => _nextId++;
+    private static uint _nextId = 1;
+    
+    internal static bool RegisterGroup(Type type, MiraPluginInfo pluginInfo)
     {
-        if (OptionAttributes.ContainsKey(property)) return null;
-        object newObj = Activator.CreateInstance(type);
-        
-        IModdedOption result;
-        
-        try
-        { 
-            result = attribute.CreateOption(property.GetValue(newObj), property);
-        }
-        catch (Exception e)
+        if (Activator.CreateInstance(type) is not AbstractOptionGroup group)
         {
-            Logger<MiraApiPlugin>.Error(e);
-            return null;
+            Logger<MiraApiPlugin>.Error($"Failed to create group from {type.Name}");
+            return false;
         }
 
-        if (result != null)
+        if (TypeToGroup.ContainsKey(type))
         {
-            var setterOriginal = property.GetSetMethod();
-            var setterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertySetterPatch));
-            PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: new HarmonyMethod(setterPatch));
-
-            var getterOriginal = property.GetGetMethod();
-            var getterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyGetterPatch));
-            PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: new HarmonyMethod(getterPatch));
-
-            attribute.HolderOption = result;
-                
-            OptionAttributes.Add(property, attribute);
-
-            if (OriginalTypes.ContainsKey(type))
-            {
-                Logger<MiraApiPlugin>.Error($"Grouping {attribute.Title} with {OriginalTypes[type].GroupName}");
-                result.Group = OriginalTypes[type];
-                result.AdvancedRole = OriginalTypes[type].AdvancedRole;
-            }
+            Logger<MiraApiPlugin>.Error($"Group {type.Name} already exists.");
+            return false;
         }
 
-        return result;
+        Groups.Add(group);
+        TypeToGroup.Add(type, group);
+        pluginInfo.OptionGroups.Add(group);
+        
+        return true;
+    }
+    
+    internal static void RegisterPropertyOption(Type type, PropertyInfo property, MiraPluginInfo pluginInfo)
+    {
+        if (!TypeToGroup.TryGetValue(type, out var group))
+        {
+            Logger<MiraApiPlugin>.Error($"Failed to get group for {type.Name}");
+            return;
+        }
+
+        if (property.GetValue(group) is not IModdedOption option)
+        {
+            Logger<MiraApiPlugin>.Error($"Failed to get option for {property.Name}");
+            return;
+        }
+        
+        RegisterOption(option, group, pluginInfo);
+    }
+    
+    internal static void RegisterAttributeOption(Type type, ModdedOptionAttribute attribute, PropertyInfo property, MiraPluginInfo pluginInfo)
+    {
+        if (OptionAttributes.ContainsKey(property))
+        {
+            Logger<MiraApiPlugin>.Error($"Property {property.Name} already has an attribute registered.");
+            return;
+        }
+
+        if (!TypeToGroup.TryGetValue(type, out var group))
+        {
+            Logger<MiraApiPlugin>.Error($"Failed to get group for {type.Name}");
+            return;
+        }
+
+        var option = attribute.CreateOption(property.GetValue(group), property);
+        
+        if (option == null)
+        {
+            Logger<MiraApiPlugin>.Error($"Failed to get option for {property.Name}");
+            return;
+        }
+        
+        var setterOriginal = property.GetSetMethod();
+        var setterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertySetterPatch));
+        PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: new HarmonyMethod(setterPatch));
+
+        var getterOriginal = property.GetGetMethod();
+        var getterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyGetterPatch));
+        PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: new HarmonyMethod(getterPatch));
+
+        OptionAttributes.Add(property, attribute);
+        attribute.HolderOption = option;
+        
+        RegisterOption(option, group, pluginInfo);
     }
 
-    public static void SyncAllOptions(int targetId=-1)
+    private static void RegisterOption(IModdedOption option, AbstractOptionGroup group, MiraPluginInfo pluginInfo)
     {
-        List<NetData> data = [];
-        int count = 0;
-        foreach (var option in ModdedOptions.Values)
+        option.ParentMod = pluginInfo.MiraPlugin;
+        option.AdvancedRole = group.AdvancedRole;
+        
+        pluginInfo.Options.Add(option);
+        
+        ModdedOptions.Add(option.Id, option);
+        group.Options.Add(option);
+    }
+    
+    internal static void SyncAllOptions(int targetId=-1)
+    {
+        var chunks = ModdedOptions.Values.Select(option => option.GetNetData()).ChunkNetData(1000);
+        
+        while (chunks.Count > 0)
         {
-            var netData = option.GetNetData();
-            data.Add(netData);
-            count += netData.GetLength();
-                
-            if (count > 1000)
-            {
-                Rpc<SyncOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.ToArray());
-                data.Clear();
-                count = 0;
-            }
-        }
-        if (data.Count > 0)
-        {
-            Rpc<SyncOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.ToArray());
+            Rpc<SyncOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, chunks.Dequeue());
         }
     }
-        
-        
-    public static void HandleSyncOptions(NetData[] data)
+
+    internal static void HandleSyncOptions(NetData[] data)
     {
         foreach (var netData in data)
         {
-            if (ModdedOptions.TryGetValue(netData.Id, out var option))
+            if (!ModdedOptions.TryGetValue(netData.Id, out var option))
             {
-                Logger<MiraApiPlugin>.Error("Handling option " + option.Title);
-                option.HandleNetData(netData.Data);
+                continue;
             }
+            
+            Logger<MiraApiPlugin>.Error("Handling option " + option.Title);
+            option.HandleNetData(netData.Data);
         }
     }
         
@@ -102,21 +137,19 @@ public static class ModdedOptionsManager
     {
         ModdedOptionAttribute attribute = OptionAttributes.First(pair => pair.Key.GetSetMethod().Equals(__originalMethod)).Value;
 
-        if (attribute != null)
-        {
-            attribute.SetValue(value);
-        }
+        attribute?.SetValue(value);
     }
 
     public static bool PropertyGetterPatch(MethodBase __originalMethod, ref object __result)
     {
         ModdedOptionAttribute attribute = OptionAttributes.First(pair => pair.Key.GetGetMethod().Equals(__originalMethod)).Value;
 
-        if (attribute != null)
+        if (attribute == null)
         {
-            __result = attribute.GetValue();
-            return false;
+            return true;
         }
-        return true;
+        
+        __result = attribute.GetValue();
+        return false;
     }
 }

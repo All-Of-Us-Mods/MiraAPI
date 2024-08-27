@@ -9,26 +9,26 @@
         <Description>Simple and easy to use Among Us modding API.</Description>
         <Authors>Angxl, XtraCube</Authors>
     </PropertyGroup>
-
-    <PropertyGroup>
-        <GamePlatform Condition="'$(GamePlatform)' == ''">Steam</GamePlatform>
-        <GameVersion Condition="'$(GamePlatform)' == 'Steam'">2024.6.18</GameVersion>
-    </PropertyGroup>
-
     <ItemGroup>
+      <None Remove="Resources\Buttons.png" />
+      <None Remove="Resources\Checkmark.png" />
+      <None Remove="Resources\CheckMarkBox.png" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <EmbeddedResource Include="Resources\Checkmark.png" />
+        <EmbeddedResource Include="Resources\CheckMarkBox.png" />
         <EmbeddedResource Include="Resources\Cog.png" />
         <EmbeddedResource Include="Resources\CogActive.png" />
-        <EmbeddedResource Include="Resources\FortniteBanner.jpeg" />
         <EmbeddedResource Include="Resources\NextButton.png" />
         <EmbeddedResource Include="Resources\NextButtonActive.png" />
-        <EmbeddedResource Include="Resources\ExampleButton.png" />
+        <EmbeddedResource Include="Resources\Empty.png" />
     </ItemGroup>
 	
     <ItemGroup>
-        <PackageReference Include="Reactor" Version="2.3.0" />
+        <PackageReference Include="Reactor" Version="2.3.1" />
         <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.697" Private="false" ExcludeAssets="runtime;native" />
-        <PackageReference Include="Iced" Version="1.21.0" />
-        <PackageReference Include="AmongUs.GameLibs.Steam" Version="$(GameVersion)" PrivateAssets="all" />
+        <PackageReference Include="AmongUs.GameLibs.Steam" Version="2024.8.13" PrivateAssets="all" />
 
         <PackageReference Include="BepInEx.AutoPlugin" Version="1.1.0" PrivateAssets="all" />
         <PackageReference Include="BepInEx.IL2CPP.MSBuild" Version="2.1.0-rc.1" PrivateAssets="all" ExcludeAssets="runtime">

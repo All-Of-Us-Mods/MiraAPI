@@ -8,6 +8,7 @@ using MiraAPI.Utilities.Assets;
 using Reactor.Utilities;
 using System;
 using System.Text;
+using MiraAPI.PluginLoading;
 using UnityEngine;
 
 namespace MiraAPI.Roles;
@@ -24,7 +25,7 @@ public interface ICustomRole
 
     ModdedRoleTeams Team { get; }
 
-    LoadableAsset<Sprite> OptionsScreenshot { get; }
+    LoadableAsset<Sprite> OptionsScreenshot => MiraAssets.Empty;
 
     LoadableAsset<Sprite> Icon => MiraAssets.Empty;
 
@@ -46,18 +47,24 @@ public interface ICustomRole
 
     bool IsGhostRole => false;
 
-    bool TargetsBodies => false;
-
     bool CreateCustomTab => true;
 
     bool HideSettings => IsGhostRole;
 
     RoleTypes GhostRole => Team == ModdedRoleTeams.Crewmate ? RoleTypes.CrewmateGhost : RoleTypes.ImpostorGhost;
 
-    void CreateOptions() { }
-
+    MiraPluginInfo ParentMod => CustomRoleManager.FindParentMod(this);
+    
+    /// <summary>
+    /// Runs on the PlayerControl FixedUpdate method for any player with this role
+    /// </summary>
+    /// <param name="playerControl">The PlayerControl that has this role</param>
     void PlayerControlFixedUpdate(PlayerControl playerControl) { }
 
+    /// <summary>
+    /// Only runs for local player on HudManager Update method
+    /// </summary>
+    /// <param name="hudManager">Reference to HudManager instance</param>
     void HudUpdate(HudManager hudManager) { }
 
     string GetCustomEjectionMessage(NetworkedPlayerInfo player)
@@ -70,17 +77,17 @@ public interface ICustomRole
         var taskStringBuilder = Helpers.CreateForRole(this);
         return taskStringBuilder;
     }
-
+    
     bool IsModifierApplicable(BaseModifier modifier)
     {
         return true;
     }
 
-    NetData GetNetData(RoleBehaviour roleBehaviour)
+    NetData GetNetData()
     {
-        PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(NumConfigDefinition, out var numEntry);
-        PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(ChanceConfigDefinition, out var chanceEntry);
-
-        return new NetData((uint)roleBehaviour.Role, BitConverter.GetBytes(numEntry.Value).AddRangeToArray(BitConverter.GetBytes(chanceEntry.Value)));
+        ParentMod.PluginConfig.TryGetEntry<int>(NumConfigDefinition, out var numEntry);
+        ParentMod.PluginConfig.TryGetEntry<int>(ChanceConfigDefinition, out var chanceEntry);
+        
+        return new NetData(RoleId.Get(GetType()), BitConverter.GetBytes(numEntry.Value).AddRangeToArray(BitConverter.GetBytes(chanceEntry.Value)));
     }
 }

@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace MiraAPI.GameOptions;
 
-public class ModdedGroupSingleton<T> where T : IModdedOptionGroup
+public class OptionGroupSingleton<T> where T : AbstractOptionGroup
 {
     private static T _instance;
 
@@ -12,7 +12,11 @@ public class ModdedGroupSingleton<T> where T : IModdedOptionGroup
         get => _instance ??= ModdedOptionsManager.Groups.OfType<T>().Single();
         set
         {
-            if (_instance != null) throw new InvalidOperationException($"Instance for {typeof(T)} is already set");
+            if (_instance != null)
+            {
+                throw new InvalidOperationException($"Instance for {typeof(T)} is already set");
+            }
+
             _instance = value;
         }
     }

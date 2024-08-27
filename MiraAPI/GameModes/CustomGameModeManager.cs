@@ -24,7 +24,7 @@ public static class CustomGameModeManager
     /// <summary>
     /// Current gamemode
     /// </summary>
-    public static CustomGameMode? ActiveMode;
+    public static CustomGameMode? ActiveMode = new DefaultMode();
 
     /// <summary>
     /// Set current gamemode
@@ -45,11 +45,11 @@ public static class CustomGameModeManager
     /// Register gamemode from type 
     /// </summary>
     /// <param name="gameModeType">Type of gamemode class, should inherit from <see cref="CustomGameMode"/></param>
-    public static void RegisterGameMode(Type gameModeType)
+    internal static void RegisterGameMode(Type gameModeType)
     {
         if (!typeof(CustomGameMode).IsAssignableFrom(gameModeType))
         {
-            Logger<MiraApiPlugin>.Warning($"{gameModeType?.Name} does not inherit CustomGameMode!");
+            Logger<MiraApiPlugin>.Warning($"{gameModeType.Name} does not inherit CustomGameMode!");
             return;
         }
 

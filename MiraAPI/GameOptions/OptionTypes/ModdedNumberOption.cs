@@ -37,7 +37,7 @@ public class ModdedNumberOption : ModdedOption<float>
         data.Value = Value;
         data.Increment = Increment;
         data.ValidRange = new FloatRange(Min, Max);
-        data.FormatString = Increment % 1 == 0 ? "0" : "0.0";
+        data.FormatString = Increment % 1 == 0 && Value % 1 == 0  && Min % 1 == 0  && Max % 1 == 0 ? "0" : "0.0";
         data.ZeroIsInfinity = ZeroInfinity;
         data.SuffixType = SuffixType;
         data.OptionName = FloatOptionNames.Invalid;
@@ -54,7 +54,7 @@ public class ModdedNumberOption : ModdedOption<float>
         numberOption.Value = Value;
         numberOption.Increment = Increment;
         numberOption.ValidRange = new FloatRange(Min, Max);
-        numberOption.FormatString = "0";
+        numberOption.FormatString = ((FloatGameSetting)Data).FormatString;
         numberOption.ZeroIsInfinity = ZeroInfinity;
         numberOption.SuffixType = SuffixType;
         numberOption.floatOptionName = FloatOptionNames.Invalid;
@@ -63,6 +63,11 @@ public class ModdedNumberOption : ModdedOption<float>
         OptionBehaviour = numberOption;
 
         return numberOption;
+    }
+
+    public override float GetFloatData()
+    {
+        return Value;
     }
 
     public override NetData GetNetData()
@@ -90,7 +95,10 @@ public class ModdedNumberOption : ModdedOption<float>
         Value = Mathf.Clamp(newValue, Min, Max);
         DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, Data.GetValueString(Value), false);
 
-        if (OptionBehaviour is null) return;
+        if (!OptionBehaviour)
+        {
+            return;
+        }
 
         var opt = OptionBehaviour as NumberOption;
         if (opt)

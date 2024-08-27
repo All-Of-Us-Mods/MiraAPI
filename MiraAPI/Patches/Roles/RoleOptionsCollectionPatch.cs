@@ -1,7 +1,6 @@
 ﻿using AmongUs.GameOptions;
 using HarmonyLib;
 using MiraAPI.Roles;
-using Reactor.Utilities;
 
 namespace MiraAPI.Patches.Roles;
 
@@ -22,7 +21,7 @@ public static class RoleOptionsCollectionPatch
                 return false;
             }
 
-            PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var entry);
+            customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var entry);
             __result = entry.Value;
             return false;
         }
@@ -44,7 +43,7 @@ public static class RoleOptionsCollectionPatch
                 return false;
             }
 
-            PluginSingleton<MiraApiPlugin>.Instance.Config.TryGetEntry<int>(customRole.NumConfigDefinition, out var entry);
+            customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.NumConfigDefinition, out var entry);
             __result = entry.Value;
             return false;
         }

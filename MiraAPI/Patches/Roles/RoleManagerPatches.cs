@@ -23,7 +23,7 @@ public static class RoleManagerPatches
     [HarmonyPatch(nameof(RoleManager.AssignRoleOnDeath))]
     public static bool AssignRoleOnDeath(RoleManager __instance, [HarmonyArgument(0)] PlayerControl plr)
     {
-        if (plr == null || !plr.Data.IsDead)
+        if (!plr || !plr.Data.IsDead)
         {
             return false;
         }

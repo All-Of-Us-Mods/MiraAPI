@@ -14,7 +14,7 @@ public class ModdedNumberOptionAttribute(
     Type roleType = null)
     : ModdedOptionAttribute(title, roleType)
 {
-    public override IModdedOption CreateOption(object value, PropertyInfo property)
+    internal override IModdedOption CreateOption(object value, PropertyInfo property)
     {
         var toggleOpt = new ModdedNumberOption(Title, (float)value, min, max, increment, suffixType, zeroInfinity, RoleType);
         return toggleOpt;

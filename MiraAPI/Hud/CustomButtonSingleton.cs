@@ -17,8 +17,16 @@ public class CustomButtonSingleton<T> where T : CustomActionButton
         get => _instance ??= CustomButtonManager.CustomButtons.OfType<T>().Single();
         set
         {
-            if (_instance == value) return;
-            if (_instance != null) throw new InvalidOperationException($"Instance for {typeof(T)} is already set");
+            if (_instance == value)
+            {
+                return;
+            }
+
+            if (_instance != null)
+            {
+                throw new InvalidOperationException($"Instance for {typeof(T)} is already set");
+            }
+
             _instance = value;
         }
     }

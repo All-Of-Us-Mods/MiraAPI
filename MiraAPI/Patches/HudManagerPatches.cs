@@ -1,10 +1,11 @@
-﻿using HarmonyLib;
+﻿using System;
+using HarmonyLib;
 using InnerNet;
-using MiraAPI.GameModes;
 using MiraAPI.Hud;
 using MiraAPI.Roles;
 using Reactor.Utilities.Extensions;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace MiraAPI.Patches;
 
@@ -27,9 +28,13 @@ public static class HudManagerPatches
         {
             return;
         }
+        
+        //CustomGameModeManager.ActiveMode?.HudUpdate(__instance);
 
-        //CustomGameModeManager.ActiveMode.HudUpdate(__instance);
-        if (local is null || local.Data is null || local.Data.Role is null) return;
+        if (local?.Data?.Role is null)
+        {
+            return;
+        }
 
         if (local.Data.Role is ICustomRole customRole)
         {
@@ -37,7 +42,7 @@ public static class HudManagerPatches
 
             if (customRole.SetTabText() != null)
             {
-                if (_roleTab == null)
+                if (!_roleTab)
                 {
                     _roleTab = CustomRoleManager.CreateRoleTab(customRole);
                 }
@@ -57,6 +62,7 @@ public static class HudManagerPatches
         }
     }
 
+    /*
     /// <summary>
     /// Trigger hudstart on current custom gamemode
     /// </summary>
@@ -65,7 +71,7 @@ public static class HudManagerPatches
     public static void GameStartPatch(HudManager __instance)
     {
         CustomGameModeManager.ActiveMode?.HudStart(__instance);
-    }
+    }*/
 
     /// <summary>
     /// Create custom buttons parent
@@ -74,10 +80,12 @@ public static class HudManagerPatches
     [HarmonyPatch(nameof(HudManager.Start))]
     public static void StartPostfix(HudManager __instance)
     {
+        var buttons = __instance.transform.Find("Buttons");
+        var bottomRight = buttons.Find("BottomRight");
+        
         if (!_bottomLeft)
         {
-            var buttons = __instance.transform.Find("Buttons");
-            _bottomLeft = Object.Instantiate(buttons.Find("BottomRight").gameObject, buttons);
+            _bottomLeft = Object.Instantiate(bottomRight.gameObject, buttons);
         }
 
         foreach (var t in _bottomLeft.GetComponentsInChildren<ActionButton>(true))
@@ -94,7 +102,14 @@ public static class HudManagerPatches
 
         foreach (var button in CustomButtonManager.CustomButtons)
         {
-            button.CreateButton(_bottomLeft.transform);
+            Transform location = button.Location switch
+            {
+                ButtonLocation.BottomLeft => _bottomLeft.transform,
+                ButtonLocation.BottomRight => bottomRight,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
+            button.CreateButton(location);
         }
 
         gridArrange.Start();
@@ -110,7 +125,7 @@ public static class HudManagerPatches
     [HarmonyPatch(nameof(HudManager.SetHudActive), typeof(PlayerControl), typeof(RoleBehaviour), typeof(bool))]
     public static void SetHudActivePostfix(HudManager __instance, [HarmonyArgument(0)] PlayerControl player, [HarmonyArgument(1)] RoleBehaviour roleBehaviour, [HarmonyArgument(2)] bool isActive)
     {
-        if (player.Data == null)
+        if (!player.Data)
         {
             return;
         }
@@ -121,7 +136,9 @@ public static class HudManagerPatches
         }
 
         foreach (var button in CustomButtonManager.CustomButtons)
+        {
             button.SetActive(isActive, roleBehaviour);
+        }
 
         if (roleBehaviour is ICustomRole role)
         {

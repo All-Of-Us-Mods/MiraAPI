@@ -16,15 +16,18 @@ namespace MiraAPI.Patches.Options;
 public static class GameSettingMenuPatches
 {
     public static int CurrentSelectedMod { get; private set; }
-    
+
     public static MiraPluginInfo SelectedMod { get; private set; }
 
     private static TextMeshPro _text;
+
+    private static Vector3 _roleBtnOgPos;
 
     [HarmonyPrefix]
     [HarmonyPatch(nameof(GameSettingMenu.Start))]
     public static void StartPrefix(GameSettingMenu __instance)
     {
+        _roleBtnOgPos = __instance.RoleSettingsButton.transform.localPosition;
         __instance.transform.FindChild("GameSettingsLabel").gameObject.SetActive(false);
 
         Transform helpThing = __instance.transform.FindChild("What Is This?");
@@ -36,7 +39,9 @@ public static class GameSettingMenuPatches
 
         _text = tmpText.GetComponent<TextMeshPro>();
         _text.fontSizeMax = 3.2f;
-        UpdateText(__instance.GameSettingsTab, __instance.RoleSettingsTab);
+        _text.overflowMode = TextOverflowModes.Overflow;
+
+        UpdateText(__instance, __instance.GameSettingsTab, __instance.RoleSettingsTab);
 
         _text.alignment = TextAlignmentOptions.Center;
 
@@ -54,7 +59,7 @@ public static class GameSettingMenuPatches
             if (CurrentSelectedMod != MiraPluginManager.Instance.RegisteredPlugins.Count)
             {
                 CurrentSelectedMod += 1;
-                UpdateText(__instance.GameSettingsTab, __instance.RoleSettingsTab);
+                UpdateText(__instance, __instance.GameSettingsTab, __instance.RoleSettingsTab);
             }
         }));
 
@@ -68,12 +73,12 @@ public static class GameSettingMenuPatches
             if (CurrentSelectedMod != 0)
             {
                 CurrentSelectedMod -= 1;
-                UpdateText(__instance.GameSettingsTab, __instance.RoleSettingsTab);
+                UpdateText(__instance, __instance.GameSettingsTab, __instance.RoleSettingsTab);
             }
         }));
     }
 
-    public static void UpdateText(GameOptionsMenu settings, RolesSettingsMenu roles)
+    private static void UpdateText(GameSettingMenu menu, GameOptionsMenu settings, RolesSettingsMenu roles)
     {
         if (CurrentSelectedMod == 0)
         {
@@ -82,19 +87,41 @@ public static class GameSettingMenuPatches
         }
         else
         {
-            _text.fontSizeMax = 2f;
+            _text.fontSizeMax = 2.3f;
             SelectedMod = MiraPluginManager.Instance.RegisteredPlugins.ElementAt(CurrentSelectedMod - 1).Value;
             if (SelectedMod == null)
             {
                 CurrentSelectedMod = 0;
-                UpdateText(settings, roles);
+                UpdateText(menu, settings, roles);
             }
 
-            string name = SelectedMod.PluginInfo.Metadata.Name;
-            _text.text = name.Substring(0, Math.Min(name.Length, 15));
+            var name = SelectedMod?.MiraPlugin.OptionsTitleText;
+            _text.text = name?[..Math.Min(name.Length, 25)];
         }
 
-        if (roles is not null && roles.roleChances is not null)
+        menu.RoleSettingsButton.transform.localPosition = _roleBtnOgPos;
+        menu.GameSettingsButton.gameObject.SetActive(true);
+        menu.RoleSettingsButton.gameObject.SetActive(true);
+
+        if (CurrentSelectedMod != 0)
+        {
+            if (SelectedMod.Options.Where(x=>x.AdvancedRole==null).ToList().Count == 0)
+            {
+                menu.GameSettingsButton.gameObject.SetActive(false);
+            }
+
+            if (SelectedMod.CustomRoles.Count == 0)
+            {
+                menu.RoleSettingsButton.gameObject.SetActive(false);
+            }
+
+            if (!menu.GameSettingsButton.gameObject.active && menu.RoleSettingsButton.gameObject.active)
+            {
+                menu.RoleSettingsButton.transform.localPosition = menu.GameSettingsButton.transform.localPosition;
+            }
+        }
+
+        if (roles?.roleChances != null && SelectedMod != null && SelectedMod.CustomRoles.Count != 0)
         {
             if (roles.advancedSettingChildren is not null)
             {
@@ -116,20 +143,29 @@ public static class GameSettingMenuPatches
                 roleChance.gameObject.DestroyImmediate();
             }
 
-
             roles.roleChances.Clear();
             roles.roleChances = null;
             roles.AdvancedRolesSettings.gameObject.SetActive(false);
             roles.RoleChancesSettings.gameObject.SetActive(true);
             roles.SetQuotaTab();
+
+            roles.scrollBar.CalculateAndSetYBounds(roles.roleChances.Count + 5, 1f, 6f, 0.43f);
+            roles.scrollBar.ScrollToTop();
         }
 
-        if (settings is not null && settings.Children is not null)
+        if (settings?.Children != null && SelectedMod.OptionGroups.Count != 0)
         {
             foreach (var child in settings.Children)
             {
-                if (child.TryCast<GameOptionsMapPicker>()) continue;
-                if (child.gameObject is null) continue;
+                if (child.TryCast<GameOptionsMapPicker>())
+                {
+                    continue;
+                }
+
+                if (!child.gameObject)
+                {
+                    continue;
+                }
 
                 child.gameObject.DestroyImmediate();
             }
@@ -143,6 +179,7 @@ public static class GameSettingMenuPatches
             settings.Children = null;
 
             settings.Initialize();
+            settings.scrollBar.ScrollToTop();
         }
     }
 }
