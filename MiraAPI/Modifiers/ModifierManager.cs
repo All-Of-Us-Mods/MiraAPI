@@ -92,22 +92,12 @@ public static class ModifierManager
     {
         var data = new List<NetData>();
 
-        if (targetId == -1)
+        foreach (var player in GameData.Instance.AllPlayers)
         {
-            foreach (var player in GameData.Instance.AllPlayers)
-            {
-                data.Add(GetPlayerModifiers(player.Object));
-            }
+            data.Add(GetPlayerModifiers(player.Object));
         }
-        else
-        {
-            var player = GameData.Instance.GetPlayerById((byte)targetId).Object;
-
-            data.Add(GetPlayerModifiers(player));
-        }
-
-
-        Rpc<SyncModifiersRpc>.Instance.Send(PlayerControl.LocalPlayer, data.ToArray(), true);
+        
+        Rpc<SyncModifiersRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.ToArray());
     }
 
     internal static void HandleSyncModifiers(NetData[] data)
