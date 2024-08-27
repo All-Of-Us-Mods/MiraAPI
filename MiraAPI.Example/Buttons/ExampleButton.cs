@@ -1,4 +1,6 @@
-﻿using MiraAPI.Hud;
+﻿using MiraAPI.Example.Modifiers;
+using MiraAPI.Hud;
+using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities;
 using UnityEngine;
@@ -22,6 +24,6 @@ public class ExampleButton : CustomActionButton
 
     public override bool Enabled(RoleBehaviour role)
     {
-        return true;
+        return PlayerControl.LocalPlayer.HasModifier<GameModifierExample>();
     }
 }

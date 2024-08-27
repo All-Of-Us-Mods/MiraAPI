@@ -1,10 +1,11 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.Generic;
 using MiraAPI.GameOptions;
+using MiraAPI.Modifiers;
+using Reactor.Utilities;
 using System.Linq;
 using MiraAPI.Networking;
-using Reactor.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.Utilities;
@@ -68,6 +69,55 @@ public static class Extensions
     public static bool IsCustom(this OptionBehaviour optionBehaviour)
     {
         return ModdedOptionsManager.ModdedOptions.Values.Any(opt => opt.OptionBehaviour && opt.OptionBehaviour.Equals(optionBehaviour));
+    }
+
+    public static ModifierComponent? GetModifierComponent(this PlayerControl player)
+    {
+        return player.GetComponent<ModifierComponent>();
+    }
+
+    public static List<T> Randomize<T>(this List<T> list)
+    {
+        List<T> randomizedList = [];
+        System.Random rnd = new();
+        while (list.Count > 0)
+        {
+            int index = rnd.Next(0, list.Count);
+            randomizedList.Add(list[index]);
+            list.RemoveAt(index);
+        }
+        return randomizedList;
+    }
+
+    public static bool HasModifier<T>(this PlayerControl? player) where T : BaseModifier
+    {
+        return player?.GetModifierComponent() != null && player.GetModifierComponent().ActiveModifiers.Exists(x => x is T);
+    }
+    public static bool HasModifier(this PlayerControl? player, uint id)
+    {
+        return player?.GetModifierComponent() != null && player.GetModifierComponent().ActiveModifiers.Exists(x => x.ModifierId == id);
+    }
+
+    public static void AddModifier<T>(this PlayerControl player) where T : BaseModifier
+    {
+        if (!ModifierManager.TypeToIdModifiers.TryGetValue(typeof(T), out var id))
+        {
+            Logger<MiraApiPlugin>.Error($"Cannot add modifier {typeof(T).Name} because it is not registered.");
+            return;
+        }
+
+        ModifierComponent.RpcAddModifier(player, id);
+    }
+
+    public static void RemoveModifier<T>(this PlayerControl player) where T : BaseModifier
+    {
+        if (!ModifierManager.TypeToIdModifiers.TryGetValue(typeof(T), out var id))
+        {
+            Logger<MiraApiPlugin>.Error($"Cannot add modifier {typeof(T).Name} because it is not registered.");
+            return;
+        }
+
+        ModifierComponent.RpcRemoveModifier(player, id);
     }
 
     public static Color DarkenColor(this Color color)

@@ -1,11 +1,12 @@
-﻿using System;
-using AmongUs.GameOptions;
+﻿using AmongUs.GameOptions;
 using BepInEx.Configuration;
+using HarmonyLib;
+using MiraAPI.Modifiers;
+using MiraAPI.Networking;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
+using System;
 using System.Text;
-using HarmonyLib;
-using MiraAPI.Networking;
 using MiraAPI.PluginLoading;
 using UnityEngine;
 
@@ -76,6 +77,11 @@ public interface ICustomRole
         return taskStringBuilder;
     }
     
+    bool IsModifierApplicable(BaseModifier modifier)
+    {
+        return true;
+    }
+
     NetData GetNetData()
     {
         ParentMod.PluginConfig.TryGetEntry<int>(NumConfigDefinition, out var numEntry);

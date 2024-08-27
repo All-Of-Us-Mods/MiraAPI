@@ -3,5 +3,8 @@
 public enum MiraRpc : uint
 {
     SyncGameOptions,
-    SyncRoleOptions
+    SyncRoleOptions,
+    AddModifier,
+    RemoveModifier,
+    SyncModifiers
 }

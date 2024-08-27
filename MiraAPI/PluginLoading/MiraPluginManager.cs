@@ -1,8 +1,8 @@
 ﻿using BepInEx.Unity.IL2CPP;
-using Il2CppInterop.Runtime.Injection;
 using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.Attributes;
 using MiraAPI.Hud;
+using MiraAPI.Modifiers;
 using MiraAPI.Roles;
 using MiraAPI.Utilities.Colors;
 using Reactor.Utilities;
@@ -39,6 +39,7 @@ internal class MiraPluginManager
 
             var info = new MiraPluginInfo(plugin as IMiraPlugin, pluginInfo);
 
+            RegisterModifierAttribute(assembly);
             RegisterAllOptions(assembly, info);
             
             RegisterRoleAttribute(assembly, info);
@@ -149,6 +150,19 @@ internal class MiraPluginManager
             }
         }
     }
+
+    private static void RegisterModifierAttribute(Assembly assembly)
+    {
+        foreach (var type in assembly.GetTypes())
+        {
+            var attribute = type.GetCustomAttribute<RegisterModifierAttribute>();
+            if (attribute != null)
+            {
+                ModifierManager.RegisterModifier(type);
+            }
+        }
+    }
+
 
     private static void RegisterButtonAttribute(Assembly assembly)
     {

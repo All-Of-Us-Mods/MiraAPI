@@ -12,7 +12,7 @@ using Reactor.Networking.Rpc;
 
 namespace MiraAPI.GameOptions;
 
-public class ModdedOptionsManager
+public static class ModdedOptionsManager
 {
     private static readonly Dictionary<PropertyInfo, ModdedOptionAttribute> OptionAttributes = new();
     private static readonly Dictionary<Type, AbstractOptionGroup> TypeToGroup = new();

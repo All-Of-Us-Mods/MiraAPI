@@ -5,10 +5,10 @@
 A thorough, but simple, Among Us modding API and utility library that covers:
 - Roles
 - Options
+- Modifiers
 - Buttons
 - Assets
 - Compatibility
-- ~~Modifiers~~ (coming soon)
 - ~~Game Modes~~ (coming soon)
 
 Mira API strives to be simple and easy to use, while also using as many base game elements as possible. The result is a less intrusive, better modding API that covers general use cases.
@@ -61,6 +61,21 @@ Note: For step 1, if you are making neutral roles, choose either `CrewmateRole` 
 Mira API handles everything else, from adding the proper options to the settings menu, to managing the role assignment at the start of the game. There are no extra steps on the developer's part.
 
 See [this file](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/Roles/CustomRole.cs) for a code example.
+
+## Modifiers
+Mira API uses a different definition of 'modifiers' than other Among Us mods. For example, in Town Of Us, a modifier is an extra "ability" that is applied on top of the base role. However, in Mira API, modifiers are very flexible. A modifier is anything that "modifiers" a player's abilities or interactions.
+
+Mira provides 3 classes for working with modifiers:
+- `BaseModifier`: The base for every modifier. You MUST add and remove this modifier from a player manually!
+- `TimedModifier`: A modifier that has a time limit. This modifier has to be added manually, but will automatically remove itself after the time limit
+- `GameModifier`: This works like the typical TOU modifier, where it is automatically applied at the beginning of the game, then removed at the end.
+
+Modifiers provide various overridable functions and properties for custom behaviour. They can also be used for "tagging" a player. You can check if a player has a modifier through the extension method `HasModifier` on a `PlayerControl` object.
+
+To start using a modifier, pick one of the base classes above and create a class that inherits from it. Implement the properties and methods you would like, then add the `[RegisterModifier]` attribute to the class.
+
+An example Game modifier can be found [here](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/Modifiers/ExampleGameModifier.cs).
+An example Timer modifier can be found [here](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/Modifiers/ModifierTimerExample.cs).
 
 ## Options
 Options are also very simple in Mira API. Mira API handles all the hard work behind the scenes, so developers only have to follow a few steps to create their custom options. The Options API is split up into Groups and Options. Every Option needs to be in a Group.
