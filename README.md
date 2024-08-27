@@ -19,7 +19,7 @@ Mira API strives to be simple and easy to use, while also using as many base gam
 # Usage
 
 To start using Mira API, you need to:
-1. Add a reference to Mira API either through a DLL, project reference, or NuGet package.
+1. Add a reference to Mira API either through a [DLL](https://github.com/All-Of-Us-Mods/MiraAPI/releases), project reference, or [NuGet package](https://www.nuget.org/packages/AllOfUs.MiraAPI).
 2. Add a BepInDependency on your plugin class like this: `[BepInDependency(MiraApiPlugin.Id)]`
 3. Implement the IMiraPlugin interface on your plugin class.
 
