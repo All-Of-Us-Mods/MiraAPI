@@ -4,7 +4,7 @@
         <LangVersion>latest</LangVersion>
         <DebugType>embedded</DebugType>
         <PackageId>AllOfUs.MiraAPI</PackageId>
-        <Version>0.1.1</Version>
+        <Version>0.1.2</Version>
         <Description>Simple and easy to use Among Us modding API.</Description>
         <Authors>Angxl, XtraCube</Authors>
         <Company>All Of Us</Company>
