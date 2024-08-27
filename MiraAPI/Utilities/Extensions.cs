@@ -72,7 +72,7 @@ public static class Extensions
 
     public static Color DarkenColor(this Color color)
     {
-        return new Color(color.r - 0.3f, color.g - 0.3f, color.b - 0.3f);
+        return new Color(color.r - 0.45f, color.g - 0.45f, color.b - 0.45f);
     }
     public static Color GetAlternateColor(this Color color)
     {
@@ -81,7 +81,7 @@ public static class Extensions
 
     public static Color LightenColor(this Color color)
     {
-        return new Color(color.r + 0.3f, color.g + 0.3f, color.b + 0.3f);
+        return new Color(color.r + 0.45f, color.g + 0.45f, color.b + 0.45f);
     }
 
     public static bool IsColorDark(this Color color)
