@@ -54,6 +54,7 @@ public static class LobbyViewPanePatches
                 CurrentSelectedMod = 0;
             }
             __instance.RefreshTab();
+            __instance.scrollBar.ScrollToTop();
         }));
 
         // Create the back button
@@ -74,6 +75,7 @@ public static class LobbyViewPanePatches
                 CurrentSelectedMod = MiraPluginManager.Instance.RegisteredPlugins.Count;
             }
             __instance.RefreshTab();
+            __instance.scrollBar.ScrollToTop();
         }));
     }
     
@@ -202,6 +204,15 @@ public static class LobbyViewPanePatches
 
 	    foreach (var team in Enum.GetValues<ModdedRoleTeams>())
 	    {
+		    var filteredRoles = SelectedMod.CustomRoles.Values
+			    .OfType<ICustomRole>()
+			    .Where(x => !x.HideSettings && x.Team == team).ToList();
+		    
+		    if (filteredRoles.Count == 0)
+		    {
+			    continue;
+		    }
+		    
 		    var categoryHeaderRoleVariant =
 			    Object.Instantiate(instance.categoryHeaderRoleOrigin, instance.settingsContainer, true);
 
@@ -226,10 +237,6 @@ public static class LobbyViewPanePatches
 		    categoryHeaderRoleVariant.transform.localPosition = new Vector3(0.09f, num, -2f);
 		    instance.settingsInfo.Add(categoryHeaderRoleVariant.gameObject);
 		    num -= 0.696f;
-
-		    var filteredRoles = SelectedMod.CustomRoles.Values
-			    .OfType<ICustomRole>()
-			    .Where(x => !x.HideSettings && x.Team == team);
 
 		    foreach (var role in filteredRoles)
 		    {
