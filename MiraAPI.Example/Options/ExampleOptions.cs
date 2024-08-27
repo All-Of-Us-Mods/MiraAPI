@@ -6,28 +6,28 @@ namespace MiraAPI.Example.Options;
 
 public class ExampleOptions : AbstractOptionGroup
 {
-    public override string GroupName => "General Group";
-    public override Color GroupColor => Color.red;
+    public override string GroupName => "Example Options 1";
+    public override Color GroupColor => Color.green;
 
-    [ModdedToggleOption("Use Thing")]
-    public bool UseThing { get; set; } = false;
+    [ModdedToggleOption("Toggle Opt 1")]
+    public bool ToggleOpt { get; set; } = false;
 
-    [ModdedToggleOption("Use another thing")]
-    public bool UseAnotherThing { get; set; } = true;
+    [ModdedToggleOption("Toggle Opt 2")]
+    public bool ToggleOpt2 { get; set; } = true;
 
-    [ModdedNumberOption("Sussy level", min: 0, max: 10)]
-    public float SussyLevel { get; set; } = 4f;
+    [ModdedNumberOption("Number Opt", min: 0, max: 10)]
+    public float NumberOpt { get; set; } = 4f;
 
-    [ModdedStringOption("Sus choices", ["hello", "hello 2", "hello 3"])]
-    public int SusChoices { get; set; } = 2;
+    [ModdedStringOption("String Opt", ["Hello", "Hey", "Bye"])]
+    public int StringOpt { get; set; } = 2;
 
-    [ModdedEnumOption("Enum test", typeof(TestEnum))]
-    public TestEnum EnumTest { get; set; } = TestEnum.Bye;
+    [ModdedEnumOption("Enum Opt", typeof(TestEnum))]
+    public TestEnum EnumOpt { get; set; } = TestEnum.Mira;
 }
 
 public enum TestEnum
 {
-    Hello,
-    Hi,
-    Bye
+    Welcome,
+    To,
+    Mira
 }

@@ -1,10 +1,10 @@
-﻿using MiraAPI.PluginLoading;
+﻿using BepInEx.Configuration;
+using MiraAPI.Networking;
+using MiraAPI.PluginLoading;
 using MiraAPI.Roles;
 using Reactor.Localization.Utilities;
-using System;
-using BepInEx.Configuration;
-using MiraAPI.Networking;
 using Reactor.Networking.Rpc;
+using System;
 using UnityEngine;
 
 namespace MiraAPI.GameOptions.OptionTypes;
@@ -12,7 +12,7 @@ namespace MiraAPI.GameOptions.OptionTypes;
 public abstract class ModdedOption<T> : IModdedOption
 {
     private IMiraPlugin _parentMod;
-    
+
     public uint Id { get; }
     public BaseGameSetting Data { get; protected init; }
     public IMiraPlugin ParentMod
@@ -33,7 +33,7 @@ public abstract class ModdedOption<T> : IModdedOption
     public Func<bool> Visible { get; set; }
     public Type AdvancedRole { get; set; }
     public OptionBehaviour OptionBehaviour { get; set; }
-    public ConfigDefinition ConfigDefinition => new ("Options", Title);
+    public ConfigDefinition ConfigDefinition => new("Options", Title);
 
     protected ModdedOption(string title, T defaultValue, Type roleType)
     {
@@ -68,19 +68,19 @@ public abstract class ModdedOption<T> : IModdedOption
         {
             Rpc<SyncOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, [GetNetData()], true);
         }
-        
+
         if (ParentMod?.GetConfigFile().TryGetEntry<T>(ConfigDefinition, out var entry) == true)
         {
             entry.Value = Value;
         }
-        
+
         OnValueChanged(newValue);
     }
 
     public abstract float GetFloatData();
     
     public abstract NetData GetNetData();
-        
+
     public abstract void HandleNetData(byte[] data);
 
     public abstract void OnValueChanged(T newValue);

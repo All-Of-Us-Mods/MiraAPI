@@ -89,6 +89,7 @@ internal class MiraPluginManager
 
     private static void RegisterRoleAttribute(Assembly assembly, MiraPluginInfo pluginInfo)
     {
+        List<Type> roles = [];
         foreach (var type in assembly.GetTypes())
         {
             var attribute = type.GetCustomAttribute<RegisterCustomRoleAttribute>();
@@ -97,32 +98,22 @@ internal class MiraPluginManager
                 continue;
             }
             
+            if (!(typeof(RoleBehaviour).IsAssignableFrom(type) && typeof(ICustomRole).IsAssignableFrom(type)))
+            {
+                Logger<MiraApiPlugin>.Error($"{type.Name} does not inherit from RoleBehaviour or ICustomRole.");
+                continue;
+            }
+            
             if (!ModList.GetById(pluginInfo.PluginId).IsRequiredOnAllClients)
             {
                 Logger<MiraApiPlugin>.Error("Custom roles are only supported on all clients.");
                 return;
             }
-
-            ClassInjector.RegisterTypeInIl2Cpp(type);
-
-            var role = CustomRoleManager.RegisterRole(type, pluginInfo);
-
-            try
-            {
-                pluginInfo.CustomRoles.Add((ushort)role.Role, role);
-            }
-            catch (Exception e)
-            {
-                Logger<MiraApiPlugin>.Error("Failed to register role: " + type.Name);
-
-                foreach (var (k, v) in pluginInfo.CustomRoles)
-                {
-                    Logger<MiraApiPlugin>.Error($"{k}: {v}");
-                }
-                
-                Logger<MiraApiPlugin>.Error(e);
-            }
+            
+            roles.Add(type);
         }
+        
+        CustomRoleManager.RegisterRoleTypes(roles, pluginInfo);
     }
 
     private static void RegisterColorClasses(Assembly assembly)
