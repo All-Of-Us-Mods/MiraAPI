@@ -7,7 +7,7 @@ namespace MiraAPI.Example.Modifiers;
 public class ModifierTimerExample : TimedModifier
 {
     public override string ModifierName => "Color Changer";
-    public override bool HideOnUi => true;
+    public override bool HideOnUi => false;
     public override float Duration => 10f;
     public override bool AutoStart => true;
 
@@ -15,7 +15,7 @@ public class ModifierTimerExample : TimedModifier
 
     public override void OnTimerComplete()
     {
-        Player.SetColor((byte)_rand.Next(0, Palette.PlayerColors.Count));
+        Player.RpcSetColor((byte)_rand.Next(0, Palette.PlayerColors.Count));
         StartTimer();
     }
 }
