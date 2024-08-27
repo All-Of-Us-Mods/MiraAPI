@@ -9,8 +9,15 @@
         <Description>Simple and easy to use Among Us modding API.</Description>
         <Authors>Angxl, XtraCube</Authors>
     </PropertyGroup>
+    <ItemGroup>
+      <None Remove="Resources\Buttons.png" />
+      <None Remove="Resources\Checkmark.png" />
+      <None Remove="Resources\CheckMarkBox.png" />
+    </ItemGroup>
     
     <ItemGroup>
+        <EmbeddedResource Include="Resources\Checkmark.png" />
+        <EmbeddedResource Include="Resources\CheckMarkBox.png" />
         <EmbeddedResource Include="Resources\Cog.png" />
         <EmbeddedResource Include="Resources\CogActive.png" />
         <EmbeddedResource Include="Resources\NextButton.png" />

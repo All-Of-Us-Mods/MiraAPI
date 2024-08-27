@@ -11,7 +11,7 @@ public class ExampleTargetButton : CustomActionButton<PlayerControl>
     public override float EffectDuration => 0f;
     public override int MaxUses => 0;
     public override LoadableAsset<Sprite> Sprite => ExampleAssets.ExampleButton;
-    
+
     protected override void OnClick()
     {
         PlayerControl.LocalPlayer.CmdCheckMurder(Target);
