@@ -18,16 +18,16 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
 {
     public List<BaseModifier> ActiveModifiers { get; private set; }
 
-    public PlayerControl Player;
+    public PlayerControl player;
 
     private TextMeshPro _modifierText;
 
     public void Start()
     {
-        Player = GetComponent<PlayerControl>();
-        ActiveModifiers = new List<BaseModifier>();
+        player = GetComponent<PlayerControl>();
+        ActiveModifiers = [];
 
-        if (!Player.AmOwner) return;
+        if (!player.AmOwner) return;
 
         _modifierText = Helpers.CreateTextLabel("ModifierText", HudManager.Instance.transform, AspectPosition.EdgeAlignments.RightTop, new Vector3(10.1f, 3.5f, 0), textAlignment: TextAlignmentOptions.Right);
         _modifierText.verticalAlignment = VerticalAlignmentOptions.Top;
@@ -50,10 +50,12 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
 
         var filteredModifiers = ActiveModifiers.Where(mod => !mod.HideOnUi);
 
-        if (Player.AmOwner && filteredModifiers.Count() > 0)
+        var baseModifiers = filteredModifiers as BaseModifier[] ?? filteredModifiers.ToArray();
+        
+        if (player.AmOwner && baseModifiers.Any())
         {
             var stringBuild = new StringBuilder();
-            foreach (var mod in filteredModifiers)
+            foreach (var mod in baseModifiers)
             {
                 stringBuild.Append($"\n{mod.ModifierName}");
                 if (mod is TimedModifier timer)
@@ -63,7 +65,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
             }
             _modifierText.text = $"<b><size=130%>Modifiers:</b></size>{stringBuild}";
         }
-        else if (Player.AmOwner && filteredModifiers.Count() == 0 && _modifierText.text != string.Empty)
+        else if (player.AmOwner && !baseModifiers.Any() && _modifierText.text != string.Empty)
         {
             _modifierText.text = string.Empty;
         }
@@ -121,7 +123,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
         }
 
         modifierComponent.ActiveModifiers.Add(modifier);
-        modifier.Player = modifierComponent.Player;
+        modifier.Player = modifierComponent.player;
         modifier.ModifierId = modifierId;
         modifier.OnActivate();
 

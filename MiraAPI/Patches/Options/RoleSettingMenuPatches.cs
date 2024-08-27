@@ -162,7 +162,7 @@ public static class RoleSettingMenuPatches
     {
         ICustomRole customRole = role as ICustomRole;
         __instance.roleDescriptionText.text = customRole.RoleLongDescription;
-        __instance.roleTitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(role.StringName, Array.Empty<Il2CppSystem.Object>());
+        __instance.roleTitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(role.StringName, []);
         __instance.roleScreenshot.sprite = Sprite.Create(role.RoleScreenshot.texture, new Rect(0, 0, 370, 230), Vector2.one / 2, 100);
         __instance.roleScreenshot.drawMode = SpriteDrawMode.Sliced;
         __instance.roleHeaderSprite.color = customRole.RoleColor;
