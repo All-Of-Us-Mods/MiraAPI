@@ -2,6 +2,7 @@
 using Reactor.Utilities.Attributes;
 using Reactor.Utilities.ImGui;
 using System;
+using MiraAPI.Example.Modifiers;
 using UnityEngine;
 
 namespace MiraAPI.Example;

@@ -71,14 +71,14 @@ public static class Extensions
         return ModdedOptionsManager.ModdedOptions.Values.Any(opt => opt.OptionBehaviour && opt.OptionBehaviour.Equals(optionBehaviour));
     }
 
-    public static ModifierComponent GetModifierComponent(this PlayerControl player)
+    public static ModifierComponent? GetModifierComponent(this PlayerControl player)
     {
         return player.GetComponent<ModifierComponent>();
     }
 
     public static List<T> Randomize<T>(this List<T> list)
     {
-        List<T> randomizedList = new List<T>();
+        List<T> randomizedList = [];
         System.Random rnd = new();
         while (list.Count > 0)
         {
@@ -89,13 +89,13 @@ public static class Extensions
         return randomizedList;
     }
 
-    public static bool HasModifier<T>(this PlayerControl player) where T : BaseModifier
+    public static bool HasModifier<T>(this PlayerControl? player) where T : BaseModifier
     {
-        return player is not null && player.GetModifierComponent() is not null && player.GetModifierComponent().ActiveModifiers.Exists(x => x is T);
+        return player?.GetModifierComponent() != null && player.GetModifierComponent().ActiveModifiers.Exists(x => x is T);
     }
-    public static bool HasModifier(this PlayerControl player, uint id)
+    public static bool HasModifier(this PlayerControl? player, uint id)
     {
-        return player is not null && player.GetModifierComponent() is not null && player.GetModifierComponent().ActiveModifiers.Exists(x => x.ModifierId == id);
+        return player?.GetModifierComponent() != null && player.GetModifierComponent().ActiveModifiers.Exists(x => x.ModifierId == id);
     }
 
     public static void AddModifier<T>(this PlayerControl player) where T : BaseModifier

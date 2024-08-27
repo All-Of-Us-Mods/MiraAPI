@@ -1,11 +1,12 @@
-﻿using MiraAPI.Modifiers.Types;
+﻿using MiraAPI.Modifiers;
+using MiraAPI.Modifiers.Types;
 
-namespace MiraAPI.Example;
+namespace MiraAPI.Example.Modifiers;
 
 [RegisterModifier]
-public class ModifierExample : GameModifier
+public class GameModifierExample : GameModifier
 {
-    public override string ModifierName => "Example Modifier";
+    public override string ModifierName => "Example Game Modifier";
 
     public override bool CanVent()
     {

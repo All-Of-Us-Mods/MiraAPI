@@ -1,6 +1,7 @@
-﻿using MiraAPI.Modifiers.Types;
+﻿using MiraAPI.Modifiers;
+using MiraAPI.Modifiers.Types;
 
-namespace MiraAPI.Example;
+namespace MiraAPI.Example.Modifiers;
 
 [RegisterModifier]
 public class ModifierTimerExample : TimedModifier
