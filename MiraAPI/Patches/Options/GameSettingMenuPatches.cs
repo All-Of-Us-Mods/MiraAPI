@@ -95,7 +95,7 @@ public static class GameSettingMenuPatches
                 UpdateText(menu, settings, roles);
             }
 
-            string name = SelectedMod?.MiraPlugin.OptionsTitleText;
+            var name = SelectedMod?.MiraPlugin.OptionsTitleText;
             _text.text = name?[..Math.Min(name.Length, 25)];
         }
 
@@ -105,7 +105,7 @@ public static class GameSettingMenuPatches
 
         if (CurrentSelectedMod != 0)
         {
-            if (SelectedMod.OptionGroups.Count == 0)
+            if (SelectedMod.Options.Where(x=>x.AdvancedRole==null).ToList().Count == 0)
             {
                 menu.GameSettingsButton.gameObject.SetActive(false);
             }

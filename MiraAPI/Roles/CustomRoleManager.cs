@@ -9,6 +9,7 @@ using Reactor.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Il2CppInterop.Runtime.Injection;
 using MiraAPI.Utilities;
 using TMPro;
 using UnityEngine;
@@ -19,7 +20,9 @@ namespace MiraAPI.Roles;
 public static class CustomRoleManager
 {
     public static readonly Dictionary<ushort, RoleBehaviour> CustomRoles = new();
-
+    
+    public static readonly Dictionary<Type, ushort> RoleIds = new();
+    
     private static ushort _roleId = 100;
     
     private static ushort GetNextRoleId()
@@ -32,7 +35,25 @@ public static class CustomRoleManager
         RoleManager.Instance.AllRoles = RoleManager.Instance.AllRoles.Concat(CustomRoles.Values).ToArray();
     }
 
-    internal static RoleBehaviour RegisterRole(Type roleType, MiraPluginInfo parentMod)
+    public static void RegisterRoleTypes(List<Type> roles, MiraPluginInfo pluginInfo)
+    {
+        roles.ForEach(x=>RoleIds.Add(x, GetNextRoleId()));
+        
+        foreach (var roleType in roles)
+        {
+            ClassInjector.RegisterTypeInIl2Cpp(roleType);
+
+            var role = RegisterRole(roleType, pluginInfo);
+            if (role is null)
+            {
+                continue;
+            }
+
+            pluginInfo.CustomRoles.Add((ushort)role.Role, role);
+        }
+    }
+
+    private static RoleBehaviour RegisterRole(Type roleType, MiraPluginInfo parentMod)
     {
         if (!(typeof(RoleBehaviour).IsAssignableFrom(roleType) && typeof(ICustomRole).IsAssignableFrom(roleType)))
         {
@@ -47,8 +68,10 @@ public static class CustomRoleManager
             roleBehaviour.gameObject.Destroy();
             return null;
         }
+        
+        var roleId = RoleIds[roleType];
 
-        roleBehaviour.Role = (RoleTypes)GetNextRoleId();
+        roleBehaviour.Role = (RoleTypes)roleId;
         roleBehaviour.TeamType = customRole.Team == ModdedRoleTeams.Neutral ? RoleTeamTypes.Crewmate : (RoleTeamTypes)customRole.Team;
         roleBehaviour.NameColor = customRole.RoleColor;
         roleBehaviour.StringName = CustomStringName.CreateAndRegister(customRole.RoleName);
@@ -68,7 +91,7 @@ public static class CustomRoleManager
             RoleManager.GhostRoles.Add(roleBehaviour.Role);
         }
 
-        CustomRoles.Add(_roleId, roleBehaviour);
+        CustomRoles.Add(roleId, roleBehaviour);
 
         if (customRole.HideSettings)
         {
@@ -78,7 +101,7 @@ public static class CustomRoleManager
         var config = parentMod.PluginConfig;
         config.Bind(customRole.NumConfigDefinition, 1);
         config.Bind(customRole.ChanceConfigDefinition, 100);
-
+        
         return roleBehaviour;
     }
 

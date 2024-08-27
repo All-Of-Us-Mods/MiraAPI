@@ -96,12 +96,12 @@ public static class GameOptionsMenuPatch
             categoryHeaderMasked.gameObject.SetActive(false);
             group.Header = categoryHeaderMasked;
 
-            TextMeshPro newText = GameObject.Instantiate(categoryHeaderMasked.Title, categoryHeaderMasked.transform);
+            TextMeshPro newText = Object.Instantiate(categoryHeaderMasked.Title, categoryHeaderMasked.transform);
             newText.text = $"<size=70%>(Click to open)</size>";
             newText.transform.localPosition = new Vector3(2.6249f, -0.165f, 0f);
             newText.gameObject.GetComponent<TextTranslatorTMP>().Destroy();
 
-            List<OptionBehaviour> newOpts = new();
+            List<OptionBehaviour> newOpts = [];
             foreach (var opt in group.Options)
             {
                 OptionBehaviour newOpt = opt.CreateOption(__instance.checkboxOrigin, __instance.numberOptionOrigin, __instance.stringOptionOrigin, __instance.settingsContainer);
