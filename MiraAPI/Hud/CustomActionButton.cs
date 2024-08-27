@@ -3,6 +3,7 @@ using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 namespace MiraAPI.Hud;
 
@@ -95,7 +96,7 @@ public abstract class CustomActionButton
         }
 
         var pb = Button.GetComponent<PassiveButton>();
-        pb.OnClick.RemoveAllListeners();
+        pb.OnClick = new Button.ButtonClickedEvent();
         pb.OnClick.AddListener((UnityAction)ClickHandler);
     }
 

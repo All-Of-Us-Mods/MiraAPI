@@ -1,4 +1,5 @@
 ﻿using MiraAPI.GameOptions.OptionTypes;
+using MiraAPI.Utilities;
 using System;
 using System.Reflection;
 
@@ -9,7 +10,7 @@ public class ModdedNumberOptionAttribute(
     float min,
     float max,
     float increment = 1,
-    NumberSuffixes suffixType = NumberSuffixes.None,
+    MiraNumberSuffixes suffixType = MiraNumberSuffixes.None,
     bool zeroInfinity = false,
     Type roleType = null)
     : ModdedOptionAttribute(title, roleType)

@@ -1,5 +1,6 @@
 ﻿using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.Attributes;
+using MiraAPI.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.Example.Options;
@@ -15,7 +16,7 @@ public class ExampleOptions : AbstractOptionGroup
     [ModdedToggleOption("Toggle Opt 2")]
     public bool ToggleOpt2 { get; set; } = true;
 
-    [ModdedNumberOption("Number Opt", min: 0, max: 10)]
+    [ModdedNumberOption("Number Opt", min: 0, max: 10, suffixType: MiraNumberSuffixes.Percent)]
     public float NumberOpt { get; set; } = 4f;
 
     [ModdedStringOption("String Opt", ["Hello", "Hey", "Bye"])]

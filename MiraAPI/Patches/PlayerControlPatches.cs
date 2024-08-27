@@ -37,9 +37,9 @@ public static class PlayerControlPatches
         
         foreach (var button in CustomButtonManager.CustomButtons)
         {
-            if (__instance.Data?.Role != null)
+            if (__instance.Data?.Role == null)
             {
-                return;
+                continue;
             }
             
             if (!button.Enabled(__instance.Data?.Role))
