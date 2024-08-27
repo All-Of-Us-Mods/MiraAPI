@@ -32,21 +32,32 @@ public static class TaskAdderPatch
         _scroller.allowY = true;
         _scroller.Inner = inner.transform;
 
-        GameObject hitbox = new("Hitbox");
-        SpriteMask mask = hitbox.AddComponent<SpriteMask>();
-        hitbox.layer = 5;
+        GameObject hitbox = new("Hitbox")
+        {
+            layer = 5
+        };
         hitbox.transform.SetParent(__instance.TaskParent.transform, false);
+        hitbox.transform.localScale = new Vector3(7.5f, 6.5f, 1);
+        hitbox.transform.localPosition = new Vector3(2.8f, -2.2f, 0);
+        
+        SpriteMask mask = hitbox.AddComponent<SpriteMask>();
         mask.sprite = MiraAssets.NextButton.LoadAsset();
-        mask.transform.localScale = new Vector3(15.1746f, 11.3691f, 1);
-
+        mask.alphaCutoff = 0.0f;
+            
         BoxCollider2D collider = hitbox.AddComponent<BoxCollider2D>();
         collider.size = new Vector2(1f, 1f);
         collider.enabled = true;
 
         _scroller.ClickMask = collider;
 
+        __instance.TaskPrefab.GetComponent<PassiveButton>().ClickMask = collider;
+        __instance.RoleButton.GetComponent<PassiveButton>().ClickMask = collider;
+        __instance.RootFolderPrefab.GetComponent<PassiveButton>().ClickMask = collider;
+        __instance.RootFolderPrefab.gameObject.SetActive(false);
+        
         __instance.TaskParent = inner.transform;
 
+        _rolesFolder = Object.Instantiate(__instance.RootFolderPrefab, _scroller.Inner);
         _rolesFolder = Object.Instantiate(__instance.RootFolderPrefab, _scroller.Inner);
         _rolesFolder.gameObject.SetActive(false);
         _rolesFolder.FolderName = "Roles";
@@ -81,6 +92,23 @@ public static class TaskAdderPatch
 
         __instance.RolloverHandler.OutColor = __instance.FileImage.color;
     }
+    
+    private static void AddFileAsChildCustom(this TaskAdderGame instance, TaskFolder taskFolder, TaskAddButton item, ref float xCursor, ref float yCursor, ref float maxHeight)
+    {
+        item.transform.SetParent(instance.TaskParent);
+        item.transform.localPosition = new Vector3(xCursor, yCursor, 0f);
+        item.transform.localScale = Vector3.one;
+        maxHeight = Mathf.Max(maxHeight, item.Text.bounds.size.y + 1.3f);
+        xCursor += instance.fileWidth;
+        if (xCursor > instance.lineWidth)
+        {
+            xCursor = 0f;
+            yCursor -= maxHeight;
+            maxHeight = 0f;
+        }
+        instance.ActiveItems.Add(item.transform);
+    }
+    
 
     // yes it might be crazy patching the entire method, but i tried so many other methods and only this works :cry:
     [HarmonyPrefix]
@@ -113,7 +141,7 @@ public static class TaskAdderPatch
 
             folderTransform.localPosition = new Vector3(num, num2, 0f);
             folderTransform.localScale = Vector3.one;
-            num3 = Mathf.Max(num3, taskFolder2.Text.bounds.size.y + 1.1f);
+            num3 = Mathf.Max(num3, taskFolder2.Text.bounds.size.y + 1.3f);
             num += __instance.folderWidth;
             if (num > __instance.lineWidth)
             {
@@ -161,7 +189,7 @@ public static class TaskAdderPatch
             {
                 taskAddButton.Text.text = DestroyableSingleton<TranslationController>.Instance.GetString(taskAddButton.MyTask.TaskType);
             }
-            __instance.AddFileAsChild(taskFolder, taskAddButton, ref num, ref num2, ref num3);
+            __instance.AddFileAsChildCustom(taskFolder, taskAddButton, ref num, ref num2, ref num3);
             if (taskAddButton != null && taskAddButton.Button != null)
             {
                 ControllerManager.Instance.AddSelectableUiElement(taskAddButton.Button);
@@ -187,7 +215,7 @@ public static class TaskAdderPatch
                     var taskAddButton2 = Object.Instantiate(__instance.RoleButton);
                     taskAddButton2.SafePositionWorld = __instance.SafePositionWorld;
                     taskAddButton2.Text.text = "Be_" + roleBehaviour.NiceName + ".exe";
-                    __instance.AddFileAsChild(_rolesFolder, taskAddButton2, ref num, ref num2, ref num3);
+                    __instance.AddFileAsChildCustom(_rolesFolder, taskAddButton2, ref num, ref num2, ref num3);
                     taskAddButton2.Role = roleBehaviour;
                     if (taskAddButton2 != null && taskAddButton2.Button != null)
                     {
@@ -218,7 +246,7 @@ public static class TaskAdderPatch
                     var taskAddButton2 = Object.Instantiate(__instance.RoleButton);
                     taskAddButton2.SafePositionWorld = __instance.SafePositionWorld;
                     taskAddButton2.Text.text = "Be_" + roleBehaviour.NiceName + ".exe";
-                    __instance.AddFileAsChild(_rolesFolder, taskAddButton2, ref num, ref num2, ref num3);
+                    __instance.AddFileAsChildCustom(_rolesFolder, taskAddButton2, ref num, ref num2, ref num3);
                     taskAddButton2.Role = roleBehaviour;
                     if (taskAddButton2 != null && taskAddButton2.Button != null)
                     {
@@ -244,7 +272,12 @@ public static class TaskAdderPatch
             chip.GetComponent<SpriteRenderer>().maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
         }
 
-        if (_scroller) _scroller.CalculateAndSetYBounds(__instance.ActiveItems.Count, 6, 3, 0.8f);
+        if (_scroller)
+        {
+            _scroller.CalculateAndSetYBounds(__instance.ActiveItems.Count, 6, 3, 1f);
+            _scroller.SetYBoundsMin(0.0f);
+            _scroller.ScrollToTop();
+        }
         if (__instance.Hierarchy.Count == 1)
         {
             ControllerManager.Instance.SetBackButton(__instance.BackButton);
