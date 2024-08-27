@@ -5,7 +5,6 @@ using MiraAPI.Modifiers;
 using MiraAPI.Networking;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
-using Reactor.Utilities;
 using System;
 using System.Text;
 using MiraAPI.PluginLoading;

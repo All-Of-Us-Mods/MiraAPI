@@ -3,15 +3,10 @@ using System;
 using System.Collections.Generic;
 using MiraAPI.GameOptions;
 using MiraAPI.Modifiers;
-using MiraAPI.Roles;
 using Reactor.Utilities;
-using Reactor.Utilities.Extensions;
-using System.Collections.Generic;
 using System.Linq;
 using MiraAPI.Networking;
-using Reactor.Utilities;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.Utilities;
 

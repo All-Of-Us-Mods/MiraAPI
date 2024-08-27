@@ -1,8 +1,6 @@
 ﻿using BepInEx.Unity.IL2CPP;
-using Il2CppInterop.Runtime.Injection;
 using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.Attributes;
-using MiraAPI.Hud;
 using MiraAPI.Hud;
 using MiraAPI.Modifiers;
 using MiraAPI.Roles;
