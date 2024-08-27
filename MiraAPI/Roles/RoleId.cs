@@ -14,4 +14,14 @@ public class RoleId
 
         return roleId;
     }
+    
+    public static ushort Get(Type type)
+    {
+        if (!CustomRoleManager.RoleIds.TryGetValue(type, out var roleId))
+        {
+            throw new InvalidOperationException($"Role {type} is not registered");
+        }
+
+        return roleId;
+    }
 }

@@ -81,7 +81,6 @@ public interface ICustomRole
         ParentMod.PluginConfig.TryGetEntry<int>(NumConfigDefinition, out var numEntry);
         ParentMod.PluginConfig.TryGetEntry<int>(ChanceConfigDefinition, out var chanceEntry);
         
-        // TODO: use the RoleID class when that branch is merged
-        return new NetData((uint)((RoleBehaviour)this).Role, BitConverter.GetBytes(numEntry.Value).AddRangeToArray(BitConverter.GetBytes(chanceEntry.Value)));
+        return new NetData(RoleId.Get(GetType()), BitConverter.GetBytes(numEntry.Value).AddRangeToArray(BitConverter.GetBytes(chanceEntry.Value)));
     }
 }
