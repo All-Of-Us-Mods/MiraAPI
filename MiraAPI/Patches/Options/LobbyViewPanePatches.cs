@@ -342,7 +342,10 @@ public static class LobbyViewPanePatches
 		    return 0;
 	    }
 
-	    var customRole = role as ICustomRole;
+	    if (role is not ICustomRole customRole)
+	    {
+		    return 0;
+	    }
 	    
         viewPanel.header.SetHeader(role.StringName, maskLayer, role.TeamType == RoleTeamTypes.Crewmate, customRole.Icon.LoadAsset());
 	    viewPanel.divider.material.SetInt(PlayerMaterial.MaskLayer, maskLayer);
