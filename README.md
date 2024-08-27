@@ -82,7 +82,7 @@ You can access any group class using the `OptionGroupSingleton` class like this:
 ```csharp
 // MyOptionsGroup is a class that inherits from AbstractOptionGroup
 var myGroup = OptionGroupSingleton<MyOptionsGroup>.Instance; // gets the instance of the group
-System.Out.Console.WriteLine(myGroup.MyNumberOption); // prints the value of the option to the console
+Logger<MyPlugin>.Info(myGroup.MyNumberOption); // prints the value of the option to the console
 ```
 
 Once you have an options group, there are two ways to make the actual options:
@@ -169,6 +169,11 @@ Mira API provides a simple interface for adding ability buttons to the game. The
 2. Add the `[RegisterCustomButton]` attribute to the class.
 
 All other tasks and logic required to add the button to the game are handled by Mira API.
+
+In case you need to access your `CustomActionButton` instance from another class, you can use the `CustomButtonSingleton` class like this:
+```csharp
+var myButton = CustomButtonSingleton<MyCoolButton>.Instance;
+```
 
 The button API is simple, but provides a lot of flexibility. There are various methods you can override to customize the behaviour of your button. See [this file](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI/Hud/CustomActionButton.cs) for a full list of methods you can override.
 
