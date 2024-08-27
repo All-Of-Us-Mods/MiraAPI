@@ -5,13 +5,15 @@
 A thorough, but simple, Among Us modding API and utility library that covers:
 - Roles
 - Options
-- Modifiers
-- Game Modes
+- Buttons
 - Assets
-- HUD Elements
 - Compatibility
+- ~~Modifiers~~ (coming soon)
+- ~~Game Modes~~ (coming soon)
 
 Mira API strives to be simple and easy to use, while also using as many base game elements as possible. The result is a less intrusive, better modding API that covers general use cases.
+
+**Join the [Discord](https://discord.gg/all-of-us-launchpad-794950428756410429) for support and to stay updated on the latest releases**
 
 # Usage
 
@@ -22,16 +24,46 @@ To start using Mira API, you need to:
 
 For a full example, see [this file](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/ExamplePlugin.cs).
 
+## Recommended Project Structure
+It is highly recommended to follow this project structure when using Mira API in order to keep your code clean and organized. You can also view the Example Mod in this repository for some guidance.
+```
+MyMiraMod/
+├── Buttons/
+│   └── MyCoolButton.cs
+├── Options/
+│   ├── Roles/
+│   │   └── CoolCustomRoleOptions.cs
+│   └── MainOptionGroup.cs
+├── Patches/
+│   ├── Roles/
+│   │   └── CoolCustomRole/
+│   │       ├── PlayerControlPatches.cs
+│   │       └── ExileControllerPatches.cs
+│   └── General/
+│       └── HudManagerPatches.cs
+├── Resources/
+│   ├── CoolButton.png
+│   └── myAssets-win-x86.bundle
+├── Roles/
+│   └── CoolCustomRole.cs
+├── MyMiraModPlugin.cs
+└── MyModAssets.cs
+```
+
 ## Roles
 Roles are very simple in Mira API. There are 3 things you need to do to create a custom role:
-1. Create a class that inherits from a base game role (like `RoleBehaviour`, `CrewmateRole`, `ImpostorRole`, etc).
+1. Create a class that inherits from a base game role (like `CrewmateRole`, `ImpostorRole`, etc) 
 2. Implement the `ICustomRole` interface from Mira API.
 3. Add the `[RegisterCustomRole]` attribute to the class.
+
+Note: For step 1, if you are making neutral roles, choose either `CrewmateRole` or `ImpostorRole` as the base depending on if it can kill or not! 
+
+Mira API handles everything else, from adding the proper options to the settings menu, to managing the role assignment at the start of the game. There are no extra steps on the developer's part.
 
 See [this file](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/Roles/CustomRole.cs) for a code example.
 
 ## Options
-Options are also very simple in Mira API. Options are split up into Groups and Options. Every Option needs to be in a Group.
+Options are also very simple in Mira API. Mira API handles all the hard work behind the scenes, so developers only have to follow a few steps to create their custom options. The Options API is split up into Groups and Options. Every Option needs to be in a Group.
 
 To create a group, you need to create a class that inherits from the `AbstractOptionGroup` abstract class. Groups contain 4 properties, `GroupName`, `GroupColor`, `GroupVisible`, and `AdvancedRole`. Only the `GroupName` is required.
 
@@ -57,12 +89,34 @@ Once you have an options group, there are two ways to make the actual options:
 - Use an Option Attribute with a property.  
 - Create a ModdedOption property.
 
+### Option Attributes
+
 This is an example of using an Option Attribute on a property:
 ```csharp
 // The first parameter is always the name of the option. The rest are dependent on the type of option.
 [ModdedNumberOption("Sussy level", min: 0, max: 10)]
 public float SussyLevel { get; set; } = 4f; // You can set a default value here.
 ```
+
+Here are the available Option Attributes and their signatures:
+```csharp
+ModdedEnumOption(string name, Type enumType, Type roleType = null)
+    
+ModdedNumberOption(
+    string name,
+    float min,
+    float max,
+    float increment=1
+    NumberSuffixes suffixType = NumberSuffixes.None,
+    bool zeroInfinity = false,
+    Type roleType = null)
+    
+ModdedStringOption(string title, string[] values, Type roleType = null)
+
+ModdedToggleOption(string name, Type roleType = null)
+```
+
+### ModdedOption Properties
 
 And this is an example of a ModdedOption property:
 ```csharp
@@ -113,6 +167,8 @@ An example can be found [here](https://github.com/All-Of-Us-Mods/MiraAPI/blob/ma
 Mira API provides a simple interface for adding ability buttons to the game. There is only 2 steps:
 1. Create a class that inherits from the `CustomActionButton` class and implement the properties and methods.
 2. Add the `[RegisterCustomButton]` attribute to the class.
+
+All other tasks and logic required to add the button to the game are handled by Mira API.
 
 The button API is simple, but provides a lot of flexibility. There are various methods you can override to customize the behaviour of your button. See [this file](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI/Hud/CustomActionButton.cs) for a full list of methods you can override.
 
