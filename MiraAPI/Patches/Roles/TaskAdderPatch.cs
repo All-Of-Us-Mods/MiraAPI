@@ -5,7 +5,9 @@ using Il2CppSystem.Collections.Generic;
 using Il2CppSystem.Text;
 using MiraAPI.PluginLoading;
 using MiraAPI.Roles;
+using MiraAPI.Utilities.Assets;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -16,18 +18,43 @@ public static class TaskAdderPatch
 {
     private static TaskFolder _rolesFolder;
     private static readonly System.Collections.Generic.Dictionary<string, string> ModsFolders = new();
+    private static Scroller _scroller;
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(TaskAdderGame), nameof(TaskAdderGame.Begin))]
     public static void AddRolesFolder(TaskAdderGame __instance)
     {
-        _rolesFolder = Object.Instantiate(__instance.RootFolderPrefab, __instance.transform);
+        GameObject inner = new("Inner");
+        inner.transform.SetParent(__instance.TaskParent.transform, false);
+
+        _scroller = __instance.TaskParent.gameObject.AddComponent<Scroller>();
+        _scroller.allowX = false;
+        _scroller.allowY = true;
+        _scroller.Inner = inner.transform;
+
+        GameObject hitbox = new("Hitbox");
+        SpriteMask mask = hitbox.AddComponent<SpriteMask>();
+        hitbox.layer = 5;
+        hitbox.transform.SetParent(__instance.TaskParent.transform, false);
+        mask.sprite = MiraAssets.NextButton.LoadAsset();
+        mask.transform.localScale = new Vector3(15.1746f, 11.3691f, 1);
+
+        BoxCollider2D collider = hitbox.AddComponent<BoxCollider2D>();
+        collider.size = new Vector2(1f, 1f);
+        collider.enabled = true;
+
+        _scroller.ClickMask = collider;
+
+        __instance.TaskParent = inner.transform;
+
+        _rolesFolder = Object.Instantiate(__instance.RootFolderPrefab, _scroller.Inner);
         _rolesFolder.gameObject.SetActive(false);
         _rolesFolder.FolderName = "Roles";
         _rolesFolder.name = "RolesFolder";
+
         foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins.Values)
         {
-            var newFolder = Object.Instantiate(__instance.RootFolderPrefab, __instance.transform);
+            var newFolder = Object.Instantiate(__instance.RootFolderPrefab, _scroller.Inner);
             newFolder.FolderName = newFolder.name = plugin.PluginInfo.Metadata.Name;
             newFolder.gameObject.SetActive(false);
             _rolesFolder.SubFolders.Add(newFolder);
@@ -210,6 +237,14 @@ public static class TaskAdderPatch
                 }
             }
         }
+
+        foreach (var chip in __instance.ActiveItems)
+        {
+            chip.GetComponentInChildren<TextMeshPro>().EnableMasking();
+            chip.GetComponent<SpriteRenderer>().maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+        }
+
+        if (_scroller) _scroller.CalculateAndSetYBounds(__instance.ActiveItems.Count, 6, 3, 0.8f);
         if (__instance.Hierarchy.Count == 1)
         {
             ControllerManager.Instance.SetBackButton(__instance.BackButton);
