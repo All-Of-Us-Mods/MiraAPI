@@ -32,6 +32,11 @@ public class ModdedToggleOption : ModdedOption<bool>
         return toggleOption;
     }
 
+    public override float GetFloatData()
+    {
+        return Value ? 1 : 0;
+    }
+
     public override NetData GetNetData()
     {
         return new NetData(Id, BitConverter.GetBytes(Value));

@@ -107,6 +107,8 @@ public static class RoleSettingMenuPatches
                 Vector3.zero, Quaternion.identity, __instance.RoleChancesSettings.transform);
             categoryHeaderEditRole3.SetHeader(StringNames.None, 20);
             categoryHeaderEditRole3.Title.text = "Neutral Roles";
+            categoryHeaderEditRole3.Background.color = Color.gray;
+            categoryHeaderEditRole3.Title.color = Color.white;
             categoryHeaderEditRole3.transform.localPosition = new Vector3(4.986f, num, -2f);
             num -= 0.522f;
 

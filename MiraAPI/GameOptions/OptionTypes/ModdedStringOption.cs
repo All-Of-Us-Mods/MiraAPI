@@ -40,6 +40,11 @@ public class ModdedStringOption : ModdedOption<int>
         return stringOption;
     }
 
+    public override float GetFloatData()
+    {
+        return Value;
+    }
+
     public override NetData GetNetData()
     {
         return new NetData(Id, BitConverter.GetBytes(Value));

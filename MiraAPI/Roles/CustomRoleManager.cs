@@ -20,23 +20,19 @@ public static class CustomRoleManager
 {
     public static readonly Dictionary<ushort, RoleBehaviour> CustomRoles = new();
 
-    private static int GetNextRoleId(ushort requestedId)
+    private static ushort _roleId = 100;
+    
+    private static ushort GetNextRoleId()
     {
-        while (CustomRoles.ContainsKey(requestedId) || requestedId <= Enum.GetNames<RoleTypes>().Length)
-        {
-            Logger<MiraApiPlugin>.Error(requestedId + ", " + (requestedId+1));
-            requestedId++;
-        }
-
-        return requestedId;
+        return _roleId++;
     }
 
-    public static void RegisterInRoleManager()
+    internal static void RegisterInRoleManager()
     {
         RoleManager.Instance.AllRoles = RoleManager.Instance.AllRoles.Concat(CustomRoles.Values).ToArray();
     }
 
-    internal static RoleBehaviour RegisterRole(Type roleType, ushort roleId, MiraPluginInfo parentMod)
+    internal static RoleBehaviour RegisterRole(Type roleType, MiraPluginInfo parentMod)
     {
         if (!(typeof(RoleBehaviour).IsAssignableFrom(roleType) && typeof(ICustomRole).IsAssignableFrom(roleType)))
         {
@@ -52,7 +48,7 @@ public static class CustomRoleManager
             return null;
         }
 
-        roleBehaviour.Role = (RoleTypes)GetNextRoleId(roleId);
+        roleBehaviour.Role = (RoleTypes)GetNextRoleId();
         roleBehaviour.TeamType = customRole.Team == ModdedRoleTeams.Neutral ? RoleTeamTypes.Crewmate : (RoleTeamTypes)customRole.Team;
         roleBehaviour.NameColor = customRole.RoleColor;
         roleBehaviour.StringName = CustomStringName.CreateAndRegister(customRole.RoleName);
@@ -72,7 +68,7 @@ public static class CustomRoleManager
             RoleManager.GhostRoles.Add(roleBehaviour.Role);
         }
 
-        CustomRoles.Add(roleId, roleBehaviour);
+        CustomRoles.Add(_roleId, roleBehaviour);
 
         if (customRole.HideSettings)
         {
