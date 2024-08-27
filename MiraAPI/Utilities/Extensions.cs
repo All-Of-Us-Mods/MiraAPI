@@ -82,7 +82,7 @@ public static class Extensions
         System.Random rnd = new();
         while (list.Count > 0)
         {
-            int index = rnd.Next(0, list.Count);
+            var index = rnd.Next(0, list.Count);
             randomizedList.Add(list[index]);
             list.RemoveAt(index);
         }

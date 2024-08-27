@@ -6,7 +6,7 @@ using Reactor.Networking.Rpc;
 namespace MiraAPI.Networking;
 
 [RegisterCustomRpc((uint)MiraRpc.SyncModifiers)]
-public class SyncModifiersRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<MiraApiPlugin, NetData[]>(plugin, id)
+internal class SyncModifiersRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<MiraApiPlugin, NetData[]>(plugin, id)
 {
     public override RpcLocalHandling LocalHandling => RpcLocalHandling.None;
 

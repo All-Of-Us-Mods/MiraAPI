@@ -14,19 +14,20 @@ public static class RoleOptionsCollectionPatch
     [HarmonyPatch(nameof(RoleOptionsCollectionV08.GetChancePerGame))]
     public static bool GetChancePrefix([HarmonyArgument(0)] RoleTypes roleType, ref int __result)
     {
-        if (CustomRoleManager.GetCustomRoleBehaviour(roleType, out var customRole))
+        if (!CustomRoleManager.GetCustomRoleBehaviour(roleType, out var customRole))
         {
-            if (customRole.HideSettings)
-            {
-                return false;
-            }
-
-            customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var entry);
-            __result = entry.Value;
+            return true;
+        }
+        
+        if (customRole.HideSettings)
+        {
             return false;
         }
 
-        return true;
+        customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var entry);
+        __result = entry.Value;
+        return false;
+
     }
 
     /// <summary>
@@ -36,18 +37,18 @@ public static class RoleOptionsCollectionPatch
     [HarmonyPatch(nameof(RoleOptionsCollectionV08.GetNumPerGame))]
     public static bool GetNumPrefix([HarmonyArgument(0)] RoleTypes roleType, ref int __result)
     {
-        if (CustomRoleManager.GetCustomRoleBehaviour(roleType, out var customRole))
+        if (!CustomRoleManager.GetCustomRoleBehaviour(roleType, out var customRole))
         {
-            if (customRole.HideSettings)
-            {
-                return false;
-            }
-
-            customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.NumConfigDefinition, out var entry);
-            __result = entry.Value;
+            return true;
+        }
+        if (customRole.HideSettings)
+        {
             return false;
         }
 
-        return true;
+        customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.NumConfigDefinition, out var entry);
+        __result = entry.Value;
+        return false;
+
     }
 }

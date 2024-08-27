@@ -17,10 +17,10 @@ public static class ModdedOptionsManager
     private static readonly Dictionary<PropertyInfo, ModdedOptionAttribute> OptionAttributes = new();
     private static readonly Dictionary<Type, AbstractOptionGroup> TypeToGroup = new();
 
-    public static readonly Dictionary<uint, IModdedOption> ModdedOptions = new();
-    public static readonly List<AbstractOptionGroup> Groups = [];
+    internal static readonly Dictionary<uint, IModdedOption> ModdedOptions = new();
+    internal static readonly List<AbstractOptionGroup> Groups = [];
     
-    public static uint NextId => _nextId++;
+    internal static uint NextId => _nextId++;
     private static uint _nextId = 1;
     
     internal static bool RegisterGroup(Type type, MiraPluginInfo pluginInfo)
@@ -127,7 +127,6 @@ public static class ModdedOptionsManager
                 continue;
             }
             
-            Logger<MiraApiPlugin>.Error("Handling option " + option.Title);
             option.HandleNetData(netData.Data);
         }
     }
@@ -135,14 +134,14 @@ public static class ModdedOptionsManager
         
     public static void PropertySetterPatch(MethodBase __originalMethod, object value)
     {
-        ModdedOptionAttribute attribute = OptionAttributes.First(pair => pair.Key.GetSetMethod().Equals(__originalMethod)).Value;
+        var attribute = OptionAttributes.First(pair => pair.Key.GetSetMethod().Equals(__originalMethod)).Value;
 
         attribute?.SetValue(value);
     }
 
     public static bool PropertyGetterPatch(MethodBase __originalMethod, ref object __result)
     {
-        ModdedOptionAttribute attribute = OptionAttributes.First(pair => pair.Key.GetGetMethod().Equals(__originalMethod)).Value;
+        var attribute = OptionAttributes.First(pair => pair.Key.GetGetMethod().Equals(__originalMethod)).Value;
 
         if (attribute == null)
         {

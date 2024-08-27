@@ -26,7 +26,7 @@ public abstract class ModdedOption<T> : IModdedOption
         }
     }
     public T Value { get; protected set; }
-    public T DefaultValue { get; init; }
+    public T DefaultValue { get; }
     public Action<T> ChangedEvent { get; set; }
     public string Title { get; }
     public StringNames StringName { get; }

@@ -14,7 +14,10 @@ public static class RoleManagerPatches
     [HarmonyPatch(nameof(RoleManager.SelectRoles))]
     public static void ModifierSelectionPatches(RoleManager __instance)
     {
-        if (!AmongUsClient.Instance.AmHost) return;
+        if (!AmongUsClient.Instance.AmHost)
+        {
+            return;
+        }
 
         ModifierManager.AssignModifiers(PlayerControl.AllPlayerControls.ToArray().Where(plr => !plr.Data.IsDead && !plr.Data.Disconnected).ToList());
     }
@@ -28,16 +31,18 @@ public static class RoleManagerPatches
             return false;
         }
 
-        if (plr.Data.Role is ICustomRole role)
+        if (plr.Data.Role is not ICustomRole role)
         {
-            Debug.Log(role.RoleName);
-            if (role.GhostRole != RoleTypes.CrewmateGhost && role.GhostRole != RoleTypes.ImpostorGhost)
-            {
-                plr.RpcSetRole(role.GhostRole);
-                return false;
-            }
+            return true;
         }
 
-        return true;
+        if (role.GhostRole is RoleTypes.CrewmateGhost or RoleTypes.ImpostorGhost)
+        {
+            return true;
+        }
+        
+        plr.RpcSetRole(role.GhostRole);
+        return false;
+
     }
 }

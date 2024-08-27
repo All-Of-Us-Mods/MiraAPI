@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MiraAPI.Utilities.Colors;
+namespace MiraAPI.Colors;
 
 [AttributeUsage(AttributeTargets.Class)]
 public class RegisterCustomColorsAttribute : Attribute;

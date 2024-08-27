@@ -5,9 +5,9 @@ using Reactor.Utilities;
 
 namespace MiraAPI.Hud;
 
-public static class CustomButtonManager
+internal static class CustomButtonManager
 {
-    public static readonly List<CustomActionButton> CustomButtons = [];
+    internal static readonly List<CustomActionButton> CustomButtons = [];
 
     internal static void RegisterButton(Type buttonType)
     {

@@ -1,7 +1,5 @@
 ﻿using HarmonyLib;
-using MiraAPI.Modifiers;
 using MiraAPI.Utilities;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -17,30 +15,32 @@ public static class VentPatches
         var @object = pc.Object;
         var role = @object.Data.Role;
 
-        List<BaseModifier> modifiers = @object.GetModifierComponent().ActiveModifiers;
-        if (modifiers.Count > 0)
+        var modifiers = @object.GetModifierComponent()?.ActiveModifiers;
+        if (modifiers is null || modifiers.Count <= 0)
         {
-            if (role.CanVent && modifiers.Any(x => !x.CanVent()))
-            {
+            return;
+        }
+
+        switch (role.CanVent)
+        {
+            case true when modifiers.Any(x => !x.CanVent()):
                 couldUse = canUse = false;
                 return;
-            }
-            else if (!role.CanVent && modifiers.Any(x => x.CanVent()))
-            {
+            case false when modifiers.Any(x => x.CanVent()):
                 couldUse = true;
-            }
-
-            var num = float.MaxValue;
-
-            canUse = couldUse;
-            if (canUse)
-            {
-                var center = @object.Collider.bounds.center;
-                var position = __instance.transform.position;
-                num = Vector2.Distance(center, position);
-                canUse &= num <= __instance.UsableDistance && !PhysicsHelpers.AnythingBetween(@object.Collider, center, position, Constants.ShipOnlyMask, false);
-            }
-            __result = num;
+                break;
         }
+
+        var num = float.MaxValue;
+
+        canUse = couldUse;
+        if (canUse)
+        {
+            var center = @object.Collider.bounds.center;
+            var position = __instance.transform.position;
+            num = Vector2.Distance(center, position);
+            canUse &= num <= __instance.UsableDistance && !PhysicsHelpers.AnythingBetween(@object.Collider, center, position, Constants.ShipOnlyMask, false);
+        }
+        __result = num;
     }
 }

@@ -102,13 +102,18 @@ public static class HudManagerPatches
 
         foreach (var button in CustomButtonManager.CustomButtons)
         {
-            Transform location = button.Location switch
+            var location = button.Location switch
             {
                 ButtonLocation.BottomLeft => _bottomLeft.transform,
                 ButtonLocation.BottomRight => bottomRight,
-                _ => throw new ArgumentOutOfRangeException()
+                _ => null
             };
 
+            if (location is null)
+            {
+                continue;
+            }
+            
             button.CreateButton(location);
         }
 

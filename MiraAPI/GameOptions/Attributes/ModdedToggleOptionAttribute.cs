@@ -14,13 +14,13 @@ public class ModdedToggleOptionAttribute(string title, Type roleType = null) : M
 
     public override void SetValue(object value)
     {
-        ModdedToggleOption toggleOpt = HolderOption as ModdedToggleOption;
+        var toggleOpt = HolderOption as ModdedToggleOption;
         toggleOpt.SetValue((bool)value);
     }
 
     public override object GetValue()
     {
-        ModdedToggleOption toggleOpt = HolderOption as ModdedToggleOption;
+        var toggleOpt = HolderOption as ModdedToggleOption;
         return toggleOpt.Value;
     }
 }

@@ -8,12 +8,16 @@ public abstract class TimedModifier : BaseModifier
     public virtual bool AutoStart => false;
     public abstract void OnTimerComplete();
 
-    public bool TimerActive = false;
-    public float TimeRemaining;
+    public bool TimerActive { get; protected set; }
+
+    public float TimeRemaining { get; protected set; }
 
     public override void FixedUpdate()
     {
-        if (!Player.AmOwner) return;
+        if (!Player.AmOwner)
+        {
+            return;
+        }
 
         if (TimeRemaining > 0 && TimerActive)
         {

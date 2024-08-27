@@ -17,5 +17,5 @@ public class MiraPluginInfo(IMiraPlugin miraPlugin, PluginInfo info)
     public readonly List<IModdedOption> Options = [];
 
     public readonly Dictionary<ushort, RoleBehaviour> CustomRoles = [];
-    public readonly Dictionary<int, CustomGameMode> GameModes = [];
+    internal readonly Dictionary<int, CustomGameMode> GameModes = [];
 }

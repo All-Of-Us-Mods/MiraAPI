@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using MiraAPI.GameOptions;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using Reactor.Localization.Utilities;
@@ -25,10 +24,10 @@ public static class GameOptionsMenuPatch
             return;
         }
 
-        float num = 2.1f;
+        var num = 2.1f;
         var filteredGroups = GameSettingMenuPatches.SelectedMod.OptionGroups.Where(x => x.GroupVisible.Invoke() && x.AdvancedRole is null);
 
-        foreach (AbstractOptionGroup group in filteredGroups)
+        foreach (var group in filteredGroups)
         {
             var filteredOpts = group.Options.Where(x => x.Visible.Invoke()).ToList();
             if (filteredOpts.Count == 0)
@@ -44,7 +43,7 @@ public static class GameOptionsMenuPatch
 
             foreach (var opt in group.Options)
             {
-                OptionBehaviour newOpt = opt.OptionBehaviour;
+                var newOpt = opt.OptionBehaviour;
 
                 if (opt.Visible.Invoke() == false)
                 {
@@ -82,9 +81,9 @@ public static class GameOptionsMenuPatch
 
         var filteredGroups = GameSettingMenuPatches.SelectedMod.OptionGroups.Where(x => x.AdvancedRole is null);
 
-        foreach (AbstractOptionGroup group in filteredGroups)
+        foreach (var group in filteredGroups)
         {
-            CategoryHeaderMasked categoryHeaderMasked = Object.Instantiate(__instance.categoryHeaderOrigin, Vector3.zero, Quaternion.identity, __instance.settingsContainer);
+            var categoryHeaderMasked = Object.Instantiate(__instance.categoryHeaderOrigin, Vector3.zero, Quaternion.identity, __instance.settingsContainer);
             categoryHeaderMasked.SetHeader(CustomStringName.CreateAndRegister(group.GroupName), 20);
             if (group.GroupColor != Color.clear)
             {
@@ -96,34 +95,35 @@ public static class GameOptionsMenuPatch
             categoryHeaderMasked.gameObject.SetActive(false);
             group.Header = categoryHeaderMasked;
 
-            TextMeshPro newText = Object.Instantiate(categoryHeaderMasked.Title, categoryHeaderMasked.transform);
+            var newText = Object.Instantiate(categoryHeaderMasked.Title, categoryHeaderMasked.transform);
             newText.text = $"<size=70%>(Click to open)</size>";
             newText.transform.localPosition = new Vector3(2.6249f, -0.165f, 0f);
             newText.gameObject.GetComponent<TextTranslatorTMP>().Destroy();
 
-            List<OptionBehaviour> newOpts = [];
-            foreach (var opt in group.Options)
+            var options = group.Options.Select(opt => opt.CreateOption(__instance.checkboxOrigin,
+                __instance.numberOptionOrigin, __instance.stringOptionOrigin, __instance.settingsContainer));
+            
+            foreach (var newOpt in options)
             {
-                OptionBehaviour newOpt = opt.CreateOption(__instance.checkboxOrigin, __instance.numberOptionOrigin, __instance.stringOptionOrigin, __instance.settingsContainer);
                 newOpt.SetClickMask(__instance.ButtonClickMask);
 
                 SpriteRenderer[] componentsInChildren = newOpt.GetComponentsInChildren<SpriteRenderer>(true);
-                for (int i = 0; i < componentsInChildren.Length; i++)
+                foreach (var renderer in componentsInChildren)
                 {
                     if (group.GroupColor != Color.clear)
                     {
-                        componentsInChildren[i].color = group.GroupColor.GetAlternateColor();
-                        if (componentsInChildren[i].transform.parent.TryGetComponent<GameOptionButton>(out var btn))
+                        renderer.color = group.GroupColor.GetAlternateColor();
+                        if (renderer.transform.parent.TryGetComponent<GameOptionButton>(out var btn))
                         {
                             btn.interactableColor = group.GroupColor.GetAlternateColor();
                             btn.interactableHoveredColor = Color.white;
                         }
                     }
 
-                    componentsInChildren[i].material.SetInt(PlayerMaterial.MaskLayer, 20);
+                    renderer.material.SetInt(PlayerMaterial.MaskLayer, 20);
                 }
 
-                foreach (TextMeshPro textMeshPro in newOpt.GetComponentsInChildren<TextMeshPro>(true))
+                foreach (var textMeshPro in newOpt.GetComponentsInChildren<TextMeshPro>(true))
                 {
                     if (group.GroupColor != Color.clear)
                     {
@@ -138,7 +138,7 @@ public static class GameOptionsMenuPatch
                 {
                     toggle.CheckMark.sprite = MiraAssets.Checkmark.LoadAsset();
 
-                    SpriteRenderer rend = toggle.CheckMark.transform.parent.FindChild("ActiveSprite").GetComponent<SpriteRenderer>();
+                    var rend = toggle.CheckMark.transform.parent.FindChild("ActiveSprite").GetComponent<SpriteRenderer>();
                     rend.sprite = MiraAssets.CheckmarkBox.LoadAsset();
                     rend.color = group.GroupColor;
                 }
@@ -146,15 +146,14 @@ public static class GameOptionsMenuPatch
                 __instance.Children.Add(newOpt);
 
                 newOpt.Initialize();
-                newOpts.Add(newOpt);
                 newOpt.gameObject.SetActive(false);
             }
 
-            BoxCollider2D boxCol = categoryHeaderMasked.gameObject.AddComponent<BoxCollider2D>();
+            var boxCol = categoryHeaderMasked.gameObject.AddComponent<BoxCollider2D>();
             boxCol.size = new Vector2(7, 0.7f);
             boxCol.offset = new Vector2(1.5f, -0.3f);
 
-            PassiveButton headerBtn = categoryHeaderMasked.gameObject.AddComponent<PassiveButton>();
+            var headerBtn = categoryHeaderMasked.gameObject.AddComponent<PassiveButton>();
             headerBtn.ClickSound = __instance.BackButton.GetComponent<PassiveButton>().ClickSound;
             headerBtn.OnMouseOver = new UnityEvent();
             headerBtn.OnMouseOut = new UnityEvent();
@@ -173,30 +172,32 @@ public static class GameOptionsMenuPatch
     [HarmonyPatch(nameof(GameOptionsMenu.Initialize))]
     public static bool InitPatch(GameOptionsMenu __instance)
     {
-        if (__instance.Children == null || __instance.Children.Count == 0)
+        if (__instance.Children != null && __instance.Children.Count != 0)
         {
-            __instance.MapPicker.gameObject.SetActive(true);
-            __instance.MapPicker.Initialize(20);
-            BaseGameSetting mapNameSetting = GameManager.Instance.GameSettingsList.MapNameSetting;
-            __instance.MapPicker.SetUpFromData(mapNameSetting, 20);
-            __instance.Children = new Il2CppSystem.Collections.Generic.List<OptionBehaviour>();
-            __instance.Children.Add(__instance.MapPicker);
-            __instance.CreateSettings();
-            __instance.cachedData = GameOptionsManager.Instance.CurrentGameOptions;
-            foreach (var optionBehaviour in __instance.Children)
+            return false;
+        }
+
+        __instance.MapPicker.gameObject.SetActive(true);
+        __instance.MapPicker.Initialize(20);
+        var mapNameSetting = GameManager.Instance.GameSettingsList.MapNameSetting;
+        __instance.MapPicker.SetUpFromData(mapNameSetting, 20);
+        __instance.Children = new Il2CppSystem.Collections.Generic.List<OptionBehaviour>();
+        __instance.Children.Add(__instance.MapPicker);
+        __instance.CreateSettings();
+        __instance.cachedData = GameOptionsManager.Instance.CurrentGameOptions;
+        foreach (var optionBehaviour in __instance.Children)
+        {
+            if (AmongUsClient.Instance && !AmongUsClient.Instance.AmHost)
             {
-                if (AmongUsClient.Instance && !AmongUsClient.Instance.AmHost)
-                {
-                    optionBehaviour.SetAsPlayer();
-                }
-
-                if (optionBehaviour.IsCustom())
-                {
-                    continue;
-                }
-
-                optionBehaviour.OnValueChanged = new System.Action<OptionBehaviour>(__instance.ValueChanged);
+                optionBehaviour.SetAsPlayer();
             }
+
+            if (optionBehaviour.IsCustom())
+            {
+                continue;
+            }
+
+            optionBehaviour.OnValueChanged = new System.Action<OptionBehaviour>(__instance.ValueChanged);
         }
 
         return false;

@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
+using MiraAPI.Colors;
 using MiraAPI.Roles;
-using MiraAPI.Utilities.Colors;
 
 namespace MiraAPI.Patches.Roles;
 

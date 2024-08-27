@@ -22,13 +22,13 @@ public class ModdedNumberOptionAttribute(
 
     public override void SetValue(object value)
     {
-        ModdedNumberOption toggleOpt = HolderOption as ModdedNumberOption;
+        var toggleOpt = HolderOption as ModdedNumberOption;
         toggleOpt.SetValue((float)value);
     }
 
     public override object GetValue()
     {
-        ModdedNumberOption toggleOpt = HolderOption as ModdedNumberOption;
+        var toggleOpt = HolderOption as ModdedNumberOption;
         return toggleOpt.Value;
     }
 }

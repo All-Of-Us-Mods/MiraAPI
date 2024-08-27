@@ -11,7 +11,7 @@ public class ModifierTimerExample : TimedModifier
     public override float Duration => 10f;
     public override bool AutoStart => true;
 
-    private System.Random _rand = new();
+    private readonly System.Random _rand = new();
 
     public override void OnTimerComplete()
     {

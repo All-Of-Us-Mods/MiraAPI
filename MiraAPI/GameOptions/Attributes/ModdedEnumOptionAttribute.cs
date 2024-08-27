@@ -15,13 +15,13 @@ public class ModdedEnumOptionAttribute(string title, Type enumType, Type roleTyp
 
     public override void SetValue(object value)
     {
-        ModdedEnumOption opt = HolderOption as ModdedEnumOption;
+        var opt = HolderOption as ModdedEnumOption;
         opt.SetValue((int)value);
     }
 
     public override object GetValue()
     {
-        ModdedEnumOption opt = HolderOption as ModdedEnumOption;
+        var opt = HolderOption as ModdedEnumOption;
         return Enum.ToObject(enumType, opt.Value);
     }
 }

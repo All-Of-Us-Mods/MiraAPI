@@ -13,17 +13,17 @@ namespace MiraAPI.Utilities.Assets;
 /// </summary>
 public static class SpriteTools
 {
-    private delegate bool DLoadImage(IntPtr tex, IntPtr data, bool markNonReadable);
+    public delegate bool DLoadImage(IntPtr tex, IntPtr data, bool markNonReadable);
 
-    private static DLoadImage _iCallLoadImage;
+    public static DLoadImage ICallLoadImage;
 
-    private static bool LoadImage(Texture2D tex, byte[] data, bool markNonReadable)
+    public static bool LoadImage(Texture2D tex, byte[] data, bool markNonReadable)
     {
-        _iCallLoadImage ??= IL2CPP.ResolveICall<DLoadImage>("UnityEngine.ImageConversion::LoadImage");
+        ICallLoadImage ??= IL2CPP.ResolveICall<DLoadImage>("UnityEngine.ImageConversion::LoadImage");
 
         var il2CPPArray = (Il2CppStructArray<byte>)data;
 
-        return _iCallLoadImage.Invoke(tex.Pointer, il2CPPArray.Pointer, markNonReadable);
+        return ICallLoadImage.Invoke(tex.Pointer, il2CPPArray.Pointer, markNonReadable);
     }
 
     /// <summary>

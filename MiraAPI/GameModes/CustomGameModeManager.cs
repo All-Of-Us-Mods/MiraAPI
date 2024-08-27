@@ -14,7 +14,7 @@ public static class CustomGameModeManager
     /// <summary>
     /// List of registered gamemodes
     /// </summary>
-    public static readonly Dictionary<int, CustomGameMode> GameModes = [];
+    internal static readonly Dictionary<int, CustomGameMode> GameModes = [];
 
     public static bool IsDefault()
     {
@@ -24,7 +24,7 @@ public static class CustomGameModeManager
     /// <summary>
     /// Current gamemode
     /// </summary>
-    public static CustomGameMode? ActiveMode = new DefaultMode();
+    public static CustomGameMode? ActiveMode { get; internal set; } = new DefaultMode();
 
     /// <summary>
     /// Set current gamemode

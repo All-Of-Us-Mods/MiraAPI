@@ -23,7 +23,7 @@ public static class ModifierManager
         return _nextId;
     }
 
-    public static void RegisterModifier(Type modifierType)
+    internal static void RegisterModifier(Type modifierType)
     {
         if (!typeof(BaseModifier).IsAssignableFrom(modifierType))
         {
@@ -34,9 +34,9 @@ public static class ModifierManager
         TypeToIdModifiers.Add(modifierType, _nextId);
     }
 
-    public static void AssignModifiers(List<PlayerControl> plrs)
+    internal static void AssignModifiers(List<PlayerControl> plrs)
     {
-        Random rand = new Random();
+        var rand = new Random();
 
         List<uint> filteredModifiers = [];
 
@@ -46,9 +46,9 @@ public static class ModifierManager
             var num = mod.GetAmountPerGame();
             var chance = mod.GetAssignmentChance();
 
-            for (int i = 0; i < num; i++)
+            for (var i = 0; i < num; i++)
             {
-                int randomNum = rand.Next(100);
+                var randomNum = rand.Next(100);
 
                 if (randomNum < Math.Clamp(chance, 0, 100))
                 {
@@ -72,17 +72,23 @@ public static class ModifierManager
 
             if (plr.Data.Role is ICustomRole modRole)
             {
-                if (!modRole.IsModifierApplicable(mod)) continue;
+                if (!modRole.IsModifierApplicable(mod))
+                {
+                    continue;
+                }
             }
 
-            if (plr.HasModifier(id) || mod.IsModifierValidOn(plr.Data.Role)) continue;
+            if (plr.HasModifier(id) || mod.IsModifierValidOn(plr.Data.Role))
+            {
+                continue;
+            }
 
             shuffledModifiers.RemoveAt(0);
             ModifierComponent.RpcAddModifier(plr, id);
         }
     }
 
-    public static void SyncAllModifiers(int targetId = -1)
+    internal static void SyncAllModifiers(int targetId = -1)
     {
         var data = new List<NetData>();
 
@@ -104,7 +110,7 @@ public static class ModifierManager
         Rpc<SyncModifiersRpc>.Instance.Send(PlayerControl.LocalPlayer, data.ToArray(), true);
     }
 
-    public static void HandleSyncModifiers(NetData[] data)
+    internal static void HandleSyncModifiers(NetData[] data)
     {
         foreach (var netData in data)
         {

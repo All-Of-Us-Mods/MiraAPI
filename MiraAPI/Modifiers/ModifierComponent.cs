@@ -27,7 +27,10 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
         player = GetComponent<PlayerControl>();
         ActiveModifiers = [];
 
-        if (!player.AmOwner) return;
+        if (!player.AmOwner)
+        {
+            return;
+        }
 
         _modifierText = Helpers.CreateTextLabel("ModifierText", HudManager.Instance.transform, AspectPosition.EdgeAlignments.RightTop, new Vector3(10.1f, 3.5f, 0), textAlignment: TextAlignmentOptions.Right);
         _modifierText.verticalAlignment = VerticalAlignmentOptions.Top;

@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Reactor.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.Utilities.Assets;
@@ -9,7 +10,7 @@ public class LoadableResourceAsset(string path) : LoadableAsset<Sprite>
 
     public override Sprite LoadAsset()
     {
-        if (LoadedAsset != null)
+        if (LoadedAsset)
         {
             return LoadedAsset;
         }
@@ -20,7 +21,7 @@ public class LoadableResourceAsset(string path) : LoadableAsset<Sprite>
         }
         catch
         {
-            Debug.LogError($"Not loading, invalid asset: {path}");
+            Logger<MiraApiPlugin>.Error($"Not loading, invalid asset: {path}");
             return null;
         }
     }

@@ -2,7 +2,7 @@
 
 namespace MiraAPI.Roles;
 
-public class RoleId
+public static class RoleId
 {
     public static ushort Get<T>() where T : RoleBehaviour
     {

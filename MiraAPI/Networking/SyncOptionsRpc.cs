@@ -7,7 +7,7 @@ namespace MiraAPI.Networking;
 
 // METHOD RPC DOESNT WORK WITH THE ARRAYS AND STUFF SO THIS IS HOW WE WILL DO IT FOR NOW
 [RegisterCustomRpc((uint)MiraRpc.SyncGameOptions)]
-public class SyncOptionsRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<MiraApiPlugin, NetData[]>(plugin, id)
+internal class SyncOptionsRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<MiraApiPlugin, NetData[]>(plugin, id)
 {
     public override RpcLocalHandling LocalHandling => RpcLocalHandling.None;
     

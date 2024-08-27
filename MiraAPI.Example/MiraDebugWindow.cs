@@ -7,25 +7,22 @@ using UnityEngine;
 
 namespace MiraAPI.Example;
 [RegisterInIl2Cpp]
-public class MiraDebugWindow : MonoBehaviour
+public class MiraDebugWindow(IntPtr ptr) : MonoBehaviour(ptr)
 {
-    public DragWindow DebuggingWindow;
-    public MiraDebugWindow(IntPtr ptr) : base(ptr)
+    public readonly DragWindow DebuggingWindow = new(new Rect(10, 10, 0, 0), "MIRA API DEBUGGING", () =>
     {
-        DebuggingWindow = new DragWindow(new Rect(10, 10, 0, 0), "MIRA API DEBUGGING", () =>
+        if (GUILayout.Button("Test modifier"))
         {
-            if (GUILayout.Button("Test modifier"))
-            {
-                PlayerControl.LocalPlayer.AddModifier<ModifierTimerExample>();
-            }
-            if (GUILayout.Button("Remove modifier"))
-            {
-                PlayerControl.LocalPlayer.RemoveModifier<ModifierTimerExample>();
-            }
-        });
-
-        DebuggingWindow.Enabled = true;
-    }
+            PlayerControl.LocalPlayer.AddModifier<ModifierTimerExample>();
+        }
+        if (GUILayout.Button("Remove modifier"))
+        {
+            PlayerControl.LocalPlayer.RemoveModifier<ModifierTimerExample>();
+        }
+    })
+    {
+        Enabled = true
+    };
 
     public void OnGUI()
     {

@@ -28,6 +28,7 @@ public abstract class AbstractOptionGroup
     /// </summary>
     public virtual Type AdvancedRole => null;
 
-    internal bool AllOptionsHidden = true;
-    internal CategoryHeaderMasked Header;
+    internal bool AllOptionsHidden { get; set; }
+
+    internal CategoryHeaderMasked Header { get; set; }
 }

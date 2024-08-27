@@ -360,7 +360,7 @@ public static class LobbyViewPanePatches
 	    for (var i = 0; i < filteredOptions.Count; i++)
 	    {
 		    var option = filteredOptions[i];
-		    BaseGameSetting baseGameSetting = option.Data;
+		    var baseGameSetting = option.Data;
 		    var viewSettingsInfoPanel = Object.Instantiate(viewPanel.infoPanelOrigin, viewPanel.transform, true);
 		    viewSettingsInfoPanel.transform.localScale = Vector3.one;
 		    viewSettingsInfoPanel.transform.localPosition = new Vector3(viewPanel.xPosStart, num, -2f);

@@ -150,7 +150,7 @@ public abstract class CustomActionButton
     /// True means the button is active, false means the button is disabled.
     /// </summary>
     /// <param name="role">The role of the local player.</param>
-    public abstract bool Enabled(RoleBehaviour role);
+    public abstract bool Enabled(RoleBehaviour? role);
 
     /// <summary>
     /// Given that there is an effect, this method that runs when the effect ends.

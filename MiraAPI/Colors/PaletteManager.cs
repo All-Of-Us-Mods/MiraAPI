@@ -2,7 +2,7 @@
 using System.Linq;
 using HarmonyLib;
 
-namespace MiraAPI.Utilities.Colors;
+namespace MiraAPI.Colors;
 
 internal static class PaletteManager
 {

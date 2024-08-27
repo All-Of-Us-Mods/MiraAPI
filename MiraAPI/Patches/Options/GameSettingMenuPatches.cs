@@ -30,8 +30,8 @@ public static class GameSettingMenuPatches
         _roleBtnOgPos = __instance.RoleSettingsButton.transform.localPosition;
         __instance.transform.FindChild("GameSettingsLabel").gameObject.SetActive(false);
 
-        Transform helpThing = __instance.transform.FindChild("What Is This?");
-        GameObject tmpText = Object.Instantiate(helpThing.transform.FindChild("InfoText"), helpThing.parent).gameObject;
+        var helpThing = __instance.transform.FindChild("What Is This?");
+        var tmpText = Object.Instantiate(helpThing.transform.FindChild("InfoText"), helpThing.parent).gameObject;
 
         tmpText.GetComponent<TextTranslatorTMP>().Destroy();
         tmpText.name = "SelectedMod";
@@ -45,14 +45,14 @@ public static class GameSettingMenuPatches
 
         _text.alignment = TextAlignmentOptions.Center;
 
-        GameObject nextButton = Object.Instantiate(__instance.BackButton, __instance.BackButton.transform.parent).gameObject;
+        var nextButton = Object.Instantiate(__instance.BackButton, __instance.BackButton.transform.parent).gameObject;
         nextButton.transform.localPosition = new Vector3(-2.2663f, 1.5272f, -25f);
         nextButton.name = "RightArrowButton";
         nextButton.transform.FindChild("Inactive").gameObject.GetComponent<SpriteRenderer>().sprite = MiraAssets.NextButton.LoadAsset();
         nextButton.transform.FindChild("Active").gameObject.GetComponent<SpriteRenderer>().sprite = MiraAssets.NextButtonActive.LoadAsset();
         nextButton.gameObject.GetComponent<CloseButtonConsoleBehaviour>().DestroyImmediate();
 
-        PassiveButton passiveButton = nextButton.gameObject.GetComponent<PassiveButton>();
+        var passiveButton = nextButton.gameObject.GetComponent<PassiveButton>();
         passiveButton.OnClick = new ButtonClickedEvent();
         passiveButton.OnClick.AddListener((UnityAction)(() =>
         {
@@ -63,7 +63,7 @@ public static class GameSettingMenuPatches
             }
         }));
 
-        GameObject backButton = Object.Instantiate(nextButton, __instance.BackButton.transform.parent).gameObject;
+        var backButton = Object.Instantiate(nextButton, __instance.BackButton.transform.parent).gameObject;
         backButton.transform.localPosition = new Vector3(-4.4209f, 1.5272f, -25f);
         backButton.name = "LeftArrowButton";
         backButton.gameObject.GetComponent<CloseButtonConsoleBehaviour>().Destroy();
@@ -105,12 +105,12 @@ public static class GameSettingMenuPatches
 
         if (CurrentSelectedMod != 0)
         {
-            if (SelectedMod.Options.Where(x=>x.AdvancedRole==null).ToList().Count == 0)
+            if (SelectedMod?.Options.Where(x=>x.AdvancedRole==null).ToList().Count == 0)
             {
                 menu.GameSettingsButton.gameObject.SetActive(false);
             }
 
-            if (SelectedMod.CustomRoles.Count == 0)
+            if (SelectedMod?.CustomRoles.Count == 0)
             {
                 menu.RoleSettingsButton.gameObject.SetActive(false);
             }
@@ -153,7 +153,7 @@ public static class GameSettingMenuPatches
             roles.scrollBar.ScrollToTop();
         }
 
-        if (settings?.Children != null && SelectedMod.OptionGroups.Count != 0)
+        if (settings?.Children != null && SelectedMod?.OptionGroups.Count != 0)
         {
             foreach (var child in settings.Children)
             {

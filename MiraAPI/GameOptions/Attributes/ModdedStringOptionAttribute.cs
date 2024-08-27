@@ -15,13 +15,13 @@ public class ModdedStringOptionAttribute(string title, string[] values, Type rol
 
     public override void SetValue(object value)
     {
-        ModdedStringOption opt = HolderOption as ModdedStringOption;
+        var opt = HolderOption as ModdedStringOption;
         opt.SetValue((int)value);
     }
 
     public override object GetValue()
     {
-        ModdedStringOption opt = HolderOption as ModdedStringOption;
+        var opt = HolderOption as ModdedStringOption;
         return opt.Value;
     }
 }

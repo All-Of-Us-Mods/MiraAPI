@@ -1,7 +1,8 @@
-﻿using Reactor.Localization.Utilities;
+﻿using MiraAPI.Utilities;
+using Reactor.Localization.Utilities;
 using UnityEngine;
 
-namespace MiraAPI.Utilities.Colors;
+namespace MiraAPI.Colors;
 public sealed class CustomColor(Color32 mainColor, Color32 shadowColor, StringNames name)
 {
     public Color32 MainColor { get; } = mainColor;

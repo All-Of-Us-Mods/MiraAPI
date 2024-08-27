@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using InnerNet;
 using MiraAPI.GameOptions;
+using MiraAPI.Modifiers;
 using MiraAPI.Roles;
 
 namespace MiraAPI.Patches;
@@ -22,6 +23,6 @@ public static class AmongUsClientSyncPatch
 
         ModdedOptionsManager.SyncAllOptions(clientData.Id);
         CustomRoleManager.SyncAllRoleSettings(clientData.Id);
-        // ModifierManager.SyncAllModifiers(clientData.Id);
+        ModifierManager.SyncAllModifiers(clientData.Id);
     }
 }
