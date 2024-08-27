@@ -1,5 +1,4 @@
-﻿using BepInEx;
-using BepInEx.Unity.IL2CPP;
+﻿using BepInEx.Unity.IL2CPP;
 using Il2CppInterop.Runtime.Injection;
 using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.Attributes;
@@ -12,7 +11,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using MiraAPI.Utilities;
-using MiraAPI.Hud;
 using Reactor.Networking;
 
 namespace MiraAPI.PluginLoading;
