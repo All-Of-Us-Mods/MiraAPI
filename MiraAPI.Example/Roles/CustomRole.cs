@@ -5,13 +5,13 @@ using UnityEngine;
 namespace MiraAPI.Example.Roles;
 
 [RegisterCustomRole]
-public class CustomRole : ImpostorRole, ICustomRole
+public class CustomRole : CrewmateRole, ICustomRole
 {
-    public string RoleName => "Custom Role";
-    public string RoleLongDescription => "Eliminate everyone with your special ability!";
+    public string RoleName => "Teleporter";
+    public string RoleLongDescription => "Zoom out and teleport across the map!";
     public string RoleDescription => RoleLongDescription;
-    public Color RoleColor => Palette.Black;
-    public ModdedRoleTeams Team => ModdedRoleTeams.Impostor;
+    public Color RoleColor => Color.blue;
+    public ModdedRoleTeams Team => ModdedRoleTeams.Crewmate;
     public LoadableAsset<Sprite> OptionsScreenshot => ExampleAssets.Banner;
 
 }

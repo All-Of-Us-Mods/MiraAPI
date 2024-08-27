@@ -71,7 +71,7 @@ public abstract class CustomActionButton
     /// The button object in game. This is created by Mira API automatically.
     /// </summary>
     protected ActionButton? Button { get; private set; }
-    
+
     internal void CreateButton(Transform parent)
     {
         if (Button)
@@ -110,10 +110,10 @@ public abstract class CustomActionButton
         {
             OnEffectEnd();
         }
-        
+
         EffectActive = false;
     }
-    
+
     /// <summary>
     /// A utility function to override the sprite of the button.
     /// </summary>
@@ -239,7 +239,7 @@ public abstract class CustomActionButton
         {
             Button?.SetDisabled();
         }
-        
+
         Button?.SetCoolDown(Timer, EffectActive ? EffectDuration : Cooldown);
 
         FixedUpdate(playerControl);
@@ -256,12 +256,12 @@ public abstract class CustomActionButton<T> : CustomActionButton where T : MonoB
     /// The target object of the button.
     /// </summary>
     public T? Target { get; private set; }
-    
+
     /// <summary>
     /// The distance the player must be from the target object to use the button.
     /// </summary>
     public virtual float Distance => PlayerControl.LocalPlayer.Data.Role.GetAbilityDistance();
-    
+
     /// <summary>
     /// An optional collider tag to filter the target object by.
     /// </summary>
@@ -274,7 +274,7 @@ public abstract class CustomActionButton<T> : CustomActionButton where T : MonoB
     {
         return target;
     }
-    
+
     /// <summary>
     /// The method used to get the target object.
     /// </summary>
@@ -288,8 +288,8 @@ public abstract class CustomActionButton<T> : CustomActionButton where T : MonoB
     /// </summary>
     /// <param name="active">Should the outline be active</param>
     public abstract void SetOutline(bool active);
-    
-    
+
+
     public override bool CanUse()
     {
         var newTarget = GetTarget();
@@ -300,7 +300,7 @@ public abstract class CustomActionButton<T> : CustomActionButton where T : MonoB
 
         Target = newTarget;
         SetOutline(true);
-        
+
         return base.CanUse() && Target;
     }
 }
