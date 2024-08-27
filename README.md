@@ -7,6 +7,7 @@ A thorough, but simple, Among Us modding API and utility library that covers:
 - Options
 - Modifiers
 - Buttons
+- Custom Colors
 - Assets
 - Compatibility
 - ~~Game Modes~~ (coming soon)
@@ -74,7 +75,7 @@ Modifiers provide various overridable functions and properties for custom behavi
 
 To start using a modifier, pick one of the base classes above and create a class that inherits from it. Implement the properties and methods you would like, then add the `[RegisterModifier]` attribute to the class.
 
-An example Game modifier can be found [here](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/Modifiers/ExampleGameModifier.cs).
+An example Game modifier can be found [here](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/Modifiers/GameModifierExample.cs).
 An example Timer modifier can be found [here](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/Modifiers/ModifierTimerExample.cs).
 
 ## Options
@@ -193,6 +194,29 @@ var myButton = CustomButtonSingleton<MyCoolButton>.Instance;
 The button API is simple, but provides a lot of flexibility. There are various methods you can override to customize the behaviour of your button. See [this file](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI/Hud/CustomActionButton.cs) for a full list of methods you can override.
 
 An example button can be found [here](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/Buttons/ExampleButton.cs).
+
+## Custom Colors
+
+Mira provides a simple Custom Color API that allows you to add custom player colors to the game.
+
+Creating custom colors isn't difficult, but there are some requirements for your colors to be registered by Mira.
+
+1. Create a ***STATIC*** class to house all your `CustomColor` objects.
+2. Inside this class, create a `CustomColor` property for each color you intend to add.
+3. Add the `[RegisterCustomColors]` attribute to the class.
+
+Here is an example of a custom color class:
+```csharp
+[RegisterCustomColors]
+public static class MyCustomColors
+{
+    public static CustomColor Cerulean { get; } = new CustomColor("Cerulean", new Color(0.0f, 0.48f, 0.65f)); 
+
+    public static CustomColor Rose { get; } = new CustomColor("Rose", new Color(0.98f, 0.26f, 0.62f));
+    
+    public static CustomColor Gold { get; } = new CustomColor("Gold", new Color(1.0f, 0.84f, 0.0f));
+}
+```
 
 ## Assets
 
