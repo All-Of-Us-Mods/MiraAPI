@@ -200,7 +200,7 @@ public static class LobbyViewPanePatches
 	    categoryHeaderMasked.transform.localPosition = new Vector3(-9.77f, 1.26f, -2f);
 	    instance.settingsInfo.Add(categoryHeaderMasked.gameObject);
 	    
-	    var list = new List<RoleRulesCategory>();
+	    var list = new List<Type>();
 
 	    foreach (var team in Enum.GetValues<ModdedRoleTeams>())
 	    {
@@ -238,9 +238,9 @@ public static class LobbyViewPanePatches
 		    instance.settingsInfo.Add(categoryHeaderRoleVariant.gameObject);
 		    num -= 0.696f;
 
-		    foreach (var role in filteredRoles)
+		    foreach (var customRole in filteredRoles)
 		    {
-			    var roleBehaviour = role as RoleBehaviour;
+			    var roleBehaviour = customRole as RoleBehaviour;
 			    if (roleBehaviour == null)
 			    {
 				    continue;
@@ -259,19 +259,23 @@ public static class LobbyViewPanePatches
 			    viewSettingsInfoPanelRoleVariant.transform.localScale = Vector3.one;
 			    viewSettingsInfoPanelRoleVariant.transform.localPosition = new Vector3(num2, num, -2f);
 			    
-			    if (!flag)
+			    var advancedRoleOptions = SelectedMod.Options
+				    .Where(x => x.AdvancedRole == customRole.GetType())
+				    .ToList();
+			    
+			    if (!flag && advancedRoleOptions.Count > 0)
 			    {
-				    //list.Add(role.GetType());
+				    list.Add(customRole.GetType());
 			    }
 
 			    viewSettingsInfoPanelRoleVariant.SetInfo(roleBehaviour.NiceName, numPerGame, chancePerGame,
-				    61, role.RoleColor, role.Icon.LoadAsset(), true);
+				    61, customRole.RoleColor, customRole.Icon.LoadAsset(), true);
 			    
 			    viewSettingsInfoPanelRoleVariant.titleText.color = 
 				    viewSettingsInfoPanelRoleVariant.chanceTitle.color = 
 					    viewSettingsInfoPanelRoleVariant.chanceBackground.color = 
 						    viewSettingsInfoPanelRoleVariant.background.color = 
-							    role.RoleColor.GetAlternateColor();
+							    customRole.RoleColor.GetAlternateColor();
 			    instance.settingsInfo.Add(viewSettingsInfoPanelRoleVariant.gameObject);
 			    num -= 0.664f;
 		    }
@@ -310,7 +314,8 @@ public static class LobbyViewPanePatches
 				    Object.Instantiate(instance.advancedRolePanelOrigin, instance.settingsContainer, true);
 			    advancedRoleViewPanel.transform.localScale = Vector3.one;
 			    advancedRoleViewPanel.transform.localPosition = new Vector3(num4, num, -2f);
-			    var num5 = advancedRoleViewPanel.SetUp(list[k], 0.59f, 61);
+			    var num5 = SetUpAdvancedRoleViewPanel(advancedRoleViewPanel, list[k], 0.59f, 61);
+			    
 			    if (num5 > num3)
 			    {
 				    num3 = num5;
@@ -321,5 +326,58 @@ public static class LobbyViewPanePatches
 	    }
 
 	    instance.scrollBar.SetYBoundsMax(-num);
+    }
+
+    private static float SetUpAdvancedRoleViewPanel(AdvancedRoleViewPanel viewPanel, Type roleType, float spacingY, int maskLayer)
+    {
+	    if (SelectedMod == null)
+	    {
+		    return 0;
+	    }
+	    
+	    var role = SelectedMod.CustomRoles.Values.FirstOrDefault(x => x.GetType() == roleType);
+
+	    if (role == null)
+	    {
+		    return 0;
+	    }
+
+	    var customRole = role as ICustomRole;
+	    
+        viewPanel.header.SetHeader(role.StringName, maskLayer, role.TeamType == RoleTeamTypes.Crewmate, customRole.Icon.LoadAsset());
+	    viewPanel.divider.material.SetInt(PlayerMaterial.MaskLayer, maskLayer);
+	    
+	    var num = viewPanel.yPosStart;
+	    var num2 = 1.08f;
+	    
+	    var filteredOptions = SelectedMod.Options
+		    .Where(x => x.AdvancedRole == roleType)
+		    .ToList();
+	    
+	    for (var i = 0; i < filteredOptions.Count; i++)
+	    {
+		    var option = filteredOptions[i];
+		    BaseGameSetting baseGameSetting = option.Data;
+		    var viewSettingsInfoPanel = Object.Instantiate(viewPanel.infoPanelOrigin, viewPanel.transform, true);
+		    viewSettingsInfoPanel.transform.localScale = Vector3.one;
+		    viewSettingsInfoPanel.transform.localPosition = new Vector3(viewPanel.xPosStart, num, -2f);
+		    
+		    var value = option.GetFloatData();
+		    
+		    if (baseGameSetting.Type == OptionTypes.Checkbox)
+		    {
+			    viewSettingsInfoPanel.SetInfoCheckbox(baseGameSetting.Title, maskLayer, value > 0f);
+		    }
+		    else
+		    {
+			    viewSettingsInfoPanel.SetInfo(baseGameSetting.Title, baseGameSetting.GetValueString(value), maskLayer);
+		    }
+		    num -= spacingY;
+		    if (i > 0)
+		    {
+			    num2 += 0.8f;
+		    }
+	    }
+	    return num2;
     }
 }
