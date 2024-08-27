@@ -1,9 +1,9 @@
-﻿using System;
-using MiraAPI.GameOptions;
+﻿using MiraAPI.GameOptions;
 using MiraAPI.Modifiers;
 using MiraAPI.Roles;
 using Reactor.Utilities;
 using Reactor.Utilities.Extensions;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -19,12 +19,29 @@ public static class Extensions
 
     public static ModifierComponent GetModifierComponent(this PlayerControl player)
     {
-        return player.gameObject.GetComponent<ModifierComponent>();
+        return player.GetComponent<ModifierComponent>();
+    }
+
+    public static List<T> Randomize<T>(this List<T> list)
+    {
+        List<T> randomizedList = new List<T>();
+        System.Random rnd = new();
+        while (list.Count > 0)
+        {
+            int index = rnd.Next(0, list.Count);
+            randomizedList.Add(list[index]);
+            list.RemoveAt(index);
+        }
+        return randomizedList;
     }
 
     public static bool HasModifier<T>(this PlayerControl player) where T : BaseModifier
     {
-        return player.GetModifierComponent().ActiveModifiers.Exists(x => x is T);
+        return player is not null && player.GetModifierComponent() is not null && player.GetModifierComponent().ActiveModifiers.Exists(x => x is T);
+    }
+    public static bool HasModifier(this PlayerControl player, uint id)
+    {
+        return player is not null && player.GetModifierComponent() is not null && player.GetModifierComponent().ActiveModifiers.Exists(x => x.ModifierId == id);
     }
 
     public static void AddModifier<T>(this PlayerControl player) where T : BaseModifier

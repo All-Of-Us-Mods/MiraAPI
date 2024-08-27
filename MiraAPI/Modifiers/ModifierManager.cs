@@ -1,8 +1,12 @@
-﻿using MiraAPI.Networking;
-using System;
-using System.Collections.Generic;
+﻿using MiraAPI.Modifiers.Types;
+using MiraAPI.Networking;
+using MiraAPI.Roles;
 using MiraAPI.Utilities;
 using Reactor.Networking.Rpc;
+using Reactor.Utilities.Extensions;
+using System;
+using System.Collections.Generic;
+using Random = System.Random;
 
 namespace MiraAPI.Modifiers;
 
@@ -30,10 +34,58 @@ public static class ModifierManager
         TypeToIdModifiers.Add(modifierType, _nextId);
     }
 
+    public static void AssignModifiers(List<PlayerControl> plrs)
+    {
+        Random rand = new Random();
+
+        List<uint> filteredModifiers = [];
+
+        foreach (var modifier in IdToTypeModifiers)
+        {
+            var mod = (GameModifier)Activator.CreateInstance(modifier.Value);
+            var num = mod.GetAmountPerGame();
+            var chance = mod.GetAssignmentChance();
+
+            for (int i = 0; i < num; i++)
+            {
+                int randomNum = rand.Next(100);
+
+                if (randomNum < Math.Clamp(chance, 0, 100))
+                {
+                    filteredModifiers.Add(TypeToIdModifiers[modifier.Value]);
+                }
+            }
+        }
+
+        var shuffledModifiers = filteredModifiers.Randomize();
+        if (shuffledModifiers.Count > plrs.Count)
+        {
+            shuffledModifiers = shuffledModifiers.GetRange(0, plrs.Count);
+        }
+
+        while (shuffledModifiers.Count > 0)
+        {
+            var id = shuffledModifiers[0];
+
+            var mod = (GameModifier)Activator.CreateInstance(IdToTypeModifiers[id]);
+            var plr = plrs.Random();
+
+            if (plr.Data.Role is ICustomRole modRole)
+            {
+                if (!modRole.IsModifierApplicable(mod)) continue;
+            }
+
+            if (plr.HasModifier(id) || mod.IsModifierValidOn(plr.Data.Role)) continue;
+
+            shuffledModifiers.RemoveAt(0);
+            ModifierComponent.RpcAddModifier(plr, id);
+        }
+    }
+
     public static void SyncAllModifiers(int targetId = -1)
     {
         var data = new List<NetData>();
-        
+
         if (targetId == -1)
         {
             foreach (var player in GameData.Instance.AllPlayers)
@@ -44,24 +96,24 @@ public static class ModifierManager
         else
         {
             var player = GameData.Instance.GetPlayerById((byte)targetId).Object;
-            
+
             data.Add(GetPlayerModifiers(player));
         }
-        
-        
+
+
         Rpc<SyncModifiersRpc>.Instance.Send(PlayerControl.LocalPlayer, data.ToArray(), true);
     }
-    
+
     public static void HandleSyncModifiers(NetData[] data)
     {
         foreach (var netData in data)
         {
             var ids = new uint[netData.Data.Length / 4];
             Buffer.BlockCopy(netData.Data, 0, ids, 0, netData.Data.Length);
-            
+
             var plr = GameData.Instance.GetPlayerById((byte)netData.Id).Object;
             var modifierComponent = plr.GetComponent<ModifierComponent>();
-            
+
             if (!modifierComponent)
             {
                 continue;
@@ -72,7 +124,7 @@ public static class ModifierManager
                 modifier.OnDeactivate();
             }
             modifierComponent.ActiveModifiers.Clear();
-            
+
             foreach (var id in ids)
             {
                 ModifierComponent.AddModifier(plr, id);
@@ -88,12 +140,12 @@ public static class ModifierManager
         {
             return new NetData(player.PlayerId, []);
         }
-                
+
         foreach (var modifier in modifierComponent.ActiveModifiers)
         {
             bytes.AddRange(BitConverter.GetBytes(TypeToIdModifiers[modifier.GetType()]));
         }
-        
+
         return new NetData(player.PlayerId, bytes.ToArray());
     }
 }

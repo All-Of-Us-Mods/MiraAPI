@@ -1,4 +1,5 @@
 ﻿using MiraAPI.Hud;
+using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities;
 using UnityEngine;
@@ -13,7 +14,7 @@ public class ExampleButton : CustomActionButton
     public override float EffectDuration => 0f;
     public override int MaxUses => 5;
     public override LoadableAsset<Sprite> Sprite { get; } = new LoadableResourceAsset("MiraAPI.Resources.ExampleButton.png");
-    
+
     protected override void OnClick()
     {
         Logger<ExamplePlugin>.Info("Example button clicked!");
@@ -21,6 +22,6 @@ public class ExampleButton : CustomActionButton
 
     public override bool Enabled(RoleBehaviour role)
     {
-        return true;
+        return PlayerControl.LocalPlayer.HasModifier<ModifierExample>();
     }
 }

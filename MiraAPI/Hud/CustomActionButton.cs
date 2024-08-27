@@ -60,7 +60,7 @@ public abstract class CustomActionButton
     /// The button object in game. This is created by Mira API automatically.
     /// </summary>
     protected ActionButton Button { get; private set; }
-    
+
     internal void CreateButton(Transform parent)
     {
         if (Button)
@@ -99,10 +99,10 @@ public abstract class CustomActionButton
         {
             OnEffectEnd();
         }
-        
+
         EffectActive = false;
     }
-    
+
     /// <summary>
     /// A utility function to override the sprite of the button.
     /// </summary>
@@ -225,7 +225,7 @@ public abstract class CustomActionButton
         {
             Button.SetDisabled();
         }
-        
+
         Button.SetCoolDown(Timer, EffectActive ? EffectDuration : Cooldown);
 
         FixedUpdate(playerControl);

@@ -8,7 +8,6 @@ namespace MiraAPI.Utilities;
 public static class Helpers
 {
     public static readonly ContactFilter2D Filter = ContactFilter2D.CreateLegacyFilter(Constants.NotShipMask, float.MinValue, float.MaxValue);
-
     public static PlainShipRoom GetRoom(Vector3 pos)
     {
         return ShipStatus.Instance.AllRooms.ToList().Find(room => room.roomArea.OverlapPoint(pos));
@@ -18,7 +17,7 @@ public static class Helpers
     {
         return Object.FindObjectsOfType<DeadBody>().FirstOrDefault(body => body.ParentId == id);
     }
-    
+
     public static string GetSuffix(NumberSuffixes suffix)
     {
         return suffix switch

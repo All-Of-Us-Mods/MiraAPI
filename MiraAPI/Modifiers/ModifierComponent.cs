@@ -13,13 +13,14 @@ namespace MiraAPI.Modifiers;
 [RegisterInIl2Cpp]
 public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
 {
-    public readonly List<BaseModifier> ActiveModifiers = [];
+    public List<BaseModifier> ActiveModifiers { get; private set; }
 
     public PlayerControl player;
 
     public void Start()
     {
         player = GetComponent<PlayerControl>();
+        ActiveModifiers = new List<BaseModifier>();
     }
 
     public void Update()
@@ -50,6 +51,11 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
 
         modifier.OnDeactivate();
         modifierComponent.ActiveModifiers.Remove(modifier);
+
+        if (target.AmOwner)
+        {
+            HudManager.Instance.SetHudActive(true);
+        }
     }
 
     public static void AddModifier(PlayerControl target, uint modifierId)
@@ -72,11 +78,17 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
 
         modifierComponent.ActiveModifiers.Add(modifier);
         modifier.Player = modifierComponent.player;
+        modifier.ModifierId = modifierId;
         modifier.OnActivate();
 
-        if (modifier is TimedModifier { AutoStart: true } timer && target.AmOwner)
+        if (target.AmOwner)
         {
-            timer.StartTimer();
+            if (modifier is TimedModifier { AutoStart: true } timer)
+            {
+                timer.StartTimer();
+            }
+
+            HudManager.Instance.SetHudActive(true);
         }
     }
 

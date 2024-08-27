@@ -1,17 +1,19 @@
 ﻿using HarmonyLib;
 using MiraAPI.Hud;
 using MiraAPI.Modifiers;
+using Reactor.Utilities.Extensions;
 
 namespace MiraAPI.Patches;
 
 [HarmonyPatch(typeof(PlayerControl))]
 public static class PlayerControlPatches
 {
-
-    [HarmonyPostfix]
+    [HarmonyPrefix]
     [HarmonyPatch(nameof(PlayerControl.Start))]
     public static void PlayerControlStartPostfix(PlayerControl __instance)
     {
+        if (__instance.gameObject.TryGetComponent<ModifierComponent>(out var comp)) comp.DestroyImmediate();
+
         __instance.gameObject.AddComponent<ModifierComponent>();
     }
 
@@ -23,7 +25,7 @@ public static class PlayerControlPatches
 
         foreach (var button in CustomButtonManager.CustomButtons)
         {
-            if (!button.Enabled(__instance.Data.Role))
+            if (!button.Enabled(__instance.Data?.Role))
             {
                 continue;
             }

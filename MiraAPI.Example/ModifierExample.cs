@@ -3,17 +3,22 @@
 namespace MiraAPI.Example;
 
 [RegisterModifier]
-public class ModifierExample : TimedModifier
+public class ModifierExample : GameModifier
 {
-    public override string ModifierName => "Timed modifier example";
-    public override float Duration => 1.5f;
-    public override bool AutoStart => true;
+    public override string ModifierName => "Example";
 
-    private System.Random _rand = new();
-
-    public override void OnTimerComplete()
+    public override bool CanVent()
     {
-        Player.SetColor((byte)_rand.Next(0, 18));
-        StartTimer();
+        return true;
+    }
+
+    public override int GetAmountPerGame()
+    {
+        return 1;
+    }
+
+    public override int GetAssignmentChance()
+    {
+        return 100;
     }
 }
