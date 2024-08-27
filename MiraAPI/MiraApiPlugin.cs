@@ -26,7 +26,7 @@ public partial class MiraApiPlugin : BasePlugin
     {
         Harmony.PatchAll();
 
-        ReactorCredits.Register("Mira API", Version.Truncate(15, "") ?? Version, true, ReactorCredits.AlwaysShow);
+        ReactorCredits.Register("Mira API", Version.Truncate(11, "") ?? Version, true, ReactorCredits.AlwaysShow);
 
         PluginManager = new MiraPluginManager();
         PluginManager.Initialize();

@@ -3,17 +3,12 @@
         <TargetFramework>net6.0</TargetFramework>
         <LangVersion>latest</LangVersion>
         <DebugType>embedded</DebugType>
-
-        <VersionPrefix>1.0.0</VersionPrefix>
-        <VersionSuffix>dev</VersionSuffix>
+        <PackageId>AllOfUs.MiraAPI</PackageId>
+        <Version>0.1.0</Version>
         <Description>Simple and easy to use Among Us modding API.</Description>
         <Authors>Angxl, XtraCube</Authors>
+        <Company>All Of Us</Company>
     </PropertyGroup>
-    <ItemGroup>
-      <None Remove="Resources\Buttons.png" />
-      <None Remove="Resources\Checkmark.png" />
-      <None Remove="Resources\CheckMarkBox.png" />
-    </ItemGroup>
     
     <ItemGroup>
         <EmbeddedResource Include="Resources\Checkmark.png" />
