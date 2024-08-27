@@ -1,5 +1,5 @@
-﻿using System;
-using MiraAPI.Networking;
+﻿using MiraAPI.Networking;
+using System;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -7,7 +7,7 @@ namespace MiraAPI.GameOptions.OptionTypes;
 
 public class ModdedToggleOption : ModdedOption<bool>
 {
-    public ModdedToggleOption(string title, bool defaultValue, Type roleType=null) : base(title, defaultValue, roleType)
+    public ModdedToggleOption(string title, bool defaultValue, Type roleType = null) : base(title, defaultValue, roleType)
     {
         Data = ScriptableObject.CreateInstance<CheckboxGameSetting>();
 
@@ -30,6 +30,11 @@ public class ModdedToggleOption : ModdedOption<bool>
         OptionBehaviour = toggleOption;
 
         return toggleOption;
+    }
+
+    public override float GetFloatData()
+    {
+        return Value ? 1 : 0;
     }
 
     public override NetData GetNetData()
@@ -55,7 +60,7 @@ public class ModdedToggleOption : ModdedOption<bool>
     public override void OnValueChanged(bool newValue)
     {
         DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, newValue ? "On" : "Off", false);
-        if (OptionBehaviour is null)
+        if (!OptionBehaviour)
         {
             return;
         }

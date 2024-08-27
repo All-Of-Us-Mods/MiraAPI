@@ -2,6 +2,7 @@
 using MiraAPI.Roles;
 using Reactor.Localization.Utilities;
 using System;
+using BepInEx.Configuration;
 using MiraAPI.Networking;
 using Reactor.Networking.Rpc;
 using UnityEngine;
@@ -10,9 +11,20 @@ namespace MiraAPI.GameOptions.OptionTypes;
 
 public abstract class ModdedOption<T> : IModdedOption
 {
+    private IMiraPlugin _parentMod;
+    
     public uint Id { get; }
     public BaseGameSetting Data { get; protected init; }
-    public IMiraPlugin ParentMod { get; set; } = null;
+    public IMiraPlugin ParentMod
+    {
+        get => _parentMod;
+        set
+        {
+            _parentMod = value;
+            var entry = _parentMod.GetConfigFile().Bind(ConfigDefinition, DefaultValue);
+            Value = entry.Value;
+        }
+    }
     public T Value { get; protected set; }
     public T DefaultValue { get; init; }
     public Action<T> ChangedEvent { get; set; }
@@ -21,9 +33,11 @@ public abstract class ModdedOption<T> : IModdedOption
     public Func<bool> Visible { get; set; }
     public Type AdvancedRole { get; set; }
     public OptionBehaviour OptionBehaviour { get; set; }
+    public ConfigDefinition ConfigDefinition => new ("Options", Title);
 
-    protected ModdedOption(string title, T defaultValue, Type roleType) : this()
+    protected ModdedOption(string title, T defaultValue, Type roleType)
     {
+        Id = ModdedOptionsManager.NextId;
         Title = title;
         DefaultValue = defaultValue;
         Value = defaultValue;
@@ -34,11 +48,6 @@ public abstract class ModdedOption<T> : IModdedOption
         {
             AdvancedRole = roleType;
         }
-    }
-
-    private ModdedOption()
-    {
-        Id = ModdedOptionsManager.NextId;
     }
 
     public void ValueChanged(OptionBehaviour optionBehaviour)
@@ -59,10 +68,17 @@ public abstract class ModdedOption<T> : IModdedOption
         {
             Rpc<SyncOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, [GetNetData()], true);
         }
-            
+        
+        if (ParentMod?.GetConfigFile().TryGetEntry<T>(ConfigDefinition, out var entry) == true)
+        {
+            entry.Value = Value;
+        }
+        
         OnValueChanged(newValue);
     }
 
+    public abstract float GetFloatData();
+    
     public abstract NetData GetNetData();
         
     public abstract void HandleNetData(byte[] data);

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using MiraAPI.Networking;
 using MiraAPI.PluginLoading;
+using MiraAPI.Utilities;
 using Reactor.Networking.Rpc;
 
 namespace MiraAPI.GameOptions;
@@ -14,20 +15,17 @@ namespace MiraAPI.GameOptions;
 public class ModdedOptionsManager
 {
     private static readonly Dictionary<PropertyInfo, ModdedOptionAttribute> OptionAttributes = new();
-    private static readonly Dictionary<Type, IModdedOptionGroup> TypeToGroup = new();
+    private static readonly Dictionary<Type, AbstractOptionGroup> TypeToGroup = new();
 
     public static readonly Dictionary<uint, IModdedOption> ModdedOptions = new();
-    public static readonly Dictionary<IModdedOptionGroup, List<IModdedOption>> Groups = new();
-
+    public static readonly List<AbstractOptionGroup> Groups = [];
     
     public static uint NextId => _nextId++;
     private static uint _nextId = 1;
     
     internal static bool RegisterGroup(Type type, MiraPluginInfo pluginInfo)
     {
-        var group = (IModdedOptionGroup)Activator.CreateInstance(type);
-            
-        if (group == null)
+        if (Activator.CreateInstance(type) is not AbstractOptionGroup group)
         {
             Logger<MiraApiPlugin>.Error($"Failed to create group from {type.Name}");
             return false;
@@ -39,7 +37,7 @@ public class ModdedOptionsManager
             return false;
         }
 
-        Groups.Add(group, []);
+        Groups.Add(group);
         TypeToGroup.Add(type, group);
         pluginInfo.OptionGroups.Add(group);
         
@@ -53,10 +51,8 @@ public class ModdedOptionsManager
             Logger<MiraApiPlugin>.Error($"Failed to get group for {type.Name}");
             return;
         }
-        
-        var option = (IModdedOption) property.GetValue(group);
-        
-        if (option == null)
+
+        if (property.GetValue(group) is not IModdedOption option)
         {
             Logger<MiraApiPlugin>.Error($"Failed to get option for {property.Name}");
             return;
@@ -101,42 +97,26 @@ public class ModdedOptionsManager
         RegisterOption(option, group, pluginInfo);
     }
 
-    private static void RegisterOption(IModdedOption option, IModdedOptionGroup group, MiraPluginInfo pluginInfo)
+    private static void RegisterOption(IModdedOption option, AbstractOptionGroup group, MiraPluginInfo pluginInfo)
     {
         option.ParentMod = pluginInfo.MiraPlugin;
         option.AdvancedRole = group.AdvancedRole;
+        
         pluginInfo.Options.Add(option);
         
         ModdedOptions.Add(option.Id, option);
-        Groups[group].Add(option);
+        group.Options.Add(option);
     }
     
     internal static void SyncAllOptions(int targetId=-1)
     {
-        List<NetData> data = [];
+        var chunks = ModdedOptions.Values.Select(option => option.GetNetData()).ChunkNetData(1000);
         
-        var count = 0;
-        foreach (var netData in ModdedOptions.Values.Select(option => option.GetNetData()))
+        while (chunks.Count > 0)
         {
-            data.Add(netData);
-            count += netData.GetLength();
-
-            if (count <= 1000)
-            {
-                continue;
-            }
-            
-            Rpc<SyncOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.ToArray());
-            data.Clear();
-            count = 0;
-        }
-        
-        if (data.Count > 0)
-        {
-            Rpc<SyncOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.ToArray());
+            Rpc<SyncOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, chunks.Dequeue());
         }
     }
-
 
     internal static void HandleSyncOptions(NetData[] data)
     {

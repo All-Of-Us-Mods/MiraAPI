@@ -25,28 +25,28 @@ public static class GameOptionsMenuPatch
         __instance.MapPicker.gameObject.SetActive(false);
 
         float num = 2.1f;
-        
+
         var filteredGroups = GameSettingMenuPatches.SelectedMod.OptionGroups.Where(x => x.GroupVisible.Invoke() && x.AdvancedRole is null);
-        
-        foreach (IModdedOptionGroup group in filteredGroups)
+
+        foreach (AbstractOptionGroup group in filteredGroups)
         {
-            var filteredOpts = ModdedOptionsManager.Groups[group].Where(x=>x.Visible.Invoke()).ToList();
+            var filteredOpts = group.Options.Where(x => x.Visible.Invoke()).ToList();
             if (filteredOpts.Count == 0)
             {
                 continue;
             }
-            
+
             CategoryHeaderMasked categoryHeaderMasked = Object.Instantiate(__instance.categoryHeaderOrigin, Vector3.zero, Quaternion.identity, __instance.settingsContainer);
             categoryHeaderMasked.SetHeader(CustomStringName.CreateAndRegister(group.GroupName), 20);
             if (group.GroupColor != Color.clear)
             {
                 categoryHeaderMasked.Background.color = group.GroupColor;
-                categoryHeaderMasked.Title.color = group.GroupColor.DarkenColor();
+                categoryHeaderMasked.Title.color = group.GroupColor.GetAlternateColor();
             }
             categoryHeaderMasked.transform.localScale = Vector3.one * 0.63f;
             categoryHeaderMasked.transform.localPosition = new Vector3(-0.903f, num, -2f);
             num -= 0.63f;
-            
+
             foreach (var opt in filteredOpts)
             {
                 OptionBehaviour newOpt = opt.CreateOption(__instance.checkboxOrigin, __instance.numberOptionOrigin, __instance.stringOptionOrigin, __instance.settingsContainer);
@@ -58,7 +58,12 @@ public static class GameOptionsMenuPatch
                 {
                     if (group.GroupColor != Color.clear)
                     {
-                        componentsInChildren[i].color = group.GroupColor;
+                        componentsInChildren[i].color = group.GroupColor.GetAlternateColor();
+                        if (componentsInChildren[i].transform.parent.TryGetComponent<GameOptionButton>(out var btn))
+                        {
+                            btn.interactableColor = group.GroupColor.GetAlternateColor();
+                            btn.interactableHoveredColor = Color.white;
+                        }
                     }
 
                     componentsInChildren[i].material.SetInt(PlayerMaterial.MaskLayer, 20);
@@ -68,7 +73,7 @@ public static class GameOptionsMenuPatch
                 {
                     if (group.GroupColor != Color.clear)
                     {
-                        textMeshPro.color = group.GroupColor.DarkenColor();
+                        textMeshPro.color = group.GroupColor;
                     }
 
                     textMeshPro.fontMaterial.SetFloat(ShaderID.StencilComp, 3f);
@@ -83,7 +88,6 @@ public static class GameOptionsMenuPatch
         }
 
         __instance.scrollBar.SetYBoundsMax(-num - 1.65f);
-
         return false;
     }
 

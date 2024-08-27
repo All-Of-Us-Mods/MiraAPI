@@ -13,7 +13,7 @@ public class MiraPluginInfo(IMiraPlugin miraPlugin, PluginInfo info)
     public PluginInfo PluginInfo { get; set; } = info;
     public ConfigFile PluginConfig { get; set; } = miraPlugin.GetConfigFile();
 
-    public readonly List<IModdedOptionGroup> OptionGroups = [];
+    public readonly List<AbstractOptionGroup> OptionGroups = [];
     public readonly List<IModdedOption> Options = [];
 
     public readonly Dictionary<ushort, RoleBehaviour> CustomRoles = [];

@@ -4,10 +4,10 @@ using UnityEngine;
 
 namespace MiraAPI.Example.Options;
 
-public class ExampleOptions : IModdedOptionGroup
+public class ExampleOptions : AbstractOptionGroup
 {
-    public string GroupName => "General Group";
-    public Color GroupColor => Color.red;
+    public override string GroupName => "General Group";
+    public override Color GroupColor => Color.red;
 
     [ModdedToggleOption("Use Thing")]
     public bool UseThing { get; set; } = false;

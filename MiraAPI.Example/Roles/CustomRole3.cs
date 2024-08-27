@@ -12,6 +12,6 @@ public class CustomRole3 : CrewmateRole, ICustomRole
     public string RoleDescription => RoleLongDescription;
     public Color RoleColor => Palette.Brown;
     public ModdedRoleTeams Team => ModdedRoleTeams.Crewmate;
-    public LoadableAsset<Sprite> OptionsScreenshot => MiraAssets.Banner;
+    public LoadableAsset<Sprite> OptionsScreenshot => ExampleAssets.Banner;
 
 }

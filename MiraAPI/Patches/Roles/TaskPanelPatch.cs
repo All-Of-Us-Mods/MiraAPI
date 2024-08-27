@@ -35,7 +35,7 @@ public static class TaskPanelPatch
         vector2.x += vector.x * 2f;
         __instance.tab.transform.localPosition = vector2;
 
-        if (GameManager.Instance == null)
+        if (!GameManager.Instance)
         {
             return false;
         }

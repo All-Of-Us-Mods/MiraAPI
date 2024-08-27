@@ -65,6 +65,11 @@ public class ModdedNumberOption : ModdedOption<float>
         return numberOption;
     }
 
+    public override float GetFloatData()
+    {
+        return Value;
+    }
+
     public override NetData GetNetData()
     {
         return new NetData(Id, BitConverter.GetBytes(Value));
@@ -90,7 +95,7 @@ public class ModdedNumberOption : ModdedOption<float>
         Value = Mathf.Clamp(newValue, Min, Max);
         DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, Data.GetValueString(Value), false);
 
-        if (OptionBehaviour is null)
+        if (!OptionBehaviour)
         {
             return;
         }

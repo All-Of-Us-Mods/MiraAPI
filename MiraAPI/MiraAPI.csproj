@@ -13,17 +13,14 @@
     <ItemGroup>
         <EmbeddedResource Include="Resources\Cog.png" />
         <EmbeddedResource Include="Resources\CogActive.png" />
-        <EmbeddedResource Include="Resources\FortniteBanner.jpeg" />
         <EmbeddedResource Include="Resources\NextButton.png" />
         <EmbeddedResource Include="Resources\NextButtonActive.png" />
-        <EmbeddedResource Include="Resources\ExampleButton.png" />
         <EmbeddedResource Include="Resources\Empty.png" />
     </ItemGroup>
 	
     <ItemGroup>
-        <PackageReference Include="Reactor" Version="2.3.0" />
+        <PackageReference Include="Reactor" Version="2.3.1" />
         <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.697" Private="false" ExcludeAssets="runtime;native" />
-        <PackageReference Include="Iced" Version="1.21.0" />
         <PackageReference Include="AmongUs.GameLibs.Steam" Version="2024.8.13" PrivateAssets="all" />
 
         <PackageReference Include="BepInEx.AutoPlugin" Version="1.1.0" PrivateAssets="all" />

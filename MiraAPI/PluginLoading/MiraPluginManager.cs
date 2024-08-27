@@ -3,12 +3,15 @@ using BepInEx.Unity.IL2CPP;
 using Il2CppInterop.Runtime.Injection;
 using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.Attributes;
+using MiraAPI.Hud;
 using MiraAPI.Roles;
+using MiraAPI.Utilities.Colors;
 using Reactor.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using MiraAPI.Utilities;
 using MiraAPI.Hud;
 using Reactor.Networking;
 
@@ -17,12 +20,13 @@ namespace MiraAPI.PluginLoading;
 internal class MiraPluginManager
 {
     public readonly Dictionary<Assembly, MiraPluginInfo> RegisteredPlugins = [];
-    
+
     private static MiraPluginManager _instance;
-    
-    public static MiraPluginManager Instance { 
+
+    public static MiraPluginManager Instance
+    {
         get => _instance ??= new MiraPluginManager();
-        private set => _instance = value; 
+        private set => _instance = value;
     }
 
     internal void Initialize()
@@ -42,6 +46,8 @@ internal class MiraPluginManager
             RegisterRoleAttribute(assembly, info);
             RegisterButtonAttribute(assembly);
 
+            RegisterColorClasses(assembly);
+
             RegisteredPlugins.Add(assembly, info);
 
             Logger<MiraApiPlugin>.Info($"Registering mod {pluginInfo.Metadata.GUID} with Mira API.");
@@ -55,8 +61,8 @@ internal class MiraPluginManager
 
     private static void RegisterAllOptions(Assembly assembly, MiraPluginInfo pluginInfo)
     {
-        var filteredTypes = assembly.GetTypes().Where(type => type.IsAssignableTo(typeof(IModdedOptionGroup)));
-        
+        var filteredTypes = assembly.GetTypes().Where(type => type.IsAssignableTo(typeof(AbstractOptionGroup)));
+
         foreach (var type in filteredTypes)
         {
             if (!ModdedOptionsManager.RegisterGroup(type, pluginInfo))
@@ -117,6 +123,40 @@ internal class MiraPluginManager
                 }
                 
                 Logger<MiraApiPlugin>.Error(e);
+            }
+        }
+    }
+
+    private static void RegisterColorClasses(Assembly assembly)
+    {
+        foreach (var type in assembly.GetTypes())
+        {
+            if (type.GetCustomAttribute<RegisterCustomColorsAttribute>() == null)
+            {
+                continue;
+            }
+
+            if (!type.IsStatic())
+            {
+                Logger<MiraApiPlugin>.Error($"Color class {type.Name} must be static.");
+                continue;
+            }
+
+            foreach (var property in type.GetProperties())
+            {
+                if (property.PropertyType != typeof(CustomColor))
+                {
+                    continue;
+                }
+                
+                var color = (CustomColor)property.GetValue(null);
+                if (color == null)
+                {
+                    Logger<MiraApiPlugin>.Error($"Color property {property.Name} in {type.Name} is null.");
+                    continue;
+                }
+                
+                PaletteManager.CustomColors.Add(color);
             }
         }
     }

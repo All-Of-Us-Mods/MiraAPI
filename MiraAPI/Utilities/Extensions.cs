@@ -1,13 +1,70 @@
-﻿using MiraAPI.GameOptions;
-using MiraAPI.Roles;
-using Reactor.Utilities.Extensions;
+﻿#nullable enable
+using System;
+using System.Collections.Generic;
+using MiraAPI.GameOptions;
 using System.Linq;
+using MiraAPI.Networking;
+using Reactor.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.Utilities;
 
 public static class Extensions
 {
+    public static bool IsStatic(this Type type)
+    {
+        return type is { IsClass: true, IsAbstract: true, IsSealed: true };
+    }
+    
+    public static Color32 GetShadowColor(this Color32 color, byte darknessAmount)
+    {
+        return
+            new Color32((byte)Mathf.Clamp(color.r - darknessAmount, 0, 255), (byte)Mathf.Clamp(color.g - darknessAmount, 0, 255),
+                (byte)Mathf.Clamp(color.b - darknessAmount, 0, 255), byte.MaxValue);
+    }
+    
+    public static string? Truncate(this string? value, int maxLength, string truncationSuffix = "…")
+    {
+        return value?.Length > maxLength
+            ? value[..maxLength] + truncationSuffix
+            : value;
+    }
+    
+    public static Queue<NetData[]> ChunkNetData(this IEnumerable<NetData> dataCollection, int chunkSize)
+    {
+        Queue<NetData[]> chunks = [];
+        List<NetData> current = [];
+        
+        var count = 0;
+        foreach (var netData in dataCollection)
+        {
+            var length = netData.GetLength();
+            
+            if (length > chunkSize)
+            {
+                Logger<MiraApiPlugin>.Error($"NetData length is greater than chunk size: {length} > {chunkSize}");
+                continue;
+            }
+            
+            if (count + length > chunkSize)
+            {
+                chunks.Enqueue(current.ToArray());
+                current.Clear();
+                count = 0;
+            }
+            
+            current.Add(netData);
+        }
+        
+        if (current.Count > 0)
+        {
+            chunks.Enqueue(current.ToArray());
+        }
+
+        return chunks;
+    }
+    
+    
     public static bool IsCustom(this OptionBehaviour optionBehaviour)
     {
         return ModdedOptionsManager.ModdedOptions.Values.Any(opt => opt.OptionBehaviour && opt.OptionBehaviour.Equals(optionBehaviour));
@@ -15,48 +72,46 @@ public static class Extensions
 
     public static Color DarkenColor(this Color color)
     {
-        return new Color(color.r - 0.3f, color.g - 0.3f, color.b - 0.3f);
+        return new Color(color.r - 0.45f, color.g - 0.45f, color.b - 0.45f);
     }
-    public static void UpdateBodies(this PlayerControl playerControl, Color outlineColor, ref DeadBody target)
+    public static Color GetAlternateColor(this Color color)
     {
-        foreach (var body in Object.FindObjectsOfType<DeadBody>())
-        {
-            foreach (var bodyRenderer in body.bodyRenderers)
-            {
-                bodyRenderer.SetOutline(null);
-            }
-        }
-
-        if (playerControl.Data.Role is not ICustomRole { TargetsBodies: true })
-        {
-            return;
-        }
-
-        target = playerControl.NearestDeadBody();
-        if (!target)
-        {
-            return;
-        }
-
-        foreach (var renderer in target.bodyRenderers)
-        {
-            renderer.SetOutline(outlineColor);
-        }
+        return color.IsColorDark() ? LightenColor(color) : DarkenColor(color);
     }
 
-    public static DeadBody NearestDeadBody(this PlayerControl playerControl)
+    public static Color LightenColor(this Color color)
+    {
+        return new Color(color.r + 0.45f, color.g + 0.45f, color.b + 0.45f);
+    }
+
+    public static bool IsColorDark(this Color color)
+    {
+        return color.r < 0.5f && color is { g: < 0.5f, b: < 0.5f };
+    }
+
+    public static DeadBody? NearestDeadBody(this PlayerControl playerControl, float radius)
     {
         var results = new Il2CppSystem.Collections.Generic.List<Collider2D>();
-        Physics2D.OverlapCircle(playerControl.GetTruePosition(), playerControl.MaxReportDistance / 4f, Helpers.Filter, results);
+        Physics2D.OverlapCircle(playerControl.GetTruePosition(), radius, Helpers.Filter, results);
         return results.ToArray()
             .Where(collider2D => collider2D.CompareTag("DeadBody"))
             .Select(collider2D => collider2D.GetComponent<DeadBody>())
             .FirstOrDefault(component => component && !component.Reported);
     }
 
-    public static PlayerControl GetClosestPlayer(this PlayerControl playerControl, bool includeImpostors, float distance)
+    public static T? GetNearestObjectOfType<T>(this PlayerControl playerControl, float radius, string? colliderTag=null, Func<T, bool>? predicate=null) where T : Component
     {
-        PlayerControl result = null;
+        var results = new Il2CppSystem.Collections.Generic.List<Collider2D>();
+        Physics2D.OverlapCircle(playerControl.GetTruePosition(), radius, Helpers.Filter, results);
+        return results.ToArray()
+            .Where(collider2D => colliderTag == null || collider2D.CompareTag(colliderTag))
+            .Select(collider2D => collider2D.GetComponent<T>())
+            .FirstOrDefault(predicate ?? (component => component));
+    }
+
+    public static PlayerControl? GetClosestPlayer(this PlayerControl playerControl, bool includeImpostors, float distance)
+    {
+        PlayerControl? result = null;
         if (!ShipStatus.Instance)
         {
             return null;
@@ -64,14 +119,12 @@ public static class Extensions
 
         var truePosition = playerControl.GetTruePosition();
 
-        foreach (var playerInfo in GameData.Instance.AllPlayers)
+        var filteredPlayers = GameData.Instance.AllPlayers.ToArray()
+            .Where(playerInfo => !playerInfo.Disconnected && playerInfo.PlayerId != playerControl.PlayerId && !playerInfo.IsDead &&
+                                 (includeImpostors || !playerInfo.Role.IsImpostor));
+        
+        foreach (var playerInfo in filteredPlayers)
         {
-            if (playerInfo.Disconnected || playerInfo.PlayerId == playerControl.PlayerId ||
-                playerInfo.IsDead || !includeImpostors && playerInfo.Role.IsImpostor)
-            {
-                continue;
-            }
-
             var @object = playerInfo.Object;
             if (!@object)
             {
