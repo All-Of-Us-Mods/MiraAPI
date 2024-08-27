@@ -5,7 +5,7 @@ namespace MiraAPI.Example;
 [RegisterModifier]
 public class ModifierExample : GameModifier
 {
-    public override string ModifierName => "Example";
+    public override string ModifierName => "Example Modifier";
 
     public override bool CanVent()
     {

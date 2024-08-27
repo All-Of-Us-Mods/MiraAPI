@@ -1,6 +1,7 @@
 ﻿using MiraAPI.Roles;
 using System.Linq;
 using System.Text;
+using TMPro;
 using UnityEngine;
 
 namespace MiraAPI.Utilities;
@@ -11,6 +12,33 @@ public static class Helpers
     public static PlainShipRoom GetRoom(Vector3 pos)
     {
         return ShipStatus.Instance.AllRooms.ToList().Find(room => room.roomArea.OverlapPoint(pos));
+    }
+
+    public static TextMeshPro CreateTextLabel(string name, Transform parent,
+AspectPosition.EdgeAlignments alignment, Vector3 distance, float fontSize = 2f,
+TextAlignmentOptions textAlignment = TextAlignmentOptions.Center)
+    {
+        var textObj = new GameObject(name)
+        {
+            transform =
+            {
+                parent = parent
+            },
+            layer = LayerMask.NameToLayer("UI")
+        };
+
+        var textMeshPro = textObj.AddComponent<TextMeshPro>();
+        textMeshPro.fontSize = fontSize;
+        textMeshPro.alignment = textAlignment;
+        textMeshPro.font = HudManager.Instance.TaskPanel.taskText.font;
+        textMeshPro.fontMaterial = HudManager.Instance.TaskPanel.taskText.fontMaterial;
+
+        var aspectPosition = textObj.AddComponent<AspectPosition>();
+        aspectPosition.Alignment = alignment;
+        aspectPosition.DistanceFromEdge = distance;
+        aspectPosition.AdjustPosition();
+
+        return textMeshPro;
     }
 
     public static DeadBody GetBodyById(byte id)

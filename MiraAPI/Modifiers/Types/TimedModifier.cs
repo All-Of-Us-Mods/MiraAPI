@@ -11,13 +11,13 @@ public abstract class TimedModifier : BaseModifier
     public bool TimerActive = false;
     public float TimeRemaining;
 
-    public override void Update()
+    public override void FixedUpdate()
     {
         if (!Player.AmOwner) return;
 
         if (TimeRemaining > 0 && TimerActive)
         {
-            TimeRemaining -= Time.deltaTime;
+            TimeRemaining -= Time.fixedDeltaTime;
         }
         else
         {

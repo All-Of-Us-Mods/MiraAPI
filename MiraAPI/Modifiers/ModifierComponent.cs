@@ -6,6 +6,9 @@ using Reactor.Utilities;
 using Reactor.Utilities.Attributes;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using TMPro;
 using UnityEngine;
 
 namespace MiraAPI.Modifiers;
@@ -15,12 +18,27 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
 {
     public List<BaseModifier> ActiveModifiers { get; private set; }
 
-    public PlayerControl player;
+    public PlayerControl Player;
+
+    private TextMeshPro _modifierText;
 
     public void Start()
     {
-        player = GetComponent<PlayerControl>();
+        Player = GetComponent<PlayerControl>();
         ActiveModifiers = new List<BaseModifier>();
+
+        if (!Player.AmOwner) return;
+
+        _modifierText = Helpers.CreateTextLabel("ModifierText", HudManager.Instance.transform, AspectPosition.EdgeAlignments.RightTop, new Vector3(10.1f, 3.5f, 0), textAlignment: TextAlignmentOptions.Right);
+        _modifierText.verticalAlignment = VerticalAlignmentOptions.Top;
+    }
+
+    public void FixedUpdate()
+    {
+        foreach (var modifier in ActiveModifiers)
+        {
+            modifier.FixedUpdate();
+        }
     }
 
     public void Update()
@@ -28,6 +46,26 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
         foreach (var modifier in ActiveModifiers)
         {
             modifier.Update();
+        }
+
+        var filteredModifiers = ActiveModifiers.Where(mod => !mod.HideOnUi);
+
+        if (Player.AmOwner && filteredModifiers.Count() > 0)
+        {
+            var stringBuild = new StringBuilder();
+            foreach (var mod in filteredModifiers)
+            {
+                stringBuild.Append($"\n{mod.ModifierName}");
+                if (mod is TimedModifier timer)
+                {
+                    stringBuild.Append($" <size=70%>({Math.Round(timer.Duration - timer.TimeRemaining, 0)}s/{timer.Duration}s)</size>");
+                }
+            }
+            _modifierText.text = $"<b><size=130%>Modifiers:</b></size>{stringBuild}";
+        }
+        else if (Player.AmOwner && filteredModifiers.Count() == 0 && _modifierText.text != string.Empty)
+        {
+            _modifierText.text = string.Empty;
         }
     }
 
@@ -66,6 +104,12 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
             return;
         }
 
+        if (target.HasModifier(modifierId))
+        {
+            Logger<MiraApiPlugin>.Error($"Player already has modifier with id {modifierId}!");
+            return;
+        }
+
         var modifier = (BaseModifier)Activator.CreateInstance(type);
 
         var modifierComponent = target.GetModifierComponent();
@@ -77,7 +121,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
         }
 
         modifierComponent.ActiveModifiers.Add(modifier);
-        modifier.Player = modifierComponent.player;
+        modifier.Player = modifierComponent.Player;
         modifier.ModifierId = modifierId;
         modifier.OnActivate();
 
