@@ -3,7 +3,6 @@ using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using Reactor.Localization.Utilities;
 using Reactor.Utilities.Extensions;
-using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -102,7 +101,7 @@ public static class GameOptionsMenuPatch
 
             var options = group.Options.Select(opt => opt.CreateOption(__instance.checkboxOrigin,
                 __instance.numberOptionOrigin, __instance.stringOptionOrigin, __instance.settingsContainer));
-            
+
             foreach (var newOpt in options)
             {
                 newOpt.SetClickMask(__instance.ButtonClickMask);
@@ -137,10 +136,10 @@ public static class GameOptionsMenuPatch
                 if (newOpt is ToggleOption toggle)
                 {
                     toggle.CheckMark.sprite = MiraAssets.Checkmark.LoadAsset();
-
+                    toggle.CheckMark.color = group.GroupColor != Color.clear ? group.GroupColor : MiraAssets.AcceptedTeal;
                     var rend = toggle.CheckMark.transform.parent.FindChild("ActiveSprite").GetComponent<SpriteRenderer>();
                     rend.sprite = MiraAssets.CheckmarkBox.LoadAsset();
-                    rend.color = group.GroupColor;
+                    rend.color = group.GroupColor != Color.clear ? group.GroupColor : MiraAssets.AcceptedTeal;
                 }
 
                 __instance.Children.Add(newOpt);

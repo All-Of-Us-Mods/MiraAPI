@@ -46,13 +46,14 @@ TextAlignmentOptions textAlignment = TextAlignmentOptions.Center)
         return Object.FindObjectsOfType<DeadBody>().FirstOrDefault(body => body.ParentId == id);
     }
 
-    public static string GetSuffix(NumberSuffixes suffix)
+    public static string GetSuffix(MiraNumberSuffixes suffix)
     {
         return suffix switch
         {
-            NumberSuffixes.None => string.Empty,
-            NumberSuffixes.Multiplier => "x",
-            NumberSuffixes.Seconds => "s",
+            MiraNumberSuffixes.None => string.Empty,
+            MiraNumberSuffixes.Multiplier => "x",
+            MiraNumberSuffixes.Seconds => "s",
+            MiraNumberSuffixes.Percent => "%",
             _ => string.Empty
         };
     }
