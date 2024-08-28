@@ -1,7 +1,5 @@
 ﻿using MiraAPI.Modifiers.Types;
-using MiraAPI.Networking;
 using MiraAPI.Utilities;
-using Reactor.Networking.Attributes;
 using Reactor.Utilities;
 using Reactor.Utilities.Attributes;
 using System;
@@ -54,7 +52,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
         var filteredModifiers = ActiveModifiers.Where(mod => !mod.HideOnUi);
 
         var baseModifiers = filteredModifiers as BaseModifier[] ?? filteredModifiers.ToArray();
-        
+
         if (player.AmOwner && baseModifiers.Any())
         {
             var stringBuild = new StringBuilder();
@@ -74,76 +72,111 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
         }
     }
 
-    public static void RemoveModifier(PlayerControl target, uint modifierId)
+    public void RemoveModifier(Type type)
     {
-        if (!ModifierManager.IdToTypeModifiers.TryGetValue(modifierId, out var type))
-        {
-            Logger<MiraApiPlugin>.Error($"Cannot remove modifier with id {modifierId} because it is not registered.");
-            return;
-        }
-
-        var modifierComponent = target.GetModifierComponent();
-
-        var modifier = modifierComponent?.ActiveModifiers.Find(x => x.GetType() == type);
+        var modifier = ActiveModifiers.Find(x => x.GetType() == type);
 
         if (modifier is null)
         {
             Logger<MiraApiPlugin>.Error($"Cannot remove modifier {type.Name} because it is not active.");
             return;
         }
+        
+        RemoveModifier(modifier);
+    }
 
+    public void RemoveModifier<T>() where T : BaseModifier
+    {
+        RemoveModifier(typeof(T));
+    }
+
+    public void RemoveModifier(uint modifierId)
+    {
+        var modifier = ActiveModifiers.Find(x => x.ModifierId == modifierId);
+
+        if (modifier is null)
+        {
+            Logger<MiraApiPlugin>.Error($"Cannot remove modifier with id {modifierId} because it is not active.");
+            return;
+        }
+        
+        RemoveModifier(modifier);
+    }
+
+    public void RemoveModifier(BaseModifier modifier)
+    {
+        if (!ActiveModifiers.Contains(modifier))
+        {
+            Logger<MiraApiPlugin>.Error($"Cannot remove modifier {modifier.ModifierName} because it is not active on this player.");
+            return;
+        }
+        
         modifier.OnDeactivate();
-        modifierComponent.ActiveModifiers.Remove(modifier);
+        ActiveModifiers.Remove(modifier);
 
-        if (target.AmOwner)
+        if (player.AmOwner)
         {
             HudManager.Instance.SetHudActive(true);
         }
     }
 
-    public static void AddModifier(PlayerControl target, uint modifierId)
+    public BaseModifier AddModifier(BaseModifier modifier)
     {
-        if (!ModifierManager.IdToTypeModifiers.TryGetValue(modifierId, out var type))
+        if (ActiveModifiers.Contains(modifier))
         {
-            Logger<MiraApiPlugin>.Error($"Cannot add modifier with id {modifierId} because it is not registered.");
-            return;
+            Logger<MiraApiPlugin>.Error($"Player already has modifier with id {modifier.ModifierId}!");
+            return null;
+        }
+        
+        ActiveModifiers.Add(modifier);
+        modifier.Player = player;
+        modifier.ModifierId = ModifierManager.TypeToIdModifiers[modifier.GetType()];
+        modifier.OnActivate();
+
+        if (!player.AmOwner)
+        {
+            return modifier;
         }
 
-        if (target.HasModifier(modifierId))
+        if (modifier is TimedModifier { AutoStart: true } timer)
+        {
+            timer.StartTimer();
+        }
+
+        HudManager.Instance.SetHudActive(true);
+
+        return modifier;
+    }
+
+    public BaseModifier AddModifier(Type type)
+    {
+        if (!ModifierManager.TypeToIdModifiers.TryGetValue(type, out var modifierId))
+        {
+            Logger<MiraApiPlugin>.Error($"Cannot add modifier {type.Name} because it is not registered.");
+            return null;
+        }
+
+        if (ActiveModifiers.Find(x=>x.ModifierId == modifierId) != null)
         {
             Logger<MiraApiPlugin>.Error($"Player already has modifier with id {modifierId}!");
-            return;
+            return null;
         }
 
         var modifier = (BaseModifier)Activator.CreateInstance(type);
 
-        var modifierComponent = target.GetModifierComponent();
-
         if (modifier is null)
         {
             Logger<MiraApiPlugin>.Error($"Cannot add modifier {type.Name} because it is null.");
-            return;
+            return null;
         }
 
-        modifierComponent.ActiveModifiers.Add(modifier);
-        modifier.Player = modifierComponent.player;
-        modifier.ModifierId = modifierId;
-        modifier.OnActivate();
-
-        if (target.AmOwner)
-        {
-            if (modifier is TimedModifier { AutoStart: true } timer)
-            {
-                timer.StartTimer();
-            }
-
-            HudManager.Instance.SetHudActive(true);
-        }
+        AddModifier(modifier);
+        
+        return modifier;
     }
 
-    [MethodRpc((uint)MiraRpc.RemoveModifier)]
-    public static void RpcRemoveModifier(PlayerControl target, uint modifierId) => RemoveModifier(target, modifierId);
-
-    [MethodRpc((uint)MiraRpc.AddModifier)]
-    public static void RpcAddModifier(PlayerControl target, uint modifierId) => AddModifier(target, modifierId);
+    public T AddModifier<T>() where T : BaseModifier
+    {
+        return AddModifier(typeof(T)) as T;
+    }
 }

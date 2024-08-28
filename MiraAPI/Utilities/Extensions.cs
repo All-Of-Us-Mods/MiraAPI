@@ -6,6 +6,7 @@ using MiraAPI.Modifiers;
 using Reactor.Utilities;
 using System.Linq;
 using MiraAPI.Networking;
+using Reactor.Networking.Attributes;
 using UnityEngine;
 
 namespace MiraAPI.Utilities;
@@ -71,9 +72,22 @@ public static class Extensions
         return ModdedOptionsManager.ModdedOptions.Values.Any(opt => opt.OptionBehaviour && opt.OptionBehaviour.Equals(optionBehaviour));
     }
 
+    public static readonly Dictionary<PlayerControl, ModifierComponent> ModifierComponents = new();
+    
     public static ModifierComponent? GetModifierComponent(this PlayerControl player)
     {
-        return player.GetComponent<ModifierComponent>();
+        if (ModifierComponents.TryGetValue(player, out var component))
+        {
+            return component;
+        }
+        
+        component = player.GetComponent<ModifierComponent>();
+        if (component)
+        {
+            ModifierComponents[player] = component;
+        }
+
+        return component;
     }
 
     public static List<T> Randomize<T>(this List<T> list)
@@ -88,28 +102,52 @@ public static class Extensions
         }
         return randomizedList;
     }
-
+    
+    public static T? GetModifier<T>(this PlayerControl? player) where T : BaseModifier
+    {
+        return player?.GetModifierComponent()?.ActiveModifiers.Find(x => x is T) as T;
+    }
+    
     public static bool HasModifier<T>(this PlayerControl? player) where T : BaseModifier
     {
         return player?.GetModifierComponent() != null && player.GetModifierComponent()!.ActiveModifiers.Exists(x => x is T);
     }
+    
     public static bool HasModifier(this PlayerControl? player, uint id)
     {
         return player?.GetModifierComponent() != null && player.GetModifierComponent()!.ActiveModifiers.Exists(x => x.ModifierId == id);
     }
 
-    public static void AddModifier<T>(this PlayerControl player) where T : BaseModifier
+    [MethodRpc((uint)MiraRpc.RemoveModifier)]
+    public static void RpcRemoveModifier(this PlayerControl target, uint modifierId)
     {
-        if (!ModifierManager.TypeToIdModifiers.TryGetValue(typeof(T), out var id))
-        {
-            Logger<MiraApiPlugin>.Error($"Cannot add modifier {typeof(T).Name} because it is not registered.");
-            return;
-        }
-
-        ModifierComponent.RpcAddModifier(player, id);
+        target.GetModifierComponent()?.RemoveModifier(modifierId);
     }
 
-    public static void RemoveModifier<T>(this PlayerControl player) where T : BaseModifier
+    [MethodRpc((uint)MiraRpc.AddModifier)]
+    public static BaseModifier? RpcAddModifier(this PlayerControl target, uint modifierId)
+    {
+        if (ModifierManager.IdToTypeModifiers.TryGetValue(modifierId, out var type))
+        {
+            return target.GetModifierComponent()?.AddModifier(type);
+        }
+
+        Logger<MiraApiPlugin>.Error($"Cannot add modifier with id {modifierId} because it is not registered.");
+        return null;
+    }
+
+    public static void RpcAddModifier<T>(this PlayerControl player) where T : BaseModifier
+    {
+        if (!ModifierManager.TypeToIdModifiers.TryGetValue(typeof(T), out var id))
+        {
+            Logger<MiraApiPlugin>.Error($"Cannot add modifier {typeof(T).Name} because it is not registered.");
+            return;
+        }
+        
+        player.RpcAddModifier(id);
+    }
+
+    public static void RpcRemoveModifier<T>(this PlayerControl player) where T : BaseModifier
     {
         if (!ModifierManager.TypeToIdModifiers.TryGetValue(typeof(T), out var id))
         {
@@ -117,7 +155,7 @@ public static class Extensions
             return;
         }
 
-        ModifierComponent.RpcRemoveModifier(player, id);
+        player.RpcAddModifier(id);
     }
 
     public static Color DarkenColor(this Color color)

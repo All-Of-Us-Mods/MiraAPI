@@ -18,7 +18,7 @@ public class FreezeButton : CustomActionButton<PlayerControl>
 
     protected override void OnClick()
     {
-        Target.AddModifier<FreezeModifier>();
+        Target?.RpcAddModifier<FreezeModifier>();
     }
 
     public override PlayerControl GetTarget()
