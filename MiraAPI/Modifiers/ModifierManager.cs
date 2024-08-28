@@ -52,16 +52,13 @@ public static class ModifierManager
                 continue;
             }
             
-            if (!plrs.Any(x=>mod.IsModifierValidOn(x.Data.Role)) ||
-                !plrs.Any(x=>x.Data.Role is ICustomRole customRole && customRole.IsModifierApplicable(mod)))
+            if (!plrs.Any(x=>IsGameModifierValid(x, mod, modifier.Key)))
             {
                 Logger<MiraApiPlugin>.Warning("No players are valid for modifier: " + mod.ModifierName);
                 continue;
             }
             
-            var maxCount = Math.Min(
-                plrs.Count(x=>mod.IsModifierValidOn(x.Data.Role)), 
-                plrs.Count(x=>x.Data.Role is ICustomRole role && role.IsModifierApplicable(mod)));
+            var maxCount = plrs.Count(x=>IsGameModifierValid(x, mod, modifier.Key));
 
             var num = Math.Clamp(mod.GetAmountPerGame(), 0, maxCount);
             var chance = mod.GetAssignmentChance();
@@ -95,10 +92,7 @@ public static class ModifierManager
                 continue;
             }
             
-            if (plrs.Where(x=> 
-                    (x.Data.Role is not ICustomRole role || role.IsModifierApplicable(mod) ) && 
-                    mod.IsModifierValidOn(x.Data.Role))
-                .All(x=>x.HasModifier(id)))
+            if (!plrs.Any(x=>IsGameModifierValid(x, mod, id)))
             {
                 shuffledModifiers.RemoveAt(0);
                 continue;
@@ -106,12 +100,7 @@ public static class ModifierManager
             
             var plr = plrs.Random();
 
-            if (plr.Data.Role is not ICustomRole modRole || !modRole.IsModifierApplicable(mod))
-            {
-                continue;
-            }
-
-            if (plr.HasModifier(id) || !mod.IsModifierValidOn(plr.Data.Role))
+            if (!IsGameModifierValid(plr, mod, id))
             {
                 continue;
             }
@@ -121,6 +110,13 @@ public static class ModifierManager
         }
     }
 
+    private static bool IsGameModifierValid(PlayerControl player, GameModifier modifier, uint modifierId)
+    {
+        return (player.Data.Role is not ICustomRole role || role.IsModifierApplicable(modifier)) &&
+               modifier.IsModifierValidOn(player.Data.Role) &&
+               !player.HasModifier(modifierId);
+    }
+    
     internal static void SyncAllModifiers(int targetId = -1)
     {
         var data = new List<NetData>();

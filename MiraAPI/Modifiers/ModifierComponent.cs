@@ -84,7 +84,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
 
         var modifierComponent = target.GetModifierComponent();
 
-        var modifier = modifierComponent.ActiveModifiers.Find(x => x.GetType() == type);
+        var modifier = modifierComponent?.ActiveModifiers.Find(x => x.GetType() == type);
 
         if (modifier is null)
         {
