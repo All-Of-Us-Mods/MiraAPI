@@ -13,11 +13,11 @@ public class MiraDebugWindow(IntPtr ptr) : MonoBehaviour(ptr)
     {
         if (GUILayout.Button("Test modifier"))
         {
-            PlayerControl.LocalPlayer.AddModifier<ModifierTimerExample>();
+            //PlayerControl.LocalPlayer.AddModifier<ModifierTimerExample>();
         }
         if (GUILayout.Button("Remove modifier"))
         {
-            PlayerControl.LocalPlayer.RemoveModifier<ModifierTimerExample>();
+            //PlayerControl.LocalPlayer.RemoveModifier<ModifierTimerExample>();
         }
     })
     {
