@@ -1,0 +1,26 @@
+name: CI
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.x
+
+      - name: Run the Cake script
+        uses: cake-build/cake-action@v2
+        with:
+          verbosity: Diagnostic
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: MiraAPI.dll
+          path: MiraAPI/bin/Release/net6.0/MiraAPI.dll

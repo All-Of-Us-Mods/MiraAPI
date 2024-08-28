@@ -15,7 +15,7 @@ public class ModifierTimerExample : TimedModifier
 
     public override void OnTimerComplete()
     {
-        Player.SetColor((byte)_rand.Next(0, Palette.PlayerColors.Count));
+        Player.RpcSetColor((byte)_rand.Next(0, Palette.PlayerColors.Count));
         StartTimer();
     }
 }

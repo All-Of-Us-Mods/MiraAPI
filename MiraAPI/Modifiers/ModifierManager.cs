@@ -6,6 +6,7 @@ using Reactor.Networking.Rpc;
 using Reactor.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Random = System.Random;
 
 namespace MiraAPI.Modifiers;
@@ -40,7 +41,7 @@ public static class ModifierManager
 
         List<uint> filteredModifiers = [];
 
-        foreach (var modifier in IdToTypeModifiers)
+        foreach (var modifier in IdToTypeModifiers.Where(pair => pair.Value.GetType() == typeof(GameModifier)))
         {
             var mod = (GameModifier)Activator.CreateInstance(modifier.Value);
             var num = mod.GetAmountPerGame();
@@ -92,22 +93,12 @@ public static class ModifierManager
     {
         var data = new List<NetData>();
 
-        if (targetId == -1)
+        foreach (var player in GameData.Instance.AllPlayers)
         {
-            foreach (var player in GameData.Instance.AllPlayers)
-            {
-                data.Add(GetPlayerModifiers(player.Object));
-            }
-        }
-        else
-        {
-            var player = GameData.Instance.GetPlayerById((byte)targetId).Object;
-
-            data.Add(GetPlayerModifiers(player));
+            data.Add(GetPlayerModifiers(player.Object));
         }
 
-
-        Rpc<SyncModifiersRpc>.Instance.Send(PlayerControl.LocalPlayer, data.ToArray(), true);
+        Rpc<SyncModifiersRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.ToArray());
     }
 
     internal static void HandleSyncModifiers(NetData[] data)
