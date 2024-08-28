@@ -66,12 +66,12 @@ public abstract class ModdedOption<T> : IModdedOption
 
         if (AmongUsClient.Instance.AmHost)
         {
+            if (ParentMod?.GetConfigFile().TryGetEntry<T>(ConfigDefinition, out var entry) == true)
+            {
+                entry.Value = Value;
+            }
+            
             Rpc<SyncOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, [GetNetData()], true);
-        }
-
-        if (ParentMod?.GetConfigFile().TryGetEntry<T>(ConfigDefinition, out var entry) == true)
-        {
-            entry.Value = Value;
         }
 
         OnValueChanged(newValue);

@@ -172,6 +172,16 @@ public static class CustomRoleManager
 
     internal static void HandleSyncRoleOptions(NetData[] data)
     {
+        // necessary to disable then re-enable this setting
+        // we dont know how other plugins handle their configs
+        // this way, all the options are saved at once, instead of one by one
+        var oldConfigSetting = new Dictionary<MiraPluginInfo, bool>();
+        foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins.Values)
+        {
+            oldConfigSetting.Add(plugin, plugin.PluginConfig.SaveOnConfigSet);
+            plugin.PluginConfig.SaveOnConfigSet = false;
+        }
+        
         foreach (var netData in data)
         {
             if (!CustomRoles.TryGetValue((ushort)netData.Id, out var role))
@@ -204,6 +214,12 @@ public static class CustomRoleManager
             {
                 Logger<MiraApiPlugin>.Error(e);
             }
+        }
+        
+        foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins.Values)
+        {
+            plugin.PluginConfig.Save();
+            plugin.PluginConfig.SaveOnConfigSet = oldConfigSetting[plugin];
         }
     }
 }
