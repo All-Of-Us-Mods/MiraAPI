@@ -180,6 +180,15 @@ public class MyOptionsGroup : AbstractOptionGroup
 
 An example can be found [here](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/Options/Roles/CustomRoleSettings.cs).
 
+## Custom Murders
+Mira API provides it's own implementation for murders. Our implementation allows for more customization on kills, and helps bypass server checks.
+You can use `PlayerControl.RpcCustomMurder` to perform a networked custom murder, or `PlayerControl.CustomMurder` to normally perform a custom murder.
+For example: 
+```cs
+PlayerControl.LocalPlayer.RpcCustomMurder(Target, createDeadBody: false, teleportMurderer: false, playKillSound: false, resetKillTimer: false, showKillAnim: false);
+```
+This will kill a player without creating a dead body and without teleporting the murderer.
+
 ## Buttons
 
 Mira API provides a simple interface for adding ability buttons to the game. There is only 2 steps:
