@@ -101,9 +101,9 @@ public abstract class CustomActionButton
     }
 
     /// <summary>
-    /// A utility function to reset the cooldown of the button.
+    /// A utility function to reset the cooldown and/or effect of the button.
     /// </summary>
-    public void ResetCooldown()
+    public void ResetCooldownAndOrEffect()
     {
         Timer = Cooldown;
         if (EffectActive)
@@ -154,7 +154,8 @@ public abstract class CustomActionButton
     public abstract bool Enabled(RoleBehaviour? role);
 
     /// <summary>
-    /// Given that there is an effect, this method that runs when the effect ends.
+    /// Given that there is an effect, this method runs when the effect ends.
+    /// <br /> <br /> THIS IS A CALLBACK METHOD! Use <see cref="ResetCooldownAndOrEffect" /> if you want to end the effect.
     /// </summary>
     public virtual void OnEffectEnd() { }
 

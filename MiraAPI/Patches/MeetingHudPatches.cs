@@ -12,7 +12,7 @@ public static class MeetingHudPatches
     {
         foreach (var customActionButton in CustomButtonManager.CustomButtons)
         {
-            customActionButton.ResetCooldown();
+            customActionButton.ResetCooldownAndOrEffect();
         }
     }
 }
