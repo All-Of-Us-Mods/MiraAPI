@@ -1,4 +1,5 @@
 ﻿using MiraAPI.Roles;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TMPro;
@@ -12,6 +13,62 @@ public static class Helpers
     public static PlainShipRoom GetRoom(Vector3 pos)
     {
         return ShipStatus.Instance.AllRooms.ToList().Find(room => room.roomArea.OverlapPoint(pos));
+    }
+
+    public static List<PlayerControl> GetClosestPlayers(PlayerControl source, float distance = 2f, bool ignoreColliders = true, bool ignoreSource = true)
+    {
+        if (!ShipStatus.Instance)
+        {
+            return null;
+        }
+
+        Vector2 myPos = source.GetTruePosition();
+        List<PlayerControl> players = GetClosestPlayers(myPos, distance, ignoreColliders);
+
+        return ignoreSource ? players.Where(plr => plr.PlayerId != source.PlayerId).ToList() : players;
+    }
+
+    public static List<PlayerControl> GetClosestPlayers(Vector2 source, float distance = 2f, bool ignoreColliders = true)
+    {
+        if (!ShipStatus.Instance)
+        {
+            return null;
+        }
+
+        List<PlayerControl> outputList = new List<PlayerControl>();
+        outputList.Clear();
+        List<NetworkedPlayerInfo> allPlayers = GameData.Instance.AllPlayers.ToArray().ToList();
+
+        for (int i = 0; i < allPlayers.Count; i++)
+        {
+            NetworkedPlayerInfo networkedPlayerInfo = allPlayers[i];
+
+            PlayerControl @object = networkedPlayerInfo.Object;
+            if (@object && @object.Collider.enabled)
+            {
+                Vector2 vector = @object.GetTruePosition() - source;
+                float magnitude = vector.magnitude;
+                if (magnitude <= distance && (ignoreColliders || !PhysicsHelpers.AnyNonTriggersBetween(source, vector.normalized, magnitude, Constants.ShipAndObjectsMask)))
+                {
+                    outputList.Add(@object);
+                }
+            }
+        }
+        outputList.Sort(delegate (PlayerControl a, PlayerControl b)
+        {
+            float magnitude2 = (a.GetTruePosition() - source).magnitude;
+            float magnitude3 = (b.GetTruePosition() - source).magnitude;
+            if (magnitude2 > magnitude3)
+            {
+                return 1;
+            }
+            if (magnitude2 < magnitude3)
+            {
+                return -1;
+            }
+            return 0;
+        });
+        return outputList;
     }
 
     public static TextMeshPro CreateTextLabel(string name, Transform parent,
