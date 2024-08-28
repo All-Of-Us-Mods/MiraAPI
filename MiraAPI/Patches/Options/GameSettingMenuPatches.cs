@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿#nullable enable
+using HarmonyLib;
 using MiraAPI.PluginLoading;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities.Extensions;
@@ -17,9 +18,9 @@ public static class GameSettingMenuPatches
 {
     public static int CurrentSelectedMod { get; private set; }
 
-    public static MiraPluginInfo SelectedMod { get; private set; }
+    public static MiraPluginInfo? SelectedMod { get; private set; }
 
-    private static TextMeshPro _text;
+    private static TextMeshPro? _text;
 
     private static Vector3 _roleBtnOgPos;
 
@@ -80,12 +81,12 @@ public static class GameSettingMenuPatches
 
     private static void UpdateText(GameSettingMenu menu, GameOptionsMenu settings, RolesSettingsMenu roles)
     {
-        if (CurrentSelectedMod == 0)
+        if (_text is not null && CurrentSelectedMod == 0)
         {
             _text.text = "Default";
             _text.fontSizeMax = 3.2f;
         }
-        else
+        else if (_text is not null)
         {
             _text.fontSizeMax = 2.3f;
             SelectedMod = MiraPluginManager.Instance.RegisteredPlugins.ElementAt(CurrentSelectedMod - 1).Value;
@@ -153,7 +154,7 @@ public static class GameSettingMenuPatches
             roles.scrollBar.ScrollToTop();
         }
 
-        if (settings?.Children != null && SelectedMod?.OptionGroups.Count != 0)
+        if (settings.Children != null && SelectedMod?.OptionGroups.Count != 0)
         {
             foreach (var child in settings.Children)
             {

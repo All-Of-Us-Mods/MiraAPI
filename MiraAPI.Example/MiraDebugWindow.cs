@@ -1,8 +1,8 @@
-﻿using MiraAPI.Utilities;
+﻿using MiraAPI.Example.Modifiers;
+using MiraAPI.Utilities;
 using Reactor.Utilities.Attributes;
 using Reactor.Utilities.ImGui;
 using System;
-using MiraAPI.Example.Modifiers;
 using UnityEngine;
 
 namespace MiraAPI.Example;
@@ -13,11 +13,11 @@ public class MiraDebugWindow(IntPtr ptr) : MonoBehaviour(ptr)
     {
         if (GUILayout.Button("Test modifier"))
         {
-            PlayerControl.LocalPlayer.AddModifier<ModifierTimerExample>();
+            //PlayerControl.LocalPlayer.AddModifier<ModifierTimerExample>();
         }
         if (GUILayout.Button("Remove modifier"))
         {
-            PlayerControl.LocalPlayer.RemoveModifier<ModifierTimerExample>();
+            //PlayerControl.LocalPlayer.RemoveModifier<ModifierTimerExample>();
         }
     })
     {

@@ -7,6 +7,7 @@ using Reactor.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Reactor.Utilities;
 using Random = System.Random;
 
 namespace MiraAPI.Modifiers;
@@ -41,12 +42,27 @@ public static class ModifierManager
 
         List<uint> filteredModifiers = [];
 
-        foreach (var modifier in IdToTypeModifiers.Where(pair => pair.Value.GetType() == typeof(GameModifier)))
+        foreach (var modifier in IdToTypeModifiers.Where(pair => pair.Value.IsAssignableTo(typeof(GameModifier))))
         {
             var mod = (GameModifier)Activator.CreateInstance(modifier.Value);
-            var num = mod.GetAmountPerGame();
-            var chance = mod.GetAssignmentChance();
 
+            if (mod is null)
+            {
+                Logger<MiraApiPlugin>.Error($"Failed to create instance of {modifier.Value.Name}");
+                continue;
+            }
+            
+            if (!plrs.Any(x=>IsGameModifierValid(x, mod, modifier.Key)))
+            {
+                Logger<MiraApiPlugin>.Warning("No players are valid for modifier: " + mod.ModifierName);
+                continue;
+            }
+            
+            var maxCount = plrs.Count(x=>IsGameModifierValid(x, mod, modifier.Key));
+
+            var num = Math.Clamp(mod.GetAmountPerGame(), 0, maxCount);
+            var chance = mod.GetAssignmentChance();
+            
             for (var i = 0; i < num; i++)
             {
                 var randomNum = rand.Next(100);
@@ -63,23 +79,28 @@ public static class ModifierManager
         {
             shuffledModifiers = shuffledModifiers.GetRange(0, plrs.Count);
         }
-
+        
         while (shuffledModifiers.Count > 0)
         {
             var id = shuffledModifiers[0];
 
             var mod = (GameModifier)Activator.CreateInstance(IdToTypeModifiers[id]);
+            
+            if (mod is null)
+            {
+                Logger<MiraApiPlugin>.Error($"Failed to create instance of {IdToTypeModifiers[id].Name}");
+                continue;
+            }
+            
+            if (!plrs.Any(x=>IsGameModifierValid(x, mod, id)))
+            {
+                shuffledModifiers.RemoveAt(0);
+                continue;
+            }
+            
             var plr = plrs.Random();
 
-            if (plr.Data.Role is ICustomRole modRole)
-            {
-                if (!modRole.IsModifierApplicable(mod))
-                {
-                    continue;
-                }
-            }
-
-            if (plr.HasModifier(id) || mod.IsModifierValidOn(plr.Data.Role))
+            if (!IsGameModifierValid(plr, mod, id))
             {
                 continue;
             }
@@ -89,6 +110,13 @@ public static class ModifierManager
         }
     }
 
+    private static bool IsGameModifierValid(PlayerControl player, GameModifier modifier, uint modifierId)
+    {
+        return (player.Data.Role is not ICustomRole role || role.IsModifierApplicable(modifier)) &&
+               modifier.IsModifierValidOn(player.Data.Role) &&
+               !player.HasModifier(modifierId);
+    }
+    
     internal static void SyncAllModifiers(int targetId = -1)
     {
         var data = new List<NetData>();

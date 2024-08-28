@@ -6,6 +6,7 @@ public abstract class TimedModifier : BaseModifier
 {
     public abstract float Duration { get; }
     public virtual bool AutoStart => false;
+    public virtual bool RemoveOnComplete => true;
     public abstract void OnTimerComplete();
 
     public bool TimerActive { get; protected set; }
@@ -28,6 +29,11 @@ public abstract class TimedModifier : BaseModifier
             TimerActive = false;
             TimeRemaining = Duration;
             OnTimerComplete();
+
+            if (RemoveOnComplete)
+            {
+                ModifierComponent.RpcRemoveModifier(Player, ModifierId);
+            }
         }
     }
 

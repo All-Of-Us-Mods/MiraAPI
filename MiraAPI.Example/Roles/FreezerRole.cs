@@ -5,12 +5,12 @@ using UnityEngine;
 namespace MiraAPI.Example.Roles;
 
 [RegisterCustomRole]
-public class CustomRole : ImpostorRole, ICustomRole
+public class FreezerRole : ImpostorRole, ICustomRole
 {
-    public string RoleName => "Custom Role";
-    public string RoleLongDescription => "Eliminate everyone with your special ability!";
+    public string RoleName => "Freezer";
+    public string RoleLongDescription => "Freeze another player for a duration of time.";
     public string RoleDescription => RoleLongDescription;
-    public Color RoleColor => Palette.Black;
+    public Color RoleColor => Palette.Blue;
     public ModdedRoleTeams Team => ModdedRoleTeams.Impostor;
     public LoadableAsset<Sprite> OptionsScreenshot => ExampleAssets.Banner;
 
