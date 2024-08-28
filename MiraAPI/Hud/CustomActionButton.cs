@@ -271,7 +271,7 @@ public abstract class CustomActionButton<T> : CustomActionButton where T : MonoB
     /// <summary>
     /// Determines if the target object is valid.
     /// </summary>
-    public virtual bool IsTargetValid(T target)
+    public virtual bool IsTargetValid(T? target)
     {
         return target;
     }
@@ -296,7 +296,7 @@ public abstract class CustomActionButton<T> : CustomActionButton where T : MonoB
             SetOutline(false);
         }
 
-        Target = newTarget;
+        Target = IsTargetValid(newTarget) ? newTarget : null;
         SetOutline(true);
         
         return base.CanUse() && Target;
