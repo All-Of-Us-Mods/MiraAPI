@@ -57,6 +57,8 @@ Roles are very simple in Mira API. There are 3 things you need to do to create a
 2. Implement the `ICustomRole` interface from Mira API.
 3. Add the `[RegisterCustomRole]` attribute to the class.
 
+**Disclaimer: Make sure your plugin class has the following attribute `[ReactorModFlags(ModFlags.RequireOnAllClients)]` or else your roles will not register correctly.**
+
 Note: For step 1, if you are making neutral roles, choose either `CrewmateRole` or `ImpostorRole` as the base depending on if it can kill or not! 
 
 Mira API handles everything else, from adding the proper options to the settings menu, to managing the role assignment at the start of the game. There are no extra steps on the developer's part.
