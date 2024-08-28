@@ -205,5 +205,10 @@ public static class CustomRoleManager
                 Logger<MiraApiPlugin>.Error(e);
             }
         }
+
+        if (LobbyInfoPane.Instance)
+        {
+            LobbyInfoPane.Instance.RefreshPane();
+        }
     }
 }

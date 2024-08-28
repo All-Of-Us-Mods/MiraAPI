@@ -129,6 +129,11 @@ public static class ModdedOptionsManager
             
             option.HandleNetData(netData.Data);
         }
+
+        if (LobbyInfoPane.Instance)
+        {
+            LobbyInfoPane.Instance.RefreshPane();
+        }
     }
         
         
