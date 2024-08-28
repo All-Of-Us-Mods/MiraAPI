@@ -275,14 +275,11 @@ public abstract class CustomActionButton<T> : CustomActionButton where T : MonoB
     {
         return target;
     }
-    
+
     /// <summary>
     /// The method used to get the target object.
     /// </summary>
-    public virtual T? GetTarget()
-    {
-        return PlayerControl.LocalPlayer.GetNearestObjectOfType<T>(Distance, ColliderTag, IsTargetValid);
-    }
+    public abstract T? GetTarget();
 
     /// <summary>
     /// Sets the outline of the target object.
