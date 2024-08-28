@@ -221,5 +221,10 @@ public static class CustomRoleManager
             plugin.PluginConfig.Save();
             plugin.PluginConfig.SaveOnConfigSet = oldConfigSetting[plugin];
         }
+        
+        if (LobbyInfoPane.Instance)
+        {
+            LobbyInfoPane.Instance.RefreshPane();
+        }
     }
 }

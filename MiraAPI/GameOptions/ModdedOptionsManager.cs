@@ -143,6 +143,11 @@ public static class ModdedOptionsManager
             plugin.PluginConfig.Save();
             plugin.PluginConfig.SaveOnConfigSet = true;
         }
+        
+        if (LobbyInfoPane.Instance)
+        {
+            LobbyInfoPane.Instance.RefreshPane();
+        }
     }
         
         

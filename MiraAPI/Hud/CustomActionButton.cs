@@ -101,9 +101,9 @@ public abstract class CustomActionButton
     }
 
     /// <summary>
-    /// A utility function to reset the cooldown of the button.
+    /// A utility function to reset the cooldown and/or effect of the button.
     /// </summary>
-    public void ResetCooldown()
+    public void ResetCooldownAndOrEffect()
     {
         Timer = Cooldown;
         if (EffectActive)
@@ -136,13 +136,13 @@ public abstract class CustomActionButton
     }
 
     /// <summary>
-    /// A utility function that runs with the local PlayerControl's FixedUpdate.
+    /// A utility function that runs with the local PlayerControl's FixedUpdate if the button is enabled.
     /// </summary>
     /// <param name="playerControl">the local PlayerControl</param>
     protected virtual void FixedUpdate(PlayerControl playerControl) { }
 
     /// <summary>
-    /// Runs when the button is clicked.
+    /// Callback method for the button click event.
     /// </summary>
     protected abstract void OnClick();
 
@@ -154,7 +154,8 @@ public abstract class CustomActionButton
     public abstract bool Enabled(RoleBehaviour? role);
 
     /// <summary>
-    /// Given that there is an effect, this method that runs when the effect ends.
+    /// Given that there is an effect, this method runs when the effect ends.
+    /// <br /> <br /> THIS IS A CALLBACK METHOD! Use <see cref="ResetCooldownAndOrEffect" /> if you want to end the effect.
     /// </summary>
     public virtual void OnEffectEnd() { }
 
@@ -270,7 +271,7 @@ public abstract class CustomActionButton<T> : CustomActionButton where T : MonoB
     /// <summary>
     /// Determines if the target object is valid.
     /// </summary>
-    public virtual bool IsTargetValid(T target)
+    public virtual bool IsTargetValid(T? target)
     {
         return target;
     }
@@ -278,10 +279,7 @@ public abstract class CustomActionButton<T> : CustomActionButton where T : MonoB
     /// <summary>
     /// The method used to get the target object.
     /// </summary>
-    public virtual T? GetTarget()
-    {
-        return PlayerControl.LocalPlayer.GetNearestObjectOfType<T>(Distance, ColliderTag, IsTargetValid);
-    }
+    public abstract T? GetTarget();
 
     /// <summary>
     /// Sets the outline of the target object.
@@ -298,7 +296,7 @@ public abstract class CustomActionButton<T> : CustomActionButton where T : MonoB
             SetOutline(false);
         }
 
-        Target = newTarget;
+        Target = IsTargetValid(newTarget) ? newTarget : null;
         SetOutline(true);
 
         return base.CanUse() && Target;
