@@ -254,27 +254,28 @@ public static class RoleSettingMenuPatches
         roleOptionSetting.titleText.transform.localPosition = new Vector3(-0.5376f, -0.2923f, 0f);
         roleOptionSetting.titleText.color = customRole.RoleColor.GetAlternateColor();
         roleOptionSetting.titleText.horizontalAlignment = HorizontalAlignmentOptions.Left;
-
-        var newButton = Object.Instantiate(roleOptionSetting.buttons[0], roleOptionSetting.transform);
-        newButton.name = "ConfigButton";
-        newButton.transform.localPosition = new Vector3(0.4473f, -0.3f, -2f);
-        newButton.transform.FindChild("Text_TMP").gameObject.DestroyImmediate();
-        newButton.activeSprites.Destroy();
-
-        var btnRend = newButton.transform.FindChild("ButtonSprite").GetComponent<SpriteRenderer>();
-        btnRend.sprite = MiraAssets.Cog.LoadAsset();
-
-        var passiveButton = newButton.GetComponent<GameOptionButton>();
-        passiveButton.OnClick = new ButtonClickedEvent();
-        passiveButton.interactableColor = btnRend.color = customRole.RoleColor.GetAlternateColor();
-        passiveButton.interactableHoveredColor = Color.white;
-
-        passiveButton.OnClick.AddListener((UnityAction)(() =>
+    
+        if (GameSettingMenuPatches.SelectedMod is null ||
+            GameSettingMenuPatches.SelectedMod.Options.Any(x => x.AdvancedRole != null && x.AdvancedRole.IsInstanceOfType(role)))
         {
-            ChangeTab(role, __instance);
-        }));
+            var newButton = Object.Instantiate(roleOptionSetting.buttons[0], roleOptionSetting.transform);
+            newButton.name = "ConfigButton";
+            newButton.transform.localPosition = new Vector3(0.4473f, -0.3f, -2f);
+            newButton.transform.FindChild("Text_TMP").gameObject.DestroyImmediate();
+            newButton.activeSprites.Destroy();
 
-        if (index < GameSettingMenuPatches.SelectedMod.CustomRoles.Count - 1)
+            var btnRend = newButton.transform.FindChild("ButtonSprite").GetComponent<SpriteRenderer>();
+            btnRend.sprite = MiraAssets.Cog.LoadAsset();
+
+            var passiveButton = newButton.GetComponent<GameOptionButton>();
+            passiveButton.OnClick = new ButtonClickedEvent();
+            passiveButton.interactableColor = btnRend.color = customRole.RoleColor.GetAlternateColor();
+            passiveButton.interactableHoveredColor = Color.white;
+
+            passiveButton.OnClick.AddListener((UnityAction)(() => { ChangeTab(role, __instance); }));
+        }
+
+        if (index < GameSettingMenuPatches.SelectedMod?.CustomRoles.Count - 1)
         {
             yPos += -0.43f;
         }
