@@ -4,15 +4,9 @@ using MiraAPI.Modifiers.Types;
 namespace MiraAPI.Example.Modifiers;
 
 [RegisterModifier]
-public class GameModifierExample : GameModifier
+public class CaptainModifier : GameModifier
 {
-    public override string ModifierName => "Example Game Modifier";
-
-    public override bool CanVent()
-    {
-        return true;
-    }
-
+    public override string ModifierName => "Captain";
     public override int GetAmountPerGame()
     {
         return 1;

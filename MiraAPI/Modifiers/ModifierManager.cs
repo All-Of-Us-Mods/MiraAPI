@@ -41,7 +41,7 @@ public static class ModifierManager
 
         List<uint> filteredModifiers = [];
 
-        foreach (var modifier in IdToTypeModifiers.Where(pair => pair.Value.GetType() == typeof(GameModifier)))
+        foreach (var modifier in IdToTypeModifiers.Where(pair => pair.Value.GetType().IsAssignableTo(typeof(GameModifier))))
         {
             var mod = (GameModifier)Activator.CreateInstance(modifier.Value);
             var num = mod.GetAmountPerGame();

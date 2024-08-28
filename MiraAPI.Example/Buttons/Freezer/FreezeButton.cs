@@ -1,20 +1,24 @@
-﻿using MiraAPI.Hud;
+﻿using MiraAPI.Example.Modifiers.Freezer;
+using MiraAPI.Example.Roles;
+using MiraAPI.Hud;
+using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using UnityEngine;
 
-namespace MiraAPI.Example.Buttons;
+namespace MiraAPI.Example.Buttons.Freezer;
 
-public class ExampleTargetButton : CustomActionButton<PlayerControl>
+[RegisterButton]
+public class FreezeButton : CustomActionButton<PlayerControl>
 {
-    public override string Name => "Shoot";
-    public override float Cooldown => 0f;
+    public override string Name => "Freeze";
+    public override float Cooldown => 5f;
     public override float EffectDuration => 0f;
     public override int MaxUses => 0;
     public override LoadableAsset<Sprite> Sprite => ExampleAssets.ExampleButton;
 
     protected override void OnClick()
     {
-        PlayerControl.LocalPlayer.CmdCheckMurder(Target);
+        Target.AddModifier<FreezeModifier>();
     }
 
     public override PlayerControl GetTarget()
@@ -24,17 +28,17 @@ public class ExampleTargetButton : CustomActionButton<PlayerControl>
 
     public override void SetOutline(bool active)
     {
-        Target?.cosmetics.SetOutline(active, new Il2CppSystem.Nullable<Color>(Color.red));
+        Target?.cosmetics.SetOutline(active, new Il2CppSystem.Nullable<Color>(Palette.Blue));
     }
 
     public override bool IsTargetValid(PlayerControl target)
     {
-        return PlayerControl.LocalPlayer.Data.Role.IsValidTarget(target.Data);
+        return true;
     }
 
     public override bool Enabled(RoleBehaviour role)
     {
-        return role.IsImpostor;
+        return role is FreezerRole;
     }
 
 }

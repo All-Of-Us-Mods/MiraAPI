@@ -1,4 +1,6 @@
-﻿using MiraAPI.Example.Roles;
+﻿using MiraAPI.Example.Options.Roles;
+using MiraAPI.Example.Roles;
+using MiraAPI.GameOptions;
 using MiraAPI.Hud;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities;
@@ -11,9 +13,9 @@ public class TeleportButton : CustomActionButton
 {
     public override string Name => "Teleport";
 
-    public override float Cooldown => 3;
+    public override float Cooldown => OptionGroupSingleton<TeleporterOptions>.Instance.TeleportCooldown;
 
-    public override float EffectDuration => 10;
+    public override float EffectDuration => OptionGroupSingleton<TeleporterOptions>.Instance.TeleportDuration;
 
     public override int MaxUses => 0;
 
@@ -22,7 +24,7 @@ public class TeleportButton : CustomActionButton
 
     public override bool Enabled(RoleBehaviour role)
     {
-        return role is CustomRole;
+        return role is TeleporterRole;
     }
     protected override void OnClick()
     {
@@ -38,12 +40,12 @@ public class TeleportButton : CustomActionButton
     {
         base.FixedUpdate(playerControl);
 
-        if (!HasEffect) return; // this doesnt work...
+        if (!EffectActive) return;
 
-        if (Input.GetKeyDown(KeyCode.Mouse0))
+        if (Input.GetKey(KeyCode.Mouse0))
         {
             playerControl.NetTransform.RpcSnapTo(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-            OnEffectEnd();
+            ResetCooldown();
         }
     }
 
@@ -51,7 +53,7 @@ public class TeleportButton : CustomActionButton
     {
         HudManager.Instance.ShadowQuad.gameObject.SetActive(false);
         IsZoom = true;
-        var zoomDistance = 6;
+        var zoomDistance = OptionGroupSingleton<TeleporterOptions>.Instance.ZoomDistance;
         for (var ft = Camera.main!.orthographicSize; ft < zoomDistance; ft += 0.3f)
         {
             Camera.main.orthographicSize = MeetingHud.Instance ? 3f : ft;

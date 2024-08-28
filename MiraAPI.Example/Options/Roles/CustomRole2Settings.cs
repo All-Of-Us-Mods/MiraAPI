@@ -9,7 +9,7 @@ public class CustomRole2Settings : AbstractOptionGroup
 {
     public override string GroupName => "Custom Role";
 
-    public override Type AdvancedRole => typeof(CustomRole2);
+    public override Type AdvancedRole => typeof(FreezerRole);
 
     [ModdedToggleOption("Teleportation ability")] public bool Teleport { get; set; } = true;
 
