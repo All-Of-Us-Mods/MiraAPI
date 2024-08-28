@@ -45,7 +45,7 @@ public class TeleportButton : CustomActionButton
         if (Input.GetKey(KeyCode.Mouse0))
         {
             playerControl.NetTransform.RpcSnapTo(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-            ResetCooldown();
+            ResetCooldownAndOrEffect();
         }
     }
 
