@@ -7,6 +7,7 @@ using Reactor.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Reactor.Utilities;
 using Random = System.Random;
 
 namespace MiraAPI.Modifiers;
@@ -41,12 +42,30 @@ public static class ModifierManager
 
         List<uint> filteredModifiers = [];
 
-        foreach (var modifier in IdToTypeModifiers.Where(pair => pair.Value.GetType().IsAssignableTo(typeof(GameModifier))))
+        foreach (var modifier in IdToTypeModifiers.Where(pair => pair.Value.IsAssignableTo(typeof(GameModifier))))
         {
             var mod = (GameModifier)Activator.CreateInstance(modifier.Value);
-            var num = mod.GetAmountPerGame();
-            var chance = mod.GetAssignmentChance();
 
+            if (mod is null)
+            {
+                Logger<MiraApiPlugin>.Error($"Failed to create instance of {modifier.Value.Name}");
+                continue;
+            }
+            
+            if (!plrs.Any(x=>mod.IsModifierValidOn(x.Data.Role)) ||
+                !plrs.Any(x=>x.Data.Role is ICustomRole customRole && customRole.IsModifierApplicable(mod)))
+            {
+                Logger<MiraApiPlugin>.Warning("No players are valid for modifier: " + mod.ModifierName);
+                continue;
+            }
+            
+            var maxCount = Math.Min(
+                plrs.Count(x=>mod.IsModifierValidOn(x.Data.Role)), 
+                plrs.Count(x=>x.Data.Role is ICustomRole role && role.IsModifierApplicable(mod)));
+
+            var num = Math.Clamp(mod.GetAmountPerGame(), 0, maxCount);
+            var chance = mod.GetAssignmentChance();
+            
             for (var i = 0; i < num; i++)
             {
                 var randomNum = rand.Next(100);
@@ -63,23 +82,36 @@ public static class ModifierManager
         {
             shuffledModifiers = shuffledModifiers.GetRange(0, plrs.Count);
         }
-
+        
         while (shuffledModifiers.Count > 0)
         {
             var id = shuffledModifiers[0];
 
             var mod = (GameModifier)Activator.CreateInstance(IdToTypeModifiers[id]);
+            
+            if (mod is null)
+            {
+                Logger<MiraApiPlugin>.Error($"Failed to create instance of {IdToTypeModifiers[id].Name}");
+                continue;
+            }
+            
+            if (plrs.Where(x=> 
+                    (x.Data.Role is not ICustomRole role || role.IsModifierApplicable(mod) ) && 
+                    mod.IsModifierValidOn(x.Data.Role))
+                .All(x=>x.HasModifier(id)))
+            {
+                shuffledModifiers.RemoveAt(0);
+                continue;
+            }
+            
             var plr = plrs.Random();
 
-            if (plr.Data.Role is ICustomRole modRole)
+            if (plr.Data.Role is not ICustomRole modRole || !modRole.IsModifierApplicable(mod))
             {
-                if (!modRole.IsModifierApplicable(mod))
-                {
-                    continue;
-                }
+                continue;
             }
 
-            if (plr.HasModifier(id) || mod.IsModifierValidOn(plr.Data.Role))
+            if (plr.HasModifier(id) || !mod.IsModifierValidOn(plr.Data.Role))
             {
                 continue;
             }
