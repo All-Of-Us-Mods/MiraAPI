@@ -136,13 +136,13 @@ public abstract class CustomActionButton
     }
 
     /// <summary>
-    /// A utility function that runs with the local PlayerControl's FixedUpdate.
+    /// A utility function that runs with the local PlayerControl's FixedUpdate if the button is enabled.
     /// </summary>
     /// <param name="playerControl">the local PlayerControl</param>
     protected virtual void FixedUpdate(PlayerControl playerControl) { }
 
     /// <summary>
-    /// Runs when the button is clicked.
+    /// Callback method for the button click event.
     /// </summary>
     protected abstract void OnClick();
 
