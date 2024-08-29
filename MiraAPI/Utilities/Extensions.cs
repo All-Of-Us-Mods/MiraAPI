@@ -4,7 +4,6 @@ using MiraAPI.Modifiers;
 using MiraAPI.Networking;
 using Reactor.Networking.Attributes;
 using Reactor.Utilities;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -13,7 +12,7 @@ namespace MiraAPI.Utilities;
 
 public static class Extensions
 {
-    public static bool IsStatic(this Type type)
+    public static bool IsStatic(this System.Type type)
     {
         return type is { IsClass: true, IsAbstract: true, IsSealed: true };
     }
@@ -158,18 +157,18 @@ public static class Extensions
         player.RpcAddModifier(id);
     }
 
-    public static Color DarkenColor(this Color color)
+    public static Color DarkenColor(this Color color, float amount = 0.45f)
     {
-        return new Color(color.r - 0.45f, color.g - 0.45f, color.b - 0.45f);
+        return new Color(color.r - amount, color.g - amount, color.b - amount);
     }
-    public static Color GetAlternateColor(this Color color)
+    public static Color GetAlternateColor(this Color color, float amount = 0.45f)
     {
-        return color.IsColorDark() ? LightenColor(color) : DarkenColor(color);
+        return color.IsColorDark() ? LightenColor(color, amount) : DarkenColor(color, amount);
     }
 
-    public static Color LightenColor(this Color color)
+    public static Color LightenColor(this Color color, float amount = 0.45f)
     {
-        return new Color(color.r + 0.45f, color.g + 0.45f, color.b + 0.45f);
+        return new Color(color.r + amount, color.g + amount, color.b + amount);
     }
 
     public static bool IsColorDark(this Color color)
@@ -177,24 +176,14 @@ public static class Extensions
         return color.r < 0.5f && color is { g: < 0.5f, b: < 0.5f };
     }
 
-    public static DeadBody? NearestDeadBody(this PlayerControl playerControl, float radius)
+    public static DeadBody? GetNearestDeadBody(this PlayerControl playerControl, float radius)
     {
-        var results = new Il2CppSystem.Collections.Generic.List<Collider2D>();
-        Physics2D.OverlapCircle(playerControl.GetTruePosition(), radius, Helpers.Filter, results);
-        return results.ToArray()
-            .Where(collider2D => collider2D.CompareTag("DeadBody"))
-            .Select(collider2D => collider2D.GetComponent<DeadBody>())
-            .FirstOrDefault(component => component && !component.Reported);
+        return Helpers.GetNearestDeadBodies(playerControl.GetTruePosition(), radius).FirstOrDefault(component => component && !component.Reported);
     }
 
-    public static T? GetNearestObjectOfType<T>(this PlayerControl playerControl, float radius, string? colliderTag = null, Func<T, bool>? predicate = null) where T : Component
+    public static T? GetNearestObjectOfType<T>(this PlayerControl playerControl, float radius, string? colliderTag = null, System.Func<T, bool>? predicate = null) where T : Component
     {
-        var results = new Il2CppSystem.Collections.Generic.List<Collider2D>();
-        Physics2D.OverlapCircle(playerControl.GetTruePosition(), radius, Helpers.Filter, results);
-        return results.ToArray()
-            .Where(collider2D => colliderTag == null || collider2D.CompareTag(colliderTag))
-            .Select(collider2D => collider2D.GetComponent<T>())
-            .FirstOrDefault(predicate ?? (component => component));
+        return Helpers.GetNearestObjectsOfType<T>(playerControl.GetTruePosition(), radius, colliderTag).FirstOrDefault(predicate ?? (component => component));
     }
 
     public static PlayerControl? GetClosestPlayer(this PlayerControl playerControl, bool includeImpostors, float distance, bool ignoreColliders = false)
