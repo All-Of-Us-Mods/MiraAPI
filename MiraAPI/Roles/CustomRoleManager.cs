@@ -1,7 +1,9 @@
 ﻿using AmongUs.GameOptions;
 using Il2CppInterop.Runtime;
+using Il2CppInterop.Runtime.Injection;
 using MiraAPI.Networking;
 using MiraAPI.PluginLoading;
+using MiraAPI.Utilities;
 using Reactor.Localization.Utilities;
 using Reactor.Networking.Rpc;
 using Reactor.Utilities;
@@ -9,8 +11,6 @@ using Reactor.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Il2CppInterop.Runtime.Injection;
-using MiraAPI.Utilities;
 using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -20,11 +20,11 @@ namespace MiraAPI.Roles;
 public static class CustomRoleManager
 {
     public static readonly Dictionary<ushort, RoleBehaviour> CustomRoles = new();
-    
+
     public static readonly Dictionary<Type, ushort> RoleIds = new();
-    
+
     private static ushort _roleId = 100;
-    
+
     private static ushort GetNextRoleId()
     {
         return _roleId++;
@@ -37,8 +37,8 @@ public static class CustomRoleManager
 
     public static void RegisterRoleTypes(List<Type> roles, MiraPluginInfo pluginInfo)
     {
-        roles.ForEach(x=>RoleIds.Add(x, GetNextRoleId()));
-        
+        roles.ForEach(x => RoleIds.Add(x, GetNextRoleId()));
+
         foreach (var roleType in roles)
         {
             ClassInjector.RegisterTypeInIl2Cpp(roleType);
@@ -68,7 +68,7 @@ public static class CustomRoleManager
             roleBehaviour.gameObject.Destroy();
             return null;
         }
-        
+
         var roleId = RoleIds[roleType];
 
         roleBehaviour.Role = (RoleTypes)roleId;
@@ -83,7 +83,7 @@ public static class CustomRoleManager
         roleBehaviour.TasksCountTowardProgress = customRole.TasksCount;
         roleBehaviour.CanVent = customRole.CanUseVent;
         roleBehaviour.DefaultGhostRole = customRole.GhostRole;
-        roleBehaviour.MaxCount = 15;
+        roleBehaviour.MaxCount = customRole.MaxPlayers;
         roleBehaviour.RoleScreenshot = customRole.OptionsScreenshot.LoadAsset();
 
         if (customRole.IsGhostRole)
@@ -101,7 +101,7 @@ public static class CustomRoleManager
         var config = parentMod.PluginConfig;
         config.Bind(customRole.NumConfigDefinition, 1);
         config.Bind(customRole.ChanceConfigDefinition, 100);
-        
+
         return roleBehaviour;
     }
 
@@ -156,8 +156,8 @@ public static class CustomRoleManager
 
         panel.SetTaskText(role.SetTabText().ToString());
     }
-    
-    internal static void SyncAllRoleSettings(int targetId=-1)
+
+    internal static void SyncAllRoleSettings(int targetId = -1)
     {
         var data = CustomRoles.Values
             .Where(x => x is ICustomRole { HideSettings: false })
@@ -181,7 +181,7 @@ public static class CustomRoleManager
             oldConfigSetting.Add(plugin, plugin.PluginConfig.SaveOnConfigSet);
             plugin.PluginConfig.SaveOnConfigSet = false;
         }
-        
+
         foreach (var netData in data)
         {
             if (!CustomRoles.TryGetValue((ushort)netData.Id, out var role))
@@ -197,7 +197,7 @@ public static class CustomRoleManager
 
             var num = BitConverter.ToInt32(netData.Data, 0);
             var chance = BitConverter.ToInt32(netData.Data, 4);
-                    
+
             DestroyableSingleton<HudManager>.Instance.Notifier.AddRoleSettingsChangeMessage(role.StringName, num, chance, role.TeamType, false);
 
             try
@@ -215,13 +215,13 @@ public static class CustomRoleManager
                 Logger<MiraApiPlugin>.Error(e);
             }
         }
-        
+
         foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins.Values)
         {
             plugin.PluginConfig.Save();
             plugin.PluginConfig.SaveOnConfigSet = oldConfigSetting[plugin];
         }
-        
+
         if (LobbyInfoPane.Instance)
         {
             LobbyInfoPane.Instance.RefreshPane();

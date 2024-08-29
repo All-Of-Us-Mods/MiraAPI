@@ -1,5 +1,4 @@
 ﻿#nullable enable
-using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using UnityEngine;
 using UnityEngine.Events;
@@ -55,17 +54,17 @@ public abstract class CustomActionButton
     /// <summary>
     /// Returns true if the effect is currently active.
     /// </summary>
-    protected bool EffectActive;
+    public bool EffectActive { get; protected set; }
+
+    /// <summary>
+    /// Returns the amount of uses left.
+    /// </summary>
+    public int UsesLeft { get; set; }
 
     /// <summary>
     /// A timer variable to measure cooldowns and effects.
     /// </summary>
     protected float Timer;
-
-    /// <summary>
-    /// Returns the amount of uses left.
-    /// </summary>
-    protected int UsesLeft;
 
     /// <summary>
     /// The button object in game. This is created by Mira API automatically.
@@ -133,6 +132,24 @@ public abstract class CustomActionButton
     public void OverrideName(string name)
     {
         Button?.OverrideText(name);
+    }
+
+    /// <summary>
+    /// Increase the amount of uses this button has left.
+    /// </summary>
+    /// <param name="amount">The amount you want to increase by. Default: 1</param>
+    public void IncreaseUses(int amount = 1)
+    {
+        UsesLeft += amount;
+    }
+
+    /// <summary>
+    /// Decrease the amount of uses this button has left.
+    /// </summary>
+    /// <param name="amount">The amount you want to decrease by. Default: 1</param>
+    public void DecreaseUses(int amount = 1)
+    {
+        UsesLeft -= amount;
     }
 
     /// <summary>

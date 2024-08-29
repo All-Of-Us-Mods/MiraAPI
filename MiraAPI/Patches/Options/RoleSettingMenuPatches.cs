@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using MiraAPI.Networking;
 using MiraAPI.Roles;
 using MiraAPI.Utilities;
@@ -8,7 +9,6 @@ using Reactor.Utilities;
 using Reactor.Utilities.Extensions;
 using System;
 using System.Linq;
-using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -224,7 +224,7 @@ public static class RoleSettingMenuPatches
         __instance.roleScreenshot.drawMode = SpriteDrawMode.Sliced;
         __instance.roleHeaderSprite.color = customRole.RoleColor;
         __instance.roleHeaderText.color = customRole.RoleColor.GetAlternateColor();
-        
+
         var bg = __instance.AdvancedRolesSettings.transform.Find("Background");
         bg.localPosition = new Vector3(1.4041f, -7.08f, 0);
         bg.GetComponent<SpriteRenderer>().size = new Vector2(89.4628f, 100);
@@ -237,7 +237,7 @@ public static class RoleSettingMenuPatches
             {
                 continue;
             }
-            
+
             optionBehaviour.OnValueChanged = new Action<OptionBehaviour>(__instance.ValueChanged);
             if (AmongUsClient.Instance && !AmongUsClient.Instance.AmHost)
             {
@@ -263,7 +263,7 @@ public static class RoleSettingMenuPatches
         roleOptionSetting.titleText.transform.localPosition = new Vector3(-0.5376f, -0.2923f, 0f);
         roleOptionSetting.titleText.color = customRole.RoleColor.GetAlternateColor();
         roleOptionSetting.titleText.horizontalAlignment = HorizontalAlignmentOptions.Left;
-    
+
         if (GameSettingMenuPatches.SelectedMod is null ||
             GameSettingMenuPatches.SelectedMod.Options.Any(x => x.AdvancedRole != null && x.AdvancedRole.IsInstanceOfType(role)))
         {
