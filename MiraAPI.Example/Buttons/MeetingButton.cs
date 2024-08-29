@@ -41,7 +41,7 @@ public class MeetingButton : CustomActionButton
 
         if (UsesLeft == 0 && PlayerControl.LocalPlayer.HasModifier<CaptainModifier>())
         {
-            PlayerControl.LocalPlayer.RemoveModifier<CaptainModifier>();
+            PlayerControl.LocalPlayer.RpcRemoveModifier<CaptainModifier>();
         }
     }
 }

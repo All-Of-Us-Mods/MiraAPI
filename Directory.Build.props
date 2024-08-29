@@ -1,0 +1,40 @@
+﻿<Project>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <DebugType>embedded</DebugType>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+
+        <VersionPrefix>0.1.3</VersionPrefix>
+        <VersionSuffix>dev</VersionSuffix>
+
+        <Authors>All Of Us, XtraCube, Angxl</Authors>
+        <Company>All Of Us</Company>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/All-Of-Us-Mods/MiraAPI</RepositoryUrl>
+        <PackageLicenseExpression>LGPL-2.1-or-later</PackageLicenseExpression>
+
+        <!-- SourceLink -->
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+        <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <EnableNETAnalyzers>true</EnableNETAnalyzers>
+        <AnalysisLevel>latest</AnalysisLevel>
+        <AnalysisMode>recommended</AnalysisMode>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" PrivateAssets="all" />
+        <AdditionalFiles Include="$(MSBuildThisFileDirectory)\stylecop.json" Link="stylecop.json" Visible="false" />
+    </ItemGroup>
+    <PropertyGroup>
+        <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)\stylecop.ruleset</CodeAnalysisRuleSet>
+    </PropertyGroup>
+</Project>

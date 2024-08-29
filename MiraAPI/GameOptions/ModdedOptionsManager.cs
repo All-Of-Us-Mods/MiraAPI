@@ -120,6 +120,14 @@ public static class ModdedOptionsManager
 
     internal static void HandleSyncOptions(NetData[] data)
     {
+        // necessary to disable then re-enable this setting
+        // we dont know how other plugins handle their configs
+        // this way, all the options are saved at once, instead of one by one
+        foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins.Values)
+        {
+            plugin.PluginConfig.SaveOnConfigSet = false;
+        }
+        
         foreach (var netData in data)
         {
             if (!ModdedOptions.TryGetValue(netData.Id, out var option))
@@ -129,7 +137,13 @@ public static class ModdedOptionsManager
             
             option.HandleNetData(netData.Data);
         }
-
+        
+        foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins.Values)
+        {
+            plugin.PluginConfig.Save();
+            plugin.PluginConfig.SaveOnConfigSet = true;
+        }
+        
         if (LobbyInfoPane.Instance)
         {
             LobbyInfoPane.Instance.RefreshPane();

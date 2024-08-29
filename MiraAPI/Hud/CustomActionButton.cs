@@ -1,5 +1,4 @@
 ﻿#nullable enable
-using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using UnityEngine;
 using UnityEngine.Events;
@@ -55,17 +54,17 @@ public abstract class CustomActionButton
     /// <summary>
     /// Returns true if the effect is currently active.
     /// </summary>
-    protected bool EffectActive;
-
-    /// <summary>
-    /// A timer variable to measure cooldowns and effects.
-    /// </summary>
-    protected float Timer;
+    public bool EffectActive { get; protected set; }
 
     /// <summary>
     /// Returns the amount of uses left.
     /// </summary>
-    protected int UsesLeft;
+    public int UsesLeft { get; protected set; }
+
+    /// <summary>
+    /// A timer variable to measure cooldowns and effects.
+    /// </summary>
+    public float Timer { get; protected set; }
 
     /// <summary>
     /// The button object in game. This is created by Mira API automatically.
@@ -133,6 +132,61 @@ public abstract class CustomActionButton
     public void OverrideName(string name)
     {
         Button?.OverrideText(name);
+    }
+
+    /// <summary>
+    /// Set the button's timer.
+    /// </summary>
+    /// <param name="amount">The amount you want to set to.</param>
+    public void SetTimer(float time)
+    {
+        Timer = Mathf.Clamp(time, -1, float.MaxValue);
+    }
+
+    /// <summary>
+    /// Increase the button's timer.
+    /// </summary>
+    /// <param name="amount">The amount you want to increase by.</param>
+    public void IncreaseTimer(float amount)
+    {
+        SetTimer(Timer + amount);
+    }
+
+    /// <summary>
+    /// Decrease the button's timer.
+    /// </summary>
+    /// <param name="amount">The amount you want to decrease by.</param>
+    public void DecreaseTimer(float amount)
+    {
+        SetTimer(Timer - amount);
+    }
+
+
+    /// <summary>
+    /// Set the amount of uses this button has left.
+    /// </summary>
+    /// <param name="amount">The amount you want to set to.</param>
+    public void SetUses(int amount)
+    {
+        UsesLeft = Mathf.Clamp(amount, 0, int.MaxValue);
+    }
+
+    /// <summary>
+    /// Increase the amount of uses this button has left.
+    /// </summary>
+    /// <param name="amount">The amount you want to increase by. Default: 1</param>
+    public void IncreaseUses(int amount = 1)
+    {
+        SetUses(UsesLeft + amount);
+    }
+
+    /// <summary>
+    /// Decrease the amount of uses this button has left.
+    /// </summary>
+    /// <param name="amount">The amount you want to decrease by. Default: 1</param>
+    public void DecreaseUses(int amount = 1)
+    {
+        SetUses(UsesLeft - amount);
     }
 
     /// <summary>

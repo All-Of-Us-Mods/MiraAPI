@@ -106,7 +106,7 @@ public static class ModifierManager
             }
 
             shuffledModifiers.RemoveAt(0);
-            ModifierComponent.RpcAddModifier(plr, id);
+            plr.RpcAddModifier(id);
         }
     }
 
@@ -152,7 +152,13 @@ public static class ModifierManager
 
             foreach (var id in ids)
             {
-                ModifierComponent.AddModifier(plr, id);
+                if (!IdToTypeModifiers.TryGetValue(id, out var type))
+                {
+                    Logger<MiraApiPlugin>.Error($"Cannot add modifier with id {id} because it is not registered.");
+                    continue;
+                }
+                
+                modifierComponent.AddModifier(type);
             }
         }
     }

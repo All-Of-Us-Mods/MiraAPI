@@ -22,13 +22,13 @@ public class ExampleOptions : AbstractOptionGroup
     [ModdedStringOption("String Opt", ["Hello", "Hey", "Bye"])]
     public int StringOpt { get; set; } = 2;
 
-    [ModdedEnumOption("Enum Opt", typeof(TestEnum))]
-    public TestEnum EnumOpt { get; set; } = TestEnum.Mira;
+    [ModdedEnumOption("Best API", typeof(BestApiEnum), ["Mira API", "Mitochondria", "Reactor"])]
+    public BestApiEnum EnumOpt { get; set; } = BestApiEnum.MiraAPI;
 }
 
-public enum TestEnum
+public enum BestApiEnum
 {
-    Welcome,
-    To,
-    Mira
+    MiraAPI,
+    Mitochondria,
+    Reactor
 }

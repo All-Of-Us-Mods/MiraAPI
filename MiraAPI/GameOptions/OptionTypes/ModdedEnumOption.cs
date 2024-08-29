@@ -1,7 +1,7 @@
-﻿using Reactor.Localization.Utilities;
+﻿using MiraAPI.Networking;
+using Reactor.Localization.Utilities;
 using System;
 using System.Linq;
-using MiraAPI.Networking;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -11,15 +11,18 @@ public class ModdedEnumOption : ModdedOption<int>
 {
     public string[] Values { get; }
 
-    public ModdedEnumOption(string title, int defaultValue, Type enumType, Type roleType=null) : base(title, defaultValue, roleType)
+    public ModdedEnumOption(string title, int defaultValue, Type enumType, string[] values = null, Type roleType = null) : base(title, defaultValue, roleType)
     {
-        Values = Enum.GetNames(enumType);
+        Values = values is null ? Enum.GetNames(enumType) : values;
         Data = ScriptableObject.CreateInstance<StringGameSetting>();
         var data = (StringGameSetting)Data;
-            
+
         data.Title = StringName;
         data.Type = global::OptionTypes.String;
-        data.Values = Values.Select(CustomStringName.CreateAndRegister).ToArray();
+        data.Values = values is null ?
+            Enum.GetNames(enumType).Select(CustomStringName.CreateAndRegister).ToArray()
+            : values.Select(CustomStringName.CreateAndRegister).ToArray();
+
         data.Index = Value;
     }
 
@@ -29,7 +32,7 @@ public class ModdedEnumOption : ModdedOption<int>
 
         stringOption.SetUpFromData(Data, 20);
         stringOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
-            
+
         // SetUpFromData method doesnt work correctly so we must set the values manually
         stringOption.Title = StringName;
         stringOption.Values = ((StringGameSetting)Data).Values;

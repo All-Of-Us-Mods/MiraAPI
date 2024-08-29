@@ -13,5 +13,5 @@ public class FreezerRole : ImpostorRole, ICustomRole
     public Color RoleColor => Palette.Blue;
     public ModdedRoleTeams Team => ModdedRoleTeams.Impostor;
     public LoadableAsset<Sprite> OptionsScreenshot => ExampleAssets.Banner;
-
+    public int MaxPlayers => 2;
 }

@@ -6,5 +6,6 @@ public enum MiraRpc : uint
     SyncRoleOptions,
     AddModifier,
     RemoveModifier,
-    SyncModifiers
+    SyncModifiers,
+    CustomMurder,
 }

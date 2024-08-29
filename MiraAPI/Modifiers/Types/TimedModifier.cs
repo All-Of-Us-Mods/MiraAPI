@@ -1,4 +1,5 @@
-﻿using Reactor.Utilities;
+﻿using MiraAPI.Utilities;
+using Reactor.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.Modifiers.Types;
@@ -32,7 +33,7 @@ public abstract class TimedModifier : BaseModifier
 
             if (RemoveOnComplete)
             {
-                ModifierComponent.RpcRemoveModifier(Player, ModifierId);
+                Player.RpcRemoveModifier(ModifierId);
             }
         }
     }
