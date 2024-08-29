@@ -59,12 +59,12 @@ public abstract class CustomActionButton
     /// <summary>
     /// Returns the amount of uses left.
     /// </summary>
-    public int UsesLeft { get; set; }
+    public int UsesLeft { get; protected set; }
 
     /// <summary>
     /// A timer variable to measure cooldowns and effects.
     /// </summary>
-    protected float Timer;
+    public float Timer { get; protected set; }
 
     /// <summary>
     /// The button object in game. This is created by Mira API automatically.
@@ -135,12 +135,49 @@ public abstract class CustomActionButton
     }
 
     /// <summary>
+    /// Set the button's timer.
+    /// </summary>
+    /// <param name="amount">The amount you want to set to.</param>
+    public void SetTimer(float time)
+    {
+        Timer = Mathf.Clamp(time, -1, float.MaxValue);
+    }
+
+    /// <summary>
+    /// Increase the button's timer.
+    /// </summary>
+    /// <param name="amount">The amount you want to increase by.</param>
+    public void IncreaseTimer(float amount)
+    {
+        SetTimer(Timer + amount);
+    }
+
+    /// <summary>
+    /// Decrease the button's timer.
+    /// </summary>
+    /// <param name="amount">The amount you want to decrease by.</param>
+    public void DecreaseTimer(float amount)
+    {
+        SetTimer(Timer - amount);
+    }
+
+
+    /// <summary>
+    /// Set the amount of uses this button has left.
+    /// </summary>
+    /// <param name="amount">The amount you want to set to.</param>
+    public void SetUses(int amount)
+    {
+        UsesLeft = Mathf.Clamp(amount, 0, int.MaxValue);
+    }
+
+    /// <summary>
     /// Increase the amount of uses this button has left.
     /// </summary>
     /// <param name="amount">The amount you want to increase by. Default: 1</param>
     public void IncreaseUses(int amount = 1)
     {
-        UsesLeft += amount;
+        SetUses(UsesLeft + amount);
     }
 
     /// <summary>
@@ -149,7 +186,7 @@ public abstract class CustomActionButton
     /// <param name="amount">The amount you want to decrease by. Default: 1</param>
     public void DecreaseUses(int amount = 1)
     {
-        UsesLeft -= amount;
+        SetUses(UsesLeft - amount);
     }
 
     /// <summary>

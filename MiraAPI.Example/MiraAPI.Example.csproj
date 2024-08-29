@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿ <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
 		<LangVersion>latest</LangVersion>
@@ -9,9 +9,6 @@
 		<Description>Example mod for Mira API</Description>
 		<Authors>Angxl, XtraCube</Authors>
 	</PropertyGroup>
-	<ItemGroup>
-	  <None Remove="Resources\TeleportButton.png" />
-	</ItemGroup>
 	
 	<ItemGroup>
 		<PackageReference Include="Reactor" Version="2.3.1" />
