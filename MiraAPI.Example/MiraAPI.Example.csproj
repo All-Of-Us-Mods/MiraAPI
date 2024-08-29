@@ -9,6 +9,9 @@
 		<Description>Example mod for Mira API</Description>
 		<Authors>Angxl, XtraCube</Authors>
 	</PropertyGroup>
+	<ItemGroup>
+	  <None Remove="Resources\TeleportButton.png" />
+	</ItemGroup>
 	
 	<ItemGroup>
 		<PackageReference Include="Reactor" Version="2.3.1" />
@@ -28,6 +31,7 @@
 	<ItemGroup>
 		<EmbeddedResource Include="Resources\ExampleButton.png" />
 		<EmbeddedResource Include="Resources\FortniteBanner.jpeg" />
+		<EmbeddedResource Include="Resources\TeleportButton.png" />
 	</ItemGroup>
 
 	<Target Name="Copy" AfterTargets="Build" Condition="'$(AmongUs)' != ''">
