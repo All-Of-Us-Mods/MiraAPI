@@ -36,16 +36,24 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
 
     public void FixedUpdate()
     {
+        if (ActiveModifiers is null) return;
+
         foreach (var modifier in ActiveModifiers)
         {
+            if (modifier is null) continue;
+
             modifier.FixedUpdate();
         }
     }
 
     public void Update()
     {
+        if (ActiveModifiers is null) return;
+
         foreach (var modifier in ActiveModifiers)
         {
+            if (modifier is null) continue;
+
             modifier.Update();
         }
 
@@ -81,7 +89,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
             Logger<MiraApiPlugin>.Error($"Cannot remove modifier {type.Name} because it is not active.");
             return;
         }
-        
+
         RemoveModifier(modifier);
     }
 
@@ -99,7 +107,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
             Logger<MiraApiPlugin>.Error($"Cannot remove modifier with id {modifierId} because it is not active.");
             return;
         }
-        
+
         RemoveModifier(modifier);
     }
 
@@ -110,7 +118,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
             Logger<MiraApiPlugin>.Error($"Cannot remove modifier {modifier.ModifierName} because it is not active on this player.");
             return;
         }
-        
+
         modifier.OnDeactivate();
         ActiveModifiers.Remove(modifier);
 
@@ -127,7 +135,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
             Logger<MiraApiPlugin>.Error($"Player already has modifier with id {modifier.ModifierId}!");
             return null;
         }
-        
+
         ActiveModifiers.Add(modifier);
         modifier.Player = player;
         modifier.ModifierId = ModifierManager.TypeToIdModifiers[modifier.GetType()];
@@ -156,7 +164,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
             return null;
         }
 
-        if (ActiveModifiers.Find(x=>x.ModifierId == modifierId) != null)
+        if (ActiveModifiers.Find(x => x.ModifierId == modifierId) != null)
         {
             Logger<MiraApiPlugin>.Error($"Player already has modifier with id {modifierId}!");
             return null;
@@ -171,7 +179,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
         }
 
         AddModifier(modifier);
-        
+
         return modifier;
     }
 

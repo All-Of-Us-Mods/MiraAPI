@@ -3,11 +3,11 @@ using BepInEx.Configuration;
 using HarmonyLib;
 using MiraAPI.Modifiers;
 using MiraAPI.Networking;
+using MiraAPI.PluginLoading;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using System;
 using System.Text;
-using MiraAPI.PluginLoading;
 using UnityEngine;
 
 namespace MiraAPI.Roles;
@@ -23,6 +23,8 @@ public interface ICustomRole
     Color RoleColor { get; }
 
     ModdedRoleTeams Team { get; }
+
+    int MaxPlayers => 15;
 
     LoadableAsset<Sprite> OptionsScreenshot => MiraAssets.Empty;
 
@@ -53,7 +55,7 @@ public interface ICustomRole
     RoleTypes GhostRole => Team == ModdedRoleTeams.Crewmate ? RoleTypes.CrewmateGhost : RoleTypes.ImpostorGhost;
 
     MiraPluginInfo ParentMod => CustomRoleManager.FindParentMod(this);
-    
+
     /// <summary>
     /// Runs on the PlayerControl FixedUpdate method for any player with this role
     /// </summary>
@@ -76,7 +78,7 @@ public interface ICustomRole
         var taskStringBuilder = Helpers.CreateForRole(this);
         return taskStringBuilder;
     }
-    
+
     bool IsModifierApplicable(BaseModifier modifier)
     {
         return true;
@@ -86,7 +88,7 @@ public interface ICustomRole
     {
         ParentMod.PluginConfig.TryGetEntry<int>(NumConfigDefinition, out var numEntry);
         ParentMod.PluginConfig.TryGetEntry<int>(ChanceConfigDefinition, out var chanceEntry);
-        
+
         return new NetData(RoleId.Get(GetType()), BitConverter.GetBytes(numEntry.Value).AddRangeToArray(BitConverter.GetBytes(chanceEntry.Value)));
     }
 }

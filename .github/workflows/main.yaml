@@ -1,19 +1,28 @@
 name: CI
 
-on: workflow_dispatch
+on: ["workflow_dispatch", "push", "pull_request"]
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: true
 
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.nuget/packages
+            ~/.cache/bepinex
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 6.x
+          dotnet-version: 8.0.x
 
       - name: Run the Cake script
         uses: cake-build/cake-action@v2
@@ -24,3 +33,19 @@ jobs:
         with:
           name: MiraAPI.dll
           path: MiraAPI/bin/Release/net6.0/MiraAPI.dll
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: AllOfUs.MiraAPI.nupkg
+          path: MiraAPI/bin/Release/AllOfUs.MiraAPI.*.nupkg
+          
+      - uses: softprops/action-gh-release@v1
+        if: github.ref_type == 'tag'
+        with:
+          draft: true
+          files: MiraAPI/bin/Release/net6.0/MiraAPI.dll
+          
+      - name: Push NuGet package
+        if: github.repository == 'All-Of-Us-Mods/MiraAPI' && github.ref == 'refs/heads/master' && github.ref_type == 'tag'
+        run: |
+          dotnet nuget push {MiraAPI/bin/Release/AllOfUs.MiraAPI.*.nupkg} --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}

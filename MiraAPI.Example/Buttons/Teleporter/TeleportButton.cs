@@ -19,7 +19,7 @@ public class TeleportButton : CustomActionButton
 
     public override int MaxUses => 0;
 
-    public override LoadableAsset<Sprite> Sprite => ExampleAssets.ExampleButton;
+    public override LoadableAsset<Sprite> Sprite => ExampleAssets.TeleportButton;
     public static bool IsZoom { get; private set; }
 
     public override bool Enabled(RoleBehaviour role)
