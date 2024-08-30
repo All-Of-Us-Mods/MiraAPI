@@ -29,26 +29,25 @@ public static class PlayerControlPatches
         {
             customRole.PlayerControlFixedUpdate(__instance);
         }
-        
+
         if (!__instance.AmOwner)
         {
             return;
         }
-        
+
         foreach (var button in CustomButtonManager.CustomButtons)
         {
             if (__instance.Data?.Role == null)
             {
                 continue;
             }
-            
+
             if (!button.Enabled(__instance.Data?.Role))
             {
                 continue;
             }
-            
+
             button.FixedUpdateHandler(__instance);
         }
     }
-    
 }

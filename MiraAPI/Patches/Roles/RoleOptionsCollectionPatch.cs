@@ -18,7 +18,7 @@ public static class RoleOptionsCollectionPatch
         {
             return true;
         }
-        
+
         if (customRole.HideSettings)
         {
             return false;
@@ -27,7 +27,6 @@ public static class RoleOptionsCollectionPatch
         customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.ChanceConfigDefinition, out var entry);
         __result = entry.Value;
         return false;
-
     }
 
     /// <summary>

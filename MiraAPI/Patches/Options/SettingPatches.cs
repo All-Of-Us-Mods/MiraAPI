@@ -10,8 +10,8 @@ public class SettingPatches
     [HarmonyPatch(typeof(FloatGameSetting), nameof(FloatGameSetting.GetValueString))]
     public static bool ValueStringPatch(FloatGameSetting __instance, ref string __result, [HarmonyArgument(0)] float value)
     {
-        string result = string.Empty;
-        MiraNumberSuffixes suffix = (MiraNumberSuffixes)__instance.SuffixType;
+        var result = string.Empty;
+        var suffix = (MiraNumberSuffixes)__instance.SuffixType;
 
         if (__instance.ZeroIsInfinity && Mathf.Abs(value) < 0.0001f)
         {

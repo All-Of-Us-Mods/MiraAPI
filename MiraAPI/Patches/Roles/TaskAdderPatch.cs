@@ -34,17 +34,17 @@ public static class TaskAdderPatch
 
         GameObject hitbox = new("Hitbox")
         {
-            layer = 5
+            layer = 5,
         };
         hitbox.transform.SetParent(__instance.TaskParent.transform, false);
         hitbox.transform.localScale = new Vector3(7.5f, 6.5f, 1);
         hitbox.transform.localPosition = new Vector3(2.8f, -2.2f, 0);
-        
-        SpriteMask mask = hitbox.AddComponent<SpriteMask>();
+
+        var mask = hitbox.AddComponent<SpriteMask>();
         mask.sprite = MiraAssets.NextButton.LoadAsset();
         mask.alphaCutoff = 0.0f;
-            
-        BoxCollider2D collider = hitbox.AddComponent<BoxCollider2D>();
+
+        var collider = hitbox.AddComponent<BoxCollider2D>();
         collider.size = new Vector2(1f, 1f);
         collider.enabled = true;
 
@@ -54,7 +54,7 @@ public static class TaskAdderPatch
         __instance.RoleButton.GetComponent<PassiveButton>().ClickMask = collider;
         __instance.RootFolderPrefab.GetComponent<PassiveButton>().ClickMask = collider;
         __instance.RootFolderPrefab.gameObject.SetActive(false);
-        
+
         __instance.TaskParent = inner.transform;
 
         _rolesFolder = Object.Instantiate(__instance.RootFolderPrefab, _scroller.Inner);
@@ -115,7 +115,7 @@ public static class TaskAdderPatch
     [HarmonyPatch(typeof(TaskAdderGame), nameof(TaskAdderGame.ShowFolder))]
     public static bool ShowPatch(TaskAdderGame __instance, [HarmonyArgument(0)] TaskFolder taskFolder)
     {
-        var stringBuilder = new StringBuilder(64);
+        var stringBuilder = new Il2CppSystem.Text.StringBuilder(64);
         __instance.Hierarchy.Add(taskFolder);
         for (var i = 0; i < __instance.Hierarchy.Count; i++)
         {

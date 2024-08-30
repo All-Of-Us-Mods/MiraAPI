@@ -14,8 +14,8 @@ public static class CustomMurderRpcs
     public static void RpcCustomMurder(this PlayerControl source, PlayerControl target, bool didSucceed = true,
         bool resetKillTimer = true, bool createDeadBody = true, bool teleportMurderer = true, bool showKillAnim = true, bool playKillSound = true)
     {
-        MurderResultFlags murderResultFlags = didSucceed ? MurderResultFlags.Succeeded : MurderResultFlags.FailedError;
-        MurderResultFlags murderResultFlags2 = MurderResultFlags.DecisionByHost | murderResultFlags;
+        var murderResultFlags = didSucceed ? MurderResultFlags.Succeeded : MurderResultFlags.FailedError;
+        var murderResultFlags2 = MurderResultFlags.DecisionByHost | murderResultFlags;
 
         source.CustomMurder(target, murderResultFlags2, resetKillTimer, createDeadBody, teleportMurderer, showKillAnim, playKillSound);
     }
@@ -25,7 +25,7 @@ public static class CustomMurderRpcs
     {
         source.isKilling = false;
         source.logger.Debug(string.Format("{0} trying to murder {1}", source.PlayerId, target.PlayerId), null);
-        NetworkedPlayerInfo data = target.Data;
+        var data = target.Data;
         if (resultFlags.HasFlag(MurderResultFlags.FailedError))
         {
             return;
@@ -33,7 +33,7 @@ public static class CustomMurderRpcs
         if (resultFlags.HasFlag(MurderResultFlags.FailedProtected) || (resultFlags.HasFlag(MurderResultFlags.DecisionByHost) && target.protectedByGuardianId > -1))
         {
             target.protectedByGuardianThisRound = true;
-            bool flag = PlayerControl.LocalPlayer.Data.Role.Role == RoleTypes.GuardianAngel;
+            var flag = PlayerControl.LocalPlayer.Data.Role.Role == RoleTypes.GuardianAngel;
             if (flag && PlayerControl.LocalPlayer.Data.PlayerId == target.protectedByGuardianId)
             {
                 StatsManager.Instance.IncrementStat(StringNames.StatsGuardianAngelCrewmatesProtected);
@@ -116,9 +116,9 @@ public static class CustomMurderRpcs
     public static IEnumerator CoPerformCustomKill(this KillAnimation anim, PlayerControl source, PlayerControl target,
         bool createDeadBody = true, bool teleportMurderer = true)
     {
-        FollowerCamera cam = Camera.main.GetComponent<FollowerCamera>();
-        bool isParticipant = PlayerControl.LocalPlayer == source || PlayerControl.LocalPlayer == target;
-        PlayerPhysics sourcePhys = source.MyPhysics;
+        var cam = Camera.main.GetComponent<FollowerCamera>();
+        var isParticipant = PlayerControl.LocalPlayer == source || PlayerControl.LocalPlayer == target;
+        var sourcePhys = source.MyPhysics;
 
         if (teleportMurderer)
         {
@@ -143,7 +143,7 @@ public static class CustomMurderRpcs
             deadBody.bodyRenderers.ToArray().ToList().ForEach(target.SetPlayerMaterialColors);
 
             target.SetPlayerMaterialColors(deadBody.bloodSplatter);
-            Vector3 vector = target.transform.position + anim.BodyOffset;
+            var vector = target.transform.position + anim.BodyOffset;
             vector.z = vector.y / 1000f;
             deadBody.transform.position = vector;
         }

@@ -311,23 +311,20 @@ public abstract class CustomActionButton
 public abstract class CustomActionButton<T> : CustomActionButton where T : MonoBehaviour
 {
     /// <summary>
-    /// The target object of the button.
+    /// Gets the target object of the button.
     /// </summary>
     public T? Target { get; private set; }
 
     /// <summary>
-    /// The distance the player must be from the target object to use the button.
+    /// Gets the distance the player must be from the target object to use the button.
     /// </summary>
     public virtual float Distance => PlayerControl.LocalPlayer.Data.Role.GetAbilityDistance();
 
     /// <summary>
-    /// An optional collider tag to filter the target object by.
-    /// </summary>
-    public virtual string? ColliderTag => null;
-
-    /// <summary>
     /// Determines if the target object is valid.
     /// </summary>
+    /// <param name="target">The target object being checked.</param>
+    /// <returns>True if the target object is valid, false otherwise.</returns>
     public virtual bool IsTargetValid(T? target)
     {
         return target;
@@ -336,6 +333,7 @@ public abstract class CustomActionButton<T> : CustomActionButton where T : MonoB
     /// <summary>
     /// The method used to get the target object.
     /// </summary>
+    /// <returns>The target object or null if it isn't found.</returns>
     public abstract T? GetTarget();
 
     /// <summary>
@@ -344,7 +342,7 @@ public abstract class CustomActionButton<T> : CustomActionButton where T : MonoB
     /// <param name="active">Should the outline be active</param>
     public abstract void SetOutline(bool active);
 
-
+    /// <inheritdoc />
     public override bool CanUse()
     {
         var newTarget = GetTarget();

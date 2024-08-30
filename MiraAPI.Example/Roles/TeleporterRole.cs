@@ -13,5 +13,4 @@ public class TeleporterRole : CrewmateRole, ICustomRole
     public Color RoleColor => new Color32(221, 176, 152, 255);
     public ModdedRoleTeams Team => ModdedRoleTeams.Crewmate;
     public LoadableAsset<Sprite> OptionsScreenshot => ExampleAssets.Banner;
-
 }

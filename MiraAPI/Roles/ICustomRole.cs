@@ -95,15 +95,14 @@ public interface ICustomRole
     bool IsGhostRole => false;
 
     /// <summary>
-    /// Unused for some reason.
-    /// </summary>
-    // TODO: change this to an enum
-    bool CreateCustomTab => true;
-
-    /// <summary>
     /// Gets a value indicating whether the role should show up in the Role Options menu.
     /// </summary>
     bool HideSettings => IsGhostRole;
+
+    /// <summary>
+    /// Gets the role hint style. See <see cref="RoleHintType"/> enum for all options.
+    /// </summary>
+    RoleHintType RoleHintType => RoleHintType.RoleTab;
 
     /// <summary>
     /// Gets the Ghost role that is applied when the player is killed.
