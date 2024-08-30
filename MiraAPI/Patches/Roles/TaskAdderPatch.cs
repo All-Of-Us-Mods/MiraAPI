@@ -85,14 +85,14 @@ public static class TaskAdderPatch
     [HarmonyPatch(typeof(TaskAddButton), "Role", MethodType.Setter)]
     public static void RoleGetterPatch(TaskAddButton __instance)
     {
-        if (__instance.role is ICustomRole { IsNeutral: true })
+        if (__instance.role is ICustomRole { Team: ModdedRoleTeams.Neutral })
         {
             __instance.FileImage.color = Color.gray;
         }
 
         __instance.RolloverHandler.OutColor = __instance.FileImage.color;
     }
-    
+
     private static void AddFileAsChildCustom(this TaskAdderGame instance, TaskFolder taskFolder, TaskAddButton item, ref float xCursor, ref float yCursor, ref float maxHeight)
     {
         item.transform.SetParent(instance.TaskParent);

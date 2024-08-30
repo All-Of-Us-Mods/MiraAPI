@@ -38,8 +38,6 @@ public interface ICustomRole
 
     bool CanGetKilled => this.Team == ModdedRoleTeams.Crewmate;
 
-    bool IsNeutral => this.Team == ModdedRoleTeams.Neutral;
-
     bool CanKill => this.Team == ModdedRoleTeams.Impostor;
 
     bool CanUseVent => this.Team == ModdedRoleTeams.Impostor;

@@ -152,10 +152,15 @@ TextAlignmentOptions textAlignment = TextAlignmentOptions.Center)
             MiraNumberSuffixes.Multiplier => "x",
             MiraNumberSuffixes.Seconds => "s",
             MiraNumberSuffixes.Percent => "%",
-            _ => string.Empty
+            _ => string.Empty,
         };
     }
 
+    /// <summary>
+    /// Creates a string builder for the Role Tab.
+    /// </summary>
+    /// <param name="role">The ICustomRole object.</param>
+    /// <returns>A StringBuilder.</returns>
     public static StringBuilder CreateForRole(ICustomRole role)
     {
         var taskStringBuilder = new StringBuilder();

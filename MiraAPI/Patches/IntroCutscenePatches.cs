@@ -26,7 +26,7 @@ public static class IntroCutscenePatches
     {
         if (PlayerControl.LocalPlayer.Data.Role is ICustomRole customRole)
         {
-            if (!customRole.IsNeutral)
+            if (customRole.Team is not ModdedRoleTeams.Neutral)
             {
                 return true;
             }
