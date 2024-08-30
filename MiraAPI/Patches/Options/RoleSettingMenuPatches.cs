@@ -134,6 +134,9 @@ public static class RoleSettingMenuPatches
     [HarmonyPatch(nameof(RolesSettingsMenu.OpenChancesTab))]
     public static void OpenChancesTabPostfix(RolesSettingsMenu __instance)
     {
+        __instance.RoleChancesSettings.transform.SetParent(__instance.scrollBar.Inner);
+        __instance.AdvancedRolesSettings.gameObject.SetActive(false);
+
         __instance.scrollBar.CalculateAndSetYBounds(__instance.roleChances.Count + 5, 1f, 6f, 0.43f);
         __instance.scrollBar.ScrollToTop();
     }
@@ -180,7 +183,8 @@ public static class RoleSettingMenuPatches
         __instance.advancedSettingChildren.Clear();
 
         var num = -0.872f;
-
+        var customRole = role as ICustomRole;
+        var hasImage = customRole.OptionsScreenshot is not null && customRole.OptionsScreenshot != MiraAssets.Empty;
         var filteredOptions = GameSettingMenuPatches.SelectedMod.Options.Where(x => x.AdvancedRole == role.GetType());
 
         foreach (var option in filteredOptions)
@@ -191,7 +195,7 @@ public static class RoleSettingMenuPatches
             }
 
             var newOpt = option.CreateOption(__instance.checkboxOrigin, __instance.numberOptionOrigin, __instance.stringOptionOrigin, __instance.AdvancedRolesSettings.transform);
-            newOpt.transform.localPosition = new Vector3(2.17f, num, -2f);
+            newOpt.transform.localPosition = new Vector3(hasImage ? 2.17f : -0.3482f, num, -2f);
             newOpt.SetClickMask(__instance.ButtonClickMask);
 
             SpriteRenderer[] componentsInChildren = newOpt.GetComponentsInChildren<SpriteRenderer>(true);
@@ -208,6 +212,14 @@ public static class RoleSettingMenuPatches
             newOpt.LabelBackground.enabled = false;
             __instance.advancedSettingChildren.Add(newOpt);
 
+            if (!hasImage)
+            {
+                Transform text = newOpt.transform.FindChild("Title Text");
+                text.transform.localPosition = new Vector3(-0.4548f, -0.0623f, -2.9968f);
+                text.GetComponent<TextMeshPro>().horizontalAlignment = HorizontalAlignmentOptions.Left;
+                text.GetComponent<RectTransform>().sizeDelta = new Vector2(2.7f, 0.458f);
+            }
+
             num += -0.45f;
             newOpt.Initialize();
         }
@@ -218,10 +230,46 @@ public static class RoleSettingMenuPatches
     private static void ChangeTab(RoleBehaviour role, RolesSettingsMenu __instance)
     {
         var customRole = role as ICustomRole;
+        var hasImage = customRole.OptionsScreenshot is not null && customRole.OptionsScreenshot != MiraAssets.Empty;
+
         __instance.roleDescriptionText.text = customRole.RoleLongDescription;
         __instance.roleTitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(role.StringName, new Il2CppReferenceArray<Il2CppSystem.Object>(0));
-        __instance.roleScreenshot.sprite = Sprite.Create(customRole.OptionsScreenshot.LoadAsset().texture, new Rect(0, 0, 370, 230), Vector2.one / 2, 100);
-        __instance.roleScreenshot.drawMode = SpriteDrawMode.Sliced;
+
+        __instance.roleScreenshot.gameObject.SetActive(hasImage);
+        __instance.AdvancedRolesSettings.transform.FindChild("Imagebackground").gameObject.SetActive(hasImage);
+
+        if (hasImage)
+        {
+            __instance.roleScreenshot.sprite = Sprite.Create(customRole.OptionsScreenshot.LoadAsset().texture, new Rect(0, 0, 370, 230), Vector2.one / 2, 100);
+            __instance.roleScreenshot.drawMode = SpriteDrawMode.Sliced;
+        }
+        else
+        {
+            __instance.roleDescriptionText.transform.parent.localPosition = new Vector3(0.4267f, -0.2731f, -1f);
+            __instance.AdvancedRolesSettings.transform.FindChild("InfoLabelBackground").transform.localPosition = new Vector3(-1.0198f, 0.1054f, -2.5f);
+            __instance.roleHeaderSprite.flipX = true;
+            __instance.roleHeaderSprite.transform.localPosition = new Vector3(-2.4648f, -0.0796f, 0f);
+            __instance.roleHeaderText.horizontalAlignment = HorizontalAlignmentOptions.Left;
+            __instance.roleHeaderText.transform.localPosition = new Vector3(-1.6914f, -0.0743f, -1f);
+            __instance.roleHeaderSprite.transform.parent.localPosition = new Vector3(0.8535f, 0.598f, 0);
+            __instance.AdvancedRolesSettings.transform.FindChild("Background").localPosition = new Vector3(0.0675f, 0.1494f, 0.5687f);
+            __instance.AdvancedRolesSettings.transform.localPosition = new Vector3(2.1709f, 0.1455f, -11.2654f);
+            __instance.AdvancedRolesSettings.transform.FindChild("CategoryHeaderMasked").gameObject.SetActive(false);
+
+            if (__instance.AdvancedRolesSettings.transform.FindChild("Cover") == null)
+            {
+                Transform newBg = GameObject.Instantiate(__instance.AdvancedRolesSettings.transform.FindChild("Background"));
+                newBg.SetParent(__instance.AdvancedRolesSettings.transform);
+                newBg.gameObject.name = "Cover";
+                newBg.localPosition = new Vector3(1.3896f, 1.5964f, 0.6853f);
+                newBg.GetComponent<SpriteRenderer>().color = new Color(0, 0, 0, 0.6974f);
+                newBg.gameObject.AddComponent<BoxCollider2D>();
+            }
+
+            __instance.RoleChancesSettings.gameObject.SetActive(true);
+            __instance.RoleChancesSettings.transform.SetParent(__instance.scrollBar.transform);
+        }
+
         __instance.roleHeaderSprite.color = customRole.RoleColor;
         __instance.roleHeaderText.color = customRole.RoleColor.GetAlternateColor();
 
@@ -244,7 +292,6 @@ public static class RoleSettingMenuPatches
                 optionBehaviour.SetAsPlayer();
             }
         }
-        __instance.RoleChancesSettings.SetActive(false);
         __instance.AdvancedRolesSettings.SetActive(true);
         __instance.RefreshChildren();
     }
