@@ -50,7 +50,7 @@ public interface ICustomRole
 
     bool HideSettings => this.IsGhostRole;
 
-    RoleTypes GhostRole => this.Team == ModdedRoleTeams.Crewmate ? RoleTypes.CrewmateGhost : RoleTypes.ImpostorGhost;
+    RoleTypes GhostRole => this.Team == ModdedRoleTeams.Impostor ? RoleTypes.ImpostorGhost : RoleTypes.CrewmateGhost;
 
     MiraPluginInfo ParentMod => CustomRoleManager.FindParentMod(this);
 
