@@ -11,62 +11,62 @@ namespace MiraAPI.Hud;
 public abstract class CustomActionButton
 {
     /// <summary>
-    /// The name and text of the button.
+    /// Gets the name and text of the button.
     /// </summary>
     public abstract string Name { get; }
 
     /// <summary>
-    /// How long the button takes to cooldown.
+    /// Gets the button's cooldown duration in seconds.
     /// </summary>
     public abstract float Cooldown { get; }
 
     /// <summary>
-    /// If the button has an effect ability, how long the effect should last. To disable effects, set to 0.
+    /// Gets the button's effect duration in seconds. If the button has no effect, set to 0.
     /// </summary>
     public abstract float EffectDuration { get; }
 
     /// <summary>
-    /// If the button has limited uses, how many uses it has. To make the button infinite, set to 0.
+    /// Gets the maximum amount of uses the button has. If the button has infinite uses, set to 0.
     /// </summary>
     public abstract int MaxUses { get; }
 
     /// <summary>
-    /// The sprite of the button. Use <see cref="LoadableResourceAsset"/> to load a sprite from a resource path. Use <see cref="LoadableBundleAsset{T}"/> to load a sprite from an asset bundle.
+    /// Gets the sprite of the button. Use <see cref="LoadableResourceAsset"/> to load a sprite from a resource path. Use <see cref="LoadableBundleAsset{T}"/> to load a sprite from an asset bundle.
     /// </summary>
     public abstract LoadableAsset<Sprite> Sprite { get; }
 
     /// <summary>
-    /// The location of the button on the screen
+    /// Gets the location of the button on the screen
     /// </summary>
     public virtual ButtonLocation Location => ButtonLocation.BottomLeft;
 
     /// <summary>
-    /// Returns true if the button has an effect ability.
+    /// Gets a value indicating whether the button has an effect ability.
     /// </summary>
     public bool HasEffect => EffectDuration > 0;
 
     /// <summary>
-    /// Returns true if the button has limited uses.
+    /// Gets a value indicating whether the button has limited uses.
     /// </summary>
     public bool LimitedUses => MaxUses > 0;
 
     /// <summary>
-    /// Returns true if the effect is currently active.
+    /// Gets or sets a value indicating whether the effect is currently active, if there is one.
     /// </summary>
     public bool EffectActive { get; protected set; }
 
     /// <summary>
-    /// Returns the amount of uses left.
+    /// Gets or sets the amount of uses left.
     /// </summary>
     public int UsesLeft { get; protected set; }
 
     /// <summary>
-    /// A timer variable to measure cooldowns and effects.
+    /// Gets or sets the timer variable to measure cooldowns and effects.
     /// </summary>
     public float Timer { get; protected set; }
 
     /// <summary>
-    /// The button object in game. This is created by Mira API automatically.
+    /// Gets the button object in game. This is created by Mira API automatically.
     /// </summary>
     protected ActionButton? Button { get; private set; }
 
@@ -83,7 +83,7 @@ public abstract class CustomActionButton
 
         Button = Object.Instantiate(HudManager.Instance.AbilityButton, parent);
         Button.name = Name + "Button";
-        Button.OverrideText(Name.ToUpper());
+        Button.OverrideText(Name.ToUpperInvariant());
 
         Button.graphic.sprite = Sprite.LoadAsset();
 
@@ -115,7 +115,7 @@ public abstract class CustomActionButton
     /// <summary>
     /// A utility function to override the sprite of the button.
     /// </summary>
-    /// <param name="sprite">The new sprite to override with</param>
+    /// <param name="sprite">The new sprite to override with.</param>
     public void OverrideSprite(Sprite sprite)
     {
         if (Button != null)
@@ -127,7 +127,7 @@ public abstract class CustomActionButton
     /// <summary>
     /// A utility function to override the name of the button.
     /// </summary>
-    /// <param name="name">The new name to override with</param>
+    /// <param name="name">The new name to override with.</param>
     public void OverrideName(string name)
     {
         Button?.OverrideText(name);
@@ -136,7 +136,7 @@ public abstract class CustomActionButton
     /// <summary>
     /// Set the button's timer.
     /// </summary>
-    /// <param name="amount">The amount you want to set to.</param>
+    /// <param name="time">The time you want to set to.</param>
     public void SetTimer(float time)
     {
         Timer = Mathf.Clamp(time, -1, float.MaxValue);
@@ -160,7 +160,6 @@ public abstract class CustomActionButton
         SetTimer(Timer - amount);
     }
 
-
     /// <summary>
     /// Set the amount of uses this button has left.
     /// </summary>
@@ -173,7 +172,7 @@ public abstract class CustomActionButton
     /// <summary>
     /// Increase the amount of uses this button has left.
     /// </summary>
-    /// <param name="amount">The amount you want to increase by. Default: 1</param>
+    /// <param name="amount">The amount you want to increase by. Default: 1.</param>
     public void IncreaseUses(int amount = 1)
     {
         SetUses(UsesLeft + amount);
@@ -182,7 +181,7 @@ public abstract class CustomActionButton
     /// <summary>
     /// Decrease the amount of uses this button has left.
     /// </summary>
-    /// <param name="amount">The amount you want to decrease by. Default: 1</param>
+    /// <param name="amount">The amount you want to decrease by. Default: 1.</param>
     public void DecreaseUses(int amount = 1)
     {
         SetUses(UsesLeft - amount);
@@ -191,8 +190,10 @@ public abstract class CustomActionButton
     /// <summary>
     /// A utility function that runs with the local PlayerControl's FixedUpdate if the button is enabled.
     /// </summary>
-    /// <param name="playerControl">the local PlayerControl</param>
-    protected virtual void FixedUpdate(PlayerControl playerControl) { }
+    /// <param name="playerControl">the local PlayerControl.</param>
+    protected virtual void FixedUpdate(PlayerControl playerControl)
+    {
+    }
 
     /// <summary>
     /// Callback method for the button click event.
@@ -204,13 +205,16 @@ public abstract class CustomActionButton
     /// True means the button is active, false means the button is disabled.
     /// </summary>
     /// <param name="role">The role of the local player.</param>
+    /// <returns>True if the button is enabled, false otherwise.</returns>
     public abstract bool Enabled(RoleBehaviour? role);
 
     /// <summary>
     /// Given that there is an effect, this method runs when the effect ends.
     /// <br /> <br /> THIS IS A CALLBACK METHOD! Use <see cref="ResetCooldownAndOrEffect" /> if you want to end the effect.
     /// </summary>
-    public virtual void OnEffectEnd() { }
+    public virtual void OnEffectEnd()
+    {
+    }
 
     /// <summary>
     /// When the button is enabled, this method is called to determine if the button can be used.
@@ -228,7 +232,7 @@ public abstract class CustomActionButton
     /// The default behavior is to show the button if the <paramref name="visible"/> parameter and the <see cref="Enabled"/> method return true.
     /// It can be overridden for custom behavior.
     /// </summary>
-    /// <param name="visible">Passed in from HudManager.SetHudActive, should hud be active?</param>
+    /// <param name="visible">Passed in from HudManager.SetHudActive, should hud be active.</param>
     /// <param name="role">Passed in from HudManager.SetHudActive, the current role of the player.</param>
     public virtual void SetActive(bool visible, RoleBehaviour role)
     {
@@ -271,7 +275,7 @@ public abstract class CustomActionButton
     /// By default, it handles the cooldown and effect timers, and sets the button to enabled or disabled.
     /// It can be overridden for custom behavior.
     /// </summary>
-    /// <param name="playerControl">The local PlayerControl</param>
+    /// <param name="playerControl">The local PlayerControl.</param>
     public virtual void FixedUpdateHandler(PlayerControl playerControl)
     {
         if (Timer >= 0)
