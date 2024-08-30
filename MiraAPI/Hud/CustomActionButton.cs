@@ -1,5 +1,4 @@
-﻿#nullable enable
-using MiraAPI.Utilities.Assets;
+﻿using MiraAPI.Utilities.Assets;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;

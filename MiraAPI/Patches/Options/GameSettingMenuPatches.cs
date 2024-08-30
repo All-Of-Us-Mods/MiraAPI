@@ -1,5 +1,4 @@
-﻿#nullable enable
-using HarmonyLib;
+﻿using HarmonyLib;
 using MiraAPI.PluginLoading;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities.Extensions;

@@ -1,18 +1,36 @@
-#nullable enable
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using HarmonyLib;
 using MiraAPI.GameOptions;
 using MiraAPI.Modifiers;
 using MiraAPI.Networking;
+using MiraAPI.Roles;
 using Reactor.Networking.Attributes;
 using Reactor.Utilities;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace MiraAPI.Utilities;
 
+/// <summary>
+/// Extension methods for various classes.
+/// </summary>
 public static class Extensions
 {
-    public static bool IsStatic(this System.Type type)
+    internal static NetData GetNetData(this ICustomRole role)
+    {
+        role.ParentMod.PluginConfig.TryGetEntry<int>(role.NumConfigDefinition, out var numEntry);
+        role.ParentMod.PluginConfig.TryGetEntry<int>(role.ChanceConfigDefinition, out var chanceEntry);
+
+        return new NetData(RoleId.Get(role.GetType()), BitConverter.GetBytes(numEntry.Value).AddRangeToArray(BitConverter.GetBytes(chanceEntry.Value)));
+    }
+
+    /// <summary>
+    /// Checks if a type is static.
+    /// </summary>
+    /// <param name="type">The type being checked.</param>
+    /// <returns>True if the type is static, false otherwise.</returns>
+    public static bool IsStatic(this Type type)
     {
         return type is { IsClass: true, IsAbstract: true, IsSealed: true };
     }

@@ -2,7 +2,6 @@
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
 using MiraAPI.PluginLoading;
-using MiraAPI.Utilities;
 using Reactor;
 using Reactor.Networking;
 using Reactor.Networking.Attributes;
