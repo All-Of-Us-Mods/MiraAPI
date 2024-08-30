@@ -36,15 +36,15 @@ public static class Helpers
 
     public static List<PlayerControl> GetClosestPlayersInCircle(Vector2 source, float radius, bool ignoreColliders = true)
     {
-        List<PlayerControl> newList = GetNearestObjectsOfType<PlayerControl>(source, radius);
+        var newList = GetNearestObjectsOfType<PlayerControl>(source, radius);
 
         if (ignoreColliders)
         {
-            List<PlayerControl> filteredList = new List<PlayerControl>();
+            var filteredList = new List<PlayerControl>();
             foreach (var player in newList)
             {
-                Vector2 vector = player.GetTruePosition() - source;
-                float magnitude = vector.magnitude;
+                var vector = player.GetTruePosition() - source;
+                var magnitude = vector.magnitude;
                 if (!PhysicsHelpers.AnyNonTriggersBetween(source, vector.normalized, magnitude, Constants.ShipAndObjectsMask))
                 {
                     filteredList.Add(player);
@@ -60,11 +60,11 @@ public static class Helpers
     {
         if (!ShipStatus.Instance)
         {
-            return null;
+            return [];
         }
 
-        Vector2 myPos = source.GetTruePosition();
-        List<PlayerControl> players = GetClosestPlayers(myPos, distance, ignoreColliders);
+        var myPos = source.GetTruePosition();
+        var players = GetClosestPlayers(myPos, distance, ignoreColliders);
 
         return ignoreSource ? players.Where(plr => plr.PlayerId != source.PlayerId).ToList() : players;
     }
@@ -73,32 +73,32 @@ public static class Helpers
     {
         if (!ShipStatus.Instance)
         {
-            return null;
+            return [];
         }
 
-        List<PlayerControl> outputList = new List<PlayerControl>();
+        List<PlayerControl> outputList = [];
         outputList.Clear();
-        List<NetworkedPlayerInfo> allPlayers = GameData.Instance.AllPlayers.ToArray().ToList();
+        var allPlayers = GameData.Instance.AllPlayers.ToArray().Select(x=>x.Object);
 
-        for (int i = 0; i < allPlayers.Count; i++)
+        foreach (var playerControl in allPlayers)
         {
-            NetworkedPlayerInfo networkedPlayerInfo = allPlayers[i];
-
-            PlayerControl @object = networkedPlayerInfo.Object;
-            if (@object && @object.Collider.enabled)
+            if (!playerControl || !playerControl.Collider.enabled)
             {
-                Vector2 vector = @object.GetTruePosition() - source;
-                float magnitude = vector.magnitude;
-                if (magnitude <= distance && (ignoreColliders || !PhysicsHelpers.AnyNonTriggersBetween(source, vector.normalized, magnitude, Constants.ShipAndObjectsMask)))
-                {
-                    outputList.Add(@object);
-                }
+                continue;
+            }
+
+            var vector = playerControl.GetTruePosition() - source;
+            var magnitude = vector.magnitude;
+            if (magnitude <= distance && (ignoreColliders || !PhysicsHelpers.AnyNonTriggersBetween(source, vector.normalized, magnitude, Constants.ShipAndObjectsMask)))
+            {
+                outputList.Add(playerControl);
             }
         }
+
         outputList.Sort(delegate (PlayerControl a, PlayerControl b)
         {
-            float magnitude2 = (a.GetTruePosition() - source).magnitude;
-            float magnitude3 = (b.GetTruePosition() - source).magnitude;
+            var magnitude2 = (a.GetTruePosition() - source).magnitude;
+            var magnitude3 = (b.GetTruePosition() - source).magnitude;
             if (magnitude2 > magnitude3)
             {
                 return 1;
