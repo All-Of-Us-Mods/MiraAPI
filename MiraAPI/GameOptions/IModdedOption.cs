@@ -10,13 +10,13 @@ public interface IModdedOption
 {
     public uint Id { get; }
     public BaseGameSetting Data { get; }
-    public IMiraPlugin ParentMod { get; set; }
+    public IMiraPlugin? ParentMod { get; set; }
     public Type AdvancedRole { get; set; }
-    public OptionBehaviour OptionBehaviour { get; protected set; }
+    public OptionBehaviour OptionBehaviour { get; }
     public string Title { get; }
     public StringNames StringName { get; }
     public Func<bool> Visible { get; set; }
-    public ConfigDefinition ConfigDefinition { get; }
+    public ConfigDefinition? ConfigDefinition { get; set; }
     public void ValueChanged(OptionBehaviour optionBehaviour);
     public OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container);
     public abstract float GetFloatData();

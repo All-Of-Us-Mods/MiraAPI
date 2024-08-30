@@ -4,12 +4,12 @@ using System.Reflection;
 
 namespace MiraAPI.GameOptions.Attributes;
 
-public class ModdedEnumOptionAttribute(string title, Type enumType, string[] values = null, Type roleType = null)
+public class ModdedEnumOptionAttribute(string title, Type enumType, string[] values = null, Type? roleType = null)
     : ModdedOptionAttribute(title, roleType)
 {
-    internal override IModdedOption CreateOption(object value, PropertyInfo property)
+    internal override IModdedOption CreateOption(object? value, PropertyInfo property)
     {
-        var opt = new ModdedEnumOption(Title, (int)value, enumType, values, RoleType);
+        var opt = new ModdedEnumOption(Title, (int)(value ?? 0), enumType, values, RoleType);
         return opt;
     }
 

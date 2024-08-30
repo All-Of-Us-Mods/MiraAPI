@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using BepInEx.Configuration;
 using MiraAPI.Networking;
 using MiraAPI.PluginLoading;
 using MiraAPI.Utilities;
@@ -57,10 +58,10 @@ public static class ModdedOptionsManager
             Logger<MiraApiPlugin>.Error($"Failed to get option for {property.Name}");
             return;
         }
-        
-        RegisterOption(option, group, pluginInfo);
+
+        RegisterOption(option, group, property.Name, pluginInfo);
     }
-    
+
     internal static void RegisterAttributeOption(Type type, ModdedOptionAttribute attribute, PropertyInfo property, MiraPluginInfo pluginInfo)
     {
         if (OptionAttributes.ContainsKey(property))
@@ -76,13 +77,13 @@ public static class ModdedOptionsManager
         }
 
         var option = attribute.CreateOption(property.GetValue(group), property);
-        
+
         if (option == null)
         {
             Logger<MiraApiPlugin>.Error($"Failed to get option for {property.Name}");
             return;
         }
-        
+
         var setterOriginal = property.GetSetMethod();
         var setterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertySetterPatch));
         PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: new HarmonyMethod(setterPatch));
@@ -93,25 +94,29 @@ public static class ModdedOptionsManager
 
         OptionAttributes.Add(property, attribute);
         attribute.HolderOption = option;
-        
-        RegisterOption(option, group, pluginInfo);
+
+        RegisterOption(option, group, property.Name, pluginInfo);
     }
 
-    private static void RegisterOption(IModdedOption option, AbstractOptionGroup group, MiraPluginInfo pluginInfo)
+    private static void RegisterOption(IModdedOption option, AbstractOptionGroup group, string propertyName, MiraPluginInfo pluginInfo)
     {
+        var groupName = group.GetType().FullName;
+
+        option.ConfigDefinition = new ConfigDefinition(groupName, propertyName);
+
         option.ParentMod = pluginInfo.MiraPlugin;
         option.AdvancedRole = group.AdvancedRole;
-        
+
         pluginInfo.Options.Add(option);
-        
+
         ModdedOptions.Add(option.Id, option);
         group.Options.Add(option);
     }
-    
-    internal static void SyncAllOptions(int targetId=-1)
+
+    internal static void SyncAllOptions(int targetId = -1)
     {
         var chunks = ModdedOptions.Values.Select(option => option.GetNetData()).ChunkNetData(1000);
-        
+
         while (chunks.Count > 0)
         {
             Rpc<SyncOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, chunks.Dequeue());
