@@ -52,7 +52,7 @@ public static class ModifierManager
                 continue;
             }
             
-            if (!plrs.Any(x=>IsGameModifierValid(x, mod, modifier.Key)))
+            if (!plrs.Exists(x=>IsGameModifierValid(x, mod, modifier.Key)))
             {
                 Logger<MiraApiPlugin>.Warning("No players are valid for modifier: " + mod.ModifierName);
                 continue;
@@ -79,25 +79,25 @@ public static class ModifierManager
         {
             shuffledModifiers = shuffledModifiers.GetRange(0, plrs.Count);
         }
-        
+
         while (shuffledModifiers.Count > 0)
         {
             var id = shuffledModifiers[0];
 
             var mod = (GameModifier)Activator.CreateInstance(IdToTypeModifiers[id]);
-            
+
             if (mod is null)
             {
                 Logger<MiraApiPlugin>.Error($"Failed to create instance of {IdToTypeModifiers[id].Name}");
                 continue;
             }
-            
-            if (!plrs.Any(x=>IsGameModifierValid(x, mod, id)))
+
+            if (!plrs.Exists(x=>IsGameModifierValid(x, mod, id)))
             {
                 shuffledModifiers.RemoveAt(0);
                 continue;
             }
-            
+
             var plr = plrs.Random();
 
             if (!IsGameModifierValid(plr, mod, id))

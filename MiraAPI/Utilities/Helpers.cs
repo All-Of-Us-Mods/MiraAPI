@@ -25,7 +25,7 @@ public static class Helpers
             .Select(collider2D => collider2D.GetComponent<DeadBody>()).ToList();
     }
 
-    public static List<T> GetNearestObjectsOfType<T>(Vector2 source, float radius, string colliderTag = null) where T : Component
+    public static List<T> GetNearestObjectsOfType<T>(Vector2 source, float radius, string? colliderTag = null) where T : Component
     {
         var results = new Il2CppSystem.Collections.Generic.List<Collider2D>();
         Physics2D.OverlapCircle(source, radius, Filter, results);

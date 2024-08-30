@@ -19,7 +19,7 @@ public class MiraDebugWindow(IntPtr ptr) : MonoBehaviour(ptr)
         }
     })
     {
-        Enabled = true
+        Enabled = true,
     };
 
     public void OnGUI()
