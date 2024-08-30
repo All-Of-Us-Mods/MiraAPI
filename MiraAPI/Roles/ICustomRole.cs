@@ -30,29 +30,29 @@ public interface ICustomRole
 
     LoadableAsset<Sprite> Icon => MiraAssets.Empty;
 
-    ConfigDefinition NumConfigDefinition => new("Roles", $"Num{RoleName}");
+    ConfigDefinition NumConfigDefinition => new("Roles", $"Num {this.GetType().FullName}");
 
-    ConfigDefinition ChanceConfigDefinition => new("Roles", $"Chance{RoleName}");
+    ConfigDefinition ChanceConfigDefinition => new("Roles", $"Chance {this.GetType().FullName}");
 
-    bool AffectedByLight => Team == ModdedRoleTeams.Crewmate;
+    bool AffectedByLight => this.Team == ModdedRoleTeams.Crewmate;
 
-    bool CanGetKilled => Team == ModdedRoleTeams.Crewmate;
+    bool CanGetKilled => this.Team == ModdedRoleTeams.Crewmate;
 
-    bool IsNeutral => Team == ModdedRoleTeams.Neutral;
+    bool IsNeutral => this.Team == ModdedRoleTeams.Neutral;
 
-    bool CanKill => Team == ModdedRoleTeams.Impostor;
+    bool CanKill => this.Team == ModdedRoleTeams.Impostor;
 
-    bool CanUseVent => Team == ModdedRoleTeams.Impostor;
+    bool CanUseVent => this.Team == ModdedRoleTeams.Impostor;
 
-    bool TasksCount => Team == ModdedRoleTeams.Crewmate;
+    bool TasksCount => this.Team == ModdedRoleTeams.Crewmate;
 
     bool IsGhostRole => false;
 
     bool CreateCustomTab => true;
 
-    bool HideSettings => IsGhostRole;
+    bool HideSettings => this.IsGhostRole;
 
-    RoleTypes GhostRole => Team == ModdedRoleTeams.Crewmate ? RoleTypes.CrewmateGhost : RoleTypes.ImpostorGhost;
+    RoleTypes GhostRole => this.Team == ModdedRoleTeams.Crewmate ? RoleTypes.CrewmateGhost : RoleTypes.ImpostorGhost;
 
     MiraPluginInfo ParentMod => CustomRoleManager.FindParentMod(this);
 
@@ -68,9 +68,9 @@ public interface ICustomRole
     /// <param name="hudManager">Reference to HudManager instance</param>
     void HudUpdate(HudManager hudManager) { }
 
-    string GetCustomEjectionMessage(NetworkedPlayerInfo player)
+    string? GetCustomEjectionMessage(NetworkedPlayerInfo player)
     {
-        return Team == ModdedRoleTeams.Impostor ? $"{player.PlayerName} was The {RoleName}" : null;
+        return this.Team == ModdedRoleTeams.Impostor ? $"{player.PlayerName} was The {this.RoleName}" : null;
     }
 
     StringBuilder SetTabText()
@@ -86,9 +86,9 @@ public interface ICustomRole
 
     NetData GetNetData()
     {
-        ParentMod.PluginConfig.TryGetEntry<int>(NumConfigDefinition, out var numEntry);
-        ParentMod.PluginConfig.TryGetEntry<int>(ChanceConfigDefinition, out var chanceEntry);
+        this.ParentMod.PluginConfig.TryGetEntry<int>(this.NumConfigDefinition, out var numEntry);
+        this.ParentMod.PluginConfig.TryGetEntry<int>(this.ChanceConfigDefinition, out var chanceEntry);
 
-        return new NetData(RoleId.Get(GetType()), BitConverter.GetBytes(numEntry.Value).AddRangeToArray(BitConverter.GetBytes(chanceEntry.Value)));
+        return new NetData(RoleId.Get(this.GetType()), BitConverter.GetBytes(numEntry.Value).AddRangeToArray(BitConverter.GetBytes(chanceEntry.Value)));
     }
 }
