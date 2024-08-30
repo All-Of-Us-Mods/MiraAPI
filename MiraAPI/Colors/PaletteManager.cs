@@ -4,11 +4,19 @@ using HarmonyLib;
 
 namespace MiraAPI.Colors;
 
-internal static class PaletteManager
+/// <summary>
+/// Used to register and track custom colors.
+/// </summary>
+public static class PaletteManager
 {
-    public static readonly List<CustomColor> CustomColors = [];
-    
-    public static void RegisterAllColors()
+    /// <summary>
+    /// Gets all registered custom colors.
+    /// </summary>
+    public static CustomColor[] RegisteredColors => [.. CustomColors];
+
+    internal static readonly List<CustomColor> CustomColors = [];
+
+    internal static void RegisterAllColors()
     {
         var colors = CustomColors.Select(x => x.MainColor);
         var shadowColors = CustomColors.Select(x => x.ShadowColor);
@@ -17,5 +25,5 @@ internal static class PaletteManager
         Palette.PlayerColors = Palette.PlayerColors.ToArray().AddRangeToArray(colors.ToArray());
         Palette.ShadowColors = Palette.ShadowColors.ToArray().AddRangeToArray(shadowColors.ToArray());
         Palette.ColorNames = Palette.ColorNames.ToArray().AddRangeToArray(stringNames.ToArray());
-    } 
+    }
 }
