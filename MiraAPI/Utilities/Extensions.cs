@@ -331,15 +331,10 @@ public static class Extensions
     /// <returns>The closest player if there is one, false otherwise.</returns>
     public static PlayerControl? GetClosestPlayer(this PlayerControl playerControl, bool includeImpostors, float distance, bool ignoreColliders = false)
     {
-        if (!ShipStatus.Instance)
-        {
-            return null;
-        }
-
         var filteredPlayers = Helpers.GetClosestPlayers(playerControl, distance, ignoreColliders)
             .Where(playerInfo => !playerInfo.Data.Disconnected && playerInfo.PlayerId != playerControl.PlayerId && !playerInfo.Data.IsDead &&
                                  (includeImpostors || !playerInfo.Data.Role.IsImpostor));
 
-        return filteredPlayers.First();
+        return filteredPlayers.FirstOrDefault();
     }
 }
