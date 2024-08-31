@@ -151,7 +151,10 @@ public static class HudManagerPatches
             return;
         }
 
-        _roleTab?.gameObject.SetActive(isActive);
+        if (_roleTab)
+        {
+            _roleTab?.gameObject.SetActive(isActive);
+        }
 
         foreach (var button in CustomButtonManager.CustomButtons)
         {
