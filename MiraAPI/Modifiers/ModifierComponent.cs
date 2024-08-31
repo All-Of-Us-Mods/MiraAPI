@@ -26,9 +26,13 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
 
     private List<BaseModifier> Modifiers { get; set; } = [];
 
-    private PlayerControl _player = null!;
+    private PlayerControl? _player;
 
-    private TextMeshPro _modifierText = null!;
+    private TextMeshPro? _modifierText;
+
+    private readonly List<BaseModifier> _toRemove = [];
+
+    private readonly List<BaseModifier> _toAdd = [];
 
     internal void ClearModifiers()
     {
@@ -37,7 +41,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
             modifier.OnDeactivate();
         }
 
-        Modifiers.Clear();
+        _toRemove.AddRange(Modifiers);
     }
 
     private void Start()
@@ -56,6 +60,33 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
 
     private void FixedUpdate()
     {
+        foreach (var modifier in _toRemove)
+        {
+            modifier.OnDeactivate();
+            Modifiers.Remove(modifier);
+        }
+
+        foreach (var modifier in _toAdd)
+        {
+            Modifiers.Add(modifier);
+            modifier.OnActivate();
+
+            if (_player?.AmOwner == true && modifier is TimedModifier { AutoStart: true } timer)
+            {
+                timer.StartTimer();
+            }
+        }
+
+        if (_toAdd.Count > 0 || _toRemove.Count > 0)
+        {
+            if (_player?.AmOwner == true)
+            {
+                HudManager.Instance?.SetHudActive(true);
+            }
+            _toAdd.Clear();
+            _toRemove.Clear();
+        }
+
         foreach (var modifier in Modifiers)
         {
             modifier.FixedUpdate();
@@ -69,7 +100,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
             modifier.Update();
         }
 
-        if (!_modifierText || !_player.AmOwner)
+        if (!_modifierText || _player?.AmOwner == false)
         {
             return;
         }
@@ -89,9 +120,9 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
                     stringBuild.Append(CultureInfo.InvariantCulture, $" <size=70%>({Math.Round(timer.Duration - timer.TimeRemaining, 0)}s/{timer.Duration}s)</size>");
                 }
             }
-            _modifierText.text = $"<b><size=130%>Modifiers:</b></size>{stringBuild}";
+            _modifierText!.text = $"<b><size=130%>Modifiers:</b></size>{stringBuild}";
         }
-        else if (_modifierText.text != string.Empty)
+        else if (_modifierText!.text != string.Empty)
         {
             _modifierText.text = string.Empty;
         }
@@ -152,13 +183,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
             return;
         }
 
-        modifier.OnDeactivate();
-        Modifiers.Remove(modifier);
-
-        if (_player.AmOwner)
-        {
-            HudManager.Instance.SetHudActive(true);
-        }
+        _toRemove.Add(modifier);
     }
 
     /// <summary>
@@ -182,23 +207,9 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
             return null;
         }
 
-        Modifiers.Add(modifier);
+        _toAdd.Add(modifier);
         modifier.Player = _player;
         modifier.ModifierId = modifierId.Value;
-        modifier.OnActivate();
-
-        if (!_player.AmOwner)
-        {
-            return modifier;
-        }
-
-        if (modifier is TimedModifier { AutoStart: true } timer)
-        {
-            timer.StartTimer();
-        }
-
-        HudManager.Instance.SetHudActive(true);
-
         return modifier;
     }
 
