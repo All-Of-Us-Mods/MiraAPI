@@ -140,9 +140,9 @@ public static class ModifierManager
     {
         var data = new List<NetData>();
 
-        foreach (var player in GameData.Instance.AllPlayers)
+        foreach (var player in PlayerControl.AllPlayerControls)
         {
-            data.Add(GetPlayerModifiers(player.Object));
+            data.Add(GetPlayerModifiers(player));
         }
 
         Rpc<SyncModifiersRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, [.. data]);
@@ -178,8 +178,13 @@ public static class ModifierManager
         }
     }
 
-    private static NetData GetPlayerModifiers(PlayerControl player)
+    private static NetData GetPlayerModifiers(PlayerControl? player)
     {
+        if (player == null || !player)
+        {
+            return new NetData(0, []);
+        }
+
         List<byte> bytes = [];
         var modifierComponent = player.GetComponent<ModifierComponent>();
         if (modifierComponent == null || !modifierComponent)
