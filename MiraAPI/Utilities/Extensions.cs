@@ -197,6 +197,6 @@ public static class Extensions
             .Where(playerInfo => !playerInfo.Data.Disconnected && playerInfo.PlayerId != playerControl.PlayerId && !playerInfo.Data.IsDead &&
                                  (includeImpostors || !playerInfo.Data.Role.IsImpostor));
 
-        return filteredPlayers.First();
+        return filteredPlayers.FirstOrDefault();
     }
 }
