@@ -180,9 +180,9 @@ public static class ModifierManager
 
     private static NetData GetPlayerModifiers(PlayerControl player)
     {
-        var bytes = new List<byte>();
+        List<byte> bytes = [];
         var modifierComponent = player.GetComponent<ModifierComponent>();
-        if (modifierComponent == null)
+        if (modifierComponent == null || !modifierComponent)
         {
             return new NetData(player.PlayerId, []);
         }
