@@ -23,6 +23,5 @@ public static class GameStartupPatch
 
         _runOnce = true;
         CustomRoleManager.RegisterInRoleManager();
-        PaletteManager.RegisterAllColors();
     }
 }

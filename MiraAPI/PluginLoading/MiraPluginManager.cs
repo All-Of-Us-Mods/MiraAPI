@@ -47,6 +47,7 @@ internal class MiraPluginManager
 
             Logger<MiraApiPlugin>.Info($"Registering mod {pluginInfo.Metadata.GUID} with Mira API.");
         };
+        IL2CPPChainloader.Instance.Finished += PaletteManager.RegisterAllColors;
     }
 
     public MiraPluginInfo GetPluginByGuid(string guid)
