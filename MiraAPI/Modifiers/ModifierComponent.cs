@@ -114,7 +114,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
             var stringBuild = new StringBuilder();
             foreach (var mod in baseModifiers)
             {
-                stringBuild.Append(CultureInfo.InvariantCulture, $"\n{mod.ModifierName}");
+                stringBuild.Append(CultureInfo.InvariantCulture, $"\n{mod.GetHudString()}");
                 if (mod is TimedModifier timer)
                 {
                     stringBuild.Append(CultureInfo.InvariantCulture, $" <size=70%>({Math.Round(timer.Duration - timer.TimeRemaining, 0)}s/{timer.Duration}s)</size>");
