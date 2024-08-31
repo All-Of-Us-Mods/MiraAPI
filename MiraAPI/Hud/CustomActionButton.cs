@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace MiraAPI.Hud;
 
 /// <summary>
-/// Class for making custom action buttons. More customizable than the default Action/Ability buttons in the base game
+/// Class for making custom action buttons. More customizable than the default Action/Ability buttons in the base game.
 /// </summary>
 public abstract class CustomActionButton
 {
@@ -36,7 +36,7 @@ public abstract class CustomActionButton
     public abstract LoadableAsset<Sprite> Sprite { get; }
 
     /// <summary>
-    /// Gets the location of the button on the screen
+    /// Gets the location of the button on the screen.
     /// </summary>
     public virtual ButtonLocation Location => ButtonLocation.BottomLeft;
 
@@ -339,7 +339,7 @@ public abstract class CustomActionButton<T> : CustomActionButton where T : MonoB
     /// <summary>
     /// Sets the outline of the target object.
     /// </summary>
-    /// <param name="active">Should the outline be active</param>
+    /// <param name="active">Should the outline be active.</param>
     public abstract void SetOutline(bool active);
 
     /// <inheritdoc />
