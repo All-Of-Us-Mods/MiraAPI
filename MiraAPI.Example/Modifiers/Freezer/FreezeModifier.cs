@@ -14,7 +14,7 @@ public class FreezeModifier : TimedModifier
 
     public override void OnActivate()
     {
-        if (Player.AmOwner)
+        if (Player?.AmOwner == true)
         {
             Player.moveable = false;
         }
@@ -22,7 +22,7 @@ public class FreezeModifier : TimedModifier
 
     public override void OnTimerComplete()
     {
-        if (Player.AmOwner)
+        if (Player?.AmOwner == true)
         {
             Player.moveable = true;
         }
