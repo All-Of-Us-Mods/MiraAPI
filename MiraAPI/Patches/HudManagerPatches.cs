@@ -65,7 +65,10 @@ public static class HudManagerPatches
             }
 
             default:
-                _roleTab?.gameObject.Destroy();
+                if (_roleTab != null && _roleTab.gameObject != null)
+                {
+                    _roleTab.gameObject.Destroy();
+                }
                 break;
         }
     }
