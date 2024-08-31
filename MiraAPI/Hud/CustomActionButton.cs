@@ -311,9 +311,9 @@ public abstract class CustomActionButton
 public abstract class CustomActionButton<T> : CustomActionButton where T : MonoBehaviour
 {
     /// <summary>
-    /// Gets the target object of the button.
+    /// Gets or sets the target object of the button.
     /// </summary>
-    public T? Target { get; private set; }
+    public T? Target { get; protected set; }
 
     /// <summary>
     /// Gets the distance the player must be from the target object to use the button.

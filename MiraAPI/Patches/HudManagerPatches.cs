@@ -14,16 +14,16 @@ namespace MiraAPI.Patches;
 [HarmonyPatch(typeof(HudManager))]
 public static class HudManagerPatches
 {
-    // Custom buttons parent
+    // Custom buttons parent.
     private static GameObject? _bottomLeft;
 
-    // Custom role tab
+    // Custom role tab.
     private static TaskPanelBehaviour? _roleTab;
 
     /// <summary>
-    /// Update custom role tab and custom role hud elements
+    /// Update custom role tab and custom role hud elements.
     /// </summary>
-    /// <param name="__instance">The HudManager instance</param>
+    /// <param name="__instance">The HudManager instance.</param>
     [HarmonyPostfix]
     [HarmonyPatch(nameof(HudManager.Update))]
     public static void UpdatePostfix(HudManager __instance)
@@ -65,7 +65,7 @@ public static class HudManagerPatches
             }
 
             default:
-                if (_roleTab != null && _roleTab.gameObject != null)
+                if (_roleTab != null)
                 {
                     _roleTab.gameObject.Destroy();
                 }
@@ -85,7 +85,7 @@ public static class HudManagerPatches
     }*/
 
     /// <summary>
-    /// Create custom buttons and arrange them on the hud
+    /// Create custom buttons and arrange them on the hud.
     /// </summary>
     /// <param name="__instance">The HudManager instance.</param>
     [HarmonyPostfix]
@@ -136,7 +136,7 @@ public static class HudManagerPatches
     }
 
     /// <summary>
-    /// Set the custom role tab and custom buttons active when the hud is active
+    /// Set the custom role tab and custom buttons active when the hud is active.
     /// </summary>
     /// <param name="__instance">HudManager instance.</param>
     /// <param name="localPlayer">The local PlayerControl.</param>
