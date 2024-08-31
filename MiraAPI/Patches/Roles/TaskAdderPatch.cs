@@ -2,7 +2,6 @@
 using HarmonyLib;
 using Il2CppSystem;
 using Il2CppSystem.Collections.Generic;
-using Il2CppSystem.Text;
 using MiraAPI.PluginLoading;
 using MiraAPI.Roles;
 using MiraAPI.Utilities.Assets;
@@ -63,7 +62,7 @@ public static class TaskAdderPatch
         _rolesFolder.FolderName = "Roles";
         _rolesFolder.name = "RolesFolder";
 
-        foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins.Values)
+        foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins())
         {
             var newFolder = Object.Instantiate(__instance.RootFolderPrefab, _scroller.Inner);
             newFolder.FolderName = newFolder.name = plugin.PluginInfo.Metadata.Name;

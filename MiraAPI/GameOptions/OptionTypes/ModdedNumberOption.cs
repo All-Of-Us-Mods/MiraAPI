@@ -80,17 +80,12 @@ public class ModdedNumberOption : ModdedOption<float>
         SetValue(BitConverter.ToSingle(data));
     }
 
-    public override string GetHudStringText()
-    {
-        return Title + ": " + Value + Helpers.GetSuffix(SuffixType);
-    }
-
     public override float GetValueFromOptionBehaviour(OptionBehaviour optionBehaviour)
     {
         return Mathf.Clamp(optionBehaviour.GetFloat(), Min, Max);
     }
 
-    public override void OnValueChanged(float newValue)
+    protected override void OnValueChanged(float newValue)
     {
         Value = Mathf.Clamp(newValue, Min, Max);
         DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, Data.GetValueString(Value), false);

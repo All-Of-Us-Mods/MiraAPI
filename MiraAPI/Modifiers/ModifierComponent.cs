@@ -1,31 +1,51 @@
-﻿using MiraAPI.Modifiers.Types;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using MiraAPI.Modifiers.Types;
 using MiraAPI.Utilities;
 using Reactor.Utilities;
 using Reactor.Utilities.Attributes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using TMPro;
 using UnityEngine;
 
 namespace MiraAPI.Modifiers;
 
+/// <summary>
+/// The component for handling modifiers.
+/// </summary>
 [RegisterInIl2Cpp]
 public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
 {
-    public List<BaseModifier> ActiveModifiers { get; private set; }
+    /// <summary>
+    /// Gets the active modifiers on the player.
+    /// </summary>
+    public ImmutableList<BaseModifier> ActiveModifiers => Modifiers.ToImmutableList();
 
-    public PlayerControl player;
+    private List<BaseModifier> Modifiers { get; set; } = [];
 
-    private TextMeshPro _modifierText;
+    private PlayerControl _player = null!;
 
-    public void Start()
+    private TextMeshPro _modifierText = null!;
+
+    internal void ClearModifiers()
     {
-        player = GetComponent<PlayerControl>();
-        ActiveModifiers = [];
+        foreach (var modifier in Modifiers)
+        {
+            modifier.OnDeactivate();
+        }
 
-        if (!player.AmOwner)
+        Modifiers.Clear();
+    }
+
+    private void Start()
+    {
+        _player = GetComponent<PlayerControl>();
+        Modifiers = [];
+
+        if (!_player.AmOwner)
         {
             return;
         }
@@ -34,55 +54,56 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
         _modifierText.verticalAlignment = VerticalAlignmentOptions.Top;
     }
 
-    public void FixedUpdate()
+    private void FixedUpdate()
     {
-        if (ActiveModifiers is null) return;
-
-        foreach (var modifier in ActiveModifiers)
+        foreach (var modifier in Modifiers)
         {
-            if (modifier is null) continue;
-
             modifier.FixedUpdate();
         }
     }
 
-    public void Update()
+    private void Update()
     {
-        if (ActiveModifiers is null) return;
-
-        foreach (var modifier in ActiveModifiers)
+        foreach (var modifier in Modifiers)
         {
-            if (modifier is null) continue;
-
             modifier.Update();
         }
 
-        var filteredModifiers = ActiveModifiers.Where(mod => !mod.HideOnUi);
+        if (!_modifierText || !_player.AmOwner)
+        {
+            return;
+        }
+
+        var filteredModifiers = Modifiers.Where(mod => !mod.HideOnUi);
 
         var baseModifiers = filteredModifiers as BaseModifier[] ?? filteredModifiers.ToArray();
 
-        if (player.AmOwner && baseModifiers.Any())
+        if (baseModifiers.Length != 0)
         {
             var stringBuild = new StringBuilder();
             foreach (var mod in baseModifiers)
             {
-                stringBuild.Append($"\n{mod.ModifierName}");
+                stringBuild.Append(CultureInfo.InvariantCulture, $"\n{mod.ModifierName}");
                 if (mod is TimedModifier timer)
                 {
-                    stringBuild.Append($" <size=70%>({Math.Round(timer.Duration - timer.TimeRemaining, 0)}s/{timer.Duration}s)</size>");
+                    stringBuild.Append(CultureInfo.InvariantCulture, $" <size=70%>({Math.Round(timer.Duration - timer.TimeRemaining, 0)}s/{timer.Duration}s)</size>");
                 }
             }
             _modifierText.text = $"<b><size=130%>Modifiers:</b></size>{stringBuild}";
         }
-        else if (player.AmOwner && !baseModifiers.Any() && _modifierText.text != string.Empty)
+        else if (_modifierText.text != string.Empty)
         {
             _modifierText.text = string.Empty;
         }
     }
 
+    /// <summary>
+    /// Removes a modifier from the player.
+    /// </summary>
+    /// <param name="type">The modifier type.</param>
     public void RemoveModifier(Type type)
     {
-        var modifier = ActiveModifiers.Find(x => x.GetType() == type);
+        var modifier = Modifiers.Find(x => x.GetType() == type);
 
         if (modifier is null)
         {
@@ -93,14 +114,22 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
         RemoveModifier(modifier);
     }
 
+    /// <summary>
+    /// Removes a modifier from the player.
+    /// </summary>
+    /// <typeparam name="T">The modifier type.</typeparam>
     public void RemoveModifier<T>() where T : BaseModifier
     {
         RemoveModifier(typeof(T));
     }
 
+    /// <summary>
+    /// Removes a modifier from the player.
+    /// </summary>
+    /// <param name="modifierId">The modifier ID.</param>
     public void RemoveModifier(uint modifierId)
     {
-        var modifier = ActiveModifiers.Find(x => x.ModifierId == modifierId);
+        var modifier = Modifiers.Find(x => x.ModifierId == modifierId);
 
         if (modifier is null)
         {
@@ -111,37 +140,54 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
         RemoveModifier(modifier);
     }
 
+    /// <summary>
+    /// Removes a modifier from the player.
+    /// </summary>
+    /// <param name="modifier">The modifier object.</param>
     public void RemoveModifier(BaseModifier modifier)
     {
-        if (!ActiveModifiers.Contains(modifier))
+        if (!Modifiers.Contains(modifier))
         {
             Logger<MiraApiPlugin>.Error($"Cannot remove modifier {modifier.ModifierName} because it is not active on this player.");
             return;
         }
 
         modifier.OnDeactivate();
-        ActiveModifiers.Remove(modifier);
+        Modifiers.Remove(modifier);
 
-        if (player.AmOwner)
+        if (_player.AmOwner)
         {
             HudManager.Instance.SetHudActive(true);
         }
     }
 
-    public BaseModifier AddModifier(BaseModifier modifier)
+    /// <summary>
+    /// Adds a modifier to the player.
+    /// </summary>
+    /// <param name="modifier">The modifier to add.</param>
+    /// <returns>The modifier that was added.</returns>
+    public BaseModifier? AddModifier(BaseModifier modifier)
     {
-        if (ActiveModifiers.Contains(modifier))
+        if (Modifiers.Contains(modifier))
         {
             Logger<MiraApiPlugin>.Error($"Player already has modifier with id {modifier.ModifierId}!");
             return null;
         }
 
-        ActiveModifiers.Add(modifier);
-        modifier.Player = player;
-        modifier.ModifierId = ModifierManager.TypeToIdModifiers[modifier.GetType()];
+        var modifierId = ModifierManager.GetModifierId(modifier.GetType());
+
+        if (modifierId == null)
+        {
+            Logger<MiraApiPlugin>.Error($"Cannot add modifier {modifier.GetType().Name} because it has no ID!");
+            return null;
+        }
+
+        Modifiers.Add(modifier);
+        modifier.Player = _player;
+        modifier.ModifierId = modifierId.Value;
         modifier.OnActivate();
 
-        if (!player.AmOwner)
+        if (!_player.AmOwner)
         {
             return modifier;
         }
@@ -156,23 +202,27 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
         return modifier;
     }
 
-    public BaseModifier AddModifier(Type type)
+    /// <summary>
+    /// Adds a modifier to the player.
+    /// </summary>
+    /// <param name="type">The modifier type.</param>
+    /// <returns>The modifier that was added.</returns>
+    public BaseModifier? AddModifier(Type type)
     {
-        if (!ModifierManager.TypeToIdModifiers.TryGetValue(type, out var modifierId))
+        var modifierId = ModifierManager.GetModifierId(type);
+        if (modifierId == null)
         {
             Logger<MiraApiPlugin>.Error($"Cannot add modifier {type.Name} because it is not registered.");
             return null;
         }
 
-        if (ActiveModifiers.Find(x => x.ModifierId == modifierId) != null)
+        if (Modifiers.Find(x => x.ModifierId == modifierId) != null)
         {
             Logger<MiraApiPlugin>.Error($"Player already has modifier with id {modifierId}!");
             return null;
         }
 
-        var modifier = (BaseModifier)Activator.CreateInstance(type);
-
-        if (modifier is null)
+        if (Activator.CreateInstance(type) is not BaseModifier modifier)
         {
             Logger<MiraApiPlugin>.Error($"Cannot add modifier {type.Name} because it is null.");
             return null;
@@ -183,7 +233,12 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
         return modifier;
     }
 
-    public T AddModifier<T>() where T : BaseModifier
+    /// <summary>
+    /// Adds a modifier to the player.
+    /// </summary>
+    /// <typeparam name="T">The Type of the modifier.</typeparam>
+    /// <returns>The new modifier.</returns>
+    public T? AddModifier<T>() where T : BaseModifier
     {
         return AddModifier(typeof(T)) as T;
     }

@@ -99,7 +99,7 @@ public static class Extensions
 
         if (current.Count > 0)
         {
-            chunks.Enqueue(current.ToArray());
+            chunks.Enqueue([.. current]);
         }
 
         return chunks;
@@ -112,7 +112,7 @@ public static class Extensions
     /// <returns>True if the OptionBehaviour is for a custom options, false otherwise.</returns>
     public static bool IsCustom(this OptionBehaviour optionBehaviour)
     {
-        return ModdedOptionsManager.ModdedOptions.Values.Any(opt => opt.OptionBehaviour && opt.OptionBehaviour.Equals(optionBehaviour));
+        return ModdedOptionsManager.ModdedOptions.Values.Any(opt => opt.OptionBehaviour && opt.OptionBehaviour == optionBehaviour);
     }
 
     private static readonly Dictionary<PlayerControl, ModifierComponent> ModifierComponents = [];
@@ -208,13 +208,15 @@ public static class Extensions
     /// <typeparam name="T">The Type of the Modifier.</typeparam>
     public static void RpcRemoveModifier<T>(this PlayerControl player) where T : BaseModifier
     {
-        if (!ModifierManager.TypeToIdModifiers.TryGetValue(typeof(T), out var id))
+        var id = ModifierManager.GetModifierId(typeof(T));
+
+        if (id == null)
         {
             Logger<MiraApiPlugin>.Error($"Cannot add modifier {typeof(T).Name} because it is not registered.");
             return;
         }
 
-        player.RpcRemoveModifier(id);
+        player.RpcRemoveModifier(id.Value);
     }
 
     /// <summary>
@@ -225,13 +227,13 @@ public static class Extensions
     [MethodRpc((uint)MiraRpc.AddModifier)]
     public static void RpcAddModifier(this PlayerControl target, uint modifierId)
     {
-        if (ModifierManager.IdToTypeModifiers.TryGetValue(modifierId, out var type))
+        var type = ModifierManager.GetModifierType(modifierId);
+        if (type == null)
         {
-            target.GetModifierComponent()?.AddModifier(type);
+            Logger<MiraApiPlugin>.Error($"Cannot add modifier with id {modifierId} because it is not registered.");
             return;
         }
-
-        Logger<MiraApiPlugin>.Error($"Cannot add modifier with id {modifierId} because it is not registered.");
+        target.GetModifierComponent()?.AddModifier(type);
     }
 
     /// <summary>
@@ -241,13 +243,14 @@ public static class Extensions
     /// <typeparam name="T">The modifier Type.</typeparam>
     public static void RpcAddModifier<T>(this PlayerControl player) where T : BaseModifier
     {
-        if (!ModifierManager.TypeToIdModifiers.TryGetValue(typeof(T), out var id))
+        var id = ModifierManager.GetModifierId(typeof(T));
+        if (id == null)
         {
             Logger<MiraApiPlugin>.Error($"Cannot add modifier {typeof(T).Name} because it is not registered.");
             return;
         }
 
-        player.RpcAddModifier(id);
+        player.RpcAddModifier(id.Value);
     }
 
     /// <summary>

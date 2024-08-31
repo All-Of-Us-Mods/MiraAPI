@@ -1,25 +1,24 @@
-﻿using MiraAPI.PluginLoading;
-using System;
+﻿using System;
 using BepInEx.Configuration;
 using MiraAPI.Networking;
+using MiraAPI.PluginLoading;
 using UnityEngine;
 
 namespace MiraAPI.GameOptions;
 
-public interface IModdedOption
+internal interface IModdedOption
 {
-    public uint Id { get; }
-    public BaseGameSetting Data { get; }
-    public IMiraPlugin? ParentMod { get; set; }
-    public Type AdvancedRole { get; set; }
-    public OptionBehaviour OptionBehaviour { get; }
-    public string Title { get; }
-    public StringNames StringName { get; }
-    public Func<bool> Visible { get; set; }
-    public ConfigDefinition? ConfigDefinition { get; set; }
-    public void ValueChanged(OptionBehaviour optionBehaviour);
-    public OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container);
-    public abstract float GetFloatData();
-    public NetData GetNetData();
-    public void HandleNetData(byte[] data);
+    uint Id { get; }
+    string Title { get; }
+    StringNames StringName { get; }
+    IMiraPlugin? ParentMod { get; set; }
+    BaseGameSetting? Data { get; }
+    Type? AdvancedRole { get; set; }
+    OptionBehaviour? OptionBehaviour { get; }
+    Func<bool> Visible { get; set; }
+    ConfigDefinition? ConfigDefinition { get; set; }
+    OptionBehaviour? CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container);
+    float GetFloatData();
+    NetData GetNetData();
+    void HandleNetData(byte[] data);
 }

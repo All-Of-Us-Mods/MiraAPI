@@ -47,17 +47,12 @@ public class ModdedToggleOption : ModdedOption<bool>
         SetValue(BitConverter.ToBoolean(data));
     }
 
-    public override string GetHudStringText()
-    {
-        return Title + ": " + (Value ? "On" : "Off");
-    }
-
     public override bool GetValueFromOptionBehaviour(OptionBehaviour optionBehaviour)
     {
         return optionBehaviour.GetBool();
     }
 
-    public override void OnValueChanged(bool newValue)
+    protected override void OnValueChanged(bool newValue)
     {
         DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, newValue ? "On" : "Off", false);
         if (!OptionBehaviour)

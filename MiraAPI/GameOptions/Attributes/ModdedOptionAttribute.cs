@@ -11,10 +11,7 @@ namespace MiraAPI.GameOptions.Attributes;
 [AttributeUsage(AttributeTargets.Property)]
 public abstract class ModdedOptionAttribute(string title, Type? roleType = null) : Attribute
 {
-    /// <summary>
-    /// Gets the IModdedOption object that this attribute is attached to.
-    /// </summary>
-    public IModdedOption? HolderOption { get; internal set; }
+    internal IModdedOption? HolderOption { get; set; }
 
     /// <summary>
     /// Gets the title of the option.

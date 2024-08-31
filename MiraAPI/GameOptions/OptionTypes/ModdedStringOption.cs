@@ -55,17 +55,12 @@ public class ModdedStringOption : ModdedOption<int>
         SetValue(BitConverter.ToInt32(data));
     }
 
-    public override string GetHudStringText()
-    {
-        return Title + ": " + Values[Value];
-    }
-
     public override int GetValueFromOptionBehaviour(OptionBehaviour optionBehaviour)
     {
         return optionBehaviour.GetInt();
     }
 
-    public override void OnValueChanged(int newValue)
+    protected override void OnValueChanged(int newValue)
     {
         DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(StringName, Data.GetValueString(newValue), false);
         if (!OptionBehaviour)

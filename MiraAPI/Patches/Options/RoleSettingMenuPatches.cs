@@ -30,7 +30,7 @@ public static class RoleSettingMenuPatches
         var maskBg = __instance.scrollBar.transform.FindChild("MaskBg");
         var hitbox = __instance.scrollBar.transform.FindChild("Hitbox");
 
-        if (GameSettingMenuPatches.CurrentSelectedMod == 0)
+        if (GameSettingMenuPatches.SelectedModIdx == 0)
         {
             __instance.AllButton.transform.parent.gameObject.SetActive(true);
             __instance.AllButton.gameObject.SetActive(true);
@@ -127,7 +127,7 @@ public static class RoleSettingMenuPatches
     [HarmonyPatch(nameof(RolesSettingsMenu.Update))]
     public static bool UpdatePatch()
     {
-        return GameSettingMenuPatches.CurrentSelectedMod == 0;
+        return GameSettingMenuPatches.SelectedModIdx == 0;
     }
 
     [HarmonyPostfix]

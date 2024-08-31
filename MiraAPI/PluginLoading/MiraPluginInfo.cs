@@ -6,16 +6,44 @@ using System.Collections.Generic;
 
 namespace MiraAPI.PluginLoading;
 
-public class MiraPluginInfo(IMiraPlugin miraPlugin, PluginInfo info)
+/// <summary>
+/// Represents a Mira plugin.
+/// </summary>
+public class MiraPluginInfo
 {
-    public string PluginId { get; set; } = info.Metadata.GUID;
-    public IMiraPlugin MiraPlugin { get; set; } = miraPlugin;
-    public PluginInfo PluginInfo { get; set; } = info;
-    public ConfigFile PluginConfig { get; set; } = miraPlugin.GetConfigFile();
+    internal MiraPluginInfo(IMiraPlugin miraPlugin, PluginInfo info)
+    {
+        MiraPlugin = miraPlugin;
+        PluginConfig = miraPlugin.GetConfigFile();
+        PluginInfo = info;
+        PluginId = info.Metadata.GUID;
+    }
 
-    public readonly List<AbstractOptionGroup> OptionGroups = [];
-    public readonly List<IModdedOption> Options = [];
+    internal List<AbstractOptionGroup> OptionGroups { get; } = [];
 
-    public readonly Dictionary<ushort, RoleBehaviour> CustomRoles = [];
-    internal readonly Dictionary<int, CustomGameMode> GameModes = [];
+    internal List<IModdedOption> Options { get; } = [];
+
+    internal Dictionary<ushort, RoleBehaviour> CustomRoles { get; } = [];
+
+    internal Dictionary<int, CustomGameMode> GameModes { get; } = [];
+
+    /// <summary>
+    /// Gets the plugin's ID, as defined in the plugin's BepInEx metadata.
+    /// </summary>
+    public string PluginId { get; }
+
+    /// <summary>
+    /// Gets the plugin's instance as an <see cref="IMiraPlugin"/>.
+    /// </summary>
+    public IMiraPlugin MiraPlugin { get; }
+
+    /// <summary>
+    /// Gets the plugin's BepInEx metadata.
+    /// </summary>
+    public PluginInfo PluginInfo { get; }
+
+    /// <summary>
+    /// Gets the plugin's configuration file.
+    /// </summary>
+    public ConfigFile PluginConfig { get; }
 }
