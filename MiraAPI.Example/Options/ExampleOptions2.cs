@@ -15,8 +15,6 @@ public class ExampleOptions2 : AbstractOptionGroup
         Visible = () => OptionGroupSingleton<ExampleOptions2>.Instance.ToggleOpt1.Value,
     };
 
-    public ModdedStringOption StringOpt { get; } = new("String Opt", 0, ["Choice 1", "Choice 2", "Choice 3"]);
-
     public ModdedEnumOption EnumOpt { get; } = new("Enum Opt", 0, typeof(TestingData))
     {
         ChangedEvent = x => Logger<ExamplePlugin>.Info($"changed Enum Opt to {x}"),
