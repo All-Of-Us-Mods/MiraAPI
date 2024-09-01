@@ -118,7 +118,7 @@ public float SussyLevel { get; set; } = 4f; // You can set a default value here.
 
 Here are the available Option Attributes and their signatures:
 ```csharp
-ModdedEnumOption(string name, Type enumType, Type roleType = null)
+ModdedEnumOption(string name, Type enumType, string[]? values = null, Type? roleType = null)
     
 ModdedNumberOption(
     string name,
@@ -127,11 +127,9 @@ ModdedNumberOption(
     float increment=1
     NumberSuffixes suffixType = NumberSuffixes.None,
     bool zeroInfinity = false,
-    Type roleType = null)
-    
-ModdedStringOption(string title, string[] values, Type roleType = null)
+    Type? roleType = null)
 
-ModdedToggleOption(string name, Type roleType = null)
+ModdedToggleOption(string name, Type? roleType = null)
 ```
 
 ### ModdedOption Properties
@@ -144,7 +142,6 @@ public ModdedToggleOption YeezusAbility { get; } = new ModdedToggleOption("Yeezu
 Here is a full list of ModdedOption classes you can use: 
 - `ModdedEnumOption`
 - `ModdedNumberOption`
-- `ModdedStringOption`
 - `ModdedToggleOption`
 
 To see a full example of an options class, see [this file](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/Options/ExampleOptions.cs).

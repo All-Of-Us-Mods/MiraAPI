@@ -1,5 +1,4 @@
-﻿#nullable enable
-using HarmonyLib;
+﻿using HarmonyLib;
 using MiraAPI.PluginLoading;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities.Extensions;
@@ -13,17 +12,30 @@ using Object = UnityEngine.Object;
 
 namespace MiraAPI.Patches.Options;
 
+/// <summary>
+/// Patches for the <see cref="GameSettingMenu"/> to add support for custom options.
+/// </summary>
 [HarmonyPatch(typeof(GameSettingMenu))]
 public static class GameSettingMenuPatches
 {
-    public static int CurrentSelectedMod { get; private set; }
+    /// <summary>
+    /// Gets the currently selected mod index.
+    /// </summary>
+    public static int SelectedModIdx { get; private set; }
 
+    /// <summary>
+    /// Gets the currently selected mod.
+    /// </summary>
     public static MiraPluginInfo? SelectedMod { get; private set; }
 
     private static TextMeshPro? _text;
 
     private static Vector3 _roleBtnOgPos;
 
+    /// <summary>
+    /// Prefix for the <see cref="GameSettingMenu.Start"/> method. Sets up the custom options.
+    /// </summary>
+    /// <param name="__instance">The GameSettingMenu instance.</param>
     [HarmonyPrefix]
     [HarmonyPatch(nameof(GameSettingMenu.Start))]
     public static void StartPrefix(GameSettingMenu __instance)
@@ -57,11 +69,12 @@ public static class GameSettingMenuPatches
         passiveButton.OnClick = new ButtonClickedEvent();
         passiveButton.OnClick.AddListener((UnityAction)(() =>
         {
-            if (CurrentSelectedMod != MiraPluginManager.Instance.RegisteredPlugins.Count)
+            SelectedModIdx += 1;
+            if (SelectedModIdx > MiraPluginManager.Instance.RegisteredPlugins().Length)
             {
-                CurrentSelectedMod += 1;
-                UpdateText(__instance, __instance.GameSettingsTab, __instance.RoleSettingsTab);
+                SelectedModIdx = 0;
             }
+            UpdateText(__instance, __instance.GameSettingsTab, __instance.RoleSettingsTab);
         }));
 
         var backButton = Object.Instantiate(nextButton, __instance.BackButton.transform.parent).gameObject;
@@ -71,17 +84,18 @@ public static class GameSettingMenuPatches
         backButton.transform.FindChild("Active").gameObject.GetComponent<SpriteRenderer>().flipX = backButton.transform.FindChild("Inactive").gameObject.GetComponent<SpriteRenderer>().flipX = true;
         backButton.gameObject.GetComponent<PassiveButton>().OnClick.AddListener((UnityAction)(() =>
         {
-            if (CurrentSelectedMod != 0)
+            SelectedModIdx -= 1;
+            if (SelectedModIdx < 0)
             {
-                CurrentSelectedMod -= 1;
-                UpdateText(__instance, __instance.GameSettingsTab, __instance.RoleSettingsTab);
+                SelectedModIdx = MiraPluginManager.Instance.RegisteredPlugins().Length;
             }
+            UpdateText(__instance, __instance.GameSettingsTab, __instance.RoleSettingsTab);
         }));
     }
 
     private static void UpdateText(GameSettingMenu menu, GameOptionsMenu settings, RolesSettingsMenu roles)
     {
-        if (_text is not null && CurrentSelectedMod == 0)
+        if (_text is not null && SelectedModIdx == 0)
         {
             _text.text = "Default";
             _text.fontSizeMax = 3.2f;
@@ -89,22 +103,17 @@ public static class GameSettingMenuPatches
         else if (_text is not null)
         {
             _text.fontSizeMax = 2.3f;
-            SelectedMod = MiraPluginManager.Instance.RegisteredPlugins.ElementAt(CurrentSelectedMod - 1).Value;
-            if (SelectedMod == null)
-            {
-                CurrentSelectedMod = 0;
-                UpdateText(menu, settings, roles);
-            }
+            SelectedMod = MiraPluginManager.Instance.RegisteredPlugins()[SelectedModIdx - 1];
 
-            var name = SelectedMod?.MiraPlugin.OptionsTitleText;
-            _text.text = name?[..Math.Min(name.Length, 25)];
+            var name = SelectedMod.MiraPlugin.OptionsTitleText;
+            _text.text = name[..Math.Min(name.Length, 25)];
         }
 
         menu.RoleSettingsButton.transform.localPosition = _roleBtnOgPos;
         menu.GameSettingsButton.gameObject.SetActive(true);
         menu.RoleSettingsButton.gameObject.SetActive(true);
 
-        if (CurrentSelectedMod != 0)
+        if (SelectedModIdx != 0)
         {
             if (SelectedMod?.Options.Where(x=>x.AdvancedRole==null).ToList().Count == 0)
             {
@@ -122,7 +131,7 @@ public static class GameSettingMenuPatches
             }
         }
 
-        if (roles?.roleChances != null && SelectedMod != null && SelectedMod.CustomRoles.Count != 0)
+        if (roles.roleChances != null && SelectedMod != null && SelectedMod.CustomRoles.Count != 0)
         {
             if (roles.advancedSettingChildren is not null)
             {

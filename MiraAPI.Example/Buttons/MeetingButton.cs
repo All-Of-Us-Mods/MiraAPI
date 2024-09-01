@@ -1,9 +1,10 @@
-﻿using MiraAPI.Example;
-using MiraAPI.Example.Modifiers;
+﻿using MiraAPI.Example.Modifiers;
 using MiraAPI.Hud;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using UnityEngine;
+
+namespace MiraAPI.Example.Buttons;
 
 [RegisterButton]
 public class MeetingButton : CustomActionButton
@@ -18,7 +19,7 @@ public class MeetingButton : CustomActionButton
 
     public override LoadableAsset<Sprite> Sprite => ExampleAssets.ExampleButton;
 
-    public override bool Enabled(RoleBehaviour role)
+    public override bool Enabled(RoleBehaviour? role)
     {
         return PlayerControl.LocalPlayer.HasModifier<CaptainModifier>();
     }

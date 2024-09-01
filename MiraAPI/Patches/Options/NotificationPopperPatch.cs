@@ -16,8 +16,8 @@ public class NotificationPopperPatch
     {
         if (CustomRoleManager.CustomRoles.Values.Any(role => role.StringName == key))
         {
-            string item = string.Empty;
-            string text = (teamType == RoleTeamTypes.Crewmate) ? Palette.CrewmateSettingChangeText.ToTextColor() : Palette.ImpostorRed.ToTextColor();
+            var item = string.Empty;
+            var text = (teamType == RoleTeamTypes.Crewmate) ? Palette.CrewmateSettingChangeText.ToTextColor() : Palette.ImpostorRed.ToTextColor();
             item = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.LobbyChangeSettingNotificationRole, new Object[]
             {
             string.Concat(

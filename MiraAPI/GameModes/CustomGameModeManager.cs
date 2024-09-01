@@ -1,5 +1,4 @@
-﻿#nullable enable
-using Reactor.Utilities;
+﻿using Reactor.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;

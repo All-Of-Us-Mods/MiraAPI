@@ -4,24 +4,33 @@ using System.Reflection;
 
 namespace MiraAPI.GameOptions.Attributes;
 
-public class ModdedEnumOptionAttribute(string title, Type enumType, string[] values = null, Type roleType = null)
+/// <summary>
+/// Attribute for creating an enum option.
+/// </summary>
+[AttributeUsage(AttributeTargets.Property)]
+public class ModdedEnumOptionAttribute(string title, Type enumType, string[]? values = null, Type? roleType = null)
     : ModdedOptionAttribute(title, roleType)
 {
-    internal override IModdedOption CreateOption(object value, PropertyInfo property)
+    internal override IModdedOption CreateOption(object? value, PropertyInfo property)
     {
-        var opt = new ModdedEnumOption(Title, (int)value, enumType, values, RoleType);
+        var opt = new ModdedEnumOption(Title, (int)(value ?? 0), enumType, values, RoleType);
         return opt;
     }
 
+    /// <inheritdoc />
     public override void SetValue(object value)
     {
         var opt = HolderOption as ModdedEnumOption;
-        opt.SetValue((int)value);
+        opt?.SetValue((int)value);
     }
 
+    /// <inheritdoc />
     public override object GetValue()
     {
-        var opt = HolderOption as ModdedEnumOption;
-        return Enum.ToObject(enumType, opt.Value);
+        if (HolderOption is ModdedEnumOption opt)
+        {
+            return Enum.ToObject(enumType, opt.Value);
+        }
+        throw new InvalidOperationException($"HolderOption for option \"{Title}\" with EnumType ${enumType.FullName} is not a ModdedEnumOption");
     }
 }

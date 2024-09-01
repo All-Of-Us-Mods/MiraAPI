@@ -19,16 +19,13 @@ public class ExampleOptions : AbstractOptionGroup
     [ModdedNumberOption("Number Opt", min: 0, max: 10, suffixType: MiraNumberSuffixes.Percent)]
     public float NumberOpt { get; set; } = 4f;
 
-    [ModdedStringOption("String Opt", ["Hello", "Hey", "Bye"])]
-    public int StringOpt { get; set; } = 2;
-
-    [ModdedEnumOption("Best API", typeof(BestApiEnum), ["Mira API", "Mitochondria", "Reactor"])]
-    public BestApiEnum EnumOpt { get; set; } = BestApiEnum.MiraAPI;
+    [ModdedEnumOption("Best API", typeof(BestApi), ["Mira API", "Mitochondria", "Reactor"])]
+    public BestApi Opt { get; set; } = BestApi.MiraAPI;
 }
 
-public enum BestApiEnum
+public enum BestApi
 {
     MiraAPI,
     Mitochondria,
-    Reactor
+    Reactor,
 }

@@ -21,9 +21,9 @@ public class FreezeButton : CustomActionButton<PlayerControl>
         Target?.RpcAddModifier<FreezeModifier>();
     }
 
-    public override PlayerControl GetTarget()
+    public override PlayerControl? GetTarget()
     {
-        return PlayerControl.LocalPlayer.Data.Role.FindClosestTarget();
+        return PlayerControl.LocalPlayer.GetClosestPlayer(true, Distance, false);
     }
 
     public override void SetOutline(bool active)
@@ -31,14 +31,13 @@ public class FreezeButton : CustomActionButton<PlayerControl>
         Target?.cosmetics.SetOutline(active, new Il2CppSystem.Nullable<Color>(Palette.Blue));
     }
 
-    public override bool IsTargetValid(PlayerControl target)
+    public override bool IsTargetValid(PlayerControl? target)
     {
         return true;
     }
 
-    public override bool Enabled(RoleBehaviour role)
+    public override bool Enabled(RoleBehaviour? role)
     {
         return role is FreezerRole;
     }
-
 }

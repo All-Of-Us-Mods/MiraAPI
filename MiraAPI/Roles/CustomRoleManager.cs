@@ -17,11 +17,13 @@ using Object = UnityEngine.Object;
 
 namespace MiraAPI.Roles;
 
+/// <summary>
+/// Custom role manager for handling custom roles.
+/// </summary>
 public static class CustomRoleManager
 {
-    public static readonly Dictionary<ushort, RoleBehaviour> CustomRoles = new();
-
-    public static readonly Dictionary<Type, ushort> RoleIds = new();
+    internal static readonly Dictionary<ushort, RoleBehaviour> CustomRoles = [];
+    internal static readonly Dictionary<Type, ushort> RoleIds = [];
 
     private static ushort _roleId = 100;
 
@@ -35,7 +37,7 @@ public static class CustomRoleManager
         RoleManager.Instance.AllRoles = RoleManager.Instance.AllRoles.Concat(CustomRoles.Values).ToArray();
     }
 
-    public static void RegisterRoleTypes(List<Type> roles, MiraPluginInfo pluginInfo)
+    internal static void RegisterRoleTypes(List<Type> roles, MiraPluginInfo pluginInfo)
     {
         roles.ForEach(x => RoleIds.Add(x, GetNextRoleId()));
 
@@ -53,11 +55,11 @@ public static class CustomRoleManager
         }
     }
 
-    private static RoleBehaviour RegisterRole(Type roleType, MiraPluginInfo parentMod)
+    private static RoleBehaviour? RegisterRole(Type roleType, MiraPluginInfo parentMod)
     {
         if (!(typeof(RoleBehaviour).IsAssignableFrom(roleType) && typeof(ICustomRole).IsAssignableFrom(roleType)))
         {
-            Logger<MiraApiPlugin>.Error($"{roleType?.Name} does not inherit from RoleBehaviour or ICustomRole.");
+            Logger<MiraApiPlugin>.Error($"{roleType.Name} does not inherit from RoleBehaviour or ICustomRole.");
             return null;
         }
 
@@ -91,6 +93,14 @@ public static class CustomRoleManager
             RoleManager.GhostRoles.Add(roleBehaviour.Role);
         }
 
+        var useTaskHint = customRole.RoleHintType is RoleHintType.TaskHint;
+        var overridesTaskText = customRole.GetType().GetMethod("SpawnTaskHeader")?.DeclaringType == customRole.GetType();
+
+        if (useTaskHint && !overridesTaskText)
+        {
+            Logger<MiraApiPlugin>.Error($"Role {customRole.RoleName} is using RoleHintType.TaskHint but does not override SpawnTaskHeader!");
+        }
+
         CustomRoles.Add(roleId, roleBehaviour);
 
         if (customRole.HideSettings)
@@ -105,12 +115,23 @@ public static class CustomRoleManager
         return roleBehaviour;
     }
 
+    /// <summary>
+    /// Finds the parent mod of a custom role.
+    /// </summary>
+    /// <param name="role">The ICustomRole object.</param>
+    /// <returns>A MiraPluginInfo object representing the parent mod of the role.</returns>
     public static MiraPluginInfo FindParentMod(ICustomRole role)
     {
-        return MiraPluginManager.Instance.RegisteredPlugins.First(plugin => plugin.Value.CustomRoles.ContainsValue(role as RoleBehaviour)).Value;
+        return MiraPluginManager.Instance.RegisteredPlugins().First(plugin => plugin.CustomRoles.ContainsValue(role as RoleBehaviour ?? throw new InvalidOperationException()));
     }
 
-    public static bool GetCustomRoleBehaviour(RoleTypes roleType, out ICustomRole result)
+    /// <summary>
+    /// Gets a custom role behaviour by role type.
+    /// </summary>
+    /// <param name="roleType">The role type enum.</param>
+    /// <param name="result">The ICustomRole result.</param>
+    /// <returns>True if the role was found.</returns>
+    public static bool GetCustomRoleBehaviour(RoleTypes roleType, out ICustomRole? result)
     {
         CustomRoles.TryGetValue((ushort)roleType, out var temp);
         if (temp)
@@ -176,7 +197,7 @@ public static class CustomRoleManager
         // we dont know how other plugins handle their configs
         // this way, all the options are saved at once, instead of one by one
         var oldConfigSetting = new Dictionary<MiraPluginInfo, bool>();
-        foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins.Values)
+        foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins())
         {
             oldConfigSetting.Add(plugin, plugin.PluginConfig.SaveOnConfigSet);
             plugin.PluginConfig.SaveOnConfigSet = false;
@@ -202,9 +223,11 @@ public static class CustomRoleManager
 
             try
             {
-                customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.NumConfigDefinition,
+                customRole.ParentMod.PluginConfig.TryGetEntry<int>(
+                    customRole.NumConfigDefinition,
                     out var numEntry);
-                customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.ChanceConfigDefinition,
+                customRole.ParentMod.PluginConfig.TryGetEntry<int>(
+                    customRole.ChanceConfigDefinition,
                     out var chanceEntry);
 
                 numEntry.Value = num;
@@ -216,7 +239,7 @@ public static class CustomRoleManager
             }
         }
 
-        foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins.Values)
+        foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins())
         {
             plugin.PluginConfig.Save();
             plugin.PluginConfig.SaveOnConfigSet = oldConfigSetting[plugin];

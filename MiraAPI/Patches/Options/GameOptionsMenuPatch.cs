@@ -10,15 +10,21 @@ using UnityEngine.Events;
 
 namespace MiraAPI.Patches.Options;
 
-
+/// <summary>
+/// Patches the GameOptionsMenu to add custom options.
+/// </summary>
 [HarmonyPatch(typeof(GameOptionsMenu))]
 public static class GameOptionsMenuPatch
 {
+    /// <summary>
+    /// Update patch for the GameOptionsMenu.
+    /// </summary>
+    /// <param name="__instance">The GameOptionsMenu instance.</param>
     [HarmonyPostfix]
     [HarmonyPatch(nameof(GameOptionsMenu.Update))]
     public static void UpdatePatch(GameOptionsMenu __instance)
     {
-        if (GameSettingMenuPatches.CurrentSelectedMod == 0)
+        if (GameSettingMenuPatches.SelectedModIdx == 0)
         {
             return;
         }
@@ -71,7 +77,7 @@ public static class GameOptionsMenuPatch
     [HarmonyPatch(nameof(GameOptionsMenu.CreateSettings))]
     public static bool SettingsPatch(GameOptionsMenu __instance)
     {
-        if (GameSettingMenuPatches.CurrentSelectedMod == 0)
+        if (GameSettingMenuPatches.SelectedModIdx == 0)
         {
             return true;
         }

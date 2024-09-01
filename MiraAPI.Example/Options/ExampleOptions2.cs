@@ -1,5 +1,6 @@
 ﻿using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.OptionTypes;
+using Reactor.Utilities;
 
 namespace MiraAPI.Example.Options;
 
@@ -11,17 +12,18 @@ public class ExampleOptions2 : AbstractOptionGroup
 
     public ModdedToggleOption ToggleOpt2 { get; } = new("Toggle Option 2", false)
     {
-        Visible = () => OptionGroupSingleton<ExampleOptions2>.Instance.ToggleOpt1.Value
+        Visible = () => OptionGroupSingleton<ExampleOptions2>.Instance.ToggleOpt1.Value,
     };
 
-    public ModdedStringOption StringOpt { get; } = new("String Opt", 0, ["Choice 1", "Choice 2", "Choice 3"]);
-
-    public ModdedEnumOption EnumOpt { get; } = new("Enum Opt", 0, typeof(TestingEnum));
+    public ModdedEnumOption EnumOpt { get; } = new("Enum Opt", 0, typeof(TestingData))
+    {
+        ChangedEvent = x => Logger<ExamplePlugin>.Info($"changed Enum Opt to {x}"),
+    };
 }
 
-public enum TestingEnum
+public enum TestingData
 {
     Happy,
     Sad,
-    Neutral
+    Neutral,
 }

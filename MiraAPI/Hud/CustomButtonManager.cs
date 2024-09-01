@@ -22,7 +22,7 @@ internal static class CustomButtonManager
             Logger<MiraApiPlugin>.Error($"Failed to create button from {buttonType.Name}");
             return;
         }
-        
+
         CustomButtons.Add(button);
         typeof(CustomButtonSingleton<>).MakeGenericType(buttonType)
             .GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic)!

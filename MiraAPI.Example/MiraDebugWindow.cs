@@ -1,6 +1,4 @@
-﻿using MiraAPI.Example.Modifiers;
-using MiraAPI.Utilities;
-using Reactor.Utilities.Attributes;
+﻿using Reactor.Utilities.Attributes;
 using Reactor.Utilities.ImGui;
 using System;
 using UnityEngine;
@@ -21,7 +19,7 @@ public class MiraDebugWindow(IntPtr ptr) : MonoBehaviour(ptr)
         }
     })
     {
-        Enabled = true
+        Enabled = true,
     };
 
     public void OnGUI()

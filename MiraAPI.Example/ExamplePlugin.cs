@@ -22,6 +22,5 @@ public partial class ExamplePlugin : BasePlugin, IMiraPlugin
     public override void Load()
     {
         Harmony.PatchAll();
-        AddComponent<MiraDebugWindow>();
     }
 }

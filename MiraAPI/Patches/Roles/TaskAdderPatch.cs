@@ -2,7 +2,6 @@
 using HarmonyLib;
 using Il2CppSystem;
 using Il2CppSystem.Collections.Generic;
-using Il2CppSystem.Text;
 using MiraAPI.PluginLoading;
 using MiraAPI.Roles;
 using MiraAPI.Utilities.Assets;
@@ -34,17 +33,17 @@ public static class TaskAdderPatch
 
         GameObject hitbox = new("Hitbox")
         {
-            layer = 5
+            layer = 5,
         };
         hitbox.transform.SetParent(__instance.TaskParent.transform, false);
         hitbox.transform.localScale = new Vector3(7.5f, 6.5f, 1);
         hitbox.transform.localPosition = new Vector3(2.8f, -2.2f, 0);
-        
-        SpriteMask mask = hitbox.AddComponent<SpriteMask>();
+
+        var mask = hitbox.AddComponent<SpriteMask>();
         mask.sprite = MiraAssets.NextButton.LoadAsset();
         mask.alphaCutoff = 0.0f;
-            
-        BoxCollider2D collider = hitbox.AddComponent<BoxCollider2D>();
+
+        var collider = hitbox.AddComponent<BoxCollider2D>();
         collider.size = new Vector2(1f, 1f);
         collider.enabled = true;
 
@@ -54,7 +53,7 @@ public static class TaskAdderPatch
         __instance.RoleButton.GetComponent<PassiveButton>().ClickMask = collider;
         __instance.RootFolderPrefab.GetComponent<PassiveButton>().ClickMask = collider;
         __instance.RootFolderPrefab.gameObject.SetActive(false);
-        
+
         __instance.TaskParent = inner.transform;
 
         _rolesFolder = Object.Instantiate(__instance.RootFolderPrefab, _scroller.Inner);
@@ -63,7 +62,7 @@ public static class TaskAdderPatch
         _rolesFolder.FolderName = "Roles";
         _rolesFolder.name = "RolesFolder";
 
-        foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins.Values)
+        foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins())
         {
             var newFolder = Object.Instantiate(__instance.RootFolderPrefab, _scroller.Inner);
             newFolder.FolderName = newFolder.name = plugin.PluginInfo.Metadata.Name;
@@ -85,14 +84,14 @@ public static class TaskAdderPatch
     [HarmonyPatch(typeof(TaskAddButton), "Role", MethodType.Setter)]
     public static void RoleGetterPatch(TaskAddButton __instance)
     {
-        if (__instance.role is ICustomRole { IsNeutral: true })
+        if (__instance.role is ICustomRole { Team: ModdedRoleTeams.Neutral })
         {
             __instance.FileImage.color = Color.gray;
         }
 
         __instance.RolloverHandler.OutColor = __instance.FileImage.color;
     }
-    
+
     private static void AddFileAsChildCustom(this TaskAdderGame instance, TaskFolder taskFolder, TaskAddButton item, ref float xCursor, ref float yCursor, ref float maxHeight)
     {
         item.transform.SetParent(instance.TaskParent);
@@ -115,7 +114,7 @@ public static class TaskAdderPatch
     [HarmonyPatch(typeof(TaskAdderGame), nameof(TaskAdderGame.ShowFolder))]
     public static bool ShowPatch(TaskAdderGame __instance, [HarmonyArgument(0)] TaskFolder taskFolder)
     {
-        var stringBuilder = new StringBuilder(64);
+        var stringBuilder = new Il2CppSystem.Text.StringBuilder(64);
         __instance.Hierarchy.Add(taskFolder);
         for (var i = 0; i < __instance.Hierarchy.Count; i++)
         {

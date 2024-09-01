@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
@@ -17,10 +16,9 @@ namespace MiraAPI.Patches.Options;
 [HarmonyPatch(typeof(LobbyViewSettingsPane))]
 public static class LobbyViewPanePatches
 {
-    
     public static int CurrentSelectedMod { get; private set; }
 
-    public static MiraPluginInfo? SelectedMod => CurrentSelectedMod == 0 ? null : MiraPluginManager.Instance.RegisteredPlugins.ElementAt(CurrentSelectedMod-1).Value;
+    public static MiraPluginInfo? SelectedMod => CurrentSelectedMod == 0 ? null : MiraPluginManager.Instance.RegisteredPlugins()[CurrentSelectedMod-1];
 
 
     [HarmonyPostfix]
@@ -49,7 +47,7 @@ public static class LobbyViewPanePatches
         passiveButton.OnClick.AddListener((UnityAction)(() =>
         {
             CurrentSelectedMod += 1;
-            if (CurrentSelectedMod > MiraPluginManager.Instance.RegisteredPlugins.Count)
+            if (CurrentSelectedMod > MiraPluginManager.Instance.RegisteredPlugins().Length)
             {
                 CurrentSelectedMod = 0;
             }
@@ -72,7 +70,7 @@ public static class LobbyViewPanePatches
             CurrentSelectedMod -= 1;
             if (CurrentSelectedMod < 0)
             {
-                CurrentSelectedMod = MiraPluginManager.Instance.RegisteredPlugins.Count;
+                CurrentSelectedMod = MiraPluginManager.Instance.RegisteredPlugins().Length;
             }
             __instance.RefreshTab();
             __instance.scrollBar.ScrollToTop();
@@ -186,146 +184,145 @@ public static class LobbyViewPanePatches
 
     private static void DrawRolesTab(LobbyViewSettingsPane instance)
     {
-	    if (SelectedMod == null)
-	    {
-		    return;
-	    }
+        if (SelectedMod == null)
+        {
+            return;
+        }
 	    
-	    var num = 0.95f;
-	    var num2 = -6.53f;
-	    var categoryHeaderMasked =
-		    Object.Instantiate(instance.categoryHeaderOrigin, instance.settingsContainer, true);
-	    categoryHeaderMasked.SetHeader(StringNames.RoleQuotaLabel, 61);
-	    categoryHeaderMasked.transform.localScale = Vector3.one;
-	    categoryHeaderMasked.transform.localPosition = new Vector3(-9.77f, 1.26f, -2f);
-	    instance.settingsInfo.Add(categoryHeaderMasked.gameObject);
+        var num = 0.95f;
+        var num2 = -6.53f;
+        var categoryHeaderMasked =
+            Object.Instantiate(instance.categoryHeaderOrigin, instance.settingsContainer, true);
+        categoryHeaderMasked.SetHeader(StringNames.RoleQuotaLabel, 61);
+        categoryHeaderMasked.transform.localScale = Vector3.one;
+        categoryHeaderMasked.transform.localPosition = new Vector3(-9.77f, 1.26f, -2f);
+        instance.settingsInfo.Add(categoryHeaderMasked.gameObject);
 	    
-	    var list = new List<Type>();
+        var list = new List<Type>();
 
-	    foreach (var team in Enum.GetValues<ModdedRoleTeams>())
-	    {
-		    var filteredRoles = SelectedMod.CustomRoles.Values
-			    .OfType<ICustomRole>()
-			    .Where(x => !x.HideSettings && x.Team == team).ToList();
+        foreach (var team in Enum.GetValues<ModdedRoleTeams>())
+        {
+            var filteredRoles = SelectedMod.CustomRoles.Values
+                .OfType<ICustomRole>()
+                .Where(x => !x.HideSettings && x.Team == team).ToList();
 		    
-		    if (filteredRoles.Count == 0)
-		    {
-			    continue;
-		    }
+            if (filteredRoles.Count == 0)
+            {
+                continue;
+            }
 		    
-		    var categoryHeaderRoleVariant =
-			    Object.Instantiate(instance.categoryHeaderRoleOrigin, instance.settingsContainer, true);
+            var categoryHeaderRoleVariant =
+                Object.Instantiate(instance.categoryHeaderRoleOrigin, instance.settingsContainer, true);
 
-		    switch (team)
-		    {
-			    case ModdedRoleTeams.Crewmate:
-				    categoryHeaderRoleVariant.SetHeader(StringNames.CrewmateRolesHeader, 61);
-				    break;
-			    case ModdedRoleTeams.Impostor:
-				    categoryHeaderRoleVariant.SetHeader(StringNames.ImpostorRolesHeader, 61);
-				    break;
-			    case ModdedRoleTeams.Neutral:
-			    default:
-				    categoryHeaderRoleVariant.SetHeader(StringNames.CrewmateRolesHeader, 61);
-				    categoryHeaderRoleVariant.Title.text = team + " Roles";
-				    categoryHeaderRoleVariant.Background.color = Color.gray;
-				    categoryHeaderRoleVariant.Title.color = Color.white;
-				    break;
-		    }
+            switch (team)
+            {
+                case ModdedRoleTeams.Crewmate:
+                    categoryHeaderRoleVariant.SetHeader(StringNames.CrewmateRolesHeader, 61);
+                    break;
+                case ModdedRoleTeams.Impostor:
+                    categoryHeaderRoleVariant.SetHeader(StringNames.ImpostorRolesHeader, 61);
+                    break;
+                default:
+                    categoryHeaderRoleVariant.SetHeader(StringNames.CrewmateRolesHeader, 61);
+                    categoryHeaderRoleVariant.Title.text = team + " Roles";
+                    categoryHeaderRoleVariant.Background.color = Color.gray;
+                    categoryHeaderRoleVariant.Title.color = Color.white;
+                    break;
+            }
 		    
-		    categoryHeaderRoleVariant.transform.localScale = Vector3.one;
-		    categoryHeaderRoleVariant.transform.localPosition = new Vector3(0.09f, num, -2f);
-		    instance.settingsInfo.Add(categoryHeaderRoleVariant.gameObject);
-		    num -= 0.696f;
+            categoryHeaderRoleVariant.transform.localScale = Vector3.one;
+            categoryHeaderRoleVariant.transform.localPosition = new Vector3(0.09f, num, -2f);
+            instance.settingsInfo.Add(categoryHeaderRoleVariant.gameObject);
+            num -= 0.696f;
 
-		    foreach (var customRole in filteredRoles)
-		    {
-			    var roleBehaviour = customRole as RoleBehaviour;
-			    if (roleBehaviour == null)
-			    {
-				    continue;
-			    }
+            foreach (var customRole in filteredRoles)
+            {
+                var roleBehaviour = customRole as RoleBehaviour;
+                if (roleBehaviour == null)
+                {
+                    continue;
+                }
 			    
-			    var chancePerGame =
-				    GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetChancePerGame(roleBehaviour.Role);
-			    var numPerGame =
-				    GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetNumPerGame(roleBehaviour.Role);
+                var chancePerGame =
+                    GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetChancePerGame(roleBehaviour.Role);
+                var numPerGame =
+                    GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetNumPerGame(roleBehaviour.Role);
 			    
-			    var flag = numPerGame == 0;
+                var flag = numPerGame == 0;
 			    
-			    var viewSettingsInfoPanelRoleVariant =
-				    Object.Instantiate(
-					    instance.infoPanelRoleOrigin, instance.settingsContainer, true);
-			    viewSettingsInfoPanelRoleVariant.transform.localScale = Vector3.one;
-			    viewSettingsInfoPanelRoleVariant.transform.localPosition = new Vector3(num2, num, -2f);
+                var viewSettingsInfoPanelRoleVariant =
+                    Object.Instantiate(
+                        instance.infoPanelRoleOrigin, instance.settingsContainer, true);
+                viewSettingsInfoPanelRoleVariant.transform.localScale = Vector3.one;
+                viewSettingsInfoPanelRoleVariant.transform.localPosition = new Vector3(num2, num, -2f);
 			    
-			    var advancedRoleOptions = SelectedMod.Options
-				    .Where(x => x.AdvancedRole == customRole.GetType())
-				    .ToList();
+                var advancedRoleOptions = SelectedMod.Options
+                    .Where(x => x.AdvancedRole == customRole.GetType())
+                    .ToList();
 			    
-			    if (!flag && advancedRoleOptions.Count > 0)
-			    {
-				    list.Add(customRole.GetType());
-			    }
+                if (!flag && advancedRoleOptions.Count > 0)
+                {
+                    list.Add(customRole.GetType());
+                }
 
-			    viewSettingsInfoPanelRoleVariant.SetInfo(roleBehaviour.NiceName, numPerGame, chancePerGame,
-				    61, customRole.RoleColor, customRole.Icon.LoadAsset(), true);
+                viewSettingsInfoPanelRoleVariant.SetInfo(roleBehaviour.NiceName, numPerGame, chancePerGame,
+                    61, customRole.RoleColor, customRole.Icon.LoadAsset(), true);
 			    
-			    viewSettingsInfoPanelRoleVariant.titleText.color = 
-				    viewSettingsInfoPanelRoleVariant.chanceTitle.color = 
-					    viewSettingsInfoPanelRoleVariant.chanceBackground.color = 
-						    viewSettingsInfoPanelRoleVariant.background.color = 
-							    customRole.RoleColor.GetAlternateColor();
-			    instance.settingsInfo.Add(viewSettingsInfoPanelRoleVariant.gameObject);
-			    num -= 0.664f;
-		    }
+                viewSettingsInfoPanelRoleVariant.titleText.color = 
+                    viewSettingsInfoPanelRoleVariant.chanceTitle.color = 
+                        viewSettingsInfoPanelRoleVariant.chanceBackground.color = 
+                            viewSettingsInfoPanelRoleVariant.background.color = 
+                                customRole.RoleColor.GetAlternateColor();
+                instance.settingsInfo.Add(viewSettingsInfoPanelRoleVariant.gameObject);
+                num -= 0.664f;
+            }
 
 
-	    }
+        }
 
-	    if (list.Count > 0)
-	    {
-		    var categoryHeaderMasked2 =
-			    Object.Instantiate(instance.categoryHeaderOrigin, instance.settingsContainer, true);
-		    categoryHeaderMasked2.SetHeader(StringNames.RoleSettingsLabel, 61);
-		    categoryHeaderMasked2.transform.localScale = Vector3.one;
-		    categoryHeaderMasked2.transform.localPosition = new Vector3(-9.77f, num, -2f);
-		    instance.settingsInfo.Add(categoryHeaderMasked2.gameObject);
-		    num -= 1.7f;
-		    var num3 = 0f;
-		    for (var k = 0; k < list.Count; k++)
-		    {
-			    float num4;
-			    if (k % 2 == 0)
-			    {
-				    num4 = -5.8f;
-				    if (k > 0)
-				    {
-					    num -= num3 + 0.59f;
-					    num3 = 0f;
-				    }
-			    }
-			    else
-			    {
-				    num4 = 0.14999962f;
-			    }
+        if (list.Count > 0)
+        {
+            var categoryHeaderMasked2 =
+                Object.Instantiate(instance.categoryHeaderOrigin, instance.settingsContainer, true);
+            categoryHeaderMasked2.SetHeader(StringNames.RoleSettingsLabel, 61);
+            categoryHeaderMasked2.transform.localScale = Vector3.one;
+            categoryHeaderMasked2.transform.localPosition = new Vector3(-9.77f, num, -2f);
+            instance.settingsInfo.Add(categoryHeaderMasked2.gameObject);
+            num -= 1.7f;
+            var num3 = 0f;
+            for (var k = 0; k < list.Count; k++)
+            {
+                float num4;
+                if (k % 2 == 0)
+                {
+                    num4 = -5.8f;
+                    if (k > 0)
+                    {
+                        num -= num3 + 0.59f;
+                        num3 = 0f;
+                    }
+                }
+                else
+                {
+                    num4 = 0.14999962f;
+                }
 
-			    var advancedRoleViewPanel =
-				    Object.Instantiate(instance.advancedRolePanelOrigin, instance.settingsContainer, true);
-			    advancedRoleViewPanel.transform.localScale = Vector3.one;
-			    advancedRoleViewPanel.transform.localPosition = new Vector3(num4, num, -2f);
-			    var num5 = SetUpAdvancedRoleViewPanel(advancedRoleViewPanel, list[k], 0.59f, 61);
+                var advancedRoleViewPanel =
+                    Object.Instantiate(instance.advancedRolePanelOrigin, instance.settingsContainer, true);
+                advancedRoleViewPanel.transform.localScale = Vector3.one;
+                advancedRoleViewPanel.transform.localPosition = new Vector3(num4, num, -2f);
+                var num5 = SetUpAdvancedRoleViewPanel(advancedRoleViewPanel, list[k], 0.59f, 61);
 			    
-			    if (num5 > num3)
-			    {
-				    num3 = num5;
-			    }
+                if (num5 > num3)
+                {
+                    num3 = num5;
+                }
 
-			    instance.settingsInfo.Add(advancedRoleViewPanel.gameObject);
-		    }
-	    }
+                instance.settingsInfo.Add(advancedRoleViewPanel.gameObject);
+            }
+        }
 
-	    instance.scrollBar.SetYBoundsMax(-num);
+        instance.scrollBar.SetYBoundsMax(-num);
     }
 
     private static float SetUpAdvancedRoleViewPanel(AdvancedRoleViewPanel viewPanel, Type roleType, float spacingY, int maskLayer)
