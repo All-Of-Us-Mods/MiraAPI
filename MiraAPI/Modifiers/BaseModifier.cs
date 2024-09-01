@@ -62,7 +62,8 @@ public abstract class BaseModifier
     /// <summary>
     /// Called when the player dies.
     /// </summary>
-    public virtual void OnDeath()
+    /// <param name="reason">The Death Reason.</param>
+    public virtual void OnDeath(DeathReason reason)
     {
     }
 
