@@ -1,4 +1,5 @@
-﻿using MiraAPI.Utilities;
+﻿using System;
+using MiraAPI.Utilities;
 using Reactor.Utilities;
 using UnityEngine;
 
@@ -38,6 +39,15 @@ public abstract class TimedModifier : BaseModifier
     /// Gets or sets the time remaining on the timer.
     /// </summary>
     public float TimeRemaining { get; protected set; }
+
+    /// <summary>
+    /// Gets the HUD information for Timed Modifier, including the time remaining.
+    /// </summary>
+    /// <returns>A string with the hud information + timer.</returns>
+    public override string GetHudString()
+    {
+        return base.GetHudString() + $" <size=70%>({Math.Round(Duration - TimeRemaining, 0)}s/{Duration}s)</size>";
+    }
 
     /// <summary>
     /// The FixedUpdate method for timed modifiers. Automatically handles the timer logic.

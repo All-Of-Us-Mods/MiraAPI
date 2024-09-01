@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using Il2CppInterop.Runtime.Attributes;
 using MiraAPI.Modifiers.Types;
 using MiraAPI.Utilities;
 using Reactor.Utilities;
@@ -22,8 +23,10 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
     /// <summary>
     /// Gets the active modifiers on the player.
     /// </summary>
+    [HideFromIl2Cpp]
     public ImmutableList<BaseModifier> ActiveModifiers => Modifiers.ToImmutableList();
 
+    [HideFromIl2Cpp]
     private List<BaseModifier> Modifiers { get; set; } = [];
 
     private PlayerControl? _player;
@@ -115,10 +118,6 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
             foreach (var mod in baseModifiers)
             {
                 stringBuild.Append(CultureInfo.InvariantCulture, $"\n{mod.GetHudString()}");
-                if (mod is TimedModifier timer)
-                {
-                    stringBuild.Append(CultureInfo.InvariantCulture, $" <size=70%>({Math.Round(timer.Duration - timer.TimeRemaining, 0)}s/{timer.Duration}s)</size>");
-                }
             }
             _modifierText!.text = $"<b><size=130%>Modifiers:</b></size>{stringBuild}";
         }
@@ -132,6 +131,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
     /// Removes a modifier from the player.
     /// </summary>
     /// <param name="type">The modifier type.</param>
+    [HideFromIl2Cpp]
     public void RemoveModifier(Type type)
     {
         var modifier = Modifiers.Find(x => x.GetType() == type);
@@ -149,6 +149,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
     /// Removes a modifier from the player.
     /// </summary>
     /// <typeparam name="T">The modifier type.</typeparam>
+    [HideFromIl2Cpp]
     public void RemoveModifier<T>() where T : BaseModifier
     {
         RemoveModifier(typeof(T));
@@ -158,6 +159,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
     /// Removes a modifier from the player.
     /// </summary>
     /// <param name="modifierId">The modifier ID.</param>
+    [HideFromIl2Cpp]
     public void RemoveModifier(uint modifierId)
     {
         var modifier = Modifiers.Find(x => x.ModifierId == modifierId);
@@ -175,6 +177,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
     /// Removes a modifier from the player.
     /// </summary>
     /// <param name="modifier">The modifier object.</param>
+    [HideFromIl2Cpp]
     public void RemoveModifier(BaseModifier modifier)
     {
         if (!Modifiers.Contains(modifier))
@@ -191,6 +194,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
     /// </summary>
     /// <param name="modifier">The modifier to add.</param>
     /// <returns>The modifier that was added.</returns>
+    [HideFromIl2Cpp]
     public BaseModifier? AddModifier(BaseModifier modifier)
     {
         if (Modifiers.Contains(modifier))
@@ -218,6 +222,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
     /// </summary>
     /// <param name="type">The modifier type.</param>
     /// <returns>The modifier that was added.</returns>
+    [HideFromIl2Cpp]
     public BaseModifier? AddModifier(Type type)
     {
         var modifierId = ModifierManager.GetModifierId(type);
@@ -249,6 +254,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
     /// </summary>
     /// <typeparam name="T">The Type of the modifier.</typeparam>
     /// <returns>The new modifier.</returns>
+    [HideFromIl2Cpp]
     public T? AddModifier<T>() where T : BaseModifier
     {
         return AddModifier(typeof(T)) as T;

@@ -1,10 +1,11 @@
-﻿using AmongUs.GameOptions;
+﻿using System.Text;
+using AmongUs.GameOptions;
 using BepInEx.Configuration;
+using Il2CppInterop.Runtime.Attributes;
 using MiraAPI.Modifiers;
 using MiraAPI.PluginLoading;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
-using System.Text;
 using UnityEngine;
 
 namespace MiraAPI.Roles;
@@ -47,11 +48,13 @@ public interface ICustomRole
     /// <summary>
     /// Gets the Sprite used for the Role Options menu screenshot.
     /// </summary>
+    [HideFromIl2Cpp]
     LoadableAsset<Sprite> OptionsScreenshot => MiraAssets.Empty;
 
     /// <summary>
     /// Gets the Sprite used for the Role Icon.
     /// </summary>
+    [HideFromIl2Cpp]
     LoadableAsset<Sprite> Icon => MiraAssets.Empty;
 
     /// <summary>

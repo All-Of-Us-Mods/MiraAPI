@@ -1,5 +1,8 @@
-﻿using MiraAPI.Modifiers;
+﻿using Il2CppSystem;
+using MiraAPI.Example.Roles;
+using MiraAPI.Modifiers;
 using MiraAPI.Modifiers.Types;
+using UnityEngine;
 
 namespace MiraAPI.Example.Modifiers.Freezer;
 
@@ -17,6 +20,16 @@ public class FreezeModifier : TimedModifier
         if (Player?.AmOwner == true)
         {
             Player.moveable = false;
+        }
+    }
+
+    public override void FixedUpdate()
+    {
+        base.FixedUpdate();
+
+        if (Player?.AmOwner == true || PlayerControl.LocalPlayer.Data.Role is FreezerRole)
+        {
+            Player?.cosmetics.SetOutline(true, new Nullable<Color>(Palette.LightBlue));
         }
     }
 
