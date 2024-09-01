@@ -19,7 +19,7 @@ public static class IntroCutscenePatches
             __instance.TeamTitle.text = $"<size=70%>{mode.Name}</size>\n<size=20%>{mode.Description}</size>";
         }
     }*/
-    
+
     [HarmonyPrefix]
     [HarmonyPatch(nameof(IntroCutscene.BeginCrewmate))]
     public static bool BeginCrewmatePatch(IntroCutscene __instance)
@@ -37,9 +37,9 @@ public static class IntroCutscenePatches
             barTransform.position = position;
 
             __instance.BackgroundBar.material.SetColor(ShaderID.Color, Color.gray);
-            __instance.TeamTitle.text = "OUTCAST";
+            __instance.TeamTitle.text = "NEUTRAL";
             __instance.impostorScale = 1f;
-            __instance.ImpostorText.text = "You are an Outcast. You do not have a team.";
+            __instance.ImpostorText.text = "You are Neutral. You do not have a team.";
             __instance.TeamTitle.color = Color.gray;
 
             __instance.ourCrewmate = __instance.CreatePlayer(0, Mathf.CeilToInt(7.5f), PlayerControl.LocalPlayer.Data, false);
