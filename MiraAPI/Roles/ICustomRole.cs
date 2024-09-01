@@ -41,7 +41,7 @@ public interface ICustomRole
     ModdedRoleTeams Team { get; }
 
     /// <summary>
-    /// Gets the **maximum amount** of players that can have this role at a time. This is not the same as the **number** of players that can have this role in a game.
+    /// Gets the hard limit of players that can have this role. This property is used to set a limit in the Role Options menu.
     /// </summary>
     int MaxPlayers => 15;
 
