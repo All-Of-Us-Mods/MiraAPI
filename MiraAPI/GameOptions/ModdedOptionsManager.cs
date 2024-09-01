@@ -18,10 +18,10 @@ namespace MiraAPI.GameOptions;
 /// </summary>
 public static class ModdedOptionsManager
 {
-    private static readonly Dictionary<PropertyInfo, ModdedOptionAttribute> OptionAttributes = new();
-    private static readonly Dictionary<Type, AbstractOptionGroup> TypeToGroup = new();
+    private static readonly Dictionary<PropertyInfo, ModdedOptionAttribute> OptionAttributes = [];
+    private static readonly Dictionary<Type, AbstractOptionGroup> TypeToGroup = [];
 
-    internal static readonly Dictionary<uint, IModdedOption> ModdedOptions = new();
+    internal static readonly Dictionary<uint, IModdedOption> ModdedOptions = [];
     internal static readonly List<AbstractOptionGroup> Groups = [];
 
     internal static uint NextId => _nextId++;
