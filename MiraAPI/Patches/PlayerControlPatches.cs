@@ -1,14 +1,20 @@
 ﻿using HarmonyLib;
 using MiraAPI.Hud;
-using MiraAPI.Roles;
 using MiraAPI.Modifiers;
+using MiraAPI.Roles;
 using Reactor.Utilities.Extensions;
 
 namespace MiraAPI.Patches;
 
+/// <summary>
+/// General patches for the PlayerControl class.
+/// </summary>
 [HarmonyPatch(typeof(PlayerControl))]
 public static class PlayerControlPatches
 {
+    /// <summary>
+    /// Adds the modifier component to the player on start.
+    /// </summary>
     [HarmonyPrefix]
     [HarmonyPatch(nameof(PlayerControl.Start))]
     public static void PlayerControlStartPostfix(PlayerControl __instance)
@@ -21,6 +27,24 @@ public static class PlayerControlPatches
         __instance.gameObject.AddComponent<ModifierComponent>();
     }
 
+    /// <summary>
+    /// Calls the OnDeath method for all active modifiers.
+    /// </summary>
+    [HarmonyPostfix]
+    [HarmonyPatch(nameof(PlayerControl.Die))]
+    public static void PlayerControlDiePostfix(PlayerControl __instance)
+    {
+        var modifiersComponent = __instance.GetComponent<ModifierComponent>();
+
+        if (modifiersComponent)
+        {
+            modifiersComponent.ActiveModifiers.ForEach(x=>x.OnDeath());
+        }
+    }
+
+    /// <summary>
+    /// FixedUpdate handler for custom roles and custom buttons.
+    /// </summary>
     [HarmonyPostfix]
     [HarmonyPatch(nameof(PlayerControl.FixedUpdate))]
     public static void PlayerControlFixedUpdatePostfix(PlayerControl __instance)
