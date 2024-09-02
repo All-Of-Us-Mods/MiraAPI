@@ -62,6 +62,11 @@ public static class TaskAdderPatch
 
         foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins())
         {
+            if (plugin.CustomRoles.Count == 0)
+            {
+                continue;
+            }
+
             var newFolder = Object.Instantiate(__instance.RootFolderPrefab, _scroller.Inner);
             newFolder.FolderName = newFolder.name = plugin.PluginInfo.Metadata.Name;
             newFolder.gameObject.SetActive(false);
