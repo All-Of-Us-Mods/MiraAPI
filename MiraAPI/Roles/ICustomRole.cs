@@ -68,9 +68,9 @@ public interface ICustomRole
     ConfigDefinition ChanceConfigDefinition => new("Roles", $"Chance {GetType().FullName}");
 
     /// <summary>
-    /// Gets a value indicating whether the role is affected by light sabotages.
+    /// Gets a value indicating whether the role is affected by light affectors on Airship.
     /// </summary>
-    bool AffectedByLight => Team == ModdedRoleTeams.Crewmate;
+    bool AffectedByLightOnAirship => Team == ModdedRoleTeams.Crewmate;
 
     /// <summary>
     /// Gets a value indicating whether the role can be killed by others.
@@ -80,7 +80,7 @@ public interface ICustomRole
     /// <summary>
     /// Gets a value indicating whether the role can kill others.
     /// </summary>
-    bool CanKill => Team == ModdedRoleTeams.Impostor;
+    bool CanUseKill => Team == ModdedRoleTeams.Impostor;
 
     /// <summary>
     /// Gets a value indicating whether the role can use vents.
@@ -90,7 +90,7 @@ public interface ICustomRole
     /// <summary>
     /// Gets a value indicating whether the role's tasks count towards task progress.
     /// </summary>
-    bool TasksCount => Team == ModdedRoleTeams.Crewmate;
+    bool TasksCountForProgress => Team == ModdedRoleTeams.Crewmate;
 
     /// <summary>
     /// Gets a value indicating whether the role is a Ghost.

@@ -1,10 +1,11 @@
-﻿using AmongUs.GameOptions;
+﻿using System.Collections;
+using System.Linq;
+using AmongUs.GameOptions;
 using Assets.CoreScripts;
+using BepInEx.Unity.IL2CPP.Utils;
 using Reactor.Networking.Attributes;
 using Reactor.Utilities;
 using Reactor.Utilities.Extensions;
-using System.Collections;
-using System.Linq;
 using UnityEngine;
 
 namespace MiraAPI.Networking;
@@ -71,7 +72,7 @@ public static class CustomMurderRpc
         bool playKillSound = true)
     {
         source.isKilling = false;
-        Logger<MiraApiPlugin>.Debug($"{source.PlayerId} trying to murder {target.PlayerId}");
+        Logger<MiraApiPlugin>.Error($"{source.PlayerId} trying to murder {target.PlayerId}");
         var data = target.Data;
         if (resultFlags.HasFlag(MurderResultFlags.FailedError))
         {
@@ -104,7 +105,7 @@ public static class CustomMurderRpc
                 target.RemoveProtection();
             }
 
-            Logger<MiraApiPlugin>.Debug($"{source.PlayerId} failed to murder {target.PlayerId} due to guardian angel protection");
+            Logger<MiraApiPlugin>.Error($"{source.PlayerId} failed to murder {target.PlayerId} due to guardian angel protection");
             return;
         }
 
@@ -134,8 +135,7 @@ public static class CustomMurderRpc
 
             if (resetKillTimer)
             {
-                source.SetKillTimer(
-                    GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown));
+                source.SetKillTimer(GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown));
             }
         }
 
@@ -172,8 +172,8 @@ public static class CustomMurderRpc
             source.CurrentOutfitType == PlayerOutfitType.Shapeshifted,
             source.shapeshiftTargetPlayerId,
             target.PlayerId);
-        Coroutines.Start(source.KillAnimations.Random()?.CoPerformCustomKill(source, target, createDeadBody, teleportMurderer));
-        Logger<MiraApiPlugin>.Debug($"{source.PlayerId} succeeded in murdering {target.PlayerId}");
+        source.MyPhysics.StartCoroutine(source.KillAnimations.Random()?.CoPerformCustomKill(source, target, createDeadBody, teleportMurderer));
+        Logger<MiraApiPlugin>.Error($"{source.PlayerId} succeeded in murdering {target.PlayerId}");
     }
 
     /// <summary>
@@ -262,7 +262,7 @@ public static class CustomMurderRpc
 
         if (cam != null)
         {
-            cam.Locked = true;
+            cam.Locked = false;
         }
 
         PlayerControl.LocalPlayer.isKilling = false;

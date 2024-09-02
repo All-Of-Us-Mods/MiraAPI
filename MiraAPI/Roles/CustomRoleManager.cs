@@ -84,7 +84,7 @@ public static class CustomRoleManager
         roleBehaviour.StringName = CustomStringName.CreateAndRegister(customRole.RoleName);
         roleBehaviour.BlurbName = CustomStringName.CreateAndRegister(customRole.RoleDescription);
         roleBehaviour.BlurbNameLong = CustomStringName.CreateAndRegister(customRole.RoleLongDescription);
-        roleBehaviour.AffectedByLightAffectors = customRole.AffectedByLight;
+        roleBehaviour.AffectedByLightAffectors = customRole.AffectedByLightOnAirship;
         roleBehaviour.CanBeKilled = customRole.CanGetKilled;
         roleBehaviour.CanUseKillButton = customRole.CanUseKill;
         roleBehaviour.TasksCountTowardProgress = customRole.TasksCountForProgress;
