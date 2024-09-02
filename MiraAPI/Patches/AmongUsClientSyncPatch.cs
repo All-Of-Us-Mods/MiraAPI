@@ -6,6 +6,9 @@ using MiraAPI.Roles;
 
 namespace MiraAPI.Patches;
 
+/// <summary>
+/// Sync all options, role settings, and modifiers to the player when they join the game.
+/// </summary>
 [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.CreatePlayer))]
 public static class AmongUsClientSyncPatch
 {

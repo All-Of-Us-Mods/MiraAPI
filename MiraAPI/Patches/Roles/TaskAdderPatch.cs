@@ -15,9 +15,8 @@ namespace MiraAPI.Patches.Roles;
 [HarmonyPatch]
 public static class TaskAdderPatch
 {
-    private static TaskFolder _rolesFolder;
-    private static readonly System.Collections.Generic.Dictionary<string, string> ModsFolders = new();
-    private static Scroller _scroller;
+    private static readonly System.Collections.Generic.Dictionary<string, string> ModsFolders = [];
+    private static Scroller? _scroller;
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(TaskAdderGame), nameof(TaskAdderGame.Begin))]
@@ -56,18 +55,17 @@ public static class TaskAdderPatch
 
         __instance.TaskParent = inner.transform;
 
-        _rolesFolder = Object.Instantiate(__instance.RootFolderPrefab, _scroller.Inner);
-        _rolesFolder = Object.Instantiate(__instance.RootFolderPrefab, _scroller.Inner);
-        _rolesFolder.gameObject.SetActive(false);
-        _rolesFolder.FolderName = "Roles";
-        _rolesFolder.name = "RolesFolder";
+        var rolesFolder = Object.Instantiate(__instance.RootFolderPrefab, _scroller.Inner);
+        rolesFolder.gameObject.SetActive(false);
+        rolesFolder.FolderName = "Roles";
+        rolesFolder.name = "RolesFolder";
 
         foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins())
         {
             var newFolder = Object.Instantiate(__instance.RootFolderPrefab, _scroller.Inner);
             newFolder.FolderName = newFolder.name = plugin.PluginInfo.Metadata.Name;
             newFolder.gameObject.SetActive(false);
-            _rolesFolder.SubFolders.Add(newFolder);
+            rolesFolder.SubFolders.Add(newFolder);
 
             if (!ModsFolders.ContainsKey(plugin.PluginInfo.Metadata.Name))
             {
@@ -75,7 +73,7 @@ public static class TaskAdderPatch
             }
         }
 
-        __instance.Root.SubFolders.Add(_rolesFolder);
+        __instance.Root.SubFolders.Add(rolesFolder);
 
         __instance.GoToRoot();
     }
@@ -92,7 +90,12 @@ public static class TaskAdderPatch
         __instance.RolloverHandler.OutColor = __instance.FileImage.color;
     }
 
-    private static void AddFileAsChildCustom(this TaskAdderGame instance, TaskFolder taskFolder, TaskAddButton item, ref float xCursor, ref float yCursor, ref float maxHeight)
+    private static void AddFileAsChildCustom(
+        this TaskAdderGame instance,
+        TaskAddButton item,
+        ref float xCursor,
+        ref float yCursor,
+        ref float maxHeight)
     {
         item.transform.SetParent(instance.TaskParent);
         item.transform.localPosition = new Vector3(xCursor, yCursor, 0f);
@@ -105,9 +108,9 @@ public static class TaskAdderPatch
             yCursor -= maxHeight;
             maxHeight = 0f;
         }
+
         instance.ActiveItems.Add(item.transform);
     }
-    
 
     // yes it might be crazy patching the entire method, but i tried so many other methods and only this works :cry:
     [HarmonyPrefix]
@@ -121,11 +124,13 @@ public static class TaskAdderPatch
             stringBuilder.Append(__instance.Hierarchy.ToArray()[i].FolderName);
             stringBuilder.Append("\\");
         }
+
         __instance.PathText.text = stringBuilder.ToString();
         for (var j = 0; j < __instance.ActiveItems.Count; j++)
         {
             Object.Destroy(__instance.ActiveItems.ToArray()[j].gameObject);
         }
+
         __instance.ActiveItems.Clear();
         var num = 0f;
         var num2 = 0f;
@@ -148,6 +153,7 @@ public static class TaskAdderPatch
                 num2 -= num3;
                 num3 = 0f;
             }
+
             __instance.ActiveItems.Add(folderTransform);
             if (!taskFolder2 || !taskFolder2.Button)
             {
@@ -155,7 +161,8 @@ public static class TaskAdderPatch
             }
 
             ControllerManager.Instance.AddSelectableUiElement(taskFolder2.Button);
-            if (!string.IsNullOrEmpty(__instance.restorePreviousSelectionByFolderName) && taskFolder2.FolderName.Equals(__instance.restorePreviousSelectionByFolderName))
+            if (!string.IsNullOrEmpty(__instance.restorePreviousSelectionByFolderName) &&
+                taskFolder2.FolderName.Equals(__instance.restorePreviousSelectionByFolderName, System.StringComparison.Ordinal))
             {
                 __instance.restorePreviousSelectionFound = taskFolder2.Button;
             }
@@ -173,63 +180,90 @@ public static class TaskAdderPatch
         {
             var taskAddButton = Object.Instantiate(__instance.TaskPrefab);
             taskAddButton.MyTask = list.ToArray()[l];
-            if (taskAddButton.MyTask.TaskType == TaskTypes.DivertPower)
+            switch (taskAddButton.MyTask.TaskType)
             {
-                var targetSystem = taskAddButton.MyTask.Cast<DivertPowerTask>().TargetSystem;
-                taskAddButton.Text.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.DivertPowerTo, DestroyableSingleton<TranslationController>.Instance.GetString(targetSystem));
-            }
-            else if (taskAddButton.MyTask.TaskType == TaskTypes.FixWeatherNode)
-            {
-                var nodeId = ((WeatherNodeTask)taskAddButton.MyTask).NodeId;
-                taskAddButton.Text.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.FixWeatherNode, Array.Empty<Il2CppSystem.Object>()) + " " + DestroyableSingleton<TranslationController>.Instance.GetString(WeatherSwitchGame.ControlNames[nodeId],
-                    Array.Empty<Il2CppSystem.Object>());
-            }
-            else
-            {
-                taskAddButton.Text.text = DestroyableSingleton<TranslationController>.Instance.GetString(taskAddButton.MyTask.TaskType);
-            }
-            __instance.AddFileAsChildCustom(taskFolder, taskAddButton, ref num, ref num2, ref num3);
-            if (taskAddButton != null && taskAddButton.Button != null)
-            {
-                ControllerManager.Instance.AddSelectableUiElement(taskAddButton.Button);
-                if (__instance.Hierarchy.Count != 1 && !flag)
+                case TaskTypes.DivertPower:
                 {
-                    var component = ControllerManager.Instance.CurrentUiState.CurrentSelection.GetComponent<TaskFolder>();
-                    if (component != null)
-                    {
-                        __instance.restorePreviousSelectionByFolderName = component.FolderName;
-                    }
-                    ControllerManager.Instance.SetDefaultSelection(taskAddButton.Button);
-                    flag = true;
+                    var targetSystem = taskAddButton.MyTask.Cast<DivertPowerTask>().TargetSystem;
+                    taskAddButton.Text.text = DestroyableSingleton<TranslationController>.Instance.GetString(
+                        StringNames.DivertPowerTo,
+                        DestroyableSingleton<TranslationController>.Instance.GetString(targetSystem));
+                    break;
                 }
+                case TaskTypes.FixWeatherNode:
+                {
+                    var nodeId = ((WeatherNodeTask)taskAddButton.MyTask).NodeId;
+                    taskAddButton.Text.text =
+                        DestroyableSingleton<TranslationController>.Instance.GetString(
+                            StringNames.FixWeatherNode,
+                            Array.Empty<Il2CppSystem.Object>()) + " " +
+                        DestroyableSingleton<TranslationController>.Instance.GetString(
+                            WeatherSwitchGame.ControlNames[nodeId],
+                            Array.Empty<Il2CppSystem.Object>());
+                    break;
+                }
+                default:
+                    taskAddButton.Text.text =
+                        DestroyableSingleton<TranslationController>.Instance.GetString(taskAddButton.MyTask.TaskType);
+                    break;
             }
+
+            __instance.AddFileAsChildCustom(taskAddButton, ref num, ref num2, ref num3);
+            if (taskAddButton.Button == null)
+            {
+                continue;
+            }
+
+            ControllerManager.Instance.AddSelectableUiElement(taskAddButton.Button);
+            if (__instance.Hierarchy.Count == 1 || flag)
+            {
+                continue;
+            }
+
+            var component =
+                ControllerManager.Instance.CurrentUiState.CurrentSelection.GetComponent<TaskFolder>();
+            if (component != null)
+            {
+                __instance.restorePreviousSelectionByFolderName = component.FolderName;
+            }
+
+            ControllerManager.Instance.SetDefaultSelection(taskAddButton.Button);
+            flag = true;
         }
+
         if (taskFolder.FolderName == "Roles")
         {
             for (var m = 0; m < DestroyableSingleton<RoleManager>.Instance.AllRoles.Length; m++)
             {
                 var roleBehaviour = DestroyableSingleton<RoleManager>.Instance.AllRoles[m];
-                if (roleBehaviour.Role != RoleTypes.ImpostorGhost && roleBehaviour.Role != RoleTypes.CrewmateGhost && !CustomRoleManager.CustomRoles.ContainsKey((ushort)roleBehaviour.Role))
+                if (roleBehaviour.Role == RoleTypes.ImpostorGhost || roleBehaviour.Role == RoleTypes.CrewmateGhost ||
+                    CustomRoleManager.CustomRoles.ContainsKey((ushort)roleBehaviour.Role))
                 {
-                    var taskAddButton2 = Object.Instantiate(__instance.RoleButton);
-                    taskAddButton2.SafePositionWorld = __instance.SafePositionWorld;
-                    taskAddButton2.Text.text = "Be_" + roleBehaviour.NiceName + ".exe";
-                    __instance.AddFileAsChildCustom(_rolesFolder, taskAddButton2, ref num, ref num2, ref num3);
-                    taskAddButton2.Role = roleBehaviour;
-                    if (taskAddButton2 != null && taskAddButton2.Button != null)
-                    {
-                        ControllerManager.Instance.AddSelectableUiElement(taskAddButton2.Button);
-                        if (m == 0 && __instance.restorePreviousSelectionFound != null)
-                        {
-                            ControllerManager.Instance.SetDefaultSelection(__instance.restorePreviousSelectionFound);
-                            __instance.restorePreviousSelectionByFolderName = string.Empty;
-                            __instance.restorePreviousSelectionFound = null;
-                        }
-                        else if (m == 0)
-                        {
-                            ControllerManager.Instance.SetDefaultSelection(taskAddButton2.Button);
-                        }
-                    }
+                    continue;
+                }
+
+                var taskAddButton2 = Object.Instantiate(__instance.RoleButton);
+                taskAddButton2.SafePositionWorld = __instance.SafePositionWorld;
+                taskAddButton2.Text.text = "Be_" + roleBehaviour.NiceName + ".exe";
+                __instance.AddFileAsChildCustom(taskAddButton2, ref num, ref num2, ref num3);
+                taskAddButton2.Role = roleBehaviour;
+
+                if (taskAddButton2.Button == null)
+                {
+                    continue;
+                }
+
+                ControllerManager.Instance.AddSelectableUiElement(taskAddButton2.Button);
+                switch (m)
+                {
+                    case 0 when __instance.restorePreviousSelectionFound != null:
+                        ControllerManager.Instance.SetDefaultSelection(__instance.restorePreviousSelectionFound);
+                        __instance.restorePreviousSelectionByFolderName = string.Empty;
+                        __instance.restorePreviousSelectionFound = null;
+                        break;
+                    case 0:
+                        ControllerManager.Instance.SetDefaultSelection(taskAddButton2.Button);
+                        break;
                 }
             }
         }
@@ -240,27 +274,33 @@ public static class TaskAdderPatch
             for (var m = 0; m < plugin.CustomRoles.Count; m++)
             {
                 var roleBehaviour = plugin.CustomRoles.ElementAt(m).Value;
-                if (roleBehaviour.Role != RoleTypes.ImpostorGhost && roleBehaviour.Role != RoleTypes.CrewmateGhost && !roleBehaviour.IsDead)
+                if (roleBehaviour.Role == RoleTypes.ImpostorGhost || roleBehaviour.Role == RoleTypes.CrewmateGhost ||
+                    roleBehaviour.IsDead)
                 {
-                    var taskAddButton2 = Object.Instantiate(__instance.RoleButton);
-                    taskAddButton2.SafePositionWorld = __instance.SafePositionWorld;
-                    taskAddButton2.Text.text = "Be_" + roleBehaviour.NiceName + ".exe";
-                    __instance.AddFileAsChildCustom(_rolesFolder, taskAddButton2, ref num, ref num2, ref num3);
-                    taskAddButton2.Role = roleBehaviour;
-                    if (taskAddButton2 != null && taskAddButton2.Button != null)
-                    {
-                        ControllerManager.Instance.AddSelectableUiElement(taskAddButton2.Button);
-                        if (m == 0 && __instance.restorePreviousSelectionFound != null)
-                        {
-                            ControllerManager.Instance.SetDefaultSelection(__instance.restorePreviousSelectionFound);
-                            __instance.restorePreviousSelectionByFolderName = string.Empty;
-                            __instance.restorePreviousSelectionFound = null;
-                        }
-                        else if (m == 0)
-                        {
-                            ControllerManager.Instance.SetDefaultSelection(taskAddButton2.Button);
-                        }
-                    }
+                    continue;
+                }
+
+                var taskAddButton2 = Object.Instantiate(__instance.RoleButton);
+                taskAddButton2.SafePositionWorld = __instance.SafePositionWorld;
+                taskAddButton2.Text.text = "Be_" + roleBehaviour.NiceName + ".exe";
+                __instance.AddFileAsChildCustom(taskAddButton2, ref num, ref num2, ref num3);
+                taskAddButton2.Role = roleBehaviour;
+                if (taskAddButton2.Button == null)
+                {
+                    continue;
+                }
+
+                ControllerManager.Instance.AddSelectableUiElement(taskAddButton2.Button);
+                switch (m)
+                {
+                    case 0 when __instance.restorePreviousSelectionFound != null:
+                        ControllerManager.Instance.SetDefaultSelection(__instance.restorePreviousSelectionFound);
+                        __instance.restorePreviousSelectionByFolderName = string.Empty;
+                        __instance.restorePreviousSelectionFound = null;
+                        break;
+                    case 0:
+                        ControllerManager.Instance.SetDefaultSelection(taskAddButton2.Button);
+                        break;
                 }
             }
         }
@@ -271,17 +311,19 @@ public static class TaskAdderPatch
             chip.GetComponent<SpriteRenderer>().maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
         }
 
-        if (_scroller)
+        if (_scroller && _scroller != null)
         {
             _scroller.CalculateAndSetYBounds(__instance.ActiveItems.Count, 6, 3, 1f);
             _scroller.SetYBoundsMin(0.0f);
             _scroller.ScrollToTop();
         }
+
         if (__instance.Hierarchy.Count == 1)
         {
             ControllerManager.Instance.SetBackButton(__instance.BackButton);
             return false;
         }
+
         ControllerManager.Instance.SetBackButton(__instance.FolderBackButton);
         return false;
     }

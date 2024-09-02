@@ -18,26 +18,26 @@ public static class NotificationPopperPatch
         [HarmonyArgument(3)] RoleTeamTypes teamType,
         [HarmonyArgument(4)] bool playSound)
     {
-        if (CustomRoleManager.CustomRoles.Values.Any(role => role.StringName == key))
+        if (CustomRoleManager.CustomRoles.Values.All(role => role.StringName != key))
         {
-            var text = teamType == RoleTeamTypes.Crewmate
-                ? Palette.CrewmateSettingChangeText.ToTextColor()
-                : Palette.ImpostorRed.ToTextColor();
-
-            var item = DestroyableSingleton<TranslationController>.Instance.GetString(
-                StringNames.LobbyChangeSettingNotificationRole,
-                "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">",
-                text,
-                DestroyableSingleton<TranslationController>.Instance.GetString(key, Array.Empty<Object>()),
-                "</color></font>",
-                "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">" + roleCount + "</font>",
-                "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">" + roleChance + "%"
-            );
-
-            __instance.SettingsChangeMessageLogic(key, item, playSound);
-            return false;
+            return true;
         }
 
-        return true;
+        var text = teamType == RoleTeamTypes.Crewmate
+            ? Palette.CrewmateSettingChangeText.ToTextColor()
+            : Palette.ImpostorRed.ToTextColor();
+
+        var item = DestroyableSingleton<TranslationController>.Instance.GetString(
+            StringNames.LobbyChangeSettingNotificationRole,
+            "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">",
+            text,
+            DestroyableSingleton<TranslationController>.Instance.GetString(key, Array.Empty<Object>()),
+            "</color></font>",
+            "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">" + roleCount + "</font>",
+            "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">" + roleChance + "%"
+        );
+
+        __instance.SettingsChangeMessageLogic(key, item, playSound);
+        return false;
     }
 }

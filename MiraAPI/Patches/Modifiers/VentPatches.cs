@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using MiraAPI.Utilities;
-using System.Linq;
 using UnityEngine;
 
 namespace MiraAPI.Patches.Modifiers;

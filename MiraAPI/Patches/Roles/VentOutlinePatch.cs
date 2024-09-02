@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace MiraAPI.Patches.Roles;
 
+/// <summary>
+/// Set vent outline color based on the player's role.
+/// </summary>
 [HarmonyPatch(typeof(Vent), nameof(Vent.SetOutline))]
 public static class VentOutlinePatch
 {

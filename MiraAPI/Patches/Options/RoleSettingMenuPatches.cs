@@ -57,7 +57,7 @@ public static class RoleSettingMenuPatches
         var crewRoles = GameSettingMenuPatches.SelectedMod?.CustomRoles.Values
             .OfType<ICustomRole>()
             .Where(role => role is { Team: ModdedRoleTeams.Crewmate, HideSettings: false })
-            .ToList();
+            .ToList() ?? [];
 
         if (crewRoles is { Count: > 0 })
         {
@@ -83,7 +83,7 @@ public static class RoleSettingMenuPatches
         var impRoles = GameSettingMenuPatches.SelectedMod?.CustomRoles.Values
             .OfType<ICustomRole>()
             .Where(role => role is { Team: ModdedRoleTeams.Impostor, HideSettings: false })
-            .ToList();
+            .ToList() ?? [];
 
         if (impRoles is { Count: > 0 })
         {
@@ -110,7 +110,7 @@ public static class RoleSettingMenuPatches
         var neutRoles = GameSettingMenuPatches.SelectedMod?.CustomRoles.Values
             .OfType<ICustomRole>()
             .Where(role => role is { Team: ModdedRoleTeams.Neutral, HideSettings: false })
-            .ToList();
+            .ToList() ?? [];
 
         if (neutRoles is { Count: > 0 })
         {
