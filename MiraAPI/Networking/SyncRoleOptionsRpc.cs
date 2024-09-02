@@ -8,11 +8,16 @@ namespace MiraAPI.Networking;
 [RegisterCustomRpc((uint)MiraRpc.SyncRoleOptions)]
 internal class SyncRoleOptionsRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<MiraApiPlugin, NetData[]>(plugin, id)
 {
-
     public override RpcLocalHandling LocalHandling => RpcLocalHandling.None;
 
-    public override void Write(MessageWriter writer, NetData[] data)
+    public override void Write(MessageWriter writer, NetData[]? data)
     {
+        if (data == null)
+        {
+            writer.WritePacked(0U);
+            return;
+        }
+
         writer.WritePacked((uint)data.Length);
         foreach (var netData in data)
         {
@@ -27,21 +32,21 @@ internal class SyncRoleOptionsRpc(MiraApiPlugin plugin, uint id) : PlayerCustomR
         var data = new NetData[length];
         for (var i = 0; i < length; i++)
         {
-            var id = reader.ReadPackedUInt32();
+            var dataId = reader.ReadPackedUInt32();
             var bytes = reader.ReadBytesAndSize();
-            data[i] = new NetData(id, bytes);
+            data[i] = new NetData(dataId, bytes);
         }
 
         return data;
     }
 
-    public override void Handle(PlayerControl playerControl, NetData[] data)
+    public override void Handle(PlayerControl playerControl, NetData[]? data)
     {
         if (AmongUsClient.Instance.HostId != playerControl.OwnerId)
         {
             return;
         }
 
-        CustomRoleManager.HandleSyncRoleOptions(data);
+        CustomRoleManager.HandleSyncRoleOptions(data ?? []);
     }
 }
