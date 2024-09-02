@@ -15,7 +15,7 @@ using Reactor.Utilities;
 
 namespace MiraAPI.PluginLoading;
 
-internal class MiraPluginManager
+internal sealed class MiraPluginManager
 {
     private readonly Dictionary<Assembly, MiraPluginInfo> _registeredPlugins = [];
 

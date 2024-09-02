@@ -13,7 +13,7 @@ public static class RoleId
 
         return roleId;
     }
-    
+
     public static ushort Get(Type type)
     {
         if (!CustomRoleManager.RoleIds.TryGetValue(type, out var roleId))

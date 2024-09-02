@@ -18,7 +18,7 @@ namespace MiraAPI.Modifiers;
 /// The component for handling modifiers.
 /// </summary>
 [RegisterInIl2Cpp]
-public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
+public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
 {
     /// <summary>
     /// Gets the active modifiers on the player.

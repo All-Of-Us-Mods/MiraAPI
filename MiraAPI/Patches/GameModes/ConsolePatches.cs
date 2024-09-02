@@ -1,5 +1,4 @@
-﻿
-/*
+﻿/*
 [HarmonyPatch]
 public static class ConsolePatches
 {

@@ -13,5 +13,7 @@ public static class OptionGroupSingleton<T> where T : AbstractOptionGroup
     /// <summary>
     /// Gets the instance of the option group.
     /// </summary>
+#pragma warning disable CA1000
     public static T Instance => _instance ??= ModdedOptionsManager.Groups.OfType<T>().Single();
+#pragma warning restore CA1000
 }
