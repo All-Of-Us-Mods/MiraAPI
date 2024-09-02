@@ -12,6 +12,9 @@ namespace MiraAPI.Patches.Roles;
 [HarmonyPatch(typeof(KillButton))]
 public static class KillButtonPatches
 {
+    /// <summary>
+    /// SetTarget for custom roles.
+    /// </summary>
     [HarmonyPrefix]
     [HarmonyPatch(nameof(KillButton.SetTarget))]
     public static bool SetTargetPrefix(KillButton __instance, PlayerControl target)
@@ -33,7 +36,7 @@ public static class KillButtonPatches
         __instance.currentTarget = target;
         if (__instance.currentTarget)
         {
-            __instance.currentTarget.cosmetics.SetOutline(true, new Nullable<Color>(customRole.RoleColor));
+            __instance.currentTarget.cosmetics.SetOutline(true, new Nullable<Color>(customRole.KillButtonOutlineColor));
             __instance.SetEnabled();
             return false;
         }
@@ -42,6 +45,9 @@ public static class KillButtonPatches
         return false;
     }
 
+    /// <summary>
+    /// Use Custom Murder if player is custom role.
+    /// </summary>
     [HarmonyPrefix]
     [HarmonyPatch(nameof(KillButton.DoClick))]
     public static bool DoClickPrefix(KillButton __instance)

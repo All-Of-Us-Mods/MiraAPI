@@ -58,29 +58,19 @@ public interface ICustomRole
     LoadableAsset<Sprite> Icon => MiraAssets.Empty;
 
     /// <summary>
-    /// Gets the BepInEx ConfigDefinition for the amount of players that can have this role.
-    /// </summary>
-    ConfigDefinition NumConfigDefinition => new("Roles", $"Num {GetType().FullName}");
-
-    /// <summary>
-    /// Gets the BepInEx ConfigDefinition for the chance of this role being selected.
-    /// </summary>
-    ConfigDefinition ChanceConfigDefinition => new("Roles", $"Chance {GetType().FullName}");
-
-    /// <summary>
     /// Gets a value indicating whether the role is affected by light affectors on Airship.
     /// </summary>
     bool AffectedByLightOnAirship => Team == ModdedRoleTeams.Crewmate;
 
     /// <summary>
-    /// Gets a value indicating whether the role can be killed by others.
+    /// Gets a value indicating whether the role can be killed by vanilla murder system.
     /// </summary>
     bool CanGetKilled => Team == ModdedRoleTeams.Crewmate;
 
     /// <summary>
-    /// Gets a value indicating whether the role can kill others.
+    /// Gets a value indicating whether the role should use the vanilla kill button.
     /// </summary>
-    bool CanUseKill => Team == ModdedRoleTeams.Impostor;
+    bool UseVanillaKillButton => Team == ModdedRoleTeams.Impostor;
 
     /// <summary>
     /// Gets a value indicating whether the role can use vents.
@@ -103,6 +93,16 @@ public interface ICustomRole
     bool HideSettings => IsGhostRole;
 
     /// <summary>
+    /// Gets the outline color for the KillButton if <see cref="UseVanillaKillButton"/> is true.
+    /// </summary>
+    Color KillButtonOutlineColor => Team switch
+    {
+        ModdedRoleTeams.Impostor => Palette.ImpostorRed,
+        ModdedRoleTeams.Crewmate => Palette.CrewmateBlue,
+        _ => RoleColor,
+    };
+
+    /// <summary>
     /// Gets the role hint style. See <see cref="RoleHintType"/> enum for all options.
     /// </summary>
     RoleHintType RoleHintType => RoleHintType.RoleTab;
@@ -111,6 +111,16 @@ public interface ICustomRole
     /// Gets the Ghost role that is applied when the player is killed.
     /// </summary>
     RoleTypes GhostRole => Team == ModdedRoleTeams.Impostor ? RoleTypes.ImpostorGhost : RoleTypes.CrewmateGhost;
+
+    /// <summary>
+    /// Gets the BepInEx ConfigDefinition for the amount of players that can have this role.
+    /// </summary>
+    ConfigDefinition NumConfigDefinition => new("Roles", $"Num {GetType().FullName}");
+
+    /// <summary>
+    /// Gets the BepInEx ConfigDefinition for the chance of this role being selected.
+    /// </summary>
+    ConfigDefinition ChanceConfigDefinition => new("Roles", $"Chance {GetType().FullName}");
 
     /// <summary>
     /// Gets the parent mod of this role.

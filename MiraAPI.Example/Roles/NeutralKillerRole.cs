@@ -11,7 +11,7 @@ public class NeutralKillerRole : ImpostorRole, ICustomRole
     public string RoleLongDescription => RoleDescription;
     public Color RoleColor => Color.magenta;
     public ModdedRoleTeams Team => ModdedRoleTeams.Neutral;
-    public bool CanUseKill => true;
+    public bool UseVanillaKillButton => true;
     public bool CanGetKilled => true;
     public bool CanUseVent => true;
 
