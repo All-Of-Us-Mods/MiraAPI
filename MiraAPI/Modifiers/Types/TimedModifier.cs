@@ -71,7 +71,7 @@ public abstract class TimedModifier : BaseModifier
 
             if (RemoveOnComplete)
             {
-                Player?.RpcRemoveModifier(ModifierId);
+                ModifierComponent?.RemoveModifier(ModifierId);
             }
         }
     }

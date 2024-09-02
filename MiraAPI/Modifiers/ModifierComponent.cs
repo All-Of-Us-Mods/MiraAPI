@@ -213,6 +213,7 @@ public class ModifierComponent(IntPtr ptr) : MonoBehaviour(ptr)
 
         _toAdd.Add(modifier);
         modifier.Player = _player;
+        modifier.ModifierComponent = this;
         modifier.ModifierId = modifierId.Value;
         return modifier;
     }
