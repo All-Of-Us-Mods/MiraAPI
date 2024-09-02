@@ -35,6 +35,11 @@ public static class CustomRoleManager
     internal static void RegisterInRoleManager()
     {
         RoleManager.Instance.AllRoles = RoleManager.Instance.AllRoles.Concat(CustomRoles.Values).ToArray();
+
+        foreach (var role in CustomRoles.Values.Where(x=>x.IsDead))
+        {
+            RoleManager.GhostRoles.Add(role.Role);
+        }
     }
 
     internal static void RegisterRoleTypes(List<Type> roles, MiraPluginInfo pluginInfo)
@@ -81,8 +86,8 @@ public static class CustomRoleManager
         roleBehaviour.BlurbNameLong = CustomStringName.CreateAndRegister(customRole.RoleLongDescription);
         roleBehaviour.AffectedByLightAffectors = customRole.AffectedByLight;
         roleBehaviour.CanBeKilled = customRole.CanGetKilled;
-        roleBehaviour.CanUseKillButton = customRole.CanKill;
-        roleBehaviour.TasksCountTowardProgress = customRole.TasksCount;
+        roleBehaviour.CanUseKillButton = customRole.CanUseKill;
+        roleBehaviour.TasksCountTowardProgress = customRole.TasksCountForProgress;
         roleBehaviour.CanVent = customRole.CanUseVent;
         roleBehaviour.DefaultGhostRole = customRole.GhostRole;
         roleBehaviour.MaxCount = customRole.MaxPlayers;
