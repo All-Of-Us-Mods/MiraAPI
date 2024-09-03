@@ -114,7 +114,7 @@ public static class GameOptionsMenuPatch
             group.Header = categoryHeaderMasked;
 
             var newText = Object.Instantiate(categoryHeaderMasked.Title, categoryHeaderMasked.transform);
-            newText.text = $"<size=70%>(Click to open)</size>";
+            newText.text = "<size=70%>(Click to close)</size>";
             newText.transform.localPosition = new Vector3(2.6249f, -0.165f, 0f);
             newText.gameObject.GetComponent<TextTranslatorTMP>().Destroy();
 
