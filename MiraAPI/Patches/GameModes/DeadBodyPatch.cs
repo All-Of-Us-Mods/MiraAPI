@@ -1,6 +1,4 @@
-﻿
-
-/*
+﻿/*
 [HarmonyPatch(typeof(DeadBody))]
 public static class DeadBodyPatch
 {

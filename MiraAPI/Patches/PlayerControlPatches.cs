@@ -32,13 +32,13 @@ public static class PlayerControlPatches
     /// </summary>
     [HarmonyPostfix]
     [HarmonyPatch(nameof(PlayerControl.Die))]
-    public static void PlayerControlDiePostfix(PlayerControl __instance)
+    public static void PlayerControlDiePostfix(PlayerControl __instance, DeathReason reason)
     {
         var modifiersComponent = __instance.GetComponent<ModifierComponent>();
 
         if (modifiersComponent)
         {
-            modifiersComponent.ActiveModifiers.ForEach(x=>x.OnDeath());
+            modifiersComponent.ActiveModifiers.ForEach(x=>x.OnDeath(reason));
         }
     }
 

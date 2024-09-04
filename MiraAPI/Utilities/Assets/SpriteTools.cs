@@ -1,9 +1,9 @@
-﻿using Il2CppInterop.Runtime;
-using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using Reactor.Utilities.Extensions;
-using System;
+﻿using System;
 using System.Reflection;
+using Il2CppInterop.Runtime;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Reactor.Utilities;
+using Reactor.Utilities.Extensions;
 using UnityEngine;
 
 namespace MiraAPI.Utilities.Assets;
@@ -13,15 +13,9 @@ namespace MiraAPI.Utilities.Assets;
 /// </summary>
 public static class SpriteTools
 {
-    /// <summary>
-    /// Delegate for LoadImage.
-    /// </summary>
-    public delegate bool DLoadImage(IntPtr tex, IntPtr data, bool markNonReadable);
+    private delegate bool DLoadImage(IntPtr tex, IntPtr data, bool markNonReadable);
 
-    /// <summary>
-    /// The ICall for LoadImage.
-    /// </summary>
-    public static DLoadImage? ICallLoadImage;
+    private static DLoadImage? _iCallLoadImage;
 
     /// <summary>
     /// Load an image into a texture.
@@ -32,18 +26,18 @@ public static class SpriteTools
     /// <returns>True if succeeded.</returns>
     public static bool LoadImage(Texture2D tex, byte[] data, bool markNonReadable)
     {
-        ICallLoadImage ??= IL2CPP.ResolveICall<DLoadImage>("UnityEngine.ImageConversion::LoadImage");
+        _iCallLoadImage ??= IL2CPP.ResolveICall<DLoadImage>("UnityEngine.ImageConversion::LoadImage");
 
         var il2CPPArray = (Il2CppStructArray<byte>)data;
 
-        return ICallLoadImage.Invoke(tex.Pointer, il2CPPArray.Pointer, markNonReadable);
+        return _iCallLoadImage.Invoke(tex.Pointer, il2CPPArray.Pointer, markNonReadable);
     }
 
     /// <summary>
     /// Load a sprite from a resource path.
     /// </summary>
     /// <param name="resourcePath">The path to the resource.</param>
-    /// <returns>A sprite made from the resource</returns>
+    /// <returns>A sprite made from the resource.</returns>
     /// <exception cref="Exception">The resource cannot be found.</exception>
     public static Sprite LoadSpriteFromPath(string resourcePath, Assembly assembly)
     {

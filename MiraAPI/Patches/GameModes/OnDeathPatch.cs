@@ -1,6 +1,4 @@
-﻿
-
-/*
+﻿/*
 [HarmonyPatch(typeof(KillAnimation))]
 public static class OnDeathPatch
 {

@@ -1,20 +1,20 @@
 ﻿using HarmonyLib;
 using MiraAPI.Hud;
 
-namespace MiraAPI.Patches;
+namespace MiraAPI.Patches.Hud;
 
 /// <summary>
-/// Harmony patches for the MeetingHud class.
+/// Reset button patches
 /// </summary>
-[HarmonyPatch(typeof(MeetingHud))]
-public static class MeetingHudPatches
+[HarmonyPatch]
+public static class ButtonResetPatches
 {
     /// <summary>
     /// Resets the cooldown and effect of all custom buttons when the meeting starts.
     /// </summary>
     [HarmonyPostfix]
-    [HarmonyPatch(nameof(MeetingHud.Start))]
-    public static void StartPostfix()
+    [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.Start))]
+    public static void MeetingHudStartPostfix()
     {
         foreach (var customActionButton in CustomButtonManager.CustomButtons)
         {
@@ -23,11 +23,11 @@ public static class MeetingHudPatches
     }
 
     /// <summary>
-    /// Resets the cooldown and effect of all custom buttons when the voting is complete.
+    /// Resets the cooldown and effect of all custom buttons after the exile screen is closed.
     /// </summary>
     [HarmonyPostfix]
-    [HarmonyPatch(nameof(MeetingHud.VotingComplete))]
-    public static void VotingCompletePostfix()
+    [HarmonyPatch(typeof(ExileController), nameof(ExileController.ReEnableGameplay))]
+    public static void ExileControllerReEnableGameplayPostfix()
     {
         foreach (var customActionButton in CustomButtonManager.CustomButtons)
         {

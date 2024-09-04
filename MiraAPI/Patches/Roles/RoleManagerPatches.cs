@@ -18,7 +18,9 @@ public static class RoleManagerPatches
             return;
         }
 
-        ModifierManager.AssignModifiers(PlayerControl.AllPlayerControls.ToArray().Where(plr => !plr.Data.IsDead && !plr.Data.Disconnected).ToList());
+        ModifierManager.AssignModifiers(
+            PlayerControl.AllPlayerControls.ToArray().Where(plr => !plr.Data.IsDead && !plr.Data.Disconnected)
+                .ToList());
     }
 
     [HarmonyPrefix]
@@ -39,9 +41,8 @@ public static class RoleManagerPatches
         {
             return true;
         }
-        
+
         plr.RpcSetRole(role.GhostRole);
         return false;
-
     }
 }

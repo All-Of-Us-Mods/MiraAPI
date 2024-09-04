@@ -154,7 +154,6 @@ public static class GameSettingMenuPatches
             }
 
             roles.roleChances.Clear();
-            roles.roleChances = null;
             roles.AdvancedRolesSettings.gameObject.SetActive(false);
             roles.RoleChancesSettings.gameObject.SetActive(true);
             roles.SetQuotaTab();

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
 namespace MiraAPI.GameOptions;
 
@@ -7,13 +6,14 @@ namespace MiraAPI.GameOptions;
 /// Singleton for option groups.
 /// </summary>
 /// <typeparam name="T">The option group type.</typeparam>
-public class OptionGroupSingleton<T> where T : AbstractOptionGroup
+public static class OptionGroupSingleton<T> where T : AbstractOptionGroup
 {
     private static T? _instance;
 
     /// <summary>
     /// Gets the instance of the option group.
     /// </summary>
-    /// <exception cref="InvalidOperationException">Can't</exception>
+#pragma warning disable CA1000
     public static T Instance => _instance ??= ModdedOptionsManager.Groups.OfType<T>().Single();
+#pragma warning restore CA1000
 }

@@ -11,7 +11,5 @@ public static class MiraAssets
     public static readonly LoadableResourceAsset Cog = new("MiraAPI.Resources.Cog.png");
     public static readonly LoadableResourceAsset Checkmark = new("MiraAPI.Resources.Checkmark.png");
     public static readonly LoadableResourceAsset CheckmarkBox = new("MiraAPI.Resources.CheckMarkBox.png");
-
-
-    public static readonly Color32 AcceptedTeal = new Color32(43, 233, 198, 255);
+    public static readonly Color32 AcceptedTeal = new(43, 233, 198, 255);
 }

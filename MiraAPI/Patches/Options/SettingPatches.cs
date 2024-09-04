@@ -9,7 +9,7 @@ namespace MiraAPI.Patches.Options;
 /// Patches for the various game settings.
 /// </summary>
 [HarmonyPatch]
-public class SettingPatches
+public static class SettingPatches
 {
     /// <summary>
     /// Prefix for the <see cref="FloatGameSetting.GetValueString"/> method. Adds support for custom number suffixes.
@@ -25,33 +25,24 @@ public class SettingPatches
         ref string __result,
         [HarmonyArgument(0)] float value)
     {
-        var result = string.Empty;
+        string result;
         var suffix = (MiraNumberSuffixes)__instance.SuffixType;
 
         if (__instance.ZeroIsInfinity && Mathf.Abs(value) < 0.0001f)
         {
             result = "<b>∞</b>";
         }
-        else if (suffix == MiraNumberSuffixes.None)
-        {
-            result = value.ToString(__instance.FormatString);
-        }
-        else if (suffix == MiraNumberSuffixes.Multiplier)
-        {
-            result = value.ToString(__instance.FormatString) + "x";
-        }
-        else if (suffix == MiraNumberSuffixes.Percent)
-        {
-            result = value.ToString(__instance.FormatString) + "%";
-        }
         else
         {
-            result = DestroyableSingleton<TranslationController>.Instance.GetString(
-                StringNames.GameSecondsAbbrev,
-                (Il2CppSystem.Object[])
-                [
-                    value.ToString(__instance.FormatString, CultureInfo.InvariantCulture)
-                ]);
+            result = suffix switch
+            {
+                MiraNumberSuffixes.None => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo),
+                MiraNumberSuffixes.Multiplier => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "x",
+                MiraNumberSuffixes.Percent => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "%",
+                _ => DestroyableSingleton<TranslationController>.Instance.GetString(
+                    StringNames.GameSecondsAbbrev,
+                    (Il2CppSystem.Object[]) [value.ToString(__instance.FormatString, CultureInfo.InvariantCulture)]),
+            };
         }
 
         __result = result;

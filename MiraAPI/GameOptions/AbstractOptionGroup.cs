@@ -27,6 +27,12 @@ public abstract class AbstractOptionGroup
     public virtual Color GroupColor => Color.clear;
 
     /// <summary>
+    /// Gets the group priority. This is used to determine the order in which groups are displayed in the options menu.
+    /// Zero is the highest priority, and the default value is the max uint value.
+    /// </summary>
+    public virtual uint GroupPriority => uint.MaxValue;
+
+    /// <summary>
     /// Gets the role the group is associated with. This is used for the advanced role options menu.
     /// </summary>
     public virtual Type? AdvancedRole => null;

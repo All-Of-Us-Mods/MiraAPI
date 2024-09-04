@@ -1,10 +1,7 @@
-﻿
-
-/*
+﻿/*
 [HarmonyPatch(typeof(Vent))]
 public static class VentPatches
 {
-    
     [HarmonyPrefix]
     [HarmonyPatch(nameof(Vent.CanUse))]
     public static bool CanUseVentPatch(Vent __instance, ref float __result, [HarmonyArgument(0)] NetworkedPlayerInfo pc, [HarmonyArgument(1)] ref bool canUse, [HarmonyArgument(2)] ref bool couldUse)
@@ -47,5 +44,4 @@ public static class VentPatches
 
         return false;
     }
-    
 }*/

@@ -17,7 +17,7 @@ internal interface IModdedOption
     OptionBehaviour? OptionBehaviour { get; }
     Func<bool> Visible { get; set; }
     ConfigDefinition? ConfigDefinition { get; set; }
-    OptionBehaviour? CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container);
+    OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, Transform container);
     float GetFloatData();
     NetData GetNetData();
     void HandleNetData(byte[] data);

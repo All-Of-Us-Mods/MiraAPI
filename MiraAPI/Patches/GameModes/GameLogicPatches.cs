@@ -1,6 +1,4 @@
-﻿
-
-/*
+﻿/*
 [HarmonyPatch]
 public static class GameLogicPatches
 {
