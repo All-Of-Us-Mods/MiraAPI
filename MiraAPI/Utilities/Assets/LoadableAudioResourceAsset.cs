@@ -11,7 +11,7 @@ namespace MiraAPI.Utilities.Assets;
 /// <summary>
 /// A utility class for loading .WAV audio assets from the DLL's embedded resources.
 /// </summary>
-/// <param name="path">The path of the wave file</param>
+/// <param name="path">The path of the wave file.</param>
 public class LoadableAudioResourceAsset(string path) : LoadableAsset<AudioClip>
 {
     private readonly Assembly _assembly = Assembly.GetCallingAssembly();
