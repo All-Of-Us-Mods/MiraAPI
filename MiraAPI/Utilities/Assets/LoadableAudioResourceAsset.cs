@@ -48,7 +48,7 @@ public class LoadableAudioResourceAsset(string path) : LoadableAsset<AudioClip>
         }
 
         var audioClip = AudioClip.Create(
-            "WavClip",
+            path,
             audioData.Length,
             channels,
             sampleRate,
