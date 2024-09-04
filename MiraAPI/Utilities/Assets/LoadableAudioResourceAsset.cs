@@ -3,7 +3,6 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using Cpp2IL.Core.Extensions;
-using MiraAPI.Utilities.Assets;
 using Reactor.Utilities.Extensions;
 using UnityEngine;
 
@@ -25,42 +24,38 @@ public class LoadableAudioResourceAsset(string path) : LoadableAsset<AudioClip>
     /// <exception cref="FileNotFoundException">Stream failed to load. Check if the name of your asset was correct.</exception>
     public override AudioClip LoadAsset()
     {
-        var assetStream = _assembly.GetManifestResourceStream(path);
+        var assetStream = _assembly.GetManifestResourceStream(path) ??
+                          throw new FileNotFoundException(
+                              "Stream failed to load. Check if the name of your asset was correct.");
+        var audioBytes = assetStream.ReadFully();
 
-        if (assetStream != null)
+        var riffHeader = Encoding.ASCII.GetString(audioBytes.SubArray(0, 4));
+        var waveHeader = Encoding.ASCII.GetString(audioBytes.SubArray(8, 4));
+
+        if (riffHeader != "RIFF" || waveHeader != "WAVE")
         {
-            var audioBytes = assetStream.ReadFully();
-
-            string riffHeader = Encoding.ASCII.GetString(audioBytes.SubArray(0, 4));
-            string waveHeader = Encoding.ASCII.GetString(audioBytes.SubArray(8, 4));
-
-            if (riffHeader != "RIFF" || waveHeader != "WAVE")
-            {
-                throw new NotSupportedException($"Attempted to load an Audio file in non WAV format '{path}'.");
-            }
-
-            int channels = BitConverter.ToInt16(audioBytes, 22);
-            int sampleRate = BitConverter.ToInt32(audioBytes, 24);
-            int dataSize = BitConverter.ToInt32(audioBytes, 40);
-
-            float[] audioData = new float[dataSize / 2];
-            for (int i = 0; i < audioData.Length; i++)
-            {
-                audioData[i] = BitConverter.ToInt16(audioBytes, 44 + i * 2) / 32768.0f;
-            }
-
-            AudioClip audioClip = AudioClip.Create(
-                "WavClip",
-                audioData.Length,
-                channels,
-                sampleRate,
-                false
-            );
-            audioClip.SetData(audioData, 0);
-
-            return audioClip;
+            throw new NotSupportedException($"Attempted to load an Audio file in non WAV format '{path}'.");
         }
 
-        throw new FileNotFoundException("Stream failed to load. Check if the name of your asset was correct.");
+        int channels = BitConverter.ToInt16(audioBytes, 22);
+        var sampleRate = BitConverter.ToInt32(audioBytes, 24);
+        var dataSize = BitConverter.ToInt32(audioBytes, 40);
+
+        var audioData = new float[dataSize / 2];
+        for (var i = 0; i < audioData.Length; i++)
+        {
+            audioData[i] = BitConverter.ToInt16(audioBytes, 44 + i * 2) / 32768.0f;
+        }
+
+        var audioClip = AudioClip.Create(
+            "WavClip",
+            audioData.Length,
+            channels,
+            sampleRate,
+            false
+        );
+        audioClip.SetData(audioData, 0);
+
+        return audioClip;
     }
 }
