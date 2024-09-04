@@ -78,6 +78,11 @@ public interface ICustomRole
     bool CanUseVent => Team == ModdedRoleTeams.Impostor;
 
     /// <summary>
+    /// Gets a value indicating whether the role can use the sabotage button.
+    /// </summary>
+    bool CanUseSabotage => Team == ModdedRoleTeams.Impostor;
+
+    /// <summary>
     /// Gets a value indicating whether the role's tasks count towards task progress.
     /// </summary>
     bool TasksCountForProgress => Team == ModdedRoleTeams.Crewmate;
