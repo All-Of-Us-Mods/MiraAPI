@@ -93,44 +93,10 @@ public static class HudManagerPatches
         {
             return;
         }
-        if (CustomRoleManager.GetCustomRoleBehaviour(role.Role, out var customRole))
-        {
-            if (customRole.CanUseSabotage)
-            {
-                __instance.SabotageButton.gameObject.SetActive(true);
-            }
-            else
-            {
-                __instance.SabotageButton.gameObject.SetActive(role.IsImpostor && isActive);
-            }
-        }
 
         foreach (var button in CustomButtonManager.CustomButtons)
         {
             button.SetActive(isActive, role);
         }
-    }
-
-    /// <summary>
-    /// Patches the Sabotage button to check if the player's custom role can use sabotage.
-    /// </summary>
-    [HarmonyPatch(typeof(SabotageButton), nameof(SabotageButton.DoClick))]
-    [HarmonyPrefix]
-    public static bool StartPrefix(SabotageButton __instance)
-    {
-
-        var player = PlayerControl.LocalPlayer;
-        
-        if (CustomRoleManager.GetCustomRoleBehaviour(player.Data.Role.Role, out var customRole))
-        {
-            if (!customRole.CanUseSabotage) return false;
-            
-             DestroyableSingleton<HudManager>.Instance.ToggleMapVisible(new MapOptions()
-             {
-                Mode = MapOptions.Modes.Sabotage
-             });
-             return false;
-        }
-        return true;
     }
 }

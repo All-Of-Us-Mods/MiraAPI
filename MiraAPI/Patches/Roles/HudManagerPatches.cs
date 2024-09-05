@@ -27,10 +27,11 @@ public static class HudManagerPatches
     {
         var flag = localPlayer.Data != null && localPlayer.Data.IsDead;
 
-        if (role is ICustomRole)
+        if (role is ICustomRole customRole)
         {
             __instance.KillButton.ToggleVisible(isActive && role.CanUseKillButton && !flag);
             __instance.ImpostorVentButton.ToggleVisible(isActive && role.CanVent && !flag);
+            __instance.SabotageButton.gameObject.SetActive(isActive && customRole.CanUseSabotage);
         }
 
         if (_roleTab)
