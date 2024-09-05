@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using MiraAPI.Animations;
 using MiraAPI.Hud;
 using MiraAPI.Modifiers;
 using MiraAPI.Roles;
@@ -13,8 +14,9 @@ namespace MiraAPI.Patches;
 public static class PlayerControlPatches
 {
     /// <summary>
-    /// Adds the modifier component to the player on start.
+    /// Adds the modifier and animator component to the player on start.
     /// </summary>
+    /// <param name="__instance">The player which will be given the components.</param>
     [HarmonyPrefix]
     [HarmonyPatch(nameof(PlayerControl.Start))]
     public static void PlayerControlStartPostfix(PlayerControl __instance)
@@ -24,12 +26,20 @@ public static class PlayerControlPatches
             comp.DestroyImmediate();
         }
 
+        if (__instance.gameObject.TryGetComponent<CustomAnimator>(out var anim))
+        {
+            anim.DestroyImmediate();
+        }
+
+        __instance.gameObject.AddComponent<CustomAnimator>();
         __instance.gameObject.AddComponent<ModifierComponent>();
     }
 
     /// <summary>
     /// Calls the OnDeath method for all active modifiers.
     /// </summary>
+    /// <param name="__instance">The player who died.</param>
+    /// <param name="reason">The reason of the death.</param>
     [HarmonyPostfix]
     [HarmonyPatch(nameof(PlayerControl.Die))]
     public static void PlayerControlDiePostfix(PlayerControl __instance, DeathReason reason)
@@ -38,13 +48,14 @@ public static class PlayerControlPatches
 
         if (modifiersComponent)
         {
-            modifiersComponent.ActiveModifiers.ForEach(x=>x.OnDeath(reason));
+            modifiersComponent.ActiveModifiers.ForEach(x => x.OnDeath(reason));
         }
     }
 
     /// <summary>
     /// FixedUpdate handler for custom roles and custom buttons.
     /// </summary>
+    /// <param name="__instance">The player who's fixed update is being called.</param>
     [HarmonyPostfix]
     [HarmonyPatch(nameof(PlayerControl.FixedUpdate))]
     public static void PlayerControlFixedUpdatePostfix(PlayerControl __instance)

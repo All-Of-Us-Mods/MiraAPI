@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using BepInEx.Unity.IL2CPP;
+﻿using BepInEx.Unity.IL2CPP;
+using MiraAPI.Animations;
 using MiraAPI.Colors;
 using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.Attributes;
@@ -10,16 +7,28 @@ using MiraAPI.Hud;
 using MiraAPI.Modifiers;
 using MiraAPI.Roles;
 using MiraAPI.Utilities;
+using MiraAPI.Utilities.Assets;
 using Reactor.Networking;
 using Reactor.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace MiraAPI.PluginLoading;
 
 internal sealed class MiraPluginManager
 {
     private readonly Dictionary<Assembly, MiraPluginInfo> _registeredPlugins = [];
-
     internal MiraPluginInfo[] RegisteredPlugins() => [.. _registeredPlugins.Values];
+
+    public List<LoadableBundleAsset<UnityEngine.Object>> BundleAssets = new();
+    internal uint NextAssetId { get; private set; }
+    internal uint GetNextAssetId()
+    {
+        NextAssetId++;
+        return NextAssetId;
+    }
 
     public static MiraPluginManager Instance { get; private set; } = new();
 
@@ -36,6 +45,7 @@ internal sealed class MiraPluginManager
             var info = new MiraPluginInfo(miraPlugin, pluginInfo);
 
             RegisterModifierAttribute(assembly);
+            RegisterAnimPresetAttribute(assembly);
             RegisterAllOptions(assembly, info);
 
             RegisterRoleAttribute(assembly, info);
@@ -157,6 +167,18 @@ internal sealed class MiraPluginManager
             if (attribute != null)
             {
                 ModifierManager.RegisterModifier(type);
+            }
+        }
+    }
+
+    private static void RegisterAnimPresetAttribute(Assembly assembly)
+    {
+        foreach (var type in assembly.GetTypes())
+        {
+            var attribute = type.GetCustomAttribute<RegisterAnimationPresetAttribute>();
+            if (attribute != null)
+            {
+                AnimationPresetManager.RegisterPreset(type);
             }
         }
     }

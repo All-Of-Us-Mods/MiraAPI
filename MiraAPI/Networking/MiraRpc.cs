@@ -34,4 +34,9 @@ public enum MiraRpc : uint
     /// Custom Murder RPC.
     /// </summary>
     CustomMurder,
+
+    /// <summary>
+    /// Trigger Animation using CustomAnimator.
+    /// </summary>
+    TriggerAnimation,
 }

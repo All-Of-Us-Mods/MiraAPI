@@ -1,13 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using HarmonyLib;
+using MiraAPI.Animations;
 using MiraAPI.GameOptions;
 using MiraAPI.Modifiers;
 using MiraAPI.Networking;
 using MiraAPI.Roles;
 using Reactor.Networking.Attributes;
 using Reactor.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace MiraAPI.Utilities;
@@ -116,6 +117,7 @@ public static class Extensions
     }
 
     private static readonly Dictionary<PlayerControl, ModifierComponent> ModifierComponents = [];
+    private static readonly Dictionary<PlayerControl, CustomAnimator> AnimatorComponents = [];
 
     /// <summary>
     /// Gets the ModifierComponent for a player.
@@ -133,6 +135,27 @@ public static class Extensions
         if (component)
         {
             ModifierComponents[player] = component;
+        }
+
+        return component;
+    }
+
+    /// <summary>
+    /// Gets the CustomAnimator for a player.
+    /// </summary>
+    /// <param name="player">The PlayerControl object.</param>
+    /// <returns>A CustomAnimator if there is one, null otherwise.</returns>
+    public static CustomAnimator? GetCustomAnimator(this PlayerControl player)
+    {
+        if (AnimatorComponents.TryGetValue(player, out var component))
+        {
+            return component;
+        }
+
+        component = player.GetComponent<CustomAnimator>();
+        if (component)
+        {
+            AnimatorComponents[player] = component;
         }
 
         return component;
