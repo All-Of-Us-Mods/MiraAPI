@@ -1,6 +1,4 @@
-﻿
-
-/*
+﻿/*
 [HarmonyPatch(typeof(MapBehaviour))]
 public static class MapBehaviourPatch
 {

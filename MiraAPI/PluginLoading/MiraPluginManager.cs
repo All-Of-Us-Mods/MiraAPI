@@ -15,7 +15,7 @@ using Reactor.Utilities;
 
 namespace MiraAPI.PluginLoading;
 
-internal class MiraPluginManager
+internal sealed class MiraPluginManager
 {
     private readonly Dictionary<Assembly, MiraPluginInfo> _registeredPlugins = [];
 
@@ -83,6 +83,8 @@ internal class MiraPluginManager
                 ModdedOptionsManager.RegisterAttributeOption(type, attribute, property, pluginInfo);
             }
         }
+
+        pluginInfo.OptionGroups.Sort((x, y) => x.GroupPriority.CompareTo(y.GroupPriority));
     }
 
     private static void RegisterRoleAttribute(Assembly assembly, MiraPluginInfo pluginInfo)

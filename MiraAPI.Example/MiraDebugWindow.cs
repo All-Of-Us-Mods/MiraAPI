@@ -1,23 +1,21 @@
-﻿using Reactor.Utilities.Attributes;
+﻿using System;
+using Il2CppInterop.Runtime.Attributes;
+using Reactor.Utilities.Attributes;
 using Reactor.Utilities.ImGui;
-using System;
 using UnityEngine;
 
 namespace MiraAPI.Example;
+
 [RegisterInIl2Cpp]
-public class MiraDebugWindow(IntPtr ptr) : MonoBehaviour(ptr)
+public class MiraDebugWindow(IntPtr cppPtr) : MonoBehaviour(cppPtr)
 {
-    public readonly DragWindow DebuggingWindow = new(new Rect(10, 10, 0, 0), "MIRA API DEBUGGING", () =>
-    {
-        if (GUILayout.Button("Test modifier"))
+    [HideFromIl2Cpp]
+    public DragWindow DebuggingWindow { get; } = new(
+        new Rect(10, 10, 0, 0),
+        "MIRA API DEBUGGING",
+        () =>
         {
-            //PlayerControl.LocalPlayer.AddModifier<ModifierTimerExample>();
-        }
-        if (GUILayout.Button("Remove modifier"))
-        {
-            //PlayerControl.LocalPlayer.RemoveModifier<ModifierTimerExample>();
-        }
-    })
+        })
     {
         Enabled = true,
     };

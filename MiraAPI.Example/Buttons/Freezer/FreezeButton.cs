@@ -1,5 +1,7 @@
 ﻿using MiraAPI.Example.Modifiers.Freezer;
+using MiraAPI.Example.Options.Roles;
 using MiraAPI.Example.Roles;
+using MiraAPI.GameOptions;
 using MiraAPI.Hud;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
@@ -11,9 +13,9 @@ namespace MiraAPI.Example.Buttons.Freezer;
 public class FreezeButton : CustomActionButton<PlayerControl>
 {
     public override string Name => "Freeze";
-    public override float Cooldown => 5f;
+    public override float Cooldown => OptionGroupSingleton<FreezerRoleSettings>.Instance.FreezeDuration;
     public override float EffectDuration => 0f;
-    public override int MaxUses => 0;
+    public override int MaxUses => (int)OptionGroupSingleton<FreezerRoleSettings>.Instance.FreezeUses;
     public override LoadableAsset<Sprite> Sprite => ExampleAssets.ExampleButton;
 
     protected override void OnClick()
@@ -23,7 +25,7 @@ public class FreezeButton : CustomActionButton<PlayerControl>
 
     public override PlayerControl? GetTarget()
     {
-        return PlayerControl.LocalPlayer.GetClosestPlayer(true, Distance, false);
+        return PlayerControl.LocalPlayer.GetClosestPlayer(true, Distance);
     }
 
     public override void SetOutline(bool active)

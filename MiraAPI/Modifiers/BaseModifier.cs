@@ -11,6 +11,11 @@ public abstract class BaseModifier
     public PlayerControl? Player { get; internal set; }
 
     /// <summary>
+    /// Gets the modifier component that the modifier is attached to.
+    /// </summary>
+    public ModifierComponent? ModifierComponent { get; internal set; }
+
+    /// <summary>
     /// Gets the modifier id.
     /// </summary>
     public uint ModifierId { get; internal set; }
@@ -62,7 +67,8 @@ public abstract class BaseModifier
     /// <summary>
     /// Called when the player dies.
     /// </summary>
-    public virtual void OnDeath()
+    /// <param name="reason">The Death Reason.</param>
+    public virtual void OnDeath(DeathReason reason)
     {
     }
 

@@ -30,12 +30,14 @@ public static class GameOptionsMenuPatch
         }
 
         var num = 2.1f;
-        var filteredGroups = GameSettingMenuPatches.SelectedMod.OptionGroups.Where(x => x.GroupVisible.Invoke() && x.AdvancedRole is null);
+        var filteredGroups =
+            GameSettingMenuPatches.SelectedMod?.OptionGroups.Where(
+                x => x.GroupVisible.Invoke() && x.AdvancedRole is null) ?? [];
 
         foreach (var group in filteredGroups)
         {
             var filteredOpts = group.Options.Where(x => x.Visible.Invoke()).ToList();
-            if (filteredOpts.Count == 0)
+            if (filteredOpts.Count == 0 || group.Header is null)
             {
                 continue;
             }
@@ -50,7 +52,12 @@ public static class GameOptionsMenuPatch
             {
                 var newOpt = opt.OptionBehaviour;
 
-                if (opt.Visible.Invoke() == false)
+                if (newOpt is null)
+                {
+                    continue;
+                }
+
+                if (!opt.Visible.Invoke())
                 {
                     newOpt.gameObject.SetActive(false);
                     continue;
@@ -70,7 +77,6 @@ public static class GameOptionsMenuPatch
         }
 
         __instance.scrollBar.SetYBoundsMax(-num - 1.65f);
-
     }
 
     [HarmonyPrefix]
@@ -84,11 +90,15 @@ public static class GameOptionsMenuPatch
 
         __instance.MapPicker.gameObject.SetActive(false);
 
-        var filteredGroups = GameSettingMenuPatches.SelectedMod.OptionGroups.Where(x => x.AdvancedRole is null);
+        var filteredGroups = GameSettingMenuPatches.SelectedMod?.OptionGroups.Where(x => x.AdvancedRole is null) ?? [];
 
         foreach (var group in filteredGroups)
         {
-            var categoryHeaderMasked = Object.Instantiate(__instance.categoryHeaderOrigin, Vector3.zero, Quaternion.identity, __instance.settingsContainer);
+            var categoryHeaderMasked = Object.Instantiate(
+                __instance.categoryHeaderOrigin,
+                Vector3.zero,
+                Quaternion.identity,
+                __instance.settingsContainer);
             categoryHeaderMasked.SetHeader(CustomStringName.CreateAndRegister(group.GroupName), 20);
             if (group.GroupColor != Color.clear)
             {
@@ -96,17 +106,24 @@ public static class GameOptionsMenuPatch
                 categoryHeaderMasked.Divider.color = group.GroupColor;
                 categoryHeaderMasked.Title.color = group.GroupColor.GetAlternateColor();
             }
-            categoryHeaderMasked.Background.size = new Vector2(categoryHeaderMasked.Background.size.x + 1.5f, categoryHeaderMasked.Background.size.y);
+
+            categoryHeaderMasked.Background.size = new Vector2(
+                categoryHeaderMasked.Background.size.x + 1.5f,
+                categoryHeaderMasked.Background.size.y);
             categoryHeaderMasked.gameObject.SetActive(false);
             group.Header = categoryHeaderMasked;
 
             var newText = Object.Instantiate(categoryHeaderMasked.Title, categoryHeaderMasked.transform);
-            newText.text = $"<size=70%>(Click to open)</size>";
+            newText.text = "<size=70%>(Click to close)</size>";
             newText.transform.localPosition = new Vector3(2.6249f, -0.165f, 0f);
             newText.gameObject.GetComponent<TextTranslatorTMP>().Destroy();
 
-            var options = group.Options.Select(opt => opt.CreateOption(__instance.checkboxOrigin,
-                __instance.numberOptionOrigin, __instance.stringOptionOrigin, __instance.settingsContainer));
+            var options = group.Options.Select(
+                opt => opt.CreateOption(
+                    __instance.checkboxOrigin,
+                    __instance.numberOptionOrigin,
+                    __instance.stringOptionOrigin,
+                    __instance.settingsContainer));
 
             foreach (var newOpt in options)
             {
@@ -142,8 +159,10 @@ public static class GameOptionsMenuPatch
                 if (newOpt is ToggleOption toggle)
                 {
                     toggle.CheckMark.sprite = MiraAssets.Checkmark.LoadAsset();
-                    toggle.CheckMark.color = group.GroupColor != Color.clear ? group.GroupColor : MiraAssets.AcceptedTeal;
-                    var rend = toggle.CheckMark.transform.parent.FindChild("ActiveSprite").GetComponent<SpriteRenderer>();
+                    toggle.CheckMark.color =
+                        group.GroupColor != Color.clear ? group.GroupColor : MiraAssets.AcceptedTeal;
+                    var rend = toggle.CheckMark.transform.parent.FindChild("ActiveSprite")
+                        .GetComponent<SpriteRenderer>();
                     rend.sprite = MiraAssets.CheckmarkBox.LoadAsset();
                     rend.color = group.GroupColor != Color.clear ? group.GroupColor : MiraAssets.AcceptedTeal;
                 }
@@ -162,11 +181,14 @@ public static class GameOptionsMenuPatch
             headerBtn.ClickSound = __instance.BackButton.GetComponent<PassiveButton>().ClickSound;
             headerBtn.OnMouseOver = new UnityEvent();
             headerBtn.OnMouseOut = new UnityEvent();
-            headerBtn.OnClick.AddListener((UnityAction)(() =>
-            {
-                group.AllOptionsHidden = !group.AllOptionsHidden;
-                newText.text = group.AllOptionsHidden ? "<size=70%>(Click to open)</size>" : "<size=70%>(Click to close)</size>";
-            }));
+            headerBtn.OnClick.AddListener(
+                (UnityAction)(() =>
+                {
+                    group.AllOptionsHidden = !group.AllOptionsHidden;
+                    newText.text = group.AllOptionsHidden
+                        ? "<size=70%>(Click to open)</size>"
+                        : "<size=70%>(Click to close)</size>";
+                }));
             headerBtn.SetButtonEnableState(true);
         }
 

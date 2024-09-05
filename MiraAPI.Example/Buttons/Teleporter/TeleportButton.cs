@@ -13,7 +13,7 @@ public class TeleportButton : CustomActionButton
 {
     public override string Name => "Teleport";
 
-    public override float Cooldown => OptionGroupSingleton<TeleporterOptions>.Instance.TeleportCooldown;
+    public override float Cooldown => OptionGroupSingleton<TeleporterOptions>.Instance.TeleportCooldown.Value;
 
     public override float EffectDuration => OptionGroupSingleton<TeleporterOptions>.Instance.TeleportDuration;
 
@@ -22,7 +22,7 @@ public class TeleportButton : CustomActionButton
     public override LoadableAsset<Sprite> Sprite => ExampleAssets.TeleportButton;
     public static bool IsZoom { get; private set; }
 
-    public override bool Enabled(RoleBehaviour role)
+    public override bool Enabled(RoleBehaviour? role)
     {
         return role is TeleporterRole;
     }

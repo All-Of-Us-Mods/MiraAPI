@@ -13,5 +13,7 @@ public static class CustomButtonSingleton<T> where T : CustomActionButton
     /// <summary>
     /// Gets the instance of the button.
     /// </summary>
+#pragma warning disable CA1000
     public static T Instance => _instance ??= CustomButtonManager.CustomButtons.OfType<T>().Single();
+#pragma warning restore CA1000
 }

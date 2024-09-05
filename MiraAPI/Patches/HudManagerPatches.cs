@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using InnerNet;
 using MiraAPI.Hud;
 using MiraAPI.Roles;
 using Reactor.Utilities.Extensions;
@@ -16,62 +15,6 @@ public static class HudManagerPatches
 {
     // Custom buttons parent.
     private static GameObject? _bottomLeft;
-
-    // Custom role tab.
-    private static TaskPanelBehaviour? _roleTab;
-
-    /// <summary>
-    /// Update custom role tab and custom role hud elements.
-    /// </summary>
-    /// <param name="__instance">The HudManager instance.</param>
-    [HarmonyPostfix]
-    [HarmonyPatch(nameof(HudManager.Update))]
-    public static void UpdatePostfix(HudManager __instance)
-    {
-        var local = PlayerControl.LocalPlayer;
-
-        if (AmongUsClient.Instance.GameState != InnerNetClient.GameStates.Started && !ShipStatus.Instance)
-        {
-            return;
-        }
-
-        // CustomGameModeManager.ActiveMode?.HudUpdate(__instance);
-
-        switch (local?.Data?.Role)
-        {
-            case null:
-                return;
-
-            case ICustomRole customRole:
-            {
-                customRole.HudUpdate(__instance);
-
-                if (customRole.RoleHintType != RoleHintType.RoleTab)
-                {
-                    _roleTab?.gameObject.Destroy();
-                    return;
-                }
-
-                if (_roleTab == null)
-                {
-                    _roleTab = CustomRoleManager.CreateRoleTab(customRole);
-                }
-                else
-                {
-                    CustomRoleManager.UpdateRoleTab(_roleTab, customRole);
-                }
-
-                break;
-            }
-
-            default:
-                if (_roleTab != null)
-                {
-                    _roleTab.gameObject.Destroy();
-                }
-                break;
-        }
-    }
 
     /*
     /// <summary>
@@ -136,7 +79,7 @@ public static class HudManagerPatches
     }
 
     /// <summary>
-    /// Set the custom role tab and custom buttons active when the hud is active.
+    /// Set the custom buttons active when the hud is active.
     /// </summary>
     /// <param name="__instance">HudManager instance.</param>
     /// <param name="localPlayer">The local PlayerControl.</param>
@@ -151,19 +94,9 @@ public static class HudManagerPatches
             return;
         }
 
-        if (_roleTab)
-        {
-            _roleTab?.gameObject.SetActive(isActive);
-        }
-
         foreach (var button in CustomButtonManager.CustomButtons)
         {
             button.SetActive(isActive, role);
-        }
-
-        if (role is ICustomRole customRole)
-        {
-            __instance.ImpostorVentButton.gameObject.SetActive(isActive && customRole.CanUseVent);
         }
     }
 }

@@ -19,33 +19,38 @@ public static class IntroCutscenePatches
             __instance.TeamTitle.text = $"<size=70%>{mode.Name}</size>\n<size=20%>{mode.Description}</size>";
         }
     }*/
-    
+
     [HarmonyPrefix]
     [HarmonyPatch(nameof(IntroCutscene.BeginCrewmate))]
     public static bool BeginCrewmatePatch(IntroCutscene __instance)
     {
-        if (PlayerControl.LocalPlayer.Data.Role is ICustomRole customRole)
+        if (PlayerControl.LocalPlayer.Data.Role is not ICustomRole customRole)
         {
-            if (customRole.Team is not ModdedRoleTeams.Neutral)
-            {
-                return true;
-            }
-
-            var barTransform = __instance.BackgroundBar.transform;
-            var position = barTransform.position;
-            position.y -= 0.25f;
-            barTransform.position = position;
-
-            __instance.BackgroundBar.material.SetColor(ShaderID.Color, Color.gray);
-            __instance.TeamTitle.text = "OUTCAST";
-            __instance.impostorScale = 1f;
-            __instance.ImpostorText.text = "You are an Outcast. You do not have a team.";
-            __instance.TeamTitle.color = Color.gray;
-
-            __instance.ourCrewmate = __instance.CreatePlayer(0, Mathf.CeilToInt(7.5f), PlayerControl.LocalPlayer.Data, false);
-            return false;
+            return true;
         }
-        return true;
+
+        if (customRole.Team is not ModdedRoleTeams.Neutral)
+        {
+            return true;
+        }
+
+        var barTransform = __instance.BackgroundBar.transform;
+        var position = barTransform.position;
+        position.y -= 0.25f;
+        barTransform.position = position;
+
+        __instance.BackgroundBar.material.SetColor(ShaderID.Color, Color.gray);
+        __instance.TeamTitle.text = "NEUTRAL";
+        __instance.impostorScale = 1f;
+        __instance.ImpostorText.text = "You are Neutral. You do not have a team.";
+        __instance.TeamTitle.color = Color.gray;
+
+        __instance.ourCrewmate = __instance.CreatePlayer(
+            0,
+            Mathf.CeilToInt(7.5f),
+            PlayerControl.LocalPlayer.Data,
+            false);
+        return false;
     }
 
     /*

@@ -1,6 +1,4 @@
-﻿// Copyright (c) PlaceholderCompany. All rights reserved.
-
-namespace MiraAPI.Roles;
+﻿namespace MiraAPI.Roles;
 
 /// <summary>
 /// The type of hint style for a role to use.
