@@ -12,7 +12,7 @@ internal interface IModdedOption
     string Title { get; }
     StringNames StringName { get; }
     IMiraPlugin? ParentMod { get; set; }
-    BaseGameSetting? Data { get; }
+    BaseGameSetting Data { get; }
     Type? AdvancedRole { get; set; }
     OptionBehaviour? OptionBehaviour { get; }
     Func<bool> Visible { get; set; }

@@ -41,7 +41,7 @@ public static class SettingPatches
                 MiraNumberSuffixes.Percent => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "%",
                 _ => DestroyableSingleton<TranslationController>.Instance.GetString(
                     StringNames.GameSecondsAbbrev,
-                    (Il2CppSystem.Object[]) [value.ToString(__instance.FormatString, CultureInfo.InvariantCulture)]),
+                    (Il2CppSystem.Object[])[value.ToString(__instance.FormatString, CultureInfo.InvariantCulture)]),
             };
         }
 

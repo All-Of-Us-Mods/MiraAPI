@@ -6,6 +6,7 @@ using MiraAPI.PluginLoading;
 using MiraAPI.Roles;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
+using Reactor.Utilities;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -128,11 +129,6 @@ public static class LobbyViewPanePatches
 
         foreach (var group in filteredGroups)
         {
-            if (group.Options.Count == 0)
-            {
-                continue;
-            }
-
             var categoryHeaderMasked = Object.Instantiate(
                 instance.categoryHeaderOrigin,
                 instance.settingsContainer,
@@ -175,11 +171,6 @@ public static class LobbyViewPanePatches
                 viewSettingsInfoPanel.transform.localPosition = new Vector3(num2, num, -2f);
 
                 var data = option.Data;
-
-                if (data == null)
-                {
-                    continue;
-                }
 
                 if (data.Type == OptionTypes.Checkbox)
                 {
