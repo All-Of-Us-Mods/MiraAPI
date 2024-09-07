@@ -53,12 +53,12 @@ public abstract class TimedModifier : BaseModifier
     /// </summary>
     public override void FixedUpdate()
     {
-        if (Player?.AmOwner == false)
+        if (Player?.AmOwner == false || !TimerActive)
         {
             return;
         }
 
-        if (TimeRemaining > 0 && TimerActive)
+        if (TimeRemaining > 0)
         {
             TimeRemaining -= Time.fixedDeltaTime;
         }
