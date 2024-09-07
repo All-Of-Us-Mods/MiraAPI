@@ -23,6 +23,8 @@ To start using Mira API, you need to:
 2. Add a BepInDependency on your plugin class like this: `[BepInDependency(MiraApiPlugin.Id)]`
 3. Implement the IMiraPlugin interface on your plugin class.
 
+Mira API also depends on [Reactor](https://github.com/NuclearPowered/Reactor) in order to function properly! Do not forget to include it as a reference and `BepInDependency`!
+
 For a full example, see [this file](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/ExamplePlugin.cs).
 
 ## Recommended Project Structure

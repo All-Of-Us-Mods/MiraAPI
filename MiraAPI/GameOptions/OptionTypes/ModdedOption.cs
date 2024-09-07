@@ -35,7 +35,7 @@ public abstract class ModdedOption<T> : IModdedOption
     /// <summary>
     /// Gets the BaseGameSetting data of the option.
     /// </summary>
-    public BaseGameSetting? Data { get; protected init; }
+    public BaseGameSetting Data { get; protected init; }
 
     /// <summary>
     /// Gets or sets the parent mod of the option.
