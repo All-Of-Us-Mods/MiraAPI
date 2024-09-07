@@ -390,11 +390,6 @@ public static class LobbyViewPanePatches
 
             var value = option.GetFloatData();
 
-            if (baseGameSetting == null)
-            {
-                continue;
-            }
-
             if (baseGameSetting.Type == OptionTypes.Checkbox)
             {
                 viewSettingsInfoPanel.SetInfoCheckbox(baseGameSetting.Title, maskLayer, value > 0f);
