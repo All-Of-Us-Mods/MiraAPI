@@ -7,7 +7,7 @@ namespace MiraAPI.Utilities.Assets;
 /// A utility class for loading assets from embedded resources.
 /// </summary>
 /// <param name="path">The path to the embedded resource.</param>
-public class LoadableResourceAsset(string path) : LoadableAsset<Sprite>
+public class LoadableResourceAsset(string path, float pixelsPerUnit=100f) : LoadableAsset<Sprite>
 {
     private readonly Assembly _assembly = Assembly.GetCallingAssembly();
 
@@ -19,6 +19,6 @@ public class LoadableResourceAsset(string path) : LoadableAsset<Sprite>
             return LoadedAsset;
         }
 
-        return LoadedAsset = SpriteTools.LoadSpriteFromPath(path, _assembly);
+        return LoadedAsset = SpriteTools.LoadSpriteFromPath(path, _assembly, pixelsPerUnit);
     }
 }

@@ -39,7 +39,7 @@ public static class SpriteTools
     /// <param name="resourcePath">The path to the resource.</param>
     /// <returns>A sprite made from the resource.</returns>
     /// <exception cref="Exception">The resource cannot be found.</exception>
-    public static Sprite LoadSpriteFromPath(string resourcePath, Assembly assembly)
+    public static Sprite LoadSpriteFromPath(string resourcePath, Assembly assembly, float pixelsPerUnit)
     {
         var tex = new Texture2D(1, 1, TextureFormat.ARGB32, false);
         var myStream = assembly.GetManifestResourceStream(resourcePath);
@@ -53,6 +53,6 @@ public static class SpriteTools
             Logger<MiraApiPlugin>.Error($"Resource not found: {resourcePath}\nReturning empty sprite!");
         }
 
-        return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+        return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), pixelsPerUnit);
     }
 }
