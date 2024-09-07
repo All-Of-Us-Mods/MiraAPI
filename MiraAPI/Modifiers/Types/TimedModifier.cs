@@ -53,7 +53,7 @@ public abstract class TimedModifier : BaseModifier
     /// </summary>
     public override void FixedUpdate()
     {
-        if (Player?.AmOwner == false || !TimerActive)
+        if (!TimerActive)
         {
             return;
         }

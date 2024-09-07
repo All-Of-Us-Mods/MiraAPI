@@ -69,7 +69,7 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
             Modifiers.Add(modifier);
             modifier.OnActivate();
 
-            if (_player?.AmOwner == true && modifier is TimedModifier { AutoStart: true } timer)
+            if (modifier is TimedModifier { AutoStart: true } timer)
             {
                 timer.StartTimer();
             }
