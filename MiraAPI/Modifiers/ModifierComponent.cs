@@ -39,11 +39,6 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
 
     internal void ClearModifiers()
     {
-        foreach (var modifier in Modifiers)
-        {
-            modifier.OnDeactivate();
-        }
-
         _toRemove.AddRange(Modifiers);
     }
 
