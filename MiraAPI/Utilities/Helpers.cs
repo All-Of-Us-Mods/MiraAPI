@@ -15,12 +15,14 @@ namespace MiraAPI.Utilities;
 public static class Helpers
 {
     /// <summary>
-    /// NotShipMask filter for collisions.
+    /// Creates a ContactFilter2D from a layer mask.
     /// </summary>
-    public static readonly ContactFilter2D Filter = ContactFilter2D.CreateLegacyFilter(
-        Constants.NotShipMask,
-        float.MinValue,
-        float.MaxValue);
+    /// <param name="layerMask">The layer mask.</param>
+    /// <returns>A new ContactFilter2D that represents the layer mask.</returns>
+    public static ContactFilter2D CreateFilter(int layerMask)
+    {
+        return ContactFilter2D.CreateLegacyFilter(layerMask, float.MinValue, float.MaxValue);
+    }
 
     /// <summary>
     /// Get the room at a specific position.
@@ -37,11 +39,12 @@ public static class Helpers
     /// </summary>
     /// <param name="source">The source location.</param>
     /// <param name="radius">The radius to search in.</param>
+    /// <param name="filter">The contact filter.</param>
     /// <returns>A list of dead bodies.</returns>
-    public static List<DeadBody> GetNearestDeadBodies(Vector2 source, float radius)
+    public static List<DeadBody> GetNearestDeadBodies(Vector2 source, float radius, ContactFilter2D filter)
     {
         var results = new Il2CppSystem.Collections.Generic.List<Collider2D>();
-        Physics2D.OverlapCircle(source, radius, Filter, results);
+        Physics2D.OverlapCircle(source, radius, filter, results);
         return results.ToArray()
             .Where(collider2D => collider2D.CompareTag("DeadBody"))
             .Select(collider2D => collider2D.GetComponent<DeadBody>()).ToList();
@@ -52,14 +55,15 @@ public static class Helpers
     /// </summary>
     /// <param name="source">The source point.</param>
     /// <param name="radius">The radius to search in.</param>
+    /// <param name="filter">The contact filter.</param>
     /// <param name="colliderTag">An optional collider tag.</param>
     /// <typeparam name="T">The type of the object.</typeparam>
     /// <returns>A list of objects of type T.</returns>
-    public static List<T> GetNearestObjectsOfType<T>(Vector2 source, float radius, string? colliderTag = null)
+    public static List<T> GetNearestObjectsOfType<T>(Vector2 source, float radius, ContactFilter2D filter, string? colliderTag = null)
         where T : Component
     {
         var results = new Il2CppSystem.Collections.Generic.List<Collider2D>();
-        Physics2D.OverlapCircle(source, radius, Filter, results);
+        Physics2D.OverlapCircle(source, radius, filter, results);
         return results.ToArray()
             .Where(collider2D => colliderTag == null || collider2D.CompareTag(colliderTag))
             .Select(collider2D => collider2D.GetComponent<T>()).ToList();
@@ -77,7 +81,7 @@ public static class Helpers
         float radius,
         bool ignoreColliders = true)
     {
-        var newList = GetNearestObjectsOfType<PlayerControl>(source, radius);
+        var newList = GetNearestObjectsOfType<PlayerControl>(source, radius, CreateFilter(Constants.NotShipMask));
 
         if (!ignoreColliders)
         {
