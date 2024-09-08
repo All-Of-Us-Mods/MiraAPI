@@ -304,7 +304,7 @@ public static class Extensions
     /// <returns>The dead body if it is found, or null there is none within the radius.</returns>
     public static DeadBody? GetNearestDeadBody(this PlayerControl playerControl, float radius)
     {
-        return Helpers.GetNearestDeadBodies(playerControl.GetTruePosition(), radius).Find(component => component && !component.Reported);
+        return Helpers.GetNearestDeadBodies(playerControl.GetTruePosition(), radius, Helpers.CreateFilter(Constants.NotShipMask)).Find(component => component && !component.Reported);
     }
 
     /// <summary>
@@ -312,13 +312,14 @@ public static class Extensions
     /// </summary>
     /// <param name="playerControl">The player object.</param>
     /// <param name="radius">The radius to search within.</param>
+    /// <param name="filter">The contact filter.</param>
     /// <param name="colliderTag">An optional collider tag.</param>
     /// <param name="predicate">Optional predicate to test if the object is valid.</param>
     /// <typeparam name="T">The type of the object.</typeparam>
     /// <returns>The object if it was found, or null if there is none within the radius.</returns>
-    public static T? GetNearestObjectOfType<T>(this PlayerControl playerControl, float radius, string? colliderTag = null, Predicate<T>? predicate = null) where T : Component
+    public static T? GetNearestObjectOfType<T>(this PlayerControl playerControl, float radius, ContactFilter2D filter, string? colliderTag = null, Predicate<T>? predicate = null) where T : Component
     {
-        return Helpers.GetNearestObjectsOfType<T>(playerControl.GetTruePosition(), radius, colliderTag).Find(predicate ?? (component => component));
+        return Helpers.GetNearestObjectsOfType<T>(playerControl.GetTruePosition(), radius, filter, colliderTag).Find(predicate ?? (component => component));
     }
 
     /// <summary>
