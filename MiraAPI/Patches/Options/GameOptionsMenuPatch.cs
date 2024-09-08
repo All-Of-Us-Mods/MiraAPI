@@ -32,13 +32,22 @@ public static class GameOptionsMenuPatch
         var num = 2.1f;
         var filteredGroups =
             GameSettingMenuPatches.SelectedMod?.OptionGroups.Where(
-                x => x.GroupVisible.Invoke() && x.AdvancedRole is null) ?? [];
+                x => x.AdvancedRole is null) ?? [];
 
         foreach (var group in filteredGroups)
         {
-            var filteredOpts = group.Options.Where(x => x.Visible.Invoke()).ToList();
-            if (filteredOpts.Count == 0 || group.Header is null)
+            if (group.Options.Count == 0 || group.Header is null)
             {
+                continue;
+            }
+
+            if (!group.GroupVisible.Invoke())
+            {
+                group.Header.gameObject.SetActive(false);
+                foreach (var option in group.Options)
+                {
+                    option.OptionBehaviour?.gameObject.SetActive(false);
+                }
                 continue;
             }
 
