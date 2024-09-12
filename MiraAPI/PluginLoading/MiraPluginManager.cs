@@ -12,6 +12,7 @@ using System.Reflection;
 using MiraAPI.Colors;
 using MiraAPI.Utilities;
 using Reactor.Networking;
+using MiraAPI.Cosmetics;
 
 namespace MiraAPI.PluginLoading;
 
@@ -30,6 +31,7 @@ internal class MiraPluginManager
     internal void Initialize()
     {
         Instance = this;
+        CustomCosmeticManager.RegisterVanilla();
         IL2CPPChainloader.Instance.PluginLoad += (pluginInfo, assembly, plugin) =>
         {
             if (!plugin.GetType().GetInterfaces().Contains(typeof(IMiraPlugin)))
@@ -41,7 +43,8 @@ internal class MiraPluginManager
 
             RegisterModifierAttribute(assembly);
             RegisterAllOptions(assembly, info);
-            
+            RegisterAllCosmetics(assembly, info);
+
             RegisterRoleAttribute(assembly, info);
             RegisterButtonAttribute(assembly);
 
@@ -84,6 +87,30 @@ internal class MiraPluginManager
                 }
 
                 ModdedOptionsManager.RegisterAttributeOption(type, attribute, property, pluginInfo);
+            }
+        }
+    }
+
+    private static void RegisterAllCosmetics(Assembly assembly, MiraPluginInfo pluginInfo)
+    {
+        var filteredTypes = assembly.GetTypes().Where(type => type.IsAssignableTo(typeof(AbstractCosmeticsGroup)));
+
+        foreach (var type in filteredTypes)
+        {
+            if (!CustomCosmeticManager.RegisterGroup(type, pluginInfo))
+            {
+                continue;
+            }
+
+            foreach (var property in type.GetProperties())
+            {
+                var attribute = property.GetCustomAttribute<RegisterCustomCosmeticAttribute>();
+                if (attribute == null)
+                {
+                    continue;
+                }
+
+                CustomCosmeticManager.RegisterAttributeOption(type, attribute, property, pluginInfo);
             }
         }
     }
