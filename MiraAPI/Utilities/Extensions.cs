@@ -22,7 +22,9 @@ public static class Extensions
         role.ParentMod.PluginConfig.TryGetEntry<int>(role.NumConfigDefinition, out var numEntry);
         role.ParentMod.PluginConfig.TryGetEntry<int>(role.ChanceConfigDefinition, out var chanceEntry);
 
-        return new NetData(RoleId.Get(role.GetType()), BitConverter.GetBytes(numEntry.Value).AddRangeToArray(BitConverter.GetBytes(chanceEntry.Value)));
+        return new NetData(
+            RoleId.Get(role.GetType()),
+            BitConverter.GetBytes(numEntry.Value).AddRangeToArray(BitConverter.GetBytes(chanceEntry.Value)));
     }
 
     /// <summary>
@@ -112,7 +114,8 @@ public static class Extensions
     /// <returns>True if the OptionBehaviour is for a custom options, false otherwise.</returns>
     public static bool IsCustom(this OptionBehaviour optionBehaviour)
     {
-        return ModdedOptionsManager.ModdedOptions.Values.Any(opt => opt.OptionBehaviour && opt.OptionBehaviour == optionBehaviour);
+        return ModdedOptionsManager.ModdedOptions.Values.Any(
+            opt => opt.OptionBehaviour && opt.OptionBehaviour == optionBehaviour);
     }
 
     private static readonly Dictionary<PlayerControl, ModifierComponent> ModifierComponents = [];
@@ -154,6 +157,7 @@ public static class Extensions
             randomizedList.Add(list[index]);
             list.RemoveAt(index);
         }
+
         return randomizedList;
     }
 
@@ -176,7 +180,8 @@ public static class Extensions
     /// <returns>True if the Modifier is present, false otherwise.</returns>
     public static bool HasModifier<T>(this PlayerControl? player) where T : BaseModifier
     {
-        return player?.GetModifierComponent() != null && player.GetModifierComponent()!.ActiveModifiers.Exists(x => x is T);
+        return player?.GetModifierComponent() != null &&
+               player.GetModifierComponent()!.ActiveModifiers.Exists(x => x is T);
     }
 
     /// <summary>
@@ -187,7 +192,8 @@ public static class Extensions
     /// <returns>True if the Modifier is present, false otherwise.</returns>
     public static bool HasModifier(this PlayerControl? player, uint id)
     {
-        return player?.GetModifierComponent() != null && player.GetModifierComponent()!.ActiveModifiers.Exists(x => x.ModifierId == id);
+        return player?.GetModifierComponent() != null &&
+               player.GetModifierComponent()!.ActiveModifiers.Exists(x => x.ModifierId == id);
     }
 
     /// <summary>
@@ -233,6 +239,7 @@ public static class Extensions
             Logger<MiraApiPlugin>.Error($"Cannot add modifier with id {modifierId} because it is not registered.");
             return;
         }
+
         target.GetModifierComponent()?.AddModifier(type);
     }
 
@@ -304,7 +311,9 @@ public static class Extensions
     /// <returns>The dead body if it is found, or null there is none within the radius.</returns>
     public static DeadBody? GetNearestDeadBody(this PlayerControl playerControl, float radius)
     {
-        return Helpers.GetNearestDeadBodies(playerControl.GetTruePosition(), radius, Helpers.CreateFilter(Constants.NotShipMask)).Find(component => component && !component.Reported);
+        return Helpers
+            .GetNearestDeadBodies(playerControl.GetTruePosition(), radius, Helpers.CreateFilter(Constants.NotShipMask))
+            .Find(component => component && !component.Reported);
     }
 
     /// <summary>
@@ -317,25 +326,41 @@ public static class Extensions
     /// <param name="predicate">Optional predicate to test if the object is valid.</param>
     /// <typeparam name="T">The type of the object.</typeparam>
     /// <returns>The object if it was found, or null if there is none within the radius.</returns>
-    public static T? GetNearestObjectOfType<T>(this PlayerControl playerControl, float radius, ContactFilter2D filter, string? colliderTag = null, Predicate<T>? predicate = null) where T : Component
+    public static T? GetNearestObjectOfType<T>(
+        this PlayerControl playerControl,
+        float radius,
+        ContactFilter2D filter,
+        string? colliderTag = null,
+        Predicate<T>? predicate = null) where T : Component
     {
-        return Helpers.GetNearestObjectsOfType<T>(playerControl.GetTruePosition(), radius, filter, colliderTag).Find(predicate ?? (component => component));
+        return Helpers.GetNearestObjectsOfType<T>(playerControl.GetTruePosition(), radius, filter, colliderTag)
+            .Find(predicate ?? (component => component));
     }
 
     /// <summary>
-    /// Gets the nearest player to a player.
+    /// Gets the closest player that matches the given criteria.
     /// </summary>
     /// <param name="playerControl">The player object.</param>
     /// <param name="includeImpostors">Whether impostors should be included in the search.</param>
     /// <param name="distance">The radius to search within.</param>
     /// <param name="ignoreColliders">Whether colliders should be ignored when searching.</param>
+    /// <param name="predicate">Optional predicate to test if the object is valid.</param>
     /// <returns>The closest player if there is one, false otherwise.</returns>
-    public static PlayerControl? GetClosestPlayer(this PlayerControl playerControl, bool includeImpostors, float distance, bool ignoreColliders = false)
+    public static PlayerControl? GetClosestPlayer(
+        this PlayerControl playerControl,
+        bool includeImpostors,
+        float distance,
+        bool ignoreColliders = false,
+        Predicate<PlayerControl>? predicate = null)
     {
         var filteredPlayers = Helpers.GetClosestPlayers(playerControl, distance, ignoreColliders)
-            .Where(playerInfo => !playerInfo.Data.Disconnected && playerInfo.PlayerId != playerControl.PlayerId && !playerInfo.Data.IsDead &&
-                                 (includeImpostors || !playerInfo.Data.Role.IsImpostor));
+            .Where(
+                playerInfo => !playerInfo.Data.Disconnected &&
+                              playerInfo.PlayerId != playerControl.PlayerId &&
+                              !playerInfo.Data.IsDead &&
+                              (includeImpostors || !playerInfo.Data.Role.IsImpostor))
+            .ToList();
 
-        return filteredPlayers.FirstOrDefault();
+        return predicate != null ? filteredPlayers.Find(predicate) : filteredPlayers.FirstOrDefault();
     }
 }
