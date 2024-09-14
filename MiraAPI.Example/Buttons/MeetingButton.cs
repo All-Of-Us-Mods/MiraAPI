@@ -21,7 +21,7 @@ public class MeetingButton : CustomActionButton
 
     public override bool Enabled(RoleBehaviour? role)
     {
-        return PlayerControl.LocalPlayer.HasModifier<CaptainModifier>();
+        return PlayerControl.LocalPlayer != null && PlayerControl.LocalPlayer.HasModifier<CaptainModifier>();
     }
 
     protected override void OnClick()

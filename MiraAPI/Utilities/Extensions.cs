@@ -133,11 +133,12 @@ public static class Extensions
         }
 
         component = player.GetComponent<ModifierComponent>();
-        if (component)
+        if (component == null)
         {
-            ModifierComponents[player] = component;
+            return null;
         }
 
+        ModifierComponents[player] = component;
         return component;
     }
 
