@@ -27,12 +27,12 @@ public static class NotificationPopperPatch
             ? Palette.CrewmateSettingChangeText.ToTextColor()
             : Palette.ImpostorRed.ToTextColor();
 
-        var item = DestroyableSingleton<TranslationController>.Instance.GetString(
+        var item = TranslationController.Instance.GetString(
             StringNames.LobbyChangeSettingNotificationRole,
             string.Concat(
                 "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">",
                 text,
-                DestroyableSingleton<TranslationController>.Instance.GetString(key, Array.Empty<Object>()),
+                TranslationController.Instance.GetString(key, Array.Empty<Object>()),
                 "</color></font>"
             ),
             "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">" + roleCount + "</font>",

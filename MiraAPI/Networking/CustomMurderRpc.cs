@@ -87,7 +87,7 @@ public static class CustomMurderRpc
             if (flag && PlayerControl.LocalPlayer.Data.PlayerId == target.protectedByGuardianId)
             {
                 StatsManager.Instance.IncrementStat(StringNames.StatsGuardianAngelCrewmatesProtected);
-                DestroyableSingleton<AchievementManager>.Instance.OnProtectACrewmate();
+                AchievementManager.Instance.OnProtectACrewmate();
             }
 
             if (source.AmOwner || flag)
@@ -115,7 +115,7 @@ public static class CustomMurderRpc
             return;
         }
 
-        DestroyableSingleton<DebugAnalytics>.Instance.Analytics.Kill(target.Data, source.Data);
+        DebugAnalytics.Instance.Analytics.Kill(target.Data, source.Data);
         if (source.AmOwner)
         {
             StatsManager.Instance.IncrementStat(
@@ -139,7 +139,7 @@ public static class CustomMurderRpc
             }
         }
 
-        DestroyableSingleton<UnityTelemetry>.Instance.WriteMurder();
+        UnityTelemetry.Instance.WriteMurder();
         target.gameObject.layer = LayerMask.NameToLayer("Ghost");
         if (target.AmOwner)
         {
@@ -159,14 +159,14 @@ public static class CustomMurderRpc
 
             if (showKillAnim)
             {
-                DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(source.Data, data);
+                HudManager.Instance.KillOverlay.ShowKillAnimation(source.Data, data);
             }
 
             target.cosmetics.SetNameMask(false);
             target.RpcSetScanner(false);
         }
 
-        DestroyableSingleton<AchievementManager>.Instance.OnMurder(
+        AchievementManager.Instance.OnMurder(
             source.AmOwner,
             target.AmOwner,
             source.CurrentOutfitType == PlayerOutfitType.Shapeshifted,

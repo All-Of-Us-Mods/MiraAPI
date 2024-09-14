@@ -224,7 +224,7 @@ public static class CustomRoleManager
             var num = BitConverter.ToInt32(netData.Data, 0);
             var chance = BitConverter.ToInt32(netData.Data, 4);
 
-            DestroyableSingleton<HudManager>.Instance.Notifier.AddRoleSettingsChangeMessage(role.StringName, num, chance, role.TeamType, false);
+            HudManager.Instance.Notifier.AddRoleSettingsChangeMessage(role.StringName, num, chance, role.TeamType, false);
 
             try
             {

@@ -25,7 +25,7 @@ public class SabotageButtonPatch
             return false;
         }
 
-        DestroyableSingleton<HudManager>.Instance.ToggleMapVisible(
+        HudManager.Instance.ToggleMapVisible(
             new MapOptions
             {
                 Mode = MapOptions.Modes.Sabotage,

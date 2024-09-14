@@ -190,26 +190,26 @@ public static class TaskAdderPatch
                 case TaskTypes.DivertPower:
                 {
                     var targetSystem = taskAddButton.MyTask.Cast<DivertPowerTask>().TargetSystem;
-                    taskAddButton.Text.text = DestroyableSingleton<TranslationController>.Instance.GetString(
+                    taskAddButton.Text.text = TranslationController.Instance.GetString(
                         StringNames.DivertPowerTo,
-                        DestroyableSingleton<TranslationController>.Instance.GetString(targetSystem));
+                        TranslationController.Instance.GetString(targetSystem));
                     break;
                 }
                 case TaskTypes.FixWeatherNode:
                 {
                     var nodeId = ((WeatherNodeTask)taskAddButton.MyTask).NodeId;
                     taskAddButton.Text.text =
-                        DestroyableSingleton<TranslationController>.Instance.GetString(
+                        TranslationController.Instance.GetString(
                             StringNames.FixWeatherNode,
                             Array.Empty<Il2CppSystem.Object>()) + " " +
-                        DestroyableSingleton<TranslationController>.Instance.GetString(
+                        TranslationController.Instance.GetString(
                             WeatherSwitchGame.ControlNames[nodeId],
                             Array.Empty<Il2CppSystem.Object>());
                     break;
                 }
                 default:
                     taskAddButton.Text.text =
-                        DestroyableSingleton<TranslationController>.Instance.GetString(taskAddButton.MyTask.TaskType);
+                        TranslationController.Instance.GetString(taskAddButton.MyTask.TaskType);
                     break;
             }
 
@@ -238,9 +238,9 @@ public static class TaskAdderPatch
 
         if (taskFolder.FolderName == "Roles")
         {
-            for (var m = 0; m < DestroyableSingleton<RoleManager>.Instance.AllRoles.Length; m++)
+            for (var m = 0; m < RoleManager.Instance.AllRoles.Length; m++)
             {
-                var roleBehaviour = DestroyableSingleton<RoleManager>.Instance.AllRoles[m];
+                var roleBehaviour = RoleManager.Instance.AllRoles[m];
                 if (roleBehaviour.Role == RoleTypes.ImpostorGhost || roleBehaviour.Role == RoleTypes.CrewmateGhost ||
                     CustomRoleManager.CustomRoles.ContainsKey((ushort)roleBehaviour.Role))
                 {

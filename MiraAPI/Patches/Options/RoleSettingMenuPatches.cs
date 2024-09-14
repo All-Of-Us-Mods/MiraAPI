@@ -178,7 +178,7 @@ public static class RoleSettingMenuPatches
         }
 
         roleSetting.UpdateValuesAndText(GameOptionsManager.Instance.CurrentGameOptions.RoleOptions);
-        DestroyableSingleton<HudManager>.Instance.Notifier.AddRoleSettingsChangeMessage(
+        HudManager.Instance.Notifier.AddRoleSettingsChangeMessage(
             roleSetting.Role.StringName,
             roleSetting.RoleMaxCount,
             roleSetting.RoleChance,
@@ -254,7 +254,7 @@ public static class RoleSettingMenuPatches
         }
 
         __instance.roleDescriptionText.text = customRole.RoleLongDescription;
-        __instance.roleTitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(
+        __instance.roleTitleText.text = TranslationController.Instance.GetString(
             role.StringName,
             new Il2CppReferenceArray<Il2CppSystem.Object>(0));
         __instance.roleScreenshot.sprite = Sprite.Create(

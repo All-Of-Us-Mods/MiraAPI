@@ -134,7 +134,7 @@ public class ModdedNumberOption : ModdedOption<float>
     protected override void OnValueChanged(float newValue)
     {
         Value = Mathf.Clamp(newValue, Min, Max);
-        DestroyableSingleton<HudManager>.Instance.Notifier.AddSettingsChangeMessage(
+        HudManager.Instance.Notifier.AddSettingsChangeMessage(
             StringName,
             Data?.GetValueString(Value),
             false);
