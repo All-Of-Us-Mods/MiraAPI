@@ -1,7 +1,7 @@
 ﻿using AmongUs.GameOptions;
 using HarmonyLib;
-using Il2CppSystem;
-using Il2CppSystem.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using MiraAPI.PluginLoading;
 using MiraAPI.Roles;
 using MiraAPI.Utilities.Assets;
@@ -12,10 +12,13 @@ using Object = UnityEngine.Object;
 
 namespace MiraAPI.Patches.Roles;
 
+/// <summary>
+/// Patch TaskAdder for organizing Roles and adding scroller.
+/// </summary>
 [HarmonyPatch]
 public static class TaskAdderPatch
 {
-    private static readonly System.Collections.Generic.Dictionary<string, string> ModsFolders = [];
+    private static readonly Dictionary<string, string> ModsFolders = [];
     private static Scroller? _scroller;
 
     [HarmonyPostfix]
@@ -167,19 +170,14 @@ public static class TaskAdderPatch
 
             ControllerManager.Instance.AddSelectableUiElement(taskFolder2.Button);
             if (!string.IsNullOrEmpty(__instance.restorePreviousSelectionByFolderName) &&
-                taskFolder2.FolderName.Equals(__instance.restorePreviousSelectionByFolderName, System.StringComparison.Ordinal))
+                taskFolder2.FolderName.Equals(__instance.restorePreviousSelectionByFolderName, StringComparison.Ordinal))
             {
                 __instance.restorePreviousSelectionFound = taskFolder2.Button;
             }
         }
 
         var flag = false;
-        var list = new List<PlayerTask>();
-
-        foreach (var item in taskFolder.Children)
-        {
-            list.Add(item);
-        }
+        var list = taskFolder.Children.ToArray().OrderBy(t => t.TaskType).ToList();
 
         for (var l = 0; l < list.Count; l++)
         {
@@ -197,14 +195,12 @@ public static class TaskAdderPatch
                 }
                 case TaskTypes.FixWeatherNode:
                 {
-                    var nodeId = ((WeatherNodeTask)taskAddButton.MyTask).NodeId;
+                    var nodeId = taskAddButton.MyTask.Cast<WeatherNodeTask>().NodeId;
                     taskAddButton.Text.text =
                         TranslationController.Instance.GetString(
-                            StringNames.FixWeatherNode,
-                            Array.Empty<Il2CppSystem.Object>()) + " " +
+                            StringNames.FixWeatherNode) + " " +
                         TranslationController.Instance.GetString(
-                            WeatherSwitchGame.ControlNames[nodeId],
-                            Array.Empty<Il2CppSystem.Object>());
+                            WeatherSwitchGame.ControlNames[nodeId]);
                     break;
                 }
                 default:
