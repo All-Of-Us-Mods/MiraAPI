@@ -79,7 +79,7 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
         {
             if (_player?.AmOwner == true)
             {
-                HudManager.Instance?.SetHudActive(true);
+                HudManager.Instance?.SetHudActive(HudManager.Instance.TaskPanel.isActiveAndEnabled);
             }
             _toAdd.Clear();
             _toRemove.Clear();
