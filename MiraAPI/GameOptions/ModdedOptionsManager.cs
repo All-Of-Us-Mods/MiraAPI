@@ -45,6 +45,10 @@ public static class ModdedOptionsManager
         TypeToGroup.Add(type, group);
         pluginInfo.OptionGroups.Add(group);
 
+        typeof(OptionGroupSingleton<>).MakeGenericType(type)
+            .GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic)!
+            .SetValue(null, group);
+
         return true;
     }
 
