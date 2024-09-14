@@ -118,7 +118,7 @@ public static class Extensions
             opt => opt.OptionBehaviour && opt.OptionBehaviour == optionBehaviour);
     }
 
-    private static readonly Dictionary<PlayerControl, ModifierComponent> ModifierComponents = [];
+    internal static Dictionary<PlayerControl, ModifierComponent> ModifierComponents { get; } = [];
 
     /// <summary>
     /// Gets the ModifierComponent for a player.
