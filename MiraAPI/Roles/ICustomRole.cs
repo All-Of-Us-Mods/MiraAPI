@@ -37,17 +37,10 @@ public interface ICustomRole
     /// </summary>
     ModdedRoleTeams Team { get; }
 
+    /// <summary>
+    /// Configure advanced settings of the role.
+    /// </summary>
     CustomRoleConfiguration Configuration { get; }
-
-    /// <summary>
-    /// Gets the BepInEx ConfigDefinition for the amount of players that can have this role.
-    /// </summary>
-    ConfigDefinition NumConfigDefinition => new("Roles", $"Num {GetType().FullName}");
-
-    /// <summary>
-    /// Gets the BepInEx ConfigDefinition for the chance of this role being selected.
-    /// </summary>
-    ConfigDefinition ChanceConfigDefinition => new("Roles", $"Chance {GetType().FullName}");
 
     /// <summary>
     /// Gets the parent mod of this role.
@@ -62,6 +55,36 @@ public interface ICustomRole
     {
     }
 
+    internal ConfigDefinition NumConfigDefinition => new("Roles", $"Num {GetType().FullName}");
+    internal ConfigDefinition ChanceConfigDefinition => new("Roles", $"Chance {GetType().FullName}");
+
+    /// <summary>
+    /// Get the role chance option.
+    /// </summary>
+    /// <returns>The role chance option.</returns>
+    public int? GetChance()
+    {
+        if (ParentMod.PluginConfig.TryGetEntry(ChanceConfigDefinition, out ConfigEntry<int> entry))
+        {
+            return Mathf.Clamp(entry.Value, 0, 100);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Get the role count option.
+    /// </summary>
+    /// <returns>The role count option.</returns>
+    public int? GetCount()
+    {
+        if (ParentMod.PluginConfig.TryGetEntry(NumConfigDefinition, out ConfigEntry<int> entry))
+        {
+            return Mathf.Clamp(entry.Value, 0, Configuration.MaxRoleCount);
+        }
+
+        return null;
+    }
     /// <summary>
     /// This method runs on the HudManager.Update method ONLY when the LOCAL player has this role.
     /// </summary>
