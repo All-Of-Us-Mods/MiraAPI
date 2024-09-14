@@ -12,19 +12,6 @@ namespace MiraAPI.Patches.Roles;
 public static class VentPatches
 {
     /// <summary>
-    /// Set CanVent of player to customRole CanUseVent because the original one isnt a property :(.
-    /// </summary>
-    [HarmonyPrefix]
-    [HarmonyPatch(nameof(Vent.CanUse))]
-    public static void CanUsePrefix(Vent __instance, NetworkedPlayerInfo pc)
-    {
-        if (pc.Role is ICustomRole customRole)
-        {
-            pc.Role.CanVent = customRole.CanUseVent;
-        }
-    }
-
-    /// <summary>
     /// Set outline to player's custom role color.
     /// </summary>
     [HarmonyPostfix]
