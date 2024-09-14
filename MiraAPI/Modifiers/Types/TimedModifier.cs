@@ -39,6 +39,9 @@ public abstract class TimedModifier : BaseModifier
     /// </summary>
     public float TimeRemaining { get; protected set; }
 
+    /// <inheritdoc />
+    public override bool HideOnUi => !TimerActive;
+
     /// <summary>
     /// Gets the HUD information for Timed Modifier, including the time remaining.
     /// </summary>
@@ -64,14 +67,7 @@ public abstract class TimedModifier : BaseModifier
         }
         else
         {
-            TimerActive = false;
-            TimeRemaining = Duration;
-            OnTimerComplete();
-
-            if (RemoveOnComplete)
-            {
-                ModifierComponent?.RemoveModifier(ModifierId);
-            }
+            StopTimer();
         }
     }
 
@@ -86,7 +82,52 @@ public abstract class TimedModifier : BaseModifier
             return;
         }
 
-        TimerActive = true;
         TimeRemaining = Duration;
+        TimerActive = true;
+    }
+
+    /// <summary>
+    /// Stops the timer and calls OnTimerComplete().
+    /// </summary>
+    public void StopTimer()
+    {
+        if (!TimerActive)
+        {
+            return;
+        }
+
+        TimerActive = false;
+        TimeRemaining = Duration;
+        OnTimerComplete();
+
+        if (RemoveOnComplete)
+        {
+            ModifierComponent?.RemoveModifier(ModifierId);
+        }
+    }
+
+    /// <summary>
+    /// Resets the timer. Does not call OnTimerComplete().
+    /// </summary>
+    public void ResetTimer()
+    {
+        TimerActive = false;
+        TimeRemaining = Duration;
+    }
+
+    /// <summary>
+    /// Pauses the timer.
+    /// </summary>
+    public void PauseTimer()
+    {
+        TimerActive = false;
+    }
+
+    /// <summary>
+    /// Pauses the timer.
+    /// </summary>
+    public void ResumeTimer()
+    {
+        TimerActive = true;
     }
 }
