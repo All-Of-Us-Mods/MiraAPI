@@ -16,7 +16,7 @@ public class NeutralKillerRole : ImpostorRole, ICustomRole
     {
         UseVanillaKillButton = true,
         CanGetKilled = true,
-        CanUseVent = true
+        CanUseVent = true,
     };
 
     public override void SpawnTaskHeader(PlayerControl playerControl)

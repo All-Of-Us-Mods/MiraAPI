@@ -15,7 +15,10 @@ public struct CustomRoleConfiguration
     /// <param name="role">The role in which you are configuring.</param>
     public CustomRoleConfiguration(ICustomRole role)
     {
-        MaxPlayers = 15;
+        MaxRoleCount = 15;
+        DefaultRoleCount = 0;
+        DefaultChance = 0;
+
         OptionsScreenshot = Icon = MiraAssets.Empty;
         AffectedByLightOnAirship = role.Team == ModdedRoleTeams.Crewmate;
         KillButtonOutlineColor = role.Team switch
@@ -33,12 +36,28 @@ public struct CustomRoleConfiguration
         TasksCountForProgress = role.Team == ModdedRoleTeams.Crewmate;
         IsGhostRole = false;
         HideSettings = IsGhostRole;
+        CanModifyChance = true;
     }
 
     /// <summary>
-    /// Gets the hard limit of players that can have this role. This property is used to set a limit in the Role Options menu.
+    /// Gets the hard limit of players that can have this role. This property is used to set a limit in the Role Options menu. If set to 0, the role will not be assigned at start.
     /// </summary>
-    public int MaxPlayers;
+    public int MaxRoleCount;
+
+    /// <summary>
+    /// Gets the default role count.
+    /// </summary>
+    public int DefaultRoleCount;
+
+    /// <summary>
+    /// Gets the default role chance.
+    /// </summary>
+    public int DefaultChance;
+
+    /// <summary>
+    /// Whether the chance option can be changed or not.
+    /// </summary>
+    public bool CanModifyChance;
 
     /// <summary>
     /// Gets the Sprite used for the Role Options menu screenshot.

@@ -90,7 +90,7 @@ public static class CustomRoleManager
         roleBehaviour.TasksCountTowardProgress = customRole.Configuration.TasksCountForProgress;
         roleBehaviour.CanVent = customRole.Configuration.CanUseVent;
         roleBehaviour.DefaultGhostRole = customRole.Configuration.GhostRole;
-        roleBehaviour.MaxCount = customRole.Configuration.MaxPlayers;
+        roleBehaviour.MaxCount = customRole.Configuration.MaxRoleCount;
         roleBehaviour.RoleScreenshot = customRole.Configuration.OptionsScreenshot.LoadAsset();
 
         if (customRole.Configuration.IsGhostRole)
@@ -114,8 +114,8 @@ public static class CustomRoleManager
         }
 
         var config = parentMod.PluginConfig;
-        config.Bind(customRole.NumConfigDefinition, 1);
-        config.Bind(customRole.ChanceConfigDefinition, 100);
+        config.Bind(customRole.NumConfigDefinition, Mathf.Clamp(customRole.Configuration.DefaultRoleCount, 0, customRole.Configuration.MaxRoleCount));
+        config.Bind(customRole.ChanceConfigDefinition, Mathf.Clamp(customRole.Configuration.DefaultChance, 0, 100));
 
         return roleBehaviour;
     }

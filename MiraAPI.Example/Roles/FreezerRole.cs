@@ -15,6 +15,6 @@ public class FreezerRole : ImpostorRole, ICustomRole
     public CustomRoleConfiguration Configuration => new CustomRoleConfiguration(this)
     {
         OptionsScreenshot = ExampleAssets.Banner,
-        MaxPlayers = 2,
+        MaxRoleCount = 2,
     };
 }

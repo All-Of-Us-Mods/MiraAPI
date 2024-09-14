@@ -166,11 +166,17 @@ public static class RoleSettingMenuPatches
 
         try
         {
-            role.ParentMod.PluginConfig.TryGetEntry<int>(role.NumConfigDefinition, out var numEntry);
-            numEntry.Value = roleSetting.RoleMaxCount;
+            if (role.Configuration.MaxRoleCount != 0)
+            {
+                role.ParentMod.PluginConfig.TryGetEntry<int>(role.NumConfigDefinition, out var numEntry);
+                numEntry.Value = Mathf.Clamp(roleSetting.RoleMaxCount, 0, role.Configuration.MaxRoleCount);
+            }
 
-            role.ParentMod.PluginConfig.TryGetEntry<int>(role.ChanceConfigDefinition, out var chanceEntry);
-            chanceEntry.Value = roleSetting.RoleChance;
+            if (role.Configuration.CanModifyChance)
+            {
+                role.ParentMod.PluginConfig.TryGetEntry<int>(role.ChanceConfigDefinition, out var chanceEntry);
+                chanceEntry.Value = roleSetting.RoleChance;
+            }
         }
         catch (Exception e)
         {
@@ -305,11 +311,23 @@ public static class RoleSettingMenuPatches
             Quaternion.identity,
             __instance.RoleChancesSettings.transform);
         roleOptionSetting.transform.localPosition = new Vector3(-0.15f, yPos, -2f);
+
         roleOptionSetting.SetRole(GameOptionsManager.Instance.CurrentGameOptions.RoleOptions, role, 20);
         roleOptionSetting.labelSprite.color = customRole.RoleColor;
         roleOptionSetting.OnValueChanged = new Action<OptionBehaviour>(ValueChanged);
         roleOptionSetting.SetClickMask(__instance.ButtonClickMask);
         __instance.roleChances.Add(roleOptionSetting);
+
+        if (customRole.Configuration.MaxRoleCount == 0 && customRole.Configuration.CanModifyChance)
+        {
+            roleOptionSetting.CountMinusBtn.gameObject.SetActive(false);
+            roleOptionSetting.CountPlusBtn.gameObject.SetActive(false);
+        }
+        else if (!customRole.Configuration.CanModifyChance)
+        {
+            roleOptionSetting.ChanceMinusBtn.gameObject.SetActive(false);
+            roleOptionSetting.ChancePlusBtn.gameObject.SetActive(false);
+        }
 
         roleOptionSetting.titleText.transform.localPosition = new Vector3(-0.5376f, -0.2923f, 0f);
         roleOptionSetting.titleText.color = customRole.RoleColor.GetAlternateColor();

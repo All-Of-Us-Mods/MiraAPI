@@ -15,7 +15,7 @@ public class ChameloenRole : CrewmateRole, ICustomRole
 
     public CustomRoleConfiguration Configuration => new CustomRoleConfiguration(this)
     {
-        MaxPlayers = 2,
+        MaxRoleCount = 0,
         OptionsScreenshot = ExampleAssets.Banner,
     };
 
