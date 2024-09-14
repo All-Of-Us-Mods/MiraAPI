@@ -12,12 +12,27 @@ namespace MiraAPI.Utilities.Assets.Addressable;
 /// </summary>
 public class Catalog(string CatalogPath)
 {
+    /// <summary>
+    /// Loads the catalog asynchronously.
+    /// </summary>
     public void LoadCatalogAsync() {
         Coroutines.Start(LoadCatalogAsynchronously());
     }
+
+    /// <summary>
+    /// Loads the catalog. This must be done before you can call any addressables.
+    /// </summary>
     public void LoadCatalog()
     {
         Addressables.LoadContentCatalog(CatalogPath).WaitForCompletion();
+    }
+
+    /// <summary>
+    /// Updates the network catalogs.
+    /// </summary>
+    public void UpdateNetworkCatalog()
+    {
+        Coroutines.Start(UpdateCatalog());
     }
     protected IEnumerator LoadCatalogAsynchronously()
     {

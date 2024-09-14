@@ -2,14 +2,13 @@
 using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace MiraAPI.Utilities.Assets.Addressable;
-public class WaitForAsyncOperationHandleFinish : IEnumerator
-{
-    internal AsyncOperationHandle handle;
-    public WaitForAsyncOperationHandleFinish(AsyncOperationHandle handle)
-    {
-        this.handle = handle;
-    }
 
+/// <summary>
+/// An IEnumerator for awaiting an AsyncOperationHandle
+/// </summary>
+/// <param name="handle">The AsyncOperationHandle being awaited</param>
+public class WaitForAsyncOperationHandleFinish(AsyncOperationHandle handle) : IEnumerator
+{
     public object Current => null;
     public bool MoveNext()
     {

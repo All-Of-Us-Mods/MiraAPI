@@ -4,9 +4,22 @@ using UnityEngine.AddressableAssets;
 
 namespace MiraAPI.Utilities.Assets;
 
+/// <summary>
+/// A utility class for loading multiple assets from the addressables api.
+/// </summary>
+/// <param name="locations">A list of IResourceLocations that locate the assets.</param>
+/// <typeparam name="T">The type of the assets to be loaded</typeparam>
 public class LoadableAddressableGroupAsset<T>(Il2CppSystem.Collections.Generic.IList<UnityEngine.ResourceManagement.ResourceLocations.IResourceLocation> locations) where T : UnityEngine.Object
 {
+    /// <summary>
+    /// A reference to the loaded assets. Intended to be used for caching purposes.
+    /// </summary>
     protected List<T> LoadedAsset = new();
+    /// <summary>
+    /// Loads the assets from the addressables api.
+    /// </summary>
+    /// <returns>The assets</returns>
+    /// <exception cref="Exception">The asset did not load properly.</exception>
     public List<T> LoadAsset()
     {
         if (LoadedAsset.Count != 0)
