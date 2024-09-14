@@ -37,7 +37,13 @@ public struct CustomRoleConfiguration
         IsGhostRole = false;
         HideSettings = IsGhostRole;
         CanModifyChance = true;
+        IntroScene = new CustomTeamIntroScene(role.Team);
     }
+
+    /// <summary>
+    /// Create a custom team intro scene.
+    /// </summary>
+    public CustomTeamIntroScene IntroScene;
 
     /// <summary>
     /// Gets the hard limit of players that can have this role. This property is used to set a limit in the Role Options menu. If set to 0, the role will not be assigned at start.

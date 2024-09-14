@@ -15,8 +15,11 @@ public class TeleporterRole : CrewmateRole, ICustomRole
     public CustomRoleConfiguration Configuration => new CustomRoleConfiguration(this)
     {
         OptionsScreenshot = ExampleAssets.Banner,
-        CanModifyChance = false,
-        DefaultChance = 73,
-        DefaultRoleCount = 4,
+        IntroScene = new CustomTeamIntroScene(ModdedRoleTeams.Crewmate)
+        {
+            TeamName = "Sus Crew",
+            TeamDescription = "You're crew, but sus.. Hm?",
+            TeamColor = Palette.AcceptedGreen,
+        },
     };
 }
