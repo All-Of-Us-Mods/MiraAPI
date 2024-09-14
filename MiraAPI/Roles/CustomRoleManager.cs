@@ -36,7 +36,7 @@ public static class CustomRoleManager
     {
         RoleManager.Instance.AllRoles = RoleManager.Instance.AllRoles.Concat(CustomRoles.Values).ToArray();
 
-        foreach (var role in CustomRoles.Values.Where(x=>x.IsDead))
+        foreach (var role in CustomRoles.Values.Where(x => x.IsDead))
         {
             RoleManager.GhostRoles.Add(role.Role);
         }
@@ -84,21 +84,21 @@ public static class CustomRoleManager
         roleBehaviour.StringName = CustomStringName.CreateAndRegister(customRole.RoleName);
         roleBehaviour.BlurbName = CustomStringName.CreateAndRegister(customRole.RoleDescription);
         roleBehaviour.BlurbNameLong = CustomStringName.CreateAndRegister(customRole.RoleLongDescription);
-        roleBehaviour.AffectedByLightAffectors = customRole.AffectedByLightOnAirship;
-        roleBehaviour.CanBeKilled = customRole.CanGetKilled;
-        roleBehaviour.CanUseKillButton = customRole.UseVanillaKillButton;
-        roleBehaviour.TasksCountTowardProgress = customRole.TasksCountForProgress;
-        roleBehaviour.CanVent = customRole.CanUseVent;
-        roleBehaviour.DefaultGhostRole = customRole.GhostRole;
-        roleBehaviour.MaxCount = customRole.MaxPlayers;
-        roleBehaviour.RoleScreenshot = customRole.OptionsScreenshot.LoadAsset();
+        roleBehaviour.AffectedByLightAffectors = customRole.Configuration.AffectedByLightOnAirship;
+        roleBehaviour.CanBeKilled = customRole.Configuration.CanGetKilled;
+        roleBehaviour.CanUseKillButton = customRole.Configuration.UseVanillaKillButton;
+        roleBehaviour.TasksCountTowardProgress = customRole.Configuration.TasksCountForProgress;
+        roleBehaviour.CanVent = customRole.Configuration.CanUseVent;
+        roleBehaviour.DefaultGhostRole = customRole.Configuration.GhostRole;
+        roleBehaviour.MaxCount = customRole.Configuration.MaxPlayers;
+        roleBehaviour.RoleScreenshot = customRole.Configuration.OptionsScreenshot.LoadAsset();
 
-        if (customRole.IsGhostRole)
+        if (customRole.Configuration.IsGhostRole)
         {
             RoleManager.GhostRoles.Add(roleBehaviour.Role);
         }
 
-        var useTaskHint = customRole.RoleHintType is RoleHintType.TaskHint;
+        var useTaskHint = customRole.Configuration.RoleHintType is RoleHintType.TaskHint;
         var overridesTaskText = customRole.GetType().GetMethod("SpawnTaskHeader")?.DeclaringType == customRole.GetType();
 
         if (useTaskHint && !overridesTaskText)
@@ -108,7 +108,7 @@ public static class CustomRoleManager
 
         CustomRoles.Add(roleId, roleBehaviour);
 
-        if (customRole.HideSettings)
+        if (customRole.Configuration.HideSettings)
         {
             return roleBehaviour;
         }
@@ -186,7 +186,7 @@ public static class CustomRoleManager
     internal static void SyncAllRoleSettings(int targetId = -1)
     {
         var data = CustomRoles.Values
-            .Where(x => x is ICustomRole { HideSettings: false })
+            .Where(x => x is ICustomRole { Configuration.HideSettings: false })
             .Select(x => ((ICustomRole)x).GetNetData())
             .ChunkNetData(1000);
 
@@ -216,7 +216,7 @@ public static class CustomRoleManager
             }
 
             var customRole = role as ICustomRole;
-            if (customRole is null or { HideSettings: true })
+            if (customRole is null or { Configuration.HideSettings: true })
             {
                 continue;
             }

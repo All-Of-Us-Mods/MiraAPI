@@ -29,9 +29,9 @@ public static class HudManagerPatches
 
         if (role is ICustomRole customRole)
         {
-            __instance.KillButton.ToggleVisible(isActive && customRole.UseVanillaKillButton && !flag);
-            __instance.ImpostorVentButton.ToggleVisible(isActive && customRole.CanUseVent && !flag);
-            __instance.SabotageButton.gameObject.SetActive(isActive && customRole.CanUseSabotage);
+            __instance.KillButton.ToggleVisible(isActive && customRole.Configuration.UseVanillaKillButton && !flag);
+            __instance.ImpostorVentButton.ToggleVisible(isActive && customRole.Configuration.CanUseVent && !flag);
+            __instance.SabotageButton.gameObject.SetActive(isActive && customRole.Configuration.CanUseSabotage);
         }
 
         if (_roleTab)
@@ -56,7 +56,7 @@ public static class HudManagerPatches
 
         var role = local?.Data?.Role;
 
-        if (role is ICustomRole { RoleHintType: RoleHintType.RoleTab } customRole)
+        if (role is ICustomRole { Configuration.RoleHintType: RoleHintType.RoleTab } customRole)
         {
             customRole.HudUpdate(__instance);
 

@@ -1,11 +1,8 @@
-﻿using System.Text;
-using AmongUs.GameOptions;
-using BepInEx.Configuration;
-using Il2CppInterop.Runtime.Attributes;
+﻿using BepInEx.Configuration;
 using MiraAPI.Modifiers;
 using MiraAPI.PluginLoading;
 using MiraAPI.Utilities;
-using MiraAPI.Utilities.Assets;
+using System.Text;
 using UnityEngine;
 
 namespace MiraAPI.Roles;
@@ -40,82 +37,7 @@ public interface ICustomRole
     /// </summary>
     ModdedRoleTeams Team { get; }
 
-    /// <summary>
-    /// Gets the hard limit of players that can have this role. This property is used to set a limit in the Role Options menu.
-    /// </summary>
-    int MaxPlayers => 15;
-
-    /// <summary>
-    /// Gets the Sprite used for the Role Options menu screenshot.
-    /// </summary>
-    [HideFromIl2Cpp]
-    LoadableAsset<Sprite> OptionsScreenshot => MiraAssets.Empty;
-
-    /// <summary>
-    /// Gets the Sprite used for the Role Icon.
-    /// </summary>
-    [HideFromIl2Cpp]
-    LoadableAsset<Sprite> Icon => MiraAssets.Empty;
-
-    /// <summary>
-    /// Gets a value indicating whether the role is affected by light affectors on Airship.
-    /// </summary>
-    bool AffectedByLightOnAirship => Team == ModdedRoleTeams.Crewmate;
-
-    /// <summary>
-    /// Gets a value indicating whether the role can be killed by vanilla murder system.
-    /// </summary>
-    bool CanGetKilled => Team == ModdedRoleTeams.Crewmate;
-
-    /// <summary>
-    /// Gets a value indicating whether the role should use the vanilla kill button.
-    /// </summary>
-    bool UseVanillaKillButton => Team == ModdedRoleTeams.Impostor;
-
-    /// <summary>
-    /// Gets a value indicating whether the role can use vents.
-    /// </summary>
-    bool CanUseVent => Team == ModdedRoleTeams.Impostor;
-
-    /// <summary>
-    /// Gets a value indicating whether the role can use the sabotage button.
-    /// </summary>
-    bool CanUseSabotage => Team == ModdedRoleTeams.Impostor;
-
-    /// <summary>
-    /// Gets a value indicating whether the role's tasks count towards task progress.
-    /// </summary>
-    bool TasksCountForProgress => Team == ModdedRoleTeams.Crewmate;
-
-    /// <summary>
-    /// Gets a value indicating whether the role is a Ghost.
-    /// </summary>
-    bool IsGhostRole => false;
-
-    /// <summary>
-    /// Gets a value indicating whether the role should show up in the Role Options menu.
-    /// </summary>
-    bool HideSettings => IsGhostRole;
-
-    /// <summary>
-    /// Gets the outline color for the KillButton if <see cref="UseVanillaKillButton"/> is true.
-    /// </summary>
-    Color KillButtonOutlineColor => Team switch
-    {
-        ModdedRoleTeams.Impostor => Palette.ImpostorRed,
-        ModdedRoleTeams.Crewmate => Palette.CrewmateBlue,
-        _ => RoleColor,
-    };
-
-    /// <summary>
-    /// Gets the role hint style. See <see cref="RoleHintType"/> enum for all options.
-    /// </summary>
-    RoleHintType RoleHintType => RoleHintType.RoleTab;
-
-    /// <summary>
-    /// Gets the Ghost role that is applied when the player is killed.
-    /// </summary>
-    RoleTypes GhostRole => Team == ModdedRoleTeams.Impostor ? RoleTypes.ImpostorGhost : RoleTypes.CrewmateGhost;
+    CustomRoleConfiguration Configuration { get; }
 
     /// <summary>
     /// Gets the BepInEx ConfigDefinition for the amount of players that can have this role.

@@ -20,7 +20,7 @@ public class SabotageButtonPatch
             return true;
         }
 
-        if (!customRole.CanUseSabotage || PlayerControl.LocalPlayer.inVent || !GameManager.Instance.SabotagesEnabled())
+        if (!customRole.Configuration.CanUseSabotage || PlayerControl.LocalPlayer.inVent || !GameManager.Instance.SabotagesEnabled())
         {
             return false;
         }
@@ -52,7 +52,7 @@ public class SabotageButtonPatch
 
         if (player.inVent || !GameManager.Instance.SabotagesEnabled() || player.petting)
         {
-            __instance.ToggleVisible(customRole.CanUseSabotage && GameManager.Instance.SabotagesEnabled());
+            __instance.ToggleVisible(customRole.Configuration.CanUseSabotage && GameManager.Instance.SabotagesEnabled());
             __instance.SetDisabled();
             return false;
         }

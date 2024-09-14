@@ -1,6 +1,4 @@
-﻿using Il2CppInterop.Runtime.Attributes;
-using MiraAPI.Roles;
-using MiraAPI.Utilities.Assets;
+﻿using MiraAPI.Roles;
 using UnityEngine;
 
 namespace MiraAPI.Example.Roles;
@@ -13,7 +11,10 @@ public class FreezerRole : ImpostorRole, ICustomRole
     public string RoleDescription => RoleLongDescription;
     public Color RoleColor => Palette.Blue;
     public ModdedRoleTeams Team => ModdedRoleTeams.Impostor;
-    [HideFromIl2Cpp]
-    public LoadableAsset<Sprite> OptionsScreenshot => ExampleAssets.Banner;
-    public int MaxPlayers => 2;
+
+    public CustomRoleConfiguration Configuration => new CustomRoleConfiguration(this)
+    {
+        OptionsScreenshot = ExampleAssets.Banner,
+        MaxPlayers = 2,
+    };
 }

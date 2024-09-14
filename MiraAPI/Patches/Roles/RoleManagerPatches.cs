@@ -37,12 +37,12 @@ public static class RoleManagerPatches
             return true;
         }
 
-        if (role.GhostRole is RoleTypes.CrewmateGhost or RoleTypes.ImpostorGhost)
+        if (role.Configuration.GhostRole is RoleTypes.CrewmateGhost or RoleTypes.ImpostorGhost)
         {
             return true;
         }
 
-        plr.RpcSetRole(role.GhostRole);
+        plr.RpcSetRole(role.Configuration.GhostRole);
         return false;
     }
 }

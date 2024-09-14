@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using HarmonyLib;
+﻿using HarmonyLib;
 using MiraAPI.PluginLoading;
 using MiraAPI.Roles;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
-using Reactor.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -216,7 +215,7 @@ public static class LobbyViewPanePatches
         {
             var filteredRoles = SelectedMod.CustomRoles.Values
                 .OfType<ICustomRole>()
-                .Where(x => !x.HideSettings && x.Team == team).ToList();
+                .Where(x => !x.Configuration.HideSettings && x.Team == team).ToList();
 
             if (filteredRoles.Count == 0)
             {
@@ -285,7 +284,7 @@ public static class LobbyViewPanePatches
                     chancePerGame,
                     61,
                     customRole.RoleColor,
-                    customRole.Icon.LoadAsset(),
+                    customRole.Configuration.Icon.LoadAsset(),
                     true);
 
                 viewSettingsInfoPanelRoleVariant.titleText.color =
@@ -370,7 +369,7 @@ public static class LobbyViewPanePatches
             role.StringName,
             maskLayer,
             role.TeamType == RoleTeamTypes.Crewmate,
-            customRole.Icon.LoadAsset());
+            customRole.Configuration.Icon.LoadAsset());
         viewPanel.divider.material.SetInt(PlayerMaterial.MaskLayer, maskLayer);
 
         var num = viewPanel.yPosStart;

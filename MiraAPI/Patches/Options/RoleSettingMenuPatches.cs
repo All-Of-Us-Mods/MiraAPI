@@ -56,7 +56,7 @@ public static class RoleSettingMenuPatches
 
         var crewRoles = GameSettingMenuPatches.SelectedMod?.CustomRoles.Values
             .OfType<ICustomRole>()
-            .Where(role => role is { Team: ModdedRoleTeams.Crewmate, HideSettings: false })
+            .Where(role => role is { Team: ModdedRoleTeams.Crewmate, Configuration.HideSettings: false })
             .ToList() ?? [];
 
         if (crewRoles is { Count: > 0 })
@@ -82,7 +82,7 @@ public static class RoleSettingMenuPatches
 
         var impRoles = GameSettingMenuPatches.SelectedMod?.CustomRoles.Values
             .OfType<ICustomRole>()
-            .Where(role => role is { Team: ModdedRoleTeams.Impostor, HideSettings: false })
+            .Where(role => role is { Team: ModdedRoleTeams.Impostor, Configuration.HideSettings: false })
             .ToList() ?? [];
 
         if (impRoles is { Count: > 0 })
@@ -109,7 +109,7 @@ public static class RoleSettingMenuPatches
 
         var neutRoles = GameSettingMenuPatches.SelectedMod?.CustomRoles.Values
             .OfType<ICustomRole>()
-            .Where(role => role is { Team: ModdedRoleTeams.Neutral, HideSettings: false })
+            .Where(role => role is { Team: ModdedRoleTeams.Neutral, Configuration.HideSettings: false })
             .ToList() ?? [];
 
         if (neutRoles is { Count: > 0 })
@@ -159,7 +159,7 @@ public static class RoleSettingMenuPatches
     {
         var roleSetting = obj.Cast<RoleOptionSetting>();
         var role = roleSetting.Role as ICustomRole;
-        if (role is null or { HideSettings: true })
+        if (role is null or { Configuration.HideSettings: true })
         {
             return;
         }
@@ -228,7 +228,7 @@ public static class RoleSettingMenuPatches
                 renderer.material.SetInt(PlayerMaterial.MaskLayer, 20);
             }
 
-            foreach (var fontMat in newOpt.GetComponentsInChildren<TextMeshPro>(true).Select(x=>x.fontMaterial))
+            foreach (var fontMat in newOpt.GetComponentsInChildren<TextMeshPro>(true).Select(x => x.fontMaterial))
             {
                 fontMat.SetFloat(ShaderID.StencilComp, 3f);
                 fontMat.SetFloat(ShaderID.Stencil, 20);
@@ -258,7 +258,7 @@ public static class RoleSettingMenuPatches
             role.StringName,
             new Il2CppReferenceArray<Il2CppSystem.Object>(0));
         __instance.roleScreenshot.sprite = Sprite.Create(
-            customRole.OptionsScreenshot.LoadAsset().texture,
+            customRole.Configuration.OptionsScreenshot.LoadAsset().texture,
             new Rect(0, 0, 370, 230),
             Vector2.one / 2,
             100);
