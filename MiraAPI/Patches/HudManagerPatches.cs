@@ -90,7 +90,7 @@ public static class HudManagerPatches
     public static void SetHudActivePostfix(HudManager __instance, PlayerControl localPlayer, RoleBehaviour role, bool isActive)
     {
         __instance.AdminButton.ToggleVisible(isActive && role.IsImpostor && GameOptionsManager.Instance.CurrentGameOptions.GameMode == AmongUs.GameOptions.GameModes.HideNSeek);
-        if (!localPlayer.Data)
+        if (localPlayer.Data == null)
         {
             return;
         }

@@ -17,6 +17,10 @@ public static class HudManagerPatches
     /// <summary>
     /// Fixes Kill Button not showing for Neutral killing role.
     /// </summary>
+    /// <param name="__instance">HudManager instance.</param>
+    /// <param name="localPlayer">The local PlayerControl.</param>
+    /// <param name="role">The player's RoleBehaviour.</param>
+    /// <param name="isActive">Whether the Hud should be set active or not.</param>
     [HarmonyPostfix]
     [HarmonyPatch(nameof(HudManager.SetHudActive), typeof(PlayerControl), typeof(RoleBehaviour), typeof(bool))]
     public static void SetHudActivePostfix(
