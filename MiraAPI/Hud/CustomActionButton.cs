@@ -167,6 +167,7 @@ public abstract class CustomActionButton
     public void SetUses(int amount)
     {
         UsesLeft = Mathf.Clamp(amount, 0, int.MaxValue);
+        Button?.SetUsesRemaining(MaxUses);
     }
 
     /// <summary>
