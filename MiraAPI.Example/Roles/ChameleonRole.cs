@@ -1,5 +1,4 @@
 ﻿using MiraAPI.Roles;
-using MiraAPI.Utilities.Assets;
 using TMPro;
 using UnityEngine;
 
@@ -13,8 +12,11 @@ public class ChameloenRole : CrewmateRole, ICustomRole
     public string RoleDescription => RoleLongDescription;
     public Color RoleColor => Palette.AcceptedGreen;
     public ModdedRoleTeams Team => ModdedRoleTeams.Crewmate;
-    public LoadableAsset<Sprite> OptionsScreenshot => ExampleAssets.Banner;
-    public int MaxPlayers => 2;
+
+    public CustomRoleConfiguration Configuration => new CustomRoleConfiguration(this)
+    {
+        OptionsScreenshot = ExampleAssets.Banner,
+    };
 
     public void PlayerControlFixedUpdate(PlayerControl playerControl)
     {

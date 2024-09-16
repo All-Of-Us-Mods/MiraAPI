@@ -21,7 +21,7 @@ public static class VentPatches
         var @object = pc.Object;
         var role = @object.Data.Role;
 
-        var canVent = role is ICustomRole customRole ? customRole.CanUseVent : role.CanVent;
+        var canVent = role is ICustomRole customRole ? customRole.Configuration.CanUseVent : role.CanVent;
 
         var modifiers = @object.GetModifierComponent()?.ActiveModifiers;
         if (modifiers is null || modifiers.Count <= 0)

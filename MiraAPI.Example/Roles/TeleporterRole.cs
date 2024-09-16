@@ -1,6 +1,4 @@
-﻿using Il2CppInterop.Runtime.Attributes;
-using MiraAPI.Roles;
-using MiraAPI.Utilities.Assets;
+﻿using MiraAPI.Roles;
 using UnityEngine;
 
 namespace MiraAPI.Example.Roles;
@@ -13,6 +11,12 @@ public class TeleporterRole : CrewmateRole, ICustomRole
     public string RoleDescription => RoleLongDescription;
     public Color RoleColor => new Color32(221, 176, 152, 255);
     public ModdedRoleTeams Team => ModdedRoleTeams.Crewmate;
-    [HideFromIl2Cpp]
-    public LoadableAsset<Sprite> OptionsScreenshot => ExampleAssets.Banner;
+
+    public CustomRoleConfiguration Configuration => new CustomRoleConfiguration(this)
+    {
+        OptionsScreenshot = ExampleAssets.Banner,
+        CanModifyChance = false,
+        DefaultChance = 73,
+        DefaultRoleCount = 4,
+    };
 }

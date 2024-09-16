@@ -56,7 +56,7 @@ public static class RoleSettingMenuPatches
 
         var crewRoles = GameSettingMenuPatches.SelectedMod?.CustomRoles.Values
             .OfType<ICustomRole>()
-            .Where(role => role is { Team: ModdedRoleTeams.Crewmate, HideSettings: false })
+            .Where(role => role is { Team: ModdedRoleTeams.Crewmate, Configuration.HideSettings: false })
             .ToList() ?? [];
 
         if (crewRoles is { Count: > 0 })
@@ -82,7 +82,7 @@ public static class RoleSettingMenuPatches
 
         var impRoles = GameSettingMenuPatches.SelectedMod?.CustomRoles.Values
             .OfType<ICustomRole>()
-            .Where(role => role is { Team: ModdedRoleTeams.Impostor, HideSettings: false })
+            .Where(role => role is { Team: ModdedRoleTeams.Impostor, Configuration.HideSettings: false })
             .ToList() ?? [];
 
         if (impRoles is { Count: > 0 })
@@ -109,7 +109,7 @@ public static class RoleSettingMenuPatches
 
         var neutRoles = GameSettingMenuPatches.SelectedMod?.CustomRoles.Values
             .OfType<ICustomRole>()
-            .Where(role => role is { Team: ModdedRoleTeams.Neutral, HideSettings: false })
+            .Where(role => role is { Team: ModdedRoleTeams.Neutral, Configuration.HideSettings: false })
             .ToList() ?? [];
 
         if (neutRoles is { Count: > 0 })
@@ -159,18 +159,24 @@ public static class RoleSettingMenuPatches
     {
         var roleSetting = obj.Cast<RoleOptionSetting>();
         var role = roleSetting.Role as ICustomRole;
-        if (role is null or { HideSettings: true })
+        if (role is null or { Configuration.HideSettings: true })
         {
             return;
         }
 
         try
         {
-            role.ParentMod.PluginConfig.TryGetEntry<int>(role.NumConfigDefinition, out var numEntry);
-            numEntry.Value = roleSetting.RoleMaxCount;
+            if (role.Configuration.MaxRoleCount != 0)
+            {
+                role.ParentMod.PluginConfig.TryGetEntry<int>(role.NumConfigDefinition, out var numEntry);
+                numEntry.Value = Mathf.Clamp(roleSetting.RoleMaxCount, 0, role.Configuration.MaxRoleCount);
+            }
 
-            role.ParentMod.PluginConfig.TryGetEntry<int>(role.ChanceConfigDefinition, out var chanceEntry);
-            chanceEntry.Value = roleSetting.RoleChance;
+            if (role.Configuration.CanModifyChance)
+            {
+                role.ParentMod.PluginConfig.TryGetEntry<int>(role.ChanceConfigDefinition, out var chanceEntry);
+                chanceEntry.Value = roleSetting.RoleChance;
+            }
         }
         catch (Exception e)
         {
@@ -228,7 +234,7 @@ public static class RoleSettingMenuPatches
                 renderer.material.SetInt(PlayerMaterial.MaskLayer, 20);
             }
 
-            foreach (var fontMat in newOpt.GetComponentsInChildren<TextMeshPro>(true).Select(x=>x.fontMaterial))
+            foreach (var fontMat in newOpt.GetComponentsInChildren<TextMeshPro>(true).Select(x => x.fontMaterial))
             {
                 fontMat.SetFloat(ShaderID.StencilComp, 3f);
                 fontMat.SetFloat(ShaderID.Stencil, 20);
@@ -258,7 +264,7 @@ public static class RoleSettingMenuPatches
             role.StringName,
             new Il2CppReferenceArray<Il2CppSystem.Object>(0));
         __instance.roleScreenshot.sprite = Sprite.Create(
-            customRole.OptionsScreenshot.LoadAsset().texture,
+            customRole.Configuration.OptionsScreenshot.LoadAsset().texture,
             new Rect(0, 0, 370, 230),
             Vector2.one / 2,
             100);
@@ -305,11 +311,23 @@ public static class RoleSettingMenuPatches
             Quaternion.identity,
             __instance.RoleChancesSettings.transform);
         roleOptionSetting.transform.localPosition = new Vector3(-0.15f, yPos, -2f);
+
         roleOptionSetting.SetRole(GameOptionsManager.Instance.CurrentGameOptions.RoleOptions, role, 20);
         roleOptionSetting.labelSprite.color = customRole.RoleColor;
         roleOptionSetting.OnValueChanged = new Action<OptionBehaviour>(ValueChanged);
         roleOptionSetting.SetClickMask(__instance.ButtonClickMask);
         __instance.roleChances.Add(roleOptionSetting);
+
+        if (customRole.Configuration.MaxRoleCount == 0 && customRole.Configuration.CanModifyChance)
+        {
+            roleOptionSetting.CountMinusBtn.gameObject.SetActive(false);
+            roleOptionSetting.CountPlusBtn.gameObject.SetActive(false);
+        }
+        else if (!customRole.Configuration.CanModifyChance)
+        {
+            roleOptionSetting.ChanceMinusBtn.gameObject.SetActive(false);
+            roleOptionSetting.ChancePlusBtn.gameObject.SetActive(false);
+        }
 
         roleOptionSetting.titleText.transform.localPosition = new Vector3(-0.5376f, -0.2923f, 0f);
         roleOptionSetting.titleText.color = customRole.RoleColor.GetAlternateColor();

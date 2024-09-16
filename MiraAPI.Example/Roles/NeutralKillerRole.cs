@@ -11,9 +11,13 @@ public class NeutralKillerRole : ImpostorRole, ICustomRole
     public string RoleLongDescription => RoleDescription;
     public Color RoleColor => Color.magenta;
     public ModdedRoleTeams Team => ModdedRoleTeams.Neutral;
-    public bool UseVanillaKillButton => true;
-    public bool CanGetKilled => true;
-    public bool CanUseVent => true;
+
+    public CustomRoleConfiguration Configuration => new CustomRoleConfiguration(this)
+    {
+        UseVanillaKillButton = true,
+        CanGetKilled = true,
+        CanUseVent = true,
+    };
 
     public override void SpawnTaskHeader(PlayerControl playerControl)
     {

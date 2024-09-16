@@ -19,7 +19,7 @@ public static class RoleOptionsCollectionPatch
             return true;
         }
 
-        if (customRole.HideSettings)
+        if (customRole.Configuration.HideSettings)
         {
             __result = 0;
             return false;
@@ -42,7 +42,7 @@ public static class RoleOptionsCollectionPatch
             return true;
         }
 
-        if (customRole.HideSettings)
+        if (customRole.Configuration.HideSettings)
         {
             __result = 0;
             return false;

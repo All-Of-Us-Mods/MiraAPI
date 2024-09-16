@@ -16,7 +16,7 @@ public enum RoleHintType
     TaskHint,
 
     /// <summary>
-    /// Use custom role tab.
+    /// Use Mira's custom role tab.
     /// </summary>
     RoleTab,
 }

@@ -36,7 +36,7 @@ public static class KillButtonPatches
         __instance.currentTarget = target;
         if (__instance.currentTarget)
         {
-            __instance.currentTarget.cosmetics.SetOutline(true, new Nullable<Color>(customRole.KillButtonOutlineColor));
+            __instance.currentTarget.cosmetics.SetOutline(true, new Nullable<Color>(customRole.Configuration.KillButtonOutlineColor));
             __instance.SetEnabled();
             return false;
         }
