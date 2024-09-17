@@ -15,13 +15,16 @@ using Reactor.Utilities;
 
 namespace MiraAPI.PluginLoading;
 
-internal sealed class MiraPluginManager
+/// <summary>
+/// Mira Plugin manager.
+/// </summary>
+public sealed class MiraPluginManager
 {
     private readonly Dictionary<Assembly, MiraPluginInfo> _registeredPlugins = [];
 
     internal MiraPluginInfo[] RegisteredPlugins() => [.. _registeredPlugins.Values];
 
-    public static MiraPluginManager Instance { get; private set; } = new();
+    internal static MiraPluginManager Instance { get; private set; } = new();
 
     internal void Initialize()
     {
@@ -50,9 +53,14 @@ internal sealed class MiraPluginManager
         IL2CPPChainloader.Instance.Finished += PaletteManager.RegisterAllColors;
     }
 
-    public MiraPluginInfo GetPluginByGuid(string guid)
+    /// <summary>
+    /// Get a mira plugin by its GUID.
+    /// </summary>
+    /// <param name="guid">The plugin GUID.</param>
+    /// <returns>A MiraPluginInfo.</returns>
+    public static MiraPluginInfo GetPluginByGuid(string guid)
     {
-        return _registeredPlugins.Values.First(plugin => plugin.PluginId == guid);
+        return Instance._registeredPlugins.Values.First(plugin => plugin.PluginId == guid);
     }
 
     private static void RegisterAllOptions(Assembly assembly, MiraPluginInfo pluginInfo)
