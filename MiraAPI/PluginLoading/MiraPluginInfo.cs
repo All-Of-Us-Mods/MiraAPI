@@ -3,6 +3,12 @@ using BepInEx.Configuration;
 using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Collections.ObjectModel;
+using System.Linq;
+using MiraAPI.GameOptions.OptionTypes;
+using MiraAPI.Hud;
+using MiraAPI.Roles;
 
 namespace MiraAPI.PluginLoading;
 
@@ -19,6 +25,42 @@ public class MiraPluginInfo
         PluginId = info.Metadata.GUID;
     }
 
+    /// <summary>
+    /// Get a read only collection of this plugin's Option Groups.
+    /// </summary>
+    /// <returns>Readonly collection of option groups.</returns>
+    public IReadOnlyCollection<AbstractOptionGroup> GetOptionGroups()
+    {
+        return OptionGroups.AsReadOnly();
+    }
+
+    /// <summary>
+    /// Gets a read only collection of this plugin's options.
+    /// </summary>
+    /// <returns>Read only collection of options.</returns>
+    public IReadOnlyCollection<IModdedOption> GetOptions()
+    {
+        return Options.AsReadOnly();
+    }
+
+    /// <summary>
+    /// Gets a read only dictionary of Role IDs and the RoleBehaviour object they are associated with.
+    /// </summary>
+    /// <returns>Read only dictionary of IDs and Roles.</returns>
+    public ReadOnlyDictionary<ushort, RoleBehaviour> GetRoles()
+    {
+        return new ReadOnlyDictionary<ushort, RoleBehaviour>(CustomRoles);
+    }
+
+    /// <summary>
+    /// Gets a read only collection of this plugin's custom buttons.
+    /// </summary>
+    /// <returns>Read only collection of buttons.</returns>
+    public IReadOnlyCollection<CustomActionButton> GetButtons()
+    {
+        return Buttons.AsReadOnly();
+    }
+
     internal List<AbstractOptionGroup> OptionGroups { get; } = [];
 
     internal List<IModdedOption> Options { get; } = [];
@@ -26,6 +68,8 @@ public class MiraPluginInfo
     internal Dictionary<ushort, RoleBehaviour> CustomRoles { get; } = [];
 
     internal Dictionary<int, CustomGameMode> GameModes { get; } = [];
+
+    internal List<CustomActionButton> Buttons { get; } = [];
 
     /// <summary>
     /// Gets the plugin's ID, as defined in the plugin's BepInEx metadata.

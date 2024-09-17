@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace MiraAPI.GameOptions;
 
-internal interface IModdedOption
+public interface IModdedOption
 {
     uint Id { get; }
     string Title { get; }

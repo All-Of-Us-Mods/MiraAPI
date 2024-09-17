@@ -39,7 +39,7 @@ internal sealed class MiraPluginManager
             RegisterAllOptions(assembly, info);
 
             RegisterRoleAttribute(assembly, info);
-            RegisterButtonAttribute(assembly);
+            RegisterButtonAttribute(assembly, info);
 
             RegisterColorClasses(assembly);
 
@@ -161,14 +161,14 @@ internal sealed class MiraPluginManager
         }
     }
 
-    private static void RegisterButtonAttribute(Assembly assembly)
+    private static void RegisterButtonAttribute(Assembly assembly, MiraPluginInfo pluginInfo)
     {
         foreach (var type in assembly.GetTypes())
         {
             var attribute = type.GetCustomAttribute<RegisterButtonAttribute>();
             if (attribute != null)
             {
-                CustomButtonManager.RegisterButton(type);
+                CustomButtonManager.RegisterButton(type, pluginInfo);
             }
         }
     }
