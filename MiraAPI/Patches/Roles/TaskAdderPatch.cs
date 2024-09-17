@@ -271,7 +271,7 @@ public static class TaskAdderPatch
 
         if (ModsFolders.TryGetValue(taskFolder.FolderName, out var guid))
         {
-            var plugin = MiraPluginManager.Instance.GetPluginByGuid(guid);
+            var plugin = MiraPluginManager.GetPluginByGuid(guid);
             for (var m = 0; m < plugin.CustomRoles.Count; m++)
             {
                 var roleBehaviour = plugin.CustomRoles.ElementAt(m).Value;
