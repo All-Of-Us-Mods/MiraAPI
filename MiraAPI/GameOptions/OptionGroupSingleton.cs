@@ -1,23 +1,19 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
 namespace MiraAPI.GameOptions;
 
-public class OptionGroupSingleton<T> where T : AbstractOptionGroup
+/// <summary>
+/// Singleton for option groups.
+/// </summary>
+/// <typeparam name="T">The option group type.</typeparam>
+public static class OptionGroupSingleton<T> where T : AbstractOptionGroup
 {
-    private static T _instance;
+    private static T? _instance;
 
-    public static T Instance
-    {
-        get => _instance ??= ModdedOptionsManager.Groups.OfType<T>().Single();
-        set
-        {
-            if (_instance != null)
-            {
-                throw new InvalidOperationException($"Instance for {typeof(T)} is already set");
-            }
-
-            _instance = value;
-        }
-    }
+    /// <summary>
+    /// Gets the instance of the option group.
+    /// </summary>
+#pragma warning disable CA1000
+    public static T Instance => _instance ??= ModdedOptionsManager.Groups.OfType<T>().Single();
+#pragma warning restore CA1000
 }

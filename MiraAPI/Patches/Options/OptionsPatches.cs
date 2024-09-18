@@ -16,7 +16,8 @@ public static class OptionsPatches
             return true;
         }
 
-        __instance.TitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(__instance.Title, Array.Empty<Object>());
+        __instance.TitleText.text =
+            TranslationController.Instance.GetString(__instance.Title, Array.Empty<Object>());
 
         return false;
     }
@@ -37,7 +38,8 @@ public static class OptionsPatches
             return true;
         }
 
-        __instance.TitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(__instance.Title, Array.Empty<Object>());
+        __instance.TitleText.text =
+            TranslationController.Instance.GetString(__instance.Title, Array.Empty<Object>());
 
         return false;
     }
@@ -58,8 +60,11 @@ public static class OptionsPatches
             return true;
         }
 
-        __instance.TitleText.text = DestroyableSingleton<TranslationController>.Instance.GetString(__instance.Title, Array.Empty<Object>());
-        __instance.ValueText.text = DestroyableSingleton<TranslationController>.Instance.GetString(__instance.Values[__instance.Value], Array.Empty<Object>());
+        __instance.TitleText.text =
+            TranslationController.Instance.GetString(__instance.Title, Array.Empty<Object>());
+        __instance.ValueText.text = TranslationController.Instance.GetString(
+            __instance.Values[__instance.Value],
+            Array.Empty<Object>());
 
         return false;
     }

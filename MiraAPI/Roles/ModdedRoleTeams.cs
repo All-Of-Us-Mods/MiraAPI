@@ -4,5 +4,5 @@ public enum ModdedRoleTeams
 {
     Crewmate,
     Impostor,
-    Neutral
+    Neutral,
 }

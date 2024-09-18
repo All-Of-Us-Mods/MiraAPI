@@ -1,32 +1,31 @@
-﻿using BepInEx.Unity.IL2CPP;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using BepInEx.Unity.IL2CPP;
+using MiraAPI.Colors;
+using MiraAPI.Cosmetics;
 using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.Attributes;
 using MiraAPI.Hud;
 using MiraAPI.Modifiers;
 using MiraAPI.Roles;
-using Reactor.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using MiraAPI.Colors;
 using MiraAPI.Utilities;
 using Reactor.Networking;
-using MiraAPI.Cosmetics;
+using Reactor.Utilities;
 
 namespace MiraAPI.PluginLoading;
 
-internal class MiraPluginManager
+/// <summary>
+/// Mira Plugin manager.
+/// </summary>
+public sealed class MiraPluginManager
 {
-    public readonly Dictionary<Assembly, MiraPluginInfo> RegisteredPlugins = [];
+    private readonly Dictionary<Assembly, MiraPluginInfo> _registeredPlugins = [];
 
-    private static MiraPluginManager _instance;
+    internal MiraPluginInfo[] RegisteredPlugins() => [.. _registeredPlugins.Values];
 
-    public static MiraPluginManager Instance
-    {
-        get => _instance ??= new MiraPluginManager();
-        private set => _instance = value;
-    }
+    internal static MiraPluginManager Instance { get; private set; } = new();
 
     internal void Initialize()
     {
@@ -34,31 +33,37 @@ internal class MiraPluginManager
         CustomCosmeticManager.RegisterVanilla();
         IL2CPPChainloader.Instance.PluginLoad += (pluginInfo, assembly, plugin) =>
         {
-            if (!plugin.GetType().GetInterfaces().Contains(typeof(IMiraPlugin)))
+            if (plugin is not IMiraPlugin miraPlugin)
             {
                 return;
             }
 
-            var info = new MiraPluginInfo(plugin as IMiraPlugin, pluginInfo);
+            var info = new MiraPluginInfo(miraPlugin, pluginInfo);
 
             RegisterModifierAttribute(assembly);
             RegisterAllOptions(assembly, info);
             RegisterAllCosmetics(assembly, info);
 
             RegisterRoleAttribute(assembly, info);
-            RegisterButtonAttribute(assembly);
+            RegisterButtonAttribute(assembly, info);
 
             RegisterColorClasses(assembly);
 
-            RegisteredPlugins.Add(assembly, info);
+            _registeredPlugins.Add(assembly, info);
 
             Logger<MiraApiPlugin>.Info($"Registering mod {pluginInfo.Metadata.GUID} with Mira API.");
         };
+        IL2CPPChainloader.Instance.Finished += PaletteManager.RegisterAllColors;
     }
 
-    public MiraPluginInfo GetPluginByGuid(string guid)
+    /// <summary>
+    /// Get a mira plugin by its GUID.
+    /// </summary>
+    /// <param name="guid">The plugin GUID.</param>
+    /// <returns>A MiraPluginInfo.</returns>
+    public static MiraPluginInfo GetPluginByGuid(string guid)
     {
-        return RegisteredPlugins.Values.First(plugin => plugin.PluginId == guid);
+        return Instance._registeredPlugins.Values.First(plugin => plugin.PluginId == guid);
     }
 
     private static void RegisterAllOptions(Assembly assembly, MiraPluginInfo pluginInfo)
@@ -71,7 +76,7 @@ internal class MiraPluginManager
             {
                 continue;
             }
-            
+
             foreach (var property in type.GetProperties())
             {
                 if (property.PropertyType.IsAssignableTo(typeof(IModdedOption)))
@@ -79,7 +84,7 @@ internal class MiraPluginManager
                     ModdedOptionsManager.RegisterPropertyOption(type, property, pluginInfo);
                     continue;
                 }
-                
+
                 var attribute = property.GetCustomAttribute<ModdedOptionAttribute>();
                 if (attribute == null)
                 {
@@ -89,6 +94,8 @@ internal class MiraPluginManager
                 ModdedOptionsManager.RegisterAttributeOption(type, attribute, property, pluginInfo);
             }
         }
+
+        pluginInfo.OptionGroups.Sort((x, y) => x.GroupPriority.CompareTo(y.GroupPriority));
     }
 
     private static void RegisterAllCosmetics(Assembly assembly, MiraPluginInfo pluginInfo)
@@ -125,22 +132,22 @@ internal class MiraPluginManager
             {
                 continue;
             }
-            
+
             if (!(typeof(RoleBehaviour).IsAssignableFrom(type) && typeof(ICustomRole).IsAssignableFrom(type)))
             {
                 Logger<MiraApiPlugin>.Error($"{type.Name} does not inherit from RoleBehaviour or ICustomRole.");
                 continue;
             }
-            
+
             if (!ModList.GetById(pluginInfo.PluginId).IsRequiredOnAllClients)
             {
                 Logger<MiraApiPlugin>.Error("Custom roles are only supported on all clients.");
                 return;
             }
-            
+
             roles.Add(type);
         }
-        
+
         CustomRoleManager.RegisterRoleTypes(roles, pluginInfo);
     }
 
@@ -165,14 +172,13 @@ internal class MiraPluginManager
                 {
                     continue;
                 }
-                
-                var color = (CustomColor)property.GetValue(null);
-                if (color == null)
+
+                if (property.GetValue(null) is not CustomColor color)
                 {
-                    Logger<MiraApiPlugin>.Error($"Color property {property.Name} in {type.Name} is null.");
+                    Logger<MiraApiPlugin>.Error($"Color property {property.Name} in {type.Name} is not a CustomColor.");
                     continue;
                 }
-                
+
                 PaletteManager.CustomColors.Add(color);
             }
         }
@@ -190,15 +196,14 @@ internal class MiraPluginManager
         }
     }
 
-
-    private static void RegisterButtonAttribute(Assembly assembly)
+    private static void RegisterButtonAttribute(Assembly assembly, MiraPluginInfo pluginInfo)
     {
         foreach (var type in assembly.GetTypes())
         {
             var attribute = type.GetCustomAttribute<RegisterButtonAttribute>();
             if (attribute != null)
             {
-                CustomButtonManager.RegisterButton(type);
+                CustomButtonManager.RegisterButton(type, pluginInfo);
             }
         }
     }

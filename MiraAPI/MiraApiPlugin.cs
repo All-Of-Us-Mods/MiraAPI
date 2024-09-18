@@ -2,7 +2,6 @@
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
 using MiraAPI.PluginLoading;
-using MiraAPI.Utilities;
 using Reactor;
 using Reactor.Networking;
 using Reactor.Networking.Attributes;
@@ -17,10 +16,10 @@ namespace MiraAPI;
 [ReactorModFlags(ModFlags.RequireOnAllClients)]
 public partial class MiraApiPlugin : BasePlugin
 {
-    public Harmony Harmony { get; } = new(Id);
-    private static MiraPluginManager PluginManager { get; set; }
+    private static MiraPluginManager? PluginManager { get; set; }
 
-    public static Color MiraColor = new Color32(238, 154, 112, 255);
+    public Harmony Harmony { get; } = new(Id);
+    public static Color MiraColor { get; } = new Color32(238, 154, 112, 255);
 
     public override void Load()
     {

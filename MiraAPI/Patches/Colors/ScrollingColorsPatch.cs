@@ -7,8 +7,8 @@ namespace MiraAPI.Patches.Colors;
 [HarmonyPatch(typeof(PlayerTab))]
 public static class ScrollingColorsPatch
 {
-    /// Collider
-    private static BoxCollider2D _collider;
+    // Collider
+    private static BoxCollider2D? _collider;
 
     /// <summary>
     /// Add scrolling to the colors tab
@@ -20,7 +20,7 @@ public static class ScrollingColorsPatch
         {
             return;
         }
-        
+
         var tab = PlayerCustomizationMenu.Instance.Tabs[1].Tab;
 
         if (__instance.scroller == null)
@@ -31,7 +31,7 @@ public static class ScrollingColorsPatch
             var maskObj = new GameObject
             {
                 layer = 5,
-                name = "SpriteMask"
+                name = "SpriteMask",
             };
             maskObj.transform.SetParent(__instance.transform);
             maskObj.transform.localPosition = new Vector3(0, 0, 0);

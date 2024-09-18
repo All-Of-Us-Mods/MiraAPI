@@ -3,20 +3,102 @@ using BepInEx.Configuration;
 using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Collections.ObjectModel;
+using System.Linq;
+using MiraAPI.GameOptions.OptionTypes;
+using MiraAPI.Hud;
+using MiraAPI.Roles;
 
 namespace MiraAPI.PluginLoading;
 
-public class MiraPluginInfo(IMiraPlugin miraPlugin, PluginInfo info)
+/// <summary>
+/// Represents a Mira plugin.
+/// </summary>
+public class MiraPluginInfo
 {
-    public string PluginId { get; set; } = info.Metadata.GUID;
-    public IMiraPlugin MiraPlugin { get; set; } = miraPlugin;
-    public PluginInfo PluginInfo { get; set; } = info;
-    public ConfigFile PluginConfig { get; set; } = miraPlugin.GetConfigFile();
+    internal MiraPluginInfo(IMiraPlugin miraPlugin, PluginInfo info)
+    {
+        MiraPlugin = miraPlugin;
+        PluginConfig = miraPlugin.GetConfigFile();
+        PluginInfo = info;
+        PluginId = info.Metadata.GUID;
+    }
 
-    public readonly List<Cosmetics.AbstractCosmeticsGroup> CosmeticGroups = [];
-    public readonly List<AbstractOptionGroup> OptionGroups = [];
-    public readonly List<IModdedOption> Options = [];
+    /// <summary>
+    /// Get a read only collection of this plugin's Option Groups.
+    /// </summary>
+    /// <returns>Readonly collection of option groups.</returns>
+    public IReadOnlyCollection<AbstractOptionGroup> GetOptionGroups()
+    {
+        return OptionGroups.AsReadOnly();
+    }
 
-    public readonly Dictionary<ushort, RoleBehaviour> CustomRoles = [];
-    internal readonly Dictionary<int, CustomGameMode> GameModes = [];
+    /// <summary>
+    /// Gets a read only collection of this plugin's options.
+    /// </summary>
+    /// <returns>Read only collection of options.</returns>
+    public IReadOnlyCollection<IModdedOption> GetOptions()
+    {
+        return Options.AsReadOnly();
+    }
+
+    /// <summary>
+    /// Gets a read only dictionary of Role IDs and the RoleBehaviour object they are associated with.
+    /// </summary>
+    /// <returns>Read only dictionary of IDs and Roles.</returns>
+    public ReadOnlyDictionary<ushort, RoleBehaviour> GetRoles()
+    {
+        return new ReadOnlyDictionary<ushort, RoleBehaviour>(CustomRoles);
+    }
+
+    /// <summary>
+    /// Gets a read only collection of this plugin's custom buttons.
+    /// </summary>
+    /// <returns>Read only collection of buttons.</returns>
+    public IReadOnlyCollection<CustomActionButton> GetButtons()
+    {
+        return Buttons.AsReadOnly();
+    }
+
+    /// <summary>
+    /// Gets a read only collection of this plugin's custom buttons.
+    /// </summary>
+    /// <returns>Read only collection of buttons.</returns>
+    public IReadOnlyCollection<Cosmetics.AbstractCosmeticsGroup> GetCosmetics()
+    {
+        return CosmeticGroups.AsReadOnly();
+    }
+
+    internal List<AbstractOptionGroup> OptionGroups { get; } = [];
+
+    internal List<IModdedOption> Options { get; } = [];
+
+    internal List<Cosmetics.AbstractCosmeticsGroup> CosmeticGroups { get; } = [];
+
+    internal Dictionary<ushort, RoleBehaviour> CustomRoles { get; } = [];
+
+    internal Dictionary<int, CustomGameMode> GameModes { get; } = [];
+
+    internal List<CustomActionButton> Buttons { get; } = [];
+
+    /// <summary>
+    /// Gets the plugin's ID, as defined in the plugin's BepInEx metadata.
+    /// </summary>
+    public string PluginId { get; }
+
+    /// <summary>
+    /// Gets the plugin's instance as an <see cref="IMiraPlugin"/>.
+    /// </summary>
+    public IMiraPlugin MiraPlugin { get; }
+
+    /// <summary>
+    /// Gets the plugin's BepInEx metadata.
+    /// </summary>
+    public PluginInfo PluginInfo { get; }
+
+    /// <summary>
+    /// Gets the plugin's configuration file.
+    /// </summary>
+    public ConfigFile PluginConfig { get; }
 }

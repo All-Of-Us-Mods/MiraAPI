@@ -1,28 +1,24 @@
 ﻿using System.Reflection;
-using Reactor.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.Utilities.Assets;
 
-public class LoadableResourceAsset(string path) : LoadableAsset<Sprite>
+/// <summary>
+/// A utility class for loading assets from embedded resources.
+/// </summary>
+/// <param name="path">The path to the embedded resource.</param>
+public class LoadableResourceAsset(string path, float pixelsPerUnit=100f) : LoadableAsset<Sprite>
 {
     private readonly Assembly _assembly = Assembly.GetCallingAssembly();
 
+    /// <inheritdoc />
     public override Sprite LoadAsset()
     {
-        if (LoadedAsset)
+        if (LoadedAsset != null)
         {
             return LoadedAsset;
         }
 
-        try
-        {
-            return LoadedAsset = SpriteTools.LoadSpriteFromPath(path, _assembly);
-        }
-        catch
-        {
-            Logger<MiraApiPlugin>.Error($"Not loading, invalid asset: {path}");
-            return null;
-        }
+        return LoadedAsset = SpriteTools.LoadSpriteFromPath(path, _assembly, pixelsPerUnit);
     }
 }

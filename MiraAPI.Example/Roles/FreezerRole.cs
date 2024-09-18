@@ -1,5 +1,4 @@
 ﻿using MiraAPI.Roles;
-using MiraAPI.Utilities.Assets;
 using UnityEngine;
 
 namespace MiraAPI.Example.Roles;
@@ -12,6 +11,10 @@ public class FreezerRole : ImpostorRole, ICustomRole
     public string RoleDescription => RoleLongDescription;
     public Color RoleColor => Palette.Blue;
     public ModdedRoleTeams Team => ModdedRoleTeams.Impostor;
-    public LoadableAsset<Sprite> OptionsScreenshot => ExampleAssets.Banner;
 
+    public CustomRoleConfiguration Configuration => new CustomRoleConfiguration(this)
+    {
+        OptionsScreenshot = ExampleAssets.Banner,
+        MaxRoleCount = 2,
+    };
 }

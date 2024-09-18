@@ -1,5 +1,4 @@
-﻿#nullable enable
-using Reactor.Utilities;
+﻿using Reactor.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,12 +6,12 @@ using System.Linq;
 namespace MiraAPI.GameModes;
 
 /// <summary>
-/// Manages custom gamemodes
+/// Manages custom gamemodes.
 /// </summary>
 public static class CustomGameModeManager
 {
     /// <summary>
-    /// List of registered gamemodes
+    /// List of registered gamemodes.
     /// </summary>
     internal static readonly Dictionary<int, CustomGameMode> GameModes = [];
 
@@ -22,14 +21,14 @@ public static class CustomGameModeManager
     }
 
     /// <summary>
-    /// Current gamemode
+    /// Current gamemode.
     /// </summary>
     public static CustomGameMode? ActiveMode { get; internal set; } = new DefaultMode();
 
     /// <summary>
-    /// Set current gamemode
+    /// Set current gamemode.
     /// </summary>
-    /// <param name="id">gamemode ID</param>
+    /// <param name="id">gamemode ID.</param>
     public static void SetGameMode(int id)
     {
         if (GameModes.TryGetValue(id, out var gameMode))
@@ -42,9 +41,9 @@ public static class CustomGameModeManager
     }
 
     /// <summary>
-    /// Register gamemode from type 
+    /// Register gamemode from type.
     /// </summary>
-    /// <param name="gameModeType">Type of gamemode class, should inherit from <see cref="CustomGameMode"/></param>
+    /// <param name="gameModeType">Type of gamemode class, should inherit from <see cref="CustomGameMode"/>.</param>
     internal static void RegisterGameMode(Type gameModeType)
     {
         if (!typeof(CustomGameMode).IsAssignableFrom(gameModeType))
@@ -60,7 +59,7 @@ public static class CustomGameModeManager
             Logger<MiraApiPlugin>.Error($"Failed to create instance of {gameModeType.Name}");
             return;
         }
-        
+
         if (GameModes.Any(x => x.Key == gameMode.Id))
         {
             Logger<MiraApiPlugin>.Error($"ID for gamemode {gameMode.Name} already exists!");

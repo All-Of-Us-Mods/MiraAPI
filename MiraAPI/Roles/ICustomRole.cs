@@ -1,92 +1,121 @@
-﻿using AmongUs.GameOptions;
-using BepInEx.Configuration;
-using HarmonyLib;
+﻿using BepInEx.Configuration;
 using MiraAPI.Modifiers;
-using MiraAPI.Networking;
-using MiraAPI.Utilities;
-using MiraAPI.Utilities.Assets;
-using System;
-using System.Text;
 using MiraAPI.PluginLoading;
+using MiraAPI.Utilities;
+using System.Text;
 using UnityEngine;
 
 namespace MiraAPI.Roles;
 
+/// <summary>
+/// Interface for custom roles.
+/// </summary>
 public interface ICustomRole
 {
+    /// <summary>
+    /// Gets the name of the role.
+    /// </summary>
     string RoleName { get; }
 
+    /// <summary>
+    /// Gets the description of the role. Used in the Intro Cutscene.
+    /// </summary>
     string RoleDescription { get; }
 
+    /// <summary>
+    /// Gets the long description of the role. Used in the Role Tab and Role Options.
+    /// </summary>
     string RoleLongDescription { get; }
 
+    /// <summary>
+    /// Gets the color of the role.
+    /// </summary>
     Color RoleColor { get; }
 
+    /// <summary>
+    /// Gets the team of the role.
+    /// </summary>
     ModdedRoleTeams Team { get; }
 
-    LoadableAsset<Sprite> OptionsScreenshot => MiraAssets.Empty;
+    /// <summary>
+    /// Configure advanced settings of the role.
+    /// </summary>
+    CustomRoleConfiguration Configuration { get; }
 
-    LoadableAsset<Sprite> Icon => MiraAssets.Empty;
-
-    ConfigDefinition NumConfigDefinition => new("Roles", $"Num{RoleName}");
-
-    ConfigDefinition ChanceConfigDefinition => new("Roles", $"Chance{RoleName}");
-
-    bool AffectedByLight => Team == ModdedRoleTeams.Crewmate;
-
-    bool CanGetKilled => Team == ModdedRoleTeams.Crewmate;
-
-    bool IsNeutral => Team == ModdedRoleTeams.Neutral;
-
-    bool CanKill => Team == ModdedRoleTeams.Impostor;
-
-    bool CanUseVent => Team == ModdedRoleTeams.Impostor;
-
-    bool TasksCount => Team == ModdedRoleTeams.Crewmate;
-
-    bool IsGhostRole => false;
-
-    bool CreateCustomTab => true;
-
-    bool HideSettings => IsGhostRole;
-
-    RoleTypes GhostRole => Team == ModdedRoleTeams.Crewmate ? RoleTypes.CrewmateGhost : RoleTypes.ImpostorGhost;
-
+    /// <summary>
+    /// Gets the parent mod of this role.
+    /// </summary>
     MiraPluginInfo ParentMod => CustomRoleManager.FindParentMod(this);
-    
-    /// <summary>
-    /// Runs on the PlayerControl FixedUpdate method for any player with this role
-    /// </summary>
-    /// <param name="playerControl">The PlayerControl that has this role</param>
-    void PlayerControlFixedUpdate(PlayerControl playerControl) { }
 
     /// <summary>
-    /// Only runs for local player on HudManager Update method
+    /// This method runs on the PlayerControl.FixedUpdate method for ALL players with this role.
     /// </summary>
-    /// <param name="hudManager">Reference to HudManager instance</param>
-    void HudUpdate(HudManager hudManager) { }
+    /// <param name="playerControl">The PlayerControl that has this role.</param>
+    void PlayerControlFixedUpdate(PlayerControl playerControl)
+    {
+    }
 
-    string GetCustomEjectionMessage(NetworkedPlayerInfo player)
+    internal ConfigDefinition NumConfigDefinition => new("Roles", $"Num {GetType().FullName}");
+    internal ConfigDefinition ChanceConfigDefinition => new("Roles", $"Chance {GetType().FullName}");
+
+    /// <summary>
+    /// Get the role chance option.
+    /// </summary>
+    /// <returns>The role chance option.</returns>
+    public int? GetChance()
+    {
+        if (ParentMod.PluginConfig.TryGetEntry(ChanceConfigDefinition, out ConfigEntry<int> entry))
+        {
+            return Mathf.Clamp(entry.Value, 0, 100);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Get the role count option.
+    /// </summary>
+    /// <returns>The role count option.</returns>
+    public int? GetCount()
+    {
+        if (ParentMod.PluginConfig.TryGetEntry(NumConfigDefinition, out ConfigEntry<int> entry))
+        {
+            return Mathf.Clamp(entry.Value, 0, Configuration.MaxRoleCount);
+        }
+
+        return null;
+    }
+    /// <summary>
+    /// This method runs on the HudManager.Update method ONLY when the LOCAL player has this role.
+    /// </summary>
+    /// <param name="hudManager">Reference to HudManager instance.</param>
+    void HudUpdate(HudManager hudManager)
+    {
+    }
+
+    /// <summary>
+    /// Gets a custom ejection message for the role. Return null to use the default message.
+    /// </summary>
+    /// <param name="player">The NetworkedPlayerInfo object for this player.</param>
+    /// <returns>A string with a custom ejection message or null.</returns>
+    string? GetCustomEjectionMessage(NetworkedPlayerInfo player)
     {
         return Team == ModdedRoleTeams.Impostor ? $"{player.PlayerName} was The {RoleName}" : null;
     }
 
-    StringBuilder SetTabText()
-    {
-        var taskStringBuilder = Helpers.CreateForRole(this);
-        return taskStringBuilder;
-    }
-    
+    /// <summary>
+    /// Get the custom Role Tab text for this role.
+    /// </summary>
+    /// <returns>A StringBuilder with the role tab text.</returns>
+    StringBuilder SetTabText() => Helpers.CreateForRole(this);
+
+    /// <summary>
+    /// Determine whether a given modifier can be applied to this role.
+    /// </summary>
+    /// <param name="modifier">The modifier to be tested.</param>
+    /// <returns>True if the modifier is valid on this role, false otherwise.</returns>
     bool IsModifierApplicable(BaseModifier modifier)
     {
         return true;
-    }
-
-    NetData GetNetData()
-    {
-        ParentMod.PluginConfig.TryGetEntry<int>(NumConfigDefinition, out var numEntry);
-        ParentMod.PluginConfig.TryGetEntry<int>(ChanceConfigDefinition, out var chanceEntry);
-        
-        return new NetData(RoleId.Get(GetType()), BitConverter.GetBytes(numEntry.Value).AddRangeToArray(BitConverter.GetBytes(chanceEntry.Value)));
     }
 }

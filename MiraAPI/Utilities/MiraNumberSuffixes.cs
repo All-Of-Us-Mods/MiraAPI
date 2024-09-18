@@ -4,5 +4,5 @@ public enum MiraNumberSuffixes
     None,
     Multiplier,
     Seconds,
-    Percent
+    Percent,
 }

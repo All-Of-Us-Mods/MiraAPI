@@ -1,19 +1,27 @@
 ﻿using HarmonyLib;
+using MiraAPI.Roles;
 using MiraAPI.Utilities;
-using System.Linq;
 using UnityEngine;
 
-namespace MiraAPI.Patches.Modifiers;
+namespace MiraAPI.Patches;
 
+/// <summary>
+/// Vent patches to make sure the player is able to use the vent.
+/// </summary>
 [HarmonyPatch(typeof(Vent))]
 public static class VentPatches
 {
+    /// <summary>
+    /// CanUse patch.
+    /// </summary>
     [HarmonyPostfix]
     [HarmonyPatch(nameof(Vent.CanUse))]
-    public static void CanUseVentPatch(Vent __instance, ref float __result, [HarmonyArgument(0)] NetworkedPlayerInfo pc, [HarmonyArgument(1)] ref bool canUse, [HarmonyArgument(2)] ref bool couldUse)
+    public static void VentCanUsePostfix(Vent __instance, ref float __result, [HarmonyArgument(0)] NetworkedPlayerInfo pc, [HarmonyArgument(1)] ref bool canUse, [HarmonyArgument(2)] ref bool couldUse)
     {
         var @object = pc.Object;
         var role = @object.Data.Role;
+
+        var canVent = role is ICustomRole customRole ? customRole.Configuration.CanUseVent : role.CanVent;
 
         var modifiers = @object.GetModifierComponent()?.ActiveModifiers;
         if (modifiers is null || modifiers.Count <= 0)
@@ -21,12 +29,12 @@ public static class VentPatches
             return;
         }
 
-        switch (role.CanVent)
+        switch (canVent)
         {
-            case true when modifiers.Any(x => !x.CanVent()):
+            case true when modifiers.Exists(x => !x.CanVent()):
                 couldUse = canUse = false;
                 return;
-            case false when modifiers.Any(x => x.CanVent()):
+            case false when modifiers.Exists(x => x.CanVent()):
                 couldUse = true;
                 break;
         }

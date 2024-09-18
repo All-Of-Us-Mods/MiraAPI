@@ -1,6 +1,4 @@
-﻿using System;
-using HarmonyLib;
-using InnerNet;
+﻿using HarmonyLib;
 using MiraAPI.Hud;
 using MiraAPI.Roles;
 using Reactor.Utilities.Extensions;
@@ -9,58 +7,14 @@ using Object = UnityEngine.Object;
 
 namespace MiraAPI.Patches;
 
+/// <summary>
+/// General patches for the HudManager class.
+/// </summary>
 [HarmonyPatch(typeof(HudManager))]
 public static class HudManagerPatches
 {
-    /// Custom buttons parent
-    private static GameObject _bottomLeft;
-
-    /// Custom role tab
-    private static TaskPanelBehaviour _roleTab;
-
-    [HarmonyPostfix]
-    [HarmonyPatch(nameof(HudManager.Update))]
-    public static void UpdatePostfix(HudManager __instance)
-    {
-        var local = PlayerControl.LocalPlayer;
-
-        if (AmongUsClient.Instance.GameState != InnerNetClient.GameStates.Started && !ShipStatus.Instance)
-        {
-            return;
-        }
-        
-        //CustomGameModeManager.ActiveMode?.HudUpdate(__instance);
-
-        if (local?.Data?.Role is null)
-        {
-            return;
-        }
-
-        if (local.Data.Role is ICustomRole customRole)
-        {
-            customRole.HudUpdate(__instance);
-
-            if (customRole.SetTabText() != null)
-            {
-                if (!_roleTab)
-                {
-                    _roleTab = CustomRoleManager.CreateRoleTab(customRole);
-                }
-                else
-                {
-                    CustomRoleManager.UpdateRoleTab(_roleTab, customRole);
-                }
-            }
-            else if (customRole.SetTabText() == null && _roleTab)
-            {
-                _roleTab.gameObject.Destroy();
-            }
-        }
-        else if (_roleTab)
-        {
-            _roleTab.gameObject.Destroy();
-        }
-    }
+    // Custom buttons parent.
+    private static GameObject? _bottomLeft;
 
     /*
     /// <summary>
@@ -74,16 +28,17 @@ public static class HudManagerPatches
     }*/
 
     /// <summary>
-    /// Create custom buttons parent
+    /// Create custom buttons and arrange them on the hud.
     /// </summary>
+    /// <param name="__instance">The HudManager instance.</param>
     [HarmonyPostfix]
     [HarmonyPatch(nameof(HudManager.Start))]
     public static void StartPostfix(HudManager __instance)
     {
         var buttons = __instance.transform.Find("Buttons");
         var bottomRight = buttons.Find("BottomRight");
-        
-        if (!_bottomLeft)
+
+        if (_bottomLeft == null)
         {
             _bottomLeft = Object.Instantiate(bottomRight.gameObject, buttons);
         }
@@ -106,14 +61,14 @@ public static class HudManagerPatches
             {
                 ButtonLocation.BottomLeft => _bottomLeft.transform,
                 ButtonLocation.BottomRight => bottomRight,
-                _ => null
+                _ => null,
             };
 
             if (location is null)
             {
                 continue;
             }
-            
+
             button.CreateButton(location);
         }
 
@@ -124,30 +79,25 @@ public static class HudManagerPatches
     }
 
     /// <summary>
-    /// Make sure all launchpad hud elements are inactive/active when appropriate
+    /// Set the custom buttons active when the hud is active.
     /// </summary>
+    /// <param name="__instance">HudManager instance.</param>
+    /// <param name="localPlayer">The local PlayerControl.</param>
+    /// <param name="role">The player's RoleBehaviour.</param>
+    /// <param name="isActive">Whether the Hud should be set active or not.</param>
     [HarmonyPostfix]
     [HarmonyPatch(nameof(HudManager.SetHudActive), typeof(PlayerControl), typeof(RoleBehaviour), typeof(bool))]
-    public static void SetHudActivePostfix(HudManager __instance, [HarmonyArgument(0)] PlayerControl player, [HarmonyArgument(1)] RoleBehaviour roleBehaviour, [HarmonyArgument(2)] bool isActive)
+    public static void SetHudActivePostfix(HudManager __instance, PlayerControl localPlayer, RoleBehaviour role, bool isActive)
     {
-        if (!player.Data)
+        __instance.AdminButton.ToggleVisible(isActive && role.IsImpostor && GameOptionsManager.Instance.CurrentGameOptions.GameMode == AmongUs.GameOptions.GameModes.HideNSeek);
+        if (localPlayer.Data == null)
         {
             return;
         }
 
-        if (_roleTab)
-        {
-            _roleTab.gameObject.SetActive(isActive);
-        }
-
         foreach (var button in CustomButtonManager.CustomButtons)
         {
-            button.SetActive(isActive, roleBehaviour);
-        }
-
-        if (roleBehaviour is ICustomRole role)
-        {
-            __instance.ImpostorVentButton.gameObject.SetActive(isActive && role.CanUseVent);
+            button.SetActive(isActive, role);
         }
     }
 }

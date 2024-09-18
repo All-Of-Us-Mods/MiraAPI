@@ -1,9 +1,10 @@
-﻿using MiraAPI.Example;
-using MiraAPI.Example.Modifiers;
+﻿using MiraAPI.Example.Modifiers;
 using MiraAPI.Hud;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using UnityEngine;
+
+namespace MiraAPI.Example.Buttons;
 
 [RegisterButton]
 public class MeetingButton : CustomActionButton
@@ -18,9 +19,9 @@ public class MeetingButton : CustomActionButton
 
     public override LoadableAsset<Sprite> Sprite => ExampleAssets.ExampleButton;
 
-    public override bool Enabled(RoleBehaviour role)
+    public override bool Enabled(RoleBehaviour? role)
     {
-        return PlayerControl.LocalPlayer.HasModifier<CaptainModifier>();
+        return PlayerControl.LocalPlayer != null && PlayerControl.LocalPlayer.HasModifier<CaptainModifier>();
     }
 
     protected override void OnClick()
@@ -41,7 +42,7 @@ public class MeetingButton : CustomActionButton
 
         if (UsesLeft == 0 && PlayerControl.LocalPlayer.HasModifier<CaptainModifier>())
         {
-            PlayerControl.LocalPlayer.RemoveModifier<CaptainModifier>();
+            PlayerControl.LocalPlayer.RpcRemoveModifier<CaptainModifier>();
         }
     }
 }

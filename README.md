@@ -23,6 +23,8 @@ To start using Mira API, you need to:
 2. Add a BepInDependency on your plugin class like this: `[BepInDependency(MiraApiPlugin.Id)]`
 3. Implement the IMiraPlugin interface on your plugin class.
 
+Mira API also depends on [Reactor](https://github.com/NuclearPowered/Reactor) in order to function properly! Do not forget to include it as a reference and `BepInDependency`!
+
 For a full example, see [this file](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/ExamplePlugin.cs).
 
 ## Recommended Project Structure
@@ -56,6 +58,8 @@ Roles are very simple in Mira API. There are 3 things you need to do to create a
 1. Create a class that inherits from a base game role (like `CrewmateRole`, `ImpostorRole`, etc) 
 2. Implement the `ICustomRole` interface from Mira API.
 3. Add the `[RegisterCustomRole]` attribute to the class.
+
+**Disclaimer: Make sure your plugin class has the following attribute `[ReactorModFlags(ModFlags.RequireOnAllClients)]` or else your roles will not register correctly.**
 
 Note: For step 1, if you are making neutral roles, choose either `CrewmateRole` or `ImpostorRole` as the base depending on if it can kill or not! 
 
@@ -116,7 +120,7 @@ public float SussyLevel { get; set; } = 4f; // You can set a default value here.
 
 Here are the available Option Attributes and their signatures:
 ```csharp
-ModdedEnumOption(string name, Type enumType, Type roleType = null)
+ModdedEnumOption(string name, Type enumType, string[]? values = null, Type? roleType = null)
     
 ModdedNumberOption(
     string name,
@@ -125,11 +129,9 @@ ModdedNumberOption(
     float increment=1
     NumberSuffixes suffixType = NumberSuffixes.None,
     bool zeroInfinity = false,
-    Type roleType = null)
-    
-ModdedStringOption(string title, string[] values, Type roleType = null)
+    Type? roleType = null)
 
-ModdedToggleOption(string name, Type roleType = null)
+ModdedToggleOption(string name, Type? roleType = null)
 ```
 
 ### ModdedOption Properties
@@ -142,7 +144,6 @@ public ModdedToggleOption YeezusAbility { get; } = new ModdedToggleOption("Yeezu
 Here is a full list of ModdedOption classes you can use: 
 - `ModdedEnumOption`
 - `ModdedNumberOption`
-- `ModdedStringOption`
 - `ModdedToggleOption`
 
 To see a full example of an options class, see [this file](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/Options/ExampleOptions.cs).
@@ -177,6 +178,15 @@ public class MyOptionsGroup : AbstractOptionGroup
 ```
 
 An example can be found [here](https://github.com/All-Of-Us-Mods/MiraAPI/blob/master/MiraAPI.Example/Options/Roles/CustomRoleSettings.cs).
+
+## Custom Murders
+Mira API provides it's own implementation for murders. Our implementation allows for more customization on kills, and helps bypass server checks.
+You can use `PlayerControl.RpcCustomMurder` to perform a networked custom murder, or `PlayerControl.CustomMurder` to normally perform a custom murder.
+For example: 
+```cs
+PlayerControl.LocalPlayer.RpcCustomMurder(Target, createDeadBody: false, teleportMurderer: false, playKillSound: false, resetKillTimer: false, showKillAnim: false);
+```
+This will kill a player without creating a dead body and without teleporting the murderer.
 
 ## Buttons
 

@@ -1,7 +1,9 @@
 ﻿using AmongUs.GameOptions;
 using Il2CppInterop.Runtime;
+using Il2CppInterop.Runtime.Injection;
 using MiraAPI.Networking;
 using MiraAPI.PluginLoading;
+using MiraAPI.Utilities;
 using Reactor.Localization.Utilities;
 using Reactor.Networking.Rpc;
 using Reactor.Utilities;
@@ -9,22 +11,22 @@ using Reactor.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Il2CppInterop.Runtime.Injection;
-using MiraAPI.Utilities;
 using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace MiraAPI.Roles;
 
+/// <summary>
+/// Custom role manager for handling custom roles.
+/// </summary>
 public static class CustomRoleManager
 {
-    public static readonly Dictionary<ushort, RoleBehaviour> CustomRoles = new();
-    
-    public static readonly Dictionary<Type, ushort> RoleIds = new();
-    
+    internal static readonly Dictionary<ushort, RoleBehaviour> CustomRoles = [];
+    internal static readonly Dictionary<Type, ushort> RoleIds = [];
+
     private static ushort _roleId = 100;
-    
+
     private static ushort GetNextRoleId()
     {
         return _roleId++;
@@ -33,12 +35,17 @@ public static class CustomRoleManager
     internal static void RegisterInRoleManager()
     {
         RoleManager.Instance.AllRoles = RoleManager.Instance.AllRoles.Concat(CustomRoles.Values).ToArray();
+
+        foreach (var role in CustomRoles.Values.Where(x => x.IsDead))
+        {
+            RoleManager.GhostRoles.Add(role.Role);
+        }
     }
 
-    public static void RegisterRoleTypes(List<Type> roles, MiraPluginInfo pluginInfo)
+    internal static void RegisterRoleTypes(List<Type> roles, MiraPluginInfo pluginInfo)
     {
-        roles.ForEach(x=>RoleIds.Add(x, GetNextRoleId()));
-        
+        roles.ForEach(x => RoleIds.Add(x, GetNextRoleId()));
+
         foreach (var roleType in roles)
         {
             ClassInjector.RegisterTypeInIl2Cpp(roleType);
@@ -53,11 +60,11 @@ public static class CustomRoleManager
         }
     }
 
-    private static RoleBehaviour RegisterRole(Type roleType, MiraPluginInfo parentMod)
+    private static RoleBehaviour? RegisterRole(Type roleType, MiraPluginInfo parentMod)
     {
         if (!(typeof(RoleBehaviour).IsAssignableFrom(roleType) && typeof(ICustomRole).IsAssignableFrom(roleType)))
         {
-            Logger<MiraApiPlugin>.Error($"{roleType?.Name} does not inherit from RoleBehaviour or ICustomRole.");
+            Logger<MiraApiPlugin>.Error($"{roleType.Name} does not inherit from RoleBehaviour or ICustomRole.");
             return null;
         }
 
@@ -68,7 +75,7 @@ public static class CustomRoleManager
             roleBehaviour.gameObject.Destroy();
             return null;
         }
-        
+
         var roleId = RoleIds[roleType];
 
         roleBehaviour.Role = (RoleTypes)roleId;
@@ -77,40 +84,59 @@ public static class CustomRoleManager
         roleBehaviour.StringName = CustomStringName.CreateAndRegister(customRole.RoleName);
         roleBehaviour.BlurbName = CustomStringName.CreateAndRegister(customRole.RoleDescription);
         roleBehaviour.BlurbNameLong = CustomStringName.CreateAndRegister(customRole.RoleLongDescription);
-        roleBehaviour.AffectedByLightAffectors = customRole.AffectedByLight;
-        roleBehaviour.CanBeKilled = customRole.CanGetKilled;
-        roleBehaviour.CanUseKillButton = customRole.CanKill;
-        roleBehaviour.TasksCountTowardProgress = customRole.TasksCount;
-        roleBehaviour.CanVent = customRole.CanUseVent;
-        roleBehaviour.DefaultGhostRole = customRole.GhostRole;
-        roleBehaviour.MaxCount = 15;
-        roleBehaviour.RoleScreenshot = customRole.OptionsScreenshot.LoadAsset();
+        roleBehaviour.AffectedByLightAffectors = customRole.Configuration.AffectedByLightOnAirship;
+        roleBehaviour.CanBeKilled = customRole.Configuration.CanGetKilled;
+        roleBehaviour.CanUseKillButton = customRole.Configuration.UseVanillaKillButton;
+        roleBehaviour.TasksCountTowardProgress = customRole.Configuration.TasksCountForProgress;
+        roleBehaviour.CanVent = customRole.Configuration.CanUseVent;
+        roleBehaviour.DefaultGhostRole = customRole.Configuration.GhostRole;
+        roleBehaviour.MaxCount = customRole.Configuration.MaxRoleCount;
+        roleBehaviour.RoleScreenshot = customRole.Configuration.OptionsScreenshot.LoadAsset();
 
-        if (customRole.IsGhostRole)
+        if (customRole.Configuration.IsGhostRole)
         {
             RoleManager.GhostRoles.Add(roleBehaviour.Role);
         }
 
+        var useTaskHint = customRole.Configuration.RoleHintType is RoleHintType.TaskHint;
+        var overridesTaskText = customRole.GetType().GetMethod("SpawnTaskHeader")?.DeclaringType == customRole.GetType();
+
+        if (useTaskHint && !overridesTaskText)
+        {
+            Logger<MiraApiPlugin>.Error($"Role {customRole.RoleName} is using RoleHintType.TaskHint but does not override SpawnTaskHeader!");
+        }
+
         CustomRoles.Add(roleId, roleBehaviour);
 
-        if (customRole.HideSettings)
+        if (customRole.Configuration.HideSettings)
         {
             return roleBehaviour;
         }
 
         var config = parentMod.PluginConfig;
-        config.Bind(customRole.NumConfigDefinition, 1);
-        config.Bind(customRole.ChanceConfigDefinition, 100);
-        
+        config.Bind(customRole.NumConfigDefinition, Mathf.Clamp(customRole.Configuration.DefaultRoleCount, 0, customRole.Configuration.MaxRoleCount));
+        config.Bind(customRole.ChanceConfigDefinition, Mathf.Clamp(customRole.Configuration.DefaultChance, 0, 100));
+
         return roleBehaviour;
     }
 
+    /// <summary>
+    /// Finds the parent mod of a custom role.
+    /// </summary>
+    /// <param name="role">The ICustomRole object.</param>
+    /// <returns>A MiraPluginInfo object representing the parent mod of the role.</returns>
     public static MiraPluginInfo FindParentMod(ICustomRole role)
     {
-        return MiraPluginManager.Instance.RegisteredPlugins.First(plugin => plugin.Value.CustomRoles.ContainsValue(role as RoleBehaviour)).Value;
+        return MiraPluginManager.Instance.RegisteredPlugins().First(plugin => plugin.CustomRoles.ContainsValue(role as RoleBehaviour ?? throw new InvalidOperationException()));
     }
 
-    public static bool GetCustomRoleBehaviour(RoleTypes roleType, out ICustomRole result)
+    /// <summary>
+    /// Gets a custom role behaviour by role type.
+    /// </summary>
+    /// <param name="roleType">The role type enum.</param>
+    /// <param name="result">The ICustomRole result.</param>
+    /// <returns>True if the role was found.</returns>
+    public static bool GetCustomRoleBehaviour(RoleTypes roleType, out ICustomRole? result)
     {
         CustomRoles.TryGetValue((ushort)roleType, out var temp);
         if (temp)
@@ -156,11 +182,11 @@ public static class CustomRoleManager
 
         panel.SetTaskText(role.SetTabText().ToString());
     }
-    
-    internal static void SyncAllRoleSettings(int targetId=-1)
+
+    internal static void SyncAllRoleSettings(int targetId = -1)
     {
         var data = CustomRoles.Values
-            .Where(x => x is ICustomRole { HideSettings: false })
+            .Where(x => x is ICustomRole { Configuration.HideSettings: false })
             .Select(x => ((ICustomRole)x).GetNetData())
             .ChunkNetData(1000);
 
@@ -172,6 +198,16 @@ public static class CustomRoleManager
 
     internal static void HandleSyncRoleOptions(NetData[] data)
     {
+        // necessary to disable then re-enable this setting
+        // we dont know how other plugins handle their configs
+        // this way, all the options are saved at once, instead of one by one
+        var oldConfigSetting = new Dictionary<MiraPluginInfo, bool>();
+        foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins())
+        {
+            oldConfigSetting.Add(plugin, plugin.PluginConfig.SaveOnConfigSet);
+            plugin.PluginConfig.SaveOnConfigSet = false;
+        }
+
         foreach (var netData in data)
         {
             if (!CustomRoles.TryGetValue((ushort)netData.Id, out var role))
@@ -180,21 +216,23 @@ public static class CustomRoleManager
             }
 
             var customRole = role as ICustomRole;
-            if (customRole is null or { HideSettings: true })
+            if (customRole is null or { Configuration.HideSettings: true })
             {
                 continue;
             }
 
             var num = BitConverter.ToInt32(netData.Data, 0);
             var chance = BitConverter.ToInt32(netData.Data, 4);
-                    
-            DestroyableSingleton<HudManager>.Instance.Notifier.AddRoleSettingsChangeMessage(role.StringName, num, chance, role.TeamType, false);
+
+            HudManager.Instance.Notifier.AddRoleSettingsChangeMessage(role.StringName, num, chance, role.TeamType, false);
 
             try
             {
-                customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.NumConfigDefinition,
+                customRole.ParentMod.PluginConfig.TryGetEntry<int>(
+                    customRole.NumConfigDefinition,
                     out var numEntry);
-                customRole.ParentMod.PluginConfig.TryGetEntry<int>(customRole.ChanceConfigDefinition,
+                customRole.ParentMod.PluginConfig.TryGetEntry<int>(
+                    customRole.ChanceConfigDefinition,
                     out var chanceEntry);
 
                 numEntry.Value = num;
@@ -204,6 +242,17 @@ public static class CustomRoleManager
             {
                 Logger<MiraApiPlugin>.Error(e);
             }
+        }
+
+        foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins())
+        {
+            plugin.PluginConfig.Save();
+            plugin.PluginConfig.SaveOnConfigSet = oldConfigSetting[plugin];
+        }
+
+        if (LobbyInfoPane.Instance)
+        {
+            LobbyInfoPane.Instance.RefreshPane();
         }
     }
 }

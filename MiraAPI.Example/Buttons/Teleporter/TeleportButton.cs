@@ -13,16 +13,16 @@ public class TeleportButton : CustomActionButton
 {
     public override string Name => "Teleport";
 
-    public override float Cooldown => OptionGroupSingleton<TeleporterOptions>.Instance.TeleportCooldown;
+    public override float Cooldown => OptionGroupSingleton<TeleporterOptions>.Instance.TeleportCooldown.Value;
 
     public override float EffectDuration => OptionGroupSingleton<TeleporterOptions>.Instance.TeleportDuration;
 
     public override int MaxUses => 0;
 
-    public override LoadableAsset<Sprite> Sprite => ExampleAssets.ExampleButton;
+    public override LoadableAsset<Sprite> Sprite => ExampleAssets.TeleportButton;
     public static bool IsZoom { get; private set; }
 
-    public override bool Enabled(RoleBehaviour role)
+    public override bool Enabled(RoleBehaviour? role)
     {
         return role is TeleporterRole;
     }
@@ -45,7 +45,7 @@ public class TeleportButton : CustomActionButton
         if (Input.GetKey(KeyCode.Mouse0))
         {
             playerControl.NetTransform.RpcSnapTo(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-            ResetCooldown();
+            ResetCooldownAndOrEffect();
         }
     }
 

@@ -3,7 +3,6 @@ using HarmonyLib;
 using MiraAPI.Modifiers;
 using MiraAPI.Roles;
 using System.Linq;
-using UnityEngine;
 
 namespace MiraAPI.Patches.Roles;
 
@@ -19,7 +18,9 @@ public static class RoleManagerPatches
             return;
         }
 
-        ModifierManager.AssignModifiers(PlayerControl.AllPlayerControls.ToArray().Where(plr => !plr.Data.IsDead && !plr.Data.Disconnected).ToList());
+        ModifierManager.AssignModifiers(
+            PlayerControl.AllPlayerControls.ToArray().Where(plr => !plr.Data.IsDead && !plr.Data.Disconnected)
+                .ToList());
     }
 
     [HarmonyPrefix]
@@ -36,13 +37,12 @@ public static class RoleManagerPatches
             return true;
         }
 
-        if (role.GhostRole is RoleTypes.CrewmateGhost or RoleTypes.ImpostorGhost)
+        if (role.Configuration.GhostRole is RoleTypes.CrewmateGhost or RoleTypes.ImpostorGhost)
         {
             return true;
         }
-        
-        plr.RpcSetRole(role.GhostRole);
-        return false;
 
+        plr.RpcSetRole(role.Configuration.GhostRole);
+        return false;
     }
 }
