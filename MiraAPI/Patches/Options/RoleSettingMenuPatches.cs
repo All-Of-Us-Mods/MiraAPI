@@ -318,17 +318,6 @@ public static class RoleSettingMenuPatches
         roleOptionSetting.SetClickMask(__instance.ButtonClickMask);
         __instance.roleChances.Add(roleOptionSetting);
 
-        if (customRole.Configuration.MaxRoleCount == 0 && customRole.Configuration.CanModifyChance)
-        {
-            roleOptionSetting.CountMinusBtn.gameObject.SetActive(false);
-            roleOptionSetting.CountPlusBtn.gameObject.SetActive(false);
-        }
-        else if (!customRole.Configuration.CanModifyChance)
-        {
-            roleOptionSetting.ChanceMinusBtn.gameObject.SetActive(false);
-            roleOptionSetting.ChancePlusBtn.gameObject.SetActive(false);
-        }
-
         roleOptionSetting.titleText.transform.localPosition = new Vector3(-0.5376f, -0.2923f, 0f);
         roleOptionSetting.titleText.color = customRole.RoleColor.GetAlternateColor();
         roleOptionSetting.titleText.horizontalAlignment = HorizontalAlignmentOptions.Left;
@@ -352,6 +341,17 @@ public static class RoleSettingMenuPatches
             passiveButton.interactableHoveredColor = Color.white;
 
             passiveButton.OnClick.AddListener((UnityAction)(() => { ChangeTab(role, __instance); }));
+        }
+
+        if (customRole.Configuration.MaxRoleCount == 0 && customRole.Configuration.CanModifyChance)
+        {
+            roleOptionSetting.CountMinusBtn.gameObject.SetActive(false);
+            roleOptionSetting.CountPlusBtn.gameObject.SetActive(false);
+        }
+        else if (!customRole.Configuration.CanModifyChance)
+        {
+            roleOptionSetting.ChanceMinusBtn.gameObject.SetActive(false);
+            roleOptionSetting.ChancePlusBtn.gameObject.SetActive(false);
         }
 
         if (index < GameSettingMenuPatches.SelectedMod?.CustomRoles.Count - 1)
