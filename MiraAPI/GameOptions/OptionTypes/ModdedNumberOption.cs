@@ -1,7 +1,7 @@
-﻿using AmongUs.GameOptions;
+﻿using System;
+using AmongUs.GameOptions;
 using MiraAPI.Networking;
 using MiraAPI.Utilities;
-using System;
 using UnityEngine;
 using Object = UnityEngine.Object;
 

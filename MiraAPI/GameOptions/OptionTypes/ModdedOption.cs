@@ -1,10 +1,10 @@
-﻿using BepInEx.Configuration;
+﻿using System;
+using BepInEx.Configuration;
 using MiraAPI.Networking;
 using MiraAPI.PluginLoading;
 using MiraAPI.Roles;
 using Reactor.Localization.Utilities;
 using Reactor.Networking.Rpc;
-using System;
 using UnityEngine;
 
 namespace MiraAPI.GameOptions.OptionTypes;
@@ -45,7 +45,11 @@ public abstract class ModdedOption<T> : IModdedOption
         get => _parentMod;
         set
         {
-            if (_parentMod != null || value == null) return;
+            if (_parentMod != null || value == null)
+            {
+                return;
+            }
+
             _parentMod = value;
             var entry = _parentMod.GetConfigFile().Bind(ConfigDefinition, DefaultValue);
             Value = entry.Value;
@@ -90,7 +94,11 @@ public abstract class ModdedOption<T> : IModdedOption
         get => _configDefinition;
         set
         {
-            if (_configDefinition is not null) return;
+            if (_configDefinition is not null)
+            {
+                return;
+            }
+
             _configDefinition = value;
         }
     }

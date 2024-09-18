@@ -1,7 +1,7 @@
-﻿using MiraAPI.Example.Roles;
+﻿using System;
+using MiraAPI.Example.Roles;
 using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.Attributes;
-using System;
 using MiraAPI.Utilities;
 
 namespace MiraAPI.Example.Options.Roles;

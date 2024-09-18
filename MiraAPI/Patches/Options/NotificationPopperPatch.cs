@@ -1,7 +1,9 @@
-﻿using HarmonyLib;
+﻿using System.Linq;
+using HarmonyLib;
 using Il2CppSystem;
 using MiraAPI.Roles;
-using System.Linq;
+using UnityEngine;
+using Object = Il2CppSystem.Object;
 
 namespace MiraAPI.Patches.Options;
 
@@ -23,9 +25,13 @@ public static class NotificationPopperPatch
             return true;
         }
 
-        var text = teamType == RoleTeamTypes.Crewmate
-            ? Palette.CrewmateSettingChangeText.ToTextColor()
-            : Palette.ImpostorRed.ToTextColor();
+        var text = customRole.Team switch
+        {
+            ModdedRoleTeams.Crewmate => Palette.CrewmateSettingChangeText.ToTextColor(),
+            ModdedRoleTeams.Impostor => Palette.ImpostorRed.ToTextColor(),
+            ModdedRoleTeams.Neutral => Palette.DisabledGrey.ToTextColor(),
+            _ => Color.white.ToTextColor(),
+        };
 
         var item = TranslationController.Instance.GetString(
             StringNames.LobbyChangeSettingNotificationRole,

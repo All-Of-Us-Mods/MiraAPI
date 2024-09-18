@@ -1,8 +1,8 @@
-﻿using BepInEx.Configuration;
+﻿using System.Text;
+using BepInEx.Configuration;
 using MiraAPI.Modifiers;
 using MiraAPI.PluginLoading;
 using MiraAPI.Utilities;
-using System.Text;
 using UnityEngine;
 
 namespace MiraAPI.Roles;
@@ -38,7 +38,7 @@ public interface ICustomRole
     ModdedRoleTeams Team { get; }
 
     /// <summary>
-    /// Configure advanced settings of the role.
+    /// Gets the advanced settings of the role.
     /// </summary>
     CustomRoleConfiguration Configuration { get; }
 

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using MiraAPI.Modifiers.Types;
 using MiraAPI.Networking;
-using MiraAPI.PluginLoading;
 using MiraAPI.Roles;
 using MiraAPI.Utilities;
 using Reactor.Networking.Rpc;

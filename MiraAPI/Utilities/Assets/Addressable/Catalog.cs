@@ -1,6 +1,6 @@
-﻿using BepInEx.Unity.IL2CPP.Utils.Collections;
+﻿using System.Collections;
+using BepInEx.Unity.IL2CPP.Utils.Collections;
 using Reactor.Utilities;
-using System.Collections;
 using UnityEngine.AddressableAssets;
 using UnityEngine.AddressableAssets.ResourceLocators;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -15,7 +15,8 @@ public class Catalog(string CatalogPath)
     /// <summary>
     /// Loads the catalog asynchronously.
     /// </summary>
-    public void LoadCatalogAsync() {
+    public void LoadCatalogAsync()
+    {
         Coroutines.Start(LoadCatalogAsynchronously());
     }
 

@@ -1,19 +1,19 @@
-﻿using HarmonyLib;
-using MiraAPI.PluginLoading;
-using MonoMod.Utils;
-using Reactor.Utilities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using HarmonyLib;
+using MiraAPI.PluginLoading;
+using MonoMod.Utils;
+using Reactor.Utilities;
 
 namespace MiraAPI.Cosmetics;
 public static class CustomCosmeticManager
 {
-    private static readonly Dictionary<PropertyInfo, RegisterCustomCosmeticAttribute> OptionAttributes = new();
-    private static readonly Dictionary<Type, AbstractCosmeticsGroup> TypeToGroup = new();
-    internal static readonly Dictionary<CosmeticData, int> _cosmeticToPriority = new();
-    internal static readonly Dictionary<CosmeticData, AbstractCosmeticsGroup> _cosmeticToGroup = new();
+    private static readonly Dictionary<PropertyInfo, RegisterCustomCosmeticAttribute> OptionAttributes = [];
+    private static readonly Dictionary<Type, AbstractCosmeticsGroup> TypeToGroup = [];
+    internal static readonly Dictionary<CosmeticData, int> CosmeticToPriority = [];
+    internal static readonly Dictionary<CosmeticData, AbstractCosmeticsGroup> CosmeticToGroup = [];
 
     internal static readonly List<AbstractCosmeticsGroup> Groups = [];
 
@@ -67,14 +67,13 @@ public static class CustomCosmeticManager
         {
             Logger<MiraApiPlugin>.Error($"Failed to get group for {type.Name}");
             return;
-        } 
+        }
 
         OptionAttributes.Add(property, attribute);
     }
 
     internal static void LoadCosmetic(PropertyInfo property, RegisterCustomCosmeticAttribute attribute)
     {
-
         if (!TypeToGroup.TryGetValue(property.DeclaringType, out var group))
         {
             Logger<MiraApiPlugin>.Error($"Failed to get group for {property.DeclaringType.Name}");
@@ -103,22 +102,26 @@ public static class CustomCosmeticManager
             return;
         }
 
-        _cosmeticToPriority.AddRange(((IEnumerable<CosmeticData>)property.GetValue(group)).ToDictionary(y => y, x => attribute.Priority));
-        _cosmeticToGroup.AddRange(((IEnumerable<CosmeticData>)property.GetValue(group)).ToDictionary(y => y, x => group));
+        CosmeticToPriority.AddRange(((IEnumerable<CosmeticData>)property.GetValue(group)).ToDictionary(y => y, x => attribute.Priority));
+        CosmeticToGroup.AddRange(((IEnumerable<CosmeticData>)property.GetValue(group)).ToDictionary(y => y, x => group));
     }
 
     internal static bool Registered { get; set; }
     internal static void LoadAll()
     {
         CosmeticGroupSingleton<VanillaCosmeticsGroup>.Instance.runtimeRegister();
-        if (Registered || !CosmeticGroupSingleton<VanillaCosmeticsGroup>.Instance.registered) return;
+        if (Registered || !CosmeticGroupSingleton<VanillaCosmeticsGroup>.Instance.registered)
+        {
+            return;
+        }
+
         Registered = true;
-        _cosmeticToPriority.AddRange(CosmeticGroupSingleton<VanillaCosmeticsGroup>.Instance.Cosmetics.ToDictionary(y => y, x => 0));
-        _cosmeticToGroup.AddRange(CosmeticGroupSingleton<VanillaCosmeticsGroup>.Instance.Cosmetics.ToDictionary(y => y, x => CosmeticGroupSingleton<VanillaCosmeticsGroup>.Instance));
-        OptionAttributes.Do(x => LoadCosmetic(x.Key,x.Value));
-        DestroyableSingleton<HatManager>.Instance.allHats = _cosmeticToGroup.Keys.Where(x=>x is HatData).Select(x=>(HatData)x).ToArray();
-        DestroyableSingleton<HatManager>.Instance.allVisors = _cosmeticToGroup.Keys.Where(x=>x is VisorData).Select(x => (VisorData)x).ToArray();
-        DestroyableSingleton<HatManager>.Instance.allSkins = _cosmeticToGroup.Keys.Where(x=>x is SkinData).Select(x => (SkinData)x).ToArray();
-        DestroyableSingleton<HatManager>.Instance.allNamePlates = _cosmeticToGroup.Keys.Where(x=>x is NamePlateData).Select(x => (NamePlateData)x).ToArray();
+        CosmeticToPriority.AddRange(CosmeticGroupSingleton<VanillaCosmeticsGroup>.Instance.Cosmetics.ToDictionary(y => y, x => 0));
+        CosmeticToGroup.AddRange(CosmeticGroupSingleton<VanillaCosmeticsGroup>.Instance.Cosmetics.ToDictionary(y => y, x => CosmeticGroupSingleton<VanillaCosmeticsGroup>.Instance));
+        OptionAttributes.Do(x => LoadCosmetic(x.Key, x.Value));
+        DestroyableSingleton<HatManager>.Instance.allHats = CosmeticToGroup.Keys.OfType<HatData>().ToArray();
+        DestroyableSingleton<HatManager>.Instance.allVisors = CosmeticToGroup.Keys.OfType<VisorData>().ToArray();
+        DestroyableSingleton<HatManager>.Instance.allSkins = CosmeticToGroup.Keys.OfType<SkinData>().ToArray();
+        DestroyableSingleton<HatManager>.Instance.allNamePlates = CosmeticToGroup.Keys.OfType<NamePlateData>().ToArray();
     }
 }

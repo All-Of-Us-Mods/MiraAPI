@@ -11,7 +11,7 @@ public static class ScrollingColorsPatch
     private static BoxCollider2D? _collider;
 
     /// <summary>
-    /// Add scrolling to the colors tab
+    /// Add scrolling to the colors tab.
     /// </summary>
     [HarmonyPostfix, HarmonyPatch("OnEnable")]
     public static void AddScrollingToColorsTabPatch(PlayerTab __instance)

@@ -10,24 +10,24 @@ public abstract class AbstractCosmeticsGroup
     public List<NamePlateData> Nameplates { get; } = [];
 
     /// <summary>
-    /// The name of the group. Visible in options menu.
+    /// Gets the name of the group. Visible in options menu.
     /// </summary>
     public abstract string GroupName { get; }
 
     /// <summary>
-    /// A function that returns whether the group should be visible or not.
+    /// Gets a function that determines whether the group should be visible or not.
     /// </summary>
     public virtual Func<bool> GroupVisible => () => true;
 
     /// <summary>
-    /// The sorting mode of individual hats within this group.
+    /// Gets the sorting mode of individual hats within this group.
     /// </summary>
-    public virtual SortingMode SortingMode { get; } = SortingMode.AlphabeticName;
-    
+    public virtual SortingMode SortingMode => SortingMode.AlphabeticName;
+
     /// <summary>
-    /// The priority of a group for sorting groups.
+    /// Gets the priority of a group for sorting groups.
     /// </summary>
-    public virtual int SortingPriority { get; } = 0; 
+    public virtual int SortingPriority { get; }
 }
 
 public enum SortingMode

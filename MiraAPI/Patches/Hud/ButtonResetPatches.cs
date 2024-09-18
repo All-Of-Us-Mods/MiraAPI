@@ -4,7 +4,7 @@ using MiraAPI.Hud;
 namespace MiraAPI.Patches.Hud;
 
 /// <summary>
-/// Reset button patches
+/// Reset button patches.
 /// </summary>
 [HarmonyPatch]
 public static class ButtonResetPatches

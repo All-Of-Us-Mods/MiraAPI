@@ -1,9 +1,9 @@
-﻿using HarmonyLib;
+﻿using System.Linq;
+using HarmonyLib;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using Reactor.Localization.Utilities;
 using Reactor.Utilities.Extensions;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;

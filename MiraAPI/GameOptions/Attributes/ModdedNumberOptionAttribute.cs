@@ -1,7 +1,7 @@
-﻿using MiraAPI.GameOptions.OptionTypes;
-using MiraAPI.Utilities;
-using System;
+﻿using System;
 using System.Reflection;
+using MiraAPI.GameOptions.OptionTypes;
+using MiraAPI.Utilities;
 
 namespace MiraAPI.GameOptions.Attributes;
 

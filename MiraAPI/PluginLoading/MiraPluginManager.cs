@@ -59,11 +59,11 @@ public sealed class MiraPluginManager
     /// <summary>
     /// Get a mira plugin by its GUID.
     /// </summary>
-    /// <param name="guid">The plugin GUID.</param>
+    /// <param name="uniqueId">The plugin GUID.</param>
     /// <returns>A MiraPluginInfo.</returns>
-    public static MiraPluginInfo GetPluginByGuid(string guid)
+    public static MiraPluginInfo GetPluginByGuid(string uniqueId)
     {
-        return Instance._registeredPlugins.Values.First(plugin => plugin.PluginId == guid);
+        return Instance._registeredPlugins.Values.First(plugin => plugin.PluginId == uniqueId);
     }
 
     private static void RegisterAllOptions(Assembly assembly, MiraPluginInfo pluginInfo)

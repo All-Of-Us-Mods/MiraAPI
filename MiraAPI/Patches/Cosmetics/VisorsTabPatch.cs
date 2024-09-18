@@ -1,20 +1,18 @@
-﻿using AmongUs.Data;
-using HarmonyLib;
-using MiraAPI.Cosmetics;
-using MonoMod.Utils;
-using Reactor.Utilities.Extensions;
-using Reactor.Utilities;
-using System;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TMPro;
-using UnityEngine.AddressableAssets;
-using UnityEngine;
+using AmongUs.Data;
+using HarmonyLib;
+using MiraAPI.Cosmetics;
 using MiraAPI.Utilities.Assets.Addressable;
+using MonoMod.Utils;
+using Reactor.Utilities;
+using Reactor.Utilities.Extensions;
+using TMPro;
+using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using System.Collections;
 
 namespace MiraAPI.Patches.Cosmetics;
 [HarmonyPatch(typeof(VisorsTab), nameof(VisorsTab.OnEnable))]
@@ -22,20 +20,20 @@ public static class VisorsTabPatch
 {
     public static bool Prefix(VisorsTab __instance)
     {
-        var Groups = new SortedList<AbstractCosmeticsGroup, List<VisorData>>(
+        var groups = new SortedList<AbstractCosmeticsGroup, List<VisorData>>(
             new AbstractCosmeticsGroupComparer()
         );
         CustomCosmeticManager.Groups.Do(x => x.Visors.Sort(new CosmeticComparer(x)));
         var c = CustomCosmeticManager.Groups.Select(x => new KeyValuePair<AbstractCosmeticsGroup, List<VisorData>>(x, x.Visors)).
             ToDictionary(x => x.Key, x => x.Value.Where(x => x.Free || DataManager.Player.Purchases.GetPurchase(x.ProductId, x.BundleId)).ToList());
-        Groups.AddRange<AbstractCosmeticsGroup, List<VisorData>>(c);
+        groups.AddRange<AbstractCosmeticsGroup, List<VisorData>>(c);
 
         foreach (var colorchip in __instance.ColorChips) colorchip.gameObject.Destroy();
         __instance.ColorChips.Clear();
         var groupNameText = __instance.GetComponentInChildren<TextMeshPro>(false);
-        int hatIdx = 0;
+        var hatIdx = 0;
 
-        foreach (var (group, visors) in Groups.Where(x => x.Key.GroupVisible() && x.Key.Visors.Count > 0))
+        foreach (var (group, visors) in groups.Where(x => x.Key.GroupVisible() && x.Key.Visors.Count > 0))
         {
             var text = UnityEngine.Object.Instantiate(groupNameText, __instance.scroller.Inner);
             text.gameObject.transform.localScale = Vector3.one;
@@ -48,16 +46,16 @@ public static class VisorsTabPatch
 
             hatIdx = (hatIdx + 4) / 5 * 5;
 
-            float xLerp = __instance.XRange.Lerp(0.5f);
-            float yLerp = __instance.YStart - (hatIdx / __instance.NumPerRow) * __instance.YOffset;
+            var xLerp = __instance.XRange.Lerp(0.5f);
+            var yLerp = __instance.YStart - (hatIdx / __instance.NumPerRow) * __instance.YOffset;
             text.transform.localPosition = new Vector3(xLerp, yLerp, -1f);
             hatIdx += 5;
 
             foreach (var visor in visors)
             {
-                float num = __instance.XRange.Lerp(hatIdx % __instance.NumPerRow / (__instance.NumPerRow - 1f));
-                float num2 = __instance.YStart - hatIdx / __instance.NumPerRow * __instance.YOffset;
-                ColorChip colorChip = UnityEngine.Object.Instantiate(__instance.ColorTabPrefab, __instance.scroller.Inner);
+                var num = __instance.XRange.Lerp(hatIdx % __instance.NumPerRow / (__instance.NumPerRow - 1f));
+                var num2 = __instance.YStart - hatIdx / __instance.NumPerRow * __instance.YOffset;
+                var colorChip = UnityEngine.Object.Instantiate(__instance.ColorTabPrefab, __instance.scroller.Inner);
                 colorChip.transform.localPosition = new Vector3(num, num2, -1f);
                 colorChip.Button.OnClick.AddListener((Action)(() => __instance.SelectVisor(visor)));
                 colorChip.Button.ClickMask = __instance.scroller.Hitbox;

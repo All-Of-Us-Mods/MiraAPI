@@ -3,21 +3,29 @@
 namespace MiraAPI.Cosmetics;
 public class VanillaCosmeticsGroup : AbstractCosmeticsGroup
 {
-    public override string GroupName { get; } = "Vanilla";
-    internal HatData[] VanillaHats { get { return DestroyableSingleton<HatManager>.Instance.allHats; } }
-    internal VisorData[] VanillaVisors { get { return DestroyableSingleton<HatManager>.Instance.allVisors; } }
-    internal SkinData[] VanillaSkins { get { return DestroyableSingleton<HatManager>.Instance.allSkins; } }
-    internal NamePlateData[] VanillaNameplates { get { return DestroyableSingleton<HatManager>.Instance.allNamePlates; } }
+    public override string GroupName => "Vanilla";
+    internal static HatData[] VanillaHats => DestroyableSingleton<HatManager>.Instance.allHats;
+    internal static VisorData[] VanillaVisors => DestroyableSingleton<HatManager>.Instance.allVisors;
+    internal static SkinData[] VanillaSkins => DestroyableSingleton<HatManager>.Instance.allSkins;
+    internal static NamePlateData[] VanillaNameplates => DestroyableSingleton<HatManager>.Instance.allNamePlates;
 
-    internal readonly List<CosmeticData> Cosmetics = new();
+    internal List<CosmeticData> Cosmetics { get; } = [];
 
     internal bool registered { get; set; }
     internal bool runtimeRegister()
     {
-        if (registered) return true;
-        if (!DestroyableSingleton<HatManager>.InstanceExists || VanillaHats.Length == 0 
-            || VanillaVisors.Length == 0 || VanillaSkins.Length == 0 
-            || VanillaNameplates.Length == 0) return false;
+        if (registered)
+        {
+            return true;
+        }
+
+        if (!DestroyableSingleton<HatManager>.InstanceExists || VanillaHats.Length == 0
+                                                             || VanillaVisors.Length == 0 || VanillaSkins.Length == 0
+                                                             || VanillaNameplates.Length == 0)
+        {
+            return false;
+        }
+
         registered = true;
         Hats.AddRange(VanillaHats);
         Visors.AddRange(VanillaVisors);

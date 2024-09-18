@@ -39,6 +39,8 @@ public struct CustomRoleConfiguration
         CanModifyChance = true;
     }
 
+#pragma warning disable S1104
+#pragma warning disable CA1051
     /// <summary>
     /// Gets the hard limit of players that can have this role. This property is used to set a limit in the Role Options menu. If set to 0, the role will not be assigned at start.
     /// </summary>
@@ -123,4 +125,6 @@ public struct CustomRoleConfiguration
     /// Gets the Ghost role that is applied when the player is killed.
     /// </summary>
     public RoleTypes GhostRole;
+#pragma warning restore S1104
+#pragma warning restore CA1051
 }

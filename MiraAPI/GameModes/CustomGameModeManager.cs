@@ -1,7 +1,7 @@
-﻿using Reactor.Utilities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Reactor.Utilities;
 
 namespace MiraAPI.GameModes;
 
@@ -21,7 +21,7 @@ public static class CustomGameModeManager
     }
 
     /// <summary>
-    /// Current gamemode.
+    /// Gets current gamemode.
     /// </summary>
     public static CustomGameMode? ActiveMode { get; internal set; } = new DefaultMode();
 
@@ -29,7 +29,7 @@ public static class CustomGameModeManager
     /// Set current gamemode.
     /// </summary>
     /// <param name="id">gamemode ID.</param>
-    public static void SetGameMode(int id)
+    internal static void SetGameMode(int id)
     {
         if (GameModes.TryGetValue(id, out var gameMode))
         {

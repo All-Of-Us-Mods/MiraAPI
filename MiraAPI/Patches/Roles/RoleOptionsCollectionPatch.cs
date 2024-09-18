@@ -8,7 +8,7 @@ namespace MiraAPI.Patches.Roles;
 public static class RoleOptionsCollectionPatch
 {
     /// <summary>
-    /// Set the role chance for custom Launchpad roles based on config
+    /// Set the role chance for custom Launchpad roles based on config.
     /// </summary>
     [HarmonyPrefix]
     [HarmonyPatch(nameof(RoleOptionsCollectionV08.GetChancePerGame))]
@@ -31,7 +31,7 @@ public static class RoleOptionsCollectionPatch
     }
 
     /// <summary>
-    /// Set the amount for custom Launchpad roles based on config
+    /// Set the amount for custom Launchpad roles based on config.
     /// </summary>
     [HarmonyPrefix]
     [HarmonyPatch(nameof(RoleOptionsCollectionV08.GetNumPerGame))]
