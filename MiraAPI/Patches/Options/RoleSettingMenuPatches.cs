@@ -168,14 +168,12 @@ public static class RoleSettingMenuPatches
         {
             if (role.Configuration.MaxRoleCount != 0)
             {
-                role.ParentMod.PluginConfig.TryGetEntry<int>(role.NumConfigDefinition, out var numEntry);
-                numEntry.Value = Mathf.Clamp(roleSetting.RoleMaxCount, 0, role.Configuration.MaxRoleCount);
+                role.SetCount(roleSetting.RoleMaxCount);
             }
 
             if (role.Configuration.CanModifyChance)
             {
-                role.ParentMod.PluginConfig.TryGetEntry<int>(role.ChanceConfigDefinition, out var chanceEntry);
-                chanceEntry.Value = roleSetting.RoleChance;
+                role.SetChance(roleSetting.RoleChance);
             }
         }
         catch (Exception e)
