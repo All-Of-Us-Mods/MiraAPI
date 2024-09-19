@@ -19,12 +19,24 @@ public static class Extensions
 {
     internal static NetData GetNetData(this ICustomRole role)
     {
-        role.ParentMod.PluginConfig.TryGetEntry<int>(role.NumConfigDefinition, out var numEntry);
-        role.ParentMod.PluginConfig.TryGetEntry<int>(role.ChanceConfigDefinition, out var chanceEntry);
+        var count = role.GetCount();
+        var chance = role.GetChance();
+
+        if (count == null)
+        {
+            Logger<MiraApiPlugin>.Error("Couldn't get role count for NetData, defaulting to zero.");
+            count = 0;
+        }
+
+        if (chance == null)
+        {
+            Logger<MiraApiPlugin>.Error("Couldn't get role chance for NetData, defaulting to zero.");
+            chance = 0;
+        }
 
         return new NetData(
             RoleId.Get(role.GetType()),
-            BitConverter.GetBytes(numEntry.Value).AddRangeToArray(BitConverter.GetBytes(chanceEntry.Value)));
+            BitConverter.GetBytes(count.Value).AddRangeToArray(BitConverter.GetBytes(chance.Value)));
     }
 
     /// <summary>

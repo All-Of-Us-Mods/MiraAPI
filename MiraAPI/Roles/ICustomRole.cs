@@ -3,6 +3,7 @@ using BepInEx.Configuration;
 using MiraAPI.Modifiers;
 using MiraAPI.PluginLoading;
 using MiraAPI.Utilities;
+using Reactor.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.Roles;
@@ -59,11 +60,16 @@ public interface ICustomRole
     internal ConfigDefinition ChanceConfigDefinition => new("Roles", $"Chance {GetType().FullName}");
 
     /// <summary>
-    /// Get the role chance option.
+    /// Gets the role chance option.
     /// </summary>
     /// <returns>The role chance option.</returns>
     public int? GetChance()
     {
+        if (!Configuration.CanModifyChance)
+        {
+            return Configuration.DefaultChance;
+        }
+
         if (ParentMod.PluginConfig.TryGetEntry(ChanceConfigDefinition, out ConfigEntry<int> entry))
         {
             return Mathf.Clamp(entry.Value, 0, 100);
@@ -73,7 +79,7 @@ public interface ICustomRole
     }
 
     /// <summary>
-    /// Get the role count option.
+    /// Gets the role count option.
     /// </summary>
     /// <returns>The role count option.</returns>
     public int? GetCount()
@@ -85,6 +91,43 @@ public interface ICustomRole
 
         return null;
     }
+
+    /// <summary>
+    /// Sets the role chance option.
+    /// </summary>
+    /// <param name="chance">The chance between 0 and 100.</param>
+    public void SetChance(int chance)
+    {
+        if (!Configuration.CanModifyChance)
+        {
+            Logger<MiraApiPlugin>.Error($"Cannot modify chance for role: {RoleName}");
+            return;
+        }
+
+        if (ParentMod.PluginConfig.TryGetEntry(ChanceConfigDefinition, out ConfigEntry<int> entry))
+        {
+            entry.Value = Mathf.Clamp(chance, 0, 100);
+            return;
+        }
+
+        Logger<MiraApiPlugin>.Error($"Error getting chance configuration for role: {RoleName}");
+    }
+
+    /// <summary>
+    /// Sets the role count option.
+    /// </summary>
+    /// <param name="count">The amount of this role between zero and its MaxRoleCount in the Configuration.</param>
+    public void SetCount(int count)
+    {
+        if (ParentMod.PluginConfig.TryGetEntry(NumConfigDefinition, out ConfigEntry<int> entry))
+        {
+            entry.Value = Mathf.Clamp(count, 0, Configuration.MaxRoleCount);
+            return;
+        }
+
+        Logger<MiraApiPlugin>.Error($"Error getting count configuration for role: {RoleName}");
+    }
+
     /// <summary>
     /// This method runs on the HudManager.Update method ONLY when the LOCAL player has this role.
     /// </summary>

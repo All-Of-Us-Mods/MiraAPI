@@ -228,15 +228,8 @@ public static class CustomRoleManager
 
             try
             {
-                customRole.ParentMod.PluginConfig.TryGetEntry<int>(
-                    customRole.NumConfigDefinition,
-                    out var numEntry);
-                customRole.ParentMod.PluginConfig.TryGetEntry<int>(
-                    customRole.ChanceConfigDefinition,
-                    out var chanceEntry);
-
-                numEntry.Value = num;
-                chanceEntry.Value = chance;
+                customRole.SetCount(num);
+                customRole.SetChance(chance);
             }
             catch (Exception e)
             {
