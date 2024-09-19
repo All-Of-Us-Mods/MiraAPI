@@ -17,9 +17,9 @@ public static class RoleOptionsCollectionPatch
     /// <returns>Return false to skip original method, true to not.</returns>
     [HarmonyPrefix]
     [HarmonyPatch(nameof(RoleOptionsCollectionV08.GetChancePerGame))]
-    public static bool GetChancePrefix(RoleTypes roleType, ref int __result)
+    public static bool GetChancePrefix(RoleTypes role, ref int __result)
     {
-        if (!CustomRoleManager.GetCustomRoleBehaviour(roleType, out var customRole) || customRole == null)
+        if (!CustomRoleManager.GetCustomRoleBehaviour(role, out var customRole) || customRole == null)
         {
             return true;
         }
@@ -47,9 +47,9 @@ public static class RoleOptionsCollectionPatch
     /// <returns>Return false to skip original method, true to not.</returns>
     [HarmonyPrefix]
     [HarmonyPatch(nameof(RoleOptionsCollectionV08.GetNumPerGame))]
-    public static bool GetNumPrefix(RoleTypes roleType, ref int __result)
+    public static bool GetNumPrefix(RoleTypes role, ref int __result)
     {
-        if (!CustomRoleManager.GetCustomRoleBehaviour(roleType, out var customRole) || customRole == null)
+        if (!CustomRoleManager.GetCustomRoleBehaviour(role, out var customRole) || customRole == null)
         {
             return true;
         }
