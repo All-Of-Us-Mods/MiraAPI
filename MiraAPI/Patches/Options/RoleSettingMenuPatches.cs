@@ -341,12 +341,13 @@ public static class RoleSettingMenuPatches
             passiveButton.OnClick.AddListener((UnityAction)(() => { ChangeTab(role, __instance); }));
         }
 
-        if (customRole.Configuration.MaxRoleCount == 0 && customRole.Configuration.CanModifyChance)
+        if (customRole.Configuration is { MaxRoleCount: 0 })
         {
             roleOptionSetting.CountMinusBtn.gameObject.SetActive(false);
             roleOptionSetting.CountPlusBtn.gameObject.SetActive(false);
         }
-        else if (!customRole.Configuration.CanModifyChance)
+
+        if (!customRole.Configuration.CanModifyChance)
         {
             roleOptionSetting.ChanceMinusBtn.gameObject.SetActive(false);
             roleOptionSetting.ChancePlusBtn.gameObject.SetActive(false);
