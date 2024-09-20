@@ -328,7 +328,7 @@ public abstract class CustomActionButton<T> : CustomActionButton where T : MonoB
     /// <returns>True if the target object is valid, false otherwise.</returns>
     public virtual bool IsTargetValid(T? target)
     {
-        return target;
+        return target != null;
     }
 
     /// <summary>
@@ -355,6 +355,6 @@ public abstract class CustomActionButton<T> : CustomActionButton where T : MonoB
         Target = IsTargetValid(newTarget) ? newTarget : null;
         SetOutline(true);
 
-        return base.CanUse() && Target;
+        return base.CanUse() && Target != null;
     }
 }
