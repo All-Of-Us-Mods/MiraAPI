@@ -52,11 +52,6 @@ public static class KillButtonPatches
     [HarmonyPatch(nameof(KillButton.DoClick))]
     public static bool DoClickPrefix(KillButton __instance)
     {
-        if (PlayerControl.LocalPlayer.Data.Role is not ICustomRole)
-        {
-            return true;
-        }
-
         if (!__instance.isActiveAndEnabled || !__instance.currentTarget || __instance.isCoolingDown ||
             PlayerControl.LocalPlayer.Data.IsDead || !PlayerControl.LocalPlayer.CanMove)
         {
