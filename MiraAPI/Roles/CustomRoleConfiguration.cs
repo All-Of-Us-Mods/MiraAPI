@@ -28,12 +28,12 @@ public struct CustomRoleConfiguration
             _ => role.RoleColor,
         };
         RoleHintType = RoleHintType.RoleTab;
-        GhostRole = role.Team == ModdedRoleTeams.Impostor ? RoleTypes.ImpostorGhost : RoleTypes.CrewmateGhost;
-        CanGetKilled = role.Team == ModdedRoleTeams.Crewmate;
-        UseVanillaKillButton = role.Team == ModdedRoleTeams.Impostor;
-        CanUseVent = role.Team == ModdedRoleTeams.Impostor;
-        CanUseSabotage = role.Team == ModdedRoleTeams.Impostor;
-        TasksCountForProgress = role.Team == ModdedRoleTeams.Crewmate;
+        GhostRole = role.Team is ModdedRoleTeams.Impostor ? RoleTypes.ImpostorGhost : RoleTypes.CrewmateGhost;
+        CanGetKilled = !IsGhostRole && role.Team is not ModdedRoleTeams.Impostor;
+        UseVanillaKillButton = role.Team is ModdedRoleTeams.Impostor;
+        CanUseVent = role.Team is ModdedRoleTeams.Impostor;
+        CanUseSabotage = role.Team is ModdedRoleTeams.Impostor;
+        TasksCountForProgress = role.Team is ModdedRoleTeams.Crewmate;
         IsGhostRole = false;
         HideSettings = IsGhostRole;
         CanModifyChance = true;
