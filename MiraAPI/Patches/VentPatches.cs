@@ -1,6 +1,8 @@
-﻿using HarmonyLib;
+﻿using System.Linq;
+using HarmonyLib;
 using MiraAPI.Roles;
 using MiraAPI.Utilities;
+using Reactor.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.Patches;
@@ -22,21 +24,20 @@ public static class VentPatches
         var role = @object.Data.Role;
 
         var canVent = role is ICustomRole customRole ? customRole.Configuration.CanUseVent : role.CanVent;
+        couldUse = canVent;
 
         var modifiers = @object.GetModifierComponent()?.ActiveModifiers;
-        if (modifiers is null || modifiers.Count <= 0)
+        if (modifiers is { Count: > 0 })
         {
-            return;
-        }
-
-        switch (canVent)
-        {
-            case true when modifiers.Exists(x => !x.CanVent()):
-                couldUse = canUse = false;
-                return;
-            case false when modifiers.Exists(x => x.CanVent()):
-                couldUse = true;
-                break;
+            switch (canVent)
+            {
+                case true when modifiers.Exists(x => x.CanVent().HasValue && x.CanVent()==false):
+                    couldUse = canUse = false;
+                    return;
+                case false when modifiers.Exists(x => x.CanVent().HasValue && x.CanVent()==true):
+                    couldUse = true;
+                    break;
+            }
         }
 
         var num = float.MaxValue;
