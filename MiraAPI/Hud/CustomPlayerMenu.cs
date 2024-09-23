@@ -10,8 +10,12 @@ using UnityEngine.Events;
 
 namespace MiraAPI.Hud;
 
+/// <summary>
+/// Custom Player Menu using the ShapeshifterPanel as a base.
+/// </summary>
+/// <param name="il2CppPtr">Used by Il2Cpp. Do not use constructor, this is a MonoBehaviour.</param>
 [RegisterInIl2Cpp]
-public class CustomPlayerMenu(IntPtr ptr) : Minigame(ptr)
+public class CustomPlayerMenu(IntPtr il2CppPtr) : Minigame(il2CppPtr)
 {
     public ShapeshifterPanel PanelPrefab;
 
@@ -27,7 +31,7 @@ public class CustomPlayerMenu(IntPtr ptr) : Minigame(ptr)
 
     public UiElement DefaultButtonSelected;
 
-    private List<ShapeshifterPanel> potentialVictims;
+    public List<ShapeshifterPanel> potentialVictims;
 
     /// <summary>
     /// Creates a CustomPlayerMenu.
