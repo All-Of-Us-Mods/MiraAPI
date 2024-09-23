@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using System.Linq;
+using HarmonyLib;
 using MiraAPI.Roles;
 using MiraAPI.Utilities;
 using UnityEngine;
@@ -31,10 +32,10 @@ public static class VentPatches
 
         switch (canVent)
         {
-            case true when modifiers.Exists(x => !x.CanVent()):
+            case true when modifiers.Exists(x => x.CanVent().HasValue && x.CanVent()==false):
                 couldUse = canUse = false;
                 return;
-            case false when modifiers.Exists(x => x.CanVent()):
+            case false when modifiers.Exists(x => x.CanVent().HasValue && x.CanVent()==true):
                 couldUse = true;
                 break;
         }

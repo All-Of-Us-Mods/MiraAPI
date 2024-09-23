@@ -75,6 +75,6 @@ public abstract class BaseModifier
     /// <summary>
     /// Determines whether the player can vent.
     /// </summary>
-    /// <returns>True if the player can vent, false otherwise.</returns>
-    public virtual bool CanVent() => Player?.Data.Role.CanVent == true;
+    /// <returns>True if the player can vent, false otherwise. Null for no effect.</returns>
+    public virtual bool? CanVent() => null;
 }
