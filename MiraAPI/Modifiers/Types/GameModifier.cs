@@ -23,4 +23,10 @@ public abstract class GameModifier : BaseModifier
     /// <param name="role">The role to be checked.</param>
     /// <returns>True if the modifier is valid on the role, otherwise false.</returns>
     public virtual bool IsModifierValidOn(RoleBehaviour role) => true;
+
+    /// <summary>
+    /// Determines whether the player won the game with this modifier.
+    /// </summary>
+    /// <returns>True if the player won, false if they lost. Return null to use the player's default win condition.</returns>
+    public virtual bool? DidWin(GameOverReason reason) => null;
 }
