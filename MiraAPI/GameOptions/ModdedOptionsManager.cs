@@ -142,7 +142,6 @@ public static class ModdedOptionsManager
     {
         // necessary to disable then re-enable this setting
         // we dont know how other plugins handle their configs
-        // this way, all the options are saved at once, instead of one by one
         var oldConfigSetting = new Dictionary<MiraPluginInfo, bool>();
         foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins())
         {
@@ -162,7 +161,6 @@ public static class ModdedOptionsManager
 
         foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins())
         {
-            plugin.PluginConfig.Save();
             plugin.PluginConfig.SaveOnConfigSet = oldConfigSetting[plugin];
         }
 

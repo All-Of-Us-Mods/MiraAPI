@@ -21,4 +21,5 @@ public interface IModdedOption
     float GetFloatData();
     NetData GetNetData();
     void HandleNetData(byte[] data);
+    void ResetToConfig();
 }

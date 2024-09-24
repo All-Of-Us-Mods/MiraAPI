@@ -89,21 +89,7 @@ public abstract class ModdedOption<T> : IModdedOption
     /// <summary>
     /// Gets or sets the config definition of the option.
     /// </summary>
-    public ConfigDefinition? ConfigDefinition
-    {
-        get => _configDefinition;
-        set
-        {
-            if (_configDefinition is not null)
-            {
-                return;
-            }
-
-            _configDefinition = value;
-        }
-    }
-
-    private ConfigDefinition? _configDefinition;
+    public ConfigDefinition? ConfigDefinition { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ModdedOption{T}"/> class.
@@ -175,6 +161,14 @@ public abstract class ModdedOption<T> : IModdedOption
     /// </summary>
     /// <param name="data">The NetData's byte array.</param>
     public abstract void HandleNetData(byte[] data);
+
+    public void ResetToConfig()
+    {
+        if (ParentMod?.GetConfigFile().TryGetEntry<T>(ConfigDefinition, out var entry) == true)
+        {
+            SetValue(entry.Value);
+        }
+    }
 
     /// <summary>
     /// Handles the value changed event.
