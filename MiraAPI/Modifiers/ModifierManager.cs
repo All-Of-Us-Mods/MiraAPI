@@ -96,6 +96,21 @@ public static class ModifierManager
         }
 
         var shuffledModifiers = filteredModifiers.Randomize();
+        var map = new Dictionary<uint, int>();
+
+        foreach (var id in shuffledModifiers)
+        {
+            if (Activator.CreateInstance(IdToTypeModifierMap[id]) is not GameModifier mod)
+            {
+                Logger<MiraApiPlugin>.Error($"Failed to create instance of {IdToTypeModifierMap[id].Name}");
+                continue;
+            }
+
+            map[id] = mod.Priority();
+        }
+
+        shuffledModifiers = map.OrderByDescending(x => x.Value).Select(x => x.Key).ToList();
+
         if (shuffledModifiers.Count > plrs.Count)
         {
             shuffledModifiers = shuffledModifiers.GetRange(0, plrs.Count);
