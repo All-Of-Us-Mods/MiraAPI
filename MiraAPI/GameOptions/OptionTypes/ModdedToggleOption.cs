@@ -69,7 +69,10 @@ public class ModdedToggleOption : ModdedOption<bool>
     /// <inheritdoc />
     protected override void OnValueChanged(bool newValue)
     {
-        HudManager.Instance.Notifier.AddSettingsChangeMessage(StringName, newValue ? "On" : "Off", false);
+        if (HudManager.InstanceExists)
+        {
+            HudManager.Instance.Notifier.AddSettingsChangeMessage(StringName, newValue ? "On" : "Off", false);
+        }
         if (!OptionBehaviour)
         {
             return;

@@ -86,7 +86,10 @@ public class ModdedEnumOption : ModdedOption<int>
     /// <inheritdoc />
     protected override void OnValueChanged(int newValue)
     {
-        HudManager.Instance.Notifier.AddSettingsChangeMessage(StringName, Data.GetValueString(newValue), false);
+        if (HudManager.InstanceExists)
+        {
+            HudManager.Instance.Notifier.AddSettingsChangeMessage(StringName, Data.GetValueString(newValue), false);
+        }
         if (!OptionBehaviour)
         {
             return;
