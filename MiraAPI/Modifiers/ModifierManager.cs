@@ -64,8 +64,9 @@ public static class ModifierManager
         var rand = new Random();
 
         List<uint> filteredModifiers = [];
+        var modifiers = IdToTypeModifierMap.Where(pair => pair.Value.IsAssignableTo(typeof(GameModifier))).Reverse(); // For some reason the modifiers are sorted in reverse by namespace, but alphabetical by class name lol
 
-        foreach (var modifier in IdToTypeModifierMap.Where(pair => pair.Value.IsAssignableTo(typeof(GameModifier))))
+        foreach (var modifier in modifiers)
         {
             if (Activator.CreateInstance(modifier.Value) is not GameModifier mod)
             {
