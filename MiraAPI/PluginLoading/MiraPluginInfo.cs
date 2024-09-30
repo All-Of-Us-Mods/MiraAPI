@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using BepInEx;
+﻿using BepInEx;
 using BepInEx.Configuration;
+using MiraAPI.Events;
+using MiraAPI.Events.Attributes;
 using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
 using MiraAPI.Hud;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace MiraAPI.PluginLoading;
 
@@ -40,12 +42,30 @@ public class MiraPluginInfo
     }
 
     /// <summary>
+    /// Gets a read only collection of this plugin's events.
+    /// </summary>
+    /// <returns>Read only collection of events.</returns>
+    public IReadOnlyCollection<AbstractEvent> GetEvents()
+    {
+        return Events.AsReadOnly();
+    }
+
+    /// <summary>
     /// Gets a read only dictionary of Role IDs and the RoleBehaviour object they are associated with.
     /// </summary>
     /// <returns>Read only dictionary of IDs and Roles.</returns>
     public ReadOnlyDictionary<ushort, RoleBehaviour> GetRoles()
     {
         return new ReadOnlyDictionary<ushort, RoleBehaviour>(CustomRoles);
+    }
+
+    /// <summary>
+    /// Gets a read only dictionary of Event Listeners and their abstract events.
+    /// </summary>
+    /// <returns>Read only dictionary of Event Listeners and their abstract events.</returns>
+    public ReadOnlyDictionary<EventListenerAttribute, AbstractEvent> GetEventListeners()
+    {
+        return new ReadOnlyDictionary<EventListenerAttribute, AbstractEvent>(EventListeners);
     }
 
     /// <summary>
@@ -69,6 +89,8 @@ public class MiraPluginInfo
     internal List<AbstractOptionGroup> OptionGroups { get; } = [];
 
     internal List<IModdedOption> Options { get; } = [];
+    internal Dictionary<EventListenerAttribute, AbstractEvent> EventListeners { get; } = [];
+    internal List<AbstractEvent> Events { get; } = [];
 
     internal List<Cosmetics.AbstractCosmeticsGroup> CosmeticGroups { get; } = [];
 

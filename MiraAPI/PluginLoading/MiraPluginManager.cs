@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using BepInEx.Unity.IL2CPP;
+﻿using BepInEx.Unity.IL2CPP;
 using MiraAPI.Colors;
 using MiraAPI.Cosmetics;
+using MiraAPI.Events;
+using MiraAPI.Events.Attributes;
 using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.Attributes;
 using MiraAPI.Hud;
@@ -13,6 +11,10 @@ using MiraAPI.Roles;
 using MiraAPI.Utilities;
 using Reactor.Networking;
 using Reactor.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace MiraAPI.PluginLoading;
 
@@ -24,6 +26,8 @@ public sealed class MiraPluginManager
     private readonly Dictionary<Assembly, MiraPluginInfo> _registeredPlugins = [];
 
     internal MiraPluginInfo[] RegisteredPlugins() => [.. _registeredPlugins.Values];
+
+    internal Dictionary<Assembly, MiraPluginInfo> RegisteredMods() => _registeredPlugins;
 
     internal static MiraPluginManager Instance { get; private set; } = new();
 
@@ -40,6 +44,7 @@ public sealed class MiraPluginManager
 
             var info = new MiraPluginInfo(miraPlugin, pluginInfo);
 
+            RegisterEventAttribute(assembly, info);
             RegisterModifierAttribute(assembly);
             RegisterAllOptions(assembly, info);
             RegisterAllCosmetics(assembly, info);
@@ -64,6 +69,26 @@ public sealed class MiraPluginManager
     public static MiraPluginInfo GetPluginByGuid(string uniqueId)
     {
         return Instance._registeredPlugins.Values.First(plugin => plugin.PluginId == uniqueId);
+    }
+
+    private static void RegisterEventListeners(Assembly assembly, MiraPluginInfo pluginInfo)
+    {
+        foreach (var type in assembly.GetTypes())
+        {
+            foreach (var method in type.GetMethods())
+            {
+                var attribute = method.GetCustomAttribute<EventListenerAttribute>();
+                if (attribute == null)
+                {
+                    continue;
+                }
+
+                if (method.GetParameters()[0].GetType().IsAssignableFrom(typeof(AbstractEvent)))
+                {
+                    // register
+                }
+            }
+        }
     }
 
     private static void RegisterAllOptions(Assembly assembly, MiraPluginInfo pluginInfo)
@@ -180,6 +205,18 @@ public sealed class MiraPluginManager
                 }
 
                 PaletteManager.CustomColors.Add(color);
+            }
+        }
+    }
+
+    private static void RegisterEventAttribute(Assembly assembly, MiraPluginInfo pluginInfo)
+    {
+        foreach (var type in assembly.GetTypes())
+        {
+            var attribute = type.GetCustomAttribute<RegisterEventAttribute>();
+            if (attribute != null)
+            {
+                CustomButtonManager.RegisterButton(type, pluginInfo);
             }
         }
     }
