@@ -2,11 +2,17 @@
 using Reactor.Utilities;
 using System;
 using System.Collections.Generic;
+using MiraAPI.Events.Attributes;
 
 namespace MiraAPI.Events;
+
+/// <summary>
+/// Used internally to register events, and externally to invoke events.
+/// </summary>
 public static class MiraEventManager
 {
     internal static readonly List<AbstractEvent> Events = [];
+    internal static readonly Dictionary<EventListenerAttribute, AbstractEvent> Listeners = [];
 
     internal static void RegisterEvent(Type eventType, MiraPluginInfo pluginInfo)
     {
@@ -33,7 +39,17 @@ public static class MiraEventManager
     /// <param name="invocationType">Which mods the event listeners will be called.</param>
     public static void InvokeEvent(AbstractEvent targetEvent, EventInvocationType invocationType = EventInvocationType.AllMods)
     {
-        // TODO: Add code.
+        if (!Events.Contains(targetEvent))
+        {
+            Logger<MiraApiPlugin>.Error($"Can't invoke {targetEvent.GetType().Name} because it is not registered.");
+            return;
+        }
+
+        foreach (var pair in Listeners)
+        {
+            if (pair.Value != targetEvent) continue;
+           // pair.Key.Method.Invoke(targetEvent);
+        }
     }
 }
 

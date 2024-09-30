@@ -6,3 +6,4 @@ bin/
 
 *.user
 *.lock.json
+.DS_Store

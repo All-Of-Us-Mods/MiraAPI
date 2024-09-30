@@ -45,6 +45,7 @@ public sealed class MiraPluginManager
             var info = new MiraPluginInfo(miraPlugin, pluginInfo);
 
             RegisterEventAttribute(assembly, info);
+            RegisterEventListeners(assembly, info);
             RegisterModifierAttribute(assembly);
             RegisterAllOptions(assembly, info);
             RegisterAllCosmetics(assembly, info);
@@ -83,9 +84,18 @@ public sealed class MiraPluginManager
                     continue;
                 }
 
-                if (method.GetParameters()[0].GetType().IsAssignableFrom(typeof(AbstractEvent)))
+                var firstParam = method.GetParameters()[0];
+                if (firstParam.GetType().IsAssignableFrom(typeof(AbstractEvent)))
                 {
-                    // register
+                    AbstractEvent @event = (AbstractEvent)Activator.CreateInstance(type);
+                    if (@event is not null)
+                    {
+                        attribute.Method = method;
+                        attribute.MethodInstance = type;
+                        
+                        MiraEventManager.Listeners.Add(attribute, @event);
+                        pluginInfo.EventListeners.Add(attribute, @event);
+                    }
                 }
             }
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 
 namespace MiraAPI.Events.Attributes;
 
@@ -12,4 +13,7 @@ public class EventListenerAttribute(string modId = "") : Attribute
     /// Gets the mod ID of the event being handled.
     /// </summary>
     public string ModId { get; } = modId;
+
+    internal MethodInfo Method;
+    internal object? MethodInstance;
 }
