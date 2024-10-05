@@ -19,6 +19,7 @@ public static class ModifierManager
 {
     private static readonly Dictionary<uint, Type> IdToTypeModifierMap = [];
     private static readonly Dictionary<Type, uint> TypeToIdModifierMap = [];
+    private static readonly Dictionary<int, List<Type>> PrioritiesToTypesMap = [];
 
     private static uint _nextId;
 
@@ -57,62 +58,59 @@ public static class ModifierManager
 
         IdToTypeModifierMap.Add(GetNextId(), modifierType);
         TypeToIdModifierMap.Add(modifierType, _nextId);
+
+        if (!typeof(GameModifier).IsAssignableFrom(modifierType))
+        {
+            return;
+        }
+
+        var mod = Activator.CreateInstance(modifierType) as GameModifier;
+        var prio = mod!.Priority();
+
+        if (!PrioritiesToTypesMap.TryGetValue(prio, out var list))
+        {
+            PrioritiesToTypesMap[prio] = list = [];
+        }
+
+        list.Add(modifierType);
     }
 
     internal static void AssignModifiers(List<PlayerControl> plrs)
     {
         var rand = new Random();
 
-        List<uint> filteredModifiers = [];
-        var modifiers = IdToTypeModifierMap.Where(pair => pair.Value.IsAssignableTo(typeof(GameModifier))).Reverse(); // For some reason the modifiers are sorted in reverse by namespace, but alphabetical by class name lol
+        Dictionary<uint, int> filteredModifiers = [];
 
-        foreach (var modifier in modifiers)
+        foreach (var prioPairs in PrioritiesToTypesMap)
         {
-            if (Activator.CreateInstance(modifier.Value) is not GameModifier mod)
+            foreach (var modifier in prioPairs.Value)
             {
-                Logger<MiraApiPlugin>.Error($"Failed to create instance of {modifier.Value.Name}");
-                continue;
-            }
+                var mod = Activator.CreateInstance(modifier) as GameModifier;
+                var id = TypeToIdModifierMap[modifier];
 
-            if (!plrs.Exists(x => IsGameModifierValid(x, mod, modifier.Key)))
-            {
-                Logger<MiraApiPlugin>.Warning("No players are valid for modifier: " + mod.ModifierName);
-                continue;
-            }
-
-            var maxCount = plrs.Count(x => IsGameModifierValid(x, mod, modifier.Key));
-
-            var num = Math.Clamp(mod.GetAmountPerGame(), 0, maxCount);
-            var chance = mod.GetAssignmentChance();
-            Logger<MiraApiPlugin>.Warning($"{mod}:{modifier.Key}:{mod.Priority()}:{mod.GetAssignmentChance()}");
-
-            for (var i = 0; i < num; i++)
-            {
-                var randomNum = rand.Next(100);
-
-                if (randomNum < Math.Clamp(chance, 0, 100))
+                if (!plrs.Exists(x => IsGameModifierValid(x, mod!, id)))
                 {
-                    filteredModifiers.Add(TypeToIdModifierMap[modifier.Value]);
+                    Logger<MiraApiPlugin>.Warning("No players are valid for modifier: " + mod!.ModifierName);
+                    continue;
+                }
+
+                var maxCount = plrs.Count(x => IsGameModifierValid(x, mod!, id));
+                var num = Math.Clamp(mod!.GetAmountPerGame(), 0, maxCount);
+                var chance = mod.GetAssignmentChance();
+
+                for (var i = 0; i < num; i++)
+                {
+                    var randomNum = rand.Next(100);
+
+                    if (randomNum < Math.Clamp(chance, 0, 100))
+                    {
+                        filteredModifiers.Add(id, prioPairs.Key);
+                    }
                 }
             }
         }
 
-        var shuffledModifiers = filteredModifiers.Randomize();
-        var map = new Dictionary<uint, int>();
-
-        foreach (var id in shuffledModifiers)
-        {
-            if (Activator.CreateInstance(IdToTypeModifierMap[id]) is not GameModifier mod)
-            {
-                Logger<MiraApiPlugin>.Error($"Failed to create instance of {IdToTypeModifierMap[id].Name}");
-                continue;
-            }
-
-            map[id] = mod.Priority();
-            Logger<MiraApiPlugin>.Warning($"{mod}:{id}:{mod.Priority()}:{mod.GetAssignmentChance()}");
-        }
-
-        shuffledModifiers = map.OrderByDescending(x => x.Value).Select(x => x.Key).ToList();
+        var shuffledModifiers = filteredModifiers.ToList().Randomize().OrderByDescending(x => x.Value).Select(x => x.Key).ToList();
 
         if (shuffledModifiers.Count > plrs.Count)
         {
