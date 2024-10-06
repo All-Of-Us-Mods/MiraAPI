@@ -19,7 +19,7 @@ public static class ModifierManager
 {
     private static readonly Dictionary<uint, Type> IdToTypeModifierMap = [];
     private static readonly Dictionary<Type, uint> TypeToIdModifierMap = [];
-    private static readonly Dictionary<int, List<Type>> PrioritiesToTypesMap = [];
+    private static readonly Dictionary<int, List<uint>> PrioritiesToIdsMap = [];
 
     private static uint _nextId;
 
@@ -65,36 +65,36 @@ public static class ModifierManager
         }
 
         var mod = Activator.CreateInstance(modifierType) as GameModifier;
-        var prio = mod!.Priority();
+        var priority = mod!.Priority();
 
-        if (!PrioritiesToTypesMap.TryGetValue(prio, out var list))
+        if (!PrioritiesToIdsMap.TryGetValue(priority, out var list))
         {
-            PrioritiesToTypesMap[prio] = list = [];
+            PrioritiesToIdsMap[priority] = list = [];
         }
 
-        list.Add(modifierType);
+        list.Add(_nextId);
     }
 
     internal static void AssignModifiers(List<PlayerControl> plrs)
     {
         var rand = new Random();
+        var sequence = PrioritiesToIdsMap.Keys.OrderByDescending(x => x);
 
-        Dictionary<uint, int> filteredModifiers = [];
-
-        foreach (var prioPairs in PrioritiesToTypesMap)
+        foreach (var priority in sequence)
         {
-            foreach (var modifier in prioPairs.Value)
-            {
-                var mod = Activator.CreateInstance(modifier) as GameModifier;
-                var id = TypeToIdModifierMap[modifier];
+            var map = new List<uint>();
 
-                if (!plrs.Exists(x => IsGameModifierValid(x, mod!, id)))
+            foreach (var modifier in PrioritiesToIdsMap[priority])
+            {
+                var mod = Activator.CreateInstance(IdToTypeModifierMap[modifier]) as GameModifier;
+
+                if (!plrs.Exists(x => IsGameModifierValid(x, mod!, modifier)))
                 {
                     Logger<MiraApiPlugin>.Warning("No players are valid for modifier: " + mod!.ModifierName);
                     continue;
                 }
 
-                var maxCount = plrs.Count(x => IsGameModifierValid(x, mod!, id));
+                var maxCount = plrs.Count(x => IsGameModifierValid(x, mod!, modifier));
                 var num = Math.Clamp(mod!.GetAmountPerGame(), 0, maxCount);
                 var chance = mod.GetAssignmentChance();
 
@@ -104,44 +104,39 @@ public static class ModifierManager
 
                     if (randomNum < Math.Clamp(chance, 0, 100))
                     {
-                        filteredModifiers.Add(id, prioPairs.Key);
+                        map.Add(modifier);
                     }
                 }
             }
-        }
 
-        var shuffledModifiers = filteredModifiers.ToList().Randomize().OrderByDescending(x => x.Value).Select(x => x.Key).ToList();
+            var shuffledList = map.ToList().Randomize();
 
-        if (shuffledModifiers.Count > plrs.Count)
-        {
-            shuffledModifiers = shuffledModifiers.GetRange(0, plrs.Count);
-        }
-
-        while (shuffledModifiers.Count > 0)
-        {
-            var id = shuffledModifiers[0];
-
-            if (Activator.CreateInstance(IdToTypeModifierMap[id]) is not GameModifier mod)
+            if (shuffledList.Count > plrs.Count)
             {
-                Logger<MiraApiPlugin>.Error($"Failed to create instance of {IdToTypeModifierMap[id].Name}");
-                continue;
+                shuffledList = shuffledList.GetRange(0, plrs.Count)!;
             }
 
-            if (!plrs.Exists(x => IsGameModifierValid(x, mod, id)))
+            while (shuffledList.Count > 0)
             {
-                shuffledModifiers.RemoveAt(0);
-                continue;
+                var id = shuffledList[0];
+                var mod = Activator.CreateInstance(IdToTypeModifierMap[id]) as GameModifier;
+
+                if (!plrs.Exists(x => IsGameModifierValid(x, mod!, id)))
+                {
+                    shuffledList.RemoveAt(0);
+                    continue;
+                }
+
+                var plr = plrs.Random();
+
+                if (plr == null || !IsGameModifierValid(plr, mod!, id))
+                {
+                    continue;
+                }
+
+                shuffledList.RemoveAt(0);
+                plr.RpcAddModifier(id);
             }
-
-            var plr = plrs.Random();
-
-            if (plr == null || !IsGameModifierValid(plr, mod, id))
-            {
-                continue;
-            }
-
-            shuffledModifiers.RemoveAt(0);
-            plr.RpcAddModifier(id);
         }
     }
 
