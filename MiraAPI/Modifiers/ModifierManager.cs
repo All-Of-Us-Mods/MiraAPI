@@ -87,14 +87,14 @@ public static class ModifierManager
             foreach (var modifier in PrioritiesToIdsMap[priority])
             {
                 var mod = Activator.CreateInstance(IdToTypeModifierMap[modifier]) as GameModifier;
+                var maxCount = plrs.Count(x => IsGameModifierValid(x, mod!, modifier));
 
-                if (!plrs.Exists(x => IsGameModifierValid(x, mod!, modifier)))
+                if (maxCount == 0)
                 {
                     Logger<MiraApiPlugin>.Warning("No players are valid for modifier: " + mod!.ModifierName);
                     continue;
                 }
 
-                var maxCount = plrs.Count(x => IsGameModifierValid(x, mod!, modifier));
                 var num = Math.Clamp(mod!.GetAmountPerGame(), 0, maxCount);
                 var chance = mod.GetAssignmentChance();
 
