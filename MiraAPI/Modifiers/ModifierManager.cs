@@ -87,12 +87,13 @@ public static class ModifierManager
             {
                 var mod = Activator.CreateInstance(IdToTypeModifierMap[id]) as GameModifier;
                 var chance = Math.Clamp(mod!.GetAssignmentChance(), 0, 100);
-                var maxCount = plrs.Count(x => IsGameModifierValid(x, mod!, id));
 
                 if (chance == 0 || mod!.GetAmountPerGame() == 0)
                 {
                     continue;
                 }
+
+                var maxCount = plrs.Count(x => IsGameModifierValid(x, mod!, id));
 
                 if (maxCount == 0)
                 {
