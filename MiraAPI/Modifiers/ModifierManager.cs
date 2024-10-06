@@ -77,17 +77,24 @@ public static class ModifierManager
 
     internal static void AssignModifiers(List<PlayerControl> plrs)
     {
+        foreach (var player in plrs)
+        {
+            Logger<MiraApiPlugin>.Message(player.Data.PlayerName);
+        }
+
         var rand = new Random();
         var sequence = PrioritiesToIdsMap.Keys.OrderByDescending(x => x);
 
         foreach (var priority in sequence)
         {
-            var map = new List<uint>();
+            var filteredModifiers = new List<uint>();
+            Logger<MiraApiPlugin>.Message(priority);
 
-            foreach (var modifier in PrioritiesToIdsMap[priority])
+            foreach (var id in PrioritiesToIdsMap[priority])
             {
-                var mod = Activator.CreateInstance(IdToTypeModifierMap[modifier]) as GameModifier;
-                var maxCount = plrs.Count(x => IsGameModifierValid(x, mod!, modifier));
+                var mod = Activator.CreateInstance(IdToTypeModifierMap[id]) as GameModifier;
+                var maxCount = plrs.Count(x => IsGameModifierValid(x, mod!, id));
+                Logger<MiraApiPlugin>.Message(maxCount);
 
                 if (maxCount == 0)
                 {
@@ -104,12 +111,12 @@ public static class ModifierManager
 
                     if (randomNum < Math.Clamp(chance, 0, 100))
                     {
-                        map.Add(modifier);
+                        filteredModifiers.Add(id);
                     }
                 }
             }
 
-            var shuffledList = map.ToList().Randomize();
+            var shuffledList = filteredModifiers.ToList().Randomize();
 
             if (shuffledList.Count > plrs.Count)
             {
