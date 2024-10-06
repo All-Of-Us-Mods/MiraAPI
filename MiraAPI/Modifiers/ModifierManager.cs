@@ -131,6 +131,7 @@ public static class ModifierManager
 
                 if (plr == null || !IsGameModifierValid(plr, mod!, id))
                 {
+                    shuffledList.RemoveAt(0); // Just some insurance
                     continue;
                 }
 
