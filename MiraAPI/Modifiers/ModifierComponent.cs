@@ -259,4 +259,24 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     {
         return AddModifier(typeof(T)) as T;
     }
+
+    /// <summary>
+    /// Checks if a player has an active or queued modifier by its ID.
+    /// </summary>
+    /// <param name="id">The Modifier ID.</param>
+    /// <returns>True if the Modifier is present, false otherwise.</returns>
+    public bool HasModifier(uint id)
+    {
+        return ActiveModifiers.Exists(x => x.ModifierId == id) || _toAdd.Exists(x => x.ModifierId == id);
+    }
+
+    /// <summary>
+    /// Checks if a player has an active or queued modifier by its type.
+    /// </summary>
+    /// <typeparam name="T">The Type of the Modifier.</typeparam>
+    /// <returns>True if the Modifier is present, false otherwise.</returns>
+    public bool HasModifier<T>()
+    {
+        return ActiveModifiers.Exists(x => x is T) || _toAdd.Exists(x => x is T);
+    }
 }

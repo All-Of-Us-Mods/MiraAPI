@@ -194,7 +194,7 @@ public static class Extensions
     public static bool HasModifier<T>(this PlayerControl? player) where T : BaseModifier
     {
         return player?.GetModifierComponent() != null &&
-               player.GetModifierComponent()!.ActiveModifiers.Exists(x => x is T);
+               player.GetModifierComponent()!.HasModifier<T>();
     }
 
     /// <summary>
@@ -206,7 +206,7 @@ public static class Extensions
     public static bool HasModifier(this PlayerControl? player, uint id)
     {
         return player?.GetModifierComponent() != null &&
-               player.GetModifierComponent()!.ActiveModifiers.Exists(x => x.ModifierId == id);
+               player.GetModifierComponent()!.HasModifier(id);
     }
 
     /// <summary>
