@@ -87,8 +87,9 @@ public static class ModifierManager
             {
                 var mod = Activator.CreateInstance(IdToTypeModifierMap[id]) as GameModifier;
                 var chance = Math.Clamp(mod!.GetAssignmentChance(), 0, 100);
+                var count = mod!.GetAmountPerGame();
 
-                if (chance == 0 || mod!.GetAmountPerGame() == 0)
+                if (chance == 0 || count == 0)
                 {
                     continue;
                 }
@@ -101,7 +102,7 @@ public static class ModifierManager
                     continue;
                 }
 
-                var num = Math.Clamp(mod!.GetAmountPerGame(), 0, maxCount);
+                var num = Math.Clamp(count, 0, maxCount);
 
                 for (var i = 0; i < num; i++)
                 {
