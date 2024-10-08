@@ -8,7 +8,7 @@ namespace MiraAPI.Roles;
 /// <typeparam name="T">The role you are trying to access.</typeparam>
 public static class CustomRoleSingleton<T> where T : ICustomRole
 {
-    private static ICustomRole? _instance;
+    private static T? _instance;
 
     /// <summary>
     /// Gets the instance of the role.

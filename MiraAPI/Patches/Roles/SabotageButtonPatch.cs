@@ -4,7 +4,7 @@ using MiraAPI.Roles;
 namespace MiraAPI.Patches.Roles;
 
 [HarmonyPatch(typeof(SabotageButton))]
-public class SabotageButtonPatch
+public static class SabotageButtonPatch
 {
     /// <summary>
     /// Patches the Sabotage button to check if the player's custom role can use sabotage.

@@ -245,7 +245,7 @@ public abstract class CustomActionButton
     /// This method takes into account cooldowns, effects, and uses, before calling the <see cref="OnClick"/> method.
     /// It can be overridden for custom behavior.
     /// </summary>
-    protected virtual void ClickHandler()
+    public virtual void ClickHandler()
     {
         if (!CanUse())
         {

@@ -1,4 +1,7 @@
-﻿using AmongUs.GameOptions;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using AmongUs.GameOptions;
 using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.Injection;
 using MiraAPI.Networking;
@@ -8,9 +11,6 @@ using Reactor.Localization.Utilities;
 using Reactor.Networking.Rpc;
 using Reactor.Utilities;
 using Reactor.Utilities.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;

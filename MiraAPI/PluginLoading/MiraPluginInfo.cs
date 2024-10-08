@@ -1,14 +1,10 @@
-﻿using BepInEx;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using BepInEx;
 using BepInEx.Configuration;
 using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Collections.ObjectModel;
-using System.Linq;
-using MiraAPI.GameOptions.OptionTypes;
 using MiraAPI.Hud;
-using MiraAPI.Roles;
 
 namespace MiraAPI.PluginLoading;
 
@@ -61,9 +57,20 @@ public class MiraPluginInfo
         return Buttons.AsReadOnly();
     }
 
+    /// <summary>
+    /// Gets a read only collection of this plugin's custom buttons.
+    /// </summary>
+    /// <returns>Read only collection of buttons.</returns>
+    public IReadOnlyCollection<Cosmetics.AbstractCosmeticsGroup> GetCosmetics()
+    {
+        return CosmeticGroups.AsReadOnly();
+    }
+
     internal List<AbstractOptionGroup> OptionGroups { get; } = [];
 
     internal List<IModdedOption> Options { get; } = [];
+
+    internal List<Cosmetics.AbstractCosmeticsGroup> CosmeticGroups { get; } = [];
 
     internal Dictionary<ushort, RoleBehaviour> CustomRoles { get; } = [];
 

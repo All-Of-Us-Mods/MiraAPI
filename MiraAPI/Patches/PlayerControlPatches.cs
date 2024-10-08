@@ -32,6 +32,7 @@ public static class PlayerControlPatches
     /// Calls the OnDeath method for all active modifiers.
     /// </summary>
     /// <param name="__instance">PlayerControl instance.</param>
+    /// <param name="reason">The death reason.</param>
     [HarmonyPostfix]
     [HarmonyPatch(nameof(PlayerControl.Die))]
     public static void PlayerControlDiePostfix(PlayerControl __instance, DeathReason reason)

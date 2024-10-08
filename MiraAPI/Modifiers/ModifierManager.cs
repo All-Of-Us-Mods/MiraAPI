@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using MiraAPI.Modifiers.Types;
 using MiraAPI.Networking;
-using MiraAPI.PluginLoading;
 using MiraAPI.Roles;
 using MiraAPI.Utilities;
 using Reactor.Networking.Rpc;
@@ -20,6 +19,7 @@ public static class ModifierManager
 {
     private static readonly Dictionary<uint, Type> IdToTypeModifierMap = [];
     private static readonly Dictionary<Type, uint> TypeToIdModifierMap = [];
+    private static readonly Dictionary<int, List<uint>> PrioritiesToIdsMap = [];
 
     private static uint _nextId;
 
@@ -58,75 +58,90 @@ public static class ModifierManager
 
         IdToTypeModifierMap.Add(GetNextId(), modifierType);
         TypeToIdModifierMap.Add(modifierType, _nextId);
+
+        if (!typeof(GameModifier).IsAssignableFrom(modifierType))
+        {
+            return;
+        }
+
+        var mod = Activator.CreateInstance(modifierType) as GameModifier;
+        var priority = mod!.Priority();
+
+        if (!PrioritiesToIdsMap.TryGetValue(priority, out var list))
+        {
+            PrioritiesToIdsMap[priority] = list = [];
+        }
+
+        list.Add(_nextId);
     }
 
     internal static void AssignModifiers(List<PlayerControl> plrs)
     {
         var rand = new Random();
 
-        List<uint> filteredModifiers = [];
-
-        foreach (var modifier in IdToTypeModifierMap.Where(pair => pair.Value.IsAssignableTo(typeof(GameModifier))))
+        foreach (var priority in PrioritiesToIdsMap.Keys.OrderByDescending(x => x))
         {
-            if (Activator.CreateInstance(modifier.Value) is not GameModifier mod)
+            var filteredModifiers = new List<uint>();
+
+            foreach (var id in PrioritiesToIdsMap[priority])
             {
-                Logger<MiraApiPlugin>.Error($"Failed to create instance of {modifier.Value.Name}");
-                continue;
-            }
+                var mod = Activator.CreateInstance(IdToTypeModifierMap[id]) as GameModifier;
+                var chance = Math.Clamp(mod!.GetAssignmentChance(), 0, 100);
+                var count = mod!.GetAmountPerGame();
 
-            if (!plrs.Exists(x => IsGameModifierValid(x, mod, modifier.Key)))
-            {
-                Logger<MiraApiPlugin>.Warning("No players are valid for modifier: " + mod.ModifierName);
-                continue;
-            }
-
-            var maxCount = plrs.Count(x => IsGameModifierValid(x, mod, modifier.Key));
-
-            var num = Math.Clamp(mod.GetAmountPerGame(), 0, maxCount);
-            var chance = mod.GetAssignmentChance();
-
-            for (var i = 0; i < num; i++)
-            {
-                var randomNum = rand.Next(100);
-
-                if (randomNum < Math.Clamp(chance, 0, 100))
+                if (chance == 0 || count == 0)
                 {
-                    filteredModifiers.Add(TypeToIdModifierMap[modifier.Value]);
+                    continue;
+                }
+
+                var maxCount = plrs.Count(x => IsGameModifierValid(x, mod!, id));
+
+                if (maxCount == 0)
+                {
+                    Logger<MiraApiPlugin>.Warning($"No players are valid for {mod!.ModifierName}");
+                    continue;
+                }
+
+                var num = Math.Clamp(count, 0, maxCount);
+
+                for (var i = 0; i < num; i++)
+                {
+                    var randomNum = rand.Next(100);
+
+                    if (randomNum < chance)
+                    {
+                        filteredModifiers.Add(id);
+                    }
                 }
             }
-        }
 
-        var shuffledModifiers = filteredModifiers.Randomize();
-        if (shuffledModifiers.Count > plrs.Count)
-        {
-            shuffledModifiers = shuffledModifiers.GetRange(0, plrs.Count);
-        }
-
-        while (shuffledModifiers.Count > 0)
-        {
-            var id = shuffledModifiers[0];
-
-            if (Activator.CreateInstance(IdToTypeModifierMap[id]) is not GameModifier mod)
+            if (filteredModifiers.Count == 0)
             {
-                Logger<MiraApiPlugin>.Error($"Failed to create instance of {IdToTypeModifierMap[id].Name}");
+                Logger<MiraApiPlugin>.Warning($"No filtered modifiers for priority {priority}");
                 continue;
             }
 
-            if (!plrs.Exists(x => IsGameModifierValid(x, mod, id)))
+            var shuffledList = filteredModifiers.Randomize();
+
+            if (shuffledList.Count > plrs.Count)
             {
-                shuffledModifiers.RemoveAt(0);
-                continue;
+                shuffledList = shuffledList.GetRange(0, plrs.Count)!;
             }
 
-            var plr = plrs.Random();
-
-            if (plr == null || !IsGameModifierValid(plr, mod, id))
+            foreach (var id in shuffledList)
             {
-                continue;
-            }
+                var mod = Activator.CreateInstance(IdToTypeModifierMap[id]) as GameModifier;
+                var plr = plrs.Where(x => IsGameModifierValid(x, mod!, id)).Random();
 
-            shuffledModifiers.RemoveAt(0);
-            plr.RpcAddModifier(id);
+                if (plr == null)
+                {
+                    Logger<MiraApiPlugin>.Warning($"Somehow valid players for modifier {mod!.ModifierName} disappeared");
+                }
+                else
+                {
+                    plr.RpcAddModifier(id);
+                }
+            }
         }
     }
 

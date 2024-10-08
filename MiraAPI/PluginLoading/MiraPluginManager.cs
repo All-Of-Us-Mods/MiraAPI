@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using BepInEx.Unity.IL2CPP;
 using MiraAPI.Colors;
+using MiraAPI.Cosmetics;
 using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.Attributes;
 using MiraAPI.Hud;
@@ -29,6 +30,7 @@ public sealed class MiraPluginManager
     internal void Initialize()
     {
         Instance = this;
+        CustomCosmeticManager.RegisterVanilla();
         IL2CPPChainloader.Instance.PluginLoad += (pluginInfo, assembly, plugin) =>
         {
             if (plugin is not IMiraPlugin miraPlugin)
@@ -40,6 +42,7 @@ public sealed class MiraPluginManager
 
             RegisterModifierAttribute(assembly);
             RegisterAllOptions(assembly, info);
+            RegisterAllCosmetics(assembly, info);
 
             RegisterRoleAttribute(assembly, info);
             RegisterButtonAttribute(assembly, info);
@@ -56,11 +59,11 @@ public sealed class MiraPluginManager
     /// <summary>
     /// Get a mira plugin by its GUID.
     /// </summary>
-    /// <param name="guid">The plugin GUID.</param>
+    /// <param name="uniqueId">The plugin GUID.</param>
     /// <returns>A MiraPluginInfo.</returns>
-    public static MiraPluginInfo GetPluginByGuid(string guid)
+    public static MiraPluginInfo GetPluginByGuid(string uniqueId)
     {
-        return Instance._registeredPlugins.Values.First(plugin => plugin.PluginId == guid);
+        return Instance._registeredPlugins.Values.First(plugin => plugin.PluginId == uniqueId);
     }
 
     private static void RegisterAllOptions(Assembly assembly, MiraPluginInfo pluginInfo)
@@ -93,6 +96,30 @@ public sealed class MiraPluginManager
         }
 
         pluginInfo.OptionGroups.Sort((x, y) => x.GroupPriority.CompareTo(y.GroupPriority));
+    }
+
+    private static void RegisterAllCosmetics(Assembly assembly, MiraPluginInfo pluginInfo)
+    {
+        var filteredTypes = assembly.GetTypes().Where(type => type.IsAssignableTo(typeof(AbstractCosmeticsGroup)));
+
+        foreach (var type in filteredTypes)
+        {
+            if (!CustomCosmeticManager.RegisterGroup(type, pluginInfo))
+            {
+                continue;
+            }
+
+            foreach (var property in type.GetProperties())
+            {
+                var attribute = property.GetCustomAttribute<RegisterCustomCosmeticAttribute>();
+                if (attribute == null)
+                {
+                    continue;
+                }
+
+                CustomCosmeticManager.RegisterAttributeOption(type, attribute, property, pluginInfo);
+            }
+        }
     }
 
     private static void RegisterRoleAttribute(Assembly assembly, MiraPluginInfo pluginInfo)

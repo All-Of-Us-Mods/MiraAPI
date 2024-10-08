@@ -4,7 +4,7 @@ using UnityEngine;
 namespace MiraAPI.Patches.Roles;
 
 /// <summary>
-/// Set nametag color depending on option
+/// Set nametag color depending on option.
 /// </summary>
 [HarmonyPatch(typeof(PlayerNameColor))]
 public static class NameTagPatch

@@ -1,14 +1,14 @@
-﻿using System;
+﻿using Il2CppInterop.Runtime.Attributes;
+using MiraAPI.Modifiers.Types;
+using MiraAPI.Utilities;
+using Reactor.Utilities;
+using Reactor.Utilities.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using Il2CppInterop.Runtime.Attributes;
-using MiraAPI.Modifiers.Types;
-using MiraAPI.Utilities;
-using Reactor.Utilities;
-using Reactor.Utilities.Attributes;
 using TMPro;
 using UnityEngine;
 
@@ -106,6 +106,10 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
         var filteredModifiers = Modifiers.Where(mod => !mod.HideOnUi);
 
         var baseModifiers = filteredModifiers as BaseModifier[] ?? filteredModifiers.ToArray();
+
+        var inMeeting = MeetingHud.Instance != null;
+
+        _modifierText!.gameObject.SetActive(!inMeeting);
 
         if (baseModifiers.Length != 0)
         {
@@ -254,5 +258,25 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     public T? AddModifier<T>() where T : BaseModifier
     {
         return AddModifier(typeof(T)) as T;
+    }
+
+    /// <summary>
+    /// Checks if a player has an active or queued modifier by its ID.
+    /// </summary>
+    /// <param name="id">The Modifier ID.</param>
+    /// <returns>True if the Modifier is present, false otherwise.</returns>
+    public bool HasModifier(uint id)
+    {
+        return ActiveModifiers.Exists(x => x.ModifierId == id) || _toAdd.Exists(x => x.ModifierId == id);
+    }
+
+    /// <summary>
+    /// Checks if a player has an active or queued modifier by its type.
+    /// </summary>
+    /// <typeparam name="T">The Type of the Modifier.</typeparam>
+    /// <returns>True if the Modifier is present, false otherwise.</returns>
+    public bool HasModifier<T>()
+    {
+        return ActiveModifiers.Exists(x => x is T) || _toAdd.Exists(x => x is T);
     }
 }

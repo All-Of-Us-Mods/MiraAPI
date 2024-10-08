@@ -1,7 +1,7 @@
-﻿using AmongUs.GameOptions;
+﻿using System;
+using AmongUs.GameOptions;
 using MiraAPI.Networking;
 using MiraAPI.Utilities;
-using System;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -134,10 +134,13 @@ public class ModdedNumberOption : ModdedOption<float>
     protected override void OnValueChanged(float newValue)
     {
         Value = Mathf.Clamp(newValue, Min, Max);
-        HudManager.Instance.Notifier.AddSettingsChangeMessage(
-            StringName,
-            Data?.GetValueString(Value),
-            false);
+        if (HudManager.InstanceExists)
+        {
+            HudManager.Instance.Notifier.AddSettingsChangeMessage(
+                StringName,
+                Data.GetValueString(Value),
+                false);
+        }
 
         if (OptionBehaviour is NumberOption opt)
         {
