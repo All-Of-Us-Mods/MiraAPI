@@ -54,6 +54,7 @@ public class ModdedEnumOption : ModdedOption<int>
         stringOption.Title = StringName;
         stringOption.Values = (Data as StringGameSetting)?.Values ?? new Il2CppStructArray<StringNames>(0);
         stringOption.Value = Value;
+        stringOption.AdjustButtonsActiveState();
 
         OptionBehaviour = stringOption;
 

@@ -106,6 +106,7 @@ public class ModdedNumberOption : ModdedOption<float>
         numberOption.ZeroIsInfinity = ZeroInfinity;
         numberOption.SuffixType = (NumberSuffixes)SuffixType;
         numberOption.floatOptionName = FloatOptionNames.Invalid;
+        numberOption.AdjustButtonsActiveState();
 
         OptionBehaviour = numberOption;
 
