@@ -35,5 +35,6 @@ public static class GameStartupPatch
 
         MiraPluginManager.Instance.QueuedRoleRegistrations.Clear();
         CustomRoleManager.RegisterInRoleManager();
+        CustomRoleUtils.BuildRoleButtonMap();
     }
 }

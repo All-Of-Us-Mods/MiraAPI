@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using AmongUs.GameOptions;
+using MiraAPI.Hud;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities;
 using UnityEngine;
@@ -14,6 +16,16 @@ namespace MiraAPI.Roles;
 /// </summary>
 public static class CustomRoleUtils
 {
+    /// <summary>
+    /// Stores the mapping of each role type to its associated list of button types.
+    /// </summary>
+    private static readonly Dictionary<Type, List<Type>> _roleToButtonsMap = new();
+
+    /// <summary>
+    /// Gets a read-only view of the role-to-buttons mapping.
+    /// </summary>
+    public static IReadOnlyDictionary<Type, List<Type>> RoleToButtonsMap => _roleToButtonsMap;
+
     /// <summary>
     /// Gets all active in-game roles.
     /// </summary>
@@ -47,6 +59,53 @@ public static class CustomRoleUtils
         taskStringBuilder.Append("<size=70%>");
         taskStringBuilder.AppendLine(CultureInfo.InvariantCulture, $"{role.RoleLongDescription}");
         return taskStringBuilder;
+    }
+
+    /// <summary>
+    /// Builds the RoleToButtonsMap by evaluating every role against all registered buttons
+    /// using the <see cref="CustomActionButton.Enabled(RoleBehaviour)"/> method.
+    /// </summary>
+    public static void BuildRoleButtonMap()
+    {
+        _roleToButtonsMap.Clear();
+
+        foreach (var role in CustomRoleManager.CustomRoles.Values)
+        {
+            var roleType = role.GetType();
+            var buttonsForRole = new List<Type>();
+
+            foreach (var btn in CustomButtonManager.Buttons)
+            {
+                if (btn.Enabled(role))
+                {
+                    var bt = btn.GetType();
+                    if (!buttonsForRole.Contains(bt))
+                        buttonsForRole.Add(bt);
+                }
+            }
+            if (buttonsForRole.Count > 0)
+            {
+                _roleToButtonsMap[roleType] = buttonsForRole;
+
+                Logger<MiraApiPlugin>.Instance.LogInfo(
+                   $"Mapped {roleType.Name} -> [{string.Join(", ", buttonsForRole.Select(x => x.Name))}]"
+               );
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets the list of button types associated with the specified role instance.
+    /// </summary>
+    /// <param name="role">The custom role instance for which to retrieve associated button types.</param>
+    /// <returns>
+    /// A read-only list of button <see cref="Type"/> objects associated with the given role.
+    /// </returns>
+    public static IReadOnlyList<Type> GetButtonsForRole(ICustomRole role)
+    {
+        var roleType = role.GetType();
+        _roleToButtonsMap.TryGetValue(roleType, out var list);
+        return list;
     }
 
     /// <summary>

@@ -133,7 +133,6 @@ public static class HudManagerPatches
     public static void StartPostfix()
     {
         if (AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.Started) return;
-        if (PlayerControl.LocalPlayer.Data.IsDead) return;
 
         foreach (var entry in KeybindManager.GetEntries())
         {
