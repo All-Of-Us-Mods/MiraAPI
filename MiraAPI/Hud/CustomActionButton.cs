@@ -210,7 +210,7 @@ public abstract class CustomActionButton
             }
         }));
 
-        if (DefaultKeybind != KeyboardKeyCode.None)
+        if (DefaultKeybind != null && DefaultKeybind != KeyboardKeyCode.None)
         {
             KeybindEntry = KeybindManager.GetEntries().First(x => x.Id == $"{Name}_Keybind");
             KeybindIcon =
