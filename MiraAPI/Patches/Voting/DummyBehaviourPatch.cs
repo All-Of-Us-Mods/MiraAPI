@@ -40,7 +40,6 @@ internal static class DummyBehaviourPatches
 
     private static IEnumerator CoDoVote(DummyBehaviour dummy)
     {
-        Logger<MiraApiPlugin>.Warning(dummy.voted);
         dummy.voted = true;
         yield return new WaitForSeconds(dummy.voteTime.Next());
 

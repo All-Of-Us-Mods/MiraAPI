@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
@@ -528,7 +528,7 @@ public static class RoleSettingMenuPatches
         roleOptionSetting.CountPlusBtn.SetInteractable(true);
         __instance.roleChances.Add(roleOptionSetting);
 
-        roleOptionSetting.titleText.transform.localPosition = new Vector3(-0.5376f, -0.2923f, 0f);
+        roleOptionSetting.titleText.transform.localPosition = new Vector3(-0.25f, -0.2923f, 0f);
         roleOptionSetting.titleText.color = customRole.OptionsMenuColor.FindAlternateColor();
         roleOptionSetting.titleText.horizontalAlignment = HorizontalAlignmentOptions.Left;
 
@@ -551,6 +551,18 @@ public static class RoleSettingMenuPatches
             passiveButton.interactableHoveredColor = Color.white;
 
             passiveButton.OnClick.AddListener((UnityAction)(() => { ChangeTab(role, __instance); }));
+
+            if (customRole.Configuration.Icon != null)
+            {
+                var roleIcon = new GameObject("RoleIcon");
+                roleIcon.transform.parent = roleOptionSetting.transform;
+                roleIcon.transform.localScale = new(.25f, .25f, 1);
+                roleIcon.layer = LayerMask.NameToLayer("UI");
+                roleIcon.transform.localPosition = new Vector3(-1.3f, -0.3f, -2f);
+                var rend = roleIcon.AddComponent<SpriteRenderer>();
+                rend.sprite = customRole.Configuration.Icon.LoadAsset();
+                rend.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            }
         }
 
         if (customRole.Configuration is { MaxRoleCount: 0 })

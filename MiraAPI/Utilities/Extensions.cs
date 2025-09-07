@@ -554,24 +554,24 @@ public static class Extensions
     /// Registers a new mod keybind as a user-assignable button action in Rewired.
     /// </summary>
     /// <param name="userData">The Rewired user data to add the action to.</param>
-    /// <param name="actionName">The internal name of the action.</param>
-    /// <param name="description">Text shown in the rebinding UI.</param>
+    /// <param name="id">The internal name of the action.</param>
+    /// <param name="name">Text shown in the rebinding UI.</param>
+    /// /// <param name="group">Group shown above the label.</param>
     /// <param name="key">The default key to assign to this action.</param>
     /// <param name="category">Category ID to group actions in Rewired (default is 0).</param>
     /// <param name="elementIdentifierId">The element identifier ID (default is -1, meaning none specified).</param>
     /// <param name="type">The <see cref="InputActionType"/> for this action (default is Button).</param>
-    /// <param name="modifier1">The first optional modifier key (e.g., <c>Control</c>, <c>Shift</c>, <c>Alt</c>) that must be held together with the main key.</param>
-    /// <param name="modifier2">The second optional modifier key. Set to <see cref="ModifierKey.None"/> if not used.</param>
-    /// <param name="modifier3">The third optional modifier key. Set to <see cref="ModifierKey.None"/> if not used.</param>
+    /// <param name="modifiers">Optional modifier keys (e.g., <c>Control</c>, <c>Shift</c>, <c>Alt</c>) that must be held together with the main key.</param>
     /// <returns>The action ID of the newly registered action.</returns>
-    public static int RegisterModBind(this UserData userData, string actionName, string description, KeyboardKeyCode key, int category = 0, int elementIdentifierId = -1, InputActionType type = InputActionType.Button, ModifierKey modifier1 = ModifierKey.None, ModifierKey modifier2 = ModifierKey.None, ModifierKey modifier3 = ModifierKey.None)
+    public static InputAction RegisterModBind(this UserData userData, string id, string name, string? group, KeyboardKeyCode key, int category = 0, int elementIdentifierId = -1, InputActionType type = InputActionType.Button, ModifierKey[]? modifiers = null)
     {
         userData.AddAction(category);
-
         var action = userData.GetAction(userData.actions.Count - 1)!;
 
-        action.name = actionName;
-        action.descriptiveName = description;
+        action.name = id;
+        action.descriptiveName = group != null
+            ? $"<b><size=70%>{Palette.CrewmateRoleHeaderDarkBlue.ToTextColor()}{group.ReplaceLineEndings(" ")}</color></size></b>\n{name}"
+            : name;
         action.categoryId = category;
         action.type = type;
         action.userAssignable = true;
@@ -583,13 +583,17 @@ public static class Extensions
             _elementType = ControllerElementType.Button,
             _axisContribution = Pole.Positive,
             _keyboardKeyCode = key,
-            _modifierKey1 = modifier1,
-            _modifierKey2 = modifier2,
-            _modifierKey3 = modifier3,
         };
+
+        if (modifiers != null)
+        {
+            if (modifiers.Length > 0) map._modifierKey1 = modifiers[0];
+            if (modifiers.Length > 1) map._modifierKey2 = modifiers[1];
+            if (modifiers.Length > 2) map._modifierKey3 = modifiers[2];
+        }
+
         userData.keyboardMaps[0].actionElementMaps.Add(map);
         userData.joystickMaps[0].actionElementMaps.Add(map);
-
-        return action.id;
+        return action;
     }
 }

@@ -1,20 +1,24 @@
 using HarmonyLib;
 using MiraAPI.Keybinds;
-using MiraAPI.Utilities;
 using Rewired;
 
-namespace MiraAPI.Patches.Keybinds
+namespace MiraAPI.Patches.Keybinds;
+
+[HarmonyPatch(typeof(InputManager_Base), nameof(InputManager_Base.Awake))]
+public static class KeybindMenuPatch
 {
-    [HarmonyPatch(typeof(InputManager_Base), nameof(InputManager_Base.Awake))]
-    public static class KeybindMenuPatch
+    private static bool _registered;
+
+    [HarmonyPrefix]
+    private static void AwakePrefix(InputManager_Base __instance)
     {
-        [HarmonyPrefix]
-        private static void StartPrefix(InputManager_Base __instance)
+        if (_registered)
         {
-            foreach (var entry in KeybindManager.GetEntries())
-            {
-                __instance.userData.RegisterModBind(entry.Id, entry.Description, entry.Key, modifier1: entry.Modifier1, modifier2: entry.Modifier2, modifier3: entry.Modifier3);
-            }
+            return;
         }
+
+        KeybindUtils.RewiredInputManager = __instance;
+        KeybindManager.RewiredInit();
+        _registered = true;
     }
 }

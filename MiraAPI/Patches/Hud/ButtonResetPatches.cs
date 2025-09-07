@@ -20,6 +20,11 @@ public static class ButtonResetPatches
             {
                 Logger<MiraApiPlugin>.Error($"Error resetting cooldown and effect for button {customActionButton.GetType().Name}: {ex}");
             }
+
+            if (customActionButton.UsesMode == ButtonUsesMode.PerRound)
+            {
+                customActionButton.SetUses(customActionButton.MaxUses);
+            }
         }
     }
 }

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Il2CppSystem.IO;
-using MiraAPI.Keybinds;
 using MiraAPI.Utilities.Assets;
 using Rewired;
 using TMPro;
@@ -26,26 +23,15 @@ public static class Helpers
     {
         return [.. GameData.Instance.AllPlayers.ToArray().Where(x => !x.IsDead && !x.Disconnected && x.Object).Select(x => x.Object)];
     }
+
     internal static GameObject CreateKeybindIcon(GameObject button, KeyboardKeyCode keyCode, Vector3 localPos)
     {
         var keybindIcon = Object.Instantiate(HudManager.Instance.AbilityButton.usesRemainingSprite.gameObject, button.transform);
         keybindIcon.GetComponent<SpriteRenderer>().sprite = MiraAssets.KeybindButton.LoadAsset();
-        keybindIcon.transform.GetChild(0).GetComponent<TextMeshPro>().text = keyCode.ToString();
+        keybindIcon.transform.GetComponentInChildren<TextMeshPro>().text = keyCode.ToString();
         keybindIcon.name = "KeybindIcon";
         keybindIcon.transform.localPosition = localPos;
         return keybindIcon;
-    }
-
-    /// <summary>
-    /// Gets the keybind for an action with ReInput.
-    /// </summary>
-    /// <param name="actionId">The action ID.</param>
-    /// <returns>The keyboard key code.</returns>
-    public static KeyboardKeyCode GetKeybindByActionId(int actionId)
-    {
-        var player = ReInput.players.GetPlayer(0);
-        return player.controllers.maps.GetFirstElementMapWithAction(ControllerType.Keyboard, actionId, false)
-            .keyboardKeyCode;
     }
 
     /// <summary>
@@ -426,23 +412,5 @@ public static class Helpers
         return new string(Enumerable.Repeat(chars, length)
             .Select(s => s[UnityEngine.Random.RandomRangeInt(0, s.Length)]).ToArray());
     }
-
-    /// <summary>
-    /// Finds and returns an unused KeyCode that is not equal to the excluded key.
-    /// </summary>
-    /// <param name="exclude">The KeyCode to skip during the search.</param>
-    /// <returns>
-    /// The first available KeyCode not currently used by any registered keybind,
-    /// or KeyCode.None if none are available.
-    /// </returns>
-    public static KeyboardKeyCode FindAvailableKey(KeyboardKeyCode exclude)
-    {
-        foreach (KeyboardKeyCode key in Enum.GetValues(typeof(KeyboardKeyCode)))
-        {
-            if (key == exclude) continue;
-            bool used = KeybindManager.GetEntries().Exists(e => e.Key == key);
-            if (!used) return key;
-        }
-        return KeyboardKeyCode.None;
-    }
 }
+

@@ -18,8 +18,6 @@ using MiraAPI.Roles;
 using MiraAPI.Utilities;
 using Reactor.Networking;
 using Reactor.Utilities;
-using Rewired;
-using UnityEngine;
 
 namespace MiraAPI.PluginLoading;
 
@@ -110,6 +108,7 @@ public sealed class MiraPluginManager
                 }
 
                 RegisterColorClasses(type);
+                RegisterKeybinds(type, plugin);
             }
 
             info.PluginConfig.Save();
@@ -135,18 +134,9 @@ public sealed class MiraPluginManager
             RegisteredPlugins = [.. _registeredPlugins.Values];
 
             ModifierManager.Modifiers = new ReadOnlyCollection<BaseModifier>(ModifierManager.InternalModifiers);
-
-            foreach (var button in CustomButtonManager.Buttons)
-            {
-                if (button.DefaultKeybind == null)
-                {
-                    continue;
-                }
-                KeybindManager.Register($"{button.Name}_Keybind", $"Keybind for {button.Name}", (KeyboardKeyCode)button.DefaultKeybind, button.ClickHandler, modifier1: button.Modifier1, modifier2: button.Modifier2, modifier3: button.Modifier3);
-
-                Logger<MiraApiPlugin>.Info($"Registered keybind for button '{button.GetType().Name}' with default key {(KeyboardKeyCode)button.DefaultKeybind}.");
-            }
         };
+
+        RegisterKeybinds(typeof(MiraGlobalKeybinds), PluginSingleton<MiraApiPlugin>.Instance);
     }
 
     /// <summary>
@@ -316,5 +306,55 @@ public sealed class MiraPluginManager
         }
 
         return false;
+    }
+
+    private static void RegisterKeybinds(Type type, BasePlugin source)
+    {
+        try
+        {
+            if (type.GetCustomAttribute<RegisterCustomKeybindsAttribute>() == null)
+            {
+                return;
+            }
+
+            if (!type.IsStatic())
+            {
+                Logger<MiraApiPlugin>.Error($"Keybinds class {type.Name} must be static.");
+                return;
+            }
+
+            foreach (var property in type.GetProperties())
+            {
+                if (property.PropertyType != typeof(MiraKeybind))
+                {
+                    continue;
+                }
+
+                if (property.GetValue(null) is not MiraKeybind keybind)
+                {
+                    Logger<MiraApiPlugin>.Error($"Keybind property {property.Name} in {type.Name} is not a MiraKeybind.");
+                    continue;
+                }
+
+                KeybindManager.Keybinds.Add(keybind);
+                if (source is IMiraPlugin miraPlugin)
+                {
+                    keybind.SourcePluginName = miraPlugin.OptionsTitleText;
+                }
+                else if (source is MiraApiPlugin)
+                {
+                    keybind.SourcePluginName = "MiraAPI";
+                }
+            }
+
+            foreach (var field in type.GetFields().Where(f => f.FieldType.IsAssignableTo(typeof(MiraKeybind))))
+            {
+                Logger<MiraApiPlugin>.Error($"{field.Name} is a field, not a property. Use properties for keybinds.");
+            }
+        }
+        catch (Exception e)
+        {
+            Logger<MiraApiPlugin>.Error($"Failed to register keybind class {type.Name}: {e}");
+        }
     }
 }

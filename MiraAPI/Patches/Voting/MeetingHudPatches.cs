@@ -15,6 +15,24 @@ namespace MiraAPI.Patches.Voting;
 [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony Convention")]
 internal static class MeetingHudPatches
 {
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(PlayerVoteArea), nameof(PlayerVoteArea.VoteForMe))]
+    public static bool VotePatch(PlayerVoteArea __instance)
+    {
+        var beforeVoteEvent = new BeforeVoteEvent(__instance, PlayerControl.LocalPlayer);
+        MiraEventManager.InvokeEvent(beforeVoteEvent);
+
+        if (beforeVoteEvent.IsCancelled)
+        {
+            return false;
+        }
+
+        var afterVoteEvent = new AfterVoteEvent(__instance, PlayerControl.LocalPlayer);
+        MiraEventManager.InvokeEvent(afterVoteEvent);
+
+        return true;
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(nameof(MeetingHud.Start))]
     public static void MeetingHudStartPatch(MeetingHud __instance)
