@@ -72,6 +72,18 @@ public static class HudManagerPatches
         gridArrange.Alignment = GridArrange.StartAlign.Right;
         aspectPosition.Alignment = AspectPosition.EdgeAlignments.LeftBottom;
 
+        var fakeButton = Object.Instantiate(__instance.AbilityButton, BottomLeft.transform);
+        foreach (var renderer in fakeButton.GetComponentsInChildren<Renderer>())
+        {
+            renderer.enabled = false;
+        }
+        fakeButton.buttonLabelText.Destroy();
+        fakeButton.cooldownTimerText.Destroy();
+        fakeButton.usesRemainingText.Destroy();
+        fakeButton.GetComponent<PassiveButton>().Destroy();
+        fakeButton.ToggleVisible(true);
+        fakeButton.Destroy();
+
         foreach (var button in CustomButtonManager.CustomButtons)
         {
             var location = button.Location switch

@@ -1,4 +1,5 @@
-﻿using MiraAPI.Example.GameOver;
+﻿using Il2CppInterop.Runtime.Attributes;
+using MiraAPI.Example.GameOver;
 using MiraAPI.GameEnd;
 using MiraAPI.Roles;
 using UnityEngine;
@@ -22,6 +23,7 @@ public class NeutralKillerRole : ImpostorRole, ICustomRole
 
     public RoleOptionsGroup RoleOptionsGroup { get; } = new("Outcast", Color.gray);
 
+    [HideFromIl2Cpp]
     public TeamIntroConfiguration? IntroConfiguration { get; } = new(
         Color.gray,
         "OUTCAST",
