@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
 using MiraAPI.Modifiers;
+using MiraAPI.Modifiers.Types;
 using MiraAPI.PluginLoading;
 using MiraAPI.Roles;
 using MiraAPI.Utilities;
@@ -336,6 +337,7 @@ internal static class TaskAdderPatches
             taskAddButton.MyTask = null;
             taskAddButton.SafePositionWorld = instance.SafePositionWorld;
             taskAddButton.Text.text = modifier.ModifierName;
+            taskAddButton.Text.fontSizeMin = 1;
             taskAddButton.Text.EnableMasking();
             taskAddButton.FileImage.color = modifier.FreeplayFileColor;
             taskAddButton.RolloverHandler.OutColor = modifier.FreeplayFileColor;
@@ -354,6 +356,12 @@ internal static class TaskAdderPatches
                     taskAddButton.Overlay.enabled = true;
                 }
             }));
+
+            if (modifier is TimedModifier timed)
+            {
+                taskAddButton.FileImage.sprite = MiraAssets.TimedModifierFile.LoadAsset();
+                taskAddButton.Text.text += $"({timed.Duration}s)";
+            }
 
             instance.AddFileAsChildCustom(taskAddButton, ref num, ref num2, ref num3);
 

@@ -99,4 +99,9 @@ public static class MiraAssets
     /// Gets the sprite used for the Keybind icons.
     /// </summary>
     public static LoadableResourceAsset KeybindButton { get; } = new("MiraAPI.Resources.KeybindButton.png");
+
+    /// <summary>
+    /// Gets the sprite used for timed modifier file in TaskAdderGame.
+    /// </summary>
+    public static LoadableResourceAsset TimedModifierFile { get; } = new("MiraAPI.Resources.TimedModifierFile.png");
 }
