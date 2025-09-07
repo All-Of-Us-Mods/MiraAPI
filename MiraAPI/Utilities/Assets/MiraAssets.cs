@@ -12,7 +12,7 @@ public static class MiraAssets
     {
         var boxTex = SpriteTools.LoadTextureFromResourcePath(
             "MiraAPI.Resources.RoundedBox.png",
-            System.Reflection.Assembly.GetCallingAssembly());
+            System.Reflection.Assembly.GetExecutingAssembly());
         var boxSprite = Sprite.Create(
             boxTex,
             new Rect(0, 0, boxTex.width, boxTex.height),

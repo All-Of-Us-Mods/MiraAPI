@@ -67,10 +67,15 @@ public static class IntroCutscenePatches
     }
 
     [HarmonyPostfix]
-    [HarmonyPatch(nameof(IntroCutscene.OnDestroy))]
-    public static void GameBeginPatch(IntroCutscene __instance)
+    [HarmonyPatch(typeof(IntroCutscene._CoBegin_d__34), nameof(IntroCutscene._CoBegin_d__34.MoveNext))]
+    public static void GameBeginPatch(IntroCutscene._CoBegin_d__34 __instance)
     {
-        MiraEventManager.InvokeEvent(new IntroEndEvent(__instance));
+        if (__instance.__1__state != -1)
+        {
+            return;
+        }
+
+        MiraEventManager.InvokeEvent(new IntroEndEvent(__instance.__4__this));
 
         var @event = new BeforeRoundStartEvent(true);
         MiraEventManager.InvokeEvent(@event);

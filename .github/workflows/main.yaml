@@ -1,6 +1,13 @@
 name: CI
 
-on: ["workflow_dispatch", "push", "pull_request"]
+on:
+  workflow_dispatch:
+  push:
+    branches: ["*"]
+  pull_request:
+    branches: ["*"]
+  release:
+    types: [created, edited, published, prereleased]
 
 jobs:
   build:
@@ -34,18 +41,92 @@ jobs:
           name: MiraAPI.dll
           path: MiraAPI/bin/Release/net6.0/MiraAPI.dll
 
+  build-android:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: android
+          submodules: true
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.nuget/packages
+            ~/.cache/bepinex
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Run the Cake script
+        uses: cake-build/cake-action@v2
+        with:
+          verbosity: Diagnostic
+
       - uses: actions/upload-artifact@v4
         with:
-          name: AllOfUs.MiraAPI.nupkg
-          path: MiraAPI/bin/Release/AllOfUs.MiraAPI.*.nupkg
-          
-      - uses: softprops/action-gh-release@v2
-        if: github.ref_type == 'tag'
+          name: MiraAPI-Android.dll
+          path: MiraAPI/bin/Release/net6.0/MiraAPI.dll
+
+  build-dev:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
         with:
-          draft: true
-          files: MiraAPI/bin/Release/net6.0/MiraAPI.dll
-          
-      - name: Push NuGet package
-        if: github.ref_type == 'tag'
+          ref: dev
+          submodules: true
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.nuget/packages
+            ~/.cache/bepinex
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Run the Cake script
+        uses: cake-build/cake-action@v2
+        with:
+          verbosity: Diagnostic
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MiraAPI-Dev.dll
+          path: MiraAPI/bin/Release/net6.0/MiraAPI.dll
+
+  publish-release:
+    needs: [build, build-android, build-dev]
+    if: github.event_name == 'release'
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            MiraAPI/bin/Release/net6.0/MiraAPI.dll
+            MiraAPI/bin/Release/net6.0/MiraAPI.dll
+            MiraAPI/bin/Release/net6.0/MiraAPI.dll
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish draft release
+        if: github.event.action == 'created'
         run: |
-          dotnet nuget push MiraAPI/bin/Release/AllOfUs.MiraAPI.*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+          gh release edit ${{ github.event.release.tag_name }} --draft=false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Handle prerelease (keep as prerelease)
+        if: github.event.action == 'prereleased'
+        run: echo "Release is prerelease, DLLs uploaded but status unchanged"
