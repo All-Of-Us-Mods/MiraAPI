@@ -21,6 +21,6 @@ public class ExampleCustomChat2 : CustomChat
 
     public override bool CanSendMessage()
     {
-        return true;
+        return false;
     }
 }

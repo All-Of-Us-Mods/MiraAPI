@@ -6,7 +6,7 @@ namespace MiraAPI.Example.CustomChats;
 
 public class ExampleCustomChat : CustomChat
 {
-    public override string Name => "uwu";
+    public override string Name => "Example Chat";
 
     public override Color ChatBackgroundColor => Color.yellow;
 
