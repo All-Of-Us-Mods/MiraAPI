@@ -1,11 +1,13 @@
 ﻿using System.Globalization;
 using System.Linq;
 using HarmonyLib;
+using MiraAPI.CustomChats;
 using MiraAPI.Events;
 using MiraAPI.Events.Vanilla.Gameplay;
 using MiraAPI.Events.Vanilla.Player;
 using MiraAPI.Hud;
 using MiraAPI.Modifiers;
+using MiraAPI.Networking;
 using MiraAPI.Utilities;
 using MiraAPI.Voting;
 using Reactor.Utilities;
@@ -164,5 +166,13 @@ internal static class PlayerControlPatches
                 Error($"Failed to update custom button {button.GetType().Name}: {e}");
             }
         }
+    }
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(PlayerControl.RpcSendChat))]
+    // ReSharper disable once InconsistentNaming
+    public static bool RpcSendChatPrefix(PlayerControl __instance, ref string chatText)
+    {
+        __instance.RpcCustomSendChat(chatText, CustomChatManager.Chats.IndexOf(ChatControllerCustomChatsPatches.CurrentChat));
+        return false;
     }
 }

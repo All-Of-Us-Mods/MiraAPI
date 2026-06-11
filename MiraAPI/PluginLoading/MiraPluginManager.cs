@@ -8,6 +8,7 @@ using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
 using MiraAPI.Colors;
+using MiraAPI.CustomChats;
 using MiraAPI.Events;
 using MiraAPI.GameEnd;
 using MiraAPI.GameOptions;
@@ -112,6 +113,11 @@ public sealed class MiraPluginManager
                 }
 
                 if (RegisterGameOver(type))
+                {
+                    continue;
+                }
+
+                if (RegisterCustomChat(type, info))
                 {
                     continue;
                 }
@@ -436,6 +442,18 @@ public sealed class MiraPluginManager
         catch (Exception e)
         {
             Error($"Failed to register keybind class {type.Name}: {e}");
+        }
+    }
+    private static bool RegisterCustomChat(Type type, MiraPluginInfo info)
+    {
+        try
+        {
+            return CustomChatManager.RegisterCustomChat(type, info);
+        }
+        catch (Exception e)
+        {
+            Error($"Failed to register custom chat {type.Name}: {e}");
+            return false;
         }
     }
 }

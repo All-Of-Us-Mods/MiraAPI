@@ -71,7 +71,7 @@ public static class MiraAssets
     public static LoadableResourceAsset NextButton { get; } = new("MiraAPI.Resources.NextButton.png");
 
     /// <summary>
-    /// Gets the Mira settings icon..
+    /// Gets the Mira settings icon.
     /// </summary>
     public static LoadableResourceAsset SettingsIcon { get; } = new("MiraAPI.Resources.Settings.png");
 
@@ -79,6 +79,21 @@ public static class MiraAssets
     /// Gets the highlighted Next Button sprite.
     /// </summary>
     public static LoadableResourceAsset NextButtonActive { get; } = new("MiraAPI.Resources.NextButtonActive.png");
+    
+    /// <summary>
+    /// Gets the Next Button sprite used for switching custom chats.
+    /// </summary>
+    public static LoadableResourceAsset NextButtonChat { get; } = new("MiraAPI.Resources.NextButtonChat.png");
+    
+    /// <summary>
+    /// Gets the Previous Button sprite used for switching custom chats.
+    /// </summary>
+    public static LoadableResourceAsset PreviousButtonChat { get; } = new("MiraAPI.Resources.PreviousButtonChat.png");
+    
+    /// <summary>
+    /// Gets the sprite used for the default chat.
+    /// </summary>
+    public static LoadableResourceAsset DefaultChatIcon { get; } = new("MiraAPI.Resources.DefaultChatIcon.png");
 
     /// <summary>
     /// Gets the Cog icon used in Role Settings Menu.
@@ -134,4 +149,24 @@ public static class MiraAssets
     /// Gets the sprite used for timed modifier file in TaskAdderGame.
     /// </summary>
     public static LoadableResourceAsset TimedModifierFile { get; } = new("MiraAPI.Resources.TimedModifierFile.png");
+
+    /// <summary>
+    /// Gets the sprite used for the chat button in its idle state.
+    /// </summary>
+    public static LoadableResourceAsset NormalChatIdle { get; } = new("MiraAPI.Resources.NormalChatIdle.png");
+
+    /// <summary>
+    /// Gets the sprite used for the chat button in its hover state.
+    /// </summary>
+    public static LoadableResourceAsset NormalChatHover { get; } = new("MiraAPI.Resources.NormalChatHover.png");
+
+    /// <summary>
+    /// Gets the sprite used for the chat button in its open state.
+    /// </summary>
+    public static LoadableResourceAsset NormalChatOpen { get; } = new("MiraAPI.Resources.NormalChatOpen.png");
+
+    /// <summary>
+    /// Gets the sprite used for the chat button notifications.
+    /// </summary>
+    public static LoadableResourceAsset ChatNormalBubble { get; } = new("MiraAPI.Resources.ChatNormalBubble.png");
 }

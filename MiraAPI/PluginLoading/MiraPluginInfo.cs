@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using BepInEx;
 using BepInEx.Configuration;
+using MiraAPI.CustomChats;
 using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
 using MiraAPI.Hud;
@@ -41,6 +42,11 @@ public class MiraPluginInfo
     public IReadOnlyCollection<IModdedOption> Options { get; private set; } = null!;
 
     /// <summary>
+    /// Gets a read only collection of this plugin's custom chats.
+    /// </summary>
+    public IReadOnlyCollection<CustomChat> Chats { get; private set; } = null!;
+
+    /// <summary>
     /// Gets a read only dictionary of Role IDs and the RoleBehaviour object they are associated with.
     /// </summary>
     public ReadOnlyDictionary<ushort, RoleBehaviour> Roles { get; private set; } = null!;
@@ -63,6 +69,7 @@ public class MiraPluginInfo
         Options = [..InternalOptions];
         Roles = new ReadOnlyDictionary<ushort, RoleBehaviour>(InternalRoles);
         Buttons = [..InternalButtons];
+        Chats = [..InternalChats];
     }
 
     internal List<OptionPreset> InternalPresets { get; } = [];
@@ -78,6 +85,8 @@ public class MiraPluginInfo
     internal Dictionary<int, CustomGameMode> InternalGameModes { get; } = [];
 
     internal List<CustomActionButton> InternalButtons { get; } = [];
+
+    internal List<CustomChat> InternalChats { get; } = [];
 
     /// <summary>
     /// Gets the plugin's ID, as defined in the plugin's BepInEx metadata.

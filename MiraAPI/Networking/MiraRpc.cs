@@ -54,4 +54,9 @@ public enum MiraRpc : uint
     /// Custom RPC to replace Among Us CastVote.
     /// </summary>
     CastVote,
+
+    /// <summary>
+    /// Custom RPC to replace Among Us SendChat.
+    /// </summary>
+    SendChat,
 }
