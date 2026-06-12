@@ -159,7 +159,7 @@ public static class ChatControllerCustomChatsPatches
         ChatIcon.gameObject.transform.SetParent(NextButton.transform.parent);
         ChatIcon.gameObject.layer = LayerMask.NameToLayer("UI");
         ChatIcon.transform.localPosition = NextButton.transform.localPosition - new Vector3(0, 0.5f, 10);
-        ChatIcon.transform.localScale = Vector3.one / 2f;
+        ChatIcon.transform.localScale = new Vector3(0.4f, 0.4f, 1f);
     }
 
     private static void SetUpObjectPools(ChatController __instance)
