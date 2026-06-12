@@ -28,7 +28,7 @@ public static class CustomSendChatRpc
         string chatText,
         int id)
     {
-        CustomChat chat = CustomChatManager.Chats[id];
+        AbstractCustomChat chat = CustomChatManager.Chats[id];
         if (!chat.CanSee()) return;
 
         HudManager.Instance.Chat.CustomAddChat(source, chatText, chat);

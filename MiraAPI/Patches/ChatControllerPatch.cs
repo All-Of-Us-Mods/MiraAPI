@@ -5,8 +5,6 @@ using AmongUs.Data;
 using HarmonyLib;
 using InnerNet;
 using MiraAPI.CustomChats;
-using MiraAPI.LocalSettings;
-using MiraAPI.PluginLoading;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities.Extensions;
@@ -14,7 +12,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using Action = Il2CppSystem.Action;
 using Object = UnityEngine.Object;
 
 namespace MiraAPI.Patches;
@@ -52,54 +49,39 @@ public static class ChatControllerPastePatch
 [HarmonyPatch(typeof(ChatController))]
 public static class ChatControllerCustomChatsPatches
 {
-    private static PassiveButton _previousButton = null!;
-    private static PassiveButton _nextButton = null!;
-    private static SpriteRenderer _chatIcon = null!;
-    private static TextMeshPro _text = null!;
-    public static CustomChat CurrentChat = null!;
-    private static Dictionary<CustomChat, ObjectPoolBehavior> pages = new();
+    public static PassiveButton PreviousButton { get; private set; } = null!;
+    public static PassiveButton NextButton { get; private set; } = null!;
+    public static SpriteRenderer ChatIcon { get; private set; } = null!;
+    public static TextMeshPro Text { get; private set; } = null!;
+    public static AbstractCustomChat CurrentChat { get; set; } = null!;
+    public static Dictionary<AbstractCustomChat, ObjectPoolBehavior> Pages { get; private set; } = new();
 
     [HarmonyPatch(nameof(ChatController.Awake))]
     [HarmonyPostfix]
     public static void ChatController_Awake_Postfix(ChatController __instance)
     {
-        pages = new();
+        Pages = new();
         CreatePaginationControls(__instance);
         SetUpObjectPools(__instance);
-        SetPage(__instance, CustomChatManager.Chats[0]);
-    }
-    [HarmonyPatch(nameof(ChatController.AddChatNote))]
-    [HarmonyPrefix]
-    public static bool ChatController_AddChatNote_Prefix(ChatController __instance, ref NetworkedPlayerInfo srcPlayer, ref ChatNoteTypes noteType)
-    {
-        __instance.CustomAddChatNote(srcPlayer, CustomChatManager.Chats[0], noteType);
-        return false;
+        __instance.SetChat(CustomChatManager.Chats[0]);
     }
 
     [HarmonyPatch(nameof(ChatController.Update))]
     [HarmonyPrefix]
     public static void ChatController_Update_Prefix(ChatController __instance)
     {
-        if (!CurrentChat.CanSee()) SetPage(__instance, CustomChatManager.Chats[0]);
+        if (!CurrentChat.CanSee()) __instance.SetChat(CustomChatManager.Chats[0]); // Fallback to default chat
 
         bool canSend = CurrentChat.CanSendMessage();
         __instance.freeChatField.gameObject.SetActive(DataManager.Settings.Multiplayer.ChatMode == QuickChatModes.FreeChatOrQuickChat && canSend);
         __instance.quickChatField.gameObject.SetActive(DataManager.Settings.Multiplayer.ChatMode == QuickChatModes.QuickChatOnly && canSend);
     }
 
-    public static ChatBubble GetPooledBubble(ChatController __instance, CustomChat chat)
-    {
-        if (!pages.TryGetValue(chat, out var pool)) return null;
-        if (pool.NotInUse == 0)
-            pool.ReclaimOldest();
-        return pool.Get<ChatBubble>();
-    }
-
     [HarmonyPatch(nameof(ChatController.AlignAllBubbles))]
     [HarmonyPrefix]
-    public static bool ChatController_AlignAllBubbles_Postfix(ChatController __instance)
+    public static bool ChatController_AlignAllBubbles_Prefix(ChatController __instance)
     {
-        foreach (var pool in pages.Values)
+        foreach (var pool in Pages.Values)
         {
             float num1 = 0.0f;
             var activeChildren = pool.activeChildren;
@@ -122,26 +104,27 @@ public static class ChatControllerCustomChatsPatches
         return false;
     }
 
-    private static void CreatePaginationControls(ChatController __instance)
+    private static void CreatePaginationControls(ChatController instance)
     {
-        _text = Object.Instantiate(HudManager.Instance.UseButton.buttonLabelText, __instance.chatScreen.transform);
-        _text.color = Color.white;
-        _text.alignment = TextAlignmentOptions.MidlineLeft;
-        _text.fontSizeMax = 4f;
-        _text.fontSizeMin = 2f;
-        _text.overflowMode = TextOverflowModes.Overflow;
-        _text.transform.localPosition = new Vector3(-6.1f, -0.3f, -490f);
-        _text.text = "Default Chat";
+        Text = Object.Instantiate(HudManager.Instance.UseButton.buttonLabelText, instance.chatScreen.transform);
+        Text.color = Color.white;
+        Text.alignment = TextAlignmentOptions.MidlineLeft;
+        Text.fontSizeMax = 4f;
+        Text.fontSizeMin = 2f;
+        Text.overflowMode = TextOverflowModes.Overflow;
+        Text.transform.localPosition = new Vector3(-6.1f, -0.3f, -490f);
+        Text.GetComponent<TextTranslatorTMP>().DestroyImmediate();
+        Text.text = "Default Chat";
 
-        _nextButton = Object.Instantiate(__instance.quickChatButton, __instance.quickChatButton.transform.parent, true);
-        _nextButton.transform.localPosition += new Vector3(0, 3, 0);
-        _nextButton.name = "UpButton";
-        _nextButton.transform.GetChild(0).gameObject.GetComponent<SpriteRenderer>().sprite =
+        NextButton = Object.Instantiate(instance.quickChatButton, instance.quickChatButton.transform.parent, true);
+        NextButton.transform.localPosition += new Vector3(0, 3, 0);
+        NextButton.name = "UpButton";
+        NextButton.transform.GetChild(0).gameObject.GetComponent<SpriteRenderer>().sprite =
             MiraAssets.NextButtonChat.LoadAsset();
-        _nextButton.GetComponent<BoxCollider2D>().size /= new Vector2(1, 2);
-        _nextButton.OnClick = new Button.ButtonClickedEvent();
+        NextButton.GetComponent<BoxCollider2D>().size /= new Vector2(1, 2);
+        NextButton.OnClick = new Button.ButtonClickedEvent();
         var customChats = CustomChatManager.Chats.Where(x => x.CanSee()).ToList();
-        _nextButton.OnClick.AddListener(
+        NextButton.OnClick.AddListener(
             (UnityAction)(() =>
             {
                 int id = customChats.IndexOf(CurrentChat);
@@ -151,15 +134,15 @@ public static class ChatControllerCustomChatsPatches
                     id = 0;
                 }
                 var chat = customChats[id];
-                SetPage(__instance, chat);
+                instance.SetChat(chat);
             }));
 
-        _previousButton = Object.Instantiate(_nextButton, __instance.chatScreen.transform, true);
-        _previousButton.transform.localPosition -= new Vector3(0, 1, 0);
-        _previousButton.name = "LeftArrowButton";
-        _previousButton.transform.GetChild(0).GetComponent<SpriteRenderer>().sprite = MiraAssets.PreviousButtonChat.LoadAsset();
-        _previousButton.OnClick = new Button.ButtonClickedEvent();
-        _previousButton.OnClick.AddListener(
+        PreviousButton = Object.Instantiate(NextButton, instance.chatScreen.transform, true);
+        PreviousButton.transform.localPosition -= new Vector3(0, 1, 0);
+        PreviousButton.name = "LeftArrowButton";
+        PreviousButton.transform.GetChild(0).GetComponent<SpriteRenderer>().sprite = MiraAssets.PreviousButtonChat.LoadAsset();
+        PreviousButton.OnClick = new Button.ButtonClickedEvent();
+        PreviousButton.OnClick.AddListener(
             (UnityAction)(() =>
             {
                 int id = customChats.IndexOf(CurrentChat);
@@ -169,14 +152,14 @@ public static class ChatControllerCustomChatsPatches
                     id = customChats.Count - 1;
                 }
                 var chat = customChats[id];
-                SetPage(__instance, chat);
+                instance.SetChat(chat);
             }));
 
-        _chatIcon = new GameObject("CurrentChatIcon").AddComponent<SpriteRenderer>();
-        _chatIcon.gameObject.transform.SetParent(_nextButton.transform.parent);
-        _chatIcon.gameObject.layer = LayerMask.NameToLayer("UI");
-        _chatIcon.transform.localPosition = _nextButton.transform.localPosition - new Vector3(0, 0.5f, 0);
-        _chatIcon.transform.localScale = Vector3.one / 2f;
+        ChatIcon = new GameObject("CurrentChatIcon").AddComponent<SpriteRenderer>();
+        ChatIcon.gameObject.transform.SetParent(NextButton.transform.parent);
+        ChatIcon.gameObject.layer = LayerMask.NameToLayer("UI");
+        ChatIcon.transform.localPosition = NextButton.transform.localPosition - new Vector3(0, 0.5f, 10);
+        ChatIcon.transform.localScale = Vector3.one / 2f;
     }
 
     private static void SetUpObjectPools(ChatController __instance)
@@ -185,123 +168,24 @@ public static class ChatControllerCustomChatsPatches
         {
             var pool = Object.Instantiate(__instance.chatBubblePool, __instance.chatBubblePool.transform.parent, true);
             pool.GetComponent<Scroller>().active = true;
-            pages.Add(chat, pool);
+            Pages.Add(chat, pool);
         }
         __instance.chatBubblePool.gameObject.SetActive(false);
     }
 
-    private static void SetPage(ChatController __instance, CustomChat chat)
+    [HarmonyPatch(nameof(ChatController.AddChat))]
+    [HarmonyPrefix]
+    public static bool ChatController_AddChat_Prefix(ChatController __instance, ref PlayerControl sourcePlayer, ref string chatText, ref bool censor)
     {
-        if (CurrentChat != null!) CurrentChat.OnChatClose(__instance);
-        CurrentChat = chat;
-        _text.text = CurrentChat.Name;
-        _chatIcon.sprite = CurrentChat.ChatIcon.LoadAsset();
-
-        __instance.StartCoroutine(Effects.ColorFade(__instance.backgroundImage, __instance.backgroundImage.color, CurrentChat.ChatBackgroundColor, 0.4f));
-        __instance.freeChatField.gameObject.SetActive(chat.CanSendMessage());
-        __instance.quickChatField.gameObject.SetActive(chat.CanSendMessage());
-
-        __instance.chatButton.activeSprites.GetComponent<SpriteRenderer>().sprite =
-            CurrentChat.ChatButtonAppearance.ActiveSprite.LoadAsset();
-        __instance.chatButton.inactiveSprites.GetComponent<SpriteRenderer>().sprite =
-            CurrentChat.ChatButtonAppearance.InactiveSprite.LoadAsset();
-        __instance.chatButton.selectedSprites.GetComponent<SpriteRenderer>().sprite =
-            CurrentChat.ChatButtonAppearance.OpenedSprite.LoadAsset();
-        foreach (var page in pages.Values)
-        {
-            page.gameObject.SetActive(false);
-        }
-
-        if (!pages.TryGetValue(CurrentChat, out var pool)) return;
-        pool.gameObject.SetActive(true);
-        chat.OnChatOpen(__instance);
+        __instance.CustomAddChat(sourcePlayer, chatText, CustomChatManager.Chats[0], censor);
+        return false;
     }
 
-    public static void CustomAddChat(this ChatController __instance, PlayerControl sourcePlayer, string chatText, CustomChat chat, bool censor = true)
+    [HarmonyPatch(nameof(ChatController.AddChatNote))]
+    [HarmonyPrefix]
+    public static bool ChatController_AddChatNote_Prefix(ChatController __instance, ref NetworkedPlayerInfo srcPlayer, ref ChatNoteTypes noteType)
     {
-        if (!sourcePlayer || !PlayerControl.LocalPlayer)
-            return;
-        if (!pages.TryGetValue(chat, out var page)) return;
-        NetworkedPlayerInfo data1 = PlayerControl.LocalPlayer.Data;
-        NetworkedPlayerInfo data2 = sourcePlayer.Data;
-        if (data2 == null || data1 == null || (data2.IsDead && !data1.IsDead))
-            return;
-        ChatBubble pooledBubble = GetPooledBubble(__instance, chat);
-        try
-        {
-            pooledBubble.transform.SetParent(page.transform.GetChild(0));
-            pooledBubble.transform.localScale = Vector3.one;
-            int num = sourcePlayer == PlayerControl.LocalPlayer ? 1 : 0;
-            if (num != 0)
-                pooledBubble.SetRight();
-            else
-                pooledBubble.SetLeft();
-            bool didVote = MeetingHud.Instance && MeetingHud.Instance.DidVote(sourcePlayer.PlayerId);
-            pooledBubble.SetCosmetics(data2);
-            __instance.SetChatBubbleName(pooledBubble, data2, data2.IsDead, didVote, PlayerNameColor.Get(data2));
-            if (censor && DataManager.Settings.Multiplayer.CensorChat)
-                chatText = BlockedWords.CensorWords(chatText);
-            pooledBubble.SetText(chatText);
-            pooledBubble.AlignChildren();
-            __instance.AlignAllBubbles();
-            if (!__instance.IsOpenOrOpening && __instance.notificationRoutine == null && chat.CanSee())
-            {
-                __instance.chatNotifyDot.sprite = chat.ChatButtonAppearance.NotificationSprite.LoadAsset();
-                __instance.notificationRoutine = __instance.StartCoroutine(__instance.BounceDot());
-            }
-            if (num != 0 || __instance.IsOpenOrOpening)
-                return;
-            if (chat.CanSee())
-            {
-                var audio = chat.MessageSound != null! ? chat.MessageSound.LoadAsset() : __instance.messageSound;
-                SoundManager.Instance.PlaySound(audio, false).pitch =
-                    (float)(0.5 + sourcePlayer.PlayerId / 15.0);
-            }
-            __instance.chatNotification.SetUp(sourcePlayer, chatText);
-
-            page.activeChildren.Add(pooledBubble);
-            chat.OnMessageSent(sourcePlayer, pooledBubble);
-        }
-        catch (Exception ex)
-        {
-            ChatController.Logger.Error(ex.ToString());
-            page.Reclaim(pooledBubble);
-        }
-    }
-
-    public static void CustomAddChatNote(this ChatController __instance, NetworkedPlayerInfo srcPlayer, CustomChat chat, ChatNoteTypes noteType)
-    {
-        if (!pages.TryGetValue(chat, out var page)) return;
-        if (srcPlayer == null)
-            return;
-        ChatBubble pooledBubble = GetPooledBubble(__instance, chat);
-        pooledBubble.SetCosmetics(srcPlayer);
-        pooledBubble.transform.SetParent(page.transform.GetChild(0));
-        pooledBubble.transform.localScale = Vector3.one;
-        pooledBubble.SetNotification();
-        if (noteType == ChatNoteTypes.DidVote)
-        {
-            int rem = MeetingHud.Instance.GetVotesRemaining();
-            pooledBubble.SetName(TranslationController.Instance.GetString(StringNames.MeetingHasVoted, srcPlayer.PlayerName, rem), false, true, Color.green);
-        }
-        pooledBubble.SetText(string.Empty);
-        pooledBubble.AlignChildren();
-        __instance.AlignAllBubbles();
-        if (!__instance.IsOpenOrOpening && __instance.notificationRoutine == null && chat.CanSee())
-        {
-            __instance.chatNotifyDot.sprite = chat.ChatButtonAppearance.NotificationSprite.LoadAsset();
-            __instance.notificationRoutine = __instance.StartCoroutine(__instance.BounceDot());
-        }
-        if (srcPlayer.Object.AmOwner)
-            return;
-        if (chat.CanSee())
-        {
-            var audio = chat.MessageSound != null! ? chat.MessageSound.LoadAsset() : __instance.messageSound;
-            SoundManager.Instance.PlaySound(audio, false).pitch =
-                (float)(0.5 + srcPlayer.PlayerId / 15.0);
-        }
-        page.activeChildren.Add(pooledBubble);
-
-        chat.OnMessageSent(srcPlayer.Object, pooledBubble);
+        __instance.CustomAddChatNote(srcPlayer, CustomChatManager.Chats[0], noteType);
+        return false;
     }
 }

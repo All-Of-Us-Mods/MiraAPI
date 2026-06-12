@@ -10,18 +10,18 @@ namespace MiraAPI.CustomChats;
 public static class CustomChatManager
 {
     /// <summary>
-    /// Gets a list of all registered <see cref="CustomChat"/>s.
+    /// Gets a list of all registered <see cref="AbstractCustomChat"/>s.
     /// </summary>
-    public static readonly List<CustomChat> Chats = [new DefaultChat()];
+    public static readonly List<AbstractCustomChat> Chats = [new DefaultChat()];
 
     internal static bool RegisterCustomChat(Type type, MiraPluginInfo info)
     {
-        if (!typeof(CustomChat).IsAssignableFrom(type))
+        if (!typeof(AbstractCustomChat).IsAssignableFrom(type))
         {
             return false;
         }
 
-        CustomChat? chat = Activator.CreateInstance(type) as CustomChat;
+        AbstractCustomChat? chat = Activator.CreateInstance(type) as AbstractCustomChat;
         if (chat == null) return false;
         Chats.Add(chat);
         info.InternalChats.Add(chat);

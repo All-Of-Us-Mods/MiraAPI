@@ -44,7 +44,7 @@ public class MiraPluginInfo
     /// <summary>
     /// Gets a read only collection of this plugin's custom chats.
     /// </summary>
-    public IReadOnlyCollection<CustomChat> Chats { get; private set; } = null!;
+    public IReadOnlyCollection<AbstractCustomChat> Chats { get; private set; } = null!;
 
     /// <summary>
     /// Gets a read only dictionary of Role IDs and the RoleBehaviour object they are associated with.
@@ -86,7 +86,7 @@ public class MiraPluginInfo
 
     internal List<CustomActionButton> InternalButtons { get; } = [];
 
-    internal List<CustomChat> InternalChats { get; } = [];
+    internal List<AbstractCustomChat> InternalChats { get; } = [];
 
     /// <summary>
     /// Gets the plugin's ID, as defined in the plugin's BepInEx metadata.

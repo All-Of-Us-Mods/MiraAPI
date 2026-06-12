@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace MiraAPI.Example.CustomChats;
 
-public class ExampleCustomChat2 : CustomChat
+public class ExampleCustomChat2 : AbstractCustomChat
 {
     public override string Name => "The chat for the mute";
 
@@ -12,7 +12,13 @@ public class ExampleCustomChat2 : CustomChat
 
     public override LoadableResourceAsset ChatIcon => ExampleAssets.ExampleButton;
 
-    public override ChatButtonVisualAppearance ChatButtonAppearance => new(ExampleAssets.CallMeetingButton, ExampleAssets.ExampleButton, ExampleAssets.TeleportButton, ExampleAssets.BlueChatBubble);
+    public override ChatButtonSprites Sprites => new()
+    {
+        ActiveSprite = ExampleAssets.CallMeetingButton,
+        InactiveSprite = ExampleAssets.ExampleButton,
+        OpenedSprite = ExampleAssets.TeleportButton,
+        NotificationSprite = ExampleAssets.BlueChatBubble,
+    };
 
     public override bool CanSee()
     {
