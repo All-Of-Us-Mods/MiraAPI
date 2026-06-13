@@ -172,7 +172,7 @@ internal static class PlayerControlPatches
     // ReSharper disable once InconsistentNaming
     public static bool RpcSendChatPrefix(PlayerControl __instance, ref string chatText)
     {
-        __instance.RpcCustomSendChat(chatText, CustomChatManager.Chats.IndexOf(ChatControllerCustomChatsPatches.CurrentChat));
+        __instance.RpcCustomSendChat(chatText, ChatControllerCustomChatsPatches.CurrentChat);
         return false;
     }
 }
