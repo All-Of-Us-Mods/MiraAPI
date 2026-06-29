@@ -19,5 +19,6 @@ public static class CustomSendChatRpc
         if (!chat.CanSee()) return;
 
         HudManager.Instance.Chat.CustomAddChat(source, chatText, chat);
+        HudManager.Instance.Chat.CustomAddChat(source, chatText, CustomChatManager.MixedChat);
     }
 }

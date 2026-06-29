@@ -9,10 +9,11 @@ namespace MiraAPI.CustomChats;
 /// </summary>
 public static class CustomChatManager
 {
+    public static readonly MixedChat MixedChat = new MixedChat();
     /// <summary>
     /// Gets a list of all registered <see cref="AbstractCustomChat"/>s.
     /// </summary>
-    public static readonly List<AbstractCustomChat> Chats = [new DefaultChat()];
+    public static readonly List<AbstractCustomChat> Chats = [new DefaultChat(), MixedChat];
 
     internal static bool RegisterCustomChat(Type type, MiraPluginInfo info)
     {
