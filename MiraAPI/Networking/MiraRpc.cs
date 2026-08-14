@@ -41,6 +41,26 @@ public enum MiraRpc : uint
     ConfirmCustomMurder,
 
     /// <summary>
+    /// Advanced Custom Murder RPC.
+    /// </summary>
+    AdvancedCustomMurder,
+
+    /// <summary>
+    /// Advanced Custom Murder RPC Confirmation.
+    /// </summary>
+    ConfirmAdvancedCustomMurder,
+
+    /// <summary>
+    /// Framed Custom Murder RPC.
+    /// </summary>
+    FramedCustomMurder,
+
+    /// <summary>
+    /// Framed Custom Murder RPC Confirmation.
+    /// </summary>
+    ConfirmFramedCustomMurder,
+
+    /// <summary>
     /// Custom Game Over RPC.
     /// </summary>
     CustomGameOver,
