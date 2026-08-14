@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using BepInEx.Configuration;
@@ -55,9 +56,10 @@ public static class PresetManager
     /// Loads the <see cref="OptionPreset"/>s for the specified plugin by reading the <see cref="ConfigFile"/>s from the preset directory.
     /// </summary>
     /// <param name="plugin">The plugin for which the <see cref="OptionPreset"/>s should be loaded.</param>
+    [SuppressMessage("Style", "IDE0031:Use null propagation", Justification = "Using null propagation bypasses Unity's lifetime checks.")]
     public static void LoadPresets(MiraPluginInfo plugin)
     {
-        foreach (var btn in plugin.InternalPresets.Select(x=>x.PresetButton))
+        foreach (var btn in plugin.InternalPresets.Select(x => x.PresetButton))
         {
             if (btn != null)
             {
@@ -87,12 +89,12 @@ public static class PresetManager
                 SaveOnConfigSet = false,
             };
 
-            foreach (var option in plugin.InternalOptions.Where(x=>x.IncludeInPreset))
+            foreach (var option in plugin.InternalOptions.Where(x => x.IncludeInPreset))
             {
                 option.Bind(presetConfig);
             }
 
-            foreach (var role in plugin.InternalRoles.Values.OfType<ICustomRole>().Where(x=>!x.Configuration.HideSettings))
+            foreach (var role in plugin.InternalRoles.Values.OfType<ICustomRole>().Where(x => !x.Configuration.HideSettings))
             {
                 role.BindConfig(presetConfig);
             }
@@ -101,7 +103,7 @@ public static class PresetManager
 
             plugin.InternalPresets.Add(new OptionPreset(presetName, plugin, presetConfig));
         }
-        plugin.Presets = [..plugin.InternalPresets];
+        plugin.Presets = [.. plugin.InternalPresets];
     }
 
     /// <summary>
@@ -109,15 +111,17 @@ public static class PresetManager
     /// </summary>
     public static void LoadMasterPreset()
     {
-        /*foreach (var btn in plugin.InternalPresets.Select(x=>x.PresetButton))
-        {
-            if (btn != null)
-            {
-                Object.DestroyImmediate(btn);
-            }
-        }
+#pragma warning disable S125 // Sections of code should not be commented out
+        /*foreach (var btn in plugin.InternalPresets.Select(x => x.PresetButton))
+                {
+                    if (btn != null)
+                    {
+                        Object.DestroyImmediate(btn);
+                    }
+                }
 
-        plugin.InternalPresets.Clear();*/
+                plugin.InternalPresets.Clear();*/
+#pragma warning restore S125 // Sections of code should not be commented out
         if (!Directory.Exists(PresetDirectory))
         {
             Directory.CreateDirectory(PresetDirectory);
@@ -133,19 +137,22 @@ public static class PresetManager
         {
             var fileName = Path.GetFileName(file);
             Info($"Loading preset file {fileName}");
+
+#pragma warning disable S125 // Sections of code should not be commented out
             // var presetName = Path.GetFileNameWithoutExtension(file);
+#pragma warning restore S125 // Sections of code should not be commented out
             var presetConfig = new ConfigFile(file, false)
             {
                 SaveOnConfigSet = false,
             };
             foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins)
             {
-                foreach (var option in plugin.InternalOptions.Where(x=>x.IncludeInPreset))
+                foreach (var option in plugin.InternalOptions.Where(x => x.IncludeInPreset))
                 {
                     option.Bind(presetConfig);
                 }
 
-                foreach (var role in plugin.InternalRoles.Values.OfType<ICustomRole>().Where(x=>!x.Configuration.HideSettings))
+                foreach (var role in plugin.InternalRoles.Values.OfType<ICustomRole>().Where(x => !x.Configuration.HideSettings))
                 {
                     role.BindConfig(presetConfig);
                 }
@@ -153,8 +160,10 @@ public static class PresetManager
 
             presetConfig.Save();
 
+#pragma warning disable S125 // Sections of code should not be commented out
             // InternalMasterPresets.Add(new OptionPreset(presetName, plugin, presetConfig));
+#pragma warning restore S125 // Sections of code should not be commented out
         }
-        MasterPresets = [..InternalMasterPresets];
+        MasterPresets = [.. InternalMasterPresets];
     }
 }

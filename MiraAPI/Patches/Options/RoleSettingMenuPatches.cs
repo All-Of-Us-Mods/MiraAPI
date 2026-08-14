@@ -33,7 +33,7 @@ public static class RoleSettingMenuPatches
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(RolesSettingsMenu.OnEnable))]
-    public static void OpenPatch(RolesSettingsMenu __instance)
+    public static void OpenPatch()
     {
         HudManager.Instance.PlayerCam.OverrideScreenShakeEnabled = false;
     }

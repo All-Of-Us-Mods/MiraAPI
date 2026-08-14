@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using MiraAPI.Events;
 using MiraAPI.Events.Vanilla.Meeting.Voting;
@@ -107,6 +108,11 @@ public static class VotingUtils
     /// <param name="srcPlayerId">The id of the player who casted the vote.</param>
     /// <param name="suspectPlayerId">The voted player's id.</param>
     [MethodRpc((uint)MiraRpc.CastVote)]
+    [SuppressMessage(
+        "Style",
+        "IDE0060:Remove unused parameter",
+        Justification = "Required parameter: The MethodRpc system mandates an InnerNetObject (or its derived class) as the first parameter for sender context, even if unused in the method body."
+    )]
     public static void RpcCastVote(PlayerControl source, byte srcPlayerId, byte suspectPlayerId)
     {
         CustomCastVote(srcPlayerId, suspectPlayerId);
@@ -168,7 +174,7 @@ public static class VotingUtils
     {
         var dictionary = new Dictionary<byte, float>();
 
-        foreach (var vote in votes.Select(v=>v.Suspect))
+        foreach (var vote in votes.Select(v => v.Suspect))
         {
             if (!dictionary.TryAdd(vote, 1))
             {
@@ -198,7 +204,7 @@ public static class VotingUtils
     /// <param name="votes">The list of <see cref="CustomVote"/>s.</param>
     public static void HandlePopulateResults(List<CustomVote> votes)
     {
-        PopulateResultsEvent @event = new PopulateResultsEvent(votes);
+        var @event = new PopulateResultsEvent(votes);
         MiraEventManager.InvokeEvent(@event);
 
         if (@event.IsCancelled)

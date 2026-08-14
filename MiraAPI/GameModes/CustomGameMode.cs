@@ -89,60 +89,87 @@ public abstract class CustomGameMode
     /// Should Roles Settings be available when this gamemode is selected.
     /// </summary>
     /// <returns><see langword="true"/> if Role Settings are enabled in this game mode.</returns>
-    public virtual bool AreRoleSettingsEnabled() => true;
+    public virtual bool AreRoleSettingsEnabled()
+    {
+        return true;
+    }
 
     /// <summary>
     /// Should Game Settings be available when this gamemode is selected.
     /// </summary>
     /// <returns><see langword="true"/> if Game Settings are enabled in this mode.</returns>
-    public virtual bool AreGameSettingsEnabled() => true;
+    public virtual bool AreGameSettingsEnabled()
+    {
+        return true;
+    }
 
     /// <summary>
     /// Custom winner selection.
     /// </summary>
     /// <returns>List of winners or <see langword="null"/>.</returns>
-    public virtual List<NetworkedPlayerInfo>? CalculateWinners() => null;
+    public virtual List<NetworkedPlayerInfo>? CalculateWinners()
+    {
+        return null;
+    }
 
     /// <summary>
     /// Show gamemode in <see cref="IntroCutscene"/>.
     /// </summary>
     /// <returns><see langword="true"/> if the game mode should be shown in the intro cutscene.</returns>
-    public virtual bool ShowGameModeIntroCutscene() => false;
+    public virtual bool ShowGameModeIntroCutscene()
+    {
+        return false;
+    }
 
     /// <summary>
     /// Can Admin be used in this gamemode.
     /// </summary>
     /// <param name="console">Admin Console.</param>
     /// <returns><see langword="true"/> if Admin console is enabled.</returns>
-    public virtual bool CanUseMapConsole(MapConsole console) => true;
+    public virtual bool CanUseMapConsole(MapConsole console)
+    {
+        return true;
+    }
 
     /// <summary>
     /// Can a <see cref="DeadBody"/> be reported in this gamemode.
     /// </summary>
     /// <param name="body">Target <see cref="DeadBody"/> for reporting.</param>
     /// <returns><see langword="true"/> if <see cref="DeadBody"/>s can be reported.</returns>
-    public virtual bool CanReport(DeadBody body) => true;
+    public virtual bool CanReport(DeadBody body)
+    {
+        return true;
+    }
 
     /// <summary>
     /// Can <see cref="SystemConsole"/>s be used in this gamemode.
     /// </summary>
     /// <param name="console">System Console.</param>
     /// <returns><see langword="true"/> if <see cref="SystemConsole"/>s are enabled in this mode.</returns>
-    public virtual bool CanUseSystemConsole(SystemConsole console) => true;
+    public virtual bool CanUseSystemConsole(SystemConsole console)
+    {
+        return true;
+    }
 
     /// <summary>
     /// Can tasks be interacted with in this gamemode.
     /// </summary>
     /// <param name="console">Task console.</param>
     /// <returns><see langword="true"/> if tasks are enabled in this mode.</returns>
-    public virtual bool CanUseTasks(Console console) => true;
+    public virtual bool CanUseTasks(Console console)
+    {
+        return true;
+    }
 
     /// <summary>
     /// Should the sabotage map be used when attempting to open sabotage overlay.
     /// </summary>
     /// <param name="map"><see cref="MapBehaviour"/> object.</param>
     /// <returns><see langword="true"/> if the sabotage map should be shown.</returns>
-    public virtual bool ShouldShowSabotageMap(MapBehaviour map) => true;
+    public virtual bool ShouldShowSabotageMap(MapBehaviour map)
+    {
+        return true;
+    }
 
     /// <summary>
     /// Can a player vent in this gamemode.
@@ -150,5 +177,8 @@ public abstract class CustomGameMode
     /// <param name="vent">Target vent.</param>
     /// <param name="playerInfo">Player attempting to vent.</param>
     /// <returns><see langword="true"/> if venting is enabled in this mode.</returns>
-    public virtual bool CanVent(Vent vent, NetworkedPlayerInfo playerInfo) => true;
+    public virtual bool CanVent(Vent vent, NetworkedPlayerInfo playerInfo)
+    {
+        return true;
+    }
 }

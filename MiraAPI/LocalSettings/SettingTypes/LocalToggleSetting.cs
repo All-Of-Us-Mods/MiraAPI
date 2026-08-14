@@ -12,21 +12,17 @@ namespace MiraAPI.LocalSettings.SettingTypes;
 /// <summary>
 /// Local setting class for toggles.
 /// </summary>
-public class LocalToggleSetting : LocalSettingBase<bool>
+/// <param name="tab">The tab to create the setting in.</param>
+/// <param name="configEntry">The config entry.</param>
+/// <param name="name">The name of the setting.</param>
+/// <param name="description">The description of the setting.</param>
+public class LocalToggleSetting(
+    Type tab,
+    ConfigEntryBase configEntry,
+    string? name = null,
+    string? description = null
+) : LocalSettingBase<bool>(tab, configEntry, name, description)
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="LocalToggleSetting"/> class.
-    /// </summary>
-    /// <inheritdoc/>
-    public LocalToggleSetting(
-        Type tab,
-        ConfigEntryBase configEntry,
-        string? name = null,
-        string? description = null
-        ) : base(tab, configEntry, name, description)
-    {
-    }
-
     /// <inheritdoc />
     public override GameObject CreateOption(ToggleButtonBehaviour toggle, SlideBar slider, Transform parent, ref float offset, ref int order, bool last)
     {

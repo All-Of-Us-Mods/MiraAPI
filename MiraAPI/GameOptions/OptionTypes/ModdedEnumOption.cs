@@ -28,19 +28,17 @@ public class ModdedEnumOption : ModdedOption<int>
     /// <param name="enumType">The <see cref="Enum"/> type.</param>
     /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
     /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
-    public ModdedEnumOption(string title, int defaultValue, Type enumType, string[]? values = null, bool includeInPreset=true) : base(title, defaultValue, includeInPreset)
+    public ModdedEnumOption(string title, int defaultValue, Type enumType, string[]? values = null, bool includeInPreset = true) : base(title, defaultValue, includeInPreset)
     {
         Values = values ?? Enum.GetNames(enumType);
-        Data = ScriptableObject.CreateInstance<StringGameSetting>();
-        var data = (StringGameSetting)Data;
 
+        var data = ScriptableObject.CreateInstance<StringGameSetting>();
         data.Title = StringName;
         data.Type = global::OptionTypes.String;
-        data.Values = values is null ?
-            Enum.GetNames(enumType).Select(CustomStringName.CreateAndRegister).ToArray()
-            : [.. values.Select(CustomStringName.CreateAndRegister)];
-
+        data.Values = Values.Select(CustomStringName.CreateAndRegister).ToArray();
         data.Index = Value;
+
+        Data = data;
     }
 
     /// <inheritdoc />
@@ -53,7 +51,7 @@ public class ModdedEnumOption : ModdedOption<int>
         stringOption.SetUpFromData(Data, 20);
         stringOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
 
-        // SetUpFromData method doesnt work correctly so we must set the values manually
+        // SetUpFromData method doesn't work correctly so we must set the values manually
         stringOption.Title = StringName;
         stringOption.Values = (Data as StringGameSetting)?.Values ?? new Il2CppStructArray<StringNames>(0);
         stringOption.Value = Value;
@@ -127,19 +125,17 @@ public class ModdedEnumOption<T> : ModdedOption<T> where T : Enum
     /// <param name="defaultValue">The default value as an <see langword="int"/>.</param>
     /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
     /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
-    public ModdedEnumOption(string title, T defaultValue, string[]? values = null, bool includeInPreset=true) : base(title, defaultValue, includeInPreset)
+    public ModdedEnumOption(string title, T defaultValue, string[]? values = null, bool includeInPreset = true) : base(title, defaultValue, includeInPreset)
     {
         Values = values ?? Enum.GetNames(typeof(T));
-        Data = ScriptableObject.CreateInstance<StringGameSetting>();
-        var data = (StringGameSetting)Data;
 
+        var data = ScriptableObject.CreateInstance<StringGameSetting>();
         data.Title = StringName;
         data.Type = global::OptionTypes.String;
-        data.Values = values is null ?
-            Enum.GetNames(typeof(T)).Select(CustomStringName.CreateAndRegister).ToArray()
-            : [.. values.Select(CustomStringName.CreateAndRegister)];
-
+        data.Values = Values.Select(CustomStringName.CreateAndRegister).ToArray();
         data.Index = Convert.ToInt32(Value, NumberFormatInfo.InvariantInfo);
+
+        Data = data;
     }
 
     /// <inheritdoc />
@@ -152,7 +148,7 @@ public class ModdedEnumOption<T> : ModdedOption<T> where T : Enum
         stringOption.SetUpFromData(Data, 20);
         stringOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
 
-        // SetUpFromData method doesnt work correctly so we must set the values manually
+        // SetUpFromData method doesn't work correctly so we must set the values manually
         stringOption.Title = StringName;
         stringOption.Values = (Data as StringGameSetting)?.Values ?? new Il2CppStructArray<StringNames>(0);
         stringOption.Value = Convert.ToInt32(Value, NumberFormatInfo.InvariantInfo);

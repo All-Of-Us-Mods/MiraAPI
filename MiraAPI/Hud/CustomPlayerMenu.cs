@@ -10,7 +10,6 @@ using Reactor.Utilities.Extensions;
 using UnityEngine;
 using UnityEngine.Events;
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
 namespace MiraAPI.Hud;
 
@@ -19,9 +18,9 @@ namespace MiraAPI.Hud;
 /// </summary>
 /// <param name="il2CppPtr">Used by Il2Cpp. Do not use constructor, this is a <see cref="MonoBehaviour"/>.</param>
 [RegisterInIl2Cpp]
-[SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Unity Convention")]
-[SuppressMessage("StyleCop.CSharp.NamingRules", "SA1307:Accessible fields should begin with upper-case letter", Justification = "Unity Convention")]
-[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Unity Convention")]
+[SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Unity Convention.")]
+[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Unity Convention.")]
+[SuppressMessage("StyleCop.CSharp.NamingRules", "SA1307:Accessible fields should begin with upper-case letter", Justification = "Unity Convention.")]
 public class CustomPlayerMenu(IntPtr il2CppPtr) : Minigame(il2CppPtr)
 {
     public ShapeshifterPanel panelPrefab;
@@ -69,6 +68,7 @@ public class CustomPlayerMenu(IntPtr il2CppPtr) : Minigame(il2CppPtr)
         return customMenu;
     }
 
+    [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity convention.")]
     private void OnDisable()
     {
         ControllerManager.Instance.CloseOverlayMenu(name);

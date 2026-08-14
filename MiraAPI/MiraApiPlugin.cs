@@ -1,4 +1,5 @@
 ﻿global using static Reactor.Utilities.Logger<MiraAPI.MiraApiPlugin>;
+
 using System;
 using BepInEx;
 using BepInEx.Unity.IL2CPP;

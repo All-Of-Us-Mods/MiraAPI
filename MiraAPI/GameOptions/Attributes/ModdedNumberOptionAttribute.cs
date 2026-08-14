@@ -42,10 +42,8 @@ public class ModdedNumberOptionAttribute(
     /// <inheritdoc />
     public override object GetValue()
     {
-        if (HolderOption is ModdedNumberOption opt)
-        {
-            return opt.Value;
-        }
-        throw new InvalidOperationException($"HolderOption for option \"{Title}\" is not a ModdedNumberOption");
+        return HolderOption is ModdedNumberOption opt
+            ? (object)opt.Value
+            : throw new InvalidOperationException($"HolderOption for option \"{Title}\" is not a ModdedNumberOption");
     }
 }

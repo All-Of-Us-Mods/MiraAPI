@@ -63,21 +63,19 @@ public static class RoleManagerPatches
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(RoleManager.SelectRoles))]
-    public static void ModifierSelectionPatches(RoleManager __instance)
+    public static void ModifierSelectionPatches()
     {
         if (!AmongUsClient.Instance.AmHost || !ModifierManager.MiraAssignsModifiers)
         {
             return;
         }
 
-        ModifierManager.AssignModifiers(
-            PlayerControl.AllPlayerControls.ToArray().Where(plr => !plr.Data.IsDead && !plr.Data.Disconnected)
-                .ToList());
+        ModifierManager.AssignModifiers([.. PlayerControl.AllPlayerControls.ToArray().Where(plr => !plr.Data.IsDead && !plr.Data.Disconnected)]);
     }
 
     [HarmonyPrefix]
     [HarmonyPatch(nameof(RoleManager.AssignRoleOnDeath))]
-    public static bool AssignRoleOnDeath(RoleManager __instance, [HarmonyArgument(0)] PlayerControl plr)
+    public static bool AssignRoleOnDeath([HarmonyArgument(0)] PlayerControl plr)
     {
         if (!plr || !plr.Data.IsDead)
         {

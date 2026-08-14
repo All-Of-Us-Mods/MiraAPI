@@ -32,7 +32,7 @@ public static class LogicRoleSelectionHnsPatch
                 roleOptions.GetChancePerGame(role.Role))).ToList();
         var source2 = CustomRoleUtils.GetPossibleRoles(assignmentData, x => x.Chance == 100);
         var guaranteedRoles = source.Where(x => source2.Contains(((ushort)x.Role, 100)));
-        List<RoleTypes> list = new List<RoleTypes>();
+        var list = new List<RoleTypes>();
         if (team == RoleTeamTypes.Crewmate)
         {
             Error($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: Before Guaranteed Assignment");
@@ -105,8 +105,8 @@ public static class LogicRoleSelectionHnsPatch
                 int num2 = 0;
                 while (num2 < teamMax && players.Count > 0)
                 {
-                    PseudoRandomList<NetworkedPlayerInfo> pseudoRandomList = new PseudoRandomList<NetworkedPlayerInfo>(AmongUsClient.Instance.GameId);
-                    players._items.Do(x => pseudoRandomList.Add(x));
+                    var pseudoRandomList = new PseudoRandomList<NetworkedPlayerInfo>(AmongUsClient.Instance.GameId);
+                    players._items.Do(pseudoRandomList.Add);
                     for (int i = 0; i < GameData.RoundsPlayedInSession; i++)
                     {
                         pseudoRandomList.PickRandom();

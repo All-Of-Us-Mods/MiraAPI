@@ -362,7 +362,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
 
         // Game / Modifier / Custom Settings tab
         // GST.settingsContainer is same as GST.scrollBar.Inner
-        if (CurrentMenu != MenuCategory.Preset && CurrentMenu != MenuCategory.Roles)
+        if (CurrentMenu is not (MenuCategory.Preset or MenuCategory.Roles))
         {
             Gsm.GameSettingsTab.settingsContainer = Gsm.GameSettingsTab.scrollBar.Inner = CurrentContainer.transform;
             CurrentContainer.SetActive(true);

@@ -3,6 +3,7 @@
 /// <summary>
 /// The event that is invoked when the intro cutscene has finished playing.
 /// </summary>
+/// <param name="introCutscene">The intro cutscene.</param>
 public class IntroEndEvent(IntroCutscene introCutscene) : MiraEvent
 {
     /// <summary>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities.Attributes;
@@ -10,18 +11,15 @@ using UnityEngine.UI;
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 [RegisterInIl2Cpp]
-#pragma warning disable S3903
-#pragma warning disable CA1050
+// TODO: Give proper reasoning
+[SuppressMessage("Design", "CA1050:Declare types in namespaces", Justification = "Reason pending.")]
+[SuppressMessage("Major Bug", "S3903:Types should be defined in named namespaces", Justification = "Reason pending.")]
 public class SavePresetPopup(nint cppPtr) : Minigame(cppPtr)
-#pragma warning restore CA1050
-#pragma warning restore S3903
 {
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     private TextMeshPro textBoxText;
     private TextBoxTMP textBox;
 
     private Action<string> onSave;
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
     // Cleanup holder object
     public void OnDestroy()
@@ -34,7 +32,9 @@ public class SavePresetPopup(nint cppPtr) : Minigame(cppPtr)
         // no-op
     }
 
+#pragma warning disable IDE0051 // Remove unused private members
     private void Awake()
+#pragma warning restore IDE0051 // Remove unused private members
     {
         var textboxHolder = transform.GetChild(1).GetChild(1);
         var saveButton = transform.FindChild("SaveButton").GetComponent<PassiveButton>();
@@ -80,7 +80,7 @@ public class SavePresetPopup(nint cppPtr) : Minigame(cppPtr)
 
     public static void CreatePopup(Action<string> saveAction)
     {
-        // Because innerscuff doesnt account for Z value in Close animation
+        // Because innerscuff doesn't account for Z value in Close animation
         var holder = new GameObject("PopupHolder")
         {
             transform =

@@ -34,19 +34,23 @@ public static class SettingPatches
         var custom =
             ModdedOptionsManager.ModdedOptions.Values.FirstOrDefault(opt =>
                 opt.OptionBehaviour != null && opt.OptionBehaviour.Data == __instance);
-        if (custom is ModdedNumberOption moddedNumberOption)
-        {
-            if (moddedNumberOption.NegativeWordValue != "#" && (int)value == -1)
-            {
-                result = $"<b>{moddedNumberOption.NegativeWordValue}</b>";
-            }
-            else if (moddedNumberOption.ZeroWordValue != "#" && Mathf.Abs(value) < 0.0001f)
-            {
-                result = $"<b>{moddedNumberOption.ZeroWordValue}</b>";
-            }
-            else
-            {
-                result = suffix switch
+        result = custom is ModdedNumberOption moddedNumberOption
+            ? moddedNumberOption.NegativeWordValue != "#" && (int)value == -1
+                ? $"<b>{moddedNumberOption.NegativeWordValue}</b>"
+                : moddedNumberOption.ZeroWordValue != "#" && Mathf.Abs(value) < 0.0001f
+                    ? $"<b>{moddedNumberOption.ZeroWordValue}</b>"
+                    : suffix switch
+                    {
+                        MiraNumberSuffixes.None => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo),
+                        MiraNumberSuffixes.Multiplier => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "x",
+                        MiraNumberSuffixes.Percent => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "%",
+                        _ => TranslationController.Instance.GetString(
+                            StringNames.GameSecondsAbbrev,
+                            (Il2CppSystem.Object[])[value.ToString(__instance.FormatString, CultureInfo.InvariantCulture)]),
+                    }
+            : __instance.ZeroIsInfinity && Mathf.Abs(value) < 0.0001f
+                ? "<b>∞</b>"
+                : suffix switch
                 {
                     MiraNumberSuffixes.None => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo),
                     MiraNumberSuffixes.Multiplier => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "x",
@@ -55,24 +59,6 @@ public static class SettingPatches
                         StringNames.GameSecondsAbbrev,
                         (Il2CppSystem.Object[])[value.ToString(__instance.FormatString, CultureInfo.InvariantCulture)]),
                 };
-            }
-        }
-        else if (__instance.ZeroIsInfinity && Mathf.Abs(value) < 0.0001f)
-        {
-            result = "<b>∞</b>";
-        }
-        else
-        {
-            result = suffix switch
-            {
-                MiraNumberSuffixes.None => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo),
-                MiraNumberSuffixes.Multiplier => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "x",
-                MiraNumberSuffixes.Percent => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "%",
-                _ => TranslationController.Instance.GetString(
-                    StringNames.GameSecondsAbbrev,
-                    (Il2CppSystem.Object[])[value.ToString(__instance.FormatString, CultureInfo.InvariantCulture)]),
-            };
-        }
 
         __result = result;
         return false;

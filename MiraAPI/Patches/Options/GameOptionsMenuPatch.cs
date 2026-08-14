@@ -71,14 +71,14 @@ internal static class GameOptionsMenuPatch
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(GameOptionsMenu.OnEnable))]
-    public static void OpenPatch(GameOptionsMenu __instance)
+    public static void OpenPatch()
     {
         HudManager.Instance.PlayerCam.OverrideScreenShakeEnabled = false;
     }
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(GameOptionsMenu.OnDisable))]
-    public static void ClosePatch(GameOptionsMenu __instance)
+    public static void ClosePatch()
     {
         HudManager.Instance.PlayerCam.OverrideScreenShakeEnabled = true;
     }

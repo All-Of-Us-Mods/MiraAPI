@@ -84,115 +84,115 @@ public abstract class LocalSettingsTab(ConfigFile config)
     /// <summary>
     /// Creates the tab <see cref="GameObject"/> and it's content.
     /// </summary>
-    /// <param name="instance">The <see cref="OptionsMenuBehaviour"/> instace.</param>
+    /// <param name="instance">The <see cref="OptionsMenuBehaviour"/> instance.</param>
     /// <returns>The created tab <see cref="GameObject"/>.</returns>
     public virtual GameObject CreateTab(OptionsMenuBehaviour instance)
     {
-         var tab = Object.Instantiate(instance.transform.FindChild("GeneralTab").gameObject, instance.transform);
-         tab.name = $"{TabName}Tab";
-         tab.transform.DestroyChildren();
-         tab.gameObject.SetActive(false);
+        var tab = Object.Instantiate(instance.transform.FindChild("GeneralTab").gameObject, instance.transform);
+        tab.name = $"{TabName}Tab";
+        tab.transform.DestroyChildren();
+        tab.gameObject.SetActive(false);
 
-         if (Scroller == null)
-         {
-             Scroller = Helpers.CreateScroller(tab.transform, OptionsMenuPatches.MaskCollider);
-         }
+        if (Scroller == null)
+        {
+            Scroller = Helpers.CreateScroller(tab.transform, OptionsMenuPatches.MaskCollider);
+        }
 
-         if (TabButton != null)
-         {
-             TabButton.Content = tab.gameObject;
-         }
+        if (TabButton != null)
+        {
+            TabButton.Content = tab.gameObject;
+        }
 
-         var generalLabel = instance.transform.FindChild("GeneralTab").FindChild("ControlGroup")
-             .FindChild("ControlText_TMP").gameObject;
-         var toggle = instance.transform.FindChild("GeneralTab").FindChild("ChatGroup").FindChild("CensorChatButton").GetComponent<ToggleButtonBehaviour>();
-         var slider = instance.transform.FindChild("GeneralTab").FindChild("SoundGroup").FindChild("SFXSlider").GetComponent<SlideBar>();
+        var generalLabel = instance.transform.FindChild("GeneralTab").FindChild("ControlGroup")
+            .FindChild("ControlText_TMP").gameObject;
+        var toggle = instance.transform.FindChild("GeneralTab").FindChild("ChatGroup").FindChild("CensorChatButton").GetComponent<ToggleButtonBehaviour>();
+        var slider = instance.transform.FindChild("GeneralTab").FindChild("SoundGroup").FindChild("SFXSlider").GetComponent<SlideBar>();
 
-         Dictionary<string, List<ILocalSetting>> entriesByGroup = new();
-         foreach (var entry in Settings)
-         {
-             var group = entry.ConfigEntry.Definition.Section;
-             if (!entriesByGroup.ContainsKey(group))
-                 entriesByGroup.Add(group, []);
+        Dictionary<string, List<ILocalSetting>> entriesByGroup = [];
+        foreach (var entry in Settings)
+        {
+            var group = entry.ConfigEntry.Definition.Section;
+            if (!entriesByGroup.ContainsKey(group))
+                entriesByGroup.Add(group, []);
 
-             entriesByGroup[group].Add(entry);
-         }
+            entriesByGroup[group].Add(entry);
+        }
 
-         float contentOffset = 0;
-         var contentOrder = 1;
-         var contentIndex = 1;
+        float contentOffset = 0;
+        var contentOrder = 1;
+        var contentIndex = 1;
 
-         foreach (var pair in entriesByGroup)
-         {
-             if (ShouldCreateLabels)
-             {
-                 CreateLabel(generalLabel, Scroller.Inner, pair.Key, ref contentOffset);
-                 contentOrder = 1;
-                 contentIndex = 1;
-             }
+        foreach (var pair in entriesByGroup)
+        {
+            if (ShouldCreateLabels)
+            {
+                CreateLabel(generalLabel, Scroller.Inner, pair.Key, ref contentOffset);
+                contentOrder = 1;
+                contentIndex = 1;
+            }
 
-             foreach (var setting in pair.Value)
-             {
-                 var obj = setting.CreateOption(
-                     toggle,
-                     slider,
-                     Scroller.Inner,
-                     ref contentOffset,
-                     ref contentOrder,
-                     contentIndex == pair.Value.Count);
+            foreach (var setting in pair.Value)
+            {
+                var obj = setting.CreateOption(
+                    toggle,
+                    slider,
+                    Scroller.Inner,
+                    ref contentOffset,
+                    ref contentOrder,
+                    contentIndex == pair.Value.Count);
 
-                 obj!.GetComponentsInChildren<SpriteRenderer>(true).Do(x =>
-                 {
-                     x.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-                     x.sortingOrder = 150;
-                     x.sortingLayerName = "Default";
-                 });
+                obj!.GetComponentsInChildren<SpriteRenderer>(true).Do(x =>
+                {
+                    x.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                    x.sortingOrder = 150;
+                    x.sortingLayerName = "Default";
+                });
 
-                 obj.GetComponentsInChildren<MeshRenderer>(true).Do(x =>
-                 {
-                     x.sortingOrder = 151;
-                     x.sortingLayerName = "Default";
-                 });
+                obj.GetComponentsInChildren<MeshRenderer>(true).Do(x =>
+                {
+                    x.sortingOrder = 151;
+                    x.sortingLayerName = "Default";
+                });
 
-                 obj.GetComponentsInChildren<PassiveButton>().Do(x => { x.ClickMask = OptionsMenuPatches.MaskCollider; });
+                obj.GetComponentsInChildren<PassiveButton>().Do(x => { x.ClickMask = OptionsMenuPatches.MaskCollider; });
 
-                 contentIndex++;
-             }
+                contentIndex++;
+            }
 
-             contentOrder = 1;
-         }
+            contentOrder = 1;
+        }
 
-         contentIndex = 1;
-         contentOrder = 1;
-         foreach (var button in Buttons)
-         {
-             var obj = button.CreateButton(
-                 toggle,
-                 Scroller.Inner,
-                 ref contentOffset,
-                 ref contentOrder,
-                 contentIndex == Buttons.Count);
+        contentIndex = 1;
+        contentOrder = 1;
+        foreach (var button in Buttons)
+        {
+            var obj = button.CreateButton(
+                toggle,
+                Scroller.Inner,
+                ref contentOffset,
+                ref contentOrder,
+                contentIndex == Buttons.Count);
 
-             obj!.GetComponentsInChildren<SpriteRenderer>(true).Do(x =>
-             {
-                 x.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-                 x.sortingOrder = 150;
-                 x.sortingLayerName = "Default";
-             });
+            obj!.GetComponentsInChildren<SpriteRenderer>(true).Do(x =>
+            {
+                x.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                x.sortingOrder = 150;
+                x.sortingLayerName = "Default";
+            });
 
-             obj.GetComponentsInChildren<MeshRenderer>(true).Do(x =>
-             {
-                 x.sortingOrder = 151;
-                 x.sortingLayerName = "Default";
-             });
+            obj.GetComponentsInChildren<MeshRenderer>(true).Do(x =>
+            {
+                x.sortingOrder = 151;
+                x.sortingLayerName = "Default";
+            });
 
-             obj.GetComponentsInChildren<PassiveButton>().Do(x => { x.ClickMask = OptionsMenuPatches.MaskCollider; });
+            obj.GetComponentsInChildren<PassiveButton>().Do(x => { x.ClickMask = OptionsMenuPatches.MaskCollider; });
 
-             contentIndex++;
-         }
+            contentIndex++;
+        }
 
-         Scroller.SetBounds(new FloatRange(0, (Settings.Count + Buttons.Count) * 0.5f - 5f), new FloatRange(0, 0));
-         return tab;
+        Scroller.SetBounds(new FloatRange(0, (Settings.Count + Buttons.Count) * 0.5f - 5f), new FloatRange(0, 0));
+        return tab;
     }
 
     /// <summary>
@@ -252,8 +252,10 @@ public abstract class LocalSettingsTab(ConfigFile config)
         {
             if (!tabButtonObject.Content.gameObject.activeSelf)
             {
-                //tabButtonObject.Button.color = TabColor;
-                //tabButtonObject.Rollover.OutColor = TabColor;
+#pragma warning disable S125 // Sections of code should not be commented out
+                // tabButtonObject.Button.color = TabColor;
+                // tabButtonObject.Rollover.OutColor = TabColor;
+#pragma warning restore S125 // Sections of code should not be commented out
             }
 
             tabButton.transform.localPosition = new Vector3(2.4f, 2.1f - tabOffset, 5.5f);

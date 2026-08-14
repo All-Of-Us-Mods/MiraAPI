@@ -85,9 +85,7 @@ public class ModdedPlayerOption : ModdedOption<int>
     /// <returns>A list of filtered players.</returns>
     public System.Collections.Generic.List<NetworkedPlayerInfo> GetFilteredPlayers()
     {
-        return GameData.Instance.AllPlayers.ToArray()
-            .Where(x => PlayerFilter?.Invoke(x) ?? true)
-            .ToList();
+        return [.. GameData.Instance.AllPlayers.ToArray().Where(x => PlayerFilter?.Invoke(x) ?? true)];
     }
 
     /// <summary>

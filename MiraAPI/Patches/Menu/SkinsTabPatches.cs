@@ -109,9 +109,9 @@ public static class SkinsTabPatches
         hatIndex += 5;
         foreach (var skin in skins.OrderBy(HatManager.Instance.allSkins.IndexOf))
         {
-            float hatXposition = __instance.XRange.Lerp(hatIndex % __instance.NumPerRow / (__instance.NumPerRow - 1f));
-            float hatYposition = __instance.YStart - hatIndex / __instance.NumPerRow * __instance.YOffset;
-            GenerateColorChip(__instance, new Vector2(hatXposition, hatYposition), skin);
+            float hatXPosition = __instance.XRange.Lerp(hatIndex % __instance.NumPerRow / (__instance.NumPerRow - 1f));
+            float hatYPosition = __instance.YStart - hatIndex / __instance.NumPerRow * __instance.YOffset;
+            GenerateColorChip(__instance, new Vector2(hatXPosition, hatYPosition), skin);
             hatIndex += 1;
         }
 

@@ -32,13 +32,21 @@ public static class ModdedOptionsManager
     internal static uint NextId => _nextId++;
     private static uint _nextId = 1;
 
+    /// <summary>
+    /// Pops a message notification of a setting being changed.
+    /// </summary>
+    /// <param name="notif">The game's notification popper.</param>
+    /// <param name="key">The <see cref="StringNames"/> key of the option that changed.</param>
+    /// <param name="value">The new value of the option.</param>
+    /// <param name="textColor">The color of the notification.</param>
+    /// <param name="sprite">The optional sprite of the notification.</param>
+    /// <param name="playSound">A flag that indicates if a notification sound should be played.</param>
     public static void AddSettingsChangeMessage(NotificationPopper notif, StringNames key, string value, Color textColor, TMP_SpriteAsset? sprite, bool playSound = true)
     {
-        var item = string.Empty;
+        string item;
         var text = textColor.ToTextColor();
-        if (sprite != null)
-        {
-            item = TranslationController.Instance.GetString(
+        item = sprite != null
+            ? TranslationController.Instance.GetString(
                 StringNames.LobbyChangeSettingNotification,
                 string.Concat(
                     "<sprite name=\"",
@@ -48,20 +56,21 @@ public static class ModdedOptionsManager
                     TranslationController.Instance.GetString(key),
                     "</color></font>"),
                 "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">" + value + "</font>"
-            );
-        }
-        else
-        {
-            item = TranslationController.Instance.GetString(
+            )
+            : TranslationController.Instance.GetString(
                 StringNames.LobbyChangeSettingNotification,
                 "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">" +
                 text +
                 TranslationController.Instance.GetString(key) + "</color></font>",
                 "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">" + value + "</font>");
-        }
         notif.SettingsChangeMessageLogic(key, item, playSound);
     }
 
+    [SuppressMessage(
+        "Major Code Smell",
+        "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields",
+        Justification = "Dynamic singleton initialization requires reflection to bypass the private field access modifier because the type is only known at runtime."
+    )]
     internal static bool RegisterGroup(Type type, MiraPluginInfo pluginInfo)
     {
         if (Activator.CreateInstance(type) is not AbstractOptionGroup group)
@@ -80,9 +89,7 @@ public static class ModdedOptionsManager
         pluginInfo.InternalOptionGroups.Add(group);
 
         typeof(OptionGroupSingleton<>).MakeGenericType(type)
-#pragma warning disable S3011
-            .GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic)!
-#pragma warning restore S3011
+            .GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic)! // Message suppression points to here
             .SetValue(null, group);
 
         return true;
@@ -211,10 +218,9 @@ public static class ModdedOptionsManager
     /// </summary>
     /// <param name="__originalMethod">The original setter method.</param>
     /// <param name="value">The new object value.</param>
-#pragma warning disable CA1707
-    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony naming convention")]
+    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony naming convention.")]
+    [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Harmony naming convention.")]
     public static void PropertySetterPatch(MethodBase __originalMethod, object value)
-#pragma warning restore CA1707
     {
         var attribute = OptionAttributes.First(pair => pair.Key.GetSetMethod() == __originalMethod).Value;
         attribute.SetValue(value);
@@ -226,10 +232,9 @@ public static class ModdedOptionsManager
     /// <param name="__originalMethod">The original getter method.</param>
     /// <param name="__result">The result of the property getter.</param>
     /// <returns><see langword="false"/> so the original getter gets skipped.</returns>
-#pragma warning disable CA1707
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony naming convention")]
+    [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Harmony naming convention.")]
     public static bool PropertyGetterPatch(MethodBase __originalMethod, ref object __result)
-#pragma warning restore CA1707
     {
         var attribute = OptionAttributes.First(pair => pair.Key.GetGetMethod() == __originalMethod).Value;
         __result = attribute.GetValue();

@@ -3,19 +3,11 @@
 /// <summary>
 /// The event that is invoked when the end game screen is shown. Non cancelable.
 /// </summary>
-public class GameEndEvent : MiraEvent
+/// <param name="manager">The <see cref="global::EndGameManager"/> instance.</param>
+public class GameEndEvent(EndGameManager manager) : MiraEvent
 {
     /// <summary>
     /// Gets the <see cref="global::EndGameManager"/> instance.
     /// </summary>
-    public EndGameManager EndGameManager { get; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GameEndEvent"/> class.
-    /// </summary>
-    /// <param name="manager">The <see cref="global::EndGameManager"/> instance.</param>
-    public GameEndEvent(EndGameManager manager)
-    {
-        EndGameManager = manager;
-    }
+    public EndGameManager EndGameManager { get; } = manager;
 }

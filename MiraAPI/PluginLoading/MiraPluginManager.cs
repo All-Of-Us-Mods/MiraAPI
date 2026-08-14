@@ -17,7 +17,6 @@ using MiraAPI.Keybinds;
 using MiraAPI.LocalSettings;
 using MiraAPI.LocalSettings.Attributes;
 using MiraAPI.Modifiers;
-using MiraAPI.Patches.Options;
 using MiraAPI.Presets;
 using MiraAPI.Roles;
 using MiraAPI.Utilities;

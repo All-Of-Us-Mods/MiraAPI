@@ -120,7 +120,7 @@ public abstract class ModdedOption<T> : IModdedOption
     }
 
     /// <inheritdoc />
-    public void SaveToPreset(ConfigFile presetConfig, bool saveDefault=false)
+    public void SaveToPreset(ConfigFile presetConfig, bool saveDefault = false)
     {
         if (ConfigDefinition is null)
         {

@@ -52,7 +52,7 @@ public static class LobbyViewPanePatches
             {
                 __instance.ChangeTab(ModifiersTabName);
             }));
-        ModifiersTabButton.gameObject.SetActive(SelectedModIdx!=0);
+        ModifiersTabButton.gameObject.SetActive(SelectedModIdx != 0);
 
         // Create the next button
         var nextButton = Object.Instantiate(__instance.BackButton, __instance.BackButton.transform.parent).gameObject;
@@ -211,8 +211,7 @@ public static class LobbyViewPanePatches
                     }
 
                     var color = (i == 0) ? Palette.CrewmateRoleBlue : Palette.ImpostorRoleRed;
-                    if (roleBehaviour is ICustomRole custom && (custom.Team is not ModdedRoleTeams.Crewmate &&
-                                                                custom.Team is not ModdedRoleTeams.Impostor))
+                    if (roleBehaviour is ICustomRole { Team: not (ModdedRoleTeams.Crewmate or ModdedRoleTeams.Impostor) })
                     {
                         color = Color.grey;
                     }
@@ -584,7 +583,7 @@ public static class LobbyViewPanePatches
 
         var filteredOptions = SelectedMod.InternalOptionGroups
             .Where(x => x.OptionableType == roleType)
-            .SelectMany(x=>x.Options)
+            .SelectMany(x => x.Options)
             .ToList();
 
         for (var i = 0; i < filteredOptions.Count; i++)

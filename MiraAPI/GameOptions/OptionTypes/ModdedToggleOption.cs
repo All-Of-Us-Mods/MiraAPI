@@ -16,7 +16,7 @@ public class ModdedToggleOption : ModdedOption<bool>
     /// <param name="title">The option title.</param>
     /// <param name="defaultValue">The default value.</param>
     /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
-    public ModdedToggleOption(string title, bool defaultValue, bool includeInPreset=true) : base(title, defaultValue, includeInPreset)
+    public ModdedToggleOption(string title, bool defaultValue, bool includeInPreset = true) : base(title, defaultValue, includeInPreset)
     {
         Data = ScriptableObject.CreateInstance<CheckboxGameSetting>();
 

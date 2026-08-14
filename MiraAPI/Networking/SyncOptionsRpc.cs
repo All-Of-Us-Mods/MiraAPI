@@ -5,7 +5,7 @@ using Reactor.Networking.Rpc;
 
 namespace MiraAPI.Networking;
 
-// METHOD RPC DOESNT WORK WITH THE ARRAYS AND STUFF SO THIS IS HOW WE WILL DO IT FOR NOW
+// METHOD RPC DOESN'T WORK WITH THE ARRAYS AND STUFF SO THIS IS HOW WE WILL DO IT FOR NOW
 [RegisterCustomRpc((uint)MiraRpc.SyncGameOptions)]
 internal sealed class SyncOptionsRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<MiraApiPlugin, NetData[]>(plugin, id)
 {

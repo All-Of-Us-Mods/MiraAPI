@@ -12,59 +12,50 @@ namespace MiraAPI.LocalSettings.SettingTypes;
 /// <summary>
 /// Local setting class for sliders.
 /// </summary>
-public class LocalSliderSetting : LocalSettingBase<float>
+/// <param name="tab">The tab to create the setting in.</param>
+/// <param name="configEntry">The config entry.</param>
+/// <param name="name">The name of the setting.</param>
+/// <param name="description">The description of the setting.</param>
+/// <param name="sliderRange">The value range.</param>
+/// <param name="suffixType">The suffix used for formatting.</param>
+/// <param name="formatString">The format string used for formatting.</param>
+/// <param name="roundValue">Should the value be rounded.</param>
+/// <param name="displayValue">Should display the value next to the name.</param>
+public class LocalSliderSetting(
+    Type tab,
+    ConfigEntryBase configEntry,
+    string? name = null,
+    string? description = null,
+    FloatRange? sliderRange = null,
+    bool displayValue = false,
+    MiraNumberSuffixes? suffixType = null,
+    string? formatString = null,
+    bool roundValue = false) : LocalSettingBase<float>(tab, configEntry, name, description)
 {
     /// <summary>
     /// Gets the range of the slider.
     /// </summary>
-    public FloatRange SliderRange { get; }
+    public FloatRange SliderRange { get; } = sliderRange ?? new FloatRange(0, 100);
 
     /// <summary>
     /// Gets a value indicating whether the value should be displayed next to name.
     /// </summary>
-    public bool DisplayValue { get; }
+    public bool DisplayValue { get; } = displayValue;
 
     /// <summary>
     /// Gets a format for the text to use to format the number.
     /// </summary>
-    public string FormatString { get; }
+    public string FormatString { get; } = formatString ?? "0.0";
 
     /// <summary>
     /// Gets a value indicating whether the value should be rounded.
     /// </summary>
-    public bool RoundValue { get; }
+    public bool RoundValue { get; } = roundValue;
 
     /// <summary>
     /// Gets the suffix for the number value.
     /// </summary>
-    public MiraNumberSuffixes SuffixType { get; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="LocalSliderSetting"/> class.
-    /// </summary>
-    /// <inheritdoc/>
-    /// <param name="sliderRange">The value range.</param>
-    /// <param name="suffixType">The suffix used for formating.</param>
-    /// <param name="formatString">The format string used for formating.</param>
-    /// <param name="roundValue">Should the value be rounded.</param>
-    public LocalSliderSetting(
-        Type tab,
-        ConfigEntryBase configEntry,
-        string? name = null,
-        string? description = null,
-        FloatRange? sliderRange = null,
-        bool displayValue = false,
-        MiraNumberSuffixes? suffixType = null,
-        string? formatString = null,
-        bool roundValue = false)
-        : base(tab, configEntry, name, description)
-    {
-        SliderRange = sliderRange ?? new FloatRange(0, 100);
-        DisplayValue = displayValue;
-        SuffixType = suffixType ?? MiraNumberSuffixes.None;
-        FormatString = formatString ?? "0.0";
-        RoundValue = roundValue;
-    }
+    public MiraNumberSuffixes SuffixType { get; } = suffixType ?? MiraNumberSuffixes.None;
 
     /// <inheritdoc />
     public override GameObject CreateOption(ToggleButtonBehaviour toggle, SlideBar slider, Transform parent, ref float offset, ref int order, bool last)
@@ -110,9 +101,9 @@ public class LocalSliderSetting : LocalSettingBase<float>
         if (DisplayValue)
         {
             var value = GetValue();
-            var formated = Helpers.FormatValue(value, SuffixType, FormatString);
-            var maxFormated = Helpers.FormatValue(SliderRange.max, SuffixType, FormatString);
-            return $"<font=\"LiberationSans SDF\" material=\"LiberationSans SDF - Chat Message Masked\">{Name}: <b>{formated} / {maxFormated}</font></b>";
+            var formatted = Helpers.FormatValue(value, SuffixType, FormatString);
+            var maxFormatted = Helpers.FormatValue(SliderRange.max, SuffixType, FormatString);
+            return $"<font=\"LiberationSans SDF\" material=\"LiberationSans SDF - Chat Message Masked\">{Name}: <b>{formatted} / {maxFormatted}</font></b>";
         }
 
         return $"<font=\"LiberationSans SDF\" material=\"LiberationSans SDF - Chat Message Masked\">{Name}</font></b>";

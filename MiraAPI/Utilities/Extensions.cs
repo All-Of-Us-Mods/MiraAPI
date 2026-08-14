@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -77,14 +78,7 @@ public static class Extensions
         TaskTypes taskType = self.TaskType;
         float realtimeSinceStartup = Time.realtimeSinceStartup - self.timeOpened;
         PlayerTask myTask = self.MyTask;
-        if (myTask != null)
-        {
-            isComplete = myTask.IsComplete;
-        }
-        else
-        {
-            isComplete = false;
-        }
+        isComplete = myTask != null && myTask.IsComplete;
         analytics.MinigameClosed(data, taskType, realtimeSinceStartup, isComplete);
         self.StartCoroutine(self.CoDestroySelf());
     }
@@ -137,26 +131,17 @@ public static class Extensions
     /// <summary>
     /// Returns a random element from the specified sequence.
     /// </summary>
-    /// <param name="input">
-    /// The sequence to select an element from.
-    /// </param>
-    /// <typeparam name="T">
-    /// The type of elements in the sequence.
-    /// </typeparam>
-    /// <returns>
-    /// A randomly selected element from <paramref name="input"/>.
-    /// </returns>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when <paramref name="input"/> is empty.
-    /// </exception>
+    /// <param name="input">The sequence to select an element from.</param>
+    /// <typeparam name="T">The type of elements in the sequence.</typeparam>
+    /// <returns>A randomly selected element from <paramref name="input"/>.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when <paramref name="input"/> is empty.</exception>
     public static T RandomSnapshot<T>(this IEnumerable<T> input)
     {
         var list = input.ToList();
 
-        if (list.Count == 0)
-            throw new InvalidOperationException("Cannot get random element from an empty collection.");
-
-        return list[UnityEngine.Random.Range(0, list.Count)];
+        return list.Count == 0
+            ? throw new InvalidOperationException("Cannot get random element from an empty collection.")
+            : list[UnityEngine.Random.Range(0, list.Count)];
     }
 
     /// <summary>
@@ -164,14 +149,20 @@ public static class Extensions
     /// </summary>
     /// <param name="state">The <see cref="PlayerVoteArea"/>.</param>
     /// <returns>The player's <see cref="PlayerControl"/>.</returns>
-    public static PlayerControl? GetPlayer(this PlayerVoteArea state) => GameData.Instance.GetPlayerById(state.TargetPlayerId)?.Object;
+    public static PlayerControl? GetPlayer(this PlayerVoteArea state)
+    {
+        return GameData.Instance.GetPlayerById(state.TargetPlayerId)?.Object;
+    }
 
     /// <summary>
     /// Gets an <see langword="int"/> representing the amount of tasks a player has left.
     /// </summary>
     /// <param name="player">The player.</param>
     /// <returns>A count of how many tasks the player has left.</returns>
-    public static int GetTasksLeft(this PlayerControl player) => player.Data.Tasks.ToArray().Count(x => !x.Complete);
+    public static int GetTasksLeft(this PlayerControl player)
+    {
+        return player.Data.Tasks.ToArray().Count(x => !x.Complete);
+    }
 
     /// <summary>
     /// Checks if a <see cref="PlayerControl"/> is the game's host.
@@ -226,9 +217,13 @@ public static class Extensions
     /// </summary>
     /// <param name="obj">The <see cref="GameObject"/> to destroy.</param>
     /// <param name="clearGc">Whether to run the garbage collector immediately.</param>
+    [SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Unclear, but please shut up.")]
     public static void DeepDestroy(this GameObject obj, bool clearGc = true)
     {
         obj.Destroy();
+#pragma warning disable S125 // Sections of code should not be commented out
+        // Nuke(obj, clearGc);
+#pragma warning restore S125 // Sections of code should not be commented out
     }
 
     /// <summary>
@@ -269,6 +264,9 @@ public static class Extensions
         }
     }
 
+    // Left intentionally, did you guys mean to use it in DeepDestroy?
+    [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Not known until intent it clear.")]
+    [SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Unclear, but please shut up.")]
     private static IEnumerator Nuke(GameObject? go, bool clearGc)
     {
         if (go == null)
@@ -359,6 +357,7 @@ public static class Extensions
     /// <summary>
     /// Clears up the Garbage Collector manually if necessary.
     /// </summary>
+    [SuppressMessage("Critical Code Smell", "S1215:\"GC.Collect\" should not be called", Justification = "Usage of GC.Collect is intentionally brought on by the user.")]
     public static void ClearGarbageCollector()
     {
         Resources.UnloadUnusedAssets();

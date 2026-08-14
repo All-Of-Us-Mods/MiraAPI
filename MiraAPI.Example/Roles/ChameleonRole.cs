@@ -8,9 +8,9 @@ using UnityEngine;
 
 namespace MiraAPI.Example.Roles;
 
-public class ChameloenRole : CrewmateRole, ICustomRole
+public class ChameleonRole : CrewmateRole, ICustomRole
 {
-    public string RoleName => "Chamelon";
+    public string RoleName => "Chameleon";
     public string RoleLongDescription => "Stay invisible while not moving.";
     public string RoleDescription => RoleLongDescription;
     public Color RoleColor => Palette.AcceptedGreen;
@@ -28,7 +28,7 @@ public class ChameloenRole : CrewmateRole, ICustomRole
 
     public override void Initialize(PlayerControl player)
     {
-        Logger<ExamplePlugin>.Info("Initializing ChamelonRole for player: " + player.PlayerId);
+        Logger<ExamplePlugin>.Info("Initializing ChameleonRole for player: " + player.PlayerId);
         RoleBehaviourStubs.Initialize(this, player);
         _shouldHide = true;
     }
@@ -68,7 +68,7 @@ public class ChameloenRole : CrewmateRole, ICustomRole
 
     public override void Deinitialize(PlayerControl targetPlayer)
     {
-        Logger<ExamplePlugin>.Info("Deinitializing ChamelonRole for player: " + targetPlayer.PlayerId);
+        Logger<ExamplePlugin>.Info("Deinitializing ChameleonRole for player: " + targetPlayer.PlayerId);
         RoleBehaviourStubs.Deinitialize(this, targetPlayer);
         _shouldHide = false;
         foreach (var cosmetic in Player.cosmetics.transform.GetComponentsInChildren<SpriteRenderer>(true))

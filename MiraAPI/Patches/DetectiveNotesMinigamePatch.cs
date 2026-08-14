@@ -30,7 +30,7 @@ public static class DetectiveNotesMinigamePatch
         var customRoles = CustomRoleManager.CustomRoleBehaviours;
         foreach (var role in allRoles)
         {
-            if (role.TeamType != RoleTeamTypes.Impostor || role.Role == RoleTypes.ImpostorGhost || customRoles.Contains(role) )
+            if (role.TeamType != RoleTeamTypes.Impostor || role.Role == RoleTypes.ImpostorGhost || customRoles.Contains(role))
                 continue;
             var gameObject = Object.Instantiate(__instance.impostorTypePrefab, __instance.impostorTypeParent);
             __instance.impostorButton.Add(gameObject);

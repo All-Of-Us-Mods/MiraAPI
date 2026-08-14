@@ -7,11 +7,13 @@ namespace MiraAPI.LocalSettings.Attributes;
 /// Base class for all local settings attributes.
 /// </summary>
 /// <param name="name">The name of the setting. Defaults to entry key.</param>
-/// <param name="description">The description of the setting. Defalts to entry description.</param>
+/// <param name="description">The description of the setting. Defaults to entry description.</param>
 [AttributeUsage(AttributeTargets.Property)]
 public abstract class LocalSettingAttribute(
+#pragma warning disable CS9113 // Parameter is unread.
     string? name = null,
     string? description = null
+#pragma warning restore CS9113 // Parameter is unread.
     ) : Attribute
 {
     /// <summary>

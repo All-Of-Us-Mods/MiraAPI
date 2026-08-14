@@ -14,6 +14,10 @@ public static class CustomGameModeManager
     /// </summary>
     internal static readonly Dictionary<int, CustomGameMode> GameModes = [];
 
+    /// <summary>
+    /// Checks to see if the currently selected gamemode is vanilla.
+    /// </summary>
+    /// <returns>true if there is no custom gamemode selected.</returns>
     public static bool IsDefault()
     {
         return ActiveMode?.Id == 0;

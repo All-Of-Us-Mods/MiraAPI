@@ -18,12 +18,13 @@ public static class NameplatesTabPatches
 {
     private static readonly SortedList<string, List<NamePlateData>> SortedNameplates = new(new ControllableComparer<string>(["vanilla"], [], StringComparer.InvariantCulture));
     private static int currentPage;
+
     internal static void AddRange(IEnumerable<(string Key, NamePlateData Visor)> data)
     {
-        foreach (var item in data)
+        foreach (var (key, visor) in data)
         {
-            if (!SortedNameplates.ContainsKey(item.Key)) SortedNameplates.Add(item.Key, []);
-            SortedNameplates[item.Key].Add(item.Visor);
+            if (!SortedNameplates.ContainsKey(key)) SortedNameplates.Add(key, []);
+            SortedNameplates[key].Add(visor);
         }
     }
 
@@ -107,9 +108,9 @@ public static class NameplatesTabPatches
         hatIndex += 2;
         foreach (var visor in nameplates.OrderBy(HatManager.Instance.allNamePlates.IndexOf))
         {
-            float hatXposition = __instance.XRange.Lerp(hatIndex % __instance.NumPerRow / (__instance.NumPerRow - 1f));
-            float hatYposition = __instance.YStart - hatIndex / __instance.NumPerRow * __instance.YOffset;
-            GenerateColorChip(__instance, new Vector2(hatXposition, hatYposition), visor);
+            float hatXPosition = __instance.XRange.Lerp(hatIndex % __instance.NumPerRow / (__instance.NumPerRow - 1f));
+            float hatYPosition = __instance.YStart - hatIndex / __instance.NumPerRow * __instance.YOffset;
+            GenerateColorChip(__instance, new Vector2(hatXPosition, hatYPosition), visor);
             hatIndex += 1;
         }
 
@@ -138,10 +139,10 @@ public static class NameplatesTabPatches
         colorChip.Button.ClickMask = __instance.scroller.Hitbox;
         colorChip.ProductId = namePlate.ProdId;
 
-        var x = (NamePlateViewData viewdata) =>
+        var x = (NamePlateViewData viewData) =>
         {
-            colorChip.transform.GetChild(1).GetComponent<SpriteRenderer>().sprite = viewdata?.Image;
-            // (colorChip as NameplateChip).image.sprite = viewdata?.Image;
+            colorChip.transform.GetChild(1).GetComponent<SpriteRenderer>().sprite = viewData?.Image;
+            // (colorChip as NameplateChip).image.sprite = viewData?.Image;
         };
         __instance.StartCoroutine(AddressableAssetExtensions.CoLoadAssetAsync<NamePlateViewData>(__instance, namePlate.GetAssetReference(), x));
         colorChip.transform.localPosition = new Vector3(position.x, position.y, -1f);

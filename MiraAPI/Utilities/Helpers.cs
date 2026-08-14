@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using HarmonyLib;
@@ -42,6 +43,7 @@ public static class Helpers
     /// Gets the move next of an <see cref="IEnumerator"/> on <typeparamref name="T"/>.
     /// </summary>
     /// <typeparam name="T">Where the <see cref="Scroller"/> should be parented to.</typeparam>
+    /// <param name="methodName">The name of the method being searched for.</param>
     /// <returns>THe corresponding method to patch.</returns>
     public static MethodBase? GetStateMachineMoveNext<T>(string methodName)
     {
@@ -49,7 +51,7 @@ public static class Helpers
         var showRoleStateMachine =
             typeof(T)
                 .GetNestedTypes()
-                .FirstOrDefault(x=>x.Name.Contains(methodName));
+                .FirstOrDefault(x => x.Name.Contains(methodName));
 
         if (showRoleStateMachine == null)
         {
@@ -285,9 +287,9 @@ public static class Helpers
     {
         var results = new Il2CppSystem.Collections.Generic.List<Collider2D>();
         Physics2D.OverlapCircle(source, radius, filter, results);
-        return results.ToArray()
+        return [.. results.ToArray()
             .Where(collider2D => collider2D.CompareTag("DeadBody"))
-            .Select(collider2D => collider2D.GetComponent<DeadBody>()).ToList();
+            .Select(collider2D => collider2D.GetComponent<DeadBody>())];
     }
 
     /// <summary>
@@ -304,9 +306,9 @@ public static class Helpers
     {
         var results = new Il2CppSystem.Collections.Generic.List<Collider2D>();
         Physics2D.OverlapCircle(source, radius, filter, results);
-        return results.ToArray()
+        return [.. results.ToArray()
             .Where(collider2D => colliderTag == null || collider2D.CompareTag(colliderTag))
-            .Select(collider2D => collider2D.GetComponent<T>()).ToList();
+            .Select(collider2D => collider2D.GetComponent<T>())];
     }
 
     /// <summary>
@@ -323,20 +325,17 @@ public static class Helpers
     {
         var newList = GetNearestObjectsOfType<PlayerControl>(source, radius, CreateFilter(Constants.NotShipMask));
 
-        if (!ignoreColliders)
-        {
-            return newList;
-        }
-
-        return (from player in newList
-                let vector = player.GetTruePosition() - source
-                let magnitude = vector.magnitude
-                where !PhysicsHelpers.AnyNonTriggersBetween(
-                    source,
-                    vector.normalized,
-                    magnitude,
-                    Constants.ShipAndObjectsMask)
-                select player).ToList();
+        return !ignoreColliders
+            ? newList
+            : [.. from player in newList
+                   let vector = player.GetTruePosition() - source
+                   let magnitude = vector.magnitude
+                   where !PhysicsHelpers.AnyNonTriggersBetween(
+                        source,
+                        vector.normalized,
+                        magnitude,
+                        Constants.ShipAndObjectsMask)
+                   select player];
     }
 
     /// <summary>
@@ -361,7 +360,7 @@ public static class Helpers
         var myPos = source.GetTruePosition();
         var players = GetClosestPlayers(myPos, distance, ignoreColliders);
 
-        return ignoreSource ? players.Where(plr => plr.PlayerId != source.PlayerId).ToList() : players;
+        return ignoreSource ? [.. players.Where(plr => plr.PlayerId != source.PlayerId)] : players;
     }
 
     /// <summary>
@@ -402,17 +401,11 @@ public static class Helpers
             {
                 var magnitude2 = (a.GetTruePosition() - source).magnitude;
                 var magnitude3 = (b.GetTruePosition() - source).magnitude;
-                if (magnitude2 > magnitude3)
-                {
-                    return 1;
-                }
-
-                if (magnitude2 < magnitude3)
-                {
-                    return -1;
-                }
-
-                return 0;
+                return magnitude2 > magnitude3
+                    ? 1
+                    : magnitude2 < magnitude3
+                        ? -1
+                        : 0;
             });
         return outputList;
     }
@@ -503,17 +496,16 @@ public static class Helpers
     /// <returns>The random string.</returns>
     public static string RandomString(int length, string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
     {
-        return new string(Enumerable.Repeat(chars, length)
-            .Select(s => s[Random.RandomRangeInt(0, s.Length)]).ToArray());
+        return new string([.. Enumerable.Repeat(chars, length).Select(s => s[Random.RandomRangeInt(0, s.Length)])]);
     }
 
     /// <summary>
-    /// Returns the formated value using the specified suffix and format string.
+    /// Returns the formatted value using the specified suffix and format string.
     /// </summary>
     /// <param name="value">The value to format.</param>
     /// <param name="suffix">The suffix to add.</param>
     /// <param name="formatString">The format string to use to format.</param>
-    /// <returns>The formated value.</returns>
+    /// <returns>The formatted value.</returns>
     public static string FormatValue(float value, MiraNumberSuffixes suffix = MiraNumberSuffixes.None, string formatString = "0.0")
     {
         return suffix switch
@@ -534,11 +526,7 @@ public static class Helpers
     /// <returns>The <see cref="RoleBehaviour"/>'s name.</returns>
     public static string GetRoleName(this RoleBehaviour role)
     {
-        if (role is ICustomRole custom)
-        {
-            return custom.RoleName;
-        }
-        return role.NiceName;
+        return role is ICustomRole custom ? custom.RoleName : role.NiceName;
     }
 
     /// <summary>
@@ -546,6 +534,7 @@ public static class Helpers
     /// </summary>
     /// <param name="role">The <see cref="RoleBehaviour"/> to check.</param>
     /// <returns>The <see cref="RoleBehaviour"/>'s blacklist status.</returns>
+    [SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Intentionally unused because the main intent is for it to be used by dependent mods to add to a blacklist.")]
     public static bool IsRoleBlacklisted(this RoleBehaviour role)
     {
         // This should be patchable by mods when a vanilla role is meant to be replaced by a custom role.

@@ -24,7 +24,8 @@ namespace MiraAPI.Patches.Freeplay;
 public static class TaskAdderPatches
 {
     private static Scroller _scroller = null!;
-    private static Dictionary<string, TaskFolder> folders = new();
+    private static readonly Dictionary<string, TaskFolder> Folders = [];
+
     public static string CrewmateName => TranslationController.Instance.GetString(StringNames.Crewmate);
     public static string ImpostorName => TranslationController.Instance.GetString(StringNames.Impostor);
     public static string NeutralName => "Neutral";
@@ -75,11 +76,11 @@ public static class TaskAdderPatches
         // var neutralFolder = __instance.CreateFolder("Neutral", __instance.Root, 2, Color.gray);
         var modifiersFolder = __instance.CreateFolder(ModifiersName, __instance.Root, 0, Color.blue);
 
-        folders.Clear();
-        folders.Add(crewmateFolder.FolderName, crewmateFolder);
-        folders.Add(impostorFolder.FolderName, impostorFolder);
+        Folders.Clear();
+        Folders.Add(crewmateFolder.FolderName, crewmateFolder);
+        Folders.Add(impostorFolder.FolderName, impostorFolder);
         // folders.Add("Neutrals", neutralFolder);
-        folders.Add(ModifiersName, modifiersFolder);
+        Folders.Add(ModifiersName, modifiersFolder);
 
         int folderIdx = 2;
         foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins)
@@ -92,10 +93,10 @@ public static class TaskAdderPatches
             {
                 var customRole = role as ICustomRole;
                 var folderName = customRole!.Configuration.FreeplayFolder;
-                if (!folders.TryGetValue(folderName, out var teamFolder))
+                if (!Folders.TryGetValue(folderName, out var teamFolder))
                 {
                     teamFolder = __instance.CreateFolder(folderName, __instance.Root, folderIdx++, customRole.IntroConfiguration?.IntroTeamColor ?? Color.gray);
-                    folders.Add(folderName, teamFolder);
+                    Folders.Add(folderName, teamFolder);
                 }
 
                 if (!pluginFolders.TryGetValue(folderName, out var pluginFolder))
@@ -187,14 +188,9 @@ public static class TaskAdderPatches
                 taskFolder3 = folders[systemTypes.ToString()] = Object.Instantiate(__instance.RootFolderPrefab, __instance.transform);
                 taskFolder3.SetFolderColor(TaskFolder.FolderColor.Tan);
                 taskFolder3.gameObject.SetActive(false);
-                if (systemTypes == SystemTypes.UpperEngine)
-                {
-                    taskFolder3.FolderName = TranslationController.Instance.GetString(StringNames.Engines);
-                }
-                else
-                {
-                    taskFolder3.FolderName = TranslationController.Instance.GetString(systemTypes);
-                }
+                taskFolder3.FolderName = systemTypes == SystemTypes.UpperEngine
+                    ? TranslationController.Instance.GetString(StringNames.Engines)
+                    : TranslationController.Instance.GetString(systemTypes);
 
                 rootFolder.SubFolders.Add(taskFolder3);
             }
@@ -204,7 +200,6 @@ public static class TaskAdderPatches
 
         return false;
     }
-
 
     private static TaskFolder CreateFolder(this TaskAdderGame instance, string name, TaskFolder parent, int idx = -1, Color? color = null)
     {
@@ -250,9 +245,12 @@ public static class TaskAdderPatches
         instance.ActiveItems.Add(item.transform);
     }
 
-    private static bool IsChildOf(this TaskFolder child, TaskFolder parent) => parent.SubFolders
-        .ToArray()
-        .Any(x => x.FolderName == child.FolderName);
+    private static bool IsChildOf(this TaskFolder child, TaskFolder parent)
+    {
+        return parent.SubFolders
+            .ToArray()
+            .Any(x => x.FolderName == child.FolderName);
+    }
 
     // yes it might be crazy patching the entire method, but i tried so many other methods and only this works :cry:
     // true -chip
@@ -260,7 +258,7 @@ public static class TaskAdderPatches
     [HarmonyPatch(nameof(TaskAdderGame.ShowFolder))]
     public static bool ShowPatch(TaskAdderGame __instance, TaskFolder taskFolder)
     {
-        StringBuilder stringBuilder = new StringBuilder(64);
+        var stringBuilder = new StringBuilder(64);
         __instance.Hierarchy.Add(taskFolder);
         foreach (var t in __instance.Hierarchy)
         {
@@ -316,6 +314,7 @@ public static class TaskAdderPatches
             switch (task.TaskType)
             {
                 case TaskTypes.DivertPower:
+#pragma warning disable IDE0055 // Fix formatting
                 {
                     var targetSystem = task.Cast<DivertPowerTask>().TargetSystem;
                     taskAddButton.Text.text = TranslationController.Instance.GetString(
@@ -334,9 +333,12 @@ public static class TaskAdderPatches
                     break;
                 }
                 default:
+                {
                     taskAddButton.Text.text =
                         TranslationController.Instance.GetString(task.TaskType);
                     break;
+                }
+#pragma warning restore IDE0055 // Fix formatting
             }
 
             __instance.AddFileAsChildCustom(taskAddButton, ref num, ref num2, ref num3);
@@ -380,7 +382,7 @@ public static class TaskAdderPatches
         {
             // I hate you
         }
-        if (split is ["Roles", _, _] && folders.Any(x => taskFolder.IsChildOf(x.Value)))
+        if (split is ["Roles", _, _] && Folders.Any(x => taskFolder.IsChildOf(x.Value)))
         {
             var plugin = MiraPluginManager.GetPluginByGuid(split[2]);
             if (plugin != null)
@@ -441,7 +443,7 @@ public static class TaskAdderPatches
             }
         }
 
-        if (folders.TryGetValue(ModifiersName, out var modifiersFolder) && taskFolder.IsChildOf(modifiersFolder))
+        if (Folders.TryGetValue(ModifiersName, out var modifiersFolder) && taskFolder.IsChildOf(modifiersFolder))
         {
             var plugin = MiraPluginManager.GetPluginByGuid(taskFolder.name.Replace("(Clone)", string.Empty));
             if (plugin != null)

@@ -7,7 +7,6 @@ namespace MiraAPI.LocalSettings.Attributes;
 /// <summary>
 /// Creates a <see cref="LocalToggleSetting"/> for the <see cref="ConfigEntry{T}"/>.
 /// </summary>
-/// <inheritdoc/>
 [AttributeUsage(AttributeTargets.Property)]
 public class LocalToggleSettingAttribute(
     string? name = null,

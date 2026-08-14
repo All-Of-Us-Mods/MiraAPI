@@ -38,7 +38,7 @@ public abstract class MultiTargetButton<T> : CustomActionButton where T : MonoBe
     /// <summary>
     /// Sets the outline of the target <typeparamref name="T"/>.
     /// </summary>
-    /// <param name="target">The target <typeparamref name="T"/> to set the oultine.</param>
+    /// <param name="target">The target <typeparamref name="T"/> to set the outline.</param>
     /// <param name="active">Should the outline be active.</param>
     public abstract void SetOutline(T target, bool active);
 
@@ -54,10 +54,9 @@ public abstract class MultiTargetButton<T> : CustomActionButton where T : MonoBe
             }
         }
 
-        Targets = newTargets
+        Targets = [.. newTargets
             .Where(IsTargetValid)
-            .Take(MaxTargets)
-            .ToArray();
+            .Take(MaxTargets)];
         Targets.Do(t => SetOutline(t, true));
 
         return base.CanUse() && Targets.Length > 0;

@@ -12,52 +12,43 @@ namespace MiraAPI.LocalSettings.SettingTypes;
 /// <summary>
 /// Local setting class for numbers.
 /// </summary>
-public class LocalNumberSetting : LocalSettingBase<float>
+/// <param name="tab">The tab to create the setting in.</param>
+/// <param name="configEntry">The config entry.</param>
+/// <param name="numberRange">The value range.</param>
+/// <param name="name">The name of the setting.</param>
+/// <param name="description">The description of the setting.</param>
+/// <param name="increment">The increment per click.</param>
+/// <param name="suffixType">The suffix used for formatting.</param>
+/// <param name="formatString">The format string used for formatting.</param>
+public class LocalNumberSetting(
+    Type tab,
+    ConfigEntryBase configEntry,
+    string? name = null,
+    string? description = null,
+    FloatRange? numberRange = null,
+    float? increment = null,
+    MiraNumberSuffixes? suffixType = null,
+    string? formatString = null) : LocalSettingBase<float>(tab, configEntry, name, description)
 {
     /// <summary>
     /// Gets the range of the button.
     /// </summary>
-    public FloatRange NumberRange { get; }
+    public FloatRange NumberRange { get; } = numberRange ?? new FloatRange(1, 5);
 
     /// <summary>
     /// Gets the increment of the value when button is pressed.
     /// </summary>
-    public float Increment { get; }
+    public float Increment { get; } = increment ?? 1;
 
     /// <summary>
     /// Gets a format for the text to use to format the number.
     /// </summary>
-    public string FormatString { get; }
+    public string FormatString { get; } = formatString ?? "0";
 
     /// <summary>
     /// Gets the suffix for the number value.
     /// </summary>
-    public MiraNumberSuffixes SuffixType { get; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="LocalNumberSetting"/> class.
-    /// </summary>
-    /// <inheritdoc/>
-    /// <param name="numberRange">The value range.</param>
-    /// <param name="increment">The increment per click.</param>
-    /// <param name="suffixType">The suffix used for formating.</param>
-    /// <param name="formatString">The format string used for formating.</param>
-    public LocalNumberSetting(
-        Type tab,
-        ConfigEntryBase configEntry,
-        string? name = null,
-        string? description = null,
-        FloatRange? numberRange = null,
-        float? increment = null,
-        MiraNumberSuffixes? suffixType = null,
-        string? formatString = null)
-        : base(tab, configEntry, name, description)
-    {
-        SuffixType = suffixType ?? MiraNumberSuffixes.None;
-        NumberRange = numberRange ?? new FloatRange(1, 5);
-        Increment = increment ?? 1;
-        FormatString = formatString ?? "0";
-    }
+    public MiraNumberSuffixes SuffixType { get; } = suffixType ?? MiraNumberSuffixes.None;
 
     /// <inheritdoc />
     public override GameObject CreateOption(ToggleButtonBehaviour toggle, SlideBar slider, Transform parent, ref float offset, ref int order, bool last)
@@ -139,7 +130,7 @@ public class LocalNumberSetting : LocalSettingBase<float>
     protected override string GetValueText()
     {
         var value = GetValue();
-        var formated = Helpers.FormatValue(value, SuffixType, FormatString);
-        return $"<font=\"LiberationSans SDF\" material=\"LiberationSans SDF - Chat Message Masked\">{Name}: <b>{formated}</font></b>";
+        var formatted = Helpers.FormatValue(value, SuffixType, FormatString);
+        return $"<font=\"LiberationSans SDF\" material=\"LiberationSans SDF - Chat Message Masked\">{Name}: <b>{formatted}</font></b>";
     }
 }

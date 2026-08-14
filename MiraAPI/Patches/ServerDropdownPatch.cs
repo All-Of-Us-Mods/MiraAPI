@@ -15,7 +15,7 @@ public static class ServerDropdownPatch
                region.TranslateName == other.TranslateName &&
                region.PingServer == other.PingServer &&
                region.TargetServer == other.TargetServer &&
-               region.Servers.All(s=>other.Servers.Any(x=>x.Equals(s)));
+               region.Servers.All(s => other.Servers.Any(x => x.Equals(s)));
     }
 
     public static bool Prefix(ServerDropdown __instance)

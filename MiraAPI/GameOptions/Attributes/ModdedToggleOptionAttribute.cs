@@ -27,10 +27,8 @@ public class ModdedToggleOptionAttribute(string title) : ModdedOptionAttribute(t
     /// <inheritdoc />
     public override object GetValue()
     {
-        if (HolderOption is ModdedToggleOption opt)
-        {
-            return opt.Value;
-        }
-        throw new InvalidOperationException($"Holder option for {Title} is not a ModdedToggleOption.");
+        return HolderOption is ModdedToggleOption opt
+            ? (object)opt.Value
+            : throw new InvalidOperationException($"Holder option for {Title} is not a ModdedToggleOption.");
     }
 }

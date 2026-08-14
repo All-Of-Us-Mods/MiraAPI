@@ -1,17 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using HarmonyLib;
-using MiraAPI.GameOptions;
-using MiraAPI.Modifiers;
-using MiraAPI.PluginLoading;
-using MiraAPI.Presets;
-using MiraAPI.Utilities.Assets;
-using Reactor.Utilities.Extensions;
-using TMPro;
-using UnityEngine;
-using UnityEngine.Events;
-using static UnityEngine.UI.Button;
-using Object = UnityEngine.Object;
+﻿using HarmonyLib;
 
 namespace MiraAPI.Patches.Options;
 

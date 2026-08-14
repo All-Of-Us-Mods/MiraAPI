@@ -3,6 +3,7 @@
 		<Version>1.0.0</Version>
 		<Description>Example mod for Mira API</Description>
 		<Authors>Angxl, XtraCube</Authors>
+		<NoWarn>$(NoWarn);EnableGenerateDocumentationFile</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>

@@ -33,7 +33,7 @@ public class ExampleLocalSettings(ConfigFile config) : LocalSettingsTab(config)
     public ConfigEntry<float> ExampleNumber { get; private set; } = config.Bind("General", "Example Number", 4f);
 
     [LocalNumberSetting(min: 0.1f, max: 2.5f, increment: 0.1f, formatString: "0.0", suffixType: MiraNumberSuffixes.Multiplier)]
-    public ConfigEntry<float> ExampleFloatNumber { get; private set; } = config.Bind("General", "Example Multplier", 1f);
+    public ConfigEntry<float> ExampleFloatNumber { get; private set; } = config.Bind("General", "Example Multiplier", 1f);
 
     [LocalEnumSetting]
     public ConfigEntry<ExampleEnumSetting> ExampleEnum { get; private set; } = config.Bind("General", "Example Enum", ExampleEnumSetting.Fries);

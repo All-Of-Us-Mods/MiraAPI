@@ -17,8 +17,13 @@ namespace MiraAPI.Example;
 public partial class ExamplePlugin : BasePlugin, IMiraPlugin
 {
     public Harmony Harmony { get; } = new(Id);
-    public string OptionsTitleText => "Mira API\nExample Mod";
-    public ConfigFile GetConfigFile() => Config;
+    public string OptionsTitleText { get; } = "Mira API\nExample Mod";
+
+    public ConfigFile GetConfigFile()
+    {
+        return Config;
+    }
+
     public override void Load()
     {
         ExampleEventHandlers.Initialize();

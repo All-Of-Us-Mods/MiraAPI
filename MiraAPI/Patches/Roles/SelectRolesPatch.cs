@@ -1,7 +1,8 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
-using System.Linq;
 using InnerNet;
 using MiraAPI.Roles;
 
@@ -10,7 +11,12 @@ namespace MiraAPI.Patches.Roles;
 [HarmonyPatch(typeof(RoleManager))]
 public static class SelectRolesPatch
 {
+    [SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
+    [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
+    [SuppressMessage("Usage", "CA2211:Non-constant fields should not be visible", Justification = "Read above.")]
+    [SuppressMessage("Minor Code Smell", "S1104:Fields should not have public accessibility", Justification = "Read above.")] // why so many warnings???
     public static bool ApiHandlesRoleSelect = true;
+
     [HarmonyPrefix]
     [HarmonyPatch(nameof(RoleManager.SelectRoles))]
     public static bool SelectRoles()
@@ -21,10 +27,9 @@ public static class SelectRolesPatch
         }
         Il2CppSystem.Collections.Generic.List<ClientData> list = new();
         AmongUsClient.Instance.GetAllClients(list);
-        List<NetworkedPlayerInfo> list2 = list.ToArray()
+        List<NetworkedPlayerInfo> list2 = [.. list.ToArray()
             .Where(c => c.Character != null && c.Character.Data != null && !c.Character.Data.Disconnected &&
-                        !c.Character.Data.IsDead).OrderBy(c => c.Id).Select(c => c.Character.Data)
-            .ToList();
+                        !c.Character.Data.IsDead).OrderBy(c => c.Id).Select(c => c.Character.Data)];
 
         foreach (NetworkedPlayerInfo networkedPlayerInfo in GameData.Instance.AllPlayers)
         {
@@ -51,7 +56,7 @@ public static class SelectRolesPatch
         var source = RoleManager.Instance.AllRoles.ToArray()
             .Where(role => role.TeamType == team && !RoleManager.IsGhostRole(role.Role) &&
                            CustomRoleUtils.CanSpawnOnCurrentMode(role));
-        List<RoleTypes> list = new List<RoleTypes>();
+        var list = new List<RoleTypes>();
         IRoleOptionsCollection roleOptions = opts.RoleOptions;
 
         // Assign guaranteed roles first, just like the vanilla selector. This is
@@ -71,8 +76,7 @@ public static class SelectRolesPatch
         // another player and, more importantly, leaves the fallback count wrong.
         list.Clear();
         foreach (var role in source.Where(x =>
-                     roleOptions.GetChancePerGame(x.Role) > 0 &&
-                     roleOptions.GetChancePerGame(x.Role) < 100)
+                     roleOptions.GetChancePerGame(x.Role) is > 0 and < 100)
                      .Select(role => role.Role))
         {
             for (var i = 0; i < roleOptions.GetNumPerGame(role); i++)

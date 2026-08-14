@@ -71,15 +71,13 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
     /// Gets the scale of the buttons.
     /// </summary>
     [LocalSliderSetting(min: 0.5f, max: 1.5f, suffixType: MiraNumberSuffixes.Multiplier, formatString: "0.00", displayValue: true)]
-    public ConfigEntry<float> ButtonUIFactorSlider { get; private set; } =
-        config.Bind("Visuals/UI", "Button Scale Factor", 0.75f);
+    public ConfigEntry<float> ButtonUIFactorSlider { get; private set; } = config.Bind("Visuals/UI", "Button Scale Factor", 0.75f);
 
     /// <summary>
     /// Gets the fps specified by the player.
     /// </summary>
     [LocalSliderSetting(min: 60f, max: 240f, suffixType: MiraNumberSuffixes.None, formatString: "0", displayValue: true, roundValue: true)]
-    public ConfigEntry<float> SetFpsSlider { get; private set; } =
-        config.Bind("Visuals/UI", "Max FPS", 120f);
+    public ConfigEntry<float> SetFpsSlider { get; private set; } = config.Bind("Visuals/UI", "Max FPS", 120f);
 
     /// <summary>
     /// Gets whether to apply cosmetic changes to the TaskAdder.

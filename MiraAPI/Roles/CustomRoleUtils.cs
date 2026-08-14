@@ -21,18 +21,17 @@ public static class CustomRoleUtils
     /// <returns><see langword="true"/> if the <see cref="RoleBehaviour"/> is able to spawn, otherwise <see langword="false"/>.</returns>
     public static bool CanSpawnOnCurrentMode(RoleBehaviour role)
     {
-        if (role is ICustomRole custom)
-        {
-            return custom.CanSpawnOnCurrentMode();
-        }
-
-        if (GameManager.Instance.IsHideAndSeek())
-        {
-            return role.Role is RoleTypes.Engineer || role.Role is RoleTypes.Impostor;
-        }
-        return true;
+        return role is ICustomRole custom
+            ? custom.CanSpawnOnCurrentMode()
+            : !GameManager.Instance.IsHideAndSeek() || role.Role is RoleTypes.Engineer or RoleTypes.Impostor;
     }
 
+    /// <summary>
+    /// Retrieves a flattened list of possible roles and their selection chances based on the provided assignment data.
+    /// </summary>
+    /// <param name="assignmentData">The list of role assignment configurations to process.</param>
+    /// <param name="predicate">An optional filter to apply to the assignment data. If null, all roles in the list are processed.</param>
+    /// <returns>A list of tuples containing the role type and its corresponding chance, duplicated according to each role's configured count.</returns>
     public static List<(ushort RoleType, int Chance)> GetPossibleRoles(
         List<RoleManager.RoleAssignmentData> assignmentData,
         Func<RoleManager.RoleAssignmentData, bool>? predicate = null)
@@ -50,6 +49,11 @@ public static class CustomRoleUtils
         return roles;
     }
 
+    /// <summary>
+    /// Generates the role assignment data for a specific role type using the current game options.
+    /// </summary>
+    /// <param name="roleType">The type of the role to retrieve assignment data for.</param>
+    /// <returns>A <see cref="RoleManager.RoleAssignmentData"/> instance containing the role behaviour, its maximum count per game, and its selection chance.</returns>
     public static RoleManager.RoleAssignmentData GetAssignData(RoleTypes roleType)
     {
         var currentGameOptions = GameOptionsManager.Instance.CurrentGameOptions;
@@ -64,12 +68,15 @@ public static class CustomRoleUtils
         return assignmentData;
     }
 
+    /// <summary>
+    /// Retrieves the registered behaviour for a given role type.
+    /// </summary>
+    /// <param name="roleType">The type of the role to find.</param>
+    /// <returns>The matching <see cref="RoleBehaviour"/> if found; otherwise, <c>null</c>.</returns>
     public static RoleBehaviour? GetRegisteredRole(RoleTypes roleType)
     {
         // we want to prioritize the custom roles because the role has the right RoleColour/TeamColor
-        var role = CustomRoleManager.AllRoles.FirstOrDefault(x => x.Role == roleType);
-
-        return role;
+        return CustomRoleManager.AllRoles.FirstOrDefault(x => x.Role == roleType);
     }
 
     /// <summary>
@@ -77,21 +84,30 @@ public static class CustomRoleUtils
     /// </summary>
     /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="RoleBehaviour"/>s.</returns>
     // ReSharper disable once MemberCanBePrivate.Global
-    public static IEnumerable<RoleBehaviour> GetActiveRoles() => PlayerControl.AllPlayerControls.ToArray().Select(x => x.Data.Role);
+    public static IEnumerable<RoleBehaviour> GetActiveRoles()
+    {
+        return PlayerControl.AllPlayerControls.ToArray().Select(x => x.Data.Role);
+    }
 
     /// <summary>
     /// Gets all active in-game roles in a certain team.
     /// </summary>
     /// <param name="team">The team you would like to check for.</param>
     /// <returns>A list of roles with the team.</returns>
-    public static IEnumerable<RoleBehaviour> GetActiveRolesOfTeam(ModdedRoleTeams team) => GetActiveRoles().Where(x => x is ICustomRole customRole && customRole.Team == team);
+    public static IEnumerable<RoleBehaviour> GetActiveRolesOfTeam(ModdedRoleTeams team)
+    {
+        return GetActiveRoles().Where(x => x is ICustomRole customRole && customRole.Team == team);
+    }
 
     /// <summary>
     /// Gets all active in-game <typeparamref name="T"/> roles.
     /// </summary>
     /// <typeparam name="T">The <see cref="RoleBehaviour"/> you would like to check for.</typeparam>
     /// <returns>An <see cref="IEnumerable{T}"/> of <typeparamref name="T"/>s.</returns>
-    public static IEnumerable<T> GetActiveRolesOfType<T>() where T : RoleBehaviour => GetActiveRoles().OfType<T>();
+    public static IEnumerable<T> GetActiveRolesOfType<T>() where T : RoleBehaviour
+    {
+        return GetActiveRoles().OfType<T>();
+    }
 
     /// <summary>
     /// Creates a <see cref="StringBuilder"/> for the Role Tab.
@@ -115,12 +131,7 @@ public static class CustomRoleUtils
     public static LoadableAsset<AudioClip>? GetIntroSound(RoleTypes roleType)
     {
         var role = CustomRoleManager.AllRoles.FirstOrDefault(role => role.Role == roleType);
-        if (role is ICustomRole customRole)
-        {
-            return customRole.Configuration.IntroSound;
-        }
-
-        return new PreloadedAsset<AudioClip>(role!.IntroSound);
+        return role is ICustomRole customRole ? customRole.Configuration.IntroSound : new PreloadedAsset<AudioClip>(role!.IntroSound);
     }
 
     /// <summary>

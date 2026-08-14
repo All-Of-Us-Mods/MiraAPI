@@ -52,7 +52,7 @@ internal static class EndGameDidWinPatch
         }
     }
 
-    public static void Postfix(EndGameResult endGameResult)
+    public static void Postfix()
     {
         EndGameResult.CachedWinners.Clear();
         foreach (var winner in CachedWinners)

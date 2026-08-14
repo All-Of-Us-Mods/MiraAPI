@@ -75,8 +75,8 @@ public static class CustomRoleManager
             RoleManager.GhostRoles.Add(role.Role);
         }
 
-        CustomRoleBehaviours = CustomRoles.Values.ToList();
-        CustomMiraRoles = CustomRoles.Values.OfType<ICustomRole>().ToList();
+        CustomRoleBehaviours = [.. CustomRoles.Values];
+        CustomMiraRoles = [.. CustomRoles.Values.OfType<ICustomRole>()];
     }
 
     internal static void RegisterRoleTypes(List<Type> roles, MiraPluginInfo pluginInfo)

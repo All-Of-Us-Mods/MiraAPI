@@ -13,40 +13,32 @@ namespace MiraAPI.LocalSettings.SettingTypes;
 /// <summary>
 /// Local setting class for <see langword="enum"/>s.
 /// </summary>
-public class LocalEnumSetting : LocalSettingBase<int>
+/// <param name="tab">The tab to create the setting in.</param>
+/// <param name="configEntry">The config entry.</param>
+/// <param name="enumType">The <see cref="Enum"/> type.</param>
+/// <param name="name">The name of the setting.</param>
+/// <param name="description">The description of the setting.</param>
+/// <param name="values">The optional values array to replace the <see langword="enum"/> names.</param>
+public class LocalEnumSetting(
+    Type tab,
+    ConfigEntryBase configEntry,
+    Type enumType,
+    string? name = null,
+    string? description = null,
+    string[]? values = null) : LocalSettingBase<int>(tab, configEntry, name, description)
 {
     /// <summary>
     /// Gets the <see cref="Enum"/> type of the setting.
     /// </summary>
-    public Type EnumType { get; }
+    public Type EnumType { get; } = enumType;
 
     /// <summary>
     /// Gets the <see langword="enum"/> values.
     /// </summary>
-    public string[] Values { get; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="LocalEnumSetting"/> class.
-    /// </summary>
-    /// <inheritdoc/>
-    /// <param name="enumType">The <see cref="Enum"/> type.</param>
-    /// <param name="values">The optional values array to replace the <see langword="enum"/> names.</param>
-    public LocalEnumSetting(
-        Type tab,
-        ConfigEntryBase configEntry,
-        Type enumType,
-        string? name = null,
-        string? description = null,
-        string[]? values = null)
-        : base(tab, configEntry, name, description)
-    {
-        EnumType = enumType;
-        Values = values ?? Enum
+    public string[] Values { get; } = values ?? [.. Enum
             .GetValues(configEntry.SettingType)
             .Cast<Enum>()
-            .Select(x => x.ToDisplayString())
-            .ToArray();
-    }
+            .Select(x => x.ToDisplayString())];
 
     /// <inheritdoc />
     public override GameObject CreateOption(ToggleButtonBehaviour toggle, SlideBar slider, Transform parent, ref float offset, ref int order, bool last)

@@ -12,7 +12,7 @@ using MiraAPI.Voting;
 namespace MiraAPI.Patches.Voting;
 
 [HarmonyPatch(typeof(MeetingHud))]
-[SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony Convention")]
+[SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony Convention.")]
 internal static class MeetingHudPatches
 {
     [HarmonyPrefix]
@@ -105,7 +105,7 @@ internal static class MeetingHudPatches
 
     [HarmonyPrefix]
     [HarmonyPatch(nameof(MeetingHud.Select))]
-    public static bool SelectPatch(MeetingHud __instance, int suspectStateIdx)
+    public static bool SelectPatch(int suspectStateIdx)
     {
         var voteData = PlayerControl.LocalPlayer.GetVoteData();
 
@@ -141,7 +141,7 @@ internal static class MeetingHudPatches
                 continue;
             }
 
-            voteData.Votes.RemoveAll(x=>x.Suspect==pc.PlayerId);
+            voteData.Votes.RemoveAll(x => x.Suspect == pc.PlayerId);
             voteData.VotesRemaining += 1;
 
             VotingUtils.RpcRemoveVote(PlayerControl.LocalPlayer, player.PlayerId, pc.PlayerId);
@@ -205,9 +205,9 @@ internal static class MeetingHudPatches
 
     [HarmonyPrefix]
     [HarmonyPatch(nameof(MeetingHud.PopulateResults))]
-    public static bool PopulateResultsPatch(MeetingHud __instance, ref Il2CppStructArray<MeetingHud.VoterState> states)
+    public static bool PopulateResultsPatch(ref Il2CppStructArray<MeetingHud.VoterState> states)
     {
-        var votes = states.Select(x=> new CustomVote(x.VoterId, x.VotedForId)).ToList();
+        var votes = states.Select(x => new CustomVote(x.VoterId, x.VotedForId)).ToList();
 
         VotingUtils.HandlePopulateResults(votes);
         return false;
@@ -217,7 +217,7 @@ internal static class MeetingHudPatches
     [HarmonyPrefix]
     [HarmonyPatch(nameof(MeetingHud.CmdCastVote))]
     // Although this method is inlined in MeetingHud.Confirm, the next patch fixes that.
-    public static bool CmdCastVoteOverridePatch(MeetingHud __instance, byte playerId, byte suspectIdx)
+    public static bool CmdCastVoteOverridePatch(byte playerId, byte suspectIdx)
     {
         VotingUtils.RpcCastVote(PlayerControl.LocalPlayer, playerId, suspectIdx);
         return false;

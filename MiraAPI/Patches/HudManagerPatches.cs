@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using MiraAPI.Hud;
 using MiraAPI.Keybinds;
@@ -27,6 +28,8 @@ public static class HudManagerPatches
 
     private static Dictionary<TextMeshPro, int> vanillaKeybindIcons = [];
 
+    [SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "This is internal and will never be used by user code.")]
+    [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "This is internal and will never be used by user code.")]
     internal static List<TextMeshPro> ModdedKeybindIcons = [];
 
     public static IEnumerator CoResizeUI()
@@ -105,23 +108,28 @@ public static class HudManagerPatches
                     }
                     catch
                     {
+#pragma warning disable S125 // Sections of code should not be commented out
                         // Error($"Error arranging child objects in GridArrange: {e}");
+#pragma warning restore S125 // Sections of code should not be commented out
                     }
                 }
             }
         }
     }
 
+#pragma warning disable S125 // Sections of code should not be commented out
     /*
     /// <summary>
-    /// Trigger hudstart on current custom gamemode
+    /// Trigger HudStart on current custom gamemode
     /// </summary>
     [HarmonyPostfix]
     [HarmonyPatch(nameof(HudManager.OnGameStart))]
     public static void GameStartPatch(HudManager __instance)
     {
         CustomGameModeManager.ActiveMode?.HudStart(__instance);
-    }*/
+    }
+    */
+#pragma warning restore S125 // Sections of code should not be commented out
 
     /// <summary>
     /// Create custom buttons and arrange them on the hud.

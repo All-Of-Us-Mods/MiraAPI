@@ -16,7 +16,7 @@ public static class RoleOptionsCollectionPatch
     /// </summary>
     [HarmonyPrefix]
     [HarmonyPatch(nameof(RoleOptionsCollectionV10.AnyRolesEnabled))]
-    public static bool AnyRolesEnabledPrefix(RoleOptionsCollectionV10 __instance, ref bool __result)
+    public static bool AnyRolesEnabledPrefix(RoleOptionsCollectionV10 __instance)
     {
         foreach (KeyValuePair<RoleTypes, RoleDataV10> keyValuePair in __instance.roles)
         {

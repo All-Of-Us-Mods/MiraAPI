@@ -447,7 +447,10 @@ public abstract class CustomActionButton
     /// Always <see langword="false"/> by default.
     /// </summary>
     /// <returns>Can the effect be canceled.</returns>
-    public virtual bool IsEffectCancellable() => false;
+    public virtual bool IsEffectCancellable()
+    {
+        return false;
+    }
 
     /// <summary>
     /// When the button is usable, this method is called to determine if the button can be clicked.

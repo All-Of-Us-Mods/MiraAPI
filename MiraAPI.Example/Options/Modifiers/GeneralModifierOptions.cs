@@ -6,9 +6,7 @@ namespace MiraAPI.Example.Options.Modifiers;
 public class GeneralModifierOptions : AbstractOptionGroup
 {
     public override string GroupName => "General";
-
     public override uint GroupPriority => 0;
-
     public override MenuCategory ParentMenu => MenuCategory.Modifiers;
 
     [ModdedToggleOption("Some Boolean Option")]

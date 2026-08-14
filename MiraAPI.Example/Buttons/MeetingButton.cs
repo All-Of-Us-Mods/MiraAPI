@@ -10,9 +10,7 @@ namespace MiraAPI.Example.Buttons;
 public class MeetingButton : CustomActionButton
 {
     public override string Name => "Call Meeting";
-
     public override float Cooldown => 15;
-
     public override int MaxUses => 3;
 
     public override LoadableAsset<Sprite> Sprite => ExampleAssets.ExampleButton;
@@ -30,10 +28,10 @@ public class MeetingButton : CustomActionButton
         PlayerControl.LocalPlayer.NetTransform.Halt();
         var minigame = Object.Instantiate(bt.MinigamePrefab, Camera.main!.transform, false);
 
-        var taskAdderGame = minigame as TaskAdderGame;
-        if (taskAdderGame != null)
+        var taskAdderGame = minigame.TryCast<TaskAdderGame>();
+        if (taskAdderGame)
         {
-            taskAdderGame.SafePositionWorld = bt.SafePositionLocal + (Vector2)bt.transform.position;
+            taskAdderGame!.SafePositionWorld = bt.SafePositionLocal + (Vector2)bt.transform.position;
         }
 
         minigame.transform.localPosition = new Vector3(0f, 0f, -50f);

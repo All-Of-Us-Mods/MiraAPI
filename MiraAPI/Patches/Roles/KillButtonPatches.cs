@@ -7,7 +7,7 @@ using UnityEngine;
 namespace MiraAPI.Patches.Roles;
 
 /// <summary>
-/// Fix <see cref="KillButton"/> issues for neutral killers.
+/// Fixes <see cref="KillButton"/> issues for neutral killers.
 /// </summary>
 [HarmonyPatch(typeof(KillButton))]
 public static class KillButtonPatches
@@ -46,7 +46,7 @@ public static class KillButtonPatches
     }
 
     /// <summary>
-    /// Use <see cref="MiraAPI.Networking.CustomMurderRpc.RpcCustomMurder(PlayerControl, PlayerControl, MeetingCheck, bool, bool, bool, bool, bool, bool)"/>
+    /// Use <see cref="CustomMurderRpc.RpcCustomMurder(PlayerControl, PlayerControl, MeetingCheck, bool, bool, bool, bool, bool, bool)"/>
     /// instead of <see cref="PlayerControl.RpcMurderPlayer(PlayerControl, bool)"/> from vanilla.
     /// </summary>
     [HarmonyPrefix]

@@ -5,6 +5,8 @@ using MiraAPI.Patches.Freeplay;
 using MiraAPI.Utilities.Assets;
 using TMPro;
 using UnityEngine;
+using System.Diagnostics.CodeAnalysis;
+
 namespace MiraAPI.Roles;
 
 /// <summary>
@@ -12,9 +14,8 @@ namespace MiraAPI.Roles;
 /// </summary>
 public record struct CustomRoleConfiguration
 {
-#pragma warning disable S1133
     [Obsolete("Default constructor is not supported. Please use the constructor that takes an ICustomRole parameter.")]
-#pragma warning restore S1133
+    [SuppressMessage("Info Code Smell", "S1133:Deprecated code should be removed", Justification = "Will not be removed, as this throws instead.")]
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public CustomRoleConfiguration()
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

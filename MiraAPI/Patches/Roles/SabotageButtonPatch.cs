@@ -11,7 +11,7 @@ public static class SabotageButtonPatch
     /// </summary>
     [HarmonyPatch(nameof(SabotageButton.DoClick))]
     [HarmonyPrefix]
-    public static bool DoClickPrefix(SabotageButton __instance)
+    public static bool DoClickPrefix()
     {
         var player = PlayerControl.LocalPlayer;
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using HarmonyLib;
 using Il2CppInterop.Runtime.Attributes;
@@ -18,6 +19,7 @@ namespace MiraAPI.Modifiers.ModifierDisplay;
 /// The code used to display <see cref="BaseModifier"/>s.
 /// </summary>
 [RegisterInIl2Cpp]
+[SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity Convention.")]
 public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
 {
     /// <summary>

@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 
 namespace MiraAPI.Patches.Stubs;
@@ -7,6 +8,7 @@ namespace MiraAPI.Patches.Stubs;
 /// Reverse patches for <see cref="Minigame"/>s.
 /// </summary>
 [HarmonyPatch]
+[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Stub parameters.")]
 public static class MinigameStubs
 {
     /// <summary>

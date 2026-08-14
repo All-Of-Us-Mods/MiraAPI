@@ -3,19 +3,11 @@
 /// <summary>
 /// Event fired when a player closes the doors in a room.
 /// </summary>
-public class CloseDoorsEvent : MiraCancelableEvent
+/// <param name="room">The room that was closed.</param>
+public class CloseDoorsEvent(SystemTypes room) : MiraCancelableEvent
 {
     /// <summary>
     /// Gets the room that the doors were closed in.
     /// </summary>
-    public SystemTypes Room { get; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CloseDoorsEvent"/> class.
-    /// </summary>
-    /// <param name="room">The room that was closed.</param>
-    public CloseDoorsEvent(SystemTypes room)
-    {
-        Room = room;
-    }
+    public SystemTypes Room { get; } = room;
 }

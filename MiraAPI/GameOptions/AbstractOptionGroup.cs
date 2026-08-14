@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using MiraAPI.Modifiers;
 using MiraAPI.Roles;
@@ -33,10 +34,9 @@ public abstract class AbstractOptionGroup
     /// <summary>
     /// Gets a value indicating whether the group should be shown in the modifiers menu.
     /// </summary>
-    // TODO: make this not a boolean
-#pragma warning disable S1133
+    // Completed: make this not a boolean
     [Obsolete("Use ParentMenu instead.")]
-#pragma warning restore S1133
+    [SuppressMessage("Info Code Smell", "S1133:Deprecated code should be removed", Justification = "Retained.")]
     public virtual bool ShowInModifiersMenu => false;
 
     /// <summary>
@@ -118,11 +118,9 @@ public abstract class AbstractRoleOptionGroup<T>() : AbstractOptionGroup<T> wher
         get
         {
             var role = CustomRoleManager.CustomMiraRoles.FirstOrDefault(x => x.GetType() == OptionableType);
-            if (role == null)
-            {
-                return new(new Color(0.7333f, 0.7333f, 0.7333f, 1));
-            }
-            return new(role.RoleColor, role.Configuration.IconTmp);
+            return role == null
+                ? new(new Color(0.7333f, 0.7333f, 0.7333f, 1))
+                : new(role.RoleColor, role.Configuration.IconTmp);
         }
     }
 }
@@ -133,7 +131,7 @@ public abstract class AbstractRoleOptionGroup<T>() : AbstractOptionGroup<T> wher
 public enum MenuCategory
 {
     /// <summary>
-    /// Placeholder for indexing purposes. Options don't exist in the presset tab.
+    /// Placeholder for indexing purposes. Options don't exist in the preset tab.
     /// </summary>
     Preset,
 

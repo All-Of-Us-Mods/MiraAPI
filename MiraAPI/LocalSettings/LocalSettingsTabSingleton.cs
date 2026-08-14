@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace MiraAPI.LocalSettings;
 
@@ -13,7 +14,6 @@ public static class LocalSettingsTabSingleton<T> where T : LocalSettingsTab
     /// <summary>
     /// Gets the instance of the <typeparamref name="T"/> setting tab.
     /// </summary>
-#pragma warning disable CA1000
+    [SuppressMessage("Design", "CA1000:Do not declare static members on generic types", Justification = "This is a utility class to get the instance of a local settings tab.")]
     public static T Instance => _instance ??= LocalSettingsManager.Tabs.OfType<T>().Single();
-#pragma warning restore CA1000
 }

@@ -20,12 +20,7 @@ public static class KeybindUtils
     /// <returns>The currently assigned keycode.</returns>
     public static KeyboardKeyCode GetKeycodeByKeybind(BaseKeybind keybind)
     {
-        if (keybind.RewiredInputAction == null)
-        {
-            return KeyboardKeyCode.None;
-        }
-
-        return GetKeycodeByActionId(keybind.RewiredInputAction.id);
+        return keybind.RewiredInputAction == null ? KeyboardKeyCode.None : GetKeycodeByActionId(keybind.RewiredInputAction.id);
     }
 
     /// <summary>

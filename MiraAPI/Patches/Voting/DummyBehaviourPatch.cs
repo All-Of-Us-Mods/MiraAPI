@@ -51,12 +51,14 @@ internal static class DummyBehaviourPatches
             yield break;
         }
 
-        List<byte> potentialSuspects = new();
-        potentialSuspects.AddRange(PlayerControl.AllPlayerControls
-            .ToArray()
-            .Where(p => p != dummy.myPlayer)
-            .Where(p => dummyVoteEvent.PlayerIsValid(p))
-            .Select(p => p.PlayerId));
+        List<byte> potentialSuspects =
+        [
+            .. PlayerControl.AllPlayerControls
+                .ToArray()
+                .Where(p => p != dummy.myPlayer)
+                .Where(p => dummyVoteEvent.PlayerIsValid(p))
+                .Select(p => p.PlayerId),
+        ];
 
         if (dummyVoteEvent.CanSkip)
         {

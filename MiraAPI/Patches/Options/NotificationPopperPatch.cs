@@ -14,10 +14,9 @@ public static class NotificationPopperPatch
         [HarmonyArgument(0)] StringNames key,
         [HarmonyArgument(1)] int roleCount,
         [HarmonyArgument(2)] int roleChance,
-        [HarmonyArgument(3)] RoleTeamTypes teamType,
         [HarmonyArgument(4)] bool playSound)
     {
-        if (CustomRoleManager.CustomRoles.Values.FirstOrDefault(x=>x.StringName==key) is not ICustomRole customRole)
+        if (CustomRoleManager.CustomRoles.Values.FirstOrDefault(x => x.StringName == key) is not ICustomRole customRole)
         {
             return true;
         }
