@@ -106,8 +106,8 @@ public static class TmpSpriteUtils
         {
             name = spriteName,
             hashCode = TMP_TextUtilities.GetSimpleHashCode(spriteName),
-            x = 0,
-            y = 0,
+            x = rect.x,
+            y = rect.y,
             width = rect.width,
             height = rect.height,
             xOffset = -(rect.width / 3) + (scale - 1) * (rect.width / 2),

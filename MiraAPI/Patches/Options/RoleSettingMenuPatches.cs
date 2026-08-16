@@ -545,12 +545,8 @@ public static class RoleSettingMenuPatches
             __instance.roleDescriptionText.transform.parent.localScale = new Vector3(0.0675f, 0.1494f, 0.5687f);
             labelBg.transform.localPosition = new Vector3(1.082f, 0.1054f, -2.5f);
 
-            __instance.roleScreenshot.sprite = Sprite.Create(
-                role.RoleScreenshot.texture,
-                new Rect(0, 0, 370, 230),
-                Vector2.one / 2,
-                100);
-            __instance.roleScreenshot.drawMode = SpriteDrawMode.Sliced;
+            __instance.roleScreenshot.sprite = role.RoleScreenshot;
+            __instance.roleScreenshot.drawMode = SpriteDrawMode.Simple;
         }
 
         __instance.roleHeaderSprite.color = customRole.OptionsMenuColor;

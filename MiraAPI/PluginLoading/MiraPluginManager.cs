@@ -139,6 +139,8 @@ public sealed class MiraPluginManager
         {
             // Save all buttons into a read-only collection for easy access
             CustomButtonManager.Buttons = new ReadOnlyCollection<CustomActionButton>(CustomButtonManager.CustomButtons);
+            CustomButtonManager.EventTypes = new ReadOnlyDictionary<Type, Type>(CustomButtonManager.ButtonEventTypes);
+            CustomButtonManager.CancelledEventTypes = new ReadOnlyDictionary<Type, Type>(CustomButtonManager.ButtonCancelledEventTypes);
 
             // Cache all the registered plugins into an array for easy access
             RegisteredPlugins = [.. _registeredPlugins.Values];
