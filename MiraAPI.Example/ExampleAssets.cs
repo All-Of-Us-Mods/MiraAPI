@@ -9,5 +9,6 @@ public static class ExampleAssets
 
     // Credit to EpicHorrors for the teleport button asset.
     public static LoadableResourceAsset TeleportButton { get; } = new("MiraAPI.Example.Resources.TeleportButton.png");
+    public static LoadableResourceAsset SharpshootButton { get; } = new("MiraAPI.Example.Resources.SharpshootButton.png");
     public static LoadableResourceAsset Banner { get; } = new("MiraAPI.Example.Resources.FortniteBanner.jpeg");
 }

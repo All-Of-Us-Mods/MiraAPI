@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using BepInEx.Configuration;
 using HarmonyLib;
 using MiraAPI.Patches.LocalSettings;
+using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using Reactor.Utilities.Extensions;
 using TMPro;
@@ -48,9 +49,19 @@ public abstract class LocalSettingsTab(ConfigFile config)
     public TabGroup? TabButton { get; internal set; }
 
     /// <summary>
+    /// Gets a collection of <see cref="TextMeshPro"/>s alongside the locale keys for them.
+    /// </summary>
+    public static Dictionary<TextMeshPro, string> TabGroups { get; } = [];
+
+    /// <summary>
     /// Gets the list of <see cref="ILocalSetting"/>s.
     /// </summary>
     public List<ILocalSetting> Settings { get; } = [];
+
+    /// <summary>
+    /// Gets a collection of <see cref="TextMeshPro"/>s alongside the locale keys for them.
+    /// </summary>
+    public Dictionary<TextMeshPro, string> Labels { get; } = [];
 
     /// <summary>
     /// Gets the list of <see cref="LocalSettingsButton"/>s.
@@ -73,12 +84,25 @@ public abstract class LocalSettingsTab(ConfigFile config)
     }
 
     /// <summary>
-    /// Attempts to open the tab.
+    /// Refreshes setting names upon opening the tab.
     /// Override for custom behavior.
     /// </summary>
     public virtual void Open()
     {
-        OptionsMenuPatches.Instance?.OpenTabGroup(TabIndex);
+        foreach (var setting in Settings)
+        {
+            setting.RefreshOption();
+        }
+        foreach (var button in Buttons)
+        {
+            button.RefreshButton();
+        }
+
+        foreach (var label in Labels)
+        {
+            label.Key.text =
+                $"<font=\"LiberationSans SDF\" material=\"LiberationSans SDF - Chat Message Masked\"><b>{label.Value.Translate()}</b></font>";
+        }
     }
 
     /// <summary>
@@ -216,7 +240,8 @@ public abstract class LocalSettingsTab(ConfigFile config)
         tabButtonText.transform.localPosition = new Vector3(0.078f, 0, 0);
         tabButtonText.transform.localScale = new Vector3(0.9f, 0.9f);
         tabButtonText.alignment = TextAlignmentOptions.Right;
-        tabButtonText.text = $"<b>{GetShortName(TabName)}</b>";
+        tabButtonText.text = $"<b>{GetShortName(TabName.Translate())}</b>";
+        TabGroups.Add(tabButtonText, TabName);
 
         var tabButton = tabButtonObject.GetComponent<PassiveButton>();
         var rollover = tabButtonObject.Rollover;
@@ -244,7 +269,7 @@ public abstract class LocalSettingsTab(ConfigFile config)
             tabButtonText.gameObject.SetActive(true);
             tabButtonText.transform.localPosition = new Vector3(-0.024f, 0, 0);
             tabButtonText.maxVisibleCharacters = int.MaxValue;
-            tabButtonText.text = TabName;
+            tabButtonText.text = TabName.Translate();
             tabButtonText.alignment = TextAlignmentOptions.Left;
             tabButtonRend?.gameObject.SetActive(!TabAppearance.HideIconOnHover);
         }));
@@ -268,13 +293,13 @@ public abstract class LocalSettingsTab(ConfigFile config)
 
             tabButtonText.transform.localPosition = new Vector3(0.1f, 0, 0);
             tabButtonText.maxVisibleCharacters = 4;
-            tabButtonText.text = $"<b>{GetShortName(TabName)}</b>";
+            tabButtonText.text = $"<b>{GetShortName(TabName.Translate())}</b>";
         }));
 
         return tabButtonObject.gameObject;
     }
 
-    private static void CreateLabel(GameObject template, Transform parent, string text, ref float offset)
+    private void CreateLabel(GameObject template, Transform parent, string text, ref float offset)
     {
         var label = Object.Instantiate(template, parent);
         label.transform.localPosition = new Vector3(0, 1.85f - offset);
@@ -282,7 +307,8 @@ public abstract class LocalSettingsTab(ConfigFile config)
         label.name = text;
 
         var tmp = label.GetComponent<TextMeshPro>();
-        tmp.text = $"<font=\"LiberationSans SDF\" material=\"LiberationSans SDF - Chat Message Masked\"><b>{text}</b></font>";
+        Labels.Add(tmp, text);
+        tmp.text = $"<font=\"LiberationSans SDF\" material=\"LiberationSans SDF - Chat Message Masked\"><b>{text.Translate()}</b></font>";
         tmp.alignment = TextAlignmentOptions.Center;
 
         var meshRend = label.GetComponent<MeshRenderer>();
@@ -292,7 +318,7 @@ public abstract class LocalSettingsTab(ConfigFile config)
         offset += 0.5f;
     }
 
-    private static string GetShortName(string name)
+    internal static string GetShortName(string name)
     {
         var shortName = string.Empty;
         name.Split(' ').Do(x => shortName += x[0]);

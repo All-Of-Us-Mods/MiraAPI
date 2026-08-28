@@ -1,4 +1,5 @@
 ﻿using MiraAPI.Hud;
+using MiraAPI.Translation;
 using MiraAPI.Utilities.Assets;
 using UnityEngine;
 
@@ -6,7 +7,7 @@ namespace MiraAPI.Example.Buttons;
 
 public class ThinkButton : CustomActionButton
 {
-    public override string Name => "Think";
+    public override string Name => "button.think";
     public override float Cooldown => 15f;
     public override float EffectDuration => 10f;
     public override int MaxUses => 1;
@@ -14,13 +15,12 @@ public class ThinkButton : CustomActionButton
     public override LoadableAsset<Sprite> Sprite => ExampleAssets.ExampleButton;
     protected override void OnClick()
     {
-        // This button does absolutely nothing besides changing its text
-        Button!.OverrideText("Thinking...");
+        Button!.OverrideText("button.think.thinking".Translate());
     }
 
     public override void OnEffectEnd()
     {
-        Button!.OverrideText("Think");
+        Button!.OverrideText("button.think".Translate());
     }
 
     public override bool IsEffectCancellable()

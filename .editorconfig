@@ -17,3 +17,6 @@ dotnet_diagnostic.CA1805.severity = none
 
 # S3358: Ternary operators should not be nested
 dotnet_diagnostic.S3358.severity = none
+
+# IDE1006: Naming Styles
+dotnet_diagnostic.IDE1006.severity = none

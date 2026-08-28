@@ -5,11 +5,11 @@ using System.Text;
 using AmongUs.GameOptions;
 using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using MiraAPI.LocalSettings;
 using MiraAPI.Modifiers;
 using MiraAPI.Modifiers.Types;
 using MiraAPI.PluginLoading;
 using MiraAPI.Roles;
+using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities.Extensions;
@@ -266,13 +266,9 @@ public static class TaskAdderPatches
             stringBuilder.Append('\\');
         }
         __instance.PathText.text = stringBuilder.ToString();
-        var prettyEnabled = LocalSettingsTabSingleton<MiraApiSettings>.Instance.PrettyTaskAdder.Value;
-        if (prettyEnabled)
-        {
-            __instance.PathText.fontSizeMin = 3;
-            __instance.PathText.fontSizeMax = 3;
-            __instance.transform.FindChild("TitleText_TMP")?.gameObject.DestroyImmediate();
-        }
+        __instance.PathText.fontSizeMin = 3;
+        __instance.PathText.fontSizeMax = 3;
+        __instance.transform.FindChild("TitleText_TMP")?.gameObject.DestroyImmediate();
 
         __instance.ActiveItems.ToArray().Do(x => x.gameObject.DeepDestroy(false));
         __instance.ActiveItems.Clear();
@@ -356,15 +352,12 @@ public static class TaskAdderPatches
         {
             TaskAddButton roleAddButton = Object.Instantiate(__instance.RoleButton);
             roleAddButton.SafePositionWorld = __instance.SafePositionWorld;
-            roleAddButton.Text.text = prettyEnabled ? role.GetRoleName() : "Be_" + role.GetRoleName() + ".exe";
+            roleAddButton.Text.text = role.GetRoleName();
             roleAddButton.Role = role;
-            if (prettyEnabled)
-            {
-                roleAddButton.Text.fontSizeMin = 1;
-                roleAddButton.FileImage.sprite = role.IsImpostor
-                    ? MiraAssets.ImpostorFile.LoadAsset()
-                    : MiraAssets.CrewmateFile.LoadAsset();
-            }
+            roleAddButton.Text.fontSizeMin = 1;
+            roleAddButton.FileImage.sprite = role.IsImpostor
+                ? MiraAssets.ImpostorFile.LoadAsset()
+                : MiraAssets.CrewmateFile.LoadAsset();
 
             __instance.AddFileAsChildCustom(roleAddButton, ref num, ref num2, ref num3);
             if (roleAddButton != null && roleAddButton.Button != null)
@@ -411,19 +404,16 @@ public static class TaskAdderPatches
                     var roleAddButton = Object.Instantiate(__instance.RoleButton);
                     roleAddButton.MyTask = null;
                     roleAddButton.SafePositionWorld = __instance.SafePositionWorld;
-                    roleAddButton.Text.text = prettyEnabled ? roleBehaviour.GetRoleName() : "Be_" + roleBehaviour.GetRoleName() + ".exe";
+                    roleAddButton.Text.text = roleBehaviour.GetRoleName();
                     roleAddButton.Text.EnableMasking();
                     roleAddButton.role = roleBehaviour;
-                    if (prettyEnabled)
-                    {
-                        roleAddButton.Text.fontSizeMin = 1;
-                        roleAddButton.FileImage.sprite = roleBehaviour.IsImpostor
-                            ? MiraAssets.ImpostorFile.LoadAsset()
-                            : MiraAssets.CrewmateFile.LoadAsset();
-                    }
+                    roleAddButton.Text.fontSizeMin = 1;
+                    roleAddButton.FileImage.sprite = roleBehaviour.IsImpostor
+                        ? MiraAssets.ImpostorFile.LoadAsset()
+                        : MiraAssets.CrewmateFile.LoadAsset();
                     if (roleBehaviour is ICustomRole custom)
                     {
-                        if (prettyEnabled && custom.Team == ModdedRoleTeams.Custom) roleAddButton.FileImage.sprite = MiraAssets.CustomTeamFile.LoadAsset();
+                        if (custom.Team == ModdedRoleTeams.Custom) roleAddButton.FileImage.sprite = MiraAssets.CustomTeamFile.LoadAsset();
                         var customColor = custom.IntroConfiguration?.IntroTeamColor ?? Color.gray;
                         if (custom.Team is ModdedRoleTeams.Crewmate)
                         {
@@ -460,7 +450,7 @@ public static class TaskAdderPatches
                     taskAddButton.role = null;
                     taskAddButton.MyTask = null;
                     taskAddButton.SafePositionWorld = __instance.SafePositionWorld;
-                    taskAddButton.Text.text = modifier.ModifierName;
+                    taskAddButton.Text.text = modifier.ModifierName.Translate();
                     taskAddButton.Text.fontSizeMin = 1;
                     taskAddButton.Text.EnableMasking();
                     taskAddButton.FileImage.color = modifier.FreeplayFileColor;

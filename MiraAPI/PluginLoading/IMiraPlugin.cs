@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Globalization;
+using System.Linq;
 using BepInEx.Configuration;
 
 namespace MiraAPI.PluginLoading;
@@ -12,6 +13,11 @@ public interface IMiraPlugin
     /// Gets a value indicating whether to display the plugin in the options menu.
     /// </summary>
     virtual bool DisplayOnOptionsMenu => true;
+
+    /// <summary>
+    /// Gets or sets a value for the localization id to use for anything registered under this mod.
+    /// </summary>
+    public virtual string ParentLocaleId => GetType().Name.ToLower(CultureInfo.InvariantCulture);
 
     /// <summary>
     /// Gets the name to display on the options menu.

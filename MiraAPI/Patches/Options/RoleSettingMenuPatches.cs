@@ -5,12 +5,13 @@ using System.Linq;
 using AmongUs.GameOptions;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using HarmonyLib;
+using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
 using MiraAPI.Networking;
 using MiraAPI.Roles;
+using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
-using Reactor.Localization.Utilities;
 using Reactor.Networking.Rpc;
 using Reactor.Utilities.Extensions;
 using TMPro;
@@ -74,7 +75,24 @@ public static class RoleSettingMenuPatches
             dividerImage.gameObject.SetActive(false);
         }
 
-        if (MenuState.Instance.FinishedRoleMenus.TryGetValue(MenuState.Instance.CurrentModIdx, out var finished) && finished)
+        var queuedRefresh = false;
+        if (MenuState.Instance.QueuedRoleMenuRefresh.TryGetValue(MenuState.Instance.CurrentModIdx, out var queued) && queued)
+        {
+            queuedRefresh = true;
+            var roleOptionSettings = roleMenu.scrollBar.Inner.GetComponentsInChildren<RoleOptionSetting>(true);
+            var headers = roleMenu.scrollBar.Inner.GetComponentsInChildren<CategoryHeaderMasked>(true);
+            foreach (var child in roleOptionSettings)
+            {
+                Object.Destroy(child.gameObject);
+            }
+            foreach (var child in headers)
+            {
+                Object.Destroy(child.gameObject);
+            }
+            yield return new WaitForEndOfFrame();
+            MenuState.Instance.QueuedRoleMenuRefresh[MenuState.Instance.CurrentModIdx] = false;
+        }
+        if (!queuedRefresh && MenuState.Instance.FinishedRoleMenus.TryGetValue(MenuState.Instance.CurrentModIdx, out var finished) && finished)
         {
             var roleOptionSettings = roleMenu.scrollBar.Inner.GetComponentsInChildren<RoleOptionSetting>(true);
             foreach (var r in roleOptionSettings)
@@ -153,6 +171,17 @@ public static class RoleSettingMenuPatches
                 ScrollerNum = 0.522f;
 
                 var num4 = 0;
+                var roleOptionSettings = roleMenu.scrollBar.Inner.GetComponentsInChildren<RoleOptionSetting>(false);
+                var headers = roleMenu.scrollBar.Inner.GetComponentsInChildren<CategoryHeaderMasked>(false);
+                foreach (var child in roleOptionSettings)
+                {
+                    Object.Destroy(child.gameObject);
+                }
+                foreach (var child in headers)
+                {
+                    Object.Destroy(child.gameObject);
+                }
+                yield return new WaitForEndOfFrame();
 
                 var roleGroups = MenuState.Instance.CurrentMod.InternalRoles.Values.OfType<ICustomRole>()
                     .ToLookup(x => x.RoleOptionsGroup);
@@ -166,7 +195,7 @@ public static class RoleSettingMenuPatches
                     // sort the groups by priority
                     var sortedRoleGroups = roleGroups
                         .OrderBy(x => x.Key.Priority)
-                        .ThenBy(x => x.Key.Name);
+                        .ThenBy(x => x.Key.Name.Translate());
 
                     var quotaThing = roleMenu.categoryHeaderEditRoleOrigin.transform.FindChild("QuotaHeader");
                     var usingNewQuota = false;
@@ -176,7 +205,7 @@ public static class RoleSettingMenuPatches
                     foreach (var grouping in sortedRoleGroups)
                     {
                         if (!grouping.Any() ||
-                            grouping.All(x => x.Configuration.HideSettings || !x.VisibleInSettings()))
+                            grouping.All(x=> x.Configuration.HideSettings || !x.VisibleInSettings() || !x.Configuration.AssociatedGameMode.IsInstanceOfType(CustomGameModeManager.ActiveMode)))
                         {
                             continue;
                         }
@@ -185,12 +214,7 @@ public static class RoleSettingMenuPatches
 
                         RoleGroupHidden.TryAdd(group, false);
 
-                        var name = group.Name switch
-                        {
-                            "Crewmate" => StringNames.CrewmateRolesHeader,
-                            "Impostor" => StringNames.ImpostorRolesHeader,
-                            _ => CustomStringName.CreateAndRegister(group.Name),
-                        };
+                        var name = MiraLocaleManager.GetOrCreateLocaleString(group.Name);
 
                         var categoryHeaderMasked = Object.Instantiate(
                             template,
@@ -264,8 +288,8 @@ public static class RoleSettingMenuPatches
                         quotaInst.gameObject.SetActive(!RoleGroupHidden[group]);
 
                         var label = RoleGroupHidden[group]
-                            ? "(Click to open)"
-                            : "(Click to close)";
+                            ? $"({"MiraApi.GameSetting.Global.ClickToOpen".Translate()})"
+                            : $"({"MiraApi.GameSetting.Global.ClickToClose".Translate()})";
                         var newText = Object.Instantiate(categoryHeaderMasked.Title, categoryHeaderMasked.transform);
                         newText.text = $"<size=70%>{label}</size>";
                         newText.transform.localPosition = new Vector3(2.6249f, -0.165f, 0f);
@@ -307,6 +331,7 @@ public static class RoleSettingMenuPatches
                                     RoleGroupHidden[group] = !groupHidden;
                                 }
 
+                                MenuState.Instance.QueuedRoleMenuRefresh[MenuState.Instance.CurrentModIdx] = false;
                                 MenuState.Instance.FinishedRoleMenus[MenuState.Instance.CurrentModIdx] = false;
 
                                 foreach (var child in roleMenu.RoleChancesSettings.transform)
@@ -326,6 +351,7 @@ public static class RoleSettingMenuPatches
                     }
                 }
             }
+            MenuState.Instance.QueuedRoleMenuRefresh[MenuState.Instance.CurrentModIdx] = false;
             MenuState.Instance.FinishedRoleMenus[MenuState.Instance.CurrentModIdx] = true;
         }
 
@@ -516,6 +542,26 @@ public static class RoleSettingMenuPatches
         CurrentRoleOptions = filteredOptions;
     }
 
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(RolesSettingsMenu.ChangeTab))]
+    public static void ChangeTabPatch(RolesSettingsMenu __instance)
+    {
+        var categoryHeaderMasked = __instance.AdvancedRolesSettings.transform.Find("CategoryHeaderMasked").GetComponent<CategoryHeaderMasked>();
+        categoryHeaderMasked.Title.text = TranslationController.Instance.GetString(StringNames.RoleSettingsLabel);
+        var labelBg = __instance.AdvancedRolesSettings.transform.FindChild("InfoLabelBackground");
+        var imgBg = __instance.AdvancedRolesSettings.transform.FindChild("Imagebackground");
+        imgBg.gameObject.SetActive(true);
+        __instance.roleScreenshot.gameObject.SetActive(true);
+        __instance.roleDescriptionText.transform.parent.localPosition = new Vector3(2.5176f, -0.2731f, -1f);
+        __instance.roleDescriptionText.transform.parent.localScale = new Vector3(0.0675f, 0.1494f, 0.5687f);
+        labelBg.transform.localPosition = new Vector3(1.082f, 0.1054f, -2.5f);
+        __instance.roleScreenshot.drawMode = SpriteDrawMode.Simple;
+        foreach (var optBehaviour in __instance.AdvancedRolesSettings.GetComponentsInChildren<OptionBehaviour>())
+        {
+            optBehaviour.gameObject.Destroy();
+        }
+    }
+
     private static void ChangeTab(RoleBehaviour role, RolesSettingsMenu __instance)
     {
         if (role is not ICustomRole customRole)
@@ -524,7 +570,7 @@ public static class RoleSettingMenuPatches
             return;
         }
 
-        __instance.roleDescriptionText.text = customRole.RoleLongDescription;
+        __instance.roleDescriptionText.text = customRole.RoleMedDescription;
         __instance.roleTitleText.text = role.GetRoleName();
 
         var imgBg = __instance.AdvancedRolesSettings.transform.FindChild("Imagebackground");
@@ -559,7 +605,7 @@ public static class RoleSettingMenuPatches
             comp.Destroy();
         }
 
-        categoryHeaderMasked.Title.text = "RETURN TO ROLE SETTINGS";
+        categoryHeaderMasked.Title.text = "MiraApi.ReturnToRoleSettings".Translate();
 
         if (!categoryHeaderMasked.gameObject.TryGetComponent<PassiveButton>(out _))
         {

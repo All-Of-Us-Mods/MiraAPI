@@ -1,5 +1,6 @@
 ﻿using System;
 using BepInEx.Configuration;
+using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using Reactor.Utilities.Extensions;
 using TMPro;
@@ -50,11 +51,16 @@ public class LocalNumberSetting(
     /// </summary>
     public MiraNumberSuffixes SuffixType { get; } = suffixType ?? MiraNumberSuffixes.None;
 
+    private SpriteRenderer _highlight { get; set; }
+
+    private TextMeshPro _btnText { get; set; }
+
     /// <inheritdoc />
     public override GameObject CreateOption(ToggleButtonBehaviour toggle, SlideBar slider, Transform parent, ref float offset, ref int order, bool last)
     {
         var button = Object.Instantiate(toggle, parent).GetComponent<PassiveButton>();
         var tmp = button.transform.FindChild("Text_TMP").GetComponent<TextMeshPro>();
+        _btnText = tmp;
         var rollover = button.GetComponent<ButtonRolloverHandler>();
         tmp.GetComponent<TextTranslatorTMP>().Destroy();
         button.gameObject.SetActive(true);
@@ -64,6 +70,7 @@ public class LocalNumberSetting(
         var highlight = button.transform.FindChild("ButtonHighlight")?.GetComponent<SpriteRenderer>();
         if (highlight != null)
         {
+            _highlight = highlight;
             highlight.color = Tab!.TabAppearance.NumberHoverColor;
             highlight.gameObject.SetActive(false);
         }
@@ -127,10 +134,20 @@ public class LocalNumberSetting(
     }
 
     /// <inheritdoc/>
+    public override void RefreshOption()
+    {
+        _btnText.text = GetValueText();
+        if (_highlight)
+        {
+            _highlight.gameObject.SetActive(false);
+        }
+    }
+
+    /// <inheritdoc/>
     protected override string GetValueText()
     {
         var value = GetValue();
         var formatted = Helpers.FormatValue(value, SuffixType, FormatString);
-        return $"<font=\"LiberationSans SDF\" material=\"LiberationSans SDF - Chat Message Masked\">{Name}: <b>{formatted}</font></b>";
+        return $"<font=\"LiberationSans SDF\" material=\"LiberationSans SDF - Chat Message Masked\">{Name.Translate()}: <b>{formatted}</font></b>";
     }
 }

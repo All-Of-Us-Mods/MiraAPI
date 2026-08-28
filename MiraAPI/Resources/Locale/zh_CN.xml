@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<resources>
+  <string name="MiraApi">Mira API</string>
+  <string name="MiraApi.VisualsUi">界面/视觉</string>
+  <string name="MiraApi.Accessibility">无障碍</string>
+  <string name="MiraApi.MiraApiBrand">MiraAPI</string>
+  <string name="MiraApi.ShowModifiersHudOnLeftSide">在左侧显示附加职业UI</string>
+  <string name="MiraApi.ShowKeybindsOnButtons">在按钮上显示快捷键</string>
+  <string name="MiraApi.ButtonScaleFactor">按钮缩放比例</string>
+  <string name="MiraApi.MaxFps">最大帧数</string>
+  <string name="MiraApi.EnableSabotageFlashes">启用破坏红色闪烁</string>
+  <string name="MiraApi.EnableSabotageBlare">启用破坏音效</string>
+  <string name="MiraApi.ReturnToRoleSettings">返回职业设置</string>
+  <string name="MiraApi.CustomCategory1">自定义类别 1</string>
+  <string name="MiraApi.CustomCategory2">自定义类别 2</string>
+  <string name="MiraApi.ModifierMenuDescription">在此配置附加职业及其设置！</string>
+  <string name="MiraApi.CustomOptionMenuDescription">为此模组应用游戏设置！</string>
+  <string name="gamemode.default">默认</string>
+  <string name="gamemode.default.description">默认原版游戏模式</string>
+  <string name="MiraApi.GameSetting.Global.ClickToClose">点击关闭</string>
+  <string name="MiraApi.GameSetting.Preset.Hint">为本游戏选择或创建一个预设</string>
+  <string name="MiraApi.GameSetting.Preset.Save">保存</string>
+  <string name="Roles">职业</string>
+  <string name="Modifiers">附加职业</string>
+    <string name="Modifier">附加属性</string>
+    <string name="MiraApi.RoleTeam.Crewmate">船员</string>
+    <string name="MiraApi.RoleTeam.Crewmate.Short">船员</string>
+    <string name="MiraApi.RoleTeam.Impostor">伪装者</string>
+    <string name="MiraApi.RoleTeam.Impostor.Short">伪装者</string>
+    <string name="MiraApi.RoleTeam.Neutral">中立</string>
+    <string name="MiraApi.RoleTeam.Neutral.Short">中立</string>
+</resources>

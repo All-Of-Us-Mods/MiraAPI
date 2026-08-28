@@ -5,13 +5,13 @@ namespace MiraAPI.Example.Options.Modifiers;
 
 public class GeneralModifierOptions : AbstractOptionGroup
 {
-    public override string GroupName => "General";
+    public override string GroupName => "options.generalModifier";
     public override uint GroupPriority => 0;
     public override MenuCategory ParentMenu => MenuCategory.Modifiers;
 
-    [ModdedToggleOption("Some Boolean Option")]
+    [ModdedToggleOption("options.generalModifier.someBooleanOption")]
     public bool SomeBooleanOption { get; set; } = true;
 
-    [ModdedNumberOption("Number Option", 0, 10, 1)]
+    [ModdedNumberOption("options.generalModifier.numberOption", 0, 10, 1)]
     public float NumberOption { get; set; } = 5;
 }

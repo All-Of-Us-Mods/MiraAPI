@@ -2,6 +2,7 @@
 using InnerNet;
 using MiraAPI.Events;
 using MiraAPI.Events.Vanilla.Player;
+using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
 using MiraAPI.Roles;
 
@@ -32,6 +33,7 @@ internal static class AmongUsClientSyncPatch
 
         ModdedOptionsManager.SyncAllOptions(clientData.Id);
         CustomRoleManager.SyncAllRoleSettings(clientData.Id);
+        GameModeOption.RpcSyncGamemode(PlayerControl.LocalPlayer, GameModeOption.Value);
     }
 
     [HarmonyPostfix]

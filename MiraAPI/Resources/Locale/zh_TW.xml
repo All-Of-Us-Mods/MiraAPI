@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<resources>
+    <string name="MiraApi.TopRightButtonScaleFactor">右上角 UI 縮放比例</string>
+    <string name="MiraApi.WikiOnBottomRow">維基按鈕顯示在主界面下方</string>
+    <string name="Roles">職業</string>
+    <string name="Modifier">附加屬性</string>
+    <string name="Modifiers">附加屬性</string>
+    <string name="MiraApi.RoleTeam.Crewmate">船員</string>
+    <string name="MiraApi.RoleTeam.Crewmate.Short">船員</string>
+    <string name="MiraApi.RoleTeam.Impostor">偽裝者</string>
+    <string name="MiraApi.RoleTeam.Impostor.Short">偽裝者</string>
+    <string name="MiraApi.RoleTeam.Neutral">中立</string>
+    <string name="MiraApi.RoleTeam.Neutral.Short">中立</string>
+</resources>

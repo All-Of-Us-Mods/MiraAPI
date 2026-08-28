@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using Il2CppInterop.Runtime.Attributes;
 using Reactor.Utilities.Attributes;
 using TMPro;

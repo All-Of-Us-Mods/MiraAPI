@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<resources>
+    <string name="MiraApi.TopRightButtonScaleFactor">Множитель разрешения верх.-правого интерфейса</string>
+    <string name="MiraApi.WikiOnBottomRow">Кнопка вики под основным интерфейсом</string>
+    <string name="Roles">Роли</string>
+    <string name="Modifier">Атрибут</string>
+    <string name="Modifiers">Атрибуты</string>
+    <string name="MiraApi.RoleTeam.Crewmate">Член Экипажа</string>
+    <string name="MiraApi.RoleTeam.Crewmate.Short">Экипаж</string>
+    <string name="MiraApi.RoleTeam.Impostor">Предатель</string>
+    <string name="MiraApi.RoleTeam.Impostor.Short">Пред</string>
+    <string name="MiraApi.RoleTeam.Neutral">Нейтрал</string>
+    <string name="MiraApi.RoleTeam.Neutral.Short">Нейт</string>
+</resources>

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using HarmonyLib;
+using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
 using MiraAPI.Networking;
 using MiraAPI.Roles;
@@ -151,7 +152,7 @@ public static class Extensions
     /// <returns>The player's <see cref="PlayerControl"/>.</returns>
     public static PlayerControl? GetPlayer(this PlayerVoteArea state)
     {
-        return GameData.Instance.GetPlayerById(state.TargetPlayerId)?.Object;
+        return GameData.Instance.GetPlayerById(state.PlayerId)?.Object;
     }
 
     /// <summary>
@@ -264,7 +265,7 @@ public static class Extensions
         }
     }
 
-    // Left intentionally, did you guys mean to use it in DeepDestroy?
+    // Left as is intentionally, did you guys mean to use it in DeepDestroy?
     [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Not known until intent it clear.")]
     [SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Unclear, but please shut up.")]
     private static IEnumerator Nuke(GameObject? go, bool clearGc)
@@ -363,6 +364,68 @@ public static class Extensions
         Resources.UnloadUnusedAssets();
         Il2CppSystem.GC.Collect();
         GC.Collect();
+    }
+
+    /// <summary>
+    /// Gets all child objects in a parent object.
+    /// </summary>
+    /// <param name="go">The object to get all children of.</param>
+    /// <returns>An <see cref="IEnumerable"/> that contains <see cref="GameObject"/>s.</returns>
+    public static IEnumerable<GameObject> GetAllChildren(this GameObject go)
+    {
+        for (var i = 0; i < go.transform.childCount; i++)
+        {
+            yield return go.transform.GetChild(i).gameObject;
+        }
+    }
+
+    /// <summary>
+    /// Gets all child objects in a parent Transform.
+    /// </summary>
+    /// <param name="go">The object to get all children of.</param>
+    /// <returns>An <see cref="IEnumerable"/> that contains <see cref="GameObject"/>s.</returns>
+    public static IEnumerable<GameObject> GetAllChildren(this Transform go)
+    {
+        for (var i = 0; i < go.transform.childCount; i++)
+        {
+            yield return go.transform.GetChild(i).gameObject;
+        }
+    }
+
+    /// <summary>
+    /// Resizes a <see cref="SpriteRenderer"/> appropriate to the maximum pixel size without messing up ratios.
+    /// </summary>
+    /// <param name="sprite">The <see cref="SpriteRenderer"/> to adjust.</param>
+    /// <param name="pixelSize">The scale for the sprite to be adjusted to.</param>
+    public static void SetSizeLimit(this SpriteRenderer sprite, float pixelSize)
+    {
+        sprite.drawMode = SpriteDrawMode.Sliced;
+        if (!sprite.sprite)
+        {
+            return;
+        }
+
+        float spriteWidth = sprite.sprite.rect.width;
+        float spriteHeight = sprite.sprite.rect.height;
+
+        sprite.size = spriteWidth < spriteHeight
+            ? new Vector2(pixelSize * spriteWidth / spriteHeight, pixelSize)
+            : new Vector2(pixelSize, pixelSize * spriteHeight / spriteWidth);
+    }
+
+    /// <summary>
+    /// Resizes a <see cref="SpriteRenderer"/> appropriate to the maximum pixel size without messing up ratios.
+    /// </summary>
+    /// <param name="spriteObj">The <see cref="GameObject"/> to adjust.</param>
+    /// <param name="pixelSize">The scale for the sprite to be adjusted to.</param>
+    public static void SetSizeLimit(this GameObject spriteObj, float pixelSize)
+    {
+        if (!spriteObj.TryGetComponent<SpriteRenderer>(out var sprite))
+        {
+            return;
+        }
+
+        sprite.SetSizeLimit(pixelSize);
     }
 
     /// <summary>
@@ -610,7 +673,8 @@ public static class Extensions
     public static bool IsCustom(this OptionBehaviour optionBehaviour)
     {
         return ModdedOptionsManager.ModdedOptions.Values.Any(
-            opt => opt.OptionBehaviour && opt.OptionBehaviour == optionBehaviour);
+            opt => opt.OptionBehaviour && opt.OptionBehaviour == optionBehaviour)
+            || optionBehaviour.Equals(GameModeOption.OptionBehaviour);
     }
 
     /// <summary>

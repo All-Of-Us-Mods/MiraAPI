@@ -8,17 +8,17 @@ namespace MiraAPI.Patches.Roles;
 /// <summary>
 /// Patches to return the correct role counts.
 /// </summary>
-[HarmonyPatch(typeof(RoleOptionsCollectionV10))]
+[HarmonyPatch(typeof(RoleOptionsCollectionV11))]
 public static class RoleOptionsCollectionPatch
 {
     /// <summary>
-    /// This patch fixes <see cref="RoleOptionsCollectionV10.GetNumPerGame(RoleTypes)"/> being inlined (2025.9.9) in the original code.
+    /// This patch fixes <see cref="RoleOptionsCollectionV11.GetNumPerGame(RoleTypes)"/> being inlined (2025.9.9) in the original code.
     /// </summary>
     [HarmonyPrefix]
-    [HarmonyPatch(nameof(RoleOptionsCollectionV10.AnyRolesEnabled))]
-    public static bool AnyRolesEnabledPrefix(RoleOptionsCollectionV10 __instance)
+    [HarmonyPatch(nameof(RoleOptionsCollectionV11.AnyRolesEnabled))]
+    public static bool AnyRolesEnabledPrefix(RoleOptionsCollectionV11 __instance)
     {
-        foreach (KeyValuePair<RoleTypes, RoleDataV10> keyValuePair in __instance.roles)
+        foreach (KeyValuePair<RoleTypes, RoleDataV11> keyValuePair in __instance.roles)
         {
             if (__instance.GetNumPerGame(keyValuePair.Key) > 0)
             {
@@ -33,7 +33,7 @@ public static class RoleOptionsCollectionPatch
     /// </summary>
     /// <returns>Return <see langword="false"/> to skip original method, <see langword="true"/> to not.</returns>
     [HarmonyPrefix]
-    [HarmonyPatch(nameof(RoleOptionsCollectionV10.GetChancePerGame))]
+    [HarmonyPatch(nameof(RoleOptionsCollectionV11.GetChancePerGame))]
     public static bool GetChancePrefix(RoleTypes role, ref int __result)
     {
         if (!CustomRoleManager.GetCustomRoleBehaviour(role, out var customRole) || customRole == null)
@@ -63,7 +63,7 @@ public static class RoleOptionsCollectionPatch
     /// </summary>
     /// <returns>Return <see langword="false"/> to skip original method, <see langword="true"/> to not.</returns>
     [HarmonyPrefix]
-    [HarmonyPatch(nameof(RoleOptionsCollectionV10.GetNumPerGame))]
+    [HarmonyPatch(nameof(RoleOptionsCollectionV11.GetNumPerGame))]
     public static bool GetNumPrefix(RoleTypes role, ref int __result)
     {
         if (!CustomRoleManager.GetCustomRoleBehaviour(role, out var customRole) || customRole == null)

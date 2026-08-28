@@ -4,6 +4,7 @@ using BepInEx.Configuration;
 using MiraAPI.GameOptions;
 using MiraAPI.Modifiers;
 using MiraAPI.PluginLoading;
+using MiraAPI.Translation;
 using UnityEngine;
 
 namespace MiraAPI.Roles;
@@ -14,19 +15,75 @@ namespace MiraAPI.Roles;
 public interface ICustomRole : IOptionable
 {
     /// <summary>
+    /// Gets the id part used to build the role's translation keys. It is recommended to simply call it what the role is, as other mods may utilize it.
+    /// </summary>
+    string IdPart => GetType().Name;
+
+    /// <summary>
+    /// Gets the id part used to build the role's translation keys. It is recommended to call it ModGuid.Role.Faction
+    /// </summary>
+    string IdPrefix => GetType().Namespace!;
+
+    /// <summary>
     /// Gets the name of the role.
     /// </summary>
-    string RoleName { get; }
+    string RoleName => MiraLocaleManager.Get(RoleNameLocale);
+
+    /// <summary>
+    /// Gets the role's name id for localization.
+    /// </summary>
+    string RoleNameLocale => MiraLocaleManager.BuildTranslationId(IdPrefix, IdPart);
 
     /// <summary>
     /// Gets the description of the role. Used in the Intro Cutscene.
     /// </summary>
-    string RoleDescription { get; }
+    string RoleDescription => MiraLocaleManager.Get(RoleDescriptionLocale);
 
     /// <summary>
-    /// Gets the long description of the role. Used in the Role Tab and Role Options.
+    /// Gets the role's intro blurb id for localization.
     /// </summary>
-    string RoleLongDescription { get; }
+    string RoleDescriptionLocale => MiraLocaleManager.BuildTranslationId(IdPrefix, IdPart, "IntroBlurb");
+
+    /// <summary>
+    /// Gets the medium description of the role. Used in the role guide and options menu.
+    /// </summary>
+    string RoleMedDescription => MiraLocaleManager.Get(RoleMedDescriptionLocale);
+
+    /// <summary>
+    /// Gets the role's medium description id for localization.
+    /// </summary>
+    string RoleMedDescriptionLocale => MiraLocaleManager.BuildTranslationId(IdPrefix, IdPart, "MedDescription");
+
+    /// <summary>
+    /// Gets the long description of the role. Used in the Role Tab.
+    /// </summary>
+    string RoleLongDescription => MiraLocaleManager.Get(RoleLongDescriptionLocale);
+
+    /// <summary>
+    /// Gets the role's long description id for localization.
+    /// </summary>
+    string RoleLongDescriptionLocale => MiraLocaleManager.BuildTranslationId(IdPrefix, IdPart, "TabDescription");
+
+    /// <summary>
+    /// Gets the wiki description of the role. Used in the wiki, but not currently required.
+    /// </summary>
+    string RoleWikiDescription => MiraLocaleManager.Get(RoleLongDescriptionLocale);
+
+    /// <summary>
+    /// Gets the role's wiki description id for localization.
+    /// </summary>
+    string RoleWikiDescriptionLocale => MiraLocaleManager.BuildTranslationId(IdPrefix, IdPart, "WikiDescription");
+
+    /// <summary>
+    /// Gets the faction / alignment of the role. Used in the role guide.
+    /// </summary>
+    string RoleFactionTitle => Team switch
+    {
+        ModdedRoleTeams.Crewmate => MiraLocaleManager.Get("MiraApi.RoleTeam.Crewmate"),
+        ModdedRoleTeams.Impostor => MiraLocaleManager.Get("MiraApi.RoleTeam.Impostor"),
+        ModdedRoleTeams.Custom => MiraLocaleManager.Get("MiraApi.RoleTeam.Neutral"),
+        _ => MiraLocaleManager.Get("MiraApi.RoleTeam.Other"),
+    };
 
     /// <summary>
     /// Gets the <see cref="Color"/> of the role.

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using InnerNet;
 using MiraAPI.Events;
 using MiraAPI.Events.Vanilla.Meeting.Voting;
 using MiraAPI.Networking;
@@ -42,9 +43,9 @@ public static class VotingUtils
     /// <param name="voteData">The player's <see cref="PlayerVoteData"/>.</param>
     /// <param name="suspectIdx">Who the player voted for.</param>
     /// <param name="cancelVote">Whether you want the vote to commence or not.</param>
-    private static void HandleVote(PlayerVoteData voteData, byte suspectIdx, out bool cancelVote)
+    private static void HandleVote(PlayerVoteData voteData, byte suspectIdx, bool byJudge, out bool cancelVote)
     {
-        var @event = new HandleVoteEvent(voteData, suspectIdx);
+        var @event = new HandleVoteEvent(voteData, suspectIdx, byJudge);
         MiraEventManager.InvokeEvent(@event);
 
         cancelVote = @event.PreventVote;
@@ -61,7 +62,14 @@ public static class VotingUtils
             return;
         }
 
-        voteData.DecreaseRemainingVotes(1);
+        if (byJudge)
+        {
+            voteData.SetRemainingVotes(0);
+        }
+        else
+        {
+            voteData.DecreaseRemainingVotes(1);
+        }
         voteData.VoteForPlayer(suspectIdx);
     }
 
@@ -76,14 +84,14 @@ public static class VotingUtils
     {
         if (!source.IsHost()) return;
 
-        MeetingHud.Instance.playerStates.First(state => state.TargetPlayerId == voterId).UnsetVote();
+        MeetingHud.Instance.playerStates.First(state => state.PlayerId == voterId).UnsetVote();
 
         if (PlayerControl.LocalPlayer.PlayerId != voterId)
         {
             return;
         }
 
-        MeetingHud.Instance.playerStates.First(state => state.TargetPlayerId == votedFor).ThumbsDown.enabled = false;
+        MeetingHud.Instance.playerStates.First(state => state.PlayerId == votedFor).ThumbsDown.enabled = false;
 
         if (!AmongUsClient.Instance.AmHost)
         {
@@ -94,11 +102,72 @@ public static class VotingUtils
 
         foreach (var t in MeetingHud.Instance.playerStates)
         {
-            t.voteComplete = false;
+            t.VoteComplete = false;
         }
 
-        MeetingHud.Instance.SkipVoteButton.voteComplete = false;
+        MeetingHud.Instance.SkipVoteButton.VoteComplete = false;
         MeetingHud.Instance.SkipVoteButton.gameObject.SetActive(true);
+    }
+
+    /// <summary>
+    /// Networks the casting of a vote. We replace the vanilla solution with a custom version that works for Judge specifically.
+    /// </summary>
+    /// <param name="source">The <see cref="PlayerControl"/> who sent this RPC.</param>
+    /// <param name="srcPlayerId">The id of the player who casted the vote.</param>
+    /// <param name="suspectPlayerId">The voted player's id.</param>
+    /// <param name="overruleNonce">Data that is checked by the Judge role to determine which Judge takes priority.</param>
+    [MethodRpc((uint)MiraRpc.QueueOverruleVotes)]
+    public static void RpcQueueOverruleVotes(PlayerControl source, byte srcPlayerId, byte suspectPlayerId, ushort overruleNonce)
+    {
+        CustomCastJudgeVote(srcPlayerId, suspectPlayerId, overruleNonce);
+    }
+
+    private static void CustomCastJudgeVote(PlayerId judgePlayerId, PlayerId targetPlayerId, ushort overruleNonce)
+    {
+        var plr = GameData.Instance.GetPlayerById(judgePlayerId.Value);
+        if (!plr) return;
+
+        var voteData = plr.Object.GetVoteData();
+        if (!voteData) return;
+
+        HandleVote(voteData, targetPlayerId.Value, true, out var cancelVote);
+
+        // Handle local behaviour for the voter (for some reason checking AmOwner does not work for host)
+        if (PlayerControl.LocalPlayer.PlayerId == judgePlayerId.Value)
+        {
+            if (!cancelVote) SoundManager.Instance.PlaySound(MeetingHud.Instance.VoteLockinSound, false);
+
+            foreach (var playerVoteArea in MeetingHud.Instance.playerStates)
+            {
+                playerVoteArea.ClearButtons();
+            }
+
+            MeetingHud.Instance.SkipVoteButton.ClearButtons();
+
+            var localVoteData = PlayerControl.LocalPlayer.GetVoteData();
+            if (!localVoteData || localVoteData.VotesRemaining != 0) return;
+
+            MeetingHud.Instance.SkipVoteButton.VoteComplete = true;
+            MeetingHud.Instance.SkipVoteButton.gameObject.SetActive(false);
+        }
+
+        if (cancelVote) return;
+
+        // If player has no more votes, then make it show that the player has used all their votes.
+        if (voteData.VotesRemaining == 0)
+        {
+            MeetingHud.Instance.AddOrUpdateJudgeOverrule(judgePlayerId, targetPlayerId, overruleNonce);
+            MeetingHud.Instance.playerStates.First(x => x.PlayerId == judgePlayerId.Value).SetVote(targetPlayerId.Value);
+        }
+
+        // If host, then check end voting, and set votes/send chat if applicable
+        if (!PlayerControl.LocalPlayer.IsHost()) return;
+
+        MeetingHud.Instance.SetDirtyBit(1U);
+        MeetingHud.Instance.CheckForEndVoting();
+
+        if (voteData.VotesRemaining != 0) return;
+        PlayerControl.LocalPlayer.RpcSendChatNote(judgePlayerId.Value, ChatNoteTypes.DidVote);
     }
 
     /// <summary>
@@ -126,7 +195,7 @@ public static class VotingUtils
         var voteData = plr.Object.GetVoteData();
         if (!voteData) return;
 
-        HandleVote(voteData, suspectPlayerId, out var cancelVote);
+        HandleVote(voteData, suspectPlayerId, false, out var cancelVote);
 
         // Handle local behaviour for the voter (for some reason checking AmOwner does not work for host)
         if (PlayerControl.LocalPlayer.PlayerId == srcPlayerId)
@@ -143,7 +212,7 @@ public static class VotingUtils
             var localVoteData = PlayerControl.LocalPlayer.GetVoteData();
             if (!localVoteData || localVoteData.VotesRemaining != 0) return;
 
-            MeetingHud.Instance.SkipVoteButton.voteComplete = true;
+            MeetingHud.Instance.SkipVoteButton.VoteComplete = true;
             MeetingHud.Instance.SkipVoteButton.gameObject.SetActive(false);
         }
 
@@ -152,7 +221,7 @@ public static class VotingUtils
         // If player has no more votes, then make it show that the player has used all their votes.
         if (voteData.VotesRemaining == 0)
         {
-            MeetingHud.Instance.playerStates.First(x => x.TargetPlayerId == srcPlayerId).SetVote(suspectPlayerId);
+            MeetingHud.Instance.playerStates.First(x => x.PlayerId == srcPlayerId).SetVote(suspectPlayerId);
         }
 
         // If host, then check end voting, and set votes/send chat if applicable
@@ -239,7 +308,7 @@ public static class VotingUtils
                     MeetingHud.Instance.BloopAVoteIcon(playerById, num, MeetingHud.Instance.SkippedVoting.transform);
                     num++;
                 }
-                else if (vote.Suspect == playerVoteArea.TargetPlayerId)
+                else if (vote.Suspect == playerVoteArea.PlayerId)
                 {
                     if (!delays.TryAdd(vote.Suspect, 0))
                     {

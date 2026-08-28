@@ -1,5 +1,5 @@
-﻿using MiraAPI.Utilities;
-using Reactor.Localization.Utilities;
+﻿using MiraAPI.Translation;
+using MiraAPI.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.Colors;
@@ -43,7 +43,7 @@ public sealed class CustomColor(StringNames name, Color32 mainColor, Color32 sha
     }
 
     /// <inheritdoc />
-    public CustomColor(string name, Color32 mainColor, Color32 shadowColor) : this(CustomStringName.CreateAndRegister(name), mainColor, shadowColor)
+    public CustomColor(string name, Color32 mainColor, Color32 shadowColor) : this(MiraLocaleManager.GetOrCreateLocaleString(name), mainColor, shadowColor)
     {
     }
 }

@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<resources>
+    <string name="MiraApi.TopRightButtonScaleFactor">버튼 크기</string>
+    <string name="Roles">역할</string>
+    <string name="Modifier">애드온</string>
+    <string name="Modifiers">애드온들</string>
+    <string name="MiraApi.RoleTeam.Crewmate">크루원</string>
+    <string name="MiraApi.RoleTeam.Crewmate.Short">크루</string>
+    <string name="MiraApi.RoleTeam.Impostor">임포스터</string>
+    <string name="MiraApi.RoleTeam.Impostor.Short">임포스터</string>
+    <string name="MiraApi.RoleTeam.Neutral">중립</string>
+    <string name="MiraApi.RoleTeam.Neutral.Short">중립</string>
+</resources>

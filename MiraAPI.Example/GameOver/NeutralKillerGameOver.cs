@@ -1,5 +1,6 @@
 ﻿using MiraAPI.Example.Roles;
 using MiraAPI.GameEnd;
+using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using UnityEngine;
 
@@ -14,7 +15,7 @@ public class NeutralKillerGameOver : CustomGameOver
 
     public override void AfterEndGameSetup(EndGameManager endGameManager)
     {
-        endGameManager.WinText.text = "Outcast Killer Wins!";
+        endGameManager.WinText.text = "gameover.outcastKiller.win".Translate();
         endGameManager.WinText.color = Color.magenta;
         endGameManager.BackgroundBar.material.SetColor(ShaderID.Color, Color.magenta);
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using Reactor.Utilities.Extensions;
 using TMPro;
@@ -28,6 +29,8 @@ public class LocalSettingsButton(string text, Action onClick)
     /// </summary>
     public LocalSettingsTab? Tab { get; internal set; }
 
+    private TextMeshPro _btnText { get; set; }
+
     internal GameObject CreateButton(ToggleButtonBehaviour toggle, Transform parent, ref float offset, ref int order, bool last)
     {
         var button = Object.Instantiate(toggle, parent).GetComponent<PassiveButton>();
@@ -51,7 +54,8 @@ public class LocalSettingsButton(string text, Action onClick)
             button.transform.localPosition = new Vector3(order == 1 ? -1.185f : 1.185f, 1.85f - offset, -7);
         }
 
-        tmp.text = Text;
+        tmp.text = Text.Translate();
+        _btnText = tmp;
         button.name = Text;
         button.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
         rollover.OutColor = Tab!.TabAppearance.ButtonColor;
@@ -73,5 +77,10 @@ public class LocalSettingsButton(string text, Action onClick)
             offset += 0.6f;
 
         return button.gameObject;
+    }
+
+    public void RefreshButton()
+    {
+        _btnText.text = Text.Translate();
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using MiraAPI.GameOptions.OptionTypes;
+using MiraAPI.Translation;
 
 namespace MiraAPI.GameOptions.Attributes;
 
@@ -13,7 +14,7 @@ public class ModdedEnumOptionAttribute(string title, Type enumType, string[]? va
 {
     internal override IModdedOption CreateOption(object? value, PropertyInfo property)
     {
-        var opt = new ModdedEnumOption(Title, (int)(value ?? 0), enumType, values);
+        var opt = new ModdedEnumOption(Title.Translate(), (int)(value ?? 0), enumType, values);
         return opt;
     }
 

@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<resources>
+    <string name="MiraApi.TopRightButtonScaleFactor">Fattore Di Scala Dei Pulsanti</string>
+    <string name="Roles">Ruoli</string>
+    <string name="Modifier">Modificatore</string>
+    <string name="Modifiers">Modificatori</string>
+    <string name="MiraApi.RoleTeam.Crewmate">Astronauta</string>
+    <string name="MiraApi.RoleTeam.Crewmate.Short">Astronauta</string>
+    <string name="MiraApi.RoleTeam.Impostor">Impostore</string>
+    <string name="MiraApi.RoleTeam.Impostor.Short">Impo</string>
+    <string name="MiraApi.RoleTeam.Neutral">Neutrale</string>
+    <string name="MiraApi.RoleTeam.Neutral.Short">Neutro</string>
+</resources>

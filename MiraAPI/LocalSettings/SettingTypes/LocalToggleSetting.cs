@@ -1,7 +1,7 @@
 ﻿using System;
 using BepInEx.Configuration;
+using MiraAPI.Translation;
 using MiraAPI.Utilities;
-using Reactor.Localization.Utilities;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -23,10 +23,13 @@ public class LocalToggleSetting(
     string? description = null
 ) : LocalSettingBase<bool>(tab, configEntry, name, description)
 {
+    private ToggleButtonBehaviour _toggle { get; set; }
+
     /// <inheritdoc />
     public override GameObject CreateOption(ToggleButtonBehaviour toggle, SlideBar slider, Transform parent, ref float offset, ref int order, bool last)
     {
         var toggleObject = Object.Instantiate(toggle, parent).GetComponent<ToggleButtonBehaviour>();
+        _toggle = toggleObject;
         var tmp = toggleObject.transform.FindChild("Text_TMP").GetComponent<TextMeshPro>();
         var passiveButton = toggleObject.GetComponent<PassiveButton>();
         var rollover = toggleObject.GetComponent<ButtonRolloverHandler>();
@@ -42,9 +45,9 @@ public class LocalToggleSetting(
             toggleObject.transform.localPosition = new Vector3(order == 1 ? -1.185f : 1.185f, 1.85f - offset, -7);
         }
 
-        toggleObject.BaseText = CustomStringName.CreateAndRegister(Name);
+        toggleObject.BaseText = MiraLocaleManager.GetOrCreateLocaleString(Name);
         toggleObject.UpdateText(GetValue());
-        toggleObject.name = Name;
+        toggleObject.name = Name.Translate();
         toggleObject.Background.color = GetValue() ? Tab!.TabAppearance.ToggleActiveColor : Tab!.TabAppearance.ToggleInactiveColor;
         passiveButton.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
         rollover.OverColor = Tab!.TabAppearance.ToggleHoverColor;
@@ -80,5 +83,12 @@ public class LocalToggleSetting(
             offset += 0.6f;
 
         return toggleObject.gameObject;
+    }
+
+    /// <inheritdoc/>
+    public override void RefreshOption()
+    {
+        _toggle.UpdateText(GetValue());
+        _toggle.Background.color = GetValue() ? Tab!.TabAppearance.ToggleActiveColor : Tab!.TabAppearance.ToggleInactiveColor;
     }
 }

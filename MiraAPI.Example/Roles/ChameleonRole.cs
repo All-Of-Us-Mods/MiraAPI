@@ -10,9 +10,8 @@ namespace MiraAPI.Example.Roles;
 
 public class ChameleonRole : CrewmateRole, ICustomRole
 {
-    public string RoleName => "Chameleon";
-    public string RoleLongDescription => "Stay invisible while not moving.";
-    public string RoleDescription => RoleLongDescription;
+    public string IdPart => "Chameleon";
+    public string IdPrefix => "ApiExample.Role.Crewmate";
     public Color RoleColor => Palette.AcceptedGreen;
     public ModdedRoleTeams Team => ModdedRoleTeams.Crewmate;
 
@@ -22,7 +21,9 @@ public class ChameleonRole : CrewmateRole, ICustomRole
     {
         OptionsScreenshot = ExampleAssets.Banner,
         Icon = MiraAssets.CrewmateFile,
-        IconTmp = TmpSpriteUtils.CreateSpriteAsset(MiraAssets.CrewmateFile.LoadAsset(), "ApiExample.Role.Impostor.ChameleonRole"),
+        IconTmp = TmpSpriteUtils.CreateSpriteAsset(
+            MiraAssets.CrewmateFile.LoadAsset(),
+            "ApiExample.Role.Impostor.ChameleonRole"),
         IntroSound = CustomRoleUtils.GetIntroSound(RoleTypes.Shapeshifter),
     };
 
@@ -56,12 +57,18 @@ public class ChameleonRole : CrewmateRole, ICustomRole
         {
             SpriteRenderer rend = Player.cosmetics.currentBodySprite.BodySprite;
             TextMeshPro tmp = Player.cosmetics.nameText;
-            tmp.color = Color.Lerp(tmp.color, new Color(tmp.color.r, tmp.color.g, tmp.color.b, Player.AmOwner ? 0.3f : 0), Time.deltaTime * 4f);
+            tmp.color = Color.Lerp(
+                tmp.color,
+                new Color(tmp.color.r, tmp.color.g, tmp.color.b, Player.AmOwner ? 0.3f : 0),
+                Time.deltaTime * 4f);
             rend.color = Color.Lerp(rend.color, new Color(1, 1, 1, Player.AmOwner ? 0.3f : 0), Time.deltaTime * 4f);
 
             foreach (var cosmetic in Player.cosmetics.transform.GetComponentsInChildren<SpriteRenderer>())
             {
-                cosmetic.color = Color.Lerp(cosmetic.color, new Color(1, 1, 1, Player.AmOwner ? 0.3f : 0), Time.deltaTime * 4f);
+                cosmetic.color = Color.Lerp(
+                    cosmetic.color,
+                    new Color(1, 1, 1, Player.AmOwner ? 0.3f : 0),
+                    Time.deltaTime * 4f);
             }
         }
     }
@@ -75,6 +82,7 @@ public class ChameleonRole : CrewmateRole, ICustomRole
         {
             cosmetic.color = Color.white;
         }
+
         Player.cosmetics.currentBodySprite.BodySprite.color = Color.white;
         Player.cosmetics.nameText.color = Color.white;
     }

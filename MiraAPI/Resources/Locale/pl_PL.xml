@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<resources>
+    <string name="MiraApi.TopRightButtonScaleFactor">Skala Przycisków</string>
+    <string name="MiraApi.WikiOnBottomRow">Przycisk Wiki Poniżej Głównego UI</string>
+    <string name="Roles">Role</string>
+    <string name="Modifier">Modyfikator</string>
+    <string name="Modifiers">Modyfikatory</string>
+    <string name="MiraApi.RoleTeam.Crewmate">Załogant</string>
+    <string name="MiraApi.RoleTeam.Crewmate.Short">Zał</string>
+    <string name="MiraApi.RoleTeam.Impostor">Intruz</string>
+    <string name="MiraApi.RoleTeam.Impostor.Short">Int</string>
+    <string name="MiraApi.RoleTeam.Neutral">Neutralny</string>
+    <string name="MiraApi.RoleTeam.Neutral.Short">Neut</string>
+</resources>

@@ -1,6 +1,7 @@
-using AmongUs.GameOptions;
 using System;
+using AmongUs.GameOptions;
 using Il2CppInterop.Runtime.Attributes;
+using MiraAPI.GameModes;
 using MiraAPI.Patches.Freeplay;
 using MiraAPI.Utilities.Assets;
 using TMPro;
@@ -100,6 +101,11 @@ public record struct CustomRoleConfiguration
     /// </summary>
     [HideFromIl2Cpp]
     public LoadableAsset<AudioClip>? IntroSound { get; set; } = null;
+
+    /// <summary>
+    /// Gets or sets the associated game mode for this role. This is used to determine if the role should be available in a specific game mode.
+    /// </summary>
+    public Type AssociatedGameMode { get; set; } = typeof(ClassicMode);
 
     /// <summary>
     /// Gets or sets a value indicating whether the role is affected by light affectors on Airship.

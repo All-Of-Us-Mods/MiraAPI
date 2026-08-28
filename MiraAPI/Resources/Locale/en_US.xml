@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<resources>
+    <string name="MiraApi">Mira API</string>
+    <string name="MiraApi.VisualsUi">Visuals/UI</string>
+    <string name="MiraApi.Accessibility">Accessibility</string>
+    <string name="MiraApi.MiraApiBrand">MiraAPI</string>
+    <string name="MiraApi.ShowModifiersHudOnLeftSide">Show Modifiers HUD on Left Side</string>
+    <string name="MiraApi.ShowKeybindsOnButtons">Show Keybinds on Buttons</string>
+    <string name="MiraApi.ButtonScaleFactor">Button Scale Factor</string>
+    <string name="MiraApi.TopRightButtonScaleFactor">Top-Right UI Scale Factor</string>
+    <string name="MiraApi.MaxFps">Max FPS</string>
+    <string name="MiraApi.WikiOnBottomRow">Display Wiki on Bottom Row</string>
+    <string name="MiraApi.EnableSabotageFlashes">Enable Sabotage Flashes</string>
+    <string name="MiraApi.EnableSabotageBlare">Enable Sabotage Blare</string>
+    <string name="MiraApi.ReturnToRoleSettings">RETURN TO ROLE SETTINGS</string>
+    <string name="MiraApi.CustomCategory1">Custom Category 1</string>
+    <string name="MiraApi.CustomCategory2">Custom Category 2</string>
+    <string name="MiraApi.ModifierMenuDescription">Configure modifiers and their settings here!</string>
+    <string name="MiraApi.CustomOptionMenuDescription">Apply game settings for this mod!</string>
+    <string name="MiraApi.Gamemode.Classic">Classic</string>
+    <string name="MiraApi.Gamemode.Classic.Description">The classic Among Us experience!
+Find the Impostors or deceive the Crew.</string>
+    <string name="MiraApi.Gamemode.HideAndSeek">Hide n Seek</string>
+    <string name="MiraApi.Gamemode.HideAndSeek.Description">You can run, but you can't hide!
+Outlive the timer or eliminate the crew.</string>
+    <string name="MiraApi.GameSetting.Global.ClickToClose">Click to close</string>
+    <string name="MiraApi.GameSetting.Global.ClickToOpen">Click to open</string>
+    <string name="MiraApi.GameSetting.Preset.Hint">Select or create a options preset for this game</string>
+    <string name="MiraApi.GameSetting.Preset.Save">Save</string>
+    <string name="Roles">Roles</string>
+    <string name="Modifiers">Modifiers</string>
+    <string name="Modifier">Modifier</string>
+    <string name="MiraApi.RoleTeam.Crewmate">Crewmate</string>
+    <string name="MiraApi.RoleTeam.Crewmate.Short">Crew</string>
+    <string name="MiraApi.RoleTeam.Crewmate.Group">Crewmate Roles</string>
+    <string name="MiraApi.RoleTeam.Impostor">Impostor</string>
+    <string name="MiraApi.RoleTeam.Impostor.Short">Imp</string>
+    <string name="MiraApi.RoleTeam.Impostor.Group">Impostor Roles</string>
+    <string name="MiraApi.RoleTeam.Neutral">Neutral</string>
+    <string name="MiraApi.RoleTeam.Neutral.Short">Neut</string>
+    <string name="MiraApi.RoleTeam.Neutral.Group">Neutral Roles</string>
+    <string name="MiraApi.RoleTeam.Other">Other</string>
+</resources>

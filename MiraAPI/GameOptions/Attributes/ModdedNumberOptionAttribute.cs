@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using MiraAPI.GameOptions.OptionTypes;
+using MiraAPI.Translation;
 using MiraAPI.Utilities;
 
 namespace MiraAPI.GameOptions.Attributes;
@@ -22,7 +23,7 @@ public class ModdedNumberOptionAttribute(
     internal override IModdedOption CreateOption(object? value, PropertyInfo property)
     {
         return new ModdedNumberOption(
-            Title,
+            Title.Translate(),
             (float)(value ?? min + increment),
             min,
             max,

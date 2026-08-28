@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Il2CppInterop.Runtime.Attributes;
+using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
 using MiraAPI.Modifiers;
 using MiraAPI.PluginLoading;
 using MiraAPI.Presets;
+using MiraAPI.Translation;
+using MiraAPI.Roles;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities.Attributes;
 using Reactor.Utilities.Extensions;
@@ -60,6 +64,8 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
 
     [HideFromIl2Cpp]
     internal Dictionary<int, bool> FinishedRoleMenus { get; } = [];
+    [HideFromIl2Cpp]
+    internal Dictionary<int, bool> QueuedRoleMenuRefresh { get; } = [];
 
     public void Awake()
     {
@@ -144,7 +150,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
         _largeButtons[MenuButton.Modifiers] = mBtn;
         mBtn.name = "ModifiersButton";
         mBtn.buttonText.gameObject.GetComponent<TextTranslatorTMP>().Destroy();
-        mBtn.buttonText.text = "Modifiers";
+        mBtn.buttonText.text = "Modifiers".Translate();
         mBtn.OnClick = new Button.ButtonClickedEvent();
         mBtn.OnClick.AddListener(
             (UnityAction)(() =>
@@ -213,7 +219,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
             }));
 
         var roleText = smRolesBtn.buttonText;
-        roleText.text = "Roles";
+        roleText.text = "Roles".Translate();
         roleText.GetComponent<TextTranslatorTMP>().Destroy();
         roleText.alignment = TextAlignmentOptions.Center;
         roleText.transform.parent.localPosition = new Vector3(
@@ -238,7 +244,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
         var smModBtn = Instantiate(smRolesBtn, smRolesBtn.transform.parent);
         _smallButtons[MenuButton.Modifiers] = smModBtn;
         smModBtn.name = "SmallModifiersButton";
-        smModBtn.buttonText.text = "Modifiers";
+        smModBtn.buttonText.text = "Modifiers".Translate();
         smModBtn.OnClick = new Button.ButtonClickedEvent();
         smModBtn.OnClick.AddListener(
             (UnityAction)(() =>
@@ -383,7 +389,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
         }
         else
         {
-            var modName = CurrentMod.MiraPlugin.OptionsTitleText;
+            var modName = CurrentMod.MiraPlugin.OptionsTitleText.Translate();
             _text.text = $"<size=40%>(Page {CurrentModIdx + 1}/{ModCount + 1})</size>\n" +
                          modName[..Math.Min(modName.Length, 25)];
         }
@@ -404,14 +410,16 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
         if (CurrentModIdx == 0)
         {
             Gsm.GameSettingsButton.gameObject.SetActive(true);
-            Gsm.RoleSettingsButton.gameObject.SetActive(true);
+            Gsm.RoleSettingsButton.gameObject.SetActive(
+                CustomGameModeManager.ActiveMode != null && CustomGameModeManager.ActiveMode.ShowNormalRoleSettings);
         }
         else
         {
             var hasOptions =
                 CurrentMod.InternalOptionGroups.Exists(g =>
                     g.OptionableType == null && g.ParentMenu == MenuCategory.Game);
-            var hasRoles = CurrentMod.InternalRoles.Count > 0;
+            var customRoles = CurrentMod.InternalRoles.Values.OfType<ICustomRole>();
+            var hasRoles = customRoles.Any(x => x.VisibleInSettings.Invoke());
             var hasModifiers = CurrentMod.InternalOptionGroups.Exists(g =>
                 g.OptionableType?.IsAssignableTo(typeof(BaseModifier)) == true
                 || g.ParentMenu == MenuCategory.Modifiers);
@@ -485,12 +493,12 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
                 _smallButtons[MenuButton.CustomOne].gameObject.SetActive(true);
                 _smallButtons[MenuButton.CustomOne].transform.localPosition =
                     new Vector3(leftPos, position.y, position.z);
-                _smallButtons[MenuButton.CustomOne].buttonText.text = CurrentMod.MiraPlugin.CustomOptionMenuNameOne;
+                _smallButtons[MenuButton.CustomOne].buttonText.text = CurrentMod.MiraPlugin.CustomOptionMenuNameOne.Translate();
 
                 _smallButtons[MenuButton.CustomTwo].gameObject.SetActive(true);
                 _smallButtons[MenuButton.CustomTwo].transform.localPosition =
                     new Vector3(rightPos, position.y, position.z);
-                _smallButtons[MenuButton.CustomTwo].buttonText.text = CurrentMod.MiraPlugin.CustomOptionMenuNameTwo;
+                _smallButtons[MenuButton.CustomTwo].buttonText.text = CurrentMod.MiraPlugin.CustomOptionMenuNameTwo.Translate();
                 position.y -= 0.637f;
             }
 
@@ -499,7 +507,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
             {
                 _largeButtons[MenuButton.CustomOne].gameObject.SetActive(true);
                 _largeButtons[MenuButton.CustomOne].transform.localPosition = position;
-                _largeButtons[MenuButton.CustomOne].buttonText.text = CurrentMod.MiraPlugin.CustomOptionMenuNameOne;
+                _largeButtons[MenuButton.CustomOne].buttonText.text = CurrentMod.MiraPlugin.CustomOptionMenuNameOne.Translate();
                 position.y -= 0.637f;
             }
             else
@@ -512,7 +520,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
             {
                 _largeButtons[MenuButton.CustomTwo].gameObject.SetActive(true);
                 _largeButtons[MenuButton.CustomTwo].transform.localPosition = position;
-                _largeButtons[MenuButton.CustomTwo].buttonText.text = CurrentMod.MiraPlugin.CustomOptionMenuNameTwo;
+                _largeButtons[MenuButton.CustomTwo].buttonText.text = CurrentMod.MiraPlugin.CustomOptionMenuNameTwo.Translate();
                 position.y -= 0.637f;
             }
             else
@@ -566,15 +574,15 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
 
                 case MenuCategory.Modifiers:
                     menu.GameSettingsTab.gameObject.SetActive(true);
-                    menu.MenuDescriptionText.text = CurrentMod.MiraPlugin.ModifierMenuDescription;
+                    menu.MenuDescriptionText.text = CurrentMod.MiraPlugin.ModifierMenuDescription.Translate();
                     break;
                 case MenuCategory.CustomOne:
                     menu.GameSettingsTab.gameObject.SetActive(true);
-                    menu.MenuDescriptionText.text = CurrentMod.MiraPlugin.CustomOptionMenuOneDescription;
+                    menu.MenuDescriptionText.text = CurrentMod.MiraPlugin.CustomOptionMenuOneDescription.Translate();
                     break;
                 case MenuCategory.CustomTwo:
                     menu.GameSettingsTab.gameObject.SetActive(true);
-                    menu.MenuDescriptionText.text = CurrentMod.MiraPlugin.CustomOptionMenuTwoDescription;
+                    menu.MenuDescriptionText.text = CurrentMod.MiraPlugin.CustomOptionMenuTwoDescription.Translate();
                     break;
             }
         }

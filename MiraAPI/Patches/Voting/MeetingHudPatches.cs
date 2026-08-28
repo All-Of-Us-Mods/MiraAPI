@@ -1,13 +1,17 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using InnerNet;
 using MiraAPI.Events;
 using MiraAPI.Events.Vanilla.Meeting;
 using MiraAPI.Events.Vanilla.Meeting.Voting;
+using MiraAPI.MeetingAbilities;
 using MiraAPI.Modifiers;
 using MiraAPI.Utilities;
 using MiraAPI.Voting;
+using UnityEngine;
 
 namespace MiraAPI.Patches.Voting;
 
@@ -33,10 +37,49 @@ internal static class MeetingHudPatches
         return true;
     }
 
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(PlayerVoteArea), nameof(PlayerVoteArea.Select))]
+    public static bool VoteAreaSelectPatch(PlayerVoteArea __instance)
+    {
+        if (PlayerControl.LocalPlayer.Data.IsDead || __instance.AmDead || !__instance.Parent)
+            return false;
+
+        JudgeRole? judgeRole = PlayerControl.LocalPlayer.Data.Role.TryCast<JudgeRole>();
+        bool flag = judgeRole && PlayerControl.LocalPlayer.PlayerId != __instance.PlayerId;
+        __instance.JudgeOverruleButton?.gameObject.SetActive(flag);
+
+        if (__instance.VoteComplete || !__instance.Parent.Select((byte)__instance.PlayerId))
+            return false;
+
+        __instance.Buttons.SetActive(true);
+
+        float startPos = __instance.AnimateButtonsFromLeft ? 0.2f : 1.95f;
+
+        Il2CppSystem.Collections.Generic.List<UiElement> selectableElements = new();
+        foreach (var btn in __instance.Buttons.GetComponentsInChildren<PassiveButton>())
+        {
+            selectableElements.Add(btn);
+        }
+
+        for (int i = 0; i < selectableElements.Count; i++)
+        {
+            var button = selectableElements[i];
+            float endPos = 1.3f - 0.65f * i;
+            float duration = 0.25f + 0.1f * i;
+            __instance.StartCoroutine(Effects.All(Effects.Lerp(duration, (Action<float>)(t =>
+                button.transform.localPosition = Vector2.Lerp(Vector2.right * startPos, Vector2.right * endPos, Effects.ExpOut(t))))));
+        }
+
+        ControllerManager.Instance.OpenOverlayMenu(__instance.name, __instance.CancelButton, selectableElements[1], selectableElements);
+
+        return false;
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(nameof(MeetingHud.Start))]
     public static void MeetingHudStartPatch(MeetingHud __instance)
     {
+        MeetingButtonManager.OnMeetingStart(__instance);
         foreach (var plr in PlayerControl.AllPlayerControls)
         {
             var voteData = plr.GetVoteData();
@@ -77,7 +120,17 @@ internal static class MeetingHudPatches
     [HarmonyPatch(nameof(MeetingHud.Update))]
     public static void ForceSkipPatch(MeetingHud __instance)
     {
-        if (__instance.state is not (MeetingHud.VoteStates.NotVoted or MeetingHud.VoteStates.Voted))
+        foreach (var targetedMeetingAbility in MeetingButtonManager.TargetedButtons.Where(x => x.Enabled(PlayerControl.LocalPlayer.Data.Role)))
+        {
+            targetedMeetingAbility.UpdateHandler();
+        }
+
+        foreach (var meetingAbility in MeetingButtonManager.UntargetedButtons.Where(x => x.Enabled(PlayerControl.LocalPlayer.Data.Role)))
+        {
+            meetingAbility.UpdateHandler(__instance);
+        }
+
+        if (__instance.state is not (MeetingHud.MeetingStates.NotVoted or MeetingHud.MeetingStates.Voted))
         {
             return;
         }
@@ -105,7 +158,7 @@ internal static class MeetingHudPatches
 
     [HarmonyPrefix]
     [HarmonyPatch(nameof(MeetingHud.Select))]
-    public static bool SelectPatch(int suspectStateIdx)
+    public static bool MeetingHudSelectPatch(int suspectStateIdx)
     {
         var voteData = PlayerControl.LocalPlayer.GetVoteData();
 
@@ -127,13 +180,13 @@ internal static class MeetingHudPatches
             return false;
         }
 
-        var playerVoteArea = __instance.playerStates.First(pv => pv.TargetPlayerId == pc.PlayerId);
+        var playerVoteArea = __instance.playerStates.First(pv => pv.PlayerId == pc.PlayerId);
         playerVoteArea.AmDead = true;
         playerVoteArea.Overlay.gameObject.SetActive(true);
 
         foreach (var player in Helpers.GetAlivePlayers())
         {
-            var pva = __instance.playerStates.First(pv => pv.TargetPlayerId == player.PlayerId);
+            var pva = __instance.playerStates.First(pv => pv.PlayerId == player.PlayerId);
             var voteData = player.GetVoteData();
 
             if (pva.AmDead || !voteData.VotedFor(pc.PlayerId))
@@ -150,7 +203,7 @@ internal static class MeetingHudPatches
         __instance.SetDirtyBit(1U);
         __instance.CheckForEndVoting();
 
-        if (__instance.state == MeetingHud.VoteStates.Results)
+        if (__instance.state == MeetingHud.MeetingStates.Results)
         {
             __instance.SetupProceedButton();
         }
@@ -199,7 +252,7 @@ internal static class MeetingHudPatches
             })
         ]);
 
-        __instance.RpcVotingComplete(voterStates, exiled, isTie);
+        __instance.RpcVotingComplete(voterStates, exiled, isTie, @event.OverruledVote, @event.OverruledNonce);
         return false;
     }
 
@@ -220,6 +273,16 @@ internal static class MeetingHudPatches
     public static bool CmdCastVoteOverridePatch(byte playerId, byte suspectIdx)
     {
         VotingUtils.RpcCastVote(PlayerControl.LocalPlayer, playerId, suspectIdx);
+        return false;
+    }
+
+    // TODO: figure out a way to do host-authorization since right now any player can send RpcQueueOverruleVotes
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(MeetingHud.CmdQueueOverruleVotes))]
+    // Although this method is inlined in MeetingHud.Confirm, the next patch fixes that.
+    public static bool CmdQueueOverruleVotesPatch(PlayerId judgePlayerId, PlayerId targetPlayerId, ushort overruleNonce)
+    {
+        VotingUtils.RpcQueueOverruleVotes(PlayerControl.LocalPlayer, judgePlayerId.Value, targetPlayerId.Value, overruleNonce);
         return false;
     }
 

@@ -1,18 +1,18 @@
-﻿ <Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<Version>1.0.0</Version>
 		<Description>Example mod for Mira API</Description>
-		<Authors>Angxl, XtraCube</Authors>
+		<Authors>Author Name</Authors>
 		<NoWarn>$(NoWarn);EnableGenerateDocumentationFile</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\MiraAPI\MiraAPI.csproj" />
+		<ProjectReference Include="..\MiraAPI\MiraAPI.csproj" /> <!-- You typically would use the nuget package here: AllOfUs.MiraAPI -->
 	</ItemGroup>
 
-	 <ItemGroup>
-		 <EmbeddedResource Include="Resources\**\*.*" />
-	 </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Resources\**\*.*" />
+	</ItemGroup>
 
 	<Import Project="..\AmongUs.props" />
 </Project>

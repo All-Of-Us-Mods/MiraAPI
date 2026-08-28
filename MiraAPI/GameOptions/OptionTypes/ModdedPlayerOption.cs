@@ -2,6 +2,7 @@
 using System.Linq;
 using Il2CppSystem.Collections.Generic;
 using MiraAPI.Networking;
+using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -65,7 +66,7 @@ public class ModdedPlayerOption : ModdedOption<int>
         playerOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
 
         playerOption.Title = StringName;
-        playerOption.TitleText.text = TranslationController.Instance.GetString(StringName);
+        playerOption.TitleText.text = Title.Translate();
         playerOption.Values = Values;
         playerOption.Value = Value;
         playerOption.playerIndex = filteredList.FindIndex(p => p.PlayerId == Value);

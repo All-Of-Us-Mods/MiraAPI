@@ -39,4 +39,9 @@ public interface ILocalSetting
     /// <param name="last">Whether it's the last on the row.</param>
     /// <returns>The created setting's <see cref="GameObject"/>.</returns>
     GameObject? CreateOption(ToggleButtonBehaviour toggle, SlideBar slider, Transform parent, ref float offset, ref int order, bool last);
+
+    /// <summary>
+    /// Used to refresh the setting's information, usually for localization.
+    /// </summary>
+    void RefreshOption();
 }

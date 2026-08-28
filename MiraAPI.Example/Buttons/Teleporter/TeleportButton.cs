@@ -12,7 +12,7 @@ namespace MiraAPI.Example.Buttons.Teleporter;
 
 public class TeleportButton : CustomActionButton
 {
-    public override string Name => "Teleport";
+    public override string Name => "button.teleport";
 
     public override float Cooldown => OptionGroupSingleton<TeleporterOptions>.Instance.TeleportCooldown.Value;
 

@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<resources>
+    <string name="MiraApi.TopRightButtonScaleFactor">Knoppenschaalfactor</string>
+    <string name="Roles">Rollen</string>
+    <string name="Modifier">Modificator</string>
+    <string name="Modifiers">Modificatoren</string>
+    <string name="MiraApi.RoleTeam.Crewmate">Bemanningslid</string>
+    <string name="MiraApi.RoleTeam.Crewmate.Short">Bemanning</string>
+    <string name="MiraApi.RoleTeam.Impostor">Bedrieger</string>
+    <string name="MiraApi.RoleTeam.Impostor.Short">Bedrieger</string>
+    <string name="MiraApi.RoleTeam.Neutral">Neutraal</string>
+    <string name="MiraApi.RoleTeam.Neutral.Short">Neut</string>
+</resources>

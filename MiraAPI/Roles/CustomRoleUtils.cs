@@ -4,6 +4,8 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using AmongUs.GameOptions;
+using MiraAPI.GameModes;
+using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using UnityEngine;
 
@@ -22,8 +24,10 @@ public static class CustomRoleUtils
     public static bool CanSpawnOnCurrentMode(RoleBehaviour role)
     {
         return role is ICustomRole custom
-            ? custom.CanSpawnOnCurrentMode()
-            : !GameManager.Instance.IsHideAndSeek() || role.Role is RoleTypes.Engineer or RoleTypes.Impostor;
+            ? custom.CanSpawnOnCurrentMode() && custom.Configuration.AssociatedGameMode.IsInstanceOfType(CustomGameModeManager.ActiveMode)
+            : (CustomGameModeManager.ActiveMode is HideAndSeekMode
+                ? role.Role is RoleTypes.Engineer or RoleTypes.Impostor
+                : !Helpers.IsRoleBlacklisted(role));
     }
 
     /// <summary>

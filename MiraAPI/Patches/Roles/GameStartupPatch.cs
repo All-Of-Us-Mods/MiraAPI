@@ -1,6 +1,8 @@
 ﻿using HarmonyLib;
+using MiraAPI.GameModes;
 using MiraAPI.PluginLoading;
 using MiraAPI.Roles;
+using MiraAPI.Utilities.Assets;
 
 namespace MiraAPI.Patches.Roles;
 
@@ -22,6 +24,13 @@ public static class GameStartupPatch
         }
 
         _runOnce = true;
+        foreach (var mode in CustomGameModeManager.IdToModeMap.Values)
+        {
+            if (mode.Icon != null)
+            {
+                mode.TmpIcon = TmpSpriteUtils.CreateSpriteAsset(mode.Icon.LoadAsset(), $"MiraApi.Gamemode.{mode.Name.Replace(" ", string.Empty)}.png", 1.35f);
+            }
+        }
 
         if (MiraPluginManager.Instance.QueuedRoleRegistrations.Count <= 0)
         {

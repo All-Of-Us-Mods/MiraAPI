@@ -2,6 +2,7 @@
 using MiraAPI.GameOptions;
 using MiraAPI.Modifiers;
 using MiraAPI.Modifiers.Types;
+using MiraAPI.Translation;
 using MiraAPI.Utilities.Assets;
 using UnityEngine;
 
@@ -9,7 +10,7 @@ namespace MiraAPI.Example.Modifiers;
 
 public class CaptainModifier : GameModifier
 {
-    public override string ModifierName => "Captain";
+    public override string ModifierName => MiraLocaleManager.Get("modifier.captain");
     public override LoadableAsset<Sprite>? ModifierIcon => ExampleAssets.CallMeetingButton;
 
     public override void OnDeath(DeathReason reason)
@@ -19,7 +20,7 @@ public class CaptainModifier : GameModifier
 
     public override string GetDescription()
     {
-        return $"You can call a meeting from anywhere on the map.";
+        return MiraLocaleManager.Get("modifier.captain.TabDescription");
     }
 
     public override int GetAssignmentChance()

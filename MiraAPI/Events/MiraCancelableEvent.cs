@@ -1,8 +1,11 @@
-﻿namespace MiraAPI.Events;
+﻿using MiraAPI.PluginLoading;
+
+namespace MiraAPI.Events;
 
 /// <summary>
 /// Abstract class for Mira Events that can be cancelled.
 /// </summary>
+[MiraIgnore]
 public abstract class MiraCancelableEvent : MiraEvent
 {
     /// <summary>

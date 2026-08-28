@@ -7,6 +7,7 @@ using Assets.CoreScripts;
 using BepInEx.Unity.IL2CPP.Utils;
 using MiraAPI.Events;
 using MiraAPI.Events.Vanilla.Gameplay;
+using MiraAPI.GameModes;
 using MiraAPI.Utilities;
 using Reactor.Networking.Attributes;
 using Reactor.Networking.Rpc;
@@ -629,7 +630,10 @@ public static class CustomMurderRpc
                 if (resetKillTimer)
                 {
                     source.SetKillTimer(
-                        GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown) / 2f);
+                        CustomGameModeManager.ActiveMode != null
+                            ? CustomGameModeManager.ActiveMode.DefaultImpostorKillCooldown / 2f
+                            : GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown) /
+                              2f);
                 }
             }
             else
@@ -666,7 +670,9 @@ public static class CustomMurderRpc
 
             if (resetKillTimer)
             {
-                source.SetKillTimer(GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown));
+                source.SetKillTimer(CustomGameModeManager.ActiveMode != null
+                    ? CustomGameModeManager.ActiveMode.DefaultImpostorKillCooldown
+                    : GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown));
             }
         }
 

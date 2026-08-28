@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using MiraAPI.GameOptions.OptionTypes;
+using MiraAPI.Translation;
 
 namespace MiraAPI.GameOptions.Attributes;
 
@@ -13,7 +14,7 @@ public class ModdedToggleOptionAttribute(string title) : ModdedOptionAttribute(t
 {
     internal override IModdedOption CreateOption(object? value, PropertyInfo property)
     {
-        var toggleOpt = new ModdedToggleOption(Title, (bool)(value ?? false));
+        var toggleOpt = new ModdedToggleOption(Title.Translate(), (bool)(value ?? false));
         return toggleOpt;
     }
 

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Linq;
 using BepInEx.Configuration;
+using MiraAPI.PluginLoading;
 using UnityEngine;
 
 namespace MiraAPI.LocalSettings.SettingTypes;
 
 /// <inheritdoc />
+[MiraIgnore]
 public abstract class LocalSettingBase<T> : ILocalSetting
 {
     /// <inheritdoc />
@@ -51,6 +53,9 @@ public abstract class LocalSettingBase<T> : ILocalSetting
     /// <param name="last">Whether the option is the last in a row.</param>
     /// <returns>The created setting.</returns>
     public abstract GameObject CreateOption(ToggleButtonBehaviour toggle, SlideBar slider, Transform parent, ref float offset, ref int order, bool last);
+
+    /// <inheritdoc/>
+    public abstract void RefreshOption();
 
     /// <summary>
     /// Returns the formated string to use in the text of the setting.

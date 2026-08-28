@@ -1,6 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
+﻿using System.Reflection;
 using BepInEx.Unity.IL2CPP;
+using SemanticVersioning;
 
 namespace MiraAPI;
 
@@ -14,15 +14,36 @@ public static class ModCompatibility
     /// </summary>
     public const string SubmergedId = "Submerged";
 
-    /// <summary>
-    /// Checks if the Submerged mod is loaded.
-    /// </summary>
-    /// <param name="submergedAssembly">Submerged mod assembly if loaded, <see langword="null"/> otherwise.</param>
-    /// <returns><see langword="true"/> if the Submerged mod is loaded, <see langword="false"/> otherwise.</returns>
-    public static bool SubmergedLoaded([NotNullWhen(true)] out Assembly? submergedAssembly)
+    public static Version SubVersion { get; private set; }
+    public static bool SubLoaded { get; private set; }
+    public static BasePlugin SubPlugin { get; private set; }
+    public static Assembly SubAssembly { get; private set; }
+
+    public const ShipStatus.MapType SubmergedMapType = (ShipStatus.MapType)6;
+
+    public static void Initialize()
     {
-        var result = IL2CPPChainloader.Instance.Plugins.TryGetValue(SubmergedId, out var plugin);
-        submergedAssembly = result ? plugin?.Instance.GetType().Assembly : null;
-        return result;
+        InitSubmerged();
+    }
+
+    public static void InitSubmerged()
+    {
+        if (!IL2CPPChainloader.Instance.Plugins.TryGetValue(SubmergedId, out var plugin))
+        {
+            return;
+        }
+
+        SubPlugin = (plugin!.Instance as BasePlugin)!;
+        SubVersion = plugin.Metadata.Version;
+
+        SubAssembly = SubPlugin.GetType().Assembly;
+
+        SubLoaded = true;
+        Message("Submerged was detected");
+    }
+
+    public static bool IsSubmerged()
+    {
+        return SubLoaded && ShipStatus.Instance && ShipStatus.Instance.Type == SubmergedMapType;
     }
 }

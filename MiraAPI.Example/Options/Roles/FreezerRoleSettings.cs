@@ -13,11 +13,11 @@ public class FreezerRoleSettings : AbstractOptionGroup<FreezerRole>
         TmpSpriteUtils.CreateSpriteAsset(
             MiraAssets.ImpostorFile.LoadAsset(),
             "ApiExample.Role.Impostor.FreezerRole"));
-    public override string GroupName => "Custom Role";
+    public override string GroupName => "ApiExample.Role.Freezer";
 
-    [ModdedNumberOption("Freeze Duration", 1, 15, 1, MiraNumberSuffixes.Seconds)]
+    [ModdedNumberOption("ApiExample.Role.Freezer.Settings.FreezeDuration", 1, 15, 1, MiraNumberSuffixes.Seconds)]
     public float FreezeDuration { get; set; } = 5;
 
-    [ModdedNumberOption("Freeze Uses", 1, 5)]
+    [ModdedNumberOption("ApiExample.Role.Freezer.Settings.FreezeUses", 1, 5)]
     public float FreezeUses { get; set; } = 1;
 }

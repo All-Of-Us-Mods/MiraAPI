@@ -5,6 +5,7 @@ using System.Linq;
 using HarmonyLib;
 using Il2CppInterop.Runtime.Attributes;
 using MiraAPI.LocalSettings;
+using MiraAPI.Translation;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities.Attributes;
 using Reactor.Utilities.Extensions;
@@ -155,7 +156,7 @@ public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
     private ModifierUiComponent CreateForModifier(BaseModifier modifier)
     {
         var newMod = Instantiate(_modTemplate, _children.transform);
-        newMod.transform.name = modifier.ModifierName;
+        newMod.transform.name = modifier.ModifierName.Translate();
         var comp = newMod.AddComponent<ModifierUiComponent>();
         comp.Modifier = modifier;
         return comp;

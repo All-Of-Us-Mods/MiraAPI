@@ -1,13 +1,6 @@
-using System.Linq;
-using AmongUs.GameOptions;
-using HarmonyLib;
-using Il2CppSystem.Collections.Generic;
-using MiraAPI.Roles;
-using UnityEngine;
-
 namespace MiraAPI.Patches;
 
-[HarmonyPatch(typeof(DetectiveNotesMinigame), nameof(DetectiveNotesMinigame.SetImpostorPopup))]
+/*[HarmonyPatch(typeof(DetectiveNotesMinigame), nameof(DetectiveNotesMinigame.SetImpostorPopup))]
 public static class DetectiveNotesMinigamePatch
 {
     public static void Prefix(DetectiveNotesMinigame __instance, bool active)
@@ -39,4 +32,4 @@ public static class DetectiveNotesMinigamePatch
         }
         ControllerManager.Instance.OpenOverlayMenu(__instance.ImpostorOverlay, __instance.impostorTypePopup, __instance.ImpostorIconControllerSelectables[0], __instance.ImpostorIconControllerSelectables, false);
     }
-}
+}*/

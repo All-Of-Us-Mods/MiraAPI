@@ -31,6 +31,16 @@ public class ProcessVotesEvent(List<CustomVote> votes, NetworkedPlayerInfo? exil
     public List<CustomVote> Votes { get; } = votes;
 
     /// <summary>
+    /// Gets or sets a value indicating whether an overruling was done. Normally set by judge but can be overwritten.
+    /// </summary>
+    public bool OverruledVote { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value specifically to determine which Judge (if any) caused the overruling. Normally set by judge but can be overwritten.
+    /// </summary>
+    public ushort OverruledNonce { get; set; }
+
+    /// <summary>
     /// Gets or sets the player to be exiled. Will be <see langword="null"/> if no player is to be exiled.
     /// </summary>
     public NetworkedPlayerInfo? ExiledPlayer

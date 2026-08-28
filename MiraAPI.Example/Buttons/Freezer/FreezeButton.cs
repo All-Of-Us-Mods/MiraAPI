@@ -13,7 +13,7 @@ namespace MiraAPI.Example.Buttons.Freezer;
 
 public class FreezeButton : CustomActionButton<PlayerControl>
 {
-    public override string Name => "Freeze";
+    public override string Name => "button.freeze";
 
     public override float Cooldown => OptionGroupSingleton<FreezerRoleSettings>.Instance.FreezeDuration;
     public override bool PauseTimerInVent => true;

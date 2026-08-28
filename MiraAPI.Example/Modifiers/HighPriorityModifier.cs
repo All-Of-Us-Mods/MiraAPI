@@ -1,14 +1,15 @@
 ﻿using MiraAPI.Modifiers.Types;
+using MiraAPI.Translation;
 
 namespace MiraAPI.Example.Modifiers;
 
 public class HighPriorityModifier : GameModifier
 {
-    public override string ModifierName => "High Priority";
+    public override string ModifierName => MiraLocaleManager.Get("modifier.highPriority");
 
     public override string GetDescription()
     {
-        return "You are high priority! Idrk what this means either tbh...";
+        return MiraLocaleManager.Get("modifier.highPriority.TabDescription");
     }
 
     public override int GetAssignmentChance()

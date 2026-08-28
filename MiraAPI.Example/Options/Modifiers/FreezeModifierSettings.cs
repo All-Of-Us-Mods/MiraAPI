@@ -6,8 +6,8 @@ namespace MiraAPI.Example.Options.Modifiers;
 
 public class FreezeModifierSettings : AbstractOptionGroup<FreezeModifier>
 {
-    public override string GroupName => "Freeze";
+    public override string GroupName => "options.freezeModifierSettings";
 
-    [ModdedToggleOption("Use Color")]
+    [ModdedToggleOption("options.freezeModifierSettings.useColor")]
     public bool UseColor { get; set; } = true;
 }

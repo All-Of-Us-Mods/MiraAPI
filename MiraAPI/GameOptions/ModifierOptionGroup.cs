@@ -1,7 +1,9 @@
 ﻿using System.Linq;
+using MiraAPI.PluginLoading;
 
 namespace MiraAPI.GameOptions;
 
+[MiraIgnore]
 internal sealed class ModifierOptionGroup : AbstractOptionGroup
 {
     public override string GroupName { get; }

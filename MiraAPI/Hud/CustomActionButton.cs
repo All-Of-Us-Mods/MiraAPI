@@ -5,6 +5,7 @@ using MiraAPI.Events.Mira;
 using MiraAPI.Keybinds;
 using MiraAPI.LocalSettings;
 using MiraAPI.Patches;
+using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using Rewired;
@@ -150,7 +151,7 @@ public abstract class CustomActionButton
 
         Button = Object.Instantiate(HudManager.Instance.AbilityButton, parent);
         Button.name = Name + "Button";
-        Button.OverrideText(Name.ToUpperInvariant());
+        Button.OverrideText(Name.Translate().ToUpperInvariant());
 
         Button.graphic.sprite = Sprite.LoadAsset();
 

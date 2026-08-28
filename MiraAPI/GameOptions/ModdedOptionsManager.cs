@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using BepInEx.Configuration;
 using HarmonyLib;
+using MiraAPI.GameModes;
 using MiraAPI.GameOptions.Attributes;
 using MiraAPI.GameOptions.OptionTypes;
 using MiraAPI.Networking;
@@ -26,6 +27,8 @@ public static class ModdedOptionsManager
     private static readonly Dictionary<Type, AbstractOptionGroup> TypeToGroup = [];
 
     internal static readonly Dictionary<OptionBehaviour, ModdedPlayerOption> CreatedPlayerOptions = [];
+    internal static readonly Dictionary<OptionBehaviour, ModdedStringOption> CreatedStringOptions = [];
+    internal static readonly Dictionary<Type, List<AbstractOptionGroup>> GameModeOptionGroups = [];
     internal static readonly Dictionary<uint, IModdedOption> ModdedOptions = [];
     internal static readonly List<AbstractOptionGroup> Groups = [];
 
@@ -66,11 +69,23 @@ public static class ModdedOptionsManager
         notif.SettingsChangeMessageLogic(key, item, playSound);
     }
 
-    [SuppressMessage(
-        "Major Code Smell",
-        "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields",
-        Justification = "Dynamic singleton initialization requires reflection to bypass the private field access modifier because the type is only known at runtime."
-    )]
+    internal static bool RegisterGroup(Type type)
+    {
+        if (Activator.CreateInstance(type) is not AbstractOptionGroup group)
+        {
+            return false;
+        }
+
+        if (TypeToGroup.ContainsKey(type))
+        {
+            Logger<MiraApiPlugin>.Error($"Group {type.Name} already exists.");
+            return false;
+        }
+
+        RegisterGroupInternal(group, type);
+        return true;
+    }
+
     internal static bool RegisterGroup(Type type, MiraPluginInfo pluginInfo)
     {
         if (Activator.CreateInstance(type) is not AbstractOptionGroup group)
@@ -84,15 +99,35 @@ public static class ModdedOptionsManager
             return false;
         }
 
-        Groups.Add(group);
-        TypeToGroup.Add(type, group);
+        if (typeof(AbstractGameMode).IsAssignableFrom(group.OptionableType))
+        {
+            if (GameModeOptionGroups.TryGetValue(group.OptionableType, out var oldList))
+            {
+                oldList.Add(group);
+            }
+            else
+            {
+                GameModeOptionGroups.Add(group.OptionableType, [group]);
+            }
+        }
         pluginInfo.InternalOptionGroups.Add(group);
 
+        RegisterGroupInternal(group, type);
+        return true;
+    }
+
+    [SuppressMessage(
+        "Major Code Smell",
+        "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields",
+        Justification = "Dynamic singleton initialization requires reflection to bypass the private field access modifier because the type is only known at runtime."
+    )]
+    private static void RegisterGroupInternal(AbstractOptionGroup group, Type type)
+    {
+        Groups.Add(group);
+        TypeToGroup.Add(type, group);
         typeof(OptionGroupSingleton<>).MakeGenericType(type)
             .GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic)! // Message suppression points to here
             .SetValue(null, group);
-
-        return true;
     }
 
     internal static void RegisterPropertyOption(Type type, PropertyInfo property, MiraPluginInfo pluginInfo)

@@ -8,7 +8,7 @@ namespace MiraAPI.Hud;
 /// <see cref="CustomActionButton"/> that has multiple target objects.
 /// </summary>
 /// <typeparam name="T">The type of the target objects.</typeparam>
-public abstract class MultiTargetButton<T> : CustomActionButton where T : MonoBehaviour
+public abstract class MultiTargetMeetingButton<T> : CustomActionButton where T : MonoBehaviour
 {
     /// <summary>
     /// Gets or sets the list of targets of the button.

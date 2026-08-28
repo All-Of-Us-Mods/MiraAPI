@@ -1,9 +1,12 @@
-﻿/*
+﻿using HarmonyLib;
+using MiraAPI.GameModes;
+
+namespace MiraAPI.Patches.GameModes;
+
 [HarmonyPatch(typeof(MapBehaviour))]
-public static class MapBehaviourPatch
+internal static class MapBehaviourPatch
 {
-    [HarmonyPrefix]
-    [HarmonyPatch(nameof(MapBehaviour.ShowSabotageMap))]
+    [HarmonyPrefix, HarmonyPatch(nameof(MapBehaviour.ShowSabotageMap))]
     public static bool ShowSabotagePatch(MapBehaviour __instance)
     {
         var shouldShow = CustomGameModeManager.ActiveMode?.ShouldShowSabotageMap(__instance);
@@ -15,4 +18,4 @@ public static class MapBehaviourPatch
 
         return true;
     }
-}*/
+}

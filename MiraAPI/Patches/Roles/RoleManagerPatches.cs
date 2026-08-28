@@ -3,6 +3,7 @@ using AmongUs.GameOptions;
 using HarmonyLib;
 using MiraAPI.Events;
 using MiraAPI.Events.Vanilla.Gameplay;
+using MiraAPI.GameModes;
 using MiraAPI.Modifiers;
 using MiraAPI.Roles;
 using UnityEngine;
@@ -65,12 +66,19 @@ public static class RoleManagerPatches
     [HarmonyPatch(nameof(RoleManager.SelectRoles))]
     public static void ModifierSelectionPatches()
     {
-        if (!AmongUsClient.Instance.AmHost || !ModifierManager.MiraAssignsModifiers)
+        if (AmongUsClient.Instance.AmHost && ModifierManager.MiraAssignsModifiers)
+        {
+            ModifierManager.AssignModifiers(
+                [.. PlayerControl.AllPlayerControls.ToArray().Where(plr => !plr.Data.IsDead && !plr.Data.Disconnected)]);
+        }
+
+        var roleSelection = GameManager.Instance.LogicRoleSelection.Cast<LogicRoleSelectionNormal>();
+        if (CustomGameModeManager.ActiveMode == null || roleSelection == null)
         {
             return;
         }
 
-        ModifierManager.AssignModifiers([.. PlayerControl.AllPlayerControls.ToArray().Where(plr => !plr.Data.IsDead && !plr.Data.Disconnected)]);
+        CustomGameModeManager.ActiveMode.PostAssignRoles(roleSelection);
     }
 
     [HarmonyPrefix]

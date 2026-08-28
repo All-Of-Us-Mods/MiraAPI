@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using MiraAPI.Networking;
-using Reactor.Localization.Utilities;
+using MiraAPI.Translation;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -35,7 +35,7 @@ public class ModdedEnumOption : ModdedOption<int>
         var data = ScriptableObject.CreateInstance<StringGameSetting>();
         data.Title = StringName;
         data.Type = global::OptionTypes.String;
-        data.Values = Values.Select(CustomStringName.CreateAndRegister).ToArray();
+        data.Values = Values.Select(MiraLocaleManager.GetOrCreateLocaleString).ToArray();
         data.Index = Value;
 
         Data = data;
@@ -132,7 +132,7 @@ public class ModdedEnumOption<T> : ModdedOption<T> where T : Enum
         var data = ScriptableObject.CreateInstance<StringGameSetting>();
         data.Title = StringName;
         data.Type = global::OptionTypes.String;
-        data.Values = Values.Select(CustomStringName.CreateAndRegister).ToArray();
+        data.Values = Values.Select(MiraLocaleManager.GetOrCreateLocaleString).ToArray();
         data.Index = Convert.ToInt32(Value, NumberFormatInfo.InvariantInfo);
 
         Data = data;
