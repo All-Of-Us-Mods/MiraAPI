@@ -1,14 +1,43 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
-    <string name="MiraApi.TopRightButtonScaleFactor">Knopfskalierungsfaktor</string>
-    <string name="MiraApi.WikiOnBottomRow">Wiki Taste Unter Haupt UI</string>
-    <string name="Roles">Rollen</string>
-    <string name="Modifier">Modifikator</string>
-    <string name="Modifiers">Modifikatoren</string>
-    <string name="MiraApi.RoleTeam.Crewmate">Besatzung</string>
-    <string name="MiraApi.RoleTeam.Crewmate.Short">Besatzung</string>
-    <string name="MiraApi.RoleTeam.Impostor">Verräter</string>
-    <string name="MiraApi.RoleTeam.Impostor.Short">Verräter</string>
-    <string name="MiraApi.RoleTeam.Neutral">Neutral</string>
-    <string name="MiraApi.RoleTeam.Neutral.Short">Neutral</string>
+  <string name="MiraApi.TopRightButtonScaleFactor">Knopfskalierungsfaktor</string>
+  <string name="MiraApi.WikiOnBottomRow">Wiki Taste auf der Hauptseite</string>
+  <string name="Roles">Rollen</string>
+  <string name="Modifier">Modifikator</string>
+  <string name="Modifiers">Modifikatoren</string>
+  <string name="MiraApi.RoleTeam.Crewmate">Besatzung</string>
+  <string name="MiraApi.RoleTeam.Crewmate.Short">Besatzung</string>
+  <string name="MiraApi.RoleTeam.Impostor">Verräter</string>
+  <string name="MiraApi.RoleTeam.Impostor.Short">Verräter</string>
+  <string name="MiraApi.RoleTeam.Neutral">Neutral</string>
+  <string name="MiraApi.RoleTeam.Neutral.Short">Neutral</string>
+  <string name="MiraApi">Mira API</string>
+  <string name="MiraApi.VisualsUi">Effekte/Benutzeroberfläche</string>
+  <string name="MiraApi.Accessibility">Bedienungshilfen</string>
+  <string name="MiraApi.MiraApiBrand">MiraAPI</string>
+  <string name="MiraApi.ShowModifiersHudOnLeftSide">Modifikatoren Oberfläche links zeigen</string>
+  <string name="MiraApi.ShowKeybindsOnButtons">Tastenbelegung auf Knöpfen zeigen</string>
+  <string name="MiraApi.ButtonScaleFactor">Knopf Skallierung</string>
+  <string name="MiraApi.MaxFps">Maximale FPS</string>
+  <string name="MiraApi.EnableSabotageFlashes">Sabortageblitze aktivieren</string>
+  <string name="MiraApi.EnableSabotageBlare">Sabortage Geräusche aktivieren</string>
+  <string name="MiraApi.ReturnToRoleSettings">Zu Rolleneinstellungen zurückkehren</string>
+  <string name="MiraApi.CustomCategory1">Benutzerdefinierte Kategorie 1</string>
+  <string name="MiraApi.CustomCategory2">Benutzerdefinierte Kategorie 2</string>
+  <string name="MiraApi.ModifierMenuDescription">Bearbeite Modifikatoren und deren Einstellungen hier!</string>
+  <string name="MiraApi.CustomOptionMenuDescription">Spieleinstellungen für die Mod speicher!</string>
+  <string name="MiraApi.Gamemode.Classic">Klassik</string>
+  <string name="MiraApi.Gamemode.Classic.Description">Die klassische Among Us erfahrung
+Finde den Verrähter oder täusche die Besatzung.</string>
+  <string name="MiraApi.Gamemode.HideAndSeek">Verstecken</string>
+  <string name="MiraApi.Gamemode.HideAndSeek.Description">Du kannst rennen, aber dich nicht Verstecken
+Überlebe die Zeit oder eliminiere die Besatzung.</string>
+  <string name="MiraApi.GameSetting.Global.ClickToClose">Zum schließen klicken</string>
+  <string name="MiraApi.GameSetting.Global.ClickToOpen">Zum öffnen klicken</string>
+  <string name="MiraApi.GameSetting.Preset.Hint">Wähle oder erstelle Voreinstellungen für dieses Spiel</string>
+  <string name="MiraApi.GameSetting.Preset.Save">Speichern</string>
+  <string name="MiraApi.RoleTeam.Crewmate.Group">Besatzung Rollen</string>
+  <string name="MiraApi.RoleTeam.Impostor.Group">Verräter Rollen</string>
+  <string name="MiraApi.RoleTeam.Neutral.Group">Neutrale Rollen</string>
+  <string name="MiraApi.RoleTeam.Other">Andere</string>
 </resources>
