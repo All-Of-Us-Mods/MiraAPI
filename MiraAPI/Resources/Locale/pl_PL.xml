@@ -29,4 +29,9 @@ Znajdź Intruzów, bądź oszukaj Załogę.</string>
   <string name="MiraApi.Gamemode.HideAndSeek">Chowany</string>
   <string name="MiraApi.Gamemode.HideAndSeek.Description">Możesz uciekać, ale nie możesz się schować!
 Przeżyj przez wymagany czas, albo zabij chowających.</string>
+  <string name="MiraApi.CustomOptionMenuDescription">Zastosuj ustawienia gry dla tego moda!</string>
+  <string name="MiraApi.GameSetting.Global.ClickToClose">Kliknij by zamknąć</string>
+  <string name="MiraApi.GameSetting.Global.ClickToOpen">Kliknij by otworzyć</string>
+  <string name="MiraApi.GameSetting.Preset.Hint">Stwórz lub wybierz zestaw ustawień na tą grę</string>
+  <string name="MiraApi.GameSetting.Preset.Save">Zapisz</string>
 </resources>
