@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
   <string name="MiraApi.TopRightButtonScaleFactor">右上角 UI 縮放比例</string>
-  <string name="MiraApi.WikiOnBottomRow">維基按鈕顯示在主界面下方</string>
+  <string name="MiraApi.WikiOnBottomRow">維基按鈕顯示在底部</string>
   <string name="Roles">職業</string>
   <string name="Modifier">附加屬性</string>
   <string name="Modifiers">附加屬性</string>
@@ -17,4 +17,16 @@
   <string name="MiraApi.MiraApiBrand">MiraAPI</string>
   <string name="MiraApi.ShowModifiersHudOnLeftSide">在左側顯示附加職業UI</string>
   <string name="MiraApi.ShowKeybindsOnButtons">在按鈕上顯示快捷鍵</string>
+  <string name="MiraApi.ButtonScaleFactor">按鈕縮放比例</string>
+  <string name="MiraApi.MaxFps">最大幀數</string>
+  <string name="MiraApi.EnableSabotageFlashes">啟用破壞紅色閃爍</string>
+  <string name="MiraApi.EnableSabotageBlare">啟用破壞音效</string>
+  <string name="MiraApi.ReturnToRoleSettings">返回職業設定</string>
+  <string name="MiraApi.CustomCategory1">自定義類別 1</string>
+  <string name="MiraApi.CustomCategory2">自定義類別 2</string>
+  <string name="MiraApi.ModifierMenuDescription">在此配置附加職業及其設定!</string>
+  <string name="MiraApi.CustomOptionMenuDescription">為此模組套用遊戲設定!</string>
+  <string name="MiraApi.GameSetting.Global.ClickToClose">點擊關閉</string>
+  <string name="MiraApi.GameSetting.Global.ClickToOpen">點擊開啟</string>
+  <string name="MiraApi.GameSetting.Preset.Save">保存</string>
 </resources>
