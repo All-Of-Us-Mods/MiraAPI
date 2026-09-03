@@ -29,4 +29,9 @@
   <string name="MiraApi.GameSetting.Global.ClickToClose">點擊關閉</string>
   <string name="MiraApi.GameSetting.Global.ClickToOpen">點擊開啟</string>
   <string name="MiraApi.GameSetting.Preset.Save">保存</string>
+  <string name="MiraApi.GameSetting.Preset.Hint">為本遊戲選擇或創建一個預設</string>
+  <string name="MiraApi.RoleTeam.Crewmate.Group">船員職業</string>
+  <string name="MiraApi.RoleTeam.Impostor.Group">偽裝者職業</string>
+  <string name="MiraApi.RoleTeam.Neutral.Group">中立職業</string>
+  <string name="MiraApi.RoleTeam.Other">其他職業</string>
 </resources>
