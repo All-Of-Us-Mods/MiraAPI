@@ -32,4 +32,8 @@
   <string name="MiraApi.TopRightButtonScaleFactor">右上角缩放比例</string>
   <string name="MiraApi.WikiOnBottomRow">维基按钮显示在底部</string>
   <string name="MiraApi.GameSetting.Global.ClickToOpen">点击开启</string>
+  <string name="MiraApi.RoleTeam.Crewmate.Group">船员职业</string>
+  <string name="MiraApi.RoleTeam.Impostor.Group">伪装者职业</string>
+  <string name="MiraApi.RoleTeam.Neutral.Group">中立职业</string>
+  <string name="MiraApi.RoleTeam.Other">其他职业</string>
 </resources>
