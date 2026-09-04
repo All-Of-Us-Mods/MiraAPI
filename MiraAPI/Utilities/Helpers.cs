@@ -530,6 +530,48 @@ public static class Helpers
     }
 
     /// <summary>
+    /// Returns the string of a <see cref="RoleBehaviour"/>.
+    /// </summary>
+    /// <param name="role">The <see cref="RoleBehaviour"/> to find.</param>
+    /// <returns>The <see cref="RoleBehaviour"/>'s intro blurb.</returns>
+    public static string GetRoleIntroBlurb(this RoleBehaviour role)
+    {
+        if (role is ICustomRole custom)
+        {
+            return custom.RoleDescription;
+        }
+        return role.Blurb;
+    }
+
+    /// <summary>
+    /// Returns the string of a <see cref="RoleBehaviour"/>.
+    /// </summary>
+    /// <param name="role">The <see cref="RoleBehaviour"/> to find.</param>
+    /// <returns>The <see cref="RoleBehaviour"/>'s medium description.</returns>
+    public static string GetRoleMedDescription(this RoleBehaviour role)
+    {
+        if (role is ICustomRole custom)
+        {
+            return custom.RoleDescription;
+        }
+        return role.BlurbMed;
+    }
+
+    /// <summary>
+    /// Returns the string of a <see cref="RoleBehaviour"/>.
+    /// </summary>
+    /// <param name="role">The <see cref="RoleBehaviour"/> to find.</param>
+    /// <returns>The <see cref="RoleBehaviour"/>'s long description.</returns>
+    public static string GetRoleLongDescription(this RoleBehaviour role)
+    {
+        if (role is ICustomRole custom)
+        {
+            return custom.RoleLongDescription;
+        }
+        return role.BlurbLong;
+    }
+
+    /// <summary>
     /// Returns whether the <see cref="RoleBehaviour"/> is blacklisted from appearing and spawning. (Only applicable to vanilla roles).
     /// </summary>
     /// <param name="role">The <see cref="RoleBehaviour"/> to check.</param>

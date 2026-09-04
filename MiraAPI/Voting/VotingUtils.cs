@@ -122,7 +122,7 @@ public static class VotingUtils
         CustomCastJudgeVote(srcPlayerId, suspectPlayerId, overruleNonce);
     }
 
-    private static void CustomCastJudgeVote(PlayerId judgePlayerId, PlayerId targetPlayerId, ushort overruleNonce)
+    public static void CustomCastJudgeVote(PlayerId judgePlayerId, PlayerId targetPlayerId, ushort overruleNonce)
     {
         var plr = GameData.Instance.GetPlayerById(judgePlayerId.Value);
         if (!plr) return;
@@ -187,7 +187,7 @@ public static class VotingUtils
         CustomCastVote(srcPlayerId, suspectPlayerId);
     }
 
-    private static void CustomCastVote(byte srcPlayerId, byte suspectPlayerId)
+    public static void CustomCastVote(byte srcPlayerId, byte suspectPlayerId)
     {
         var plr = GameData.Instance.GetPlayerById(srcPlayerId);
         if (!plr) return;

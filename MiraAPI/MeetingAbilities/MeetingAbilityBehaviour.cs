@@ -1,4 +1,5 @@
 using System.Globalization;
+using Il2CppInterop.Runtime.Attributes;
 using Reactor.Utilities.Attributes;
 using Reactor.Utilities.Extensions;
 using TMPro;
@@ -52,6 +53,7 @@ public class MeetingAbilityBehaviour : MonoBehaviour
     /// </summary>
     /// <param name="button">The <see cref="TargetedMeetingButton"/> to initialize this component for.</param>
     /// <param name="voteArea">The parent <see cref="PlayerVoteArea"/>.</param>
+    [HideFromIl2Cpp]
     public void Initialize(TargetedMeetingButton button, PlayerVoteArea voteArea)
     {
         if (_init) return;

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Xml;
 using MiraAPI.Utilities;
+using MonoMod.Utils;
 using Reactor.Localization.Utilities;
 using UnityEngine;
 
@@ -14,7 +15,9 @@ public static class MiraLocaleManager
 {
     private const string LangDirectory = "mira_languages";
 
-    public static readonly Dictionary<string, Dictionary<MiraLanguage, Dictionary<string, string>>> Locale = [];
+    // Language, Xml Name, then Value
+    public static Dictionary<MiraLanguage, Dictionary<string, string>> Locale { get; } = [];
+    public static readonly List<string> RegisteredModIds = [];
 
     public static readonly Dictionary<string, StringNames> RegisteredStringNames = [];
     internal static readonly Dictionary<StringNames, string> StringNamesLookup = [];
@@ -88,22 +91,19 @@ public static class MiraLocaleManager
     }
 
     /// <summary>
-    /// Registers translations for a mod. Copies embedded XML to mira_languages/{modGuid}/ on first run,
-    /// then loads all XML files from that directory into memory.
+    /// Registers translations for a mod.
     /// Call once per mod during plugin Load().
     /// </summary>
     /// <param name="modGuid">The mod GUID (e.g., "mira.example").</param>
     public static void Register(string modGuid)
     {
         var callingAssembly = Assembly.GetCallingAssembly();
-        var dir = GetModLangDir(modGuid);
 
-        LoadInternalStrings(callingAssembly, callingAssembly.GetName().Name!, modGuid, dir);
+        LoadInternalStrings(callingAssembly, callingAssembly.GetName().Name!, modGuid);
     }
 
     /// <summary>
-    /// Registers translations for a mod. Copies embedded XML to mira_languages/{modGuid}/ on first run,
-    /// then loads all XML files from that directory into memory.
+    /// Registers translations for a mod.
     /// Call once per mod during plugin Load().
     /// </summary>
     /// <param name="modGuid">The mod GUID (e.g., "mira.example").</param>
@@ -111,80 +111,95 @@ public static class MiraLocaleManager
     public static void Register(string modGuid, string internalName)
     {
         var callingAssembly = Assembly.GetCallingAssembly();
-        var dir = GetModLangDir(modGuid);
 
-        LoadInternalStrings(callingAssembly, internalName, modGuid, dir);
+        LoadInternalStrings(callingAssembly, internalName, modGuid);
     }
 
     /// <summary>
     /// Translates a key into the current language.
-    /// Searches all mods, with reverse lookup fallback.
     /// </summary>
     /// <param name="key">The string id to find.</param>
     /// <param name="fallback">Fallback string to use if no translation is found.</param>
     /// <returns>A <see cref="string"/> based on the key provided.</returns>
     public static string Get(string key, string fallback = "")
     {
-        var currentLang = CurrentLanguage;
+        return Get(CurrentLanguage, key, fallback != string.Empty ? fallback : key);
+    }
 
-        foreach (var (_, modLocale) in Locale)
+    /// <summary>
+    /// Translates a key into the current language.
+    /// </summary>
+    /// <param name="language">The specific language to prioritize.</param>
+    /// <param name="key">The string id to find.</param>
+    /// <param name="fallback">Fallback string to use if no translation is found.</param>
+    /// <returns>A <see cref="string"/> based on the key provided.</returns>
+    public static string Get(MiraLanguage language, string key, string fallback = "")
+    {
+        if (Locale.TryGetValue(language, out var translations) &&
+            translations.TryGetValue(key, out var translation))
         {
-            if (modLocale.TryGetValue(currentLang, out var langDict) &&
-                langDict.TryGetValue(key, out var translated))
-            {
-                return translated;
-            }
+            return translation;
         }
 
-        foreach (var (_, modLocale) in Locale)
+        if (Locale.TryGetValue(MiraLanguage.English, out var translationsEng) &&
+            translationsEng.TryGetValue(key, out var translationEng))
         {
-            if (modLocale.TryGetValue(MiraLanguage.English, out var engDict) &&
-                engDict.TryGetValue(key, out var english))
-            {
-                return english;
-            }
+            return translationEng;
         }
 
-        string? bestStructuredKey = null;
-        foreach (var (_, modLocale) in Locale)
-        {
-            if (modLocale.TryGetValue(MiraLanguage.English, out var engDict))
-            {
-                foreach (var (structuredKey, englishValue) in engDict)
-                {
-                    if (englishValue == key)
-                    {
-                        bestStructuredKey = structuredKey;
-                        break;
-                    }
-                }
-            }
+        return fallback;
+    }
 
-            if (bestStructuredKey != null) break;
+    /// <summary>
+    /// Translates a key into the current language.
+    /// </summary>
+    /// <param name="key">The string id to find.</param>
+    /// <param name="parseList">List of keys to change into other text.</param>
+    /// <param name="fallback">Fallback string to use if no translation is found.</param>
+    /// <returns>A <see cref="string"/> based on the key provided.</returns>
+    public static string GetParsed(
+        string key,
+        Dictionary<string, string> parseList,
+        string fallback = "")
+    {
+        return GetParsed(CurrentLanguage, key, parseList, fallback != string.Empty ? fallback : key);
+    }
+
+    /// <summary>
+    /// Translates a key into the current language.
+    /// </summary>
+    /// <param name="language">The specific language to prioritize.</param>
+    /// <param name="key">The string id to find.</param>
+    /// <param name="parseList">List of keys to change into other text.</param>
+    /// <param name="fallback">Fallback string to use if no translation is found.</param>
+    /// <returns>A <see cref="string"/> based on the key provided.</returns>
+    public static string GetParsed(
+        MiraLanguage language,
+        string key,
+        Dictionary<string, string> parseList,
+        string fallback = "")
+    {
+        var text = fallback;
+
+        if (Locale.TryGetValue(MiraLanguage.English, out var translationsEng) &&
+            translationsEng.TryGetValue(key, out var translationEng))
+        {
+            text = translationEng;
         }
 
-        if (bestStructuredKey != null)
+        if (language is not MiraLanguage.English &&
+            Locale.TryGetValue(language, out var translations) &&
+            translations.TryGetValue(key, out var translation))
         {
-            foreach (var (_, modLocale) in Locale)
-            {
-                if (modLocale.TryGetValue(currentLang, out var langDict) &&
-                    langDict.TryGetValue(bestStructuredKey, out var revTranslated))
-                {
-                    return revTranslated;
-                }
-            }
-
-            foreach (var (_, modLocale) in Locale)
-            {
-                if (modLocale.TryGetValue(MiraLanguage.English, out var engDict) &&
-                    engDict.TryGetValue(bestStructuredKey, out var revEnglish))
-                {
-                    return revEnglish;
-                }
-            }
+            text = translation;
         }
 
-        return fallback != string.Empty ? fallback : key;
+        foreach (var tmpText in parseList.Where(x => text.Contains(x.Key)))
+        {
+            text = text.Replace(tmpText.Key, tmpText.Value);
+        }
+
+        return text;
     }
 
     public static string BuildTranslationId(string modId, string idPart, string suffix)
@@ -215,16 +230,48 @@ public static class MiraLocaleManager
         return newString;
     }
 
-    private static void LoadInternalStrings(Assembly assembly, string internalName, string modGuid, string dir)
+    public static void LoadExternalLocale()
+    {
+        CheckExternalDirectory("mira.api", BepInEx.Paths.PluginPath);
+        CheckExternalDirectory("mira.api", BepInEx.Paths.BepInExRootPath);
+        CheckExternalDirectory("mira.api", BepInEx.Paths.GameRootPath);
+        foreach (var mod in RegisteredModIds)
+        {
+            CheckExternalDirectory(mod, GetModLangDir(mod));
+        }
+    }
+
+    public static void CheckExternalDirectory(string modGuid, string dir)
     {
         Directory.CreateDirectory(dir);
 
-        if (!Locale.ContainsKey(modGuid))
+        foreach (var filePath in Directory.GetFiles(dir, "*.xml"))
         {
-            Locale[modGuid] = [];
-        }
+            var fileName = Path.GetFileNameWithoutExtension(filePath);
 
+            var lang = LangList.ContainsValue(fileName)
+                ? LangList.First(x => x.Value == fileName).Key
+                : (MiraLanguage)(-1);
+            if ((int)lang == -1) continue;
+
+            try
+            {
+                Locale.TryAdd(lang, []);
+                var xmlContent = File.ReadAllText(filePath);
+                ParseXmlFile(xmlContent, lang, false);
+            }
+            catch (Exception e)
+            {
+                Error($"Failed to load external translation {filePath}: {e.Message}");
+            }
+        }
+    }
+
+    private static void LoadInternalStrings(Assembly assembly, string internalName, string modGuid)
+    {
         var resourcePrefix = $"{internalName}.Resources.Locale.";
+
+        RegisteredModIds.Add(modGuid);
 
         var atLeastOneLoaded = false;
         foreach (var locale in LangList)
@@ -241,9 +288,8 @@ public static class MiraLocaleManager
             string xmlContent = reader.ReadToEnd();
             try
             {
-                var dict = ParseXmlFile(xmlContent);
-                Locale[modGuid][locale.Key] = dict;
-                Info($"Loaded {locale.Key.ToDisplayString()} translation for mod {modGuid} ({dict.Count} keys)");
+                Locale.TryAdd(locale.Key, []);
+                ParseXmlFile(xmlContent, locale.Key, true);
                 atLeastOneLoaded = true;
             }
             catch (Exception e)
@@ -256,37 +302,11 @@ public static class MiraLocaleManager
         {
             Error($"No internal strings were found for {internalName}!");
         }
-
-        if (!Locale.TryGetValue(modGuid, out _))
-        {
-            Locale[modGuid] = [];
-        }
-
-        foreach (var filePath in Directory.GetFiles(dir, "*"))
-        {
-            var fileName = Path.GetFileNameWithoutExtension(filePath);
-
-            var lang = LangList.ContainsValue(fileName)
-                ? LangList.First(x => x.Value == fileName).Key
-                : (MiraLanguage)(-1);
-            if ((int)lang == -1) continue;
-
-            try
-            {
-                var dict = ParseXmlFile(filePath);
-                Locale[modGuid][lang] = dict;
-                Info($"Loaded external {lang.ToDisplayString()} translation for mod {modGuid} ({dict.Count} keys)");
-            }
-            catch (Exception e)
-            {
-                Error($"Failed to load external translation {filePath}: {e.Message}");
-            }
-        }
     }
 
-    private static Dictionary<string, string> ParseXmlFile(string xmlContent)
+    private static void ParseXmlFile(string xmlContent, MiraLanguage language, bool loadingInternal)
     {
-        var dict = new Dictionary<string, string>();
+        var dict = Locale[language];
         XmlDocument xmlDoc = new();
         try
         {
@@ -295,6 +315,7 @@ public static class MiraLocaleManager
 
             if (stringNodes != null)
             {
+                var total = 0;
                 foreach (XmlNode node in stringNodes)
                 {
                     if (node.Attributes?["name"] != null)
@@ -316,16 +337,20 @@ public static class MiraLocaleManager
 
                         value = value.Replace("<nl>", "\n").Replace("<and>", "&");
 
+                        if (loadingInternal && Locale[language].ContainsKey(name))
+                        {
+                            Error($"String for \"{name}\" in {language} was overwritten by duplicate!");
+                        }
                         dict[name] = value;
+                        total++;
                     }
                 }
+                Info($"Loaded {language.ToDisplayString()} translation with ({total} keys)");
             }
         }
         catch (XmlException ex)
         {
             Error($"XML parsing error: {ex.Message}");
         }
-
-        return dict;
     }
 }

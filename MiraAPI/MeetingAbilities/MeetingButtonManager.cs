@@ -99,8 +99,9 @@ public static class MeetingButtonManager
                 {
                     var btn = ability.CreateButton(playerVoteArea);
                     btn.transform.SetParent(playerVoteArea.Buttons.transform);
-                    playerVoteArea.CancelButton.transform.SetAsFirstSibling();
                 }
+                var btn2 = ability.CreateButton(meetingHud.SkipVoteButton);
+                btn2.transform.SetParent(meetingHud.SkipVoteButton.Buttons.transform);
 
                 if (ability.UsesMode == MeetingButtonUsesMode.PerMeeting) ability.UsesLeft = ability.MaxUses;
                 if (ability is MultiTargetMeetingButton multiAbility) multiAbility.Targets = new();
@@ -110,5 +111,10 @@ public static class MeetingButtonManager
                 Error($"Failed to create targeted meeting button {ability.Name}: {e.Message}");
             }
         }
+        foreach (var playerVoteArea in meetingHud.playerStates)
+        {
+            playerVoteArea.CancelButton.transform.SetAsFirstSibling();
+        }
+        meetingHud.SkipVoteButton.CancelButton.transform.SetAsFirstSibling();
     }
 }

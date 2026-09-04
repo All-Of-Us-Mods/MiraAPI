@@ -1,12 +1,15 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
-    <string name="Roles">Roles</string>
-    <string name="Modifier">Modificador</string>
-    <string name="Modifiers">Modificadores</string>
-    <string name="MiraApi.RoleTeam.Crewmate">Tripulante</string>
-    <string name="MiraApi.RoleTeam.Crewmate.Short">Tripulante</string>
-    <string name="MiraApi.RoleTeam.Impostor">Impostor</string>
-    <string name="MiraApi.RoleTeam.Impostor.Short">Impostor</string>
-    <string name="MiraApi.RoleTeam.Neutral">Neutro</string>
-    <string name="MiraApi.RoleTeam.Neutral.Short">Neutro</string>
+  <string name="Roles">Roles</string>
+  <string name="Modifier">Modificador</string>
+  <string name="Modifiers">Modificadores</string>
+  <string name="MiraApi.RoleTeam.Crewmate">Tripulante</string>
+  <string name="MiraApi.RoleTeam.Crewmate.Short">Tripulante</string>
+  <string name="MiraApi.RoleTeam.Impostor">Impostor</string>
+  <string name="MiraApi.RoleTeam.Impostor.Short">Impostor</string>
+  <string name="MiraApi.RoleTeam.Neutral">Neutro</string>
+  <string name="MiraApi.RoleTeam.Neutral.Short">Neutro</string>
+  <string name="MiraApi">Mira API</string>
+  <string name="MiraApi.Accessibility">Accesibilidad</string>
+  <string name="MiraApi.MiraApiBrand">MiraAPI</string>
 </resources>

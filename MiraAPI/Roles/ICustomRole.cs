@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using BepInEx.Configuration;
+using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
 using MiraAPI.Modifiers;
 using MiraAPI.PluginLoading;
@@ -20,7 +21,7 @@ public interface ICustomRole : IOptionable
     string IdPart => GetType().Name;
 
     /// <summary>
-    /// Gets the id part used to build the role's translation keys. It is recommended to call it ModGuid.Role.Faction
+    /// Gets the id part used to build the role's translation keys. It is recommended to call it ModGuid.Role.Faction.
     /// </summary>
     string IdPrefix => GetType().Namespace!;
 
@@ -297,8 +298,14 @@ public interface ICustomRole : IOptionable
     /// <returns><see langword="true"/> if the role is able to spawn, otherwise <see langword="false"/>.</returns>
     virtual bool CanSpawnOnCurrentMode()
     {
-        return !GameManager.Instance.IsHideAndSeek();
+        return Configuration.AssociatedGameMode.IsInstanceOfType(CustomGameModeManager.ActiveMode);
     }
+
+    /// <summary>
+    /// Gets whether the role is forcibly shown or disabled in the wiki screen.
+    /// </summary>
+    /// <returns><see langword="true"/> if the role is always displayed, otherwise <see langword="false"/> if it is never displayable, or <see langword="null"/> if it is dictated by amount and chance.</returns>
+    virtual bool? ForceShowRoleOnWiki => null;
 
     /// <summary>
     /// Gets the function that determines whether the role should be toggled on or off in the game settings.

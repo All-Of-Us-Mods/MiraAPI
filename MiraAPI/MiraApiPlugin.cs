@@ -71,6 +71,7 @@ public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
     public override void Load()
     {
         Harmony.PatchAll();
+        UiResetEvents.Initialize();
         JudgeEvents.Initialize();
 
         ReactorCredits.Register("Mira API", Version, IsDevBuild, ReactorCredits.AlwaysShow);

@@ -112,6 +112,15 @@ internal static class MeetingHudPatches
     [HarmonyPatch(nameof(MeetingHud.VotingComplete))]
     public static void VotingCompletePatch(MeetingHud __instance)
     {
+        foreach (var meetingAbility in MeetingButtonManager.UntargetedButtons.Where(x => x.Enabled(PlayerControl.LocalPlayer.Data.Role) &&
+                     (x.DisableUponVoting || x.HideUponWrapUp)))
+        {
+            meetingAbility.UpdateHandler(__instance);
+            if (meetingAbility.Button)
+            {
+                meetingAbility.Button!.SetDisabled();
+            }
+        }
         MiraEventManager.InvokeEvent(new VotingCompleteEvent(__instance));
     }
 

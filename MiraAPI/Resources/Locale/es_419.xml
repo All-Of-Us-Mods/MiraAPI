@@ -1,14 +1,43 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
-    <string name="MiraApi.TopRightButtonScaleFactor">Escala De Botón</string>
-    <string name="MiraApi.WikiOnBottomRow">Botón de Wiki debajo de la IU principal</string>
-    <string name="Roles">Roles</string>
-    <string name="Modifier">Modificador</string>
-    <string name="Modifiers">Modificadores</string>
-    <string name="MiraApi.RoleTeam.Crewmate">Tripulante</string>
-    <string name="MiraApi.RoleTeam.Crewmate.Short">Trip</string>
-    <string name="MiraApi.RoleTeam.Impostor">Impostor</string>
-    <string name="MiraApi.RoleTeam.Impostor.Short">Imp</string>
-    <string name="MiraApi.RoleTeam.Neutral">Neutral</string>
-    <string name="MiraApi.RoleTeam.Neutral.Short">Neut</string>
+  <string name="MiraApi.TopRightButtonScaleFactor">Factor de Escala de la IU superior derecha</string>
+  <string name="MiraApi.WikiOnBottomRow">Botón de Wiki debajo de la IU principal</string>
+  <string name="Roles">Roles</string>
+  <string name="Modifier">Modificador</string>
+  <string name="Modifiers">Modificadores</string>
+  <string name="MiraApi.RoleTeam.Crewmate">Tripulante</string>
+  <string name="MiraApi.RoleTeam.Crewmate.Short">Trip</string>
+  <string name="MiraApi.RoleTeam.Impostor">Impostor</string>
+  <string name="MiraApi.RoleTeam.Impostor.Short">Imp</string>
+  <string name="MiraApi.RoleTeam.Neutral">Neutral</string>
+  <string name="MiraApi.RoleTeam.Neutral.Short">Neut</string>
+  <string name="MiraApi">API Mira</string>
+  <string name="MiraApi.VisualsUi">Visuales/IU</string>
+  <string name="MiraApi.Accessibility">Accesibilidad</string>
+  <string name="MiraApi.MiraApiBrand">MiraAPI</string>
+  <string name="MiraApi.ShowModifiersHudOnLeftSide">Mostrar Modificadores al Lado Izq</string>
+  <string name="MiraApi.ShowKeybindsOnButtons">Mostrar Atajos en Botones</string>
+  <string name="MiraApi.ButtonScaleFactor">Escala de Botón</string>
+  <string name="MiraApi.MaxFps">FPS Máx</string>
+  <string name="MiraApi.EnableSabotageFlashes">Activar Visuales de Sabotaje</string>
+  <string name="MiraApi.EnableSabotageBlare">Activar Alarma de Sabotaje</string>
+  <string name="MiraApi.ReturnToRoleSettings">REGRESAR A AJUSTES DE ROL</string>
+  <string name="MiraApi.CustomCategory1">Categoría Personalizada 1</string>
+  <string name="MiraApi.CustomCategory2">Categoría Personalizada 2</string>
+  <string name="MiraApi.ModifierMenuDescription">¡Configura modificadores y sus ajustes aquí!</string>
+  <string name="MiraApi.CustomOptionMenuDescription">¡Aplica opciones de partida para este mod!</string>
+  <string name="MiraApi.Gamemode.Classic">Clásico</string>
+  <string name="MiraApi.Gamemode.Classic.Description">La experiencia clásica de Among Us
+Encuentra a los Impostores o engaña a la Tripulación.</string>
+  <string name="MiraApi.Gamemode.HideAndSeek">Escondidas</string>
+  <string name="MiraApi.Gamemode.HideAndSeek.Description">¡Puedes correr, pero no esconderte!
+Sobrevive al temporizador o elimina a la Tripulación.</string>
+  <string name="MiraApi.GameSetting.Global.ClickToClose">Click para cerrar</string>
+  <string name="MiraApi.GameSetting.Global.ClickToOpen">Click para abrir</string>
+  <string name="MiraApi.GameSetting.Preset.Hint">Selecciona o crea un ajuste predefinido para esta partida</string>
+  <string name="MiraApi.GameSetting.Preset.Save">Guardar</string>
+  <string name="MiraApi.RoleTeam.Crewmate.Group">Roles de Tripulante</string>
+  <string name="MiraApi.RoleTeam.Impostor.Group">Roles de Impostor</string>
+  <string name="MiraApi.RoleTeam.Neutral.Group">Roles Neutrales</string>
+  <string name="MiraApi.RoleTeam.Other">Otros</string>
 </resources>

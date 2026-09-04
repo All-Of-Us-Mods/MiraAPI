@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Linq;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
+using Il2CppInterop.Runtime.Attributes;
 using MiraAPI.GameOptions;
 using MiraAPI.HnsReimplemented.Options;
 using MiraAPI.Utilities;
@@ -245,6 +246,7 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
         }
     }
 
+    [HideFromIl2Cpp]
     private IEnumerator BeepAlmostEverySecond()
     {
         while (!IsFinalCountdown)

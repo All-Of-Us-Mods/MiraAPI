@@ -1,14 +1,32 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
-    <string name="MiraApi.TopRightButtonScaleFactor">Skala Przycisków</string>
-    <string name="MiraApi.WikiOnBottomRow">Przycisk Wiki Poniżej Głównego UI</string>
-    <string name="Roles">Role</string>
-    <string name="Modifier">Modyfikator</string>
-    <string name="Modifiers">Modyfikatory</string>
-    <string name="MiraApi.RoleTeam.Crewmate">Załogant</string>
-    <string name="MiraApi.RoleTeam.Crewmate.Short">Zał</string>
-    <string name="MiraApi.RoleTeam.Impostor">Intruz</string>
-    <string name="MiraApi.RoleTeam.Impostor.Short">Int</string>
-    <string name="MiraApi.RoleTeam.Neutral">Neutralny</string>
-    <string name="MiraApi.RoleTeam.Neutral.Short">Neut</string>
+  <string name="MiraApi.TopRightButtonScaleFactor">Skala Przycisków w Prawym Górnym</string>
+  <string name="MiraApi.WikiOnBottomRow">Przycisk Wiki Poniżej Głównego UI</string>
+  <string name="Roles">Role</string>
+  <string name="Modifier">Modyfikator</string>
+  <string name="Modifiers">Modyfikatory</string>
+  <string name="MiraApi.RoleTeam.Crewmate">Załogant</string>
+  <string name="MiraApi.RoleTeam.Crewmate.Short">Zał</string>
+  <string name="MiraApi.RoleTeam.Impostor">Intruz</string>
+  <string name="MiraApi.RoleTeam.Impostor.Short">Int</string>
+  <string name="MiraApi.RoleTeam.Neutral">Neutralny</string>
+  <string name="MiraApi.RoleTeam.Neutral.Short">Neut</string>
+  <string name="MiraApi.VisualsUi">Wizualne/UI</string>
+  <string name="MiraApi.Accessibility">Dostępności</string>
+  <string name="MiraApi.ShowModifiersHudOnLeftSide">Pokaż HUD Modyfikatorów Po Lewo</string>
+  <string name="MiraApi.ShowKeybindsOnButtons">Pokaż Przypisane Klawisze na Przyciskach</string>
+  <string name="MiraApi.ButtonScaleFactor">Skala Przycisków</string>
+  <string name="MiraApi.MaxFps">Limit FPS</string>
+  <string name="MiraApi.EnableSabotageFlashes">Włącz Błyski Sabotaży</string>
+  <string name="MiraApi.EnableSabotageBlare">Włącz Dźwięk Sabotaży</string>
+  <string name="MiraApi.ReturnToRoleSettings">WRÓĆ DO USTAWIEŃ RÓL</string>
+  <string name="MiraApi.CustomCategory1">Niestandardowa Kategoria 1</string>
+  <string name="MiraApi.CustomCategory2">Niestandardowa Kategoria 2</string>
+  <string name="MiraApi.ModifierMenuDescription">Skonfiguruj modyfikatory i ich ustawienia tutaj!</string>
+  <string name="MiraApi.Gamemode.Classic">Klasyczny</string>
+  <string name="MiraApi.Gamemode.Classic.Description">Klasyczna rozgrywka w Among Us!
+Znajdź Intruzów, bądź oszukaj Załogę.</string>
+  <string name="MiraApi.Gamemode.HideAndSeek">Chowany</string>
+  <string name="MiraApi.Gamemode.HideAndSeek.Description">Możesz uciekać, ale nie możesz się schować!
+Przeżyj przez wymagany czas, albo zabij chowających.</string>
 </resources>

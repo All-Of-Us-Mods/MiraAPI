@@ -11,6 +11,7 @@ public class MiraLocalizationProvider : LocalizationProvider
 {
     public override int Priority => ReactorPriority.Normal;
     private static LocalizationProvider? _reactorProvider;
+    private static bool _loadedStrings;
 
     public override bool TryGetText(StringNames stringName, out string? result)
     {
@@ -38,6 +39,11 @@ public class MiraLocalizationProvider : LocalizationProvider
         if (MiraLocaleManager.LangCultureList.TryGetValue((MiraLanguage)newLanguage, out var culture))
         {
             MiraApiPlugin.Culture = new(culture);
+        }
+        if (!_loadedStrings)
+        {
+            MiraLocaleManager.LoadExternalLocale();
+            _loadedStrings = true;
         }
 
         foreach (var tab in LocalSettingsTab.TabGroups)

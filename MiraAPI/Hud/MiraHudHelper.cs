@@ -186,7 +186,7 @@ public sealed class MiraHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
         {
             ExtraUiTopRight = new GameObject("ExtraUiTopRight")
             {
-                layer = UiTopRight.layer
+                layer = UiTopRight.layer,
             };
             ExtraUiTopRight.transform.SetParent(instance.MapButton.transform.parent.parent, false);
 

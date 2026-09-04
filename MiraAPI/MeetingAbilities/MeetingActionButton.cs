@@ -68,6 +68,26 @@ public abstract class MeetingActionButton
     public bool TimerPaused { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating how many times the ability was used in the current meeting.
+    /// </summary>
+    public int UsesSoFar { get; set; }
+
+    /// <summary>
+    /// Gets a value determining if the abiity is disabled upon being used.
+    /// </summary>
+    public virtual bool DisableUponUse => false;
+
+    /// <summary>
+    /// Gets a value determining if the abiity is disabled upon voting.
+    /// </summary>
+    public virtual bool DisableUponVoting => false;
+
+    /// <summary>
+    /// Gets a value determining if the abiity is hidden when votes wrapping up.
+    /// </summary>
+    public virtual bool HideUponWrapUp => false;
+
+    /// <summary>
     /// Gets or sets the amount of uses left.
     /// </summary>
     public int UsesLeft { get; set; }
@@ -103,6 +123,7 @@ public abstract class MeetingActionButton
         Button.graphic.sprite = Sprite.LoadAsset();
 
         Button.SetUsesRemaining(UsesLeft);
+        UsesSoFar = 0;
         if (MaxUses <= 0)
         {
             Button.SetInfiniteUses();
@@ -260,7 +281,9 @@ public abstract class MeetingActionButton
     /// <returns>A value that represents whether the button should light up or not.</returns>
     public virtual bool CanUse()
     {
-        return !LimitedUses || UsesLeft > 0;
+        return (!DisableUponUse || UsesSoFar < 1) &&
+               (!DisableUponVoting || MeetingHud.Instance.CurrentState is not MeetingHud.MeetingStates.Voted) &&
+               (!LimitedUses || UsesLeft > 0);
     }
 
     /// <summary>
@@ -283,6 +306,11 @@ public abstract class MeetingActionButton
 
         Timer = Cooldown;
         OnClick();
+        UsesSoFar++;
+        if (DisableUponUse && Button)
+        {
+            Button!.SetDisabled();
+        }
     }
 
     /// <summary>
