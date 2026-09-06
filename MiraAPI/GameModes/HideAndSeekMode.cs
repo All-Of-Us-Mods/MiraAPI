@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using AmongUs.Data;
 using AmongUs.GameOptions;
@@ -30,52 +32,70 @@ public class HideAndSeekMode : AbstractGameMode
     /// <inheritdoc/>
     public override string Description => "MiraApi.Gamemode.HideAndSeek.Description";
 
+    /// <inheritdoc/>
     // TODO: Once the Hide n Seek port is ready for release, we will remove this.
     public override bool HideMode => !MiraApiPlugin.IsDevBuild;
 
+    /// <inheritdoc/>
     public override Color Color { get; } = new Color32(255, 88, 90, 255);
-    public override LoadableAsset<Sprite>? Icon => MiraAssets.HnSGamemodeIcon;
+
+    /// <inheritdoc/>
+    public override LoadableAsset<Sprite> Icon => MiraAssets.HnSGamemodeIcon;
+
+    /// <inheritdoc/>
+    public override bool ShowGameModeIntroCutscene => true;
+
+    /// <inheritdoc/>
+    public override bool GameModeBodyTypeOverride => true;
+
+    /// <inheritdoc/>
+    public override bool ShowNormalGameSettings => false;
+
+    /// <inheritdoc/>
+    public override bool ShowNormalRoleSettings => false;
+
+    /// <inheritdoc/>
+    public override float DefaultImpostorKillCooldown => 1f;
+
+    /// <inheritdoc/>
+    public override bool ShowTaskBar => false;
+
+    /// <inheritdoc/>
     public override bool CanReport(DeadBody body)
     {
         return false;
     }
 
+    /// <inheritdoc/>
     public override bool ShouldShowSabotageMap(MapBehaviour map)
     {
         return false;
     }
 
-    public override bool ShowGameModeIntroCutscene => true;
-    public override bool GameModeBodyTypeOverride => true;
-    public override bool ShowNormalGameSettings => false;
-    public override bool ShowNormalRoleSettings => false;
-    public override float DefaultImpostorKillCooldown => 1f;
-
-    public override bool ShowTaskBar => false;
-    public static int ImpostorPlayerID()
+    private static int ImpostorPlayerID()
     {
         return OptionGroupSingleton<HnsImpostorOptions>.Instance.SelectedSeeker.Value;
     }
 
-    public static bool HasImpostorPlayerID()
+    private static bool HasImpostorPlayerID()
     {
         return ImpostorPlayerID() > -1;
     }
 
-    public static bool ValidateImpostorPlayerID(List<NetworkedPlayerInfo> players)
+    private static bool ValidateImpostorPlayerID(List<NetworkedPlayerInfo> players)
     {
-        return HasImpostorPlayerID() && players.Find((NetworkedPlayerInfo p) => (int)p.PlayerId == ImpostorPlayerID()) != null;
+        return HasImpostorPlayerID() && players.Find(p => p.PlayerId == ImpostorPlayerID()) != null;
     }
 
+    /// <inheritdoc/>
     public override void AssignRoles(out bool runOriginal, LogicRoleSelectionNormal instance)
     {
         runOriginal = false;
         Il2CppSystem.Collections.Generic.List<ClientData> list = new();
         AmongUsClient.Instance.GetAllClients(list);
-        List<NetworkedPlayerInfo> list2 = list.ToArray()
+        List<NetworkedPlayerInfo> list2 = [.. list.ToArray()
             .Where(c => c.Character != null && c.Character.Data != null && !c.Character.Data.Disconnected &&
-                        !c.Character.Data.IsDead).OrderBy(c => c.Id).Select(c => c.Character.Data)
-            .ToList();
+                        !c.Character.Data.IsDead).OrderBy(c => c.Id).Select(c => c.Character.Data)];
 
         foreach (NetworkedPlayerInfo networkedPlayerInfo in GameData.Instance.AllPlayers)
         {
@@ -90,7 +110,7 @@ public class HideAndSeekMode : AbstractGameMode
         AssignRolesForTeam(list2, currentGameOptions, RoleTeamTypes.Crewmate, int.MaxValue, RoleTypes.Engineer);
     }
 
-    public static void AssignRolesForTeam(
+    private static void AssignRolesForTeam(
         List<NetworkedPlayerInfo> players,
         IGameOptions opts,
         RoleTeamTypes team,
@@ -102,7 +122,8 @@ public class HideAndSeekMode : AbstractGameMode
         IRoleOptionsCollection roleOptions = opts.RoleOptions;
         var source = RoleManager.Instance.AllRoles.ToArray()
             .Where(role => role.TeamType == team && !RoleManager.IsGhostRole(role.Role) &&
-                           CustomRoleUtils.CanSpawnOnCurrentMode(role));
+                           CustomRoleUtils.CanSpawnOnCurrentMode(role))
+            .ToList();
         var assignmentData = source.Where(x => !x.IsDead).Select(role =>
             new RoleManager.RoleAssignmentData(
                 role,
@@ -110,7 +131,7 @@ public class HideAndSeekMode : AbstractGameMode
                 roleOptions.GetChancePerGame(role.Role))).ToList();
         var source2 = CustomRoleUtils.GetPossibleRoles(assignmentData, x => x.Chance == 100);
         var guaranteedRoles = source.Where(x => source2.Contains(((ushort)x.Role, 100)));
-        List<RoleTypes> list = new List<RoleTypes>();
+        List<RoleTypes> list = [];
         if (team == RoleTeamTypes.Crewmate)
         {
             Error($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: Before Guaranteed Assignment");
@@ -168,10 +189,10 @@ public class HideAndSeekMode : AbstractGameMode
             var newImpostors = new List<NetworkedPlayerInfo>();
             // Specified Seeker
             if (HasImpostorPlayerID() &&
-               ValidateImpostorPlayerID(players) &&
+                ValidateImpostorPlayerID(players) &&
                 !AmongUsClient.Instance.IsGamePublic)
             {
-                NetworkedPlayerInfo networkedPlayerInfo = players.ToArray()
+                NetworkedPlayerInfo networkedPlayerInfo = players
                     .First(p => p.PlayerId == ImpostorPlayerID());
                 players.Remove(networkedPlayerInfo);
                 newImpostors.Add(networkedPlayerInfo);
@@ -183,8 +204,8 @@ public class HideAndSeekMode : AbstractGameMode
                 int num2 = 0;
                 while (num2 < teamMax && players.Count > 0)
                 {
-                    PseudoRandomList<NetworkedPlayerInfo> pseudoRandomList = new PseudoRandomList<NetworkedPlayerInfo>(AmongUsClient.Instance.GameId);
-                    players.Do(x => pseudoRandomList.Add(x));
+                    PseudoRandomList<NetworkedPlayerInfo> pseudoRandomList = new(AmongUsClient.Instance.GameId);
+                    players.Do(pseudoRandomList.Add);
                     for (int i = 0; i < GameData.RoundsPlayedInSession; i++)
                     {
                         pseudoRandomList.PickRandom();
@@ -244,7 +265,7 @@ public class HideAndSeekMode : AbstractGameMode
         }
     }
 
-    public static void AssignRolesFromList(List<NetworkedPlayerInfo> players, int teamMax, List<RoleTypes> roleList, ref int rolesAssigned)
+    private static void AssignRolesFromList(List<NetworkedPlayerInfo> players, int teamMax, List<RoleTypes> roleList, ref int rolesAssigned)
     {
         while (roleList.Count > 0 && players.Count > 0 && rolesAssigned < teamMax)
         {
@@ -252,62 +273,56 @@ public class HideAndSeekMode : AbstractGameMode
             RoleTypes roleType = roleList[index];
             roleList.RemoveAt(index);
             int index2 = HashRandom.FastNext(players.Count);
-            players[index2].Object.RpcSetRole(roleType, false);
+            players[index2].Object.RpcSetRole(roleType);
             players.RemoveAt(index2);
             rolesAssigned++;
         }
     }
 
-    public override IEnumerator IntroCutscene(IntroCutscene __instance)
+    /// <inheritdoc/>
+    public override IEnumerator IntroCutscene(IntroCutscene introCutscene)
     {
-        SoundManager.Instance.PlaySound(__instance.IntroStinger, false, 1f, null);
-        Logger.GlobalInstance.Info("IntroCutscene :: CoBegin() :: Game Mode: Hide and Seek (MiraAPI)", null);
-        __instance.LogPlayerRoleData();
-        __instance.HideAndSeekPanels.SetActive(true);
+        SoundManager.Instance.PlaySound(introCutscene.IntroStinger, false);
+        Logger.GlobalInstance.Info("IntroCutscene :: CoBegin() :: Game Mode: Hide and Seek (MiraAPI)");
+        introCutscene.LogPlayerRoleData();
+        introCutscene.HideAndSeekPanels.SetActive(true);
         if (PlayerControl.LocalPlayer.Data.Role.IsImpostor)
         {
-            __instance.CrewmateRules.SetActive(false);
-            __instance.ImpostorRules.SetActive(true);
+            introCutscene.CrewmateRules.SetActive(false);
+            introCutscene.ImpostorRules.SetActive(true);
         }
         else
         {
-            __instance.CrewmateRules.SetActive(true);
-            __instance.ImpostorRules.SetActive(false);
+            introCutscene.CrewmateRules.SetActive(true);
+            introCutscene.ImpostorRules.SetActive(false);
         }
 
-        __instance.ImpostorName.gameObject.SetActive(true);
-        __instance.ImpostorTitle.gameObject.SetActive(true);
-        __instance.BackgroundBar.enabled = false;
-        __instance.TeamTitle.gameObject.SetActive(false);
+        introCutscene.ImpostorName.gameObject.SetActive(true);
+        introCutscene.ImpostorTitle.gameObject.SetActive(true);
+        introCutscene.BackgroundBar.enabled = false;
+        introCutscene.TeamTitle.gameObject.SetActive(false);
         var impostor = PlayerControl.AllPlayerControls.ToArray().FirstOrDefault(x => x.Data.Role.IsImpostor);
         if (impostor == null)
         {
-            Logger.GlobalInstance.Error("IntroCutscene :: CoBegin() :: impostor is NULL", null);
+            Logger.GlobalInstance.Error("IntroCutscene :: CoBegin() :: impostor is NULL");
         }
 
         GameManager.Instance.SetSpecialCosmetics(impostor);
-        if (impostor != null)
-        {
-            __instance.ImpostorName.text = impostor.Data.PlayerName;
-        }
-        else
-        {
-            __instance.ImpostorName.text = "???";
-        }
+        introCutscene.ImpostorName.text = impostor != null ? impostor.Data.PlayerName : "???";
 
         yield return new WaitForSecondsRealtime(0.1f);
         if (impostor != null)
         {
-            __instance.ImpostorTitle.text = impostor.Data.Role.GetRoleName();
+            introCutscene.ImpostorTitle.text = impostor.Data.Role.GetRoleName();
         }
-        PoolablePlayer playerSlot = null;
+        PoolablePlayer? playerSlot = null;
         if (impostor != null)
         {
-            playerSlot = __instance.CreatePlayer(1, 1, impostor.Data, false);
+            playerSlot = introCutscene.CreatePlayer(1, 1, impostor.Data, false);
             playerSlot.SetBodyType(PlayerBodyTypes.Normal);
             playerSlot.SetFlipX(false);
-            playerSlot.transform.localPosition = __instance.impostorPos;
-            playerSlot.transform.localScale = Vector3.one * __instance.impostorScale;
+            playerSlot.transform.localPosition = introCutscene.impostorPos;
+            playerSlot.transform.localScale = Vector3.one * introCutscene.impostorScale;
         }
 
         yield return ShipStatus.Instance.CosmeticsCache.PopulateFromPlayers();
@@ -317,45 +332,43 @@ public class HideAndSeekMode : AbstractGameMode
             playerSlot.gameObject.SetActive(false);
         }
 
-        __instance.HideAndSeekPanels.SetActive(false);
-        __instance.CrewmateRules.SetActive(false);
-        __instance.ImpostorRules.SetActive(false);
+        introCutscene.HideAndSeekPanels.SetActive(false);
+        introCutscene.CrewmateRules.SetActive(false);
+        introCutscene.ImpostorRules.SetActive(false);
         HnsMusicHandler.Instance.StartMusicWithIntro();
         var hideTimer = 10f;
 
         if (PlayerControl.LocalPlayer.Data.Role.IsImpostor)
         {
-            __instance.HideAndSeekTimerText.gameObject.SetActive(true);
+            introCutscene.HideAndSeekTimerText.gameObject.SetActive(true);
             PoolablePlayer poolablePlayer;
             AnimationClip anim;
             if (AprilFoolsMode.ShouldHorseAround())
             {
-                poolablePlayer = __instance.HorseWrangleVisualSuit;
+                poolablePlayer = introCutscene.HorseWrangleVisualSuit;
                 poolablePlayer.gameObject.SetActive(true);
                 poolablePlayer.SetBodyType(PlayerBodyTypes.Seeker);
-                anim = __instance.HnSSeekerSpawnHorseAnim;
-                __instance.HorseWrangleVisualPlayer.SetBodyType(PlayerBodyTypes.Normal);
-                __instance.HorseWrangleVisualPlayer.UpdateFromPlayerData(
+                anim = introCutscene.HnSSeekerSpawnHorseAnim;
+                introCutscene.HorseWrangleVisualPlayer.SetBodyType(PlayerBodyTypes.Normal);
+                introCutscene.HorseWrangleVisualPlayer.UpdateFromPlayerData(
                     PlayerControl.LocalPlayer.Data,
                     PlayerControl.LocalPlayer.CurrentOutfitType,
                     PlayerMaterial.MaskType.None,
-                    false,
-                    null,
                     false);
             }
             else if (AprilFoolsMode.ShouldLongAround())
             {
-                poolablePlayer = __instance.HideAndSeekPlayerVisual;
+                poolablePlayer = introCutscene.HideAndSeekPlayerVisual;
                 poolablePlayer.gameObject.SetActive(true);
                 poolablePlayer.SetBodyType(PlayerBodyTypes.LongSeeker);
-                anim = __instance.HnSSeekerSpawnLongAnim;
+                anim = introCutscene.HnSSeekerSpawnLongAnim;
             }
             else
             {
-                poolablePlayer = __instance.HideAndSeekPlayerVisual;
+                poolablePlayer = introCutscene.HideAndSeekPlayerVisual;
                 poolablePlayer.gameObject.SetActive(true);
                 poolablePlayer.SetBodyType(PlayerBodyTypes.Seeker);
-                anim = __instance.HnSSeekerSpawnAnim;
+                anim = introCutscene.HnSSeekerSpawnAnim;
             }
 
             poolablePlayer.SetBodyCosmeticsVisible(false);
@@ -363,16 +376,14 @@ public class HideAndSeekMode : AbstractGameMode
                 PlayerControl.LocalPlayer.Data,
                 PlayerControl.LocalPlayer.CurrentOutfitType,
                 PlayerMaterial.MaskType.None,
-                false,
-                null,
                 false);
             SpriteAnim component = poolablePlayer.GetComponent<SpriteAnim>();
             poolablePlayer.gameObject.SetActive(true);
             poolablePlayer.ToggleName(false);
-            component.Play(anim, 1f);
+            component.Play(anim);
             while (hideTimer > 0f)
             {
-                __instance.HideAndSeekTimerText.text = Mathf.RoundToInt(hideTimer).ToString();
+                introCutscene.HideAndSeekTimerText.text = Mathf.RoundToInt(hideTimer).ToString(CultureInfo.InvariantCulture);
                 hideTimer -= Time.deltaTime;
                 yield return null;
             }
@@ -384,27 +395,29 @@ public class HideAndSeekMode : AbstractGameMode
             {
                 if (impostor != null)
                 {
-                    impostor.AnimateCustom(__instance.HnSSeekerSpawnHorseInGameAnim);
+                    impostor.AnimateCustom(introCutscene.HnSSeekerSpawnHorseInGameAnim);
                 }
             }
             else if (AprilFoolsMode.ShouldLongAround())
             {
                 if (impostor != null)
                 {
-                    impostor.AnimateCustom(__instance.HnSSeekerSpawnLongInGameAnim);
+                    impostor.AnimateCustom(introCutscene.HnSSeekerSpawnLongInGameAnim);
                 }
             }
             else if (impostor != null)
             {
-                impostor.AnimateCustom(__instance.HnSSeekerSpawnAnim);
+                impostor.AnimateCustom(introCutscene.HnSSeekerSpawnAnim);
                 impostor.cosmetics.SetBodyCosmeticsVisible(false);
             }
         }
         ShipStatus.Instance.StartSFX();
         HnsMusicHandler.Instance.OnGameStart();
         HnsDangerMeter.Instance.OnGameStart();
-        UnityEngine.Object.Destroy(__instance.gameObject);
+        UnityEngine.Object.Destroy(introCutscene.gameObject);
     }
+
+    /// <inheritdoc/>
     public override void Initialize()
     {
         deadPlayerCount = 0;
@@ -417,9 +430,11 @@ public class HideAndSeekMode : AbstractGameMode
             HudManager.Instance.gameObject.AddComponent<HnsDangerMeter>();
         }
     }
+
+    /// <inheritdoc/>
     public override MapOptions GetMapOptions()
     {
-        MapOptions mapOptions = new MapOptions
+        MapOptions mapOptions = new()
         {
             Mode = MapOptions.Modes.Normal,
         };
@@ -433,14 +448,16 @@ public class HideAndSeekMode : AbstractGameMode
         return mapOptions;
     }
 
+    /// <inheritdoc/>
     public override void CheckGameEnd(out bool runOriginal, LogicGameFlowNormal instance)
     {
         runOriginal = false;
-        if (Helpers.GetAlivePlayers().Count(x => x.Data.Role.IsImpostor) == 0)
+        var players = Helpers.GetAlivePlayers();
+        if (!players.Any(x => x.Data.Role.IsImpostor))
         {
             instance.Manager.RpcEndGame(GameOverReason.ImpostorDisconnect, !DataManager.Player.Ads.HasPurchasedAdRemoval);
         }
-        if (Helpers.GetAlivePlayers().Count(x => !x.Data.Role.IsImpostor) != 0)
+        if (players.Any(x => !x.Data.Role.IsImpostor))
         {
             if (HideAndSeekHudHelper.Instance.AllTimersExpired())
             {
@@ -451,6 +468,8 @@ public class HideAndSeekMode : AbstractGameMode
         instance.Manager.RpcEndGame(GameOverReason.HideAndSeek_ImpostorsByKills, !DataManager.Player.Ads.HasPurchasedAdRemoval);
     }
 
+    /// <inheritdoc/>
+    [SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "Warning cascades into forcing the entire tree to be ternary operators.")]
     public override PlayerBodyTypes GetBodyType(PlayerControl player)
     {
         if (player == null || player.Data == null || player.Data.Role == null)
@@ -490,6 +509,8 @@ public class HideAndSeekMode : AbstractGameMode
             return PlayerBodyTypes.Normal;
         }
     }
+
+    /// <inheritdoc/>
     public override void UpdateTaskPanel(TaskPanelBehaviour instance)
     {
         instance.background.transform.localScale = (instance.taskText.textBounds.size.x > 0f)
@@ -513,14 +534,9 @@ public class HideAndSeekMode : AbstractGameMode
         var xPos = -instance.background.sprite.bounds.size.x * instance.background.transform.localScale.x;
         instance.closedPosition = new Vector3(xPos, yPos, instance.closedPosition.z);
         instance.openPosition = new Vector3(instance.openPosition.x, yPos, instance.openPosition.z);
-        if (instance.open)
-        {
-            instance.timer = Mathf.Min(1f, instance.timer + Time.deltaTime / instance.animationTimeSeconds);
-        }
-        else
-        {
-            instance.timer = Mathf.Max(0f, instance.timer - Time.deltaTime / instance.animationTimeSeconds);
-        }
+        instance.timer = instance.open
+            ? Mathf.Min(1f, instance.timer + Time.deltaTime / instance.animationTimeSeconds)
+            : Mathf.Max(0f, instance.timer - Time.deltaTime / instance.animationTimeSeconds);
 
         Vector3 relativePos = new(
             Mathf.SmoothStep(instance.closedPosition.x, instance.openPosition.x, instance.timer),
@@ -529,7 +545,10 @@ public class HideAndSeekMode : AbstractGameMode
         instance.transform.localPosition =
             AspectPosition.ComputePosition(AspectPosition.EdgeAlignments.LeftTop, relativePos);
     }
+
     private int deadPlayerCount;
+
+    /// <inheritdoc/>
     public override void OnPlayerDeath(PlayerControl player, bool assignGhostRole)
     {
         base.OnPlayerDeath(player, assignGhostRole);

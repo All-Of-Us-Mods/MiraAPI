@@ -59,9 +59,9 @@ public class LocalSettingsButton(string text, Action onClick)
         button.name = Text;
         button.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
         rollover.OutColor = Tab!.TabAppearance.ButtonColor;
-        rollover.OverColor = Tab!.TabAppearance.ButtonHoverColor;
+        rollover.OverColor = Tab.TabAppearance.ButtonHoverColor;
         rollover.Target = background;
-        background.color = Tab!.TabAppearance.ButtonColor;
+        background.color = Tab.TabAppearance.ButtonColor;
         button.OnClick.AddListener((UnityAction)OnClick);
 
         background.transform.localScale = new Vector3(1, 1.25f, 1);
@@ -79,6 +79,9 @@ public class LocalSettingsButton(string text, Action onClick)
         return button.gameObject;
     }
 
+    /// <summary>
+    /// Refreshes the button.
+    /// </summary>
     public void RefreshButton()
     {
         _btnText.text = Text.Translate();

@@ -50,18 +50,8 @@ public sealed class BeforeMurderEvent(PlayerControl source, PlayerControl target
     /// </summary>
     /// <param name="source">The <see cref="PlayerControl"/> that is killing the <paramref name="target"/>.</param>
     /// <param name="target">The <see cref="PlayerControl"/> that is being killed.</param>
-    public BeforeMurderEvent(PlayerControl source, PlayerControl target)
-        : this(source, target, MeetingCheck.Ignore)
-    {
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="BeforeMurderEvent"/> class.
-    /// </summary>
-    /// <param name="source">The <see cref="PlayerControl"/> that is killing the <paramref name="target"/>.</param>
-    /// <param name="target">The <see cref="PlayerControl"/> that is being killed.</param>
     /// <param name="inMeeting">Whether the murder is intended to be triggered in a meeting.</param>
-    public BeforeMurderEvent(PlayerControl source, PlayerControl target, MeetingCheck inMeeting)
+    public BeforeMurderEvent(PlayerControl source, PlayerControl target, MeetingCheck inMeeting = MeetingCheck.Ignore)
         : this(source, target, false, false, inMeeting)
     {
     }

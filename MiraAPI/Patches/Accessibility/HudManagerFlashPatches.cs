@@ -50,7 +50,7 @@ public static class HudManagerFlashPatches
             hudManager.FullScreen.gameObject.SetActive(settings.EnableSabotageFlashes.Value && !hudManager.FullScreen.gameObject.activeSelf);
             if (settings.EnableSabotageBlares.Value)
             {
-                SoundManager.Instance.PlaySound(ShipStatus.Instance.SabotageSound, false, 1f, null);
+                SoundManager.Instance.PlaySound(ShipStatus.Instance.SabotageSound, false);
             }
             light = !light;
 

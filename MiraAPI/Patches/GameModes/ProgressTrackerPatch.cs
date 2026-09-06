@@ -2,6 +2,7 @@
 using MiraAPI.GameModes;
 
 namespace MiraAPI.Patches.GameModes;
+
 [HarmonyPatch(typeof(ProgressTracker), nameof(ProgressTracker.Start))]
 internal static class ProgressTrackerPatch
 {

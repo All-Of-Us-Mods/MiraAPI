@@ -5,12 +5,17 @@ using MiraAPI.Utilities;
 
 namespace MiraAPI.HnsReimplemented.Options;
 
-/// <inheritdoc />
+/// <summary>
+/// Gets or sets the task options for Hide and Seek.
+/// </summary>
 public class HnsTaskOptions : AbstractOptionGroup<HideAndSeekMode>
 {
     /// <inheritdoc />
     public override string GroupName => "Tasks";
 
+    /// <summary>
+    /// Gets or sets the umber of common tasks.
+    /// </summary>
     public ModdedNumberOption CommonTasks { get; set; } = new(
         "# Common Tasks",
         1,
@@ -21,6 +26,9 @@ public class HnsTaskOptions : AbstractOptionGroup<HideAndSeekMode>
         "#",
         MiraNumberSuffixes.None);
 
+    /// <summary>
+    /// Gets or sets the number of long tasks.
+    /// </summary>
     public ModdedNumberOption LongTasks { get; set; } = new(
         "# Long Tasks",
         1,
@@ -31,6 +39,9 @@ public class HnsTaskOptions : AbstractOptionGroup<HideAndSeekMode>
         "#",
         MiraNumberSuffixes.None);
 
+    /// <summary>
+    /// Gets or sets the number of short tasks.
+    /// </summary>
     public ModdedNumberOption ShortTasks { get; set; } = new(
         "# Short Tasks",
         2,

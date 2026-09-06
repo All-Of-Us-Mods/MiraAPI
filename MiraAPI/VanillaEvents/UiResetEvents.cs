@@ -5,17 +5,17 @@ using MiraAPI.LocalSettings;
 
 namespace MiraAPI.VanillaEvents;
 
-public static class UiResetEvents
+internal static class UiResetEvents
 {
     public static void Initialize()
     {
-        MiraEventManager.RegisterEventHandler<UiButtonResetEvent>(@event => ResetButtonParents(@event));
-        MiraEventManager.RegisterEventHandler<UiButtonPostResetEvent>(@event => PlaceWikiButton(@event), -900);
-        MiraEventManager.RegisterEventHandler<UiButtonPostResetEvent>(@event => PlaceSubmergedButton(@event), -800);
-        MiraEventManager.RegisterEventHandler<UiButtonPostResetEvent>(@event => PlaceModifierUi(@event), -700);
+        MiraEventManager.RegisterEventHandler<UiButtonResetEvent>(ResetButtonParents);
+        MiraEventManager.RegisterEventHandler<UiButtonPostResetEvent>(PlaceWikiButton, -900);
+        MiraEventManager.RegisterEventHandler<UiButtonPostResetEvent>(PlaceSubmergedButton, -800);
+        MiraEventManager.RegisterEventHandler<UiButtonPostResetEvent>(PlaceModifierUi, -700);
     }
 
-    public static void ResetButtonParents(UiButtonResetEvent @event)
+    public static void ResetButtonParents(UiButtonResetEvent _)
     {
         var wikiButton = MiraHudHelper.VanillaMatchInfoButton;
         var subButton = MiraHudHelper.SubmergedFloorButton;

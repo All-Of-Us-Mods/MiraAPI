@@ -50,13 +50,13 @@ public class LocalToggleSetting(
         toggleObject.name = Name.Translate();
         toggleObject.Background.color = GetValue() ? Tab!.TabAppearance.ToggleActiveColor : Tab!.TabAppearance.ToggleInactiveColor;
         passiveButton.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
-        rollover.OverColor = Tab!.TabAppearance.ToggleHoverColor;
+        rollover.OverColor = Tab.TabAppearance.ToggleHoverColor;
 
         passiveButton.OnClick.AddListener((UnityAction)(() =>
         {
             SetValue(!GetValue());
             toggleObject.UpdateText(GetValue());
-            toggleObject.Background.color = GetValue() ? Tab!.TabAppearance.ToggleActiveColor : Tab!.TabAppearance.ToggleInactiveColor;
+            toggleObject.Background.color = GetValue() ? Tab.TabAppearance.ToggleActiveColor : Tab.TabAppearance.ToggleInactiveColor;
         }));
         passiveButton.OnMouseOver.AddListener((UnityAction)(() =>
         {
@@ -68,7 +68,7 @@ public class LocalToggleSetting(
         passiveButton.OnMouseOut.AddListener((UnityAction)(() =>
         {
             toggleObject.UpdateText(GetValue());
-            toggleObject.Background.color = GetValue() ? Tab!.TabAppearance.ToggleActiveColor : Tab!.TabAppearance.ToggleInactiveColor;
+            toggleObject.Background.color = GetValue() ? Tab.TabAppearance.ToggleActiveColor : Tab.TabAppearance.ToggleInactiveColor;
         }));
 
         Helpers.DivideSize(toggleObject.gameObject, 1.1f);

@@ -90,8 +90,8 @@ public class LocalNumberSetting(
         button.name = Name;
         button.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
         rollover.OutColor = Tab!.TabAppearance.NumberColor;
-        rollover.OverColor = Tab!.TabAppearance.NumberHoverColor;
-        background.color = Tab!.TabAppearance.NumberColor;
+        rollover.OverColor = Tab.TabAppearance.NumberHoverColor;
+        background.color = Tab.TabAppearance.NumberColor;
 
         button.OnClick.AddListener((UnityAction)(() =>
         {

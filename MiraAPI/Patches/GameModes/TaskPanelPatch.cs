@@ -2,6 +2,7 @@
 using MiraAPI.GameModes;
 
 namespace MiraAPI.Patches.GameModes;
+
 [HarmonyPatch(typeof(TaskPanelBehaviour), nameof(TaskPanelBehaviour.Update))]
 internal static class TaskPanelPatch
 {

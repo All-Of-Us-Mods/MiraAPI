@@ -111,17 +111,16 @@ public static class PresetManager
     /// </summary>
     public static void LoadMasterPreset()
     {
-#pragma warning disable S125 // Sections of code should not be commented out
         /*foreach (var btn in plugin.InternalPresets.Select(x => x.PresetButton))
-                {
-                    if (btn != null)
-                    {
-                        Object.DestroyImmediate(btn);
-                    }
-                }
+        {
+            if (btn != null)
+            {
+                Object.DestroyImmediate(btn);
+            }
+        }
 
-                plugin.InternalPresets.Clear();*/
-#pragma warning restore S125 // Sections of code should not be commented out
+        plugin.InternalPresets.Clear();*/
+
         if (!Directory.Exists(PresetDirectory))
         {
             Directory.CreateDirectory(PresetDirectory);
@@ -138,9 +137,7 @@ public static class PresetManager
             var fileName = Path.GetFileName(file);
             Info($"Loading preset file {fileName}");
 
-#pragma warning disable S125 // Sections of code should not be commented out
             // var presetName = Path.GetFileNameWithoutExtension(file);
-#pragma warning restore S125 // Sections of code should not be commented out
             var presetConfig = new ConfigFile(file, false)
             {
                 SaveOnConfigSet = false,
@@ -160,9 +157,7 @@ public static class PresetManager
 
             presetConfig.Save();
 
-#pragma warning disable S125 // Sections of code should not be commented out
             // InternalMasterPresets.Add(new OptionPreset(presetName, plugin, presetConfig));
-#pragma warning restore S125 // Sections of code should not be commented out
         }
         MasterPresets = [.. InternalMasterPresets];
     }

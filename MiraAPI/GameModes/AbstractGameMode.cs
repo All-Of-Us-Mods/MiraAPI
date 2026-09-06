@@ -84,15 +84,11 @@ public abstract class AbstractGameMode : IOptionable
     /// <returns>Resulting body type.</returns>
     public virtual PlayerBodyTypes GetBodyType(PlayerControl player)
     {
-        if (AprilFoolsMode.ShouldHorseAround())
-        {
-            return PlayerBodyTypes.Horse;
-        }
-        if (AprilFoolsMode.ShouldLongAround())
-        {
-            return PlayerBodyTypes.Long;
-        }
-        return PlayerBodyTypes.Normal;
+        return AprilFoolsMode.ShouldHorseAround()
+            ? PlayerBodyTypes.Horse
+            : (AprilFoolsMode.ShouldLongAround()
+                ? PlayerBodyTypes.Long
+                : PlayerBodyTypes.Normal);
     }
 
     /// <summary>
@@ -185,9 +181,9 @@ public abstract class AbstractGameMode : IOptionable
     /// <summary>
     /// The IEnumerator that plays the intro cutscene for this gamemode.
     /// </summary>
-    /// <param name="__instance">An instance of IntroCutscene.</param>
+    /// <param name="introCutscene">An instance of IntroCutscene.</param>
     /// <returns>An IEnumerator to run the intro cutscene instead of the base game one.</returns>
-    public virtual IEnumerator IntroCutscene(IntroCutscene __instance)
+    public virtual IEnumerator IntroCutscene(IntroCutscene introCutscene)
     {
         yield return new WaitForEndOfFrame();
     }
@@ -268,11 +264,15 @@ public abstract class AbstractGameMode : IOptionable
     }
 
     /// <summary>
-    /// Does the task bar appear in the gamemode.
+    /// Gets a value indicating whether the task bar appears in the gamemode.
     /// </summary>
     /// <returns>True if the task bar is enabled in this mode.</returns>
     public virtual bool ShowTaskBar => true;
 
+    /// <summary>
+    /// Updates the task panel.
+    /// </summary>
+    /// <param name="instance">The task panel to update.</param>
     public virtual void UpdateTaskPanel(TaskPanelBehaviour instance)
     {
         instance.background.transform.localScale = (instance.taskText.textBounds.size.x > 0f)
@@ -296,14 +296,9 @@ public abstract class AbstractGameMode : IOptionable
         var xPos = -instance.background.sprite.bounds.size.x * instance.background.transform.localScale.x;
         instance.closedPosition = new Vector3(xPos, yPos, instance.closedPosition.z);
         instance.openPosition = new Vector3(instance.openPosition.x, yPos, instance.openPosition.z);
-        if (instance.open)
-        {
-            instance.timer = Mathf.Min(1f, instance.timer + Time.deltaTime / instance.animationTimeSeconds);
-        }
-        else
-        {
-            instance.timer = Mathf.Max(0f, instance.timer - Time.deltaTime / instance.animationTimeSeconds);
-        }
+        instance.timer = instance.open
+            ? Mathf.Min(1f, instance.timer + Time.deltaTime / instance.animationTimeSeconds)
+            : Mathf.Max(0f, instance.timer - Time.deltaTime / instance.animationTimeSeconds);
 
         Vector3 relativePos = new(
             Mathf.SmoothStep(instance.closedPosition.x, instance.openPosition.x, instance.timer),

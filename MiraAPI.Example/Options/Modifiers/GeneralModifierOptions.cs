@@ -12,6 +12,6 @@ public class GeneralModifierOptions : AbstractOptionGroup
     [ModdedToggleOption("options.generalModifier.someBooleanOption")]
     public bool SomeBooleanOption { get; set; } = true;
 
-    [ModdedNumberOption("options.generalModifier.numberOption", 0, 10, 1)]
+    [ModdedNumberOption("options.generalModifier.numberOption", 0, 10)]
     public float NumberOption { get; set; } = 5;
 }

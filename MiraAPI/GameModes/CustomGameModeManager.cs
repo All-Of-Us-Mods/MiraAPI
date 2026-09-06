@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using MiraAPI.PluginLoading;
-using Reactor.Utilities;
 
 namespace MiraAPI.GameModes;
 
@@ -42,14 +41,13 @@ public static class CustomGameModeManager
             return false;
         }
 
-        if (!mode.HideMode)
-        {
-            IdToModeMap.Add(GetNextId(), mode);
-            pluginInfo.GameModes.Add(LastId, mode);
-            mode.ID = LastId;
-            GameModeOption.AddOption(mode);
-        }
+        if (mode.HideMode)
+            return true;
 
+        IdToModeMap.Add(GetNextId(), mode);
+        pluginInfo.GameModes.Add(LastId, mode);
+        mode.ID = LastId;
+        GameModeOption.AddOption(mode);
         return true;
     }
 
@@ -135,6 +133,6 @@ public static class CustomGameModeManager
         }
 
         ActiveMode = IdToModeMap[0];
-        Logger<MiraApiPlugin>.Warning($"Unable to find game mode of id {id}!");
+        Warning($"Unable to find game mode of id {id}!");
     }
 }

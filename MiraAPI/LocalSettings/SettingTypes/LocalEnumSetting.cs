@@ -80,8 +80,8 @@ public class LocalEnumSetting(
         button.name = Name;
         button.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
         rollover.OutColor = Tab!.TabAppearance.EnumColor;
-        rollover.OverColor = Tab!.TabAppearance.EnumHoverColor;
-        background.color = Tab!.TabAppearance.EnumColor;
+        rollover.OverColor = Tab.TabAppearance.EnumHoverColor;
+        background.color = Tab.TabAppearance.EnumColor;
 
         button.OnClick.AddListener((UnityAction)(() =>
         {

@@ -62,7 +62,7 @@ public static class Extensions
         }
         if (self.CloseSound && Constants.ShouldPlaySfx())
         {
-            SoundManager.Instance.PlaySound(self.CloseSound, false, 1f, null);
+            SoundManager.Instance.PlaySound(self.CloseSound, false);
         }
         if (PlayerControl.LocalPlayer.Data.Role.TeamType == RoleTeamTypes.Crewmate)
         {
@@ -222,9 +222,7 @@ public static class Extensions
     public static void DeepDestroy(this GameObject obj, bool clearGc = true)
     {
         obj.Destroy();
-#pragma warning disable S125 // Sections of code should not be commented out
         // Nuke(obj, clearGc);
-#pragma warning restore S125 // Sections of code should not be commented out
     }
 
     /// <summary>
@@ -528,7 +526,7 @@ public static class Extensions
     /// <returns>A proper string for the <see cref="Enum"/>.</returns>
     public static string ToDisplayString(this Enum @enum)
     {
-        var regex = new Regex(@"([^\^])([A-Z][a-z$])");
+        var regex = new Regex(@"([^\^])([A-Z][a-z$])", default, default);
         return regex.Replace(@enum.ToString(), m => $"{m.Groups[1].Value} {m.Groups[2].Value}");
     }
 

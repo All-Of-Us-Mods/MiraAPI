@@ -58,7 +58,7 @@ public abstract class LocalSettingBase<T> : ILocalSetting
     public abstract void RefreshOption();
 
     /// <summary>
-    /// Returns the formated string to use in the text of the setting.
+    /// Returns the formatted string to use in the text of the setting.
     /// </summary>
     /// <returns>The value text.</returns>
     protected virtual string GetValueText()

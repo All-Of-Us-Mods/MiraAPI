@@ -20,3 +20,18 @@ dotnet_diagnostic.S3358.severity = none
 
 # IDE1006: Naming Styles
 dotnet_diagnostic.IDE1006.severity = none
+
+# S3267: Use LINQ methods to simply foreach loops
+dotnet_diagnostic.S3267.severity = none
+
+# S125: Sections of code should not be commented out
+dotnet_diagnostic.S125.severity = none
+
+# SA1512: Single-line comments should not be followed by blank line
+dotnet_diagnostic.SA1512.severity = none
+
+# S2696: Instance members should not write to "static" fields
+dotnet_diagnostic.S2696.severity = none
+
+# S2245: Pseudorandom number generators (PRNGs) should not be used in security contexts
+dotnet_diagnostic.S2245.severity = none

@@ -117,15 +117,15 @@ public static class RoleGuidePatches
         ControllerManager instance = ControllerManager.Instance;
         ControllerUiElementsState currentUiState = ControllerManager.Instance.CurrentUiState;
         Il2CppSystem.Collections.Generic.List<UiElement> controllerSelectable = __instance.ControllerSelectable;
-        instance.SetUpSelectables(currentUiState, controllerSelectable[controllerSelectable.Count - 1], __instance.ControllerSelectable);
+        instance.SetUpSelectables(currentUiState, controllerSelectable[^1], __instance.ControllerSelectable);
         ControllerManager instance2 = ControllerManager.Instance;
         Il2CppSystem.Collections.Generic.List<UiElement> controllerSelectable2 = __instance.ControllerSelectable;
-        instance2.SetCurrentSelected(controllerSelectable2[controllerSelectable2.Count - 1]);
+        instance2.SetCurrentSelected(controllerSelectable2[^1]);
         __instance.SetActiveTab(0);
         return false;
     }
 
-    private static Dictionary<RoleBehaviour, MatchInfoRolePanel> _rolePanels = [];
+    private static readonly Dictionary<RoleBehaviour, MatchInfoRolePanel> _rolePanels = [];
 
     public static void DisplayNormalRoleSettings(MatchInfoGuide instance, bool reset)
     {
@@ -158,9 +158,9 @@ public static class RoleGuidePatches
                 GameManager.Instance.LogicOptions.GetTaskBarMode().ToString());
             foreach (RoleBehaviour roleBehaviour in RoleManager.Instance.AllRoles)
             {
-                if (roleBehaviour.Role != RoleTypes.Crewmate && roleBehaviour.Role != RoleTypes.Impostor &&
-                    roleBehaviour.Role is not RoleTypes.CrewmateGhost &&
-                    roleBehaviour.Role is not RoleTypes.ImpostorGhost)
+                if (roleBehaviour.Role is not RoleTypes.Crewmate and not RoleTypes.Impostor and
+                    not RoleTypes.CrewmateGhost and
+                    not RoleTypes.ImpostorGhost)
                 {
                     var panel = Object.Instantiate(
                         instance.MatchInfoRolePanelPrefab,

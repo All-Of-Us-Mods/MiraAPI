@@ -35,12 +35,7 @@ public static class LobbyViewPanePatches
 
     private static AbstractGameMode? GetCustomGamemode()
     {
-        if (!CustomGameModeManager.IsClassic() && !CustomGameModeManager.IsHideNSeek())
-        {
-            return CustomGameModeManager.ActiveMode;
-        }
-
-        return null;
+        return !CustomGameModeManager.IsClassic() && !CustomGameModeManager.IsHideNSeek() ? CustomGameModeManager.ActiveMode : null;
     }
 
     private static IEnumerable<AbstractOptionGroup>? GetCustomGamemodeOptions()

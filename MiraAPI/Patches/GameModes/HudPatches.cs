@@ -23,7 +23,6 @@ internal static class HudPatches
         }
     }
 
-
     [HarmonyPatch(typeof(HudManager), nameof(HudManager.Start))]
     [HarmonyPostfix]
     public static void PostHudStart(HudManager __instance)

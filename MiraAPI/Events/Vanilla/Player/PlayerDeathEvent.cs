@@ -1,7 +1,7 @@
 ﻿namespace MiraAPI.Events.Vanilla.Player;
 
 /// <summary>
-/// Event that is invoked when a player dies. Non cancelable.
+/// Event that is invoked when a player dies. Non-cancelable.
 /// </summary>
 /// <param name="player">The player who died.</param>
 /// <param name="reason">The reason the player died.</param>

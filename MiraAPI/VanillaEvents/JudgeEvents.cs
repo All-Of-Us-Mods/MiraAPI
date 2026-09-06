@@ -4,12 +4,12 @@ using MiraAPI.Roles;
 
 namespace MiraAPI.VanillaEvents;
 
-public static class JudgeEvents
+internal static class JudgeEvents
 {
     public static void Initialize()
     {
         // This is required because MiraAPI isn't an IMiraPlugin (besides in the gamemodes branch)
-        MiraEventManager.RegisterEventHandler<ProcessVotesEvent>(@event => ProcessVotesEventHandler(@event), -1000);
+        MiraEventManager.RegisterEventHandler<ProcessVotesEvent>(ProcessVotesEventHandler, -1000);
     }
 
     public static void ProcessVotesEventHandler(ProcessVotesEvent @event)

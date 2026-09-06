@@ -39,11 +39,11 @@ internal static class HowToPlayPatch
             {
                 uiElement.ReceiveMouseOut();
             }
-            ControllerManager.Instance.NewScene(__instance.name, __instance.closeButton, __instance.defaultButtonSelected, __instance.controllerSelectables, false);
+            ControllerManager.Instance.NewScene(__instance.name, __instance.closeButton, __instance.defaultButtonSelected, __instance.controllerSelectables);
         }
         __instance.DisableAllScenes();
         __instance.roleSelectionScene.SetActive(true);
-        ControllerManager.Instance.SetDefaultSelection(__instance.defaultButtonSelected, null);
+        ControllerManager.Instance.SetDefaultSelection(__instance.defaultButtonSelected);
     }
     public static void OpenRolePage(HowToPlayScene instance, RoleTypes roleType)
     {

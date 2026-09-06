@@ -112,16 +112,13 @@ public static class HudManagerPatches
                     }
                     catch
                     {
-#pragma warning disable S125 // Sections of code should not be commented out
                         // Error($"Error arranging child objects in GridArrange: {e}");
-#pragma warning restore S125 // Sections of code should not be commented out
                     }
                 }
             }
         }
     }
 
-#pragma warning disable S125 // Sections of code should not be commented out
     /*
     /// <summary>
     /// Trigger HudStart on current custom gamemode
@@ -133,7 +130,6 @@ public static class HudManagerPatches
         CustomGameModeManager.ActiveMode?.HudStart(__instance);
     }
     */
-#pragma warning restore S125 // Sections of code should not be commented out
 
     [HarmonyPrefix]
     [HarmonyPriority(Priority.First)]
@@ -371,10 +367,7 @@ public static class HudManagerPatches
             }
         }
 
-        // suppressed warning because we want minimum allocations here
-#pragma warning disable S3267
         foreach (var entry in KeybindManager.VanillaKeybinds.Values)
-#pragma warning restore S3267
         {
             if (player.GetButtonDown(entry.Id))
             {

@@ -27,14 +27,8 @@ namespace MiraAPI;
 [ReactorModFlags(ModFlags.RequireOnAllClients)]
 public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
 {
-    /// <inheritdoc />
-    public ConfigFile GetConfigFile()
-    {
-        return Config;
-    }
-
     /// <summary>
-    ///     Gets the specified Culture for string manipulations.
+    /// Gets the specified Culture for string manipulations.
     /// </summary>
     public static CultureInfo Culture { get; internal set; } = new("en-US");
 
@@ -85,5 +79,11 @@ public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
         IL2CPPChainloader.Instance.Finished +=
             ModCompatibility
                 .Initialize; // Initialise AFTER the mods are loaded to ensure maximum parity (no need for the soft dependency either then)
+    }
+
+    /// <inheritdoc />
+    public ConfigFile GetConfigFile()
+    {
+        return Config;
     }
 }

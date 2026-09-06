@@ -31,6 +31,7 @@ public static class MinigameStubs
     [HarmonyReversePatch]
     [HarmonyPatch(typeof(Minigame), nameof(Minigame.Close), [])]
     [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("Minor Code Smell", "S3878:Arrays should not be created for params parameters", Justification = "Prevents ambiguity errors.")]
     public static void Close(Minigame instance)
     {
         // nothing needed

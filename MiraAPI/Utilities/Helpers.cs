@@ -536,11 +536,7 @@ public static class Helpers
     /// <returns>The <see cref="RoleBehaviour"/>'s intro blurb.</returns>
     public static string GetRoleIntroBlurb(this RoleBehaviour role)
     {
-        if (role is ICustomRole custom)
-        {
-            return custom.RoleDescription;
-        }
-        return role.Blurb;
+        return role is ICustomRole custom ? custom.RoleDescription : role.Blurb;
     }
 
     /// <summary>
@@ -550,11 +546,7 @@ public static class Helpers
     /// <returns>The <see cref="RoleBehaviour"/>'s medium description.</returns>
     public static string GetRoleMedDescription(this RoleBehaviour role)
     {
-        if (role is ICustomRole custom)
-        {
-            return custom.RoleDescription;
-        }
-        return role.BlurbMed;
+        return role is ICustomRole custom ? custom.RoleDescription : role.BlurbMed;
     }
 
     /// <summary>
@@ -564,11 +556,7 @@ public static class Helpers
     /// <returns>The <see cref="RoleBehaviour"/>'s long description.</returns>
     public static string GetRoleLongDescription(this RoleBehaviour role)
     {
-        if (role is ICustomRole custom)
-        {
-            return custom.RoleLongDescription;
-        }
-        return role.BlurbLong;
+        return role is ICustomRole custom ? custom.RoleLongDescription : role.BlurbLong;
     }
 
     /// <summary>

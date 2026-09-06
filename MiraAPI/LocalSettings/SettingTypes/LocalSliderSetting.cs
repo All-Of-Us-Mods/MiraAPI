@@ -79,8 +79,8 @@ public class LocalSliderSetting(
         newSlider.name = Name;
         newSlider.Range = new FloatRange(-1.5f, 1.5f);
         newSlider.SetValue(Mathf.InverseLerp(SliderRange.min, SliderRange.max, GetValue()));
-        rollover.OutColor = Tab!.TabAppearance.SliderColor;
-        rollover.OverColor = Tab!.TabAppearance.SliderHoverColor;
+        rollover.OutColor = Tab.TabAppearance.SliderColor;
+        rollover.OverColor = Tab.TabAppearance.SliderHoverColor;
         newSlider.Title.transform.localPosition = new Vector3(0.5f, 0, -1f);
         newSlider.Title.horizontalAlignment = DisplayValue ? HorizontalAlignmentOptions.Left : HorizontalAlignmentOptions.Center;
         newSlider.Title.text = GetValueText();

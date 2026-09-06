@@ -197,7 +197,7 @@ public abstract class LocalSettingsTab(ConfigFile config)
                 ref contentOrder,
                 contentIndex == Buttons.Count);
 
-            obj!.GetComponentsInChildren<SpriteRenderer>(true).Do(x =>
+            obj.GetComponentsInChildren<SpriteRenderer>(true).Do(x =>
             {
                 x.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                 x.sortingOrder = 150;
@@ -277,10 +277,8 @@ public abstract class LocalSettingsTab(ConfigFile config)
         {
             if (!tabButtonObject.Content.gameObject.activeSelf)
             {
-#pragma warning disable S125 // Sections of code should not be commented out
                 // tabButtonObject.Button.color = TabColor;
                 // tabButtonObject.Rollover.OutColor = TabColor;
-#pragma warning restore S125 // Sections of code should not be commented out
             }
 
             tabButton.transform.localPosition = new Vector3(2.4f, 2.1f - tabOffset, 5.5f);

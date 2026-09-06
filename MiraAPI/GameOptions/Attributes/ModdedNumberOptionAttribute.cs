@@ -9,6 +9,13 @@ namespace MiraAPI.GameOptions.Attributes;
 /// <summary>
 /// Attribute for a <see cref="ModdedNumberOption"/>.
 /// </summary>
+/// <param name="title">The option title.</param>
+/// <param name="min">The minimum value.</param>
+/// <param name="max">The maximum value.</param>
+/// <param name="increment">The increment.</param>
+/// <param name="suffixType">The suffix type.</param>
+/// <param name="formatString">Optional format string for the option screen.</param>
+/// <param name="zeroInfinity">Flag indicating whether 0 means infinity.</param>
 [AttributeUsage(AttributeTargets.Property)]
 public class ModdedNumberOptionAttribute(
     string title,

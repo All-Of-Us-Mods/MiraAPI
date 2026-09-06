@@ -42,6 +42,7 @@ public static class VotingUtils
     /// </summary>
     /// <param name="voteData">The player's <see cref="PlayerVoteData"/>.</param>
     /// <param name="suspectIdx">Who the player voted for.</param>
+    /// <param name="byJudge">Flag that indicates that the vote was done by a Judge.</param>
     /// <param name="cancelVote">Whether you want the vote to commence or not.</param>
     private static void HandleVote(PlayerVoteData voteData, byte suspectIdx, bool byJudge, out bool cancelVote)
     {
@@ -117,11 +118,22 @@ public static class VotingUtils
     /// <param name="suspectPlayerId">The voted player's id.</param>
     /// <param name="overruleNonce">Data that is checked by the Judge role to determine which Judge takes priority.</param>
     [MethodRpc((uint)MiraRpc.QueueOverruleVotes)]
+    [SuppressMessage(
+        "Style",
+        "IDE0060:Remove unused parameter",
+        Justification = "Required parameter: The MethodRpc system mandates an InnerNetObject (or its derived class) as the first parameter for sender context, even if unused in the method body."
+    )]
     public static void RpcQueueOverruleVotes(PlayerControl source, byte srcPlayerId, byte suspectPlayerId, ushort overruleNonce)
     {
         CustomCastJudgeVote(srcPlayerId, suspectPlayerId, overruleNonce);
     }
 
+    /// <summary>
+    /// Casts a custom Judge vote.
+    /// </summary>
+    /// <param name="judgePlayerId">The Judge's player ID.</param>
+    /// <param name="targetPlayerId">The unfortunate soul's player ID.</param>
+    /// <param name="overruleNonce">Overruled.</param>
     public static void CustomCastJudgeVote(PlayerId judgePlayerId, PlayerId targetPlayerId, ushort overruleNonce)
     {
         var plr = GameData.Instance.GetPlayerById(judgePlayerId.Value);
@@ -187,6 +199,11 @@ public static class VotingUtils
         CustomCastVote(srcPlayerId, suspectPlayerId);
     }
 
+    /// <summary>
+    /// Casts a custom vote.
+    /// </summary>
+    /// <param name="srcPlayerId">The casting player's ID.</param>
+    /// <param name="suspectPlayerId">The voted player's ID.</param>
     public static void CustomCastVote(byte srcPlayerId, byte suspectPlayerId)
     {
         var plr = GameData.Instance.GetPlayerById(srcPlayerId);

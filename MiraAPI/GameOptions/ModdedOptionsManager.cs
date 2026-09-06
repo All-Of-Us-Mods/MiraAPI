@@ -46,9 +46,8 @@ public static class ModdedOptionsManager
     /// <param name="playSound">A flag that indicates if a notification sound should be played.</param>
     public static void AddSettingsChangeMessage(NotificationPopper notif, StringNames key, string value, Color textColor, TMP_SpriteAsset? sprite, bool playSound = true)
     {
-        string item;
         var text = textColor.ToTextColor();
-        item = sprite != null
+        var item = sprite != null
             ? TranslationController.Instance.GetString(
                 StringNames.LobbyChangeSettingNotification,
                 string.Concat(
@@ -187,7 +186,7 @@ public static class ModdedOptionsManager
         RegisterOption(option, group, property.Name, pluginInfo);
     }
 
-    internal static void RegisterOption(
+    private static void RegisterOption(
         IModdedOption option,
         AbstractOptionGroup group,
         string propertyName,

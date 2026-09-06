@@ -25,12 +25,12 @@ namespace MiraAPI.Patches.Options;
 [HarmonyPatch(typeof(GameOptionsMenu))]
 internal static class GameOptionsMenuPatch
 {
-    private static List<CategoryHeaderMasked> _vanillaHeaders = new();
-    private static List<OptionBehaviour> _vanillaOptions = new();
-    private static List<OptionBehaviour> _mainOptions = new();
-    private static System.Collections.Generic.Dictionary<AbstractGameMode, System.Collections.Generic.List<AbstractOptionGroup>> _gameModeGroups = new();
-    private static System.Collections.Generic.Dictionary<AbstractGameMode, System.Collections.Generic.List<OptionBehaviour>> _gameModeOptions = new();
-    private static System.Collections.Generic.Dictionary<AbstractGameMode, System.Collections.Generic.List<CategoryHeaderMasked>> _gameModeHeaders = new();
+    private static readonly List<CategoryHeaderMasked> _vanillaHeaders = new();
+    private static readonly List<OptionBehaviour> _vanillaOptions = new();
+    private static readonly List<OptionBehaviour> _mainOptions = new();
+    private static readonly System.Collections.Generic.Dictionary<AbstractGameMode, System.Collections.Generic.List<AbstractOptionGroup>> _gameModeGroups = [];
+    private static readonly System.Collections.Generic.Dictionary<AbstractGameMode, System.Collections.Generic.List<OptionBehaviour>> _gameModeOptions = [];
+    private static readonly System.Collections.Generic.Dictionary<AbstractGameMode, System.Collections.Generic.List<CategoryHeaderMasked>> _gameModeHeaders = [];
     private static TextMeshPro _gamemodeDescription = null!;
     private static SpriteRenderer _modIcon = null!;
 
@@ -77,7 +77,8 @@ internal static class GameOptionsMenuPatch
         return false;
     }
 
-    public static float AdditionalVanillaScrollNum;
+    private static float additionalVanillaScrollNum;
+
     internal static void ToggleGamemodeOptions(AbstractGameMode gameMode, GameOptionsMenu instance)
     {
         float num = -1.217f;
@@ -185,7 +186,6 @@ internal static class GameOptionsMenuPatch
         instance.scrollBar.SetYBoundsMax(-num - 1.65f);
     }
 
-
     private static void CreateSettings(GameOptionsMenu instance, Transform container)
     {
         float num = 0.713f;
@@ -200,21 +200,17 @@ internal static class GameOptionsMenuPatch
         gmCategory.SetHeader(GameModeOption.CustomName, 20);
         gmCategory.transform.localScale = Vector3.one * 0.63f;
         gmCategory.transform.localPosition = new Vector3(-0.903f, num, -2f);
-        GameModeOption.OptionBehaviour = Object.Instantiate(
-            instance.stringOptionOrigin,
-            Vector3.zero,
-            Quaternion.identity,
-            container);
+        GameModeOption.OptionBehaviour = Object.Instantiate(instance.stringOptionOrigin, container);
         num -= 0.63f;
         GameModeOption.OptionBehaviour.transform.localPosition = new Vector3(0.952f, num, -2f);
         GameModeOption.OptionBehaviour.SetClickMask(instance.ButtonClickMask);
         StringGameSetting setting = ScriptableObject.CreateInstance<StringGameSetting>();
         setting.Type = OptionTypes.MultipleChoice;
         setting.Title = GameModeOption.GamemodeName;
-        setting.Index = GameModeOption._lastValue;
+        setting.Index = GameModeOption.LastValue;
         setting.Values = new Il2CppStructArray<StringNames>([GameModeOption.Values[0]]);
         GameModeOption.OptionBehaviour.SetUpFromData(setting, 20);
-        GameModeOption.Set(GameModeOption._lastValue);
+        GameModeOption.Set(GameModeOption.LastValue);
         GameModeOption.OptionBehaviour.TitleText.fontSize = 3;
         instance.Children.Add(GameModeOption.OptionBehaviour);
         foreach (var optionBehaviour in instance.Children)
@@ -267,81 +263,47 @@ internal static class GameOptionsMenuPatch
         _gamemodeDescription.alignment = TextAlignmentOptions.Left;
 
         num -= 1.3f;
-        AdditionalVanillaScrollNum = 0f;
+        additionalVanillaScrollNum = 0f;
         foreach (RulesCategory rulesCategory in GameManager.Instance.GameSettingsList.AllCategories)
         {
-            CategoryHeaderMasked categoryHeaderMasked = Object.Instantiate<CategoryHeaderMasked>(
-                instance.categoryHeaderOrigin,
-                Vector3.zero,
-                Quaternion.identity,
-                container);
+            var categoryHeaderMasked = Object.Instantiate(instance.categoryHeaderOrigin, container);
             categoryHeaderMasked.SetHeader(rulesCategory.CategoryName, 20);
             categoryHeaderMasked.transform.localScale = Vector3.one * 0.63f;
             categoryHeaderMasked.transform.localPosition = new Vector3(-0.903f, num, -2f);
             _vanillaHeaders.Add(categoryHeaderMasked);
             num -= 0.63f;
-            AdditionalVanillaScrollNum -= 0.63f;
+            additionalVanillaScrollNum -= 0.63f;
             foreach (BaseGameSetting baseGameSetting in rulesCategory.AllGameSettings)
             {
+                OptionBehaviour? optionBehaviour = null;
+
                 switch (baseGameSetting.Type)
                 {
                     case OptionTypes.Checkbox:
-                    {
-                        OptionBehaviour optionBehaviour = Object.Instantiate<ToggleOption>(
-                            instance.checkboxOrigin,
-                            Vector3.zero,
-                            Quaternion.identity,
-                            container);
-                        optionBehaviour.transform.localPosition = new Vector3(0.952f, num, -2f);
-                        optionBehaviour.SetClickMask(instance.ButtonClickMask);
-                        optionBehaviour.SetUpFromData(baseGameSetting, 20);
-                        _vanillaOptions.Add(optionBehaviour);
+                        optionBehaviour = Object.Instantiate(instance.checkboxOrigin, container);
                         break;
-                    }
                     case OptionTypes.String:
-                    {
-                        OptionBehaviour optionBehaviour = Object.Instantiate<StringOption>(
-                            instance.stringOptionOrigin,
-                            Vector3.zero,
-                            Quaternion.identity,
-                            container);
-                        optionBehaviour.transform.localPosition = new Vector3(0.952f, num, -2f);
-                        optionBehaviour.SetClickMask(instance.ButtonClickMask);
-                        optionBehaviour.SetUpFromData(baseGameSetting, 20);
-                        _vanillaOptions.Add(optionBehaviour);
+                        optionBehaviour = Object.Instantiate(instance.stringOptionOrigin, container);
                         break;
-                    }
                     case OptionTypes.Float:
                     case OptionTypes.Int:
-                    {
-                        OptionBehaviour optionBehaviour = Object.Instantiate<NumberOption>(
-                            instance.numberOptionOrigin,
-                            Vector3.zero,
-                            Quaternion.identity,
-                            container);
-                        optionBehaviour.transform.localPosition = new Vector3(0.952f, num, -2f);
-                        optionBehaviour.SetClickMask(instance.ButtonClickMask);
-                        optionBehaviour.SetUpFromData(baseGameSetting, 20);
-                        _vanillaOptions.Add(optionBehaviour);
+                        optionBehaviour = Object.Instantiate(instance.numberOptionOrigin, container);
                         break;
-                    }
                     case OptionTypes.Player:
-                    {
-                        OptionBehaviour optionBehaviour = Object.Instantiate<PlayerOption>(
-                            instance.playerOptionOrigin,
-                            Vector3.zero,
-                            Quaternion.identity,
-                            container);
-                        optionBehaviour.transform.localPosition = new Vector3(0.952f, num, -2f);
-                        optionBehaviour.SetClickMask(instance.ButtonClickMask);
-                        optionBehaviour.SetUpFromData(baseGameSetting, 20);
-                        _vanillaOptions.Add(optionBehaviour);
+                        optionBehaviour = Object.Instantiate(instance.playerOptionOrigin, container);
                         break;
-                    }
                 }
 
+                if (!optionBehaviour)
+                    continue;
+
+                optionBehaviour!.transform.localPosition = new Vector3(0.952f, num, -2f);
+                optionBehaviour.SetClickMask(instance.ButtonClickMask);
+                optionBehaviour.SetUpFromData(baseGameSetting, 20);
+                _vanillaOptions.Add(optionBehaviour);
+
                 num -= 0.45f;
-                AdditionalVanillaScrollNum -= 0.45f;
+                additionalVanillaScrollNum -= 0.45f;
             }
         }
         foreach (var optionBehaviour in _vanillaOptions)
@@ -363,11 +325,11 @@ internal static class GameOptionsMenuPatch
             var filteredGroups =
                 ModdedOptionsManager.GameModeOptionGroups
                     .Where(x => x.Key == mode.GetType()).Select(y => y.Value).SelectMany(y => y) ?? [];
-            _gameModeGroups.Add(mode, filteredGroups.ToList());
+            _gameModeGroups.Add(mode, [.. filteredGroups]);
 
             var optionBehaviours = new System.Collections.Generic.List<OptionBehaviour>();
             var categoryHeaders = new System.Collections.Generic.List<CategoryHeaderMasked>();
-            var newNum = mode.ShowNormalGameSettings ? num : num - AdditionalVanillaScrollNum;
+            var newNum = mode.ShowNormalGameSettings ? num : num - additionalVanillaScrollNum;
             foreach (var group in filteredGroups)
             {
                 CreateGroup(instance, group, container, ref newNum, ref optionBehaviours, ref categoryHeaders);
@@ -550,7 +512,7 @@ internal static class GameOptionsMenuPatch
             foreach (var option in group.Options)
             {
                 if (option.OptionBehaviour != null && option.OptionBehaviour.gameObject != null)
-                    option.OptionBehaviour?.gameObject.SetActive(false);
+                    option.OptionBehaviour.gameObject.SetActive(false);
             }
 
             return;
@@ -601,7 +563,7 @@ internal static class GameOptionsMenuPatch
 
         if (mode.ShowNormalGameSettings)
         {
-            num += AdditionalVanillaScrollNum;
+            num += additionalVanillaScrollNum;
         }
 
         if (!_gameModeGroups.TryGetValue(mode, out var groups) || groups.Count == 0)

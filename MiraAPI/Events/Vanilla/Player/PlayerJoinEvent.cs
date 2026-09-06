@@ -3,7 +3,7 @@
 namespace MiraAPI.Events.Vanilla.Player;
 
 /// <summary>
-/// Event that is invoked when a player joins the lobby. Non cancelable.
+/// Event that is invoked when a player joins the lobby. Non-cancelable.
 /// </summary>
 /// <param name="data">The data of the player who joined.</param>
 public class PlayerJoinEvent(ClientData data) : MiraEvent

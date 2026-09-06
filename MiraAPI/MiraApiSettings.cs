@@ -84,16 +84,17 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
     {
         var topUi = MiraHudHelper.UiTopRight;
         var extraTopUi = MiraHudHelper.ExtraUiTopRight;
-        if (topUi && extraTopUi)
-        {
-            var genericEvent = new UiButtonResetEvent();
-            MiraEventManager.InvokeEvent(genericEvent);
 
-            var genericEvent2 = new UiButtonPostResetEvent(topUi, extraTopUi);
-            MiraEventManager.InvokeEvent(genericEvent2);
-            MiraHudHelper.UiGrid.ArrangeChilds();
-            MiraHudHelper.ExtraUiGrid.ArrangeChilds();
-        }
+        if (!topUi || !extraTopUi)
+            return;
+
+        var genericEvent = new UiButtonResetEvent();
+        MiraEventManager.InvokeEvent(genericEvent);
+
+        var genericEvent2 = new UiButtonPostResetEvent(topUi, extraTopUi);
+        MiraEventManager.InvokeEvent(genericEvent2);
+        MiraHudHelper.UiGrid.ArrangeChilds();
+        MiraHudHelper.ExtraUiGrid.ArrangeChilds();
     }
 
     /// <summary>

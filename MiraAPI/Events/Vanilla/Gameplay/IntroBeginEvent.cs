@@ -1,7 +1,7 @@
 ﻿namespace MiraAPI.Events.Vanilla.Gameplay;
 
 /// <summary>
-/// The event that is invoked when the intro cutscene is shown. Non cancelable.
+/// The event that is invoked when the intro cutscene is shown. Non-cancelable.
 /// </summary>
 /// <param name="introCutscene">The intro cutscene.</param>
 public class IntroBeginEvent(IntroCutscene introCutscene) : MiraEvent

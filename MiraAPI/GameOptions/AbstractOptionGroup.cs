@@ -87,11 +87,11 @@ public abstract class AbstractOptionGroup<T> : AbstractOptionGroup where T : IOp
         get
         {
             var type = typeof(T);
-            if (type == typeof(BaseModifier))
+            if (typeof(BaseModifier).IsAssignableFrom(type))
             {
                 return MenuCategory.Modifiers;
             }
-            else if (type == typeof(RoleBehaviour))
+            else if (typeof(RoleBehaviour).IsAssignableFrom(type))
             {
                 return MenuCategory.Roles;
             }
@@ -104,7 +104,7 @@ public abstract class AbstractOptionGroup<T> : AbstractOptionGroup where T : IOp
 /// Base class for option groups. An option group is a collection of options that are displayed together in the options menu.
 /// </summary>
 /// <typeparam name="T">The custom role that the group is for.</typeparam>
-public abstract class AbstractRoleOptionGroup<T>() : AbstractOptionGroup<T> where T : ICustomRole
+public abstract class AbstractRoleOptionGroup<T> : AbstractOptionGroup<T> where T : ICustomRole
 {
     /// <inheritdoc />
     public override Type OptionableType => typeof(T);

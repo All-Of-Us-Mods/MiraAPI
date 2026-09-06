@@ -1,6 +1,6 @@
-namespace MiraAPI.Patches;
+/*namespace MiraAPI.Patches;
 
-/*[HarmonyPatch(typeof(DetectiveNotesMinigame), nameof(DetectiveNotesMinigame.SetImpostorPopup))]
+[HarmonyPatch(typeof(DetectiveNotesMinigame), nameof(DetectiveNotesMinigame.SetImpostorPopup))]
 public static class DetectiveNotesMinigamePatch
 {
     public static void Prefix(DetectiveNotesMinigame __instance, bool active)

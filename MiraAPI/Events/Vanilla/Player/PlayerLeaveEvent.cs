@@ -3,7 +3,7 @@
 namespace MiraAPI.Events.Vanilla.Player;
 
 /// <summary>
-/// Event that is invoked when a player leaves the game. Non cancelable.
+/// Event that is invoked when a player leaves the game. Non-cancelable.
 /// </summary>
 /// <param name="data">The data of the player who left.</param>
 /// <param name="reason">The reason why the player left.</param>

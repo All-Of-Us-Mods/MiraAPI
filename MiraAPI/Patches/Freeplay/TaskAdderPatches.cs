@@ -310,16 +310,12 @@ public static class TaskAdderPatches
             switch (task.TaskType)
             {
                 case TaskTypes.DivertPower:
-#pragma warning disable IDE0055 // Fix formatting
-                {
                     var targetSystem = task.Cast<DivertPowerTask>().TargetSystem;
                     taskAddButton.Text.text = TranslationController.Instance.GetString(
                         StringNames.DivertPowerTo,
                         TranslationController.Instance.GetString(targetSystem));
                     break;
-                }
                 case TaskTypes.FixWeatherNode:
-                {
                     var nodeId = task.Cast<WeatherNodeTask>().NodeId;
                     taskAddButton.Text.text =
                         TranslationController.Instance.GetString(
@@ -327,20 +323,16 @@ public static class TaskAdderPatches
                         TranslationController.Instance.GetString(
                             WeatherSwitchGame.ControlNames[nodeId]);
                     break;
-                }
                 default:
-                {
                     taskAddButton.Text.text =
                         TranslationController.Instance.GetString(task.TaskType);
                     break;
-                }
-#pragma warning restore IDE0055 // Fix formatting
             }
 
             __instance.AddFileAsChildCustom(taskAddButton, ref num, ref num2, ref num3);
             if (taskAddButton != null && taskAddButton.Button != null)
             {
-                ControllerManager.Instance.AddSelectableUiElement(taskAddButton.Button, false);
+                ControllerManager.Instance.AddSelectableUiElement(taskAddButton.Button);
             }
         }
 

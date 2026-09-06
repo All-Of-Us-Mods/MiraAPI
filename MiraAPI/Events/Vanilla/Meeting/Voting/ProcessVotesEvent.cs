@@ -13,8 +13,6 @@ public class ProcessVotesEvent(List<CustomVote> votes, NetworkedPlayerInfo? exil
 {
     private readonly List<CustomVote> _originalVotes = [.. votes];
 
-    private NetworkedPlayerInfo? _exiledPlayer = exiledPlayer;
-
     /// <summary>
     /// Gets a value indicating whether the exiled player has been modified by the event.
     /// </summary>
@@ -45,11 +43,12 @@ public class ProcessVotesEvent(List<CustomVote> votes, NetworkedPlayerInfo? exil
     /// </summary>
     public NetworkedPlayerInfo? ExiledPlayer
     {
-        get => _exiledPlayer;
+        get;
         set
         {
-            _exiledPlayer = value;
+            field = value;
             ExiledPlayerModified = true;
         }
     }
+    = exiledPlayer;
 }

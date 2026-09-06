@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using MiraAPI.GameOptions;
 using MiraAPI.HnsReimplemented.Options;
@@ -8,19 +9,22 @@ using UnityEngine;
 
 namespace MiraAPI.HnsReimplemented;
 
+/// <summary>
+/// A Unity script designed to mimic the base game's player danger meter during Hide and Seek.
+/// </summary>
+/// <param name="cppPtr">The pointer of this instance's equivalent in the Il2Cpp domain.</param>
 [RegisterInIl2Cpp]
+[SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity Convention.")]
 public sealed class HnsDangerMeter(nint cppPtr) : MonoBehaviour(cppPtr)
 {
-    public static HnsDangerMeter Instance;
-
-    private void Awake()
-    {
-        Instance = this;
-    }
+    /// <summary>
+    /// Gets the instance of the danger meter.
+    /// </summary>
+    public static HnsDangerMeter Instance { get; private set; }
 
     private DangerMeter dangerMeter;
 
-    private List<PlayerControl> impostors = [];
+    private List<PlayerControl>? impostors = [];
 
     private float scaryMusicDistance;
 
@@ -34,7 +38,12 @@ public sealed class HnsDangerMeter(nint cppPtr) : MonoBehaviour(cppPtr)
 
     private float firstCrossfadeCountdown;
 
-    public void FixedUpdate()
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    private void FixedUpdate()
     {
         PlayerControl localPlayer = PlayerControl.LocalPlayer;
         if (impostors == null || localPlayer == null)
@@ -50,13 +59,12 @@ public sealed class HnsDangerMeter(nint cppPtr) : MonoBehaviour(cppPtr)
         float num = float.MaxValue;
         foreach (PlayerControl playerControl in impostors)
         {
-            if (!(playerControl == null))
+            if (playerControl == null)
+                continue;
+            float sqrMagnitude = (playerControl.transform.position - localPlayer.transform.position).sqrMagnitude;
+            if (sqrMagnitude < scaryMusicDistance && num > sqrMagnitude)
             {
-                float sqrMagnitude = (playerControl.transform.position - localPlayer.transform.position).sqrMagnitude;
-                if (sqrMagnitude < scaryMusicDistance && num > sqrMagnitude)
-                {
-                    num = sqrMagnitude;
-                }
+                num = sqrMagnitude;
             }
         }
 
@@ -71,7 +79,7 @@ public sealed class HnsDangerMeter(nint cppPtr) : MonoBehaviour(cppPtr)
             {
                 firstMusicActivation = false;
                 firstCrossfadeCountdown = 3f;
-                HnsMusicHandler.Instance.SetMusicCrossfadeSpeed(0.6f);
+                HnsMusicHandler.Instance.SetMusicCrossFadeSpeed(0.6f);
             }
 
             if (firstCrossfadeCountdown > 0f)
@@ -79,7 +87,7 @@ public sealed class HnsDangerMeter(nint cppPtr) : MonoBehaviour(cppPtr)
                 firstCrossfadeCountdown -= Time.deltaTime;
                 if (firstCrossfadeCountdown <= 0f)
                 {
-                    HnsMusicHandler.Instance.SetMusicCrossfadeSpeed(5f);
+                    HnsMusicHandler.Instance.SetMusicCrossFadeSpeed(5f);
                 }
             }
 
@@ -115,6 +123,9 @@ public sealed class HnsDangerMeter(nint cppPtr) : MonoBehaviour(cppPtr)
         dangerMeter.SetDangerValue(dangerLevel1, dangerLevel2);
     }
 
+    /// <summary>
+    /// An event that is executed when the game starts.
+    /// </summary>
     public void OnGameStart()
     {
         firstMusicActivation = true;
@@ -124,19 +135,15 @@ public sealed class HnsDangerMeter(nint cppPtr) : MonoBehaviour(cppPtr)
             dangerMeter.gameObject.SetActive(true);
         }
 
-        impostors = Helpers.GetAlivePlayers().Where(x => x.Data.Role.IsImpostor).ToList();
+        impostors = [.. Helpers.GetAlivePlayers().Where(x => x.Data.Role.IsImpostor)];
 
         var baseSpeed = OptionGroupSingleton<HnsCrewmateOptions>.Instance.PlayerSpeed.Value;
-        scaryMusicDistance = 55f *
-                                  baseSpeed;
-        veryScaryMusicDistance = 15f *
-                                      baseSpeed;
-        if (scaryMusicDistance < veryScaryMusicDistance)
-        {
-            float num = veryScaryMusicDistance;
-            float num2 = scaryMusicDistance;
-            scaryMusicDistance = num;
-            veryScaryMusicDistance = num2;
-        }
+        scaryMusicDistance = 55f * baseSpeed;
+        veryScaryMusicDistance = 15f * baseSpeed;
+        if (scaryMusicDistance >= veryScaryMusicDistance) return;
+        float num = veryScaryMusicDistance;
+        float num2 = scaryMusicDistance;
+        scaryMusicDistance = num;
+        veryScaryMusicDistance = num2;
     }
 }

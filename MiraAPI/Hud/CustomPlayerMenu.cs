@@ -9,7 +9,6 @@ using Reactor.Utilities.Attributes;
 using Reactor.Utilities.Extensions;
 using UnityEngine;
 using UnityEngine.Events;
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 namespace MiraAPI.Hud;
 
@@ -21,6 +20,8 @@ namespace MiraAPI.Hud;
 [SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Unity Convention.")]
 [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Unity Convention.")]
 [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1307:Accessible fields should begin with upper-case letter", Justification = "Unity Convention.")]
+[SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity convention.")]
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (Justification: Unity fields to mirror base game ShapeshifterMinigame; not worth documenting)
 public class CustomPlayerMenu(IntPtr il2CppPtr) : Minigame(il2CppPtr)
 {
     public ShapeshifterPanel panelPrefab;
@@ -68,7 +69,6 @@ public class CustomPlayerMenu(IntPtr il2CppPtr) : Minigame(il2CppPtr)
         return customMenu;
     }
 
-    [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity convention.")]
     private void OnDisable()
     {
         ControllerManager.Instance.CloseOverlayMenu(name);

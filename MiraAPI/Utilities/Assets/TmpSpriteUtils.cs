@@ -67,10 +67,8 @@ public static class TmpSpriteUtils
         };
         material.SetTexture(ShaderUtilities.ID_MainTex, sourceTexture);
         // TODO: Using these values, the icons will NOT clip through chat boxes. However, this breaks quite literally every other tmp text that isn't masked. Please fix this if a good solution is found.
-#pragma warning disable S125 // Sections of code should not be commented out
         /*material.SetFloat(ShaderUtilities.ID_StencilComp, 4);
         material.SetFloat(ShaderUtilities.ID_StencilID, 1);*/
-#pragma warning restore S125 // Sections of code should not be commented out
         material.SetFloat(ShaderUtilities.ID_StencilComp, 0);
         material.SetFloat(ShaderUtilities.ID_StencilID, 0);
         material.SetFloat(ShaderUtilities.ID_StencilOp, 0);

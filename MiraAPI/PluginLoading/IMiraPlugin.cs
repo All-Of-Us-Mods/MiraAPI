@@ -15,9 +15,9 @@ public interface IMiraPlugin
     virtual bool DisplayOnOptionsMenu => true;
 
     /// <summary>
-    /// Gets or sets a value for the localization id to use for anything registered under this mod.
+    /// Gets the localization id to use for anything registered under this mod.
     /// </summary>
-    public virtual string ParentLocaleId => GetType().Name.ToLower(CultureInfo.InvariantCulture);
+    virtual string ParentLocaleId => GetType().Name.ToLower(CultureInfo.InvariantCulture);
 
     /// <summary>
     /// Gets the name to display on the options menu.

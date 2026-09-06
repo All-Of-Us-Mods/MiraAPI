@@ -123,7 +123,7 @@ public static class SelectRolesPatch
             RoleTypes roleType = roleList[index];
             roleList.RemoveAt(index);
             int index2 = HashRandom.FastNext(players.Count);
-            players[index2].Object.RpcSetRole(roleType, false);
+            players[index2].Object.RpcSetRole(roleType);
             players.RemoveAt(index2);
             rolesAssigned++;
         }
