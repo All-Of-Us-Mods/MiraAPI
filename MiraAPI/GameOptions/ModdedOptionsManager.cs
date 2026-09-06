@@ -216,7 +216,7 @@ public static class ModdedOptionsManager
     internal static void HandleSyncOptions(NetData[] data)
     {
         // necessary to disable then re-enable this setting
-        // we dont know how other plugins handle their configs
+        // we don't know how other plugins handle their configs
         // this way, all the options are saved at once, instead of one by one
         var oldConfigSetting = new Dictionary<MiraPluginInfo, bool>();
         foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins)

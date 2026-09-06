@@ -31,7 +31,7 @@ public class CenteredGridArrange(IntPtr iPtr) : MonoBehaviour(iPtr)
     private void Start()
     {
         cells = [];
-        GetChildsActive();
+        GetChildrenActive();
         CheckCurrentChildren();
     }
 
@@ -42,16 +42,16 @@ public class CenteredGridArrange(IntPtr iPtr) : MonoBehaviour(iPtr)
 
     private void CheckCurrentChildren()
     {
-        GetChildsActive();
+        GetChildrenActive();
         if (cells.SequenceEqual(CurrentChildren))
             return;
         cells.Clear();
-        foreach (Transform currentChild in CurrentChildren)
+        foreach (var currentChild in CurrentChildren)
             cells.Add(currentChild);
-        ArrangeChilds();
+        ArrangeChildren();
     }
 
-    private void GetChildsActive()
+    private void GetChildrenActive()
     {
         CurrentChildren.Clear();
         foreach (var obj in transform)
@@ -63,29 +63,29 @@ public class CenteredGridArrange(IntPtr iPtr) : MonoBehaviour(iPtr)
         }
     }
 
-    private void ArrangeChilds()
+    private void ArrangeChildren()
     {
         if (cells.Count == 0)
             return;
 
-        int totalRows = Mathf.CeilToInt((float)cells.Count / MaxColumns);
-        float totalHeight = (totalRows - 1) * CellSize.y;
-        float startY = transform.position.y + totalHeight * 0.5f;
+        var totalRows = Mathf.CeilToInt((float)cells.Count / MaxColumns);
+        var totalHeight = (totalRows - 1) * CellSize.y;
+        var startY = transform.position.y + totalHeight * 0.5f;
 
-        for (int index = 0; index < cells.Count; ++index)
+        for (var index = 0; index < cells.Count; ++index)
         {
-            int row = index / MaxColumns;
-            int rowStartIndex = row * MaxColumns;
-            int itemsInRow = Mathf.Min(MaxColumns, cells.Count - rowStartIndex);
-            int col = index - rowStartIndex;
+            var row = index / MaxColumns;
+            var rowStartIndex = row * MaxColumns;
+            var itemsInRow = Mathf.Min(MaxColumns, cells.Count - rowStartIndex);
+            var col = index - rowStartIndex;
 
-            float rowWidth = (itemsInRow - 1) * CellSize.x;
-            float startX = transform.position.x - rowWidth * 0.5f;
+            var rowWidth = (itemsInRow - 1) * CellSize.x;
+            var startX = transform.position.x - rowWidth * 0.5f;
 
-            float x = startX + col * CellSize.x;
-            float y = startY - row * CellSize.y;
+            var x = startX + col * CellSize.x;
+            var y = startY - row * CellSize.y;
 
-            Transform cell = cells[index];
+            var cell = cells[index];
             cell.position = new Vector3(x, y, cell.position.z);
         }
     }

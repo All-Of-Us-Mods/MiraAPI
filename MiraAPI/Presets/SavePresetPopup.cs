@@ -8,12 +8,13 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 [RegisterInIl2Cpp]
 // TODO: Give proper reasoning
 [SuppressMessage("Design", "CA1050:Declare types in namespaces", Justification = "Reason pending.")]
 [SuppressMessage("Major Bug", "S3903:Types should be defined in named namespaces", Justification = "Reason pending.")]
+[SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity Convention.")]
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (Justification: Unity fields; ignore.)
 public class SavePresetPopup(nint cppPtr) : Minigame(cppPtr)
 {
     private TextMeshPro textBoxText;
@@ -22,7 +23,7 @@ public class SavePresetPopup(nint cppPtr) : Minigame(cppPtr)
     private Action<string> onSave;
 
     // Cleanup holder object
-    public void OnDestroy()
+    private void OnDestroy()
     {
         transform.parent.gameObject.Destroy();
     }
@@ -32,9 +33,7 @@ public class SavePresetPopup(nint cppPtr) : Minigame(cppPtr)
         // no-op
     }
 
-#pragma warning disable IDE0051 // Remove unused private members
     private void Awake()
-#pragma warning restore IDE0051 // Remove unused private members
     {
         var textboxHolder = transform.GetChild(1).GetChild(1);
         var saveButton = transform.FindChild("SaveButton").GetComponent<PassiveButton>();

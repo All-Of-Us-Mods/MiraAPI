@@ -69,9 +69,9 @@ public static class OptionsMenuPatches
         currentPage = 1;
         TabButtons.Clear();
         float yOffset = 0;
-        int i = 0;
-        int tabIdx = 0;
-        int page = 1;
+        var i = 0;
+        var tabIdx = 0;
+        var page = 1;
         LocalSettingsTab.TabGroups.Clear();
         foreach (var settings in LocalSettingsManager.AvailableTabs)
         {

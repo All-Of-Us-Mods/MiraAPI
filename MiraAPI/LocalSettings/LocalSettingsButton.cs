@@ -29,7 +29,7 @@ public class LocalSettingsButton(string text, Action onClick)
     /// </summary>
     public LocalSettingsTab? Tab { get; internal set; }
 
-    private TextMeshPro _btnText { get; set; }
+    private TextMeshPro _btnText;
 
     internal GameObject CreateButton(ToggleButtonBehaviour toggle, Transform parent, ref float offset, ref int order, bool last)
     {

@@ -52,12 +52,13 @@ public static class TmpSpriteUtils
             AssetHolder.fallbackSpriteAssets = new();
         }
 
-        TMP_SpriteAsset spriteAsset = ScriptableObject.CreateInstance<TMP_SpriteAsset>();
+        var spriteAsset = ScriptableObject.CreateInstance<TMP_SpriteAsset>();
         spriteAsset.name = assetName;
         spriteAsset.spriteSheet = sourceTexture;
 
         if (!_spriteShader)
         {
+            // ReSharper disable once ShaderLabShaderReferenceNotResolved (Justification: Unnecessary.)
             _spriteShader = Shader.Find("TextMeshPro/Sprite");
         }
 

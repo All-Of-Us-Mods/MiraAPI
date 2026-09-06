@@ -58,7 +58,7 @@ public class LocalSliderSetting(
     /// </summary>
     public MiraNumberSuffixes SuffixType { get; } = suffixType ?? MiraNumberSuffixes.None;
 
-    private SlideBar _slider { get; set; }
+    private SlideBar _slider;
 
     /// <inheritdoc />
     public override GameObject CreateOption(ToggleButtonBehaviour toggle, SlideBar slider, Transform parent, ref float offset, ref int order, bool last)

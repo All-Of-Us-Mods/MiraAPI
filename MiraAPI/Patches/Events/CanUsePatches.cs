@@ -30,15 +30,11 @@ public static class CanUsePatches
     {
         canUse = couldUse = false;
 
-        IUsable usable = __instance.TryCast<IUsable>()!;
-        if (usable != null)
-        {
-            var @event = new PlayerCanUseEvent(usable);
-            MiraEventManager.InvokeEvent(@event);
+        var usable = __instance.TryCast<IUsable>();
+        if (usable == null) return true;
+        var @event = new PlayerCanUseEvent(usable);
+        MiraEventManager.InvokeEvent(@event);
 
-            return !@event.IsCancelled;
-        }
-
-        return true;
+        return !@event.IsCancelled;
     }
 }

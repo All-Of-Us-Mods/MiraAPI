@@ -72,7 +72,7 @@ public static class RoleGuidePatches
             ConsoleJoystick.SetMode_MenuAdditive();
         }
         ControllerManager.Instance.OpenOverlayMenu("MatchInfoGuide", __instance.closeButton);
-        bool enabled = ActiveInputManager.currentControlType == ActiveInputManager.InputType.Joystick;
+        var enabled = ActiveInputManager.currentControlType == ActiveInputManager.InputType.Joystick;
         __instance.glyphL.enabled = enabled;
         __instance.glyphR.enabled = enabled;
         if (GameManager.Instance.TryCast<NormalGameManager>() != null)
@@ -114,24 +114,24 @@ public static class RoleGuidePatches
         }
         PlayerControl.LocalPlayer.NetTransform.Halt();
         __instance.MatchInfoParent.SetActive(true);
-        ControllerManager instance = ControllerManager.Instance;
-        ControllerUiElementsState currentUiState = ControllerManager.Instance.CurrentUiState;
-        Il2CppSystem.Collections.Generic.List<UiElement> controllerSelectable = __instance.ControllerSelectable;
+        var instance = ControllerManager.Instance;
+        var currentUiState = ControllerManager.Instance.CurrentUiState;
+        var controllerSelectable = __instance.ControllerSelectable;
         instance.SetUpSelectables(currentUiState, controllerSelectable[^1], __instance.ControllerSelectable);
-        ControllerManager instance2 = ControllerManager.Instance;
-        Il2CppSystem.Collections.Generic.List<UiElement> controllerSelectable2 = __instance.ControllerSelectable;
+        var instance2 = ControllerManager.Instance;
+        var controllerSelectable2 = __instance.ControllerSelectable;
         instance2.SetCurrentSelected(controllerSelectable2[^1]);
         __instance.SetActiveTab(0);
         return false;
     }
 
-    private static readonly Dictionary<RoleBehaviour, MatchInfoRolePanel> _rolePanels = [];
+    private static readonly Dictionary<RoleBehaviour, MatchInfoRolePanel> RolePanels = [];
 
     public static void DisplayNormalRoleSettings(MatchInfoGuide instance, bool reset)
     {
         if (reset)
         {
-            _rolePanels.Clear();
+            RolePanels.Clear();
             instance.CreateSettingsEntry(
                 StringNames.GameNumImpostors,
                 GameManager.Instance.AllGameSettingData[StringNames.GameNumImpostors]
@@ -143,7 +143,7 @@ public static class RoleGuidePatches
             instance.CreateSettingsEntry(
                 StringNames.GameEmergencyCooldown,
                 GameManager.Instance.AllGameSettingData[StringNames.GameEmergencyCooldown]
-                    .GetValueString((float)GameManager.Instance.LogicOptions.GetEmergencyCooldown()));
+                    .GetValueString(GameManager.Instance.LogicOptions.GetEmergencyCooldown()));
             instance.CreateSettingsEntry(
                 StringNames.GameVisualTasks,
                 instance.GetBoolString(GameManager.Instance.LogicOptions.GetVisualTasks()));
@@ -156,7 +156,7 @@ public static class RoleGuidePatches
             instance.CreateSettingsEntry(
                 StringNames.GameTaskBarMode,
                 GameManager.Instance.LogicOptions.GetTaskBarMode().ToString());
-            foreach (RoleBehaviour roleBehaviour in RoleManager.Instance.AllRoles)
+            foreach (var roleBehaviour in RoleManager.Instance.AllRoles)
             {
                 if (roleBehaviour.Role is not RoleTypes.Crewmate and not RoleTypes.Impostor and
                     not RoleTypes.CrewmateGhost and
@@ -165,22 +165,20 @@ public static class RoleGuidePatches
                     var panel = Object.Instantiate(
                         instance.MatchInfoRolePanelPrefab,
                         instance.settingsTabs[2].GetComponent<Scroller>().Inner);
-                    _rolePanels.Add(roleBehaviour, panel);
+                    RolePanels.Add(roleBehaviour, panel);
                 }
             }
         }
 
-        int num = 0;
-        foreach (var pair in _rolePanels)
+        var num = 0;
+        foreach (var (roleData, panel) in RolePanels)
         {
-            var role = pair.Key;
-            var panel = pair.Value;
-            var amount = GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetNumPerGame(role.Role);
-            var chance = GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetChancePerGame(role.Role);
-            var forciblyShow = role is ICustomRole custom ? custom.ForceShowRoleOnWiki : null;
-            if (amount == 0 || chance == 0 || (Enum.IsDefined(role.Role) && role.IsRoleBlacklisted()) ||
-                (role is ICustomRole custom2 && ((!custom2.CanSpawnOnCurrentMode() && forciblyShow == null) ||
-                                                 (forciblyShow.HasValue && !forciblyShow.Value))))
+            var amount = GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetNumPerGame(roleData.Role);
+            var chance = GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetChancePerGame(roleData.Role);
+            var forciblyShow = roleData is ICustomRole custom ? custom.ForceShowRoleOnWiki : null;
+            if (amount == 0 || chance == 0 || (Enum.IsDefined(roleData.Role) && roleData.IsRoleBlacklisted()) ||
+                (roleData is ICustomRole custom2 && ((!custom2.CanSpawnOnCurrentMode() && forciblyShow == null) ||
+                                                                    (forciblyShow.HasValue && !forciblyShow.Value))))
             {
                 panel.gameObject.SetActive(false);
                 continue;
@@ -188,7 +186,7 @@ public static class RoleGuidePatches
 
             panel.gameObject.SetActive(true);
             panel.SetPanel(
-                role,
+                roleData,
                 amount,
                 chance);
             num++;
@@ -199,7 +197,7 @@ public static class RoleGuidePatches
             instance.rolesEnabledMessage.SetActive(true);
         }
 
-        instance.MatchInfoRoleScroller.SetYBoundsMax(Mathf.Clamp(Mathf.Ceil((float)num / 2f) * 1.3f - 1.5f, 0f, 999f));
+        instance.MatchInfoRoleScroller.SetYBoundsMax(Mathf.Clamp(Mathf.Ceil(num / 2f) * 1.3f - 1.5f, 0f, 999f));
         instance.MatchInfoRoleMaskArea.material.SetInt(PlayerMaterial.MaskLayer, 50);
         instance.matchInfoSettingsMaskArea.material.SetInt(PlayerMaterial.MaskLayer, 50);
         if (reset)
@@ -214,10 +212,10 @@ public static class RoleGuidePatches
     private static bool CreatePlayerEntries(MatchInfoGuide __instance)
     {
         __instance.PlayerPool.ReclaimAll();
-        int num = 51;
-        foreach (NetworkedPlayerInfo networkedPlayerInfo in GameData.Instance.AllPlayers)
+        var num = 51;
+        foreach (var networkedPlayerInfo in GameData.Instance.AllPlayers)
         {
-            PlayerIdentifierButton component =
+            var component =
                 __instance.PlayerPool.Get<PoolableBehavior>().GetComponent<PlayerIdentifierButton>();
             component.transform.localPosition = new Vector3(0f, 0f, -1f);
             component.Populate(networkedPlayerInfo);
@@ -227,17 +225,19 @@ public static class RoleGuidePatches
             component.NameText.transform.localPosition = new Vector3(0.3563f, 0, -2.98f);
             component.NameText.text += $"\n<size=75%>{networkedPlayerInfo.GetPlayerColorString()}</size>";
             var namePlate = HatManager.Instance.GetNamePlateById(networkedPlayerInfo.DefaultOutfit.NamePlateId);
-            var x = (NamePlateViewData viewdata) =>
+
+            __instance.StartCoroutine(
+                __instance.CoLoadAssetAsync<NamePlateViewData>(
+                    namePlate.GetAssetReference(),
+                    (Action<NamePlateViewData>?)LoadNameplate));
+            continue;
+
+            void LoadNameplate(NamePlateViewData viewdata)
             {
-                component.buttonSprite.sprite = viewdata?.Image;
+                component.buttonSprite.sprite = viewdata.Image;
                 component.buttonSprite.transform.localScale = new Vector3(0.7f, 1.075f, 1);
                 component.buttonSprite.transform.localPosition = new Vector3(-0.395f, 0, 0.1f);
-            };
-            __instance.StartCoroutine(
-                AddressableAssetExtensions.CoLoadAssetAsync<NamePlateViewData>(
-                    __instance,
-                    namePlate.GetAssetReference(),
-                    x));
+            }
         }
 
         return false;

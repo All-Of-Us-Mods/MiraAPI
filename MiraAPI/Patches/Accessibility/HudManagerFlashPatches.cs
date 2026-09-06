@@ -9,6 +9,7 @@ namespace MiraAPI.Patches.Accessibility;
 
 [HarmonyPatch]
 [SuppressMessage("Style", "IDE0074:Use compound assignment", Justification = "Using compound assignment bypasses Unity lifetime checks.")]
+// ReSharper disable ConvertIfStatementToNullCoalescingAssignment (Justification: Read above.)
 public static class HudManagerFlashPatches
 {
     [HarmonyPatch(typeof(HudManager), nameof(HudManager.StartReactorFlash))]
@@ -22,6 +23,7 @@ public static class HudManagerFlashPatches
 
         return false;
     }
+
     [HarmonyPatch(typeof(HudManager), nameof(HudManager.StartOxyFlash))]
     [HarmonyPrefix]
     public static bool OxygenFlashPrefix(HudManager __instance)
@@ -33,7 +35,8 @@ public static class HudManagerFlashPatches
 
         return false;
     }
-    public static IEnumerator CoReactorFlash()
+
+    private static IEnumerator CoReactorFlash()
     {
         if (!HudManager.InstanceExists)
         {

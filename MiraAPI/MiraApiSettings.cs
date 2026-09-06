@@ -154,32 +154,30 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
         var extraAspect = MiraHudHelper.ExtraUiAspectPos;
         var extraGrid = MiraHudHelper.ExtraUiGrid;
         var extraUi = MiraHudHelper.ExtraUiTopRight;
-        if (extraUi && extraAspect && extraGrid)
+        if (!extraUi || !extraAspect || !extraGrid) return;
+        extraAspect.DistanceFromEdge = new Vector3(0.435f * scaleFactor, 1.25f * scaleFactor, 0f);
+
+        foreach (var button in extraUi.GetAllChildren())
         {
-            extraAspect.DistanceFromEdge = new Vector3(0.435f * scaleFactor, 1.25f * scaleFactor, 0f);
-
-            foreach (var button in extraUi.GetAllChildren())
+            if (button.gameObject == null)
             {
-                if (button.gameObject == null)
-                {
-                    continue;
-                }
-                if (button.transform.name.Contains("Modifiers"))
-                {
-                    button.gameObject.transform.localScale = new Vector3(0.65f * scaleFactor, 0.65f * scaleFactor, 1);
-                    continue;
-                }
-
-                button.gameObject.transform.localScale = actualScale;
+                continue;
+            }
+            if (button.transform.name.Contains("Modifiers"))
+            {
+                button.gameObject.transform.localScale = new Vector3(0.65f * scaleFactor, 0.65f * scaleFactor, 1);
+                continue;
             }
 
-            extraGrid.CellSize = new Vector2(alteredScale, alteredScale);
-            if (extraGrid.gameObject.transform.childCount != 0)
-            {
-                extraGrid.ArrangeChilds();
-            }
-            extraAspect.AdjustPosition();
+            button.gameObject.transform.localScale = actualScale;
         }
+
+        extraGrid.CellSize = new Vector2(alteredScale, alteredScale);
+        if (extraGrid.gameObject.transform.childCount != 0)
+        {
+            extraGrid.ArrangeChilds();
+        }
+        extraAspect.AdjustPosition();
     }
 
     /// <summary>

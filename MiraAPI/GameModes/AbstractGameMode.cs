@@ -278,11 +278,11 @@ public abstract class AbstractGameMode : IOptionable
         instance.background.transform.localScale = (instance.taskText.textBounds.size.x > 0f)
             ? new Vector3(instance.taskText.textBounds.size.x + 0.2f, instance.taskText.textBounds.size.y + 0.2f, 1f)
             : Vector3.zero;
-        Vector3 vector = instance.background.sprite.bounds.extents;
+        var vector = instance.background.sprite.bounds.extents;
         vector.y = -vector.y;
         vector = vector.Mul(instance.background.transform.localScale);
         instance.background.transform.localPosition = vector;
-        Vector3 vector2 = instance.tab.sprite.bounds.extents;
+        var vector2 = instance.tab.sprite.bounds.extents;
         vector2 = vector2.Mul(instance.tab.transform.localScale);
         vector2.y = -vector2.y;
         vector2.x += vector.x * 2f;

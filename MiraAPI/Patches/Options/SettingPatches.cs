@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using HarmonyLib;
 using MiraAPI.GameOptions;
@@ -23,6 +24,7 @@ public static class SettingPatches
     /// <returns><see langword="false"/> to skip original method.</returns>
     [HarmonyPrefix]
     [HarmonyPatch(typeof(FloatGameSetting), nameof(FloatGameSetting.GetValueString))]
+    [SuppressMessage("Style", "IDE0045:Convert to conditional expression", Justification = "Warning cascades into forcing the entire tree to be ternary operators.")]
     public static bool ValueStringPatch(
         FloatGameSetting __instance,
         ref string __result,
@@ -34,23 +36,19 @@ public static class SettingPatches
         var custom =
             ModdedOptionsManager.ModdedOptions.Values.FirstOrDefault(opt =>
                 opt.OptionBehaviour != null && opt.OptionBehaviour.Data == __instance);
-        result = custom is ModdedNumberOption moddedNumberOption
-            ? moddedNumberOption.NegativeWordValue != "#" && (int)value == -1
-                ? $"<b>{moddedNumberOption.NegativeWordValue}</b>"
-                : moddedNumberOption.ZeroWordValue != "#" && Mathf.Abs(value) < 0.0001f
-                    ? $"<b>{moddedNumberOption.ZeroWordValue}</b>"
-                    : suffix switch
-                    {
-                        MiraNumberSuffixes.None => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo),
-                        MiraNumberSuffixes.Multiplier => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "x",
-                        MiraNumberSuffixes.Percent => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "%",
-                        _ => TranslationController.Instance.GetString(
-                            StringNames.GameSecondsAbbrev,
-                            (Il2CppSystem.Object[])[value.ToString(__instance.FormatString, CultureInfo.InvariantCulture)]),
-                    }
-            : __instance.ZeroIsInfinity && Mathf.Abs(value) < 0.0001f
-                ? "<b>∞</b>"
-                : suffix switch
+        if (custom is ModdedNumberOption moddedNumberOption)
+        {
+            if (moddedNumberOption.NegativeWordValue != "#" && (int)value == -1)
+            {
+                result = $"<b>{moddedNumberOption.NegativeWordValue}</b>";
+            }
+            else if (moddedNumberOption.ZeroWordValue != "#" && Mathf.Abs(value) < 0.0001f)
+            {
+                result = $"<b>{moddedNumberOption.ZeroWordValue}</b>";
+            }
+            else
+            {
+                result = suffix switch
                 {
                     MiraNumberSuffixes.None => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo),
                     MiraNumberSuffixes.Multiplier => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "x",
@@ -59,6 +57,24 @@ public static class SettingPatches
                         StringNames.GameSecondsAbbrev,
                         (Il2CppSystem.Object[])[value.ToString(__instance.FormatString, CultureInfo.InvariantCulture)]),
                 };
+            }
+        }
+        else if (__instance.ZeroIsInfinity && Mathf.Abs(value) < 0.0001f)
+        {
+            result = "<b>∞</b>";
+        }
+        else
+        {
+            result = suffix switch
+            {
+                MiraNumberSuffixes.None => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo),
+                MiraNumberSuffixes.Multiplier => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "x",
+                MiraNumberSuffixes.Percent => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "%",
+                _ => TranslationController.Instance.GetString(
+                    StringNames.GameSecondsAbbrev,
+                    (Il2CppSystem.Object[])[value.ToString(__instance.FormatString, CultureInfo.InvariantCulture)]),
+            };
+        }
 
         __result = result;
         return false;

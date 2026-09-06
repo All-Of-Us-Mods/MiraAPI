@@ -70,8 +70,8 @@ public class BaseKeybind
     /// <param name="action">The <see cref="Action"/> to remove.</param>
     public void RemoveOnActivate(Action action)
     {
-#pragma warning disable CS8601 // Possible null reference assignment.
+#pragma warning disable CS8601 // Possible null reference assignment (Justification: Shut up.)
         Handler -= action;
-#pragma warning restore CS8601 // Possible null reference assignment.
+#pragma warning restore CS8601 // Possible null reference assignment
     }
 }

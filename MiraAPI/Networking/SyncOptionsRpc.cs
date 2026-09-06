@@ -7,6 +7,7 @@ namespace MiraAPI.Networking;
 
 // METHOD RPC DOESN'T WORK WITH THE ARRAYS AND STUFF SO THIS IS HOW WE WILL DO IT FOR NOW
 [RegisterCustomRpc((uint)MiraRpc.SyncGameOptions)]
+// ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated via Activator.CreateInstance.)
 internal sealed class SyncOptionsRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<MiraApiPlugin, NetData[]>(plugin, id)
 {
     public override RpcLocalHandling LocalHandling => RpcLocalHandling.None;

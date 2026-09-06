@@ -4,7 +4,7 @@ using MiraAPI.GameModes;
 namespace MiraAPI.Patches.GameModes;
 
 /// <summary>
-/// Allow Impostors to kill each other if can kill is enabled in gamemode or friendly fire is toggled on.
+/// Allow Impostors to kill each other if CanKill is enabled in gamemode or friendly fire is toggled on.
 /// </summary>
 [HarmonyPatch(typeof(ImpostorRole), "IsValidTarget")]
 internal static class ImpostorTargetPatch

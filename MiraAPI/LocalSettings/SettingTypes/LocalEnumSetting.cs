@@ -41,9 +41,8 @@ public class LocalEnumSetting(
         .Cast<Enum>()
         .Select(x => x.ToDisplayString())];
 
-    private SpriteRenderer _highlight { get; set; }
-
-    private TextMeshPro _btnText { get; set; }
+    private SpriteRenderer _highlight;
+    private TextMeshPro _btnText;
 
     /// <inheritdoc />
     public override GameObject CreateOption(ToggleButtonBehaviour toggle, SlideBar slider, Transform parent, ref float offset, ref int order, bool last)
@@ -60,7 +59,7 @@ public class LocalEnumSetting(
         var highlight = button.transform.FindChild("ButtonHighlight")?.GetComponent<SpriteRenderer>();
         if (highlight != null)
         {
-            _highlight = highlight;
+            this._highlight = highlight;
             highlight.color = Tab!.TabAppearance.EnumHoverColor;
             highlight.gameObject.SetActive(false);
         }
@@ -85,7 +84,7 @@ public class LocalEnumSetting(
 
         button.OnClick.AddListener((UnityAction)(() =>
         {
-            int value = GetValue();
+            var value = GetValue();
             value++;
             if (value >= Values.Length)
             {

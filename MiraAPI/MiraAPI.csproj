@@ -16,5 +16,11 @@
         <EmbeddedResource Include="Resources\**\*.*" />
     </ItemGroup>
 
+    <ItemGroup>
+      <EditorConfigFiles Remove="GameModes\.editorconfig" />
+      <EditorConfigFiles Remove="Patches\GameModes\.editorconfig" />
+      <EditorConfigFiles Remove="Patches\.editorconfig" />
+    </ItemGroup>
+
     <Import Project="../AmongUs.props" />
 </Project>

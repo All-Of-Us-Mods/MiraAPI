@@ -25,6 +25,7 @@ namespace MiraAPI;
 [BepInProcess("Among Us.exe")]
 [BepInDependency(ReactorPlugin.Id)]
 [ReactorModFlags(ModFlags.RequireOnAllClients)]
+// ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated by BepInEx.)
 public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
 {
     /// <summary>

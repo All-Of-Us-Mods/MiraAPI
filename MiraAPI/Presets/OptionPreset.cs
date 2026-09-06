@@ -72,11 +72,9 @@ public class OptionPreset(string name, MiraPluginInfo plugin, ConfigFile presetC
     {
         var selectedOpt = Plugin.InternalOptions.First(x => x.OptionBehaviour == baseOption);
         selectedOpt.LoadFromPreset(PresetConfig);
-#pragma warning disable S125 // Sections of code should not be commented out
         /*ModdedOptionsManager.SyncAllOptions();
 
         CustomRoleManager.SyncAllRoleSettings();*/
-#pragma warning restore S125 // Sections of code should not be commented out
     }
 
     /// <summary>

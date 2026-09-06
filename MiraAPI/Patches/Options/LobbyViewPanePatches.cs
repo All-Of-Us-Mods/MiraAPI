@@ -220,16 +220,16 @@ public static class LobbyViewPanePatches
     {
         if (SelectedModIdx == 0)
         {
-            float num = 0.95f;
-            float num2 = -6.53f;
-            CategoryHeaderMasked categoryHeaderMasked =
+            var num = 0.95f;
+            var num2 = -6.53f;
+            var categoryHeaderMasked =
                 Object.Instantiate(__instance.categoryHeaderOrigin, __instance.settingsContainer);
             categoryHeaderMasked.SetHeader(StringNames.RoleQuotaLabel, 61);
             categoryHeaderMasked.transform.localScale = Vector3.one;
             categoryHeaderMasked.transform.localPosition = new Vector3(-9.77f, 1.26f, -2f);
             __instance.settingsInfo.Add(categoryHeaderMasked.gameObject);
             var list = new List<RoleBehaviour>();
-            for (int i = 0; i < 2; i++)
+            for (var i = 0; i < 2; i++)
             {
                 var categoryHeaderRoleVariant =
                     Object.Instantiate(__instance.categoryHeaderRoleOrigin, __instance.settingsContainer);
@@ -245,16 +245,16 @@ public static class LobbyViewPanePatches
                     x.Role != RoleTypes.Impostor && ((i == 0 && x.TeamType is RoleTeamTypes.Crewmate) ||
                                                      (i == 1 && x.TeamType is RoleTeamTypes.Impostor)) &&
                     x.Role != RoleTypes.CrewmateGhost && x.Role != RoleTypes.ImpostorGhost).ToList();
-                for (int j = 0; j < roles.Count; j++)
+                for (var j = 0; j < roles.Count; j++)
                 {
                     var roleBehaviour = roles[j];
-                    int chancePerGame =
+                    var chancePerGame =
                         GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetChancePerGame(
                             roleBehaviour.Role);
-                    int numPerGame =
+                    var numPerGame =
                         GameOptionsManager.Instance.CurrentGameOptions.RoleOptions
                             .GetNumPerGame(roleBehaviour.Role);
-                    bool flag = numPerGame == 0;
+                    var flag = numPerGame == 0;
                     var viewSettingsInfoPanelRoleVariant =
                         Object.Instantiate(
                             __instance.infoPanelRoleOrigin,
@@ -295,8 +295,8 @@ public static class LobbyViewPanePatches
                 categoryHeaderMasked2.transform.localPosition = new Vector3(-9.77f, num, -2f);
                 __instance.settingsInfo.Add(categoryHeaderMasked2.gameObject);
                 num -= 2.1f;
-                float num3 = 0f;
-                for (int k = 0; k < list.Count; k++)
+                var num3 = 0f;
+                for (var k = 0; k < list.Count; k++)
                 {
                     float num4;
                     if (k % 2 == 0)
@@ -317,7 +317,7 @@ public static class LobbyViewPanePatches
                         Object.Instantiate(__instance.advancedRolePanelOrigin, __instance.settingsContainer);
                     advancedRoleViewPanel.transform.localScale = Vector3.one;
                     advancedRoleViewPanel.transform.localPosition = new Vector3(num4, num, -2f);
-                    float num5 = advancedRoleViewPanel.SetUp(list[k], 0.85f, 61);
+                    var num5 = advancedRoleViewPanel.SetUp(list[k], 0.85f, 61);
                     if (num5 > num3)
                     {
                         num3 = num5;
@@ -431,7 +431,7 @@ public static class LobbyViewPanePatches
         }
 
         var num = 0.95f;
-        var num2 = -6.53f;
+        const float num2 = -6.53f;
         var categoryHeaderMasked =
             Object.Instantiate(instance.categoryHeaderOrigin, instance.settingsContainer, true);
         categoryHeaderMasked.SetHeader(StringNames.RoleQuotaLabel, 61);

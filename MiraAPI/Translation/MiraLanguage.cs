@@ -79,6 +79,7 @@ public enum MiraLanguage
     /// <summary>
     /// TChinese.
     /// </summary>
+    // ReSharper disable once InconsistentNaming (Justification: Language name.)
     TChinese,
 
     /// <summary>

@@ -27,6 +27,7 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
     private AudioClip finalHideAlertSfx;
     private AudioClip finalHideCountdownSfx;
     [SuppressMessage("Style", "IDE0052:Remove unread private members", Justification = "Ignore for now; tentative code.")]
+    // ReSharper disable once NotAccessedField.Local (Justification: Read above.)
     private AudioClip taskFinishedSound;
 
     // private const int SECONDS_TO_BEEP = 10;
@@ -38,7 +39,7 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
     private float currentFinalHideTime = float.MaxValue;
 
     private float secondsSinceLastSetDirty;
-    private Coroutine beepCoroutine;
+    private Coroutine? beepCoroutine;
     private HideAndSeekTimerBar timerBar;
     private float taskDirtyTimer;
 
@@ -64,7 +65,7 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
     /// <returns>true if the player can use the admin ability.</returns>
     public bool SeekerAdminMapEnabled(PlayerControl player)
     {
-        int item = Helpers.GetAlivePlayers().Count(x => !x.Data.Role.IsImpostor);
+        var item = Helpers.GetAlivePlayers().Count(x => !x.Data.Role.IsImpostor);
         return !player.inVent && player.Data != null && player.Data.Role != null &&
                ((!player.inVent && player.Data.Role.IsImpostor && IsFinalCountdown &&
                  OptionGroupSingleton<HnsFinalHideOptions>.Instance.FinalHideSeekMap.Value) ||
@@ -74,7 +75,7 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
     }
 
     /// <summary>
-    /// A event that is called when a task is completed.
+    /// An event that is called when a task is completed.
     /// </summary>
     /// <param name="timeDeduction">The amount of time to deduct from the timer.</param>
     public void OnTaskComplete(float timeDeduction)
@@ -93,8 +94,8 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
     /// <returns>The match duration in seconds.</returns>
     public static float GetTotalRoundTime()
     {
-        float escapeTime = OptionGroupSingleton<HnsCrewmateOptions>.Instance.HidingTime.Value;
-        float finalCountdownTime = OptionGroupSingleton<HnsFinalHideOptions>.Instance.FinalHideTime.Value;
+        var escapeTime = OptionGroupSingleton<HnsCrewmateOptions>.Instance.HidingTime.Value;
+        var finalCountdownTime = OptionGroupSingleton<HnsFinalHideOptions>.Instance.FinalHideTime.Value;
         return escapeTime + finalCountdownTime;
     }
 
@@ -156,55 +157,54 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
         {
             return;
         }
-        if (HideCountdown > 0f && taskDirtyTimer > 0.25f)
+
+        if (!(HideCountdown > 0f) || !(taskDirtyTimer > 0.25f)) return;
+        var num = taskDirtyTimer;
+        taskDirtyTimer = 0f;
+        if (!PlayerControl.LocalPlayer)
         {
-            float num = taskDirtyTimer;
-            taskDirtyTimer = 0f;
-            if (!PlayerControl.LocalPlayer)
-            {
-                HudManager.Instance.TaskPanel.SetTaskText(string.Empty);
-                return;
-            }
-            NetworkedPlayerInfo data = PlayerControl.LocalPlayer.Data;
-            if (data == null)
-            {
-                return;
-            }
-            bool flag = data.Role != null && data.Role.IsImpostor;
-            HudManager.Instance.tasksString.Clear();
-            if (PlayerControl.LocalPlayer.myTasks == null || PlayerControl.LocalPlayer.myTasks.Count == 0)
-            {
-                HudManager.Instance.tasksString.Append("None");
-            }
-            else
-            {
-                for (int i = 0; i < PlayerControl.LocalPlayer.myTasks.Count; i++)
-                {
-                    PlayerTask playerTask = PlayerControl.LocalPlayer.myTasks[i];
-                    if (playerTask)
-                    {
-                        if (playerTask.TaskType == TaskTypes.FixComms && !flag)
-                        {
-                            HudManager.Instance.tasksString.Clear();
-                            playerTask.AppendTaskText(HudManager.Instance.tasksString);
-                            break;
-                        }
-                        playerTask.AppendTaskText(HudManager.Instance.tasksString);
-                    }
-                }
-                if (data.Role != null)
-                {
-                    data.Role.AppendTaskHint(HudManager.Instance.tasksString);
-                }
-                if (HideCountdown > 0f)
-                {
-                    HideCountdown -= num;
-                    HudManager.Instance.tasksString.Append("\n\n" + ((int)HideCountdown));
-                }
-                HudManager.Instance.tasksString.TrimEnd();
-            }
-            HudManager.Instance.TaskPanel.SetTaskText(HudManager.Instance.tasksString.ToString());
+            HudManager.Instance.TaskPanel.SetTaskText(string.Empty);
+            return;
         }
+        var data = PlayerControl.LocalPlayer.Data;
+        if (data == null)
+        {
+            return;
+        }
+        var flag = data.Role != null && data.Role.IsImpostor;
+        HudManager.Instance.tasksString.Clear();
+        if (PlayerControl.LocalPlayer.myTasks == null || PlayerControl.LocalPlayer.myTasks.Count == 0)
+        {
+            HudManager.Instance.tasksString.Append("None");
+        }
+        else
+        {
+            for (var i = 0; i < PlayerControl.LocalPlayer.myTasks.Count; i++)
+            {
+                var playerTask = PlayerControl.LocalPlayer.myTasks[i];
+                if (playerTask)
+                {
+                    if (playerTask.TaskType == TaskTypes.FixComms && !flag)
+                    {
+                        HudManager.Instance.tasksString.Clear();
+                        playerTask.AppendTaskText(HudManager.Instance.tasksString);
+                        break;
+                    }
+                    playerTask.AppendTaskText(HudManager.Instance.tasksString);
+                }
+            }
+            if (data.Role != null)
+            {
+                data.Role.AppendTaskHint(HudManager.Instance.tasksString);
+            }
+            if (HideCountdown > 0f)
+            {
+                HideCountdown -= num;
+                HudManager.Instance.tasksString.Append("\n\n" + ((int)HideCountdown));
+            }
+            HudManager.Instance.tasksString.TrimEnd();
+        }
+        HudManager.Instance.TaskPanel.SetTaskText(HudManager.Instance.tasksString.ToString());
     }
 
     private void FixedUpdate()
@@ -230,7 +230,7 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
 
     private void OnFinalCountdownTriggered()
     {
-        foreach (PlayerControl playerControl in PlayerControl.AllPlayerControls)
+        foreach (var playerControl in PlayerControl.AllPlayerControls)
         {
             if (!playerControl.Data.Role.IsImpostor && !playerControl.Data.IsDead)
             {
@@ -242,7 +242,7 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
 
         if (!PlayerControl.LocalPlayer.Data.IsDead && Minigame.Instance != null)
         {
-            Minigame instance = Minigame.Instance;
+            var instance = Minigame.Instance;
             if (instance != null)
             {
                 instance.ForceClose();
@@ -256,7 +256,7 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
 
     private void AdjustEscapeTimer(float timeDeduction, bool forceDirty)
     {
-        float num = currentHideTime;
+        var num = currentHideTime;
         currentHideTime -= timeDeduction;
         currentHideTime = Mathf.Max(currentHideTime, 0f);
         if (currentHideTime <= 10f && beepCoroutine == null)
@@ -281,8 +281,8 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
     {
         while (!IsFinalCountdown)
         {
-            float num = currentHideTime / 10f;
-            float pitch = 1.5f - num / 2f;
+            var num = currentHideTime / 10f;
+            var pitch = 1.5f - num / 2f;
             SoundManager.Instance.PlaySoundImmediate(finalHideCountdownSfx, false, 1f, pitch);
             yield return new WaitForSeconds(1f);
         }
@@ -290,8 +290,8 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
         yield return Effects.Wait(currentFinalHideTime - 10f);
         while (currentFinalHideTime > 0f)
         {
-            float num2 = currentFinalHideTime / 10f;
-            float pitch2 = 1.5f - num2 / 2f;
+            var num2 = currentFinalHideTime / 10f;
+            var pitch2 = 1.5f - num2 / 2f;
             SoundManager.Instance.PlaySoundImmediate(finalHideCountdownSfx, false, 1f, pitch2);
             yield return new WaitForSeconds(1f);
         }

@@ -137,18 +137,12 @@ public static class Helpers
     /// <returns><see langword="true"/> if the number falls in the range, <see langword="false"/> if not.</returns>
     public static bool CheckChance(int probability)
     {
-        switch (probability)
+        return probability switch
         {
-            case 0:
-                return false;
-            case 100:
-                return true;
-            default:
-                {
-                    var num = Random.RandomRangeInt(1, 101);
-                    return num <= probability;
-                }
-        }
+            0 => false,
+            100 => true,
+            _ => Random.RandomRangeInt(1, 100) <= probability,
+        };
     }
 
     /// <summary>
@@ -198,11 +192,9 @@ public static class Helpers
             }
 
             var sqrDistance = (obj.transform.position - position).sqrMagnitude;
-            if (sqrDistance < closestDistanceSqr)
-            {
-                closestDistanceSqr = sqrDistance;
-                closest = obj;
-            }
+            if (!(sqrDistance < closestDistanceSqr)) continue;
+            closestDistanceSqr = sqrDistance;
+            closest = obj;
         }
 
         return closest;
@@ -455,7 +447,7 @@ public static class Helpers
     /// Gets a <see cref="DeadBody"/> by its parent ID.
     /// </summary>
     /// <param name="id">The player ID.</param>
-    /// <returns>A <see cref="DeadBody"/> or <see langword="null"/> if its not found.</returns>
+    /// <returns>A <see cref="DeadBody"/> or <see langword="null"/> if it's not found.</returns>
     public static DeadBody? GetBodyById(byte id)
     {
         return Object.FindObjectsOfType<DeadBody>().FirstOrDefault(body => body.ParentId == id);

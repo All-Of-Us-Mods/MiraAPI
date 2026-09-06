@@ -47,15 +47,15 @@ public static class SelectRolesPatch
             .Where(c => c.Character != null && c.Character.Data != null && !c.Character.Data.Disconnected &&
                         !c.Character.Data.IsDead).OrderBy(c => c.Id).Select(c => c.Character.Data)];
 
-        foreach (NetworkedPlayerInfo networkedPlayerInfo in GameData.Instance.AllPlayers)
+        foreach (var networkedPlayerInfo in GameData.Instance.AllPlayers)
         {
             if (networkedPlayerInfo.Object != null && networkedPlayerInfo.Object.isDummy)
             {
                 list2.Add(networkedPlayerInfo);
             }
         }
-        IGameOptions currentGameOptions = GameOptionsManager.Instance.CurrentGameOptions;
-        int adjustedNumImpostors = GameOptionsManager.Instance.CurrentGameOptions.GetAdjustedNumImpostors(list2.Count);
+        var currentGameOptions = GameOptionsManager.Instance.CurrentGameOptions;
+        var adjustedNumImpostors = GameOptionsManager.Instance.CurrentGameOptions.GetAdjustedNumImpostors(list2.Count);
         AssignRolesForTeam(list2, currentGameOptions, RoleTeamTypes.Impostor, adjustedNumImpostors, RoleTypes.Impostor);
         AssignRolesForTeam(list2, currentGameOptions, RoleTeamTypes.Crewmate, int.MaxValue, RoleTypes.Crewmate);
         return false;
@@ -68,12 +68,13 @@ public static class SelectRolesPatch
         int teamMax,
         RoleTypes defaultRole)
     {
-        int num = 0;
+        var num = 0;
         var source = RoleManager.Instance.AllRoles.ToArray()
             .Where(role => role.TeamType == team && !RoleManager.IsGhostRole(role.Role) &&
-                           CustomRoleUtils.CanSpawnOnCurrentMode(role));
+                           CustomRoleUtils.CanSpawnOnCurrentMode(role))
+            .ToArray();
         var list = new List<RoleTypes>();
-        IRoleOptionsCollection roleOptions = opts.RoleOptions;
+        var roleOptions = opts.RoleOptions;
 
         // Assign guaranteed roles first, just like the vanilla selector. This is
         // important because the list of players is shared by both team passes.
@@ -119,10 +120,10 @@ public static class SelectRolesPatch
     {
         while (roleList.Count > 0 && players.Count > 0 && rolesAssigned < teamMax)
         {
-            int index = HashRandom.FastNext(roleList.Count);
-            RoleTypes roleType = roleList[index];
+            var index = HashRandom.FastNext(roleList.Count);
+            var roleType = roleList[index];
             roleList.RemoveAt(index);
-            int index2 = HashRandom.FastNext(players.Count);
+            var index2 = HashRandom.FastNext(players.Count);
             players[index2].Object.RpcSetRole(roleType);
             players.RemoveAt(index2);
             rolesAssigned++;

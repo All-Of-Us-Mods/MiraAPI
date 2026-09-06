@@ -10,10 +10,10 @@ namespace MiraAPI.LocalSettings.Attributes;
 /// <param name="description">The description of the setting. Defaults to entry description.</param>
 [AttributeUsage(AttributeTargets.Property)]
 public abstract class LocalSettingAttribute(
-#pragma warning disable CS9113 // Parameter is unread.
+#pragma warning disable CS9113 // Parameter is unread (Justification: No idea why they exist, but they probably do for a reason unknown to me.)
     string? name = null,
     string? description = null
-#pragma warning restore CS9113 // Parameter is unread.
+#pragma warning restore CS9113 // Parameter is unread
     ) : Attribute
 {
     /// <summary>

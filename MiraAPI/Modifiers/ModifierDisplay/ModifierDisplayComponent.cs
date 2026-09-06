@@ -99,15 +99,13 @@ public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
         IsOpen = false;
         _children.gameObject.SetActive(false);
 
-        if (LocalSettingsTabSingleton<MiraApiSettings>.Instance.ModifiersHudLeftSide.Value)
-        {
-            var aspect = GetComponent<AspectPosition>();
-            _toggleButton.transform.localPosition = new Vector3(-1f, 2.7f, 0f);
-            _children.transform.localPosition = new Vector3(-0.2f, -0.05f, 0f);
-            aspect.Alignment = AspectPosition.EdgeAlignments.LeftTop;
-            aspect.DistanceFromEdge = new Vector3(1.8f, 2.55f, -20f);
-            aspect.AdjustPosition();
-        }
+        if (!LocalSettingsTabSingleton<MiraApiSettings>.Instance.ModifiersHudLeftSide.Value) return;
+        var aspect = GetComponent<AspectPosition>();
+        _toggleButton.transform.localPosition = new Vector3(-1f, 2.7f, 0f);
+        _children.transform.localPosition = new Vector3(-0.2f, -0.05f, 0f);
+        aspect.Alignment = AspectPosition.EdgeAlignments.LeftTop;
+        aspect.DistanceFromEdge = new Vector3(1.8f, 2.55f, -20f);
+        aspect.AdjustPosition();
     }
 
     /// <summary>

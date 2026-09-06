@@ -15,7 +15,7 @@ internal static class UiResetEvents
         MiraEventManager.RegisterEventHandler<UiButtonPostResetEvent>(PlaceModifierUi, -700);
     }
 
-    public static void ResetButtonParents(UiButtonResetEvent _)
+    private static void ResetButtonParents(UiButtonResetEvent _)
     {
         var wikiButton = MiraHudHelper.VanillaMatchInfoButton;
         var subButton = MiraHudHelper.SubmergedFloorButton;
@@ -34,7 +34,7 @@ internal static class UiResetEvents
         }
     }
 
-    public static void PlaceWikiButton(UiButtonPostResetEvent @event)
+    private static void PlaceWikiButton(UiButtonPostResetEvent @event)
     {
         var wikiButton = MiraHudHelper.VanillaMatchInfoButton;
         if (!wikiButton)
@@ -47,7 +47,7 @@ internal static class UiResetEvents
         wikiButton.transform.SetParent(opts.WikiOnBottomRow.Value ? secondRow.transform : firstRow.transform);
     }
 
-    public static void PlaceSubmergedButton(UiButtonPostResetEvent @event)
+    private static void PlaceSubmergedButton(UiButtonPostResetEvent @event)
     {
         var subButton = MiraHudHelper.SubmergedFloorButton;
         if (!subButton)
@@ -58,7 +58,7 @@ internal static class UiResetEvents
         subButton.transform.SetParent(secondRow.transform);
     }
 
-    public static void PlaceModifierUi(UiButtonPostResetEvent @event)
+    private static void PlaceModifierUi(UiButtonPostResetEvent @event)
     {
         var modDisplay = MiraHudHelper.ModifierDisplayOnRight ? MiraHudHelper.ModifierDisplayObject : null!;
         if (!modDisplay)

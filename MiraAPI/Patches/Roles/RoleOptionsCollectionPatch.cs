@@ -1,6 +1,5 @@
 ﻿using AmongUs.GameOptions;
 using HarmonyLib;
-using Il2CppSystem.Collections.Generic;
 using MiraAPI.Roles;
 
 namespace MiraAPI.Patches.Roles;
@@ -18,7 +17,7 @@ public static class RoleOptionsCollectionPatch
     [HarmonyPatch(nameof(RoleOptionsCollectionV11.AnyRolesEnabled))]
     public static bool AnyRolesEnabledPrefix(RoleOptionsCollectionV11 __instance)
     {
-        foreach (KeyValuePair<RoleTypes, RoleDataV11> keyValuePair in __instance.roles)
+        foreach (var keyValuePair in __instance.roles)
         {
             if (__instance.GetNumPerGame(keyValuePair.Key) > 0)
             {

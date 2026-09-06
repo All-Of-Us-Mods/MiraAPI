@@ -25,8 +25,8 @@ internal static class HowToPlayPatch
             {
                 if (!role.IsSimpleRole && role.Role != RoleTypes.CrewmateGhost && role.Role != RoleTypes.ImpostorGhost)
                 {
-                    HowToPlayRoleButton component = Object.Instantiate(__instance.roleButtonPrefab, __instance.roleButtonsParent).GetComponent<HowToPlayRoleButton>();
-                    Sprite roleIcon = __instance.rolesScenes.ToArray().First(r => r.role == role.Role).roleIcon;
+                    var component = Object.Instantiate(__instance.roleButtonPrefab, __instance.roleButtonsParent).GetComponent<HowToPlayRoleButton>();
+                    var roleIcon = __instance.rolesScenes.ToArray().First(r => r.role == role.Role).roleIcon;
                     component.SetRoleInfo(role, roleIcon);
                     component.SetButtonAction((Il2CppSystem.Action)(() =>
                     {
@@ -35,7 +35,7 @@ internal static class HowToPlayPatch
                     __instance.controllerSelectables.Add(component.GetComponent<PassiveButton>());
                 }
             }
-            foreach (UiElement uiElement in __instance.controllerSelectables)
+            foreach (var uiElement in __instance.controllerSelectables)
             {
                 uiElement.ReceiveMouseOut();
             }

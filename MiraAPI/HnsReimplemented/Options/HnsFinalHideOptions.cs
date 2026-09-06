@@ -8,6 +8,7 @@ namespace MiraAPI.HnsReimplemented.Options;
 /// <summary>
 /// Gets or sets the Final Hide options for Hide and Seek.
 /// </summary>
+// ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated via Activator.CreateInstance.)
 public class HnsFinalHideOptions : AbstractOptionGroup<HideAndSeekMode>
 {
     /// <inheritdoc />

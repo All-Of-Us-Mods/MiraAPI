@@ -144,27 +144,25 @@ public sealed class HnsMusicHandler(nint cppPtr) : MonoBehaviour(cppPtr)
     /// </summary>
     public void StartMusicWithIntro()
     {
-        if (PlayerControl.LocalPlayer.Data.Role.IsImpostor)
+        if (!PlayerControl.LocalPlayer.Data.Role.IsImpostor) return;
+        var clip = OptionGroupSingleton<HnsCrewmateOptions>.Instance.HidingTime.Value <= 180f
+            ? musicCollection.ImpostorShortMusic
+            : musicCollection.ImpostorLongMusic;
+        if (AprilFoolsMode.ShouldHorseAround())
         {
-            AudioClip clip = OptionGroupSingleton<HnsCrewmateOptions>.Instance.HidingTime.Value <= 180f
-                ? musicCollection.ImpostorShortMusic
-                : musicCollection.ImpostorLongMusic;
-            if (AprilFoolsMode.ShouldHorseAround())
-            {
-                clip = musicCollection.ImpostorRanchMusic;
-            }
-
-            SoundManager.Instance.PlaySound(clip, true, 1f, SoundManager.Instance.MusicChannel);
+            clip = musicCollection.ImpostorRanchMusic;
         }
+
+        SoundManager.Instance.PlaySound(clip, true, 1f, SoundManager.Instance.MusicChannel);
     }
 
     /// <summary>
     /// Sets the current task state to alter music behaviour.
     /// </summary>
-    /// <param name="isDoingTask">The new value of the state.</param>
-    public void SetTaskState(bool isDoingTask)
+    /// <param name="taskState">The new value of the state.</param>
+    public void SetTaskState(bool taskState)
     {
-        this.isDoingTask = isDoingTask;
+        isDoingTask = taskState;
     }
 
     private void FixedUpdate()

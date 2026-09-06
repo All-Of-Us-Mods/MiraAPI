@@ -13,6 +13,7 @@ namespace MiraAPI.Networking.Modifiers;
 /// <param name="plugin">Mira plugin.</param>
 /// <param name="id">RPC ID.</param>
 [RegisterCustomRpc((uint)MiraRpc.AddModifier)]
+// ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated by Reactor.)
 public class AddModifierRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<MiraApiPlugin, ModifierData>(plugin, id)
 {
     /// <inheritdoc />

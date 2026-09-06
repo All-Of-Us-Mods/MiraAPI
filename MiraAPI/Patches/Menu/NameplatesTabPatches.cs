@@ -88,7 +88,7 @@ public static class NameplatesTabPatches
 
         var groupNameText = __instance.GetComponentInChildren<TextMeshPro>(false);
 
-        int hatIndex = 0;
+        var hatIndex = 0;
 
         var (groupName, nameplates) = SortedNameplates.ToArray()[page];
         var text = Object.Instantiate(groupNameText, __instance.scroller.Inner);
@@ -101,15 +101,16 @@ public static class NameplatesTabPatches
         text.fontSize = 5f;
         text.fontSizeMax = 5f;
         text.fontSizeMin = 0f;
-        float xLerp = __instance.XRange.Lerp(0.5f);
-        float yLerp = __instance.YStart - hatIndex / __instance.NumPerRow * __instance.YOffset;
+        var xLerp = __instance.XRange.Lerp(0.5f);
+        var yLerp = __instance.YStart - __instance.YOffset;
         text.transform.localPosition = new Vector3(xLerp, yLerp, -1f);
 
         hatIndex += 2;
         foreach (var visor in nameplates.OrderBy(HatManager.Instance.allNamePlates.IndexOf))
         {
-            float hatXPosition = __instance.XRange.Lerp(hatIndex % __instance.NumPerRow / (__instance.NumPerRow - 1f));
-            float hatYPosition = __instance.YStart - hatIndex / __instance.NumPerRow * __instance.YOffset;
+            var hatXPosition = __instance.XRange.Lerp(hatIndex % __instance.NumPerRow / (__instance.NumPerRow - 1f));
+            // ReSharper disable once PossibleLossOfFraction (Justification: Intended.)
+            var hatYPosition = __instance.YStart - hatIndex / __instance.NumPerRow * __instance.YOffset;
             GenerateColorChip(__instance, new Vector2(hatXPosition, hatYPosition), visor);
             hatIndex += 1;
         }
@@ -139,14 +140,16 @@ public static class NameplatesTabPatches
         colorChip.Button.ClickMask = __instance.scroller.Hitbox;
         colorChip.ProductId = namePlate.ProdId;
 
-        var x = (NamePlateViewData viewData) =>
-        {
-            colorChip.transform.GetChild(1).GetComponent<SpriteRenderer>().sprite = viewData?.Image;
-            // (colorChip as NameplateChip).image.sprite = viewData?.Image;
-        };
-        __instance.StartCoroutine(AddressableAssetExtensions.CoLoadAssetAsync<NamePlateViewData>(__instance, namePlate.GetAssetReference(), x));
+        __instance.StartCoroutine(__instance.CoLoadAssetAsync<NamePlateViewData>(namePlate.GetAssetReference(), (Action<NamePlateViewData>?)LoadNameplate));
         colorChip.transform.localPosition = new Vector3(position.x, position.y, -1f);
         colorChip.Tag = namePlate;
         __instance.ColorChips.Add(colorChip);
+        return;
+
+        void LoadNameplate(NamePlateViewData viewData)
+        {
+            colorChip.transform.GetChild(1).GetComponent<SpriteRenderer>().sprite = viewData.Image;
+            // (colorChip as NameplateChip).image.sprite = viewData?.Image;
+        }
     }
 }

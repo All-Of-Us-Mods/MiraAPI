@@ -44,8 +44,8 @@ internal static class MeetingHudPatches
         if (PlayerControl.LocalPlayer.Data.IsDead || __instance.AmDead || !__instance.Parent)
             return false;
 
-        JudgeRole? judgeRole = PlayerControl.LocalPlayer.Data.Role.TryCast<JudgeRole>();
-        bool flag = judgeRole && PlayerControl.LocalPlayer.PlayerId != __instance.PlayerId;
+        var judgeRole = PlayerControl.LocalPlayer.Data.Role.TryCast<JudgeRole>();
+        var flag = judgeRole && PlayerControl.LocalPlayer.PlayerId != __instance.PlayerId;
         __instance.JudgeOverruleButton?.gameObject.SetActive(flag);
 
         if (__instance.VoteComplete || !__instance.Parent.Select((byte)__instance.PlayerId))
@@ -53,7 +53,7 @@ internal static class MeetingHudPatches
 
         __instance.Buttons.SetActive(true);
 
-        float startPos = __instance.AnimateButtonsFromLeft ? 0.2f : 1.95f;
+        var startPos = __instance.AnimateButtonsFromLeft ? 0.2f : 1.95f;
 
         Il2CppSystem.Collections.Generic.List<UiElement> selectableElements = new();
         foreach (var btn in __instance.Buttons.GetComponentsInChildren<PassiveButton>())
@@ -61,11 +61,11 @@ internal static class MeetingHudPatches
             selectableElements.Add(btn);
         }
 
-        for (int i = 0; i < selectableElements.Count; i++)
+        for (var i = 0; i < selectableElements.Count; i++)
         {
             var button = selectableElements[i];
-            float endPos = 1.3f - 0.65f * i;
-            float duration = 0.25f + 0.1f * i;
+            var endPos = 1.3f - 0.65f * i;
+            var duration = 0.25f + 0.1f * i;
             __instance.StartCoroutine(Effects.All(Effects.Lerp(duration, (Action<float>)(t =>
                 button.transform.localPosition = Vector2.Lerp(Vector2.right * startPos, Vector2.right * endPos, Effects.ExpOut(t))))));
         }

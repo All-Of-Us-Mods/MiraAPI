@@ -82,7 +82,7 @@ public static class TaskAdderPatches
         // folders.Add("Neutrals", neutralFolder);
         Folders.Add(ModifiersName, modifiersFolder);
 
-        int folderIdx = 2;
+        var folderIdx = 2;
         foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins)
         {
             var pluginFolders = new Dictionary<string, TaskFolder>();
@@ -131,11 +131,11 @@ public static class TaskAdderPatches
                 return false;
             }
 
-            TaskFolder crewFolder = folders["Crewmates"] =
+            var crewFolder = folders["Crewmates"] =
                 Object.Instantiate(__instance.RootFolderPrefab, __instance.transform);
             crewFolder.gameObject.SetActive(false);
             crewFolder.SetFolderColor(TaskFolder.FolderColor.Blue);
-            TaskFolder impFolder = folders["Impostors"] =
+            var impFolder = folders["Impostors"] =
                 Object.Instantiate(__instance.RootFolderPrefab, __instance.transform);
             impFolder.gameObject.SetActive(false);
             impFolder.SetFolderColor(TaskFolder.FolderColor.Red);
@@ -165,14 +165,15 @@ public static class TaskAdderPatches
             return false;
         }
 
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract (Justification: Nullable annotations of reference types do not survive compilation.)
         if (taskList == null)
         {
             return false;
         }
 
-        foreach (NormalPlayerTask normalPlayerTask in taskList)
+        foreach (var normalPlayerTask in taskList)
         {
-            SystemTypes systemTypes = normalPlayerTask.StartAt;
+            var systemTypes = normalPlayerTask.StartAt;
             if (normalPlayerTask is DivertPowerTask task)
             {
                 systemTypes = task.TargetSystem;
@@ -252,7 +253,7 @@ public static class TaskAdderPatches
             .Any(x => x.FolderName == child.FolderName);
     }
 
-    // yes it might be crazy patching the entire method, but i tried so many other methods and only this works :cry:
+    // yes it might be crazy patching the entire method, but I tried so many other methods and only this works :cry:
     // true -chip
     [HarmonyPrefix]
     [HarmonyPatch(nameof(TaskAdderGame.ShowFolder))]
@@ -273,12 +274,12 @@ public static class TaskAdderPatches
         __instance.ActiveItems.ToArray().Do(x => x.gameObject.DeepDestroy(false));
         __instance.ActiveItems.Clear();
 
-        float num = 0f;
-        float num2 = 0f;
-        float num3 = 0f;
+        var num = 0f;
+        var num2 = 0f;
+        var num3 = 0f;
         foreach (var t in taskFolder.SubFolders)
         {
-            TaskFolder taskFolder2 = Object.Instantiate(t, __instance.TaskParent);
+            var taskFolder2 = Object.Instantiate(t, __instance.TaskParent);
             taskFolder2.gameObject.SetActive(true);
             taskFolder2.Parent = __instance;
             taskFolder2.transform.localPosition = new Vector3(num, num2, 0f);
@@ -305,7 +306,7 @@ public static class TaskAdderPatches
             .ToArray();
         foreach (var task in list)
         {
-            TaskAddButton taskAddButton = Object.Instantiate(__instance.TaskPrefab);
+            var taskAddButton = Object.Instantiate(__instance.TaskPrefab);
             taskAddButton.MyTask = task;
             switch (task.TaskType)
             {
@@ -342,7 +343,7 @@ public static class TaskAdderPatches
             .ToArray();
         foreach (var role in roleChildren)
         {
-            TaskAddButton roleAddButton = Object.Instantiate(__instance.RoleButton);
+            var roleAddButton = Object.Instantiate(__instance.RoleButton);
             roleAddButton.SafePositionWorld = __instance.SafePositionWorld;
             roleAddButton.Text.text = role.GetRoleName();
             roleAddButton.Role = role;

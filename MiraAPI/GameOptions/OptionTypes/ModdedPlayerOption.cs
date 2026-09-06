@@ -10,7 +10,7 @@ using Object = UnityEngine.Object;
 namespace MiraAPI.GameOptions.OptionTypes;
 
 /// <summary>
-/// An option for selecting an ingame player. It returns an index of the values list, NOT A PLAYER ID. To get a player out of this, index the <see cref="Values"/> list.
+/// An option for selecting an in-game player. It returns an index of the values list, NOT A PLAYER ID. To get a player out of this, index the <see cref="Values"/> list.
 /// </summary>
 public class ModdedPlayerOption : ModdedOption<int>
 {

@@ -31,8 +31,8 @@ internal sealed class MiraHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
     public static SpriteRenderer SubmergedFloorButtonRenderer;
     public static SpriteRenderer SubmergedFloorButtonRendererHover;
 
-    public static readonly Vector3 BelowOptionPos = new(0.435f, 1.25f, 0f);
-    public static readonly Vector3 FullTopPos = new(0.435f, 0.475f, 0f);
+    private static readonly Vector3 BelowOptionPos = new(0.435f, 1.25f, 0f);
+    private static readonly Vector3 FullTopPos = new(0.435f, 0.475f, 0f);
 
     private void Awake()
     {
@@ -71,7 +71,7 @@ internal sealed class MiraHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
         UpdateSubmergedButtons(instance);
     }
 
-    public static void CreateUiRow(HudManager instance)
+    private static void CreateUiRow(HudManager instance)
     {
         if (!UiTopRight)
         {
@@ -146,7 +146,7 @@ internal sealed class MiraHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
         }
     }
 
-    public static void UpdateSubmergedButtons(HudManager instance)
+    private static void UpdateSubmergedButtons(HudManager instance)
     {
         if (!ModCompatibility.IsSubmerged() || SubmergedFloorButton || !ExtraUiTopRight || SubmergedFloorButton || !ExtraUiTopRight)
             return;
@@ -166,7 +166,7 @@ internal sealed class MiraHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
         MiraApiSettings.SetUpButtonPositions();
     }
 
-    public static void AdjustModifierTab()
+    private static void AdjustModifierTab()
     {
         if (ModifierDisplayObject || !UiTopRight || !ExtraUiTopRight || !ModifierDisplayComponent.Instance)
             return;
@@ -185,7 +185,7 @@ internal sealed class MiraHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
         MiraApiSettings.SetUpButtonPositions();
     }
 
-    public static void CreateNewUiRow(HudManager instance)
+    private static void CreateNewUiRow(HudManager instance)
     {
         if (ExtraUiTopRight || !UiTopRight)
             return;

@@ -44,7 +44,7 @@ public static class ModCompatibility
         InitSubmerged();
     }
 
-    internal static void InitSubmerged()
+    private static void InitSubmerged()
     {
         if (!IL2CPPChainloader.Instance.Plugins.TryGetValue(SubmergedId, out var plugin))
         {

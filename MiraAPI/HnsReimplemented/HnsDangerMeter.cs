@@ -45,7 +45,7 @@ public sealed class HnsDangerMeter(nint cppPtr) : MonoBehaviour(cppPtr)
 
     private void FixedUpdate()
     {
-        PlayerControl localPlayer = PlayerControl.LocalPlayer;
+        var localPlayer = PlayerControl.LocalPlayer;
         if (impostors == null || localPlayer == null)
         {
             return;
@@ -56,12 +56,12 @@ public sealed class HnsDangerMeter(nint cppPtr) : MonoBehaviour(cppPtr)
             return;
         }
 
-        float num = float.MaxValue;
-        foreach (PlayerControl playerControl in impostors)
+        var num = float.MaxValue;
+        foreach (var playerControl in impostors)
         {
             if (playerControl == null)
                 continue;
-            float sqrMagnitude = (playerControl.transform.position - localPlayer.transform.position).sqrMagnitude;
+            var sqrMagnitude = (playerControl.transform.position - localPlayer.transform.position).sqrMagnitude;
             if (sqrMagnitude < scaryMusicDistance && num > sqrMagnitude)
             {
                 num = sqrMagnitude;
@@ -102,7 +102,7 @@ public sealed class HnsDangerMeter(nint cppPtr) : MonoBehaviour(cppPtr)
 
     private void UpdateDangerMusic()
     {
-        PlayerControl localPlayer = PlayerControl.LocalPlayer;
+        var localPlayer = PlayerControl.LocalPlayer;
         if (localPlayer != null && localPlayer.Data != null && localPlayer.Data.IsDead)
         {
             HnsMusicHandler.Instance.SetTaskState(false);
@@ -141,8 +141,8 @@ public sealed class HnsDangerMeter(nint cppPtr) : MonoBehaviour(cppPtr)
         scaryMusicDistance = 55f * baseSpeed;
         veryScaryMusicDistance = 15f * baseSpeed;
         if (scaryMusicDistance >= veryScaryMusicDistance) return;
-        float num = veryScaryMusicDistance;
-        float num2 = scaryMusicDistance;
+        var num = veryScaryMusicDistance;
+        var num2 = scaryMusicDistance;
         scaryMusicDistance = num;
         veryScaryMusicDistance = num2;
     }

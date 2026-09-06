@@ -198,7 +198,7 @@ public static class AddressablesLoader
     private static T[] PrepareArray<T>(List<T> data, List<T> behaviours) where T : CosmeticData
     {
         var count = data.Count;
-        for (int i = 0; i < behaviours.Count; i++)
+        for (var i = 0; i < behaviours.Count; i++)
         {
             behaviours[i].displayOrder = count + i;
             data.Add(behaviours[i]);

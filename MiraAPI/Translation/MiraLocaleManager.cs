@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -17,7 +18,7 @@ public static class MiraLocaleManager
 {
     private const string LangDirectory = "mira_languages";
 
-    // Language, Xml Name, then Value
+    // Language, XML Name, then Value
 
     /// <summary>
     /// Gets the dictionary containing all loaded localization strings, organized by language and XML name.
@@ -153,15 +154,22 @@ public static class MiraLocaleManager
     /// <param name="key">The string id to find.</param>
     /// <param name="fallback">Fallback string to use if no translation is found.</param>
     /// <returns>A <see cref="string"/> based on the key provided.</returns>
+    [SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "Warning cascades into forcing the entire tree to be ternary operators.")]
     public static string Get(MiraLanguage language, string key, string fallback = "")
     {
-        return Locale.TryGetValue(language, out var translations) &&
-            translations.TryGetValue(key, out var translation)
-            ? translation
-            : Locale.TryGetValue(MiraLanguage.English, out var translationsEng) &&
-                translationsEng.TryGetValue(key, out var translationEng)
-                ? translationEng
-                : fallback;
+        if (Locale.TryGetValue(language, out var translations) &&
+            translations.TryGetValue(key, out var translation))
+        {
+            return translation;
+        }
+
+        if (Locale.TryGetValue(MiraLanguage.English, out var translationsEng) &&
+            translationsEng.TryGetValue(key, out var translationEng))
+        {
+            return translationEng;
+        }
+
+        return fallback;
     }
 
     /// <summary>
@@ -325,7 +333,7 @@ public static class MiraLocaleManager
             }
 
             using StreamReader reader = new(resourceStream);
-            string xmlContent = reader.ReadToEnd();
+            var xmlContent = reader.ReadToEnd();
             try
             {
                 Locale.TryAdd(locale.Key, []);
@@ -351,7 +359,7 @@ public static class MiraLocaleManager
         try
         {
             xmlDoc.LoadXml(xmlContent);
-            XmlNodeList? stringNodes = xmlDoc.SelectNodes("/resources/string");
+            var stringNodes = xmlDoc.SelectNodes("/resources/string");
 
             if (stringNodes == null)
             {
@@ -367,19 +375,19 @@ public static class MiraLocaleManager
                     continue;
                 }
 
-                string name = node.Attributes["name"]!.Value;
-                string value = node.InnerText;
+                var name = node.Attributes["name"]!.Value;
+                var value = node.InnerText;
 
                 if (string.IsNullOrEmpty(name)) continue;
 
                 if (value.Contains('['))
                 {
-                    value = value.Replace("[", "<");
+                    value = value.Replace('[', '<');
                 }
 
                 if (value.Contains(']'))
                 {
-                    value = value.Replace("]", ">");
+                    value = value.Replace(']', '>');
                 }
 
                 value = value.Replace("<nl>", "\n").Replace("<and>", "&");

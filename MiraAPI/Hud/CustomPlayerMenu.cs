@@ -77,7 +77,7 @@ public class CustomPlayerMenu(IntPtr il2CppPtr) : Minigame(il2CppPtr)
     /// <inheritdoc />
     public override void Begin(PlayerTask task)
     {
-        throw new NotImplementedException("Use the other Begin method.");
+        throw new NotSupportedException("Use the other Begin method.");
     }
 
     /// <summary>

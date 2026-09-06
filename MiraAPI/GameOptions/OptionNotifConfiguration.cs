@@ -13,7 +13,7 @@ public record struct OptionNotifConfiguration
 {
     [Obsolete("Default constructor is not supported. Please use the constructor that takes an AbstractOptionGroup parameter.")]
     [SuppressMessage("Info Code Smell", "S1133:Deprecated code should be removed", Justification = "Will not be removed, as this throws instead.")]
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (Justification: Read above.)
     public OptionNotifConfiguration()
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
     {

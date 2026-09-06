@@ -56,6 +56,7 @@ public static class GameModeOption
         if (!Values.ContainsKey(mode.ID))
             Values.Add(mode.ID, MiraLocaleManager.GetOrCreateLocaleString(mode.Name));
     }
+
     /*[HarmonyPatch(typeof(GameOptionsMenu), nameof(GameOptionsMenu.CreateSettings))]
     [HarmonyPostfix]
     private static void CreateSettingsPatch(GameOptionsMenu __instance)
@@ -126,7 +127,7 @@ public static class GameModeOption
                 }
             }
         }
-        // could make Values a dict of AbstractGameMode too
+        // TODO: could make Values a dict of AbstractGameMode too
     }
 
     [HarmonyPatch(typeof(GameOptionsMenu), nameof(GameOptionsMenu.ValueChanged))]

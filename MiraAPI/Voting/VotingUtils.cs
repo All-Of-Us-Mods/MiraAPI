@@ -114,7 +114,7 @@ public static class VotingUtils
     /// Networks the casting of a vote. We replace the vanilla solution with a custom version that works for Judge specifically.
     /// </summary>
     /// <param name="source">The <see cref="PlayerControl"/> who sent this RPC.</param>
-    /// <param name="srcPlayerId">The id of the player who casted the vote.</param>
+    /// <param name="srcPlayerId">The id of the player who cast the vote.</param>
     /// <param name="suspectPlayerId">The voted player's id.</param>
     /// <param name="overruleNonce">Data that is checked by the Judge role to determine which Judge takes priority.</param>
     [MethodRpc((uint)MiraRpc.QueueOverruleVotes)]
@@ -186,7 +186,7 @@ public static class VotingUtils
     /// Networks the casting of a vote. We replace the vanilla solution with a custom version that works for the use case.
     /// </summary>
     /// <param name="source">The <see cref="PlayerControl"/> who sent this RPC.</param>
-    /// <param name="srcPlayerId">The id of the player who casted the vote.</param>
+    /// <param name="srcPlayerId">The id of the player who cast the vote.</param>
     /// <param name="suspectPlayerId">The voted player's id.</param>
     [MethodRpc((uint)MiraRpc.CastVote)]
     [SuppressMessage(

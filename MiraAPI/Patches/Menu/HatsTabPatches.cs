@@ -107,7 +107,7 @@ public static class HatsTabPatches
         var groupNameText = __instance.GetComponentInChildren<TextMeshPro>(false);
         var group = sortedHats.Where(x => x.Key == StoreNames[page]);
 
-        foreach ((string groupName, List<HatData> hats) in group)
+        foreach (var (groupName, hats) in group)
         {
             var text = Object.Instantiate(groupNameText, __instance.scroller.Inner);
             text.enabled = true;
@@ -120,12 +120,14 @@ public static class HatsTabPatches
             text.fontSizeMax = 5f;
             text.fontSizeMin = 0f;
             var xLerp = __instance.XRange.Lerp(0.5f);
+            // ReSharper disable once PossibleLossOfFraction (Justification: Intended.)
             var yLerp = __instance.YStart - hatIndex / __instance.NumPerRow * __instance.YOffset;
             text.transform.localPosition = new Vector3(xLerp, yLerp, -1f);
 
             hatIndex += 5;
             loadRoutine = Coroutines.Start(CoGenerateChips(__instance, hats));
         }
+        // ReSharper disable once PossibleLossOfFraction (Justification: Intended.)
         __instance.scroller.ContentYBounds.max = -(__instance.YStart - (hatIndex + 1) / __instance.NumPerRow * __instance.YOffset) - 3f;
         __instance.currentHatIsEquipped = true;
     }
@@ -141,6 +143,7 @@ public static class HatsTabPatches
             foreach (var hat in batch.OrderBy(HatManager.Instance.allHats.IndexOf))
             {
                 var hatXPosition = __instance.XRange.Lerp(hatIndex % __instance.NumPerRow / (__instance.NumPerRow - 1f));
+                // ReSharper disable once PossibleLossOfFraction (Justification: Intended.)
                 var hatYPosition = __instance.YStart - hatIndex / __instance.NumPerRow * __instance.YOffset;
                 GenerateColorChip(__instance, new Vector2(hatXPosition, hatYPosition), hat);
                 hatIndex += 1;

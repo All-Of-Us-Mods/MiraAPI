@@ -17,7 +17,7 @@ public static class ModifierUtils
     /// <returns>An <see cref="IEnumerable{T}"/> of <typeparamref name="T"/>s.</returns>
     public static IEnumerable<T> GetActiveModifiers<T>(Func<T, bool>? predicate = null) where T : BaseModifier
     {
-        return PlayerControl.AllPlayerControls.ToArray().SelectMany(x => x.GetModifiers<T>(predicate)).OfType<T>();
+        return PlayerControl.AllPlayerControls.ToArray().SelectMany(x => x.GetModifiers(predicate));
     }
 
     /// <summary>
@@ -28,6 +28,6 @@ public static class ModifierUtils
     /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="PlayerControl"/>s with that <typeparamref name="T"/>.</returns>
     public static IEnumerable<PlayerControl> GetPlayersWithModifier<T>(Func<T, bool>? predicate = null) where T : BaseModifier
     {
-        return PlayerControl.AllPlayerControls.ToArray().Where(x => x.HasModifier<T>(predicate));
+        return PlayerControl.AllPlayerControls.ToArray().Where(x => x.HasModifier(predicate));
     }
 }

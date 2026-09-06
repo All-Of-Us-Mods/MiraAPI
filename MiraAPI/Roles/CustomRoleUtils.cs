@@ -27,7 +27,7 @@ public static class CustomRoleUtils
             ? custom.CanSpawnOnCurrentMode() && custom.Configuration.AssociatedGameMode.IsInstanceOfType(CustomGameModeManager.ActiveMode)
             : (CustomGameModeManager.ActiveMode is HideAndSeekMode
                 ? role.Role is RoleTypes.Engineer or RoleTypes.Impostor
-                : !Helpers.IsRoleBlacklisted(role));
+                : !role.IsRoleBlacklisted());
     }
 
     /// <summary>

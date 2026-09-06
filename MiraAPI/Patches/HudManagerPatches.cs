@@ -87,34 +87,30 @@ public static class HudManagerPatches
             button.gameObject.SetActive(!button.isActiveAndEnabled);
         }
 
-        if (_storedButtonsParent)
+        if (!_storedButtonsParent) return;
+        foreach (var arrange in _storedButtonsParent.GetComponentsInChildren<GridArrange>(true))
         {
-            foreach (var arrange in _storedButtonsParent.GetComponentsInChildren<GridArrange>(true))
+            if (!arrange.gameObject || !arrange.transform)
             {
-                if (!arrange.gameObject || !arrange.transform)
-                {
-                    continue;
-                }
+                continue;
+            }
 
-                if (arrange.gameObject.name.Contains("TopRight"))
-                {
-                    continue;
-                }
+            if (arrange.gameObject.name.Contains("TopRight"))
+            {
+                continue;
+            }
 
-                arrange.gameObject.SetActive(!arrange.isActiveAndEnabled);
-                arrange.CellSize = new Vector2(scaleFactor, scaleFactor);
-                arrange.gameObject.SetActive(!arrange.isActiveAndEnabled);
-                if (arrange.isActiveAndEnabled && arrange.gameObject.transform.childCount != 0)
-                {
-                    try
-                    {
-                        arrange.ArrangeChilds();
-                    }
-                    catch
-                    {
-                        // Error($"Error arranging child objects in GridArrange: {e}");
-                    }
-                }
+            arrange.gameObject.SetActive(!arrange.isActiveAndEnabled);
+            arrange.CellSize = new Vector2(scaleFactor, scaleFactor);
+            arrange.gameObject.SetActive(!arrange.isActiveAndEnabled);
+            if (!arrange.isActiveAndEnabled || arrange.gameObject.transform.childCount == 0) continue;
+            try
+            {
+                arrange.ArrangeChilds();
+            }
+            catch
+            {
+                // Error($"Error arranging child objects in GridArrange: {e}");
             }
         }
     }

@@ -82,13 +82,13 @@ internal static class PlayerControlPatches
 
         if (!target || __instance.Data.IsDead || !__instance.Data.Role.IsImpostor || __instance.Data.Disconnected)
         {
-            int num = target ? target!.PlayerId : -1;
+            var num = target ? target!.PlayerId : -1;
             __instance.logger.Warning($"Bad kill from {__instance.PlayerId} to {num}");
             __instance.RpcMurderPlayer(target, false);
             return;
         }
 
-        NetworkedPlayerInfo data = target!.Data;
+        var data = target!.Data;
         if (data == null || data.IsDead || target.inVent || target.MyPhysics.Animations.IsPlayingEnterVentAnimation() ||
             target.MyPhysics.Animations.IsPlayingAnyLadderAnimation() || target.inMovingPlat)
         {

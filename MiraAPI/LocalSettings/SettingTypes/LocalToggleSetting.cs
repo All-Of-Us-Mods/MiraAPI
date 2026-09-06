@@ -23,7 +23,7 @@ public class LocalToggleSetting(
     string? description = null
 ) : LocalSettingBase<bool>(tab, configEntry, name, description)
 {
-    private ToggleButtonBehaviour _toggle { get; set; }
+    private ToggleButtonBehaviour _toggle;
 
     /// <inheritdoc />
     public override GameObject CreateOption(ToggleButtonBehaviour toggle, SlideBar slider, Transform parent, ref float offset, ref int order, bool last)

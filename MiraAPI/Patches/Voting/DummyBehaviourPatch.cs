@@ -19,7 +19,7 @@ internal static class DummyBehaviourPatches
     [HarmonyPatch(nameof(DummyBehaviour.Update))]
     public static bool DummyUpdatePatch(DummyBehaviour __instance)
     {
-        NetworkedPlayerInfo data = __instance.myPlayer.Data;
+        var data = __instance.myPlayer.Data;
         if (data == null || data.IsDead) return false;
 
         if (MeetingHud.Instance)
@@ -65,7 +65,7 @@ internal static class DummyBehaviourPatches
             potentialSuspects.Add(253);
         }
 
-        if (CanVote(dummy))
+        if (dummy.CanVote())
         {
             VotingUtils.RpcCastVote(PlayerControl.LocalPlayer, dummy.myPlayer.PlayerId, potentialSuspects.Random());
         }

@@ -51,9 +51,8 @@ public class LocalNumberSetting(
     /// </summary>
     public MiraNumberSuffixes SuffixType { get; } = suffixType ?? MiraNumberSuffixes.None;
 
-    private SpriteRenderer _highlight { get; set; }
-
-    private TextMeshPro _btnText { get; set; }
+    private SpriteRenderer _highlight;
+    private TextMeshPro _btnText;
 
     /// <inheritdoc />
     public override GameObject CreateOption(ToggleButtonBehaviour toggle, SlideBar slider, Transform parent, ref float offset, ref int order, bool last)
@@ -95,7 +94,7 @@ public class LocalNumberSetting(
 
         button.OnClick.AddListener((UnityAction)(() =>
         {
-            float value = GetValue();
+            var value = GetValue();
             value += Increment;
             if (value > NumberRange.max)
             {

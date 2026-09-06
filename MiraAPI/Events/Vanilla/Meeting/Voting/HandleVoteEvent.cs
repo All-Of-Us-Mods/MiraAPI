@@ -12,7 +12,7 @@ namespace MiraAPI.Events.Vanilla.Meeting.Voting;
 /// <param name="playerVoteData">The voter's <see cref="PlayerVoteData"/>.</param>
 /// <param name="targetId">The target's playerId.</param>
 /// <param name="isOverruling">Whether the vote is actually for a Judge.</param>
-public class HandleVoteEvent(PlayerVoteData playerVoteData, byte targetId, bool isOverruling) : MiraCancelableEvent
+public class HandleVoteEvent(PlayerVoteData playerVoteData, byte targetId, bool isOverruling = false) : MiraCancelableEvent
 {
     /// <summary>
     /// Gets the instance of the voter's <see cref="PlayerVoteData"/>.
@@ -43,13 +43,4 @@ public class HandleVoteEvent(PlayerVoteData playerVoteData, byte targetId, bool 
     /// Gets or sets a value indicating whether the vote event is an Overrule caused by a Judge.
     /// </summary>
     public bool IsOverruling { get; set; } = isOverruling;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="HandleVoteEvent"/> class.
-    /// </summary>
-    /// <param name="playerVoteData">The voter's <see cref="PlayerVoteData"/>.</param>
-    /// <param name="targetId">The target's playerId.</param>
-    public HandleVoteEvent(PlayerVoteData playerVoteData, byte targetId) : this(playerVoteData, targetId, false)
-    {
-    }
 }

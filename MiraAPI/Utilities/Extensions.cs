@@ -54,7 +54,6 @@ public static class Extensions
     /// <param name="self">The <see cref="Minigame"/>.</param>
     public static void BaseClose(this Minigame self)
     {
-        bool isComplete;
         if (self.amClosing == Minigame.CloseState.Closing)
         {
             self.gameObject.Destroy();
@@ -74,12 +73,12 @@ public static class Extensions
         }
         self.amClosing = Minigame.CloseState.Closing;
         self.logger.Info(string.Concat("Closing minigame ", self.GetType().Name));
-        IAnalyticsReporter analytics = DebugAnalytics.Instance.Analytics;
-        NetworkedPlayerInfo data = PlayerControl.LocalPlayer.Data;
-        TaskTypes taskType = self.TaskType;
-        float realtimeSinceStartup = Time.realtimeSinceStartup - self.timeOpened;
-        PlayerTask myTask = self.MyTask;
-        isComplete = myTask != null && myTask.IsComplete;
+        var analytics = DebugAnalytics.Instance.Analytics;
+        var data = PlayerControl.LocalPlayer.Data;
+        var taskType = self.TaskType;
+        var realtimeSinceStartup = Time.realtimeSinceStartup - self.timeOpened;
+        var myTask = self.MyTask;
+        var isComplete = myTask != null && myTask.IsComplete;
         analytics.MinigameClosed(data, taskType, realtimeSinceStartup, isComplete);
         self.StartCoroutine(self.CoDestroySelf());
     }
@@ -193,6 +192,7 @@ public static class Extensions
     /// <returns>The converted list.</returns>
     public static Il2CppSystem.Collections.Generic.List<T> ToIl2CppList<T>(this List<T> systemList)
     {
+        // ReSharper disable once InconsistentNaming (Justification: Acronym.)
         var il2cppList = new Il2CppSystem.Collections.Generic.List<T>();
 
         foreach (var item in systemList)
@@ -266,6 +266,8 @@ public static class Extensions
     // Left as is intentionally, did you guys mean to use it in DeepDestroy?
     [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Not known until intent it clear.")]
     [SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Unclear, but please shut up.")]
+    // ReSharper disable once UnusedParameter.Local (Justification: Read above.)
+    // ReSharper disable once UnusedMember.Local (Justification: Read above.)
     private static IEnumerator Nuke(GameObject? go, bool clearGc)
     {
         if (go == null)
@@ -403,8 +405,8 @@ public static class Extensions
             return;
         }
 
-        float spriteWidth = sprite.sprite.rect.width;
-        float spriteHeight = sprite.sprite.rect.height;
+        var spriteWidth = sprite.sprite.rect.width;
+        var spriteHeight = sprite.sprite.rect.height;
 
         sprite.size = spriteWidth < spriteHeight
             ? new Vector2(pixelSize * spriteWidth / spriteHeight, pixelSize)
@@ -526,7 +528,7 @@ public static class Extensions
     /// <returns>A proper string for the <see cref="Enum"/>.</returns>
     public static string ToDisplayString(this Enum @enum)
     {
-        var regex = new Regex(@"([^\^])([A-Z][a-z$])", default, default);
+        var regex = new Regex(@"([^\^])([A-Z][a-z$])", default, Regex.InfiniteMatchTimeout);
         return regex.Replace(@enum.ToString(), m => $"{m.Groups[1].Value} {m.Groups[2].Value}");
     }
 

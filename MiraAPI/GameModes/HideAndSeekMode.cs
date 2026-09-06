@@ -97,17 +97,64 @@ public class HideAndSeekMode : AbstractGameMode
             .Where(c => c.Character != null && c.Character.Data != null && !c.Character.Data.Disconnected &&
                         !c.Character.Data.IsDead).OrderBy(c => c.Id).Select(c => c.Character.Data)];
 
-        foreach (NetworkedPlayerInfo networkedPlayerInfo in GameData.Instance.AllPlayers)
+        foreach (var networkedPlayerInfo in GameData.Instance.AllPlayers)
         {
             if (networkedPlayerInfo.Object != null && networkedPlayerInfo.Object.isDummy)
             {
                 list2.Add(networkedPlayerInfo);
             }
         }
-        IGameOptions currentGameOptions = GameOptionsManager.Instance.CurrentGameOptions;
-        int adjustedNumImpostors = GameOptionsManager.Instance.CurrentGameOptions.GetAdjustedNumImpostors(list2.Count);
+        var currentGameOptions = GameOptionsManager.Instance.CurrentGameOptions;
+        var adjustedNumImpostors = GameOptionsManager.Instance.CurrentGameOptions.GetAdjustedNumImpostors(list2.Count);
         AssignRolesForTeam(list2, currentGameOptions, RoleTeamTypes.Impostor, Math.Max(adjustedNumImpostors, 1), RoleTypes.Impostor);
         AssignRolesForTeam(list2, currentGameOptions, RoleTeamTypes.Crewmate, int.MaxValue, RoleTypes.Engineer);
+    }
+
+    private static void AddGuaranteedRoles(IEnumerable<RoleBehaviour> guaranteedRoles, IGameOptions opts, List<RoleTypes> list)
+    {
+        var roleOptions = opts.RoleOptions;
+        foreach (var roleAssignmentData in guaranteedRoles.Select(x =>
+                     new RoleManager.RoleAssignmentData(x, roleOptions.GetNumPerGame(x.Role), 100)))
+        {
+            while (true)
+            {
+                var count = roleAssignmentData.Count;
+                roleAssignmentData.Count = count - 1;
+                if (count <= 0) break;
+
+                list.Add(roleAssignmentData.Role.Role);
+            }
+        }
+    }
+
+    private static void AddPotentialRoles(IEnumerable<RoleBehaviour> source, IGameOptions opts, List<RoleTypes> list)
+    {
+        var roleOptions = opts.RoleOptions;
+        var potentialRoles = source.Where(x => !x.IsDead).Select(role =>
+            new RoleManager.RoleAssignmentData(
+                role,
+                roleOptions.GetNumPerGame(role.Role),
+                roleOptions.GetChancePerGame(role.Role))).ToList();
+
+        list.Clear();
+        foreach (var roleData in potentialRoles)
+        {
+            for (var i = 0; i < roleData.Count; i++)
+            {
+                if (HashRandom.Next(101) < roleData.Chance)
+                {
+                    list.Add(roleData.Role.Role);
+                }
+            }
+        }
+    }
+
+    private static void AddFallbackRoles(List<RoleTypes> list, int targetPlayerCount, int teamMax, int rolesAssigned, RoleTypes basicRole)
+    {
+        while (list.Count < targetPlayerCount && list.Count + rolesAssigned < teamMax)
+        {
+            list.Add(basicRole);
+        }
     }
 
     private static void AssignRolesForTeam(
@@ -117,151 +164,90 @@ public class HideAndSeekMode : AbstractGameMode
         int teamMax,
         RoleTypes defaultRole)
     {
-        Error($"Hide And Seek Mode - AssignRolesForTeam: Team: {team}, Max: {teamMax}, Players: {players.Count}, DefaultRole: {defaultRole}");
-        int num = 0;
-        IRoleOptionsCollection roleOptions = opts.RoleOptions;
+        Info($"Hide And Seek Mode - AssignRolesForTeam: Team: {team}, Max: {teamMax}, Players: {players.Count}, DefaultRole: {defaultRole}");
+        var num = 0;
+        var roleOptions = opts.RoleOptions;
         var source = RoleManager.Instance.AllRoles.ToArray()
             .Where(role => role.TeamType == team && !RoleManager.IsGhostRole(role.Role) &&
                            CustomRoleUtils.CanSpawnOnCurrentMode(role))
             .ToList();
+
         var assignmentData = source.Where(x => !x.IsDead).Select(role =>
             new RoleManager.RoleAssignmentData(
                 role,
                 roleOptions.GetNumPerGame(role.Role),
                 roleOptions.GetChancePerGame(role.Role))).ToList();
+
         var source2 = CustomRoleUtils.GetPossibleRoles(assignmentData, x => x.Chance == 100);
-        var guaranteedRoles = source.Where(x => source2.Contains(((ushort)x.Role, 100)));
+        var guaranteedRoles = source.Where(x => source2.Contains(((ushort)x.Role, 100))).ToList();
         List<RoleTypes> list = [];
-        if (team == RoleTeamTypes.Crewmate)
+
+        switch (team)
         {
-            Error($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: Before Guaranteed Assignment");
-            foreach (RoleManager.RoleAssignmentData roleAssignmentData in guaranteedRoles.Select((x) =>
-                         new RoleManager.RoleAssignmentData(x, roleOptions.GetNumPerGame(x.Role), 100)))
-            {
-                while (true)
+            case RoleTeamTypes.Crewmate:
+                Info($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: Before Guaranteed Assignment");
+                AddGuaranteedRoles(guaranteedRoles, opts, list);
+                Info($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: After Guaranteed Assignment");
+                AssignRolesFromList(players, teamMax, list, ref num);
+
+                AddPotentialRoles(source, opts, list);
+                Info($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: After Potential Assignment");
+                AssignRolesFromList(players, teamMax, list, ref num);
+
+                const RoleTypes basicCrewRole = RoleTypes.Engineer;
+                AddFallbackRoles(list, players.Count, teamMax, num, basicCrewRole);
+                AssignRolesFromList(players, teamMax, list, ref num);
+                Info($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: After Fallback Assignment");
+                break;
+
+            case RoleTeamTypes.Impostor:
+                Info($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: Before Guaranteed Assignment");
+                var newImpostors = new List<NetworkedPlayerInfo>();
+
+                // Specified Seeker
+                if (HasImpostorPlayerID() &&
+                    ValidateImpostorPlayerID(players) &&
+                    !AmongUsClient.Instance.IsGamePublic)
                 {
-                    RoleManager.RoleAssignmentData roleAssignmentData2 = roleAssignmentData;
-                    int count = roleAssignmentData2.Count;
-                    roleAssignmentData2.Count = count - 1;
-                    if (count <= 0)
-                    {
-                        break;
-                    }
-
-                    list.Add(roleAssignmentData.Role.Role);
-                }
-            }
-            Error($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: After Guaranteed Assignment");
-            AssignRolesFromList(players, teamMax, list, ref num);
-
-            var list2 = source.Where(x => !x.IsDead).Select(role =>
-                new RoleManager.RoleAssignmentData(
-                    role,
-                    roleOptions.GetNumPerGame(role.Role),
-                    roleOptions.GetChancePerGame(role.Role))).ToList();
-
-            list.Clear();
-            foreach (RoleManager.RoleAssignmentData roleAssignmentData3 in list2)
-            {
-                for (int i = 0; i < roleAssignmentData3.Count; i++)
-                {
-                    if (HashRandom.Next(101) < roleAssignmentData3.Chance)
-                    {
-                        list.Add(roleAssignmentData3.Role.Role);
-                    }
-                }
-            }
-            Error($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: After Potential Assignment");
-
-            AssignRolesFromList(players, teamMax, list, ref num);
-            var basicRole = RoleTypes.Engineer;
-            while (list.Count < players.Count && list.Count + num < teamMax)
-            {
-                list.Add(basicRole);
-            }
-
-            AssignRolesFromList(players, teamMax, list, ref num);
-            Error($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: After Fallback Assignment");
-        }
-        else if (team == RoleTeamTypes.Impostor)
-        {
-            Error($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: Before Guaranteed Assignment");
-            var newImpostors = new List<NetworkedPlayerInfo>();
-            // Specified Seeker
-            if (HasImpostorPlayerID() &&
-                ValidateImpostorPlayerID(players) &&
-                !AmongUsClient.Instance.IsGamePublic)
-            {
-                NetworkedPlayerInfo networkedPlayerInfo = players
-                    .First(p => p.PlayerId == ImpostorPlayerID());
-                players.Remove(networkedPlayerInfo);
-                newImpostors.Add(networkedPlayerInfo);
-                Error($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: Seeker is {networkedPlayerInfo.PlayerName}, ID: {networkedPlayerInfo.PlayerId}");
-            }
-            // Random Seeker
-            else
-            {
-                int num2 = 0;
-                while (num2 < teamMax && players.Count > 0)
-                {
-                    PseudoRandomList<NetworkedPlayerInfo> pseudoRandomList = new(AmongUsClient.Instance.GameId);
-                    players.Do(pseudoRandomList.Add);
-                    for (int i = 0; i < GameData.RoundsPlayedInSession; i++)
-                    {
-                        pseudoRandomList.PickRandom();
-                    }
-                    NetworkedPlayerInfo networkedPlayerInfo = pseudoRandomList.PickRandom();
+                    var networkedPlayerInfo = players.First(p => p.PlayerId == ImpostorPlayerID());
                     players.Remove(networkedPlayerInfo);
                     newImpostors.Add(networkedPlayerInfo);
-                    num2++;
-                    Error($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: Seeker is {networkedPlayerInfo.PlayerName}, ID: {networkedPlayerInfo.PlayerId}");
+                    Info($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: Seeker is {networkedPlayerInfo.PlayerName}, ID: {networkedPlayerInfo.PlayerId}");
                 }
-            }
-            Error($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: After Guaranteed Assignment");
-            foreach (RoleManager.RoleAssignmentData roleAssignmentData in guaranteedRoles.Select((x) =>
-                         new RoleManager.RoleAssignmentData(x, roleOptions.GetNumPerGame(x.Role), 100)))
-            {
-                while (true)
+                // Random Seeker
+                else
                 {
-                    RoleManager.RoleAssignmentData roleAssignmentData2 = roleAssignmentData;
-                    int count = roleAssignmentData2.Count;
-                    roleAssignmentData2.Count = count - 1;
-                    if (count <= 0)
+                    var num2 = 0;
+                    while (num2 < teamMax && players.Count > 0)
                     {
-                        break;
-                    }
-
-                    list.Add(roleAssignmentData.Role.Role);
-                }
-            }
-            AssignRolesFromList(newImpostors, teamMax, list, ref num);
-
-            var list2 = source.Where(x => !x.IsDead).Select(role =>
-                new RoleManager.RoleAssignmentData(
-                    role,
-                    roleOptions.GetNumPerGame(role.Role),
-                    roleOptions.GetChancePerGame(role.Role))).ToList();
-
-            list.Clear();
-            foreach (RoleManager.RoleAssignmentData roleAssignmentData3 in list2)
-            {
-                for (int i = 0; i < roleAssignmentData3.Count; i++)
-                {
-                    if (HashRandom.Next(101) < roleAssignmentData3.Chance)
-                    {
-                        list.Add(roleAssignmentData3.Role.Role);
+                        PseudoRandomList<NetworkedPlayerInfo> pseudoRandomList = new(AmongUsClient.Instance.GameId);
+                        players.Do(pseudoRandomList.Add);
+                        for (var i = 0; i < GameData.RoundsPlayedInSession; i++)
+                        {
+                            pseudoRandomList.PickRandom();
+                        }
+                        var networkedPlayerInfo = pseudoRandomList.PickRandom();
+                        players.Remove(networkedPlayerInfo);
+                        newImpostors.Add(networkedPlayerInfo);
+                        num2++;
+                        Info($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: Seeker is {networkedPlayerInfo.PlayerName}, ID: {networkedPlayerInfo.PlayerId}");
                     }
                 }
-            }
+                Info($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: After Guaranteed Assignment");
 
-            AssignRolesFromList(newImpostors, teamMax, list, ref num);
-            var basicRole = RoleTypes.Impostor;
-            while (list.Count < newImpostors.Count && list.Count + num < teamMax)
-            {
-                list.Add(basicRole);
-            }
+                AddGuaranteedRoles(guaranteedRoles, opts, list);
+                AssignRolesFromList(newImpostors, teamMax, list, ref num);
 
-            AssignRolesFromList(newImpostors, teamMax, list, ref num);
+                AddPotentialRoles(source, opts, list);
+                AssignRolesFromList(newImpostors, teamMax, list, ref num);
+
+                const RoleTypes basicImpRole = RoleTypes.Impostor;
+                AddFallbackRoles(list, newImpostors.Count, teamMax, num, basicImpRole);
+                AssignRolesFromList(newImpostors, teamMax, list, ref num);
+                break;
+
+            default:
+                throw new ArgumentOutOfRangeException(nameof(team), team, null);
         }
     }
 
@@ -269,10 +255,10 @@ public class HideAndSeekMode : AbstractGameMode
     {
         while (roleList.Count > 0 && players.Count > 0 && rolesAssigned < teamMax)
         {
-            int index = HashRandom.FastNext(roleList.Count);
-            RoleTypes roleType = roleList[index];
+            var index = HashRandom.FastNext(roleList.Count);
+            var roleType = roleList[index];
             roleList.RemoveAt(index);
-            int index2 = HashRandom.FastNext(players.Count);
+            var index2 = HashRandom.FastNext(players.Count);
             players[index2].Object.RpcSetRole(roleType);
             players.RemoveAt(index2);
             rolesAssigned++;
@@ -377,7 +363,7 @@ public class HideAndSeekMode : AbstractGameMode
                 PlayerControl.LocalPlayer.CurrentOutfitType,
                 PlayerMaterial.MaskType.None,
                 false);
-            SpriteAnim component = poolablePlayer.GetComponent<SpriteAnim>();
+            var component = poolablePlayer.GetComponent<SpriteAnim>();
             poolablePlayer.gameObject.SetActive(true);
             poolablePlayer.ToggleName(false);
             component.Play(anim);
@@ -423,12 +409,10 @@ public class HideAndSeekMode : AbstractGameMode
         deadPlayerCount = 0;
         ShipStatus.Instance.BreakEmergencyButton();
         PlayerControl.LocalPlayer.SetKillTimer(0.01f);
-        if (HudManager.InstanceExists)
-        {
-            HudManager.Instance.gameObject.AddComponent<HnsMusicHandler>();
-            HudManager.Instance.gameObject.AddComponent<HideAndSeekHudHelper>();
-            HudManager.Instance.gameObject.AddComponent<HnsDangerMeter>();
-        }
+        if (!HudManager.InstanceExists) return;
+        HudManager.Instance.gameObject.AddComponent<HnsMusicHandler>();
+        HudManager.Instance.gameObject.AddComponent<HideAndSeekHudHelper>();
+        HudManager.Instance.gameObject.AddComponent<HnsDangerMeter>();
     }
 
     /// <inheritdoc/>
@@ -484,30 +468,18 @@ public class HideAndSeekMode : AbstractGameMode
             }
             return PlayerBodyTypes.Normal;
         }
-        else if (AprilFoolsMode.ShouldHorseAround())
+
+        if (AprilFoolsMode.ShouldHorseAround())
         {
-            if (player.Data.Role.IsImpostor)
-            {
-                return PlayerBodyTypes.Normal;
-            }
-            return PlayerBodyTypes.Horse;
+            return player.Data.Role.IsImpostor ? PlayerBodyTypes.Normal : PlayerBodyTypes.Horse;
         }
-        else if (AprilFoolsMode.ShouldLongAround())
+
+        if (AprilFoolsMode.ShouldLongAround())
         {
-            if (player.Data.Role.IsImpostor)
-            {
-                return PlayerBodyTypes.LongSeeker;
-            }
-            return PlayerBodyTypes.Long;
+            return player.Data.Role.IsImpostor ? PlayerBodyTypes.LongSeeker : PlayerBodyTypes.Long;
         }
-        else
-        {
-            if (player.Data.Role.IsImpostor)
-            {
-                return PlayerBodyTypes.Seeker;
-            }
-            return PlayerBodyTypes.Normal;
-        }
+
+        return player.Data.Role.IsImpostor ? PlayerBodyTypes.Seeker : PlayerBodyTypes.Normal;
     }
 
     /// <inheritdoc/>
@@ -516,11 +488,11 @@ public class HideAndSeekMode : AbstractGameMode
         instance.background.transform.localScale = (instance.taskText.textBounds.size.x > 0f)
             ? new Vector3(instance.taskText.textBounds.size.x + 0.2f, instance.taskText.textBounds.size.y + 0.2f, 1f)
             : Vector3.zero;
-        Vector3 vector = instance.background.sprite.bounds.extents;
+        var vector = instance.background.sprite.bounds.extents;
         vector.y = -vector.y;
         vector = vector.Mul(instance.background.transform.localScale);
         instance.background.transform.localPosition = vector;
-        Vector3 vector2 = instance.tab.sprite.bounds.extents;
+        var vector2 = instance.tab.sprite.bounds.extents;
         vector2 = vector2.Mul(instance.tab.transform.localScale);
         vector2.y = -vector2.y;
         vector2.x += vector.x * 2f;

@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Il2CppInterop.Runtime.Attributes;
+using MiraAPI.Utilities;
 using Reactor.Utilities.Attributes;
 using Reactor.Utilities.Extensions;
 using TMPro;
@@ -31,12 +32,12 @@ public class MeetingAbilityBehaviour : MonoBehaviour
     public PassiveButton Button { get; internal set; }
 
     /// <summary>
-    /// Gets he parent <see cref="PlayerVoteArea"/>.
+    /// Gets the parent <see cref="PlayerVoteArea"/>.
     /// </summary>
     public PlayerVoteArea VoteArea { get; internal set; }
 
     /// <summary>
-    /// Gets he button's <see cref="SpriteRenderer"/> component.
+    /// Gets the button's <see cref="SpriteRenderer"/> component.
     /// </summary>
     public SpriteRenderer Renderer { get; internal set; }
 
@@ -102,13 +103,13 @@ public class MeetingAbilityBehaviour : MonoBehaviour
         if (!_init) return;
         if (_button.Timer < 0.01f)
         {
-            Renderer.material.SetFloat("_Desat", 0.0f);
+            Renderer.material.SetFloat(ShaderID.Desat, 0.0f);
             CooldownText.text = string.Empty;
             UsesText.text = _button.LimitedUses ? _button.UsesLeft.ToString(CultureInfo.InvariantCulture) : string.Empty;
         }
         else
         {
-            Renderer.material.SetFloat("_Desat", 0.5f);
+            Renderer.material.SetFloat(ShaderID.Desat, 0.5f);
             CooldownText.text = _button.Timer.ToString(_button.CooldownTimerFormatString, NumberFormatInfo.InvariantInfo);
             UsesText.text = string.Empty;
         }
@@ -122,8 +123,8 @@ public class MeetingAbilityBehaviour : MonoBehaviour
     /// <param name="maxTimer">The maximum timer.</param>
     public void SetFillUp(float timer, float maxTimer)
     {
-        float percentCool = Mathf.Clamp(timer / maxTimer, 0.001f, 1f);
+        var percentCool = Mathf.Clamp(timer / maxTimer, 0.001f, 1f);
         if (percentCool <= 0) percentCool = 1f;
-        Renderer.material.SetFloat("_Percent", percentCool);
+        Renderer.material.SetFloat(ShaderID.Percent, percentCool);
     }
 }

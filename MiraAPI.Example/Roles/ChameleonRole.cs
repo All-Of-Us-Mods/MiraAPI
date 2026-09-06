@@ -3,7 +3,6 @@ using MiraAPI.Patches.Stubs;
 using MiraAPI.Roles;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities;
-using TMPro;
 using UnityEngine;
 
 namespace MiraAPI.Example.Roles;
@@ -55,8 +54,8 @@ public class ChameleonRole : CrewmateRole, ICustomRole
         }
         else
         {
-            SpriteRenderer rend = Player.cosmetics.currentBodySprite.BodySprite;
-            TextMeshPro tmp = Player.cosmetics.nameText;
+            var rend = Player.cosmetics.currentBodySprite.BodySprite;
+            var tmp = Player.cosmetics.nameText;
             tmp.color = Color.Lerp(
                 tmp.color,
                 new Color(tmp.color.r, tmp.color.g, tmp.color.b, Player.AmOwner ? 0.3f : 0),

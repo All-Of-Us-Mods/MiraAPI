@@ -12,6 +12,7 @@ namespace MiraAPI.Networking;
 /// </summary>
 /// <inheritdoc />
 [RegisterCustomRpc((uint)MiraRpc.CustomGameOver)]
+// ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated via Activator.CreateInstance.)
 public class CustomGameOverRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<MiraApiPlugin, GameOverData>(plugin, id)
 {
     /// <inheritdoc />
