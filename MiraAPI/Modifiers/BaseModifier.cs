@@ -134,4 +134,12 @@ public abstract class BaseModifier : IOptionable
     {
         return null;
     }
+
+    /// <summary>
+    /// Removes this modifier instance from the player.
+    /// </summary>
+    public void RemoveSelf()
+    {
+        ModifierComponent?.RemoveModifier(this);
+    }
 }

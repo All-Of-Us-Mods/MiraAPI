@@ -230,7 +230,9 @@ public static class RoleGuidePatches
                 __instance.CoLoadAssetAsync<NamePlateViewData>(
                     namePlate.GetAssetReference(),
                     (Action<NamePlateViewData>?)LoadNameplate));
+#pragma warning disable S1751 // Loops with at most one iteration should be refactored (Justification: No idea why it's behaving this way.)
             continue;
+#pragma warning restore S1751 // Loops with at most one iteration should be refactored
 
             void LoadNameplate(NamePlateViewData viewdata)
             {

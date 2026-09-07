@@ -35,3 +35,6 @@ dotnet_diagnostic.S2696.severity = none
 
 # S2245: Pseudorandom number generators (PRNGs) should not be used in security contexts
 dotnet_diagnostic.S2245.severity = none
+
+# IDE0130: Namespace does not match folder structure
+dotnet_diagnostic.IDE0130.severity = none

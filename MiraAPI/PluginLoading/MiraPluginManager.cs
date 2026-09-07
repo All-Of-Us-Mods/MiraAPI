@@ -326,15 +326,26 @@ public sealed class MiraPluginManager
                 }
 
                 var attribute = property.GetCustomAttribute<ModdedOptionAttribute>();
-                if (attribute == null)
+                if (attribute != null)
                 {
+                    ModdedOptionsManager.RegisterAttributeOption(type, attribute, property, pluginInfo);
                     continue;
                 }
 
-                ModdedOptionsManager.RegisterAttributeOption(type, attribute, property, pluginInfo);
+                if (property.PropertyType.IsAssignableTo(typeof(IModdedOptionList)))
+                {
+                    ModdedOptionsManager.RegisterPropertyOptionList(type, property, pluginInfo);
+                }
+
+                var listAttr = property.GetCustomAttribute<ModdedOptionListAttribute>();
+                if (listAttr != null)
+                {
+                    ModdedOptionsManager.RegisterAttributeOptionList(type, listAttr, property, pluginInfo);
+                }
             }
 
-            foreach (var field in type.GetFields().Where(f => f.FieldType.IsAssignableTo(typeof(IModdedOption))))
+            foreach (var field in type.GetFields()
+                .Where(f => f.FieldType.IsAssignableTo(typeof(IModdedOption)) || f.FieldType.IsAssignableTo(typeof(IModdedOptionList))))
             {
                 Error($"{field.Name} is a field, not a property. Use properties for options.");
             }

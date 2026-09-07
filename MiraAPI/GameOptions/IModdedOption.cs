@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using BepInEx.Configuration;
 using MiraAPI.Networking;
 using MiraAPI.PluginLoading;
@@ -113,4 +114,11 @@ public interface IModdedOption
     /// </summary>
     /// <param name="presetConfig">The <see cref="ConfigFile"/> representing the preset configuration.</param>
     void LoadFromPreset(ConfigFile presetConfig);
+}
+
+/// <summary>
+/// Interface for list of modded options.
+/// </summary>
+public interface IModdedOptionList : IReadOnlyList<IModdedOption>
+{
 }
