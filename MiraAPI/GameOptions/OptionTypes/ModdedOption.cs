@@ -15,8 +15,6 @@ namespace MiraAPI.GameOptions.OptionTypes;
 /// <typeparam name="T">The value type.</typeparam>
 public abstract class ModdedOption<T> : IModdedOption
 {
-    private IMiraPlugin? _parentMod;
-
     /// <inheritdoc />
     public uint Id { get; }
 
@@ -32,13 +30,13 @@ public abstract class ModdedOption<T> : IModdedOption
     /// <inheritdoc />
     public IMiraPlugin? ParentMod
     {
-        get => _parentMod;
+        get;
         set
         {
-            if (_parentMod != null || value == null) return;
-            _parentMod = value;
+            if (field != null || value == null) return;
+            field = value;
 
-            var entry = _parentMod.GetConfigFile().Bind(ConfigDefinition, DefaultValue);
+            var entry = field.GetConfigFile().Bind(ConfigDefinition, DefaultValue);
             Value = entry.Value;
         }
     }

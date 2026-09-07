@@ -128,4 +128,12 @@ public abstract class BaseModifier : IOptionable
     /// </summary>
     /// <returns><see langword="true"/> if the player can vent, <see langword="false"/> otherwise. <see langword="null"/> for no effect.</returns>
     public virtual bool? CanVent() => null;
+
+    /// <summary>
+    /// Removes this modifier instance from the player.
+    /// </summary>
+    public void RemoveSelf()
+    {
+        ModifierComponent?.RemoveModifier(this);
+    }
 }

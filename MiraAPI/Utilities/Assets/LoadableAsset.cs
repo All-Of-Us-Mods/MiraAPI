@@ -22,6 +22,12 @@ public abstract class LoadableAsset<T> where T : UnityEngine.Object
     public abstract T LoadAsset();
 
     /// <summary>
+    /// Converts the <see cref="LoadableAsset{T}"/> into its <typeparamref name="T"/> by loading the asset.
+    /// </summary>
+    /// <param name="loadable">The <see cref="LoadableAsset{T}"/> to get the asset from.</param>
+    public static implicit operator T(LoadableAsset<T> loadable) => loadable.LoadAsset();
+
+    /// <summary>
     /// Unloads an asset.
     /// </summary>
     /// <returns>True if the asset was unloaded, false otherwise.</returns>
