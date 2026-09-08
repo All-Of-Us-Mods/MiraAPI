@@ -458,7 +458,7 @@ public static class LobbyViewPanePatches
 
         foreach (var grouping in sortedRoleGroups)
         {
-            if (!grouping.Any() || grouping.All(x => x.Configuration.HideSettings || !x.VisibleInSettings()))
+            if (!grouping.Any() || grouping.All(x => x.Configuration.HideSettings || !x.VisibleInSettings() || !x.Configuration.AssociatedGameMode.IsInstanceOfType(CustomGameModeManager.ActiveMode)))
             {
                 continue;
             }
@@ -484,7 +484,7 @@ public static class LobbyViewPanePatches
 
             foreach (var customRole in grouping)
             {
-                if (customRole.Configuration.HideSettings || !customRole.VisibleInSettings())
+                if (customRole.Configuration.HideSettings || !customRole.VisibleInSettings() || !customRole.Configuration.AssociatedGameMode.IsInstanceOfType(CustomGameModeManager.ActiveMode))
                 {
                     continue;
                 }

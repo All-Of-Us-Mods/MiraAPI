@@ -17,7 +17,7 @@ public static class MiraEventManager
     /// <param name="eventInstance">The <typeparamref name="T"/> instance.</param>
     /// <typeparam name="T">Type of Event.</typeparam>
     /// <returns>If there was an event handler invoked for this event, return <see langword="true"/>. Otherwise, return <see langword="false"/>.</returns>
-    public static bool InvokeEvent<T>(T eventInstance) where T : MiraEvent
+    public static bool InvokeEvent<T>(this T eventInstance) where T : MiraEvent
     {
         EventWrappers.TryGetValue(typeof(T), out var handlers);
         if (handlers == null || handlers.Count == 0)
@@ -46,7 +46,7 @@ public static class MiraEventManager
     /// <param name="eventInstance">The <see cref="MiraEvent"/> instance.</param>
     /// <param name="type">The type to use for handler lookup.</param>
     /// <returns>If there was an event handler invoked for this event, return <see langword="true"/>. Otherwise, return <see langword="false"/>.</returns>
-    public static bool InvokeEvent(MiraEvent eventInstance, Type type)
+    public static bool InvokeEvent(this MiraEvent eventInstance, Type type)
     {
         EventWrappers.TryGetValue(type, out var handlers);
         if (handlers == null || handlers.Count == 0)

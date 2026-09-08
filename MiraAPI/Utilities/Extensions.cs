@@ -43,7 +43,7 @@ public static class Extensions
         }
 
         return new NetData(
-            RoleId.Get(role.GetType()),
+            RoleId.Get(role),
             BitConverter.GetBytes(count.Value).AddRangeToArray(BitConverter.GetBytes(chance.Value)));
     }
 

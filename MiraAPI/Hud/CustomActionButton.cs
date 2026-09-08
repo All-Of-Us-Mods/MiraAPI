@@ -643,7 +643,7 @@ public abstract class CustomActionButton<T> : CustomActionButton where T : MonoB
     /// </summary>
     public virtual void ResetTarget()
     {
-        Target = null;
         SetOutline(false);
+        Target = null;
     }
 }
