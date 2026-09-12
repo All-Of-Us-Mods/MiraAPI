@@ -7,7 +7,6 @@ using System.Reflection;
 using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
-using Il2CppInterop.Runtime.Injection;
 using MiraAPI.Colors;
 using MiraAPI.Events;
 using MiraAPI.GameEnd;
@@ -20,12 +19,10 @@ using MiraAPI.LocalSettings;
 using MiraAPI.LocalSettings.Attributes;
 using MiraAPI.MeetingAbilities;
 using MiraAPI.Modifiers;
-using MiraAPI.Patches.Options;
 using MiraAPI.Presets;
 using MiraAPI.Roles;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;
-using Reactor.Localization.Utilities;
 using Reactor.Networking;
 using Reactor.Utilities;
 
@@ -44,8 +41,8 @@ public sealed class MiraPluginManager
 
     internal Dictionary<MiraPluginInfo, List<Type>> QueuedRoleRegistrations { get; } = [];
     internal static MiraPluginManager Instance { get; private set; } = new();
-    public static ConfigFile MiraApiConfig { get; private set; } = null!;
-    public static MiraPluginInfo MiraApiPluginInfo { get; private set; } = null!;
+    internal static ConfigFile MiraApiConfig { get; private set; } = null!;
+    internal static MiraPluginInfo MiraApiPluginInfo { get; private set; } = null!;
 
     internal void Initialize(BasePlugin miraApiPlugin, IMiraPlugin apiPlugin)
     {
@@ -225,7 +222,6 @@ public sealed class MiraPluginManager
                     continue;
                 }
 
-
                 if (RegisterMeetingAbility(type, info))
                 {
                     continue;
@@ -269,7 +265,7 @@ public sealed class MiraPluginManager
             // Cache all the registered plugins into an array for easy access
             RegisteredPlugins = [.. _registeredPlugins.Values];
             RegisteredPluginsWithOptions = [.. RegisteredPlugins.Where(m => m.MiraPlugin.DisplayOnOptionsMenu)];
-            PluginsWithOptionsOrGameModes = [..RegisteredPlugins.Where(m => m.MiraPlugin.DisplayOnOptionsMenu || m.GameModes.Count > 0)];
+            PluginsWithOptionsOrGameModes = [.. RegisteredPlugins.Where(m => m.MiraPlugin.DisplayOnOptionsMenu || m.GameModes.Count > 0)];
 
             ModifierManager.Modifiers = new ReadOnlyCollection<BaseModifier>(ModifierManager.InternalModifiers);
         };

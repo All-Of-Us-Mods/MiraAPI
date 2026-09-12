@@ -163,16 +163,16 @@ public static class AddressablesLoader
     [HideFromIl2Cpp]
     internal static IEnumerator LoadCosmetics()
     {
-        while (!AmongUsClient.Instance || CatalogLocations.Select(x=>x.Location).Any(x=>!LoadedLocations.Contains(x))) yield return null;
+        while (!AmongUsClient.Instance || CatalogLocations.Select(x => x.Location).Any(x => !LoadedLocations.Contains(x))) yield return null;
 
         var hatBehaviours = DiscoverData<HatData>(RegisteredHatKeys);
-        hatBehaviours = hatBehaviours.OrderBy(x => x.StoreName).ToList();
+        hatBehaviours = [.. hatBehaviours.OrderBy(x => x.StoreName)];
         var skinBehaviours = DiscoverData<SkinData>(RegisteredSkinKeys);
-        skinBehaviours = skinBehaviours.OrderBy(x => x.StoreName).ToList();
+        skinBehaviours = [.. skinBehaviours.OrderBy(x => x.StoreName)];
         var namePlateBehaviours = DiscoverAndReportData<NamePlateData>(RegisteredNameplateKeys);
-        namePlateBehaviours = namePlateBehaviours.OrderBy(x => x.Category).ToList();
+        namePlateBehaviours = [.. namePlateBehaviours.OrderBy(x => x.Category)];
         var visorBehaviours = DiscoverAndReportData<VisorData>(RegisteredVisorKeys);
-        visorBehaviours = visorBehaviours.OrderBy(x => x.Category).ToList();
+        visorBehaviours = [.. visorBehaviours.OrderBy(x => x.Category)];
 
         var hatData = new List<HatData>();
         hatData.AddRange(HatManager.Instance.allHats);
@@ -187,23 +187,23 @@ public static class AddressablesLoader
         var visorData = new List<VisorData>();
         visorData.AddRange(HatManager.Instance.allVisors);
         VisorsTabPatches.AddRange(visorBehaviours);
-        HatManager.Instance.allVisors = PrepareArray(visorData, visorBehaviours.Select(x=>x.Data).ToList());
+        HatManager.Instance.allVisors = PrepareArray(visorData, [.. visorBehaviours.Select(x => x.Data)]);
 
         var namePlateData = new List<NamePlateData>();
         namePlateData.AddRange(HatManager.Instance.allNamePlates);
         NameplatesTabPatches.AddRange(namePlateBehaviours);
-        HatManager.Instance.allNamePlates = PrepareArray(namePlateData, namePlateBehaviours.Select(x => x.Data).ToList());
+        HatManager.Instance.allNamePlates = PrepareArray(namePlateData, [.. namePlateBehaviours.Select(x => x.Data)]);
     }
 
     private static T[] PrepareArray<T>(List<T> data, List<T> behaviours) where T : CosmeticData
     {
         var count = data.Count;
-        for (int i = 0; i < behaviours.Count; i++)
+        for (var i = 0; i < behaviours.Count; i++)
         {
             behaviours[i].displayOrder = count + i;
             data.Add(behaviours[i]);
         }
-        return data.ToArray();
+        return [.. data];
     }
 
     private static List<T> DiscoverData<T>(List<string> tags)

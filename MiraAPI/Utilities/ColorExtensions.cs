@@ -14,10 +14,19 @@ public static class ColorExtensions
     /// <returns>Luminance value between 0 and 1.</returns>
     public static float GetRelativeLuminance(this Color color)
     {
-        var r = color.r <= 0.03928f ? color.r / 12.92f : Mathf.Pow((color.r + 0.055f) / 1.055f, 2.4f);
-        var g = color.g <= 0.03928f ? color.g / 12.92f : Mathf.Pow((color.g + 0.055f) / 1.055f, 2.4f);
-        var b = color.b <= 0.03928f ? color.b / 12.92f : Mathf.Pow((color.b + 0.055f) / 1.055f, 2.4f);
-        return (0.2126f * r) + (0.7152f * g) + (0.0722f * b);
+        return (0.2126f * Linearize(color.r)) +
+               (0.7152f * Linearize(color.g)) +
+               (0.0722f * Linearize(color.b));
+    }
+
+    /// <summary>
+    /// Linearizes an sRGB component into linear space.
+    /// </summary>
+    /// <param name="c">The component to linearize.</param>
+    /// <returns>The linearized result.</returns>
+    public static float Linearize(float c)
+    {
+        return c <= 0.03928f ? c / 12.92f : Mathf.Pow((c + 0.055f) / 1.055f, 2.4f);
     }
 
     /// <summary>

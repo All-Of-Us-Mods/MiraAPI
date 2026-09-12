@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using HarmonyLib;
 using Il2CppInterop.Runtime;
@@ -12,6 +13,14 @@ namespace MiraAPI.Utilities.Assets;
 /// </summary>
 public class LoadableBundleSubAssetHolder
 {
+    private readonly string[] spriteNames;
+    private readonly AssetBundle bundle;
+
+    /// <summary>
+    /// Gets the sprites contained within the asset.
+    /// </summary>
+    public Sprite[] SubSprites { get; private set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="LoadableBundleSubAssetHolder"/> class.
     /// </summary>
@@ -19,8 +28,8 @@ public class LoadableBundleSubAssetHolder
     /// <param name="bundle">The <see cref="AssetBundle"/> that contains the assets.</param>
     public LoadableBundleSubAssetHolder(string[] names, AssetBundle bundle)
     {
-        Bundle = bundle;
-        SpriteNames = names;
+        this.bundle = bundle;
+        spriteNames = names;
     }
 
     /// <summary>
@@ -30,26 +39,30 @@ public class LoadableBundleSubAssetHolder
     /// <param name="bundle">The <see cref="AssetBundle"/> that contains the assets.</param>
     public LoadableBundleSubAssetHolder(string name, AssetBundle bundle)
     {
-        Bundle = bundle;
-        SpriteNames = [name];
+        this.bundle = bundle;
+        spriteNames = [name];
     }
-    internal string[] SpriteNames = [];
-    internal AssetBundle Bundle;
-    public Sprite[] SubSprites = [];
 
+    /// <summary>
+    /// Attempts to load all of the sprite assets within the sprite sheet.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if the asset is not actually a sprite sheet.</exception>
+    [SuppressMessage("Style", "IDE0270:Use coalesce expression", Justification = "Null coalescing bypasses Unity lifetime checks.")]
     public void TryInit()
     {
         if (SubSprites.Length == 0)
         {
             var newSprites = Array.Empty<Sprite>();
-            foreach (var name in SpriteNames)
+
+            foreach (var name in spriteNames)
             {
-                var loadedAssets = Bundle.LoadAssetWithSubAssets(name, Il2CppType.From(typeof(Sprite))).ToArray();
+                var loadedAssets = bundle.LoadAssetWithSubAssets(name, Il2CppType.From(typeof(Sprite))).ToArray();
 
                 if (loadedAssets == null)
                 {
                     throw new InvalidOperationException($"INVALID ASSETS: {name}");
                 }
+
                 foreach (var obj in loadedAssets)
                 {
                     var img = obj.TryCast<Sprite>();

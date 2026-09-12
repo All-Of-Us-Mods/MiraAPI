@@ -1,5 +1,5 @@
-﻿using Il2CppInterop.Runtime.Attributes;
-using MiraAPI.Translation;
+using System.Diagnostics.CodeAnalysis;
+using Il2CppInterop.Runtime.Attributes;
 using Reactor.Utilities.Attributes;
 using TMPro;
 using UnityEngine;
@@ -10,6 +10,7 @@ namespace MiraAPI.Modifiers.ModifierDisplay;
 /// The code placed on every <see cref="BaseModifier"/> HUD object. Used to handle updating.
 /// </summary>
 [RegisterInIl2Cpp]
+[SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity Convention.")]
 public class ModifierUiComponent(nint cppPtr) : MonoBehaviour(cppPtr)
 {
     /// <summary>

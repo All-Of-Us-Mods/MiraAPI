@@ -26,19 +26,15 @@ public static class CanUsePatches
 
     [HarmonyPriority(Priority.Last)]
     [HarmonyPrefix]
-    public static bool CanUsePatch(Il2CppSystem.Object __instance, [HarmonyArgument(0)] NetworkedPlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse)
+    public static bool CanUsePatch(Il2CppSystem.Object __instance, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse)
     {
         canUse = couldUse = false;
 
-        IUsable usable = __instance.Cast<IUsable>();
-        if (usable != null)
-        {
-            var @event = new PlayerCanUseEvent(__instance.Cast<IUsable>());
-            MiraEventManager.InvokeEvent(@event);
+        var usable = __instance.TryCast<IUsable>();
+        if (usable == null) return true;
+        var @event = new PlayerCanUseEvent(usable);
+        MiraEventManager.InvokeEvent(@event);
 
-            return !@event.IsCancelled;
-        }
-
-        return true;
+        return !@event.IsCancelled;
     }
 }

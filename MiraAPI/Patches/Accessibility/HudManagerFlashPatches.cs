@@ -1,11 +1,15 @@
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using HarmonyLib;
 using MiraAPI.LocalSettings;
 using UnityEngine;
 
 namespace MiraAPI.Patches.Accessibility;
+
 [HarmonyPatch]
+[SuppressMessage("Style", "IDE0074:Use compound assignment", Justification = "Using compound assignment bypasses Unity lifetime checks.")]
+// ReSharper disable ConvertIfStatementToNullCoalescingAssignment (Justification: Read above.)
 public static class HudManagerFlashPatches
 {
     [HarmonyPatch(typeof(HudManager), nameof(HudManager.StartReactorFlash))]
@@ -19,6 +23,7 @@ public static class HudManagerFlashPatches
 
         return false;
     }
+
     [HarmonyPatch(typeof(HudManager), nameof(HudManager.StartOxyFlash))]
     [HarmonyPrefix]
     public static bool OxygenFlashPrefix(HudManager __instance)
@@ -30,24 +35,25 @@ public static class HudManagerFlashPatches
 
         return false;
     }
-    public static IEnumerator CoReactorFlash()
+
+    private static IEnumerator CoReactorFlash()
     {
         if (!HudManager.InstanceExists)
         {
             yield break;
         }
         var hudManager = HudManager.Instance;
-        WaitForSeconds wait = new WaitForSeconds(1f);
-        bool light = false;
+        var wait = new WaitForSeconds(1f);
+        var light = false;
 
         hudManager.FullScreen.color = new Color(1f, 0f, 0f, 0.37254903f);
         while (true)
         {
-            var settins = LocalSettingsTabSingleton<MiraApiSettings>.Instance;
-            hudManager.FullScreen.gameObject.SetActive(settins.EnableSabotageFlashes.Value && !hudManager.FullScreen.gameObject.activeSelf);
-            if (settins.EnableSabotageBlares.Value)
+            var settings = LocalSettingsTabSingleton<MiraApiSettings>.Instance;
+            hudManager.FullScreen.gameObject.SetActive(settings.EnableSabotageFlashes.Value && !hudManager.FullScreen.gameObject.activeSelf);
+            if (settings.EnableSabotageBlares.Value)
             {
-                SoundManager.Instance.PlaySound(ShipStatus.Instance.SabotageSound, false, 1f, null);
+                SoundManager.Instance.PlaySound(ShipStatus.Instance.SabotageSound, false);
             }
             light = !light;
 

@@ -27,7 +27,7 @@ public class ModdedOptionList<T> : IModdedOptionList where T : IModdedOption
     public ModdedOptionList(int count, Func<int, T> optionFactory)
     {
         Count = count;
-        Options = Enumerable.Range(0, Count).Select(optionFactory).ToArray();
+        Options = [.. Enumerable.Range(0, Count).Select(optionFactory)];
     }
 
     /// <summary>
@@ -37,7 +37,7 @@ public class ModdedOptionList<T> : IModdedOptionList where T : IModdedOption
     public ModdedOptionList(IEnumerable<T> options)
     {
         Count = options.Count();
-        Options = options.ToArray();
+        Options = [.. options];
     }
 
     /// <inheritdoc/>

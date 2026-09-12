@@ -12,7 +12,6 @@ using MiraAPI.Roles;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
-using Reactor.Localization.Utilities;
 using Reactor.Networking.Rpc;
 using Reactor.Utilities.Extensions;
 using TMPro;
@@ -35,7 +34,7 @@ public static class RoleSettingMenuPatches
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(RolesSettingsMenu.OnEnable))]
-    public static void OpenPatch(RolesSettingsMenu __instance)
+    public static void OpenPatch()
     {
         HudManager.Instance.PlayerCam.OverrideScreenShakeEnabled = false;
     }
@@ -206,7 +205,7 @@ public static class RoleSettingMenuPatches
                     foreach (var grouping in sortedRoleGroups)
                     {
                         if (!grouping.Any() ||
-                            grouping.All(x=> x.Configuration.HideSettings || !x.VisibleInSettings() || !x.Configuration.AssociatedGameMode.IsInstanceOfType(CustomGameModeManager.ActiveMode)))
+                            grouping.All(x => x.Configuration.HideSettings || !x.VisibleInSettings() || !x.Configuration.AssociatedGameMode.IsInstanceOfType(CustomGameModeManager.ActiveMode)))
                         {
                             continue;
                         }
@@ -550,6 +549,7 @@ public static class RoleSettingMenuPatches
         var categoryHeaderMasked = __instance.AdvancedRolesSettings.transform.Find("CategoryHeaderMasked").GetComponent<CategoryHeaderMasked>();
         categoryHeaderMasked.Title.text = TranslationController.Instance.GetString(StringNames.RoleSettingsLabel);
         var labelBg = __instance.AdvancedRolesSettings.transform.FindChild("InfoLabelBackground");
+        // ReSharper disable once StringLiteralTypo (Justification: Actual name in-game.)
         var imgBg = __instance.AdvancedRolesSettings.transform.FindChild("Imagebackground");
         imgBg.gameObject.SetActive(true);
         __instance.roleScreenshot.gameObject.SetActive(true);
@@ -574,6 +574,7 @@ public static class RoleSettingMenuPatches
         __instance.roleDescriptionText.text = customRole.RoleMedDescription;
         __instance.roleTitleText.text = role.GetRoleName();
 
+        // ReSharper disable once StringLiteralTypo (Justification: Actual name in-game.)
         var imgBg = __instance.AdvancedRolesSettings.transform.FindChild("Imagebackground");
         var labelBg = __instance.AdvancedRolesSettings.transform.FindChild("InfoLabelBackground");
         if (role.RoleScreenshot == null)
@@ -627,7 +628,7 @@ public static class RoleSettingMenuPatches
 
             IEnumerator CoReturnToRoleSettings()
             {
-                // set gameobjects
+                // set game objects
                 __instance.RoleChancesSettings.SetActive(true);
                 __instance.AdvancedRolesSettings.SetActive(false);
 
@@ -707,11 +708,16 @@ public static class RoleSettingMenuPatches
 
         if (customRole.Configuration.Icon != null)
         {
-            var roleIcon = new GameObject("RoleIcon");
-            roleIcon.transform.parent = roleOptionSetting.transform;
-            roleIcon.transform.localScale = new(.25f, .25f, 1);
-            roleIcon.layer = LayerMask.NameToLayer("UI");
-            roleIcon.transform.localPosition = new Vector3(-1.3f, -0.3f, -2f);
+            var roleIcon = new GameObject("RoleIcon")
+            {
+                transform =
+                {
+                    parent = roleOptionSetting.transform,
+                    localScale = new(.25f, .25f, 1),
+                    localPosition = new Vector3(-1.3f, -0.3f, -2f),
+                },
+                layer = LayerMask.NameToLayer("UI"),
+            };
             var rend = roleIcon.AddComponent<SpriteRenderer>();
             rend.sprite = customRole.Configuration.Icon.LoadAsset();
 

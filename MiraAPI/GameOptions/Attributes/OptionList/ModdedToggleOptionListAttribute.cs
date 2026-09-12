@@ -29,10 +29,8 @@ public class ModdedToggleOptionListAttribute(string title) : ModdedOptionListAtt
     /// <inheritdoc />
     public override object GetValue(int idx)
     {
-        if (HolderOptionList?[idx] is ModdedToggleOption opt)
-        {
-            return opt.Value;
-        }
-        throw new InvalidOperationException($"Holder option for {GetFormattedTitle(idx)} is not a ModdedToggleOption.");
+        return HolderOptionList?[idx] is ModdedToggleOption opt
+            ? (object)opt.Value
+            : throw new InvalidOperationException($"Holder option for {GetFormattedTitle(idx)} is not a ModdedToggleOption.");
     }
 }

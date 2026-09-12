@@ -1,18 +1,43 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Reactor.Utilities.Extensions;
 using TMPro;
 using UnityEngine;
 
 namespace MiraAPI.Utilities.Assets;
+
+/// <summary>
+/// Utility class for dynamically generating and managing TextMeshPro sprite assets.
+/// </summary>
 public static class TmpSpriteUtils
 {
     private static Shader _spriteShader;
-    private static Dictionary<string, TMP_SpriteAsset> LoadedSprites = [];
-    public static TMP_SpriteAsset AssetHolder;
+    private static readonly Dictionary<string, TMP_SpriteAsset> LoadedSprites = [];
+
+    [SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
+    [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
+    internal static TMP_SpriteAsset AssetHolder;
+
+    /// <summary>
+    /// Creates and caches a <see cref="TMP_SpriteAsset"/> from a given Unity <see cref="Sprite"/>.
+    /// </summary>
+    /// <param name="sprite">The Unity sprite to convert into a TMP sprite asset.</param>
+    /// <param name="assetName">The unique name for the sprite asset, used for caching and inline rich text tags.</param>
+    /// <param name="scale">The scale applied to the sprite. Defaults to 1.</param>
+    /// <returns>The generated or previously cached <see cref="TMP_SpriteAsset"/>.</returns>
     public static TMP_SpriteAsset CreateSpriteAsset(Sprite sprite, string assetName, float scale = 1)
     {
         return CreateSpriteAsset(sprite.texture, sprite.rect, assetName, scale);
     }
+
+    /// <summary>
+    /// Creates and caches a <see cref="TMP_SpriteAsset"/> from a source texture and a specific region.
+    /// </summary>
+    /// <param name="sourceTexture">The source <see cref="Texture2D"/> containing the sprite.</param>
+    /// <param name="rect">The specific region of the texture to use.</param>
+    /// <param name="assetName">The unique name for the sprite asset, used for caching and inline rich text tags.</param>
+    /// <param name="scale">The scale applied to the sprite. Defaults to 1.</param>
+    /// <returns>The generated or previously cached <see cref="TMP_SpriteAsset"/>.</returns>
     public static TMP_SpriteAsset CreateSpriteAsset(Texture2D sourceTexture, Rect rect, string assetName, float scale = 1)
     {
         if (LoadedSprites.TryGetValue(assetName, out var existingAsset))
@@ -26,12 +51,14 @@ public static class TmpSpriteUtils
             AssetHolder.DontUnload().DontDestroy();
             AssetHolder.fallbackSpriteAssets = new();
         }
-        TMP_SpriteAsset spriteAsset = ScriptableObject.CreateInstance<TMP_SpriteAsset>();
+
+        var spriteAsset = ScriptableObject.CreateInstance<TMP_SpriteAsset>();
         spriteAsset.name = assetName;
         spriteAsset.spriteSheet = sourceTexture;
 
         if (!_spriteShader)
         {
+            // ReSharper disable once ShaderLabShaderReferenceNotResolved (Justification: Unnecessary.)
             _spriteShader = Shader.Find("TextMeshPro/Sprite");
         }
 
@@ -40,7 +67,7 @@ public static class TmpSpriteUtils
             name = assetName + " Material",
         };
         material.SetTexture(ShaderUtilities.ID_MainTex, sourceTexture);
-        // TODO: Using these values, the icons will NOT clip through chatboxes. However, this breaks quite literally every other tmp text that isn't masked. Please fix this if a good solution is found.
+        // TODO: Using these values, the icons will NOT clip through chat boxes. However, this breaks quite literally every other tmp text that isn't masked. Please fix this if a good solution is found.
         /*material.SetFloat(ShaderUtilities.ID_StencilComp, 4);
         material.SetFloat(ShaderUtilities.ID_StencilID, 1);*/
         material.SetFloat(ShaderUtilities.ID_StencilComp, 0);
@@ -65,9 +92,16 @@ public static class TmpSpriteUtils
         return spriteAsset;
     }
 
+    /// <summary>
+    /// Constructs a <see cref="TMP_Sprite"/> with calculated offsets and adds it to the provided <see cref="TMP_SpriteAsset"/>.
+    /// </summary>
+    /// <param name="spriteAsset">The target sprite asset to add the sprite information to.</param>
+    /// <param name="rect">The texture rect dimensions used to calculate width, height, and offsets.</param>
+    /// <param name="spriteName">The name assigned to the sprite, used to generate its hash code.</param>
+    /// <param name="scale">The visual scale applied to the sprite rendering.</param>
     private static void AddSpriteToAsset(TMP_SpriteAsset spriteAsset, Rect rect, string spriteName, float scale)
     {
-        TMP_Sprite newSprite = new TMP_Sprite
+        var newSprite = new TMP_Sprite
         {
             name = spriteName,
             hashCode = TMP_TextUtilities.GetSimpleHashCode(spriteName),

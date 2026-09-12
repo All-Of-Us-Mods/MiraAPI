@@ -17,12 +17,13 @@ public static class VisorsTabPatches
 {
     private static readonly SortedList<string, List<VisorData>> SortedVisors = new(new ControllableComparer<string>(["vanilla"], [], StringComparer.InvariantCulture));
     private static int currentPage;
+
     internal static void AddRange(IEnumerable<(string Key, VisorData Visor)> data)
     {
-        foreach (var item in data)
+        foreach (var (key, visor) in data)
         {
-            if (!SortedVisors.ContainsKey(item.Key)) SortedVisors.Add(item.Key, []);
-            SortedVisors[item.Key].Add(item.Visor);
+            if (!SortedVisors.ContainsKey(key)) SortedVisors.Add(key, []);
+            SortedVisors[key].Add(visor);
         }
     }
 
@@ -86,7 +87,7 @@ public static class VisorsTabPatches
 
         var groupNameText = __instance.GetComponentInChildren<TextMeshPro>(false);
 
-        int hatIndex = 0;
+        var hatIndex = 0;
 
         var (groupName, visors) = SortedVisors.ToArray()[page];
         var text = Object.Instantiate(groupNameText, __instance.scroller.Inner);
@@ -99,16 +100,17 @@ public static class VisorsTabPatches
         text.fontSize = 5f;
         text.fontSizeMax = 5f;
         text.fontSizeMin = 0f;
-        float xLerp = __instance.XRange.Lerp(0.5f);
-        float yLerp = __instance.YStart - hatIndex / __instance.NumPerRow * __instance.YOffset;
+        var xLerp = __instance.XRange.Lerp(0.5f);
+        var yLerp = __instance.YStart - __instance.YOffset;
         text.transform.localPosition = new Vector3(xLerp, yLerp, -1f);
 
         hatIndex += 5;
         foreach (var visor in visors.OrderBy(HatManager.Instance.allVisors.IndexOf))
         {
-            float hatXposition = __instance.XRange.Lerp(hatIndex % __instance.NumPerRow / (__instance.NumPerRow - 1f));
-            float hatYposition = __instance.YStart - hatIndex / __instance.NumPerRow * __instance.YOffset;
-            GenerateColorChip(__instance, new Vector2(hatXposition, hatYposition), visor);
+            var hatXPosition = __instance.XRange.Lerp(hatIndex % __instance.NumPerRow / (__instance.NumPerRow - 1f));
+            // ReSharper disable once PossibleLossOfFraction (Justification: Intended.)
+            var hatYPosition = __instance.YStart - hatIndex / __instance.NumPerRow * __instance.YOffset;
+            GenerateColorChip(__instance, new Vector2(hatXPosition, hatYPosition), visor);
             hatIndex += 1;
         }
 

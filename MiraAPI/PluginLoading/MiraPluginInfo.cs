@@ -76,14 +76,14 @@ public class MiraPluginInfo
 
     internal void SavePublicCollections()
     {
-        Presets = [..InternalPresets];
-        Modifiers = [..InternalModifiers];
-        OptionGroups = [..InternalOptionGroups];
-        Options = [..InternalOptions];
+        Presets = [.. InternalPresets];
+        Modifiers = [.. InternalModifiers];
+        OptionGroups = [.. InternalOptionGroups];
+        Options = [.. InternalOptions];
         Roles = new ReadOnlyDictionary<ushort, RoleBehaviour>(InternalRoles);
-        Buttons = [..InternalButtons];
-        MeetingButtons = [..InternalMeetingButtons];
-        TargetedMeetingButtons = [..InternalTargetedMeetingButtons];
+        Buttons = [.. InternalButtons];
+        MeetingButtons = [.. InternalMeetingButtons];
+        TargetedMeetingButtons = [.. InternalTargetedMeetingButtons];
     }
 
     internal List<OptionPreset> InternalPresets { get; } = [];

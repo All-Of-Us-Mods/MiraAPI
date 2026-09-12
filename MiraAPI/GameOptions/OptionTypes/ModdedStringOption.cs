@@ -5,7 +5,6 @@ using System.Text;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using MiraAPI.Networking;
 using MiraAPI.Translation;
-using Reactor.Localization.Utilities;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -31,14 +30,14 @@ public class ModdedStringOption : ModdedOption<string>
     /// </summary>
     /// <param name="value">The option's string value.</param>
     /// <returns>The option's value in the index.</returns>
-    public int GetIndex(string value, int location)
+    public int GetIndex(string value)
     {
         if (Values.Contains(value))
         {
-            return Values.ToList().IndexOf(value);
+            return Array.IndexOf(Values, value);
         }
-        Info($"Cannot find a valid index for {value} in {location}. Returning 0 instead. Values: {string.Join(", ", Values)}");
-        return 0;
+        Info($"Cannot find a valid index for {value}. Returning -1 instead. Values: {string.Join(", ", Values)}");
+        return -1;
     }
 
     /// <summary>
@@ -55,10 +54,10 @@ public class ModdedStringOption : ModdedOption<string>
 
             var newVals = Values.ToList();
             newVals.Insert(index, value);
-            Values = newVals.ToArray();
+            Values = [.. newVals];
             var newStrVals = StringNameValues.ToList();
             newStrVals.Insert(index, MiraLocaleManager.GetOrCreateLocaleString(value));
-            StringNameValues = newStrVals.ToArray();
+            StringNameValues = [.. newStrVals];
         }
 
         if (Data != null)
@@ -66,14 +65,14 @@ public class ModdedStringOption : ModdedOption<string>
             var data = (StringGameSetting)Data;
             data.Values = StringNameValues;
 
-            data.Index = GetIndex(Value, 1);
+            data.Index = GetIndex(Value);
             if (OptionBehaviour != null)
             {
                 var strOpt = OptionBehaviour.TryCast<StringOption>();
                 if (strOpt != null)
                 {
                     strOpt.Values = StringNameValues;
-                    strOpt.Value = GetIndex(Value, 2);
+                    strOpt.Value = GetIndex(Value);
                     Warning("StringOption is valid");
                 }
                 else
@@ -101,7 +100,7 @@ public class ModdedStringOption : ModdedOption<string>
     /// <param name="defaultValue">The default value as a string.</param>
     /// <param name="values">An option list of string values to use.</param>
     /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
-    public ModdedStringOption(string title, string defaultValue, string[] values, bool includeInPreset=true) : base(title, defaultValue, includeInPreset)
+    public ModdedStringOption(string title, string defaultValue, string[] values, bool includeInPreset = true) : base(title, defaultValue, includeInPreset)
     {
         Values = values;
         Data = ScriptableObject.CreateInstance<StringGameSetting>();
@@ -109,10 +108,10 @@ public class ModdedStringOption : ModdedOption<string>
 
         data.Title = StringName;
         data.Type = global::OptionTypes.String;
-        StringNameValues = values.Select(MiraLocaleManager.GetOrCreateLocaleString).ToArray();
+        StringNameValues = [.. values.Select(MiraLocaleManager.GetOrCreateLocaleString)];
         data.Values = StringNameValues;
 
-        data.Index = GetIndex(Value, 3);
+        data.Index = GetIndex(Value);
     }
 
     /// <inheritdoc />
@@ -125,10 +124,10 @@ public class ModdedStringOption : ModdedOption<string>
         stringOption.SetUpFromData(Data, 20);
         stringOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
 
-        // SetUpFromData method doesnt work correctly so we must set the values manually
+        // SetUpFromData method doesn't work correctly so we must set the values manually
         stringOption.Title = StringName;
         stringOption.Values = (Data as StringGameSetting)?.Values ?? new Il2CppStructArray<StringNames>(0);
-        stringOption.Value = GetIndex(Value, 4);
+        stringOption.Value = GetIndex(Value);
 
         OptionBehaviour = stringOption;
         ModdedOptionsManager.CreatedStringOptions.TryAdd(stringOption, this);
@@ -163,7 +162,7 @@ public class ModdedStringOption : ModdedOption<string>
     /// <inheritdoc />
     protected override void OnValueChanged(string newValue)
     {
-        HudManager.Instance.Notifier.AddSettingsChangeMessage(StringName, Data.GetValueString(GetIndex(newValue, 5)), false);
+        HudManager.Instance.Notifier.AddSettingsChangeMessage(StringName, Data.GetValueString(GetIndex(newValue)), false);
         if (!OptionBehaviour)
         {
             return;
@@ -171,7 +170,7 @@ public class ModdedStringOption : ModdedOption<string>
 
         if (OptionBehaviour is StringOption opt)
         {
-            opt.Value = GetIndex(newValue, 5);
+            opt.Value = GetIndex(newValue);
         }
     }
 }

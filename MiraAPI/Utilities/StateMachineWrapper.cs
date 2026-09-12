@@ -53,19 +53,28 @@ public class StateMachineWrapper<T> where T : Il2CppObjectBase
     /// Gets the current state of the state machine.
     /// </summary>
     /// <returns>The current state as an integer.</returns>
-    public int GetState() => (int)_stateProperty.GetValue(_stateMachine)!;
+    public int GetState()
+    {
+        return (int)_stateProperty.GetValue(_stateMachine)!;
+    }
 
     /// <summary>
     /// Sets the current state of the state machine.
     /// </summary>
     /// <param name="newState">The new state to use.</param>
-    public void SetState(int newState) => _stateProperty.SetValue(_stateMachine, newState);
+    public void SetState(int newState)
+    {
+        _stateProperty.SetValue(_stateMachine, newState);
+    }
 
     /// <summary>
     /// Sets the newest yield return of the state machine.
     /// </summary>
     /// <param name="newReturn">The new return to use.</param>
-    public void SetRecentReturn(Object newReturn) => _currentProperty.SetValue(_stateMachine, newReturn);
+    public void SetRecentReturn(Object newReturn)
+    {
+        _currentProperty.SetValue(_stateMachine, newReturn);
+    }
 
     /// <summary>
     /// Gets a parameter of type <typeparamref name="TField"/> from the state machine by its name.

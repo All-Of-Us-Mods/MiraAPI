@@ -1,6 +1,5 @@
 ﻿using System;
 using MiraAPI.PluginLoading;
-using Reactor.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.Modifiers.Types;

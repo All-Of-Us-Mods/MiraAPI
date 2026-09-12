@@ -15,7 +15,7 @@ public static class KeybindManager
     /// <summary>
     /// Gets a list of all registered <see cref="MiraKeybind"/>s.
     /// </summary>
-    public static List<MiraKeybind> Keybinds { get; } = new();
+    public static List<MiraKeybind> Keybinds { get; } = [];
 
     [HideFromIl2Cpp]
     internal static Dictionary<Type, VanillaKeybind> VanillaKeybinds { get; set; } = [];
@@ -61,7 +61,7 @@ public static class KeybindManager
             {
                 if (!conflicts.TryGetValue(keybind.CurrentKey, out var group))
                 {
-                    conflicts.Add(keybind.CurrentKey, new List<MiraKeybind>());
+                    conflicts.Add(keybind.CurrentKey, []);
                     group = conflicts[keybind.CurrentKey];
                 }
 
@@ -79,7 +79,7 @@ public static class KeybindManager
     /// Returns all <see cref="MiraKeybind"/>s for a specified keycode.
     /// </summary>
     /// <param name="keyCode">The key to look for.</param>
-    /// /// <param name="exclusiveCheck">Should only exlusive keybinds be present.</param>
+    /// /// <param name="exclusiveCheck">Should only exclusive keybinds be present.</param>
     /// <returns>The list of <see cref="MiraKeybind"/>s.</returns>
     public static MiraKeybind[] GetKeybindsForKey(KeyboardKeyCode keyCode, bool exclusiveCheck = false)
     {
@@ -92,6 +92,6 @@ public static class KeybindManager
             }
         }
 
-        return all.ToArray();
+        return [.. all];
     }
 }

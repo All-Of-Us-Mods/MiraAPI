@@ -2,7 +2,6 @@
 using BepInEx.Configuration;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;
-using Reactor.Localization.Utilities;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -13,22 +12,18 @@ namespace MiraAPI.LocalSettings.SettingTypes;
 /// <summary>
 /// Local setting class for toggles.
 /// </summary>
-public class LocalToggleSetting : LocalSettingBase<bool>
+/// <param name="tab">The tab to create the setting in.</param>
+/// <param name="configEntry">The config entry.</param>
+/// <param name="name">The name of the setting.</param>
+/// <param name="description">The description of the setting.</param>
+public class LocalToggleSetting(
+    Type tab,
+    ConfigEntryBase configEntry,
+    string? name = null,
+    string? description = null
+) : LocalSettingBase<bool>(tab, configEntry, name, description)
 {
-    private ToggleButtonBehaviour _toggle { get; set; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="LocalToggleSetting"/> class.
-    /// </summary>
-    /// <inheritdoc/>
-    public LocalToggleSetting(
-        Type tab,
-        ConfigEntryBase configEntry,
-        string? name = null,
-        string? description = null
-        ) : base(tab, configEntry, name, description)
-    {
-    }
+    private ToggleButtonBehaviour _toggle;
 
     /// <inheritdoc />
     public override GameObject CreateOption(ToggleButtonBehaviour toggle, SlideBar slider, Transform parent, ref float offset, ref int order, bool last)
@@ -55,13 +50,13 @@ public class LocalToggleSetting : LocalSettingBase<bool>
         toggleObject.name = Name.Translate();
         toggleObject.Background.color = GetValue() ? Tab!.TabAppearance.ToggleActiveColor : Tab!.TabAppearance.ToggleInactiveColor;
         passiveButton.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
-        rollover.OverColor = Tab!.TabAppearance.ToggleHoverColor;
+        rollover.OverColor = Tab.TabAppearance.ToggleHoverColor;
 
         passiveButton.OnClick.AddListener((UnityAction)(() =>
         {
             SetValue(!GetValue());
             toggleObject.UpdateText(GetValue());
-            toggleObject.Background.color = GetValue() ? Tab!.TabAppearance.ToggleActiveColor : Tab!.TabAppearance.ToggleInactiveColor;
+            toggleObject.Background.color = GetValue() ? Tab.TabAppearance.ToggleActiveColor : Tab.TabAppearance.ToggleInactiveColor;
         }));
         passiveButton.OnMouseOver.AddListener((UnityAction)(() =>
         {
@@ -73,7 +68,7 @@ public class LocalToggleSetting : LocalSettingBase<bool>
         passiveButton.OnMouseOut.AddListener((UnityAction)(() =>
         {
             toggleObject.UpdateText(GetValue());
-            toggleObject.Background.color = GetValue() ? Tab!.TabAppearance.ToggleActiveColor : Tab!.TabAppearance.ToggleInactiveColor;
+            toggleObject.Background.color = GetValue() ? Tab.TabAppearance.ToggleActiveColor : Tab.TabAppearance.ToggleInactiveColor;
         }));
 
         Helpers.DivideSize(toggleObject.gameObject, 1.1f);

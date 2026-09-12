@@ -11,13 +11,11 @@ internal static class TaskAddButtonPatches
     public static bool StartPrefix(TaskAddButton __instance)
     {
         // if this becomes problematic in the future, find a new method.
-        if (uint.TryParse(__instance.name, out var result))
-        {
-            __instance.Overlay.sprite = __instance.CheckImage;
-            __instance.Overlay.enabled = PlayerControl.LocalPlayer.HasModifier(result);
-            return false;
-        }
+        if (!uint.TryParse(__instance.name, out var result))
+            return true;
 
-        return true;
+        __instance.Overlay.sprite = __instance.CheckImage;
+        __instance.Overlay.enabled = PlayerControl.LocalPlayer.HasModifier(result);
+        return false;
     }
 }

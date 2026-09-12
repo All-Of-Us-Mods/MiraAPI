@@ -12,7 +12,6 @@ using MiraAPI.Presets;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
-using Reactor.Localization.Utilities;
 using Reactor.Utilities.Extensions;
 using TMPro;
 using UnityEngine;
@@ -26,12 +25,12 @@ namespace MiraAPI.Patches.Options;
 [HarmonyPatch(typeof(GameOptionsMenu))]
 internal static class GameOptionsMenuPatch
 {
-    private static List<CategoryHeaderMasked> _vanillaHeaders = new();
-    private static List<OptionBehaviour> _vanillaOptions = new();
-    private static List<OptionBehaviour> _mainOptions = new();
-    private static System.Collections.Generic.Dictionary<AbstractGameMode, System.Collections.Generic.List<AbstractOptionGroup>> _gameModeGroups = new();
-    private static System.Collections.Generic.Dictionary<AbstractGameMode, System.Collections.Generic.List<OptionBehaviour>> _gameModeOptions = new();
-    private static System.Collections.Generic.Dictionary<AbstractGameMode, System.Collections.Generic.List<CategoryHeaderMasked>> _gameModeHeaders = new();
+    private static readonly List<CategoryHeaderMasked> VanillaHeaders = new();
+    private static readonly List<OptionBehaviour> VanillaOptions = new();
+    private static readonly List<OptionBehaviour> MainOptions = new();
+    private static readonly System.Collections.Generic.Dictionary<AbstractGameMode, System.Collections.Generic.List<AbstractOptionGroup>> GameModeGroups = [];
+    private static readonly System.Collections.Generic.Dictionary<AbstractGameMode, System.Collections.Generic.List<OptionBehaviour>> GameModeOptions = [];
+    private static readonly System.Collections.Generic.Dictionary<AbstractGameMode, System.Collections.Generic.List<CategoryHeaderMasked>> GameModeHeaders = [];
     private static TextMeshPro _gamemodeDescription = null!;
     private static SpriteRenderer _modIcon = null!;
 
@@ -40,7 +39,7 @@ internal static class GameOptionsMenuPatch
     // ReSharper disable once InconsistentNaming
     public static bool InitPatch(GameOptionsMenu __instance)
     {
-        __instance.Children ??= new Il2CppSystem.Collections.Generic.List<OptionBehaviour>();
+        __instance.Children ??= new List<OptionBehaviour>();
         __instance.Children.Clear();
 
         if (MenuState.Instance.CurrentModIdx == 0)
@@ -78,12 +77,13 @@ internal static class GameOptionsMenuPatch
         return false;
     }
 
-    public static float AdditionalVanillaScrollNum;
+    private static float additionalVanillaScrollNum;
+
     internal static void ToggleGamemodeOptions(AbstractGameMode gameMode, GameOptionsMenu instance)
     {
-        float num = -1.217f;
+        var num = -1.217f;
         instance.Children.Clear();
-        foreach (var opt in _mainOptions)
+        foreach (var opt in MainOptions)
         {
             instance.Children.Add(opt);
         }
@@ -117,12 +117,12 @@ internal static class GameOptionsMenuPatch
         _gamemodeDescription.text = MiraLocaleManager.Get(gameMode.Description);
         if (gameMode.ShowNormalGameSettings)
         {
-            foreach (var opt in _vanillaHeaders)
+            foreach (var opt in VanillaHeaders)
             {
                 num -= 0.63f;
                 opt.gameObject.SetActive(true);
             }
-            foreach (var opt in _vanillaOptions)
+            foreach (var opt in VanillaOptions)
             {
                 opt.gameObject.SetActive(true);
                 instance.Children.Add(opt);
@@ -131,29 +131,29 @@ internal static class GameOptionsMenuPatch
         }
         else
         {
-            foreach (var opt in _vanillaHeaders)
+            foreach (var opt in VanillaHeaders)
             {
                 opt.gameObject.SetActive(false);
             }
-            foreach (var opt in _vanillaOptions)
+            foreach (var opt in VanillaOptions)
             {
                 opt.gameObject.SetActive(false);
             }
         }
 
-        foreach (var pair in _gameModeGroups)
+        foreach (var pair in GameModeGroups)
         {
             if (pair.Value.Count != 0)
             {
                 if (gameMode == pair.Key)
                 {
-                    foreach (var opt in _gameModeHeaders[gameMode])
+                    foreach (var opt in GameModeHeaders[gameMode])
                     {
                         num -= 0.63f;
                         opt.gameObject.SetActive(true);
                     }
 
-                    foreach (var opt in _gameModeOptions[gameMode])
+                    foreach (var opt in GameModeOptions[gameMode])
                     {
                         opt.gameObject.SetActive(true);
                         instance.Children.Add(opt);
@@ -162,12 +162,12 @@ internal static class GameOptionsMenuPatch
                 }
                 else
                 {
-                    foreach (var opt in _gameModeHeaders[pair.Key])
+                    foreach (var opt in GameModeHeaders[pair.Key])
                     {
                         opt.gameObject.SetActive(false);
                     }
 
-                    foreach (var opt in _gameModeOptions[pair.Key])
+                    foreach (var opt in GameModeOptions[pair.Key])
                     {
                         opt.gameObject.SetActive(false);
                     }
@@ -185,42 +185,37 @@ internal static class GameOptionsMenuPatch
         }
         instance.scrollBar.SetYBoundsMax(-num - 1.65f);
     }
-    
 
     private static void CreateSettings(GameOptionsMenu instance, Transform container)
     {
-        float num = 0.713f;
-        _vanillaHeaders.Clear();
-        _vanillaOptions.Clear();
-        _mainOptions.Clear();
-        _gameModeHeaders.Clear();
-        _gameModeOptions.Clear();
-        _gameModeGroups.Clear();
+        var num = 0.713f;
+        VanillaHeaders.Clear();
+        VanillaOptions.Clear();
+        MainOptions.Clear();
+        GameModeHeaders.Clear();
+        GameModeOptions.Clear();
+        GameModeGroups.Clear();
 
-        CategoryHeaderMasked gmCategory = Object.Instantiate(instance.categoryHeaderOrigin, Vector3.zero, Quaternion.identity, container);
+        var gmCategory = Object.Instantiate(instance.categoryHeaderOrigin, Vector3.zero, Quaternion.identity, container);
         gmCategory.SetHeader(GameModeOption.CustomName, 20);
         gmCategory.transform.localScale = Vector3.one * 0.63f;
         gmCategory.transform.localPosition = new Vector3(-0.903f, num, -2f);
-        GameModeOption.OptionBehaviour = Object.Instantiate(
-            instance.stringOptionOrigin,
-            Vector3.zero,
-            Quaternion.identity,
-            container);
+        GameModeOption.OptionBehaviour = Object.Instantiate(instance.stringOptionOrigin, container);
         num -= 0.63f;
         GameModeOption.OptionBehaviour.transform.localPosition = new Vector3(0.952f, num, -2f);
         GameModeOption.OptionBehaviour.SetClickMask(instance.ButtonClickMask);
-        StringGameSetting setting = ScriptableObject.CreateInstance<StringGameSetting>();
+        var setting = ScriptableObject.CreateInstance<StringGameSetting>();
         setting.Type = OptionTypes.MultipleChoice;
         setting.Title = GameModeOption.GamemodeName;
-        setting.Index = GameModeOption._lastValue;
+        setting.Index = GameModeOption.LastValue;
         setting.Values = new Il2CppStructArray<StringNames>([GameModeOption.Values[0]]);
         GameModeOption.OptionBehaviour.SetUpFromData(setting, 20);
-        GameModeOption.Set(GameModeOption._lastValue);
+        GameModeOption.Set(GameModeOption.LastValue);
         GameModeOption.OptionBehaviour.TitleText.fontSize = 3;
         instance.Children.Add(GameModeOption.OptionBehaviour);
         foreach (var optionBehaviour in instance.Children)
         {
-            _mainOptions.Add(optionBehaviour);
+            MainOptions.Add(optionBehaviour);
         }
         for (var i = 1; i < GameModeOption.Values.Count; i++)
         {
@@ -268,84 +263,40 @@ internal static class GameOptionsMenuPatch
         _gamemodeDescription.alignment = TextAlignmentOptions.Left;
 
         num -= 1.3f;
-        AdditionalVanillaScrollNum = 0f;
-        foreach (RulesCategory rulesCategory in GameManager.Instance.GameSettingsList.AllCategories)
+        additionalVanillaScrollNum = 0f;
+        foreach (var rulesCategory in GameManager.Instance.GameSettingsList.AllCategories)
         {
-            CategoryHeaderMasked categoryHeaderMasked = Object.Instantiate<CategoryHeaderMasked>(
-                instance.categoryHeaderOrigin,
-                Vector3.zero,
-                Quaternion.identity,
-                container);
+            var categoryHeaderMasked = Object.Instantiate(instance.categoryHeaderOrigin, container);
             categoryHeaderMasked.SetHeader(rulesCategory.CategoryName, 20);
             categoryHeaderMasked.transform.localScale = Vector3.one * 0.63f;
             categoryHeaderMasked.transform.localPosition = new Vector3(-0.903f, num, -2f);
-            _vanillaHeaders.Add(categoryHeaderMasked);
+            VanillaHeaders.Add(categoryHeaderMasked);
             num -= 0.63f;
-            AdditionalVanillaScrollNum -= 0.63f;
-            foreach (BaseGameSetting baseGameSetting in rulesCategory.AllGameSettings)
+            additionalVanillaScrollNum -= 0.63f;
+            foreach (var baseGameSetting in rulesCategory.AllGameSettings)
             {
-                switch (baseGameSetting.Type)
+                OptionBehaviour? optionBehaviour = baseGameSetting.Type switch
                 {
-                    case OptionTypes.Checkbox:
-                    {
-                        OptionBehaviour optionBehaviour = Object.Instantiate<ToggleOption>(
-                            instance.checkboxOrigin,
-                            Vector3.zero,
-                            Quaternion.identity,
-                            container);
-                        optionBehaviour.transform.localPosition = new Vector3(0.952f, num, -2f);
-                        optionBehaviour.SetClickMask(instance.ButtonClickMask);
-                        optionBehaviour.SetUpFromData(baseGameSetting, 20);
-                        _vanillaOptions.Add(optionBehaviour);
-                        break;
-                    }
-                    case OptionTypes.String:
-                    {
-                        OptionBehaviour optionBehaviour = Object.Instantiate<StringOption>(
-                            instance.stringOptionOrigin,
-                            Vector3.zero,
-                            Quaternion.identity,
-                            container);
-                        optionBehaviour.transform.localPosition = new Vector3(0.952f, num, -2f);
-                        optionBehaviour.SetClickMask(instance.ButtonClickMask);
-                        optionBehaviour.SetUpFromData(baseGameSetting, 20);
-                        _vanillaOptions.Add(optionBehaviour);
-                        break;
-                    }
-                    case OptionTypes.Float:
-                    case OptionTypes.Int:
-                    {
-                        OptionBehaviour optionBehaviour = Object.Instantiate<NumberOption>(
-                            instance.numberOptionOrigin,
-                            Vector3.zero,
-                            Quaternion.identity,
-                            container);
-                        optionBehaviour.transform.localPosition = new Vector3(0.952f, num, -2f);
-                        optionBehaviour.SetClickMask(instance.ButtonClickMask);
-                        optionBehaviour.SetUpFromData(baseGameSetting, 20);
-                        _vanillaOptions.Add(optionBehaviour);
-                        break;
-                    }
-                    case OptionTypes.Player:
-                    {
-                        OptionBehaviour optionBehaviour = Object.Instantiate<PlayerOption>(
-                            instance.playerOptionOrigin,
-                            Vector3.zero,
-                            Quaternion.identity,
-                            container);
-                        optionBehaviour.transform.localPosition = new Vector3(0.952f, num, -2f);
-                        optionBehaviour.SetClickMask(instance.ButtonClickMask);
-                        optionBehaviour.SetUpFromData(baseGameSetting, 20);
-                        _vanillaOptions.Add(optionBehaviour);
-                        break;
-                    }
-                }
+                    OptionTypes.Checkbox => Object.Instantiate(instance.checkboxOrigin, container),
+                    OptionTypes.String => Object.Instantiate(instance.stringOptionOrigin, container),
+                    OptionTypes.Float or OptionTypes.Int => Object.Instantiate(instance.numberOptionOrigin, container),
+                    OptionTypes.Player => Object.Instantiate(instance.playerOptionOrigin, container),
+                    _ => null,
+                };
+
+                if (!optionBehaviour)
+                    continue;
+
+                optionBehaviour!.transform.localPosition = new Vector3(0.952f, num, -2f);
+                optionBehaviour.SetClickMask(instance.ButtonClickMask);
+                optionBehaviour.SetUpFromData(baseGameSetting, 20);
+                VanillaOptions.Add(optionBehaviour);
 
                 num -= 0.45f;
-                AdditionalVanillaScrollNum -= 0.45f;
+                additionalVanillaScrollNum -= 0.45f;
             }
         }
-        foreach (var optionBehaviour in _vanillaOptions)
+        foreach (var optionBehaviour in VanillaOptions)
         {
             if (AmongUsClient.Instance && !AmongUsClient.Instance.AmHost)
             {
@@ -363,19 +314,22 @@ internal static class GameOptionsMenuPatch
         {
             var filteredGroups =
                 ModdedOptionsManager.GameModeOptionGroups
-                    .Where(x => x.Key == mode.GetType()).Select(y => y.Value).SelectMany(y => y) ?? [];
-            _gameModeGroups.Add(mode, filteredGroups.ToList());
+                    .Where(x => x.Key == mode.GetType())
+                    .Select(y => y.Value)
+                    .SelectMany(y => y)
+                    .ToList();
+            GameModeGroups.Add(mode, [.. filteredGroups]);
 
             var optionBehaviours = new System.Collections.Generic.List<OptionBehaviour>();
             var categoryHeaders = new System.Collections.Generic.List<CategoryHeaderMasked>();
-            var newNum = mode.ShowNormalGameSettings ? num : num - AdditionalVanillaScrollNum;
+            var newNum = mode.ShowNormalGameSettings ? num : num - additionalVanillaScrollNum;
             foreach (var group in filteredGroups)
             {
                 CreateGroup(instance, group, container, ref newNum, ref optionBehaviours, ref categoryHeaders);
                 group.Ready = true;
             }
-            _gameModeHeaders.Add(mode, categoryHeaders);
-            _gameModeOptions.Add(mode, optionBehaviours);
+            GameModeHeaders.Add(mode, categoryHeaders);
+            GameModeOptions.Add(mode, optionBehaviours);
         }
 
         instance.ControllerSelectable.Clear();
@@ -388,14 +342,14 @@ internal static class GameOptionsMenuPatch
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(GameOptionsMenu.OnEnable))]
-    public static void OpenPatch(GameOptionsMenu __instance)
+    public static void OpenPatch()
     {
         HudManager.Instance.PlayerCam.OverrideScreenShakeEnabled = false;
     }
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(GameOptionsMenu.OnDisable))]
-    public static void ClosePatch(GameOptionsMenu __instance)
+    public static void ClosePatch()
     {
         HudManager.Instance.PlayerCam.OverrideScreenShakeEnabled = true;
     }
@@ -405,7 +359,7 @@ internal static class GameOptionsMenuPatch
     // ReSharper disable once InconsistentNaming
     public static void UpdatePatch(GameOptionsMenu __instance)
     {
-        if (MenuState.Instance.CurrentModIdx == 0 && _gameModeGroups.Count <= 0)
+        if (MenuState.Instance.CurrentModIdx == 0 && GameModeGroups.Count <= 0)
         {
             return;
         }
@@ -432,7 +386,7 @@ internal static class GameOptionsMenuPatch
                 var filteredGroups =
                     MenuState.Instance.CurrentMod.InternalOptionGroups
                         .Where(x => (x.OptionableType == null || CustomGameModeManager.ActiveMode!.GetType().IsAssignableTo(x.OptionableType)) &&
-                                    x.ParentMenu == MenuCategory.Game) ?? [];
+                                    x.ParentMenu == MenuCategory.Game);
 
                 foreach (var group in filteredGroups)
                 {
@@ -551,7 +505,7 @@ internal static class GameOptionsMenuPatch
             foreach (var option in group.Options)
             {
                 if (option.OptionBehaviour != null && option.OptionBehaviour.gameObject != null)
-                    option.OptionBehaviour?.gameObject.SetActive(false);
+                    option.OptionBehaviour.gameObject.SetActive(false);
             }
 
             return;
@@ -602,10 +556,10 @@ internal static class GameOptionsMenuPatch
 
         if (mode.ShowNormalGameSettings)
         {
-            num += AdditionalVanillaScrollNum;
+            num += additionalVanillaScrollNum;
         }
 
-        if (!_gameModeGroups.TryGetValue(mode, out var groups) || groups.Count == 0)
+        if (!GameModeGroups.TryGetValue(mode, out var groups) || groups.Count == 0)
         {
             return;
         }
@@ -674,6 +628,7 @@ internal static class GameOptionsMenuPatch
         }
 
         _creationCoroutine = GameSettingMenu.Instance.StartCoroutine(CreateGroups().WrapToIl2Cpp());
+        return;
 
         IEnumerator CreateGroups()
         {
@@ -802,11 +757,16 @@ internal static class GameOptionsMenuPatch
             }
 
             menu.Children.Add(newOpt);
-            var resetBtn = new GameObject("ResetOption");
-            resetBtn.transform.parent = newOpt.transform;
-            resetBtn.transform.localScale = new(.5f, .5f, 1);
-            resetBtn.layer = LayerMask.NameToLayer("UI");
-            resetBtn.transform.localPosition = new Vector3(-3.1f, 0f, -2f);
+            var resetBtn = new GameObject("ResetOption")
+            {
+                transform =
+                {
+                    parent = newOpt.transform,
+                    localScale = new(.5f, .5f, 1),
+                    localPosition = new Vector3(-3.1f, 0f, -2f),
+                },
+                layer = LayerMask.NameToLayer("UI"),
+            };
             var resetRend = resetBtn.AddComponent<SpriteRenderer>();
             resetRend.sprite = MiraAssets.ResetButton.LoadAsset();
             resetRend.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;

@@ -81,9 +81,8 @@ public static class GameOverManager
     /// <exception cref="ArgumentException">Thrown when the type is not registered.</exception>
     public static int GetGameOverId(Type gameOverType)
     {
-        if (GameOverIds.TryGetValue(gameOverType, out var id))
-            return id;
-
-        throw new ArgumentException($"{gameOverType.FullName} is not a registered custom game over!");
+        return GameOverIds.TryGetValue(gameOverType, out var id)
+            ? id
+            : throw new ArgumentException($"{gameOverType.FullName} is not a registered custom game over!");
     }
 }

@@ -1,11 +1,10 @@
-﻿using System.Linq;
-using System.Reflection;
+﻿using System.Reflection;
 using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes;
 using MiraAPI.Events;
 using MiraAPI.Events.Vanilla.Gameplay;
-using MiraAPI.MeetingAbilities;
 using MiraAPI.GameModes;
+using MiraAPI.MeetingAbilities;
 using MiraAPI.Roles;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;

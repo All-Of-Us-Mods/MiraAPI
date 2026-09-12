@@ -3,7 +3,6 @@ using BepInEx.Configuration;
 using MiraAPI.Networking;
 using MiraAPI.PluginLoading;
 using MiraAPI.Translation;
-using Reactor.Localization.Utilities;
 using Reactor.Networking.Rpc;
 using UnityEngine;
 
@@ -119,7 +118,7 @@ public abstract class ModdedOption<T> : IModdedOption
     }
 
     /// <inheritdoc />
-    public void SaveToPreset(ConfigFile presetConfig, bool saveDefault=false)
+    public void SaveToPreset(ConfigFile presetConfig, bool saveDefault = false)
     {
         if (ConfigDefinition is null)
         {

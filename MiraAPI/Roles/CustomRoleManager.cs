@@ -10,7 +10,6 @@ using MiraAPI.PluginLoading;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
-using Reactor.Localization.Utilities;
 using Reactor.Networking.Rpc;
 using Reactor.Utilities.Extensions;
 using TMPro;
@@ -76,8 +75,8 @@ public static class CustomRoleManager
             RoleManager.GhostRoles.Add(role.Role);
         }
 
-        CustomRoleBehaviours = CustomRoles.Values.ToList();
-        CustomMiraRoles = CustomRoles.Values.OfType<ICustomRole>().ToList();
+        CustomRoleBehaviours = [.. CustomRoles.Values];
+        CustomMiraRoles = [.. CustomRoles.Values.OfType<ICustomRole>()];
     }
 
     internal static void RegisterRoleTypes(List<Type> roles, MiraPluginInfo pluginInfo)
@@ -143,18 +142,13 @@ public static class CustomRoleManager
         roleBehaviour.CanVent = customRole.Configuration.CanUseVent || customRole.Configuration.GetsVentData;
         roleBehaviour.DefaultGhostRole = customRole.Configuration.GhostRole;
         roleBehaviour.MaxCount = customRole.Configuration.MaxRoleCount;
-        if (customRole.Configuration.OptionsScreenshot != null)
-        {
-            roleBehaviour.RoleScreenshot = customRole.Configuration.OptionsScreenshot.LoadAsset();
-        }
-        else
-        {
-            roleBehaviour.RoleScreenshot = Sprite.Create(
+        roleBehaviour.RoleScreenshot = customRole.Configuration.OptionsScreenshot != null
+            ? customRole.Configuration.OptionsScreenshot.LoadAsset()
+            : Sprite.Create(
                 null,
                 new Rect(0, 0, 370, 230),
                 Vector2.one / 2,
                 100);
-        }
 
         _emptySettings ??= new(0);
         _emptyKillAnimations ??= new(0);
@@ -283,7 +277,7 @@ public static class CustomRoleManager
     internal static void HandleSyncRoleOptions(NetData[] data)
     {
         // necessary to disable then re-enable this setting
-        // we dont know how other plugins handle their configs
+        // we don't know how other plugins handle their configs
         // this way, all the options are saved at once, instead of one by one
         var oldConfigSetting = new Dictionary<MiraPluginInfo, bool>();
         foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins)

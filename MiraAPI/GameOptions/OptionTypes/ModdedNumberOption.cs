@@ -138,7 +138,7 @@ public class ModdedNumberOption : ModdedOption<float>
         SuffixType = suffixType;
         ZeroWordValue = zeroInfinity ? "∞" : "#";
         NegativeWordValue = "#";
-        ShiftIncrement = increment != 1f;
+        ShiftIncrement = Mathf.Approximately(increment, 1f);
 
         Value = Mathf.Clamp(defaultValue, min, max);
 

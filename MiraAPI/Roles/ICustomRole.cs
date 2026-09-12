@@ -21,7 +21,7 @@ public interface ICustomRole : IOptionable
     string IdPart => GetType().Name;
 
     /// <summary>
-    /// Gets the id part used to build the role's translation keys. It is recommended to call it ModGuid.Role.Faction
+    /// Gets the id part used to build the role's translation keys. It is recommended to call it ModGuid.Role.Faction.
     /// </summary>
     string IdPrefix => GetType().Namespace!;
 
@@ -138,7 +138,7 @@ public interface ICustomRole : IOptionable
     /// Binds the configuration options for this role to the provided ConfigFile.
     /// </summary>
     /// <param name="config">The ConfigFile to bind the options to.</param>
-    public virtual void BindConfig(ConfigFile config)
+    void BindConfig(ConfigFile config)
     {
         config.Bind(NumConfigDefinition, Configuration.DefaultRoleCount);
         config.Bind(ChanceConfigDefinition, Configuration.DefaultChance);
@@ -149,7 +149,7 @@ public interface ICustomRole : IOptionable
     /// </summary>
     /// <param name="presetConfig">The <see cref="ConfigFile"/> to save the preset configuration to.</param>
     /// <param name="useDefault">Whether to use the default values for the configuration.</param>
-    public virtual void SaveToPreset(ConfigFile presetConfig, bool useDefault=false)
+    void SaveToPreset(ConfigFile presetConfig, bool useDefault = false)
     {
         BindConfig(presetConfig);
         presetConfig[NumConfigDefinition].BoxedValue = useDefault ? Configuration.DefaultRoleCount : GetCount();
@@ -160,7 +160,7 @@ public interface ICustomRole : IOptionable
     /// Loads the role's configuration from a preset <see cref="ConfigFile"/>.
     /// </summary>
     /// <param name="presetConfig">The <see cref="ConfigFile"/> containing the preset configuration.</param>
-    public virtual void LoadFromPreset(ConfigFile presetConfig)
+    void LoadFromPreset(ConfigFile presetConfig)
     {
         if (presetConfig.TryGetEntry(NumConfigDefinition, out ConfigEntry<int> numEntry))
         {
@@ -177,40 +177,31 @@ public interface ICustomRole : IOptionable
     /// Gets the role chance option.
     /// </summary>
     /// <returns>The role chance option.</returns>
-    public virtual int? GetChance()
+    int? GetChance()
     {
-        if (!Configuration.CanModifyChance)
-        {
-            return Configuration.DefaultChance;
-        }
-
-        if (ParentMod.PluginConfig.TryGetEntry(ChanceConfigDefinition, out ConfigEntry<int> entry))
-        {
-            return Mathf.Clamp(entry.Value, 0, 100);
-        }
-
-        return null;
+        return !Configuration.CanModifyChance
+            ? Configuration.DefaultChance
+            : ParentMod.PluginConfig.TryGetEntry(ChanceConfigDefinition, out ConfigEntry<int> entry)
+                ? Mathf.Clamp(entry.Value, 0, 100)
+                : null;
     }
 
     /// <summary>
     /// Gets the role count option.
     /// </summary>
     /// <returns>The role count option.</returns>
-    public virtual int? GetCount()
+    int? GetCount()
     {
-        if (ParentMod.PluginConfig.TryGetEntry(NumConfigDefinition, out ConfigEntry<int> entry))
-        {
-            return Mathf.Clamp(entry.Value, 0, Configuration.MaxRoleCount);
-        }
-
-        return null;
+        return ParentMod.PluginConfig.TryGetEntry(NumConfigDefinition, out ConfigEntry<int> entry)
+            ? Mathf.Clamp(entry.Value, 0, Configuration.MaxRoleCount)
+            : null;
     }
 
     /// <summary>
     /// Sets the role chance option.
     /// </summary>
     /// <param name="chance">The chance between 0 and 100.</param>
-    public virtual void SetChance(int chance)
+    void SetChance(int chance)
     {
         if (!Configuration.CanModifyChance)
         {
@@ -231,7 +222,7 @@ public interface ICustomRole : IOptionable
     /// Sets the role count option.
     /// </summary>
     /// <param name="count">The amount of this role between zero and its MaxRoleCount in the Configuration.</param>
-    public virtual void SetCount(int count)
+    void SetCount(int count)
     {
         if (ParentMod.PluginConfig.TryGetEntry(NumConfigDefinition, out ConfigEntry<int> entry))
         {
@@ -247,7 +238,7 @@ public interface ICustomRole : IOptionable
     /// </summary>
     /// <param name="player">The player with the role.</param>
     /// <returns>Whether they can see the role (name color) or not.</returns>
-    public virtual bool CanLocalPlayerSeeRole(PlayerControl player)
+    bool CanLocalPlayerSeeRole(PlayerControl player)
     {
         return (PlayerControl.LocalPlayer.Data.Role.IsImpostor && player.Data.Role.IsImpostor) || PlayerControl.LocalPlayer.Data.IsDead;
     }
@@ -258,7 +249,7 @@ public interface ICustomRole : IOptionable
     /// <param name="instance">The intro cutscene instance.</param>
     /// <param name="yourTeam">The reference to the list of player in the team.</param>
     /// <returns><see langword="true"/> to use the original team intro code, <see langword="false"/> to skip.</returns>
-    public virtual bool SetupIntroTeam(IntroCutscene instance, ref Il2CppSystem.Collections.Generic.List<PlayerControl> yourTeam)
+    bool SetupIntroTeam(IntroCutscene instance, ref Il2CppSystem.Collections.Generic.List<PlayerControl> yourTeam)
     {
         if (Team == ModdedRoleTeams.Custom)
         {
@@ -286,7 +277,10 @@ public interface ICustomRole : IOptionable
     /// Get the custom Role Tab text for this role.
     /// </summary>
     /// <returns>A <see cref="StringBuilder"/> with the role tab text.</returns>
-    StringBuilder SetTabText() => CustomRoleUtils.CreateForRole(this);
+    StringBuilder SetTabText()
+    {
+        return CustomRoleUtils.CreateForRole(this);
+    }
 
     /// <summary>
     /// Determine whether a given <see cref="BaseModifier"/> can be applied to this role.
@@ -302,16 +296,19 @@ public interface ICustomRole : IOptionable
     /// Determines whether the role can spawn in general, accounting for gamemodes and everything else.
     /// </summary>
     /// <returns><see langword="true"/> if the role is able to spawn, otherwise <see langword="false"/>.</returns>
-    public virtual bool CanSpawnOnCurrentMode() => Configuration.AssociatedGameMode.IsInstanceOfType(CustomGameModeManager.ActiveMode);
+    bool CanSpawnOnCurrentMode()
+    {
+        return Configuration.AssociatedGameMode.IsInstanceOfType(CustomGameModeManager.ActiveMode);
+    }
 
     /// <summary>
-    /// Determines whether the role is forcibly shown or disabled in the wiki screen.
+    /// Gets whether the role is forcibly shown or disabled in the wiki screen.
     /// </summary>
     /// <returns><see langword="true"/> if the role is always displayed, otherwise <see langword="false"/> if it is never displayable, or <see langword="null"/> if it is dictated by amount and chance.</returns>
-    public virtual bool? ForceShowRoleOnWiki => null;
+    bool? ForceShowRoleOnWiki => null;
 
     /// <summary>
     /// Gets the function that determines whether the role should be toggled on or off in the game settings.
     /// </summary>
-    public virtual Func<bool> VisibleInSettings => () => true;
+    Func<bool> VisibleInSettings => () => true;
 }

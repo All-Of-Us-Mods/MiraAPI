@@ -205,58 +205,54 @@ public abstract class CustomActionButton
             }
         }));
 
-        if (Keybind != null)
+        if (Keybind == null) return;
+        Keybind.OnActivate(() =>
         {
-            Keybind.OnActivate(() =>
+            if (!Enabled(PlayerControl.LocalPlayer.Data.Role)) return;
+            // Invoke the generic button click event.
+            var genericEvent = new MiraButtonClickEvent(this);
+            MiraEventManager.InvokeEvent(genericEvent);
+            if (genericEvent.IsCancelled)
             {
-                if (Enabled(PlayerControl.LocalPlayer.Data.Role))
+                MiraEventManager.InvokeEvent(new MiraButtonCancelledEvent(this));
+            }
+
+            // Invoke the button click event for specific button.
+            var eventType = CustomButtonManager.ButtonEventTypes[GetType()];
+            var @event = (MiraCancelableEvent)Activator.CreateInstance(eventType, this, genericEvent)!;
+            var specificInvoked = MiraEventManager.InvokeEvent(@event, eventType);
+            if (@event.IsCancelled)
+            {
+                var cancelEventType = CustomButtonManager.ButtonCancelledEventTypes[GetType()];
+                var cancelEvent = (MiraEvent)Activator.CreateInstance(cancelEventType, this)!;
+                MiraEventManager.InvokeEvent(cancelEvent, cancelEventType);
+            }
+
+            if (specificInvoked)
+            {
+                if (!@event.IsCancelled)
                 {
-                    // Invoke the generic button click event.
-                    var genericEvent = new MiraButtonClickEvent(this);
-                    MiraEventManager.InvokeEvent(genericEvent);
-                    if (genericEvent.IsCancelled)
-                    {
-                        MiraEventManager.InvokeEvent(new MiraButtonCancelledEvent(this));
-                    }
-
-                    // Invoke the button click event for specific button.
-                    var eventType = CustomButtonManager.ButtonEventTypes[GetType()];
-                    var @event = (MiraCancelableEvent)Activator.CreateInstance(eventType, this, genericEvent)!;
-                    var specificInvoked = MiraEventManager.InvokeEvent(@event, eventType);
-                    if (@event.IsCancelled)
-                    {
-                        var cancelEventType = CustomButtonManager.ButtonCancelledEventTypes[GetType()];
-                        var cancelEvent = (MiraEvent)Activator.CreateInstance(cancelEventType, this)!;
-                        MiraEventManager.InvokeEvent(cancelEvent, cancelEventType);
-                    }
-
-                    if (specificInvoked)
-                    {
-                        if (!@event.IsCancelled)
-                        {
-                            ClickHandler();
-                        }
-                    }
-                    else
-                    {
-                        if (!genericEvent.IsCancelled)
-                        {
-                            ClickHandler();
-                        }
-                    }
+                    ClickHandler();
                 }
-            });
+            }
+            else
+            {
+                if (!genericEvent.IsCancelled)
+                {
+                    ClickHandler();
+                }
+            }
+        });
 
-            KeybindIcon =
-                Helpers.CreateKeybindIcon(
-                    Button.gameObject,
-                    Keybind.CurrentKey,
-                    new Vector3(0.4f, 0.45f, -9f)
-                );
-            KeybindText = KeybindIcon.transform.GetChild(0).GetComponent<TextMeshPro>();
-            HudManagerPatches.ModdedKeybindIcons.Add(KeybindText);
-            Button.usesRemainingSprite.transform.localPosition = new(-0.341f, 0.45f, -0.1f);
-        }
+        KeybindIcon =
+            Helpers.CreateKeybindIcon(
+                Button.gameObject,
+                Keybind.CurrentKey,
+                new Vector3(0.4f, 0.45f, -9f)
+            );
+        KeybindText = KeybindIcon.transform.GetChild(0).GetComponent<TextMeshPro>();
+        HudManagerPatches.ModdedKeybindIcons.Add(KeybindText);
+        Button.usesRemainingSprite.transform.localPosition = new(-0.341f, 0.45f, -0.1f);
     }
 
     /// <summary>
@@ -298,6 +294,8 @@ public abstract class CustomActionButton
             case ButtonLocation.BottomRight:
                 Button.transform.SetParent(HudManagerPatches.BottomRight);
                 break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(location), location, null);
         }
     }
 
@@ -448,7 +446,10 @@ public abstract class CustomActionButton
     /// Always <see langword="false"/> by default.
     /// </summary>
     /// <returns>Can the effect be canceled.</returns>
-    public virtual bool IsEffectCancellable() => false;
+    public virtual bool IsEffectCancellable()
+    {
+        return false;
+    }
 
     /// <summary>
     /// When the button is usable, this method is called to determine if the button can be clicked.

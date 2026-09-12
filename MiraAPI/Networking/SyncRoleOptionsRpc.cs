@@ -6,6 +6,7 @@ using Reactor.Networking.Rpc;
 namespace MiraAPI.Networking;
 
 [RegisterCustomRpc((uint)MiraRpc.SyncRoleOptions)]
+// ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated via Activator.CreateInstance.)
 internal sealed class SyncRoleOptionsRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<MiraApiPlugin, NetData[]>(plugin, id)
 {
     public override RpcLocalHandling LocalHandling => RpcLocalHandling.None;

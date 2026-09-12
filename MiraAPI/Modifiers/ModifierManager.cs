@@ -4,8 +4,8 @@ using System.Linq;
 using System.Runtime.Serialization;
 using MiraAPI.Modifiers.Types;
 using MiraAPI.PluginLoading;
-using MiraAPI.Translation;
 using MiraAPI.Roles;
+using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using Reactor.Utilities.Extensions;
 using Random = System.Random;
@@ -58,12 +58,7 @@ public static class ModifierManager
     /// <returns>The ID of the modifier.</returns>
     public static uint? GetModifierTypeId(Type type)
     {
-        if (!TypeToIdModifierMap.TryGetValue(type, out var id))
-        {
-            return null;
-        }
-
-        return id;
+        return !TypeToIdModifierMap.TryGetValue(type, out var id) ? null : id;
     }
 
     internal static bool RegisterModifier(Type modifierType, MiraPluginInfo info)
@@ -122,7 +117,7 @@ public static class ModifierManager
 
         // Filter and sort modifiers by descending priority.
         var modifiers = IdToTypeModifierMap
-            .Where(x=>x.Value.IsAssignableTo(typeof(GameModifier)))
+            .Where(x => x.Value.IsAssignableTo(typeof(GameModifier)))
             .Select(x => Activator.CreateInstance(x.Value) as GameModifier)
             .OfType<GameModifier>()
             .Where(x => x.GetAmountPerGame() > 0 && x.GetAssignmentChance() > 0)

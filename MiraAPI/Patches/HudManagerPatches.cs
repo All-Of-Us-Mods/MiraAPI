@@ -1,11 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
+using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using MiraAPI.Hud;
 using MiraAPI.Keybinds;
 using MiraAPI.LocalSettings;
-using MiraAPI.Roles;
 using MiraAPI.Utilities;
 using Reactor.Utilities;
 using Reactor.Utilities.Extensions;
@@ -29,6 +28,8 @@ public static class HudManagerPatches
 
     private static Dictionary<TextMeshPro, int> vanillaKeybindIcons = [];
 
+    [SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "This is internal and will never be used by user code.")]
+    [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "This is internal and will never be used by user code.")]
     internal static List<TextMeshPro> ModdedKeybindIcons = [];
 
     public static IEnumerator CoResizeUI()
@@ -86,48 +87,45 @@ public static class HudManagerPatches
             button.gameObject.SetActive(!button.isActiveAndEnabled);
         }
 
-        if (_storedButtonsParent)
+        if (!_storedButtonsParent) return;
+        foreach (var arrange in _storedButtonsParent.GetComponentsInChildren<GridArrange>(true))
         {
-            foreach (var arrange in _storedButtonsParent.GetComponentsInChildren<GridArrange>(true))
+            if (!arrange.gameObject || !arrange.transform)
             {
-                if (!arrange.gameObject || !arrange.transform)
-                {
-                    continue;
-                }
+                continue;
+            }
 
-                if (arrange.gameObject.name.Contains("TopRight"))
-                {
-                    continue;
-                }
+            if (arrange.gameObject.name.Contains("TopRight"))
+            {
+                continue;
+            }
 
-                arrange.gameObject.SetActive(!arrange.isActiveAndEnabled);
-                arrange.CellSize = new Vector2(scaleFactor, scaleFactor);
-                arrange.gameObject.SetActive(!arrange.isActiveAndEnabled);
-                if (arrange.isActiveAndEnabled && arrange.gameObject.transform.childCount != 0)
-                {
-                    try
-                    {
-                        arrange.ArrangeChilds();
-                    }
-                    catch
-                    {
-                        // Error($"Error arranging child objects in GridArrange: {e}");
-                    }
-                }
+            arrange.gameObject.SetActive(!arrange.isActiveAndEnabled);
+            arrange.CellSize = new Vector2(scaleFactor, scaleFactor);
+            arrange.gameObject.SetActive(!arrange.isActiveAndEnabled);
+            if (!arrange.isActiveAndEnabled || arrange.gameObject.transform.childCount == 0) continue;
+            try
+            {
+                arrange.ArrangeChilds();
+            }
+            catch
+            {
+                // Error($"Error arranging child objects in GridArrange: {e}");
             }
         }
     }
 
     /*
     /// <summary>
-    /// Trigger hudstart on current custom gamemode
+    /// Trigger HudStart on current custom gamemode
     /// </summary>
     [HarmonyPostfix]
     [HarmonyPatch(nameof(HudManager.OnGameStart))]
     public static void GameStartPatch(HudManager __instance)
     {
         CustomGameModeManager.ActiveMode?.HudStart(__instance);
-    }*/
+    }
+    */
 
     [HarmonyPrefix]
     [HarmonyPriority(Priority.First)]
@@ -155,7 +153,7 @@ public static class HudManagerPatches
     [HarmonyPriority(Priority.First)]
     [HarmonyPatch(typeof(ChatController), nameof(ChatController.Toggle))]
     [HarmonyPatch(typeof(ChatController), nameof(ChatController.Close))]
-    public static void TogglePostfix(ChatController __instance)
+    public static void TogglePostfix()
     {
         MiraHudHelper.UiGrid.ArrangeChilds();
     }
@@ -365,10 +363,7 @@ public static class HudManagerPatches
             }
         }
 
-        // suppressed warning because we want minimum allocations here
-#pragma warning disable S3267
         foreach (var entry in KeybindManager.VanillaKeybinds.Values)
-#pragma warning restore S3267
         {
             if (player.GetButtonDown(entry.Id))
             {

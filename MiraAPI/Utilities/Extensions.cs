@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -53,7 +54,6 @@ public static class Extensions
     /// <param name="self">The <see cref="Minigame"/>.</param>
     public static void BaseClose(this Minigame self)
     {
-        bool isComplete;
         if (self.amClosing == Minigame.CloseState.Closing)
         {
             self.gameObject.Destroy();
@@ -61,7 +61,7 @@ public static class Extensions
         }
         if (self.CloseSound && Constants.ShouldPlaySfx())
         {
-            SoundManager.Instance.PlaySound(self.CloseSound, false, 1f, null);
+            SoundManager.Instance.PlaySound(self.CloseSound, false);
         }
         if (PlayerControl.LocalPlayer.Data.Role.TeamType == RoleTeamTypes.Crewmate)
         {
@@ -73,19 +73,12 @@ public static class Extensions
         }
         self.amClosing = Minigame.CloseState.Closing;
         self.logger.Info(string.Concat("Closing minigame ", self.GetType().Name));
-        IAnalyticsReporter analytics = DebugAnalytics.Instance.Analytics;
-        NetworkedPlayerInfo data = PlayerControl.LocalPlayer.Data;
-        TaskTypes taskType = self.TaskType;
-        float realtimeSinceStartup = Time.realtimeSinceStartup - self.timeOpened;
-        PlayerTask myTask = self.MyTask;
-        if (myTask != null)
-        {
-            isComplete = myTask.IsComplete;
-        }
-        else
-        {
-            isComplete = false;
-        }
+        var analytics = DebugAnalytics.Instance.Analytics;
+        var data = PlayerControl.LocalPlayer.Data;
+        var taskType = self.TaskType;
+        var realtimeSinceStartup = Time.realtimeSinceStartup - self.timeOpened;
+        var myTask = self.MyTask;
+        var isComplete = myTask != null && myTask.IsComplete;
         analytics.MinigameClosed(data, taskType, realtimeSinceStartup, isComplete);
         self.StartCoroutine(self.CoDestroySelf());
     }
@@ -138,26 +131,17 @@ public static class Extensions
     /// <summary>
     /// Returns a random element from the specified sequence.
     /// </summary>
-    /// <param name="input">
-    /// The sequence to select an element from.
-    /// </param>
-    /// <typeparam name="T">
-    /// The type of elements in the sequence.
-    /// </typeparam>
-    /// <returns>
-    /// A randomly selected element from <paramref name="input"/>.
-    /// </returns>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when <paramref name="input"/> is empty.
-    /// </exception>
+    /// <param name="input">The sequence to select an element from.</param>
+    /// <typeparam name="T">The type of elements in the sequence.</typeparam>
+    /// <returns>A randomly selected element from <paramref name="input"/>.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when <paramref name="input"/> is empty.</exception>
     public static T RandomSnapshot<T>(this IEnumerable<T> input)
     {
         var list = input.ToList();
 
-        if (list.Count == 0)
-            throw new InvalidOperationException("Cannot get random element from an empty collection.");
-
-        return list[UnityEngine.Random.Range(0, list.Count)];
+        return list.Count == 0
+            ? throw new InvalidOperationException("Cannot get random element from an empty collection.")
+            : list[UnityEngine.Random.Range(0, list.Count)];
     }
 
     /// <summary>
@@ -165,14 +149,20 @@ public static class Extensions
     /// </summary>
     /// <param name="state">The <see cref="PlayerVoteArea"/>.</param>
     /// <returns>The player's <see cref="PlayerControl"/>.</returns>
-    public static PlayerControl? GetPlayer(this PlayerVoteArea state) => GameData.Instance.GetPlayerById(state.PlayerId)?.Object;
+    public static PlayerControl? GetPlayer(this PlayerVoteArea state)
+    {
+        return GameData.Instance.GetPlayerById(state.PlayerId)?.Object;
+    }
 
     /// <summary>
     /// Gets an <see langword="int"/> representing the amount of tasks a player has left.
     /// </summary>
     /// <param name="player">The player.</param>
     /// <returns>A count of how many tasks the player has left.</returns>
-    public static int GetTasksLeft(this PlayerControl player) => player.Data.Tasks.ToArray().Count(x => !x.Complete);
+    public static int GetTasksLeft(this PlayerControl player)
+    {
+        return player.Data.Tasks.ToArray().Count(x => !x.Complete);
+    }
 
     /// <summary>
     /// Checks if a <see cref="PlayerControl"/> is the game's host.
@@ -202,6 +192,7 @@ public static class Extensions
     /// <returns>The converted list.</returns>
     public static Il2CppSystem.Collections.Generic.List<T> ToIl2CppList<T>(this List<T> systemList)
     {
+        // ReSharper disable once InconsistentNaming (Justification: Acronym.)
         var il2cppList = new Il2CppSystem.Collections.Generic.List<T>();
 
         foreach (var item in systemList)
@@ -227,9 +218,11 @@ public static class Extensions
     /// </summary>
     /// <param name="obj">The <see cref="GameObject"/> to destroy.</param>
     /// <param name="clearGc">Whether to run the garbage collector immediately.</param>
+    [SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Unclear, but please shut up.")]
     public static void DeepDestroy(this GameObject obj, bool clearGc = true)
     {
         obj.Destroy();
+        // Nuke(obj, clearGc);
     }
 
     /// <summary>
@@ -270,6 +263,11 @@ public static class Extensions
         }
     }
 
+    // Left as is intentionally, did you guys mean to use it in DeepDestroy?
+    [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Not known until intent it clear.")]
+    [SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Unclear, but please shut up.")]
+    // ReSharper disable once UnusedParameter.Local (Justification: Read above.)
+    // ReSharper disable once UnusedMember.Local (Justification: Read above.)
     private static IEnumerator Nuke(GameObject? go, bool clearGc)
     {
         if (go == null)
@@ -360,6 +358,7 @@ public static class Extensions
     /// <summary>
     /// Clears up the Garbage Collector manually if necessary.
     /// </summary>
+    [SuppressMessage("Critical Code Smell", "S1215:\"GC.Collect\" should not be called", Justification = "Usage of GC.Collect is intentionally brought on by the user.")]
     public static void ClearGarbageCollector()
     {
         Resources.UnloadUnusedAssets();
@@ -370,6 +369,7 @@ public static class Extensions
     /// <summary>
     /// Gets all child objects in a parent object.
     /// </summary>
+    /// <param name="go">The object to get all children of.</param>
     /// <returns>An <see cref="IEnumerable"/> that contains <see cref="GameObject"/>s.</returns>
     public static IEnumerable<GameObject> GetAllChildren(this GameObject go)
     {
@@ -382,6 +382,7 @@ public static class Extensions
     /// <summary>
     /// Gets all child objects in a parent Transform.
     /// </summary>
+    /// <param name="go">The object to get all children of.</param>
     /// <returns>An <see cref="IEnumerable"/> that contains <see cref="GameObject"/>s.</returns>
     public static IEnumerable<GameObject> GetAllChildren(this Transform go)
     {
@@ -404,17 +405,12 @@ public static class Extensions
             return;
         }
 
-        float spriteWidth = sprite.sprite.rect.width;
-        float spriteHeight = sprite.sprite.rect.height;
+        var spriteWidth = sprite.sprite.rect.width;
+        var spriteHeight = sprite.sprite.rect.height;
 
-        if (spriteWidth < spriteHeight)
-        {
-            sprite.size = new Vector2(pixelSize * spriteWidth / spriteHeight, pixelSize);
-        }
-        else
-        {
-            sprite.size = new Vector2(pixelSize, pixelSize * spriteHeight / spriteWidth);
-        }
+        sprite.size = spriteWidth < spriteHeight
+            ? new Vector2(pixelSize * spriteWidth / spriteHeight, pixelSize)
+            : new Vector2(pixelSize, pixelSize * spriteHeight / spriteWidth);
     }
 
     /// <summary>
@@ -532,7 +528,7 @@ public static class Extensions
     /// <returns>A proper string for the <see cref="Enum"/>.</returns>
     public static string ToDisplayString(this Enum @enum)
     {
-        var regex = new Regex(@"([^\^])([A-Z][a-z$])");
+        var regex = new Regex(@"([^\^])([A-Z][a-z$])", default, Regex.InfiniteMatchTimeout);
         return regex.Replace(@enum.ToString(), m => $"{m.Groups[1].Value} {m.Groups[2].Value}");
     }
 

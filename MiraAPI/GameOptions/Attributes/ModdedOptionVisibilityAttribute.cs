@@ -10,18 +10,18 @@ namespace MiraAPI.GameOptions.Attributes;
 /// Attribute to modify a property with a <see cref="ModdedOptionAttribute"/> or <see cref="ModdedOptionListAttribute"/>.
 /// </summary>
 /// <remarks>
-/// Initializes a new instance of the <see cref="ModdedOptionVisiblityAttribute"/> class.
+/// Initializes a new instance of the <see cref="ModdedOptionVisibilityAttribute"/> class.
 /// </remarks>
 /// <param name="holderType">The type the member is in.</param>
 /// <param name="memberName">The member to get the visibility function from.</param>
 [AttributeUsage(AttributeTargets.Property)]
-public sealed class ModdedOptionVisiblityAttribute(Type? holderType = null, string? memberName = null) : Attribute
+public sealed class ModdedOptionVisibilityAttribute(Type? holderType = null, string? memberName = null) : Attribute
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedOptionVisiblityAttribute"/> class.
+    /// Initializes a new instance of the <see cref="ModdedOptionVisibilityAttribute"/> class.
     /// </summary>
     /// <param name="memberName">The member to get the visibility function from.</param>
-    public ModdedOptionVisiblityAttribute(string memberName)
+    public ModdedOptionVisibilityAttribute(string memberName)
         : this(null, memberName)
     {
     }

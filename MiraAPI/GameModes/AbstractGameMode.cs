@@ -84,15 +84,11 @@ public abstract class AbstractGameMode : IOptionable
     /// <returns>Resulting body type.</returns>
     public virtual PlayerBodyTypes GetBodyType(PlayerControl player)
     {
-        if (AprilFoolsMode.ShouldHorseAround())
-        {
-            return PlayerBodyTypes.Horse;
-        }
-        if (AprilFoolsMode.ShouldLongAround())
-        {
-            return PlayerBodyTypes.Long;
-        }
-        return PlayerBodyTypes.Normal;
+        return AprilFoolsMode.ShouldHorseAround()
+            ? PlayerBodyTypes.Horse
+            : (AprilFoolsMode.ShouldLongAround()
+                ? PlayerBodyTypes.Long
+                : PlayerBodyTypes.Normal);
     }
 
     /// <summary>
@@ -177,14 +173,17 @@ public abstract class AbstractGameMode : IOptionable
     /// Custom winner selection.
     /// </summary>
     /// <returns>List of winners or null.</returns>
-    public virtual List<NetworkedPlayerInfo>? CalculateWinners() => null;
+    public virtual List<NetworkedPlayerInfo>? CalculateWinners()
+    {
+        return null;
+    }
 
     /// <summary>
     /// The IEnumerator that plays the intro cutscene for this gamemode.
     /// </summary>
-    /// <param name="__instance">An instance of IntroCutscene.</param>
+    /// <param name="introCutscene">An instance of IntroCutscene.</param>
     /// <returns>An IEnumerator to run the intro cutscene instead of the base game one.</returns>
-    public virtual IEnumerator IntroCutscene(IntroCutscene __instance)
+    public virtual IEnumerator IntroCutscene(IntroCutscene introCutscene)
     {
         yield return new WaitForEndOfFrame();
     }
@@ -194,35 +193,50 @@ public abstract class AbstractGameMode : IOptionable
     /// </summary>
     /// <param name="console">Admin Console.</param>
     /// <returns>True if Admin console is enabled.</returns>
-    public virtual bool CanUseMapConsole(MapConsole console) => true;
+    public virtual bool CanUseMapConsole(MapConsole console)
+    {
+        return true;
+    }
 
     /// <summary>
     /// Can a body be reported in this gamemode.
     /// </summary>
     /// <param name="body">Target body for reporting.</param>
     /// <returns>True if dead bodies can be reported.</returns>
-    public virtual bool CanReport(DeadBody body) => true;
+    public virtual bool CanReport(DeadBody body)
+    {
+        return true;
+    }
 
     /// <summary>
     /// Can system consoles be used in this gamemode.
     /// </summary>
     /// <param name="console">System Console.</param>
     /// <returns>True if system consoles are enabled in this mode.</returns>
-    public virtual bool CanUseSystemConsole(SystemConsole console) => true;
+    public virtual bool CanUseSystemConsole(SystemConsole console)
+    {
+        return true;
+    }
 
     /// <summary>
     /// Can tasks be interacted with in this gamemode.
     /// </summary>
     /// <param name="console">Task console.</param>
     /// <returns>True if tasks are enabled in this mode.</returns>
-    public virtual bool CanUseTasks(Console console) => true;
+    public virtual bool CanUseTasks(Console console)
+    {
+        return true;
+    }
 
     /// <summary>
     /// Should the sabotage map be used when attempting to open sabotage overlay.
     /// </summary>
     /// <param name="map">MapBehaviour object.</param>
     /// <returns>True if the sabotage map should be shown.</returns>
-    public virtual bool ShouldShowSabotageMap(MapBehaviour map) => true;
+    public virtual bool ShouldShowSabotageMap(MapBehaviour map)
+    {
+        return true;
+    }
 
     /// <summary>
     /// Gets the <see cref="MapOptions"/> to display on the map.
@@ -244,24 +258,31 @@ public abstract class AbstractGameMode : IOptionable
     /// <param name="vent">Target vent.</param>
     /// <param name="playerInfo">Player attempting to vent.</param>
     /// <returns>True if venting is enabled in this mode.</returns>
-    public virtual bool CanVent(Vent vent, NetworkedPlayerInfo playerInfo) => true;
+    public virtual bool CanVent(Vent vent, NetworkedPlayerInfo playerInfo)
+    {
+        return true;
+    }
 
     /// <summary>
-    /// Does the task bar appear in the gamemode.
+    /// Gets a value indicating whether the task bar appears in the gamemode.
     /// </summary>
     /// <returns>True if the task bar is enabled in this mode.</returns>
     public virtual bool ShowTaskBar => true;
 
+    /// <summary>
+    /// Updates the task panel.
+    /// </summary>
+    /// <param name="instance">The task panel to update.</param>
     public virtual void UpdateTaskPanel(TaskPanelBehaviour instance)
     {
         instance.background.transform.localScale = (instance.taskText.textBounds.size.x > 0f)
             ? new Vector3(instance.taskText.textBounds.size.x + 0.2f, instance.taskText.textBounds.size.y + 0.2f, 1f)
             : Vector3.zero;
-        Vector3 vector = instance.background.sprite.bounds.extents;
+        var vector = instance.background.sprite.bounds.extents;
         vector.y = -vector.y;
         vector = vector.Mul(instance.background.transform.localScale);
         instance.background.transform.localPosition = vector;
-        Vector3 vector2 = instance.tab.sprite.bounds.extents;
+        var vector2 = instance.tab.sprite.bounds.extents;
         vector2 = vector2.Mul(instance.tab.transform.localScale);
         vector2.y = -vector2.y;
         vector2.x += vector.x * 2f;
@@ -275,14 +296,9 @@ public abstract class AbstractGameMode : IOptionable
         var xPos = -instance.background.sprite.bounds.size.x * instance.background.transform.localScale.x;
         instance.closedPosition = new Vector3(xPos, yPos, instance.closedPosition.z);
         instance.openPosition = new Vector3(instance.openPosition.x, yPos, instance.openPosition.z);
-        if (instance.open)
-        {
-            instance.timer = Mathf.Min(1f, instance.timer + Time.deltaTime / instance.animationTimeSeconds);
-        }
-        else
-        {
-            instance.timer = Mathf.Max(0f, instance.timer - Time.deltaTime / instance.animationTimeSeconds);
-        }
+        instance.timer = instance.open
+            ? Mathf.Min(1f, instance.timer + Time.deltaTime / instance.animationTimeSeconds)
+            : Mathf.Max(0f, instance.timer - Time.deltaTime / instance.animationTimeSeconds);
 
         Vector3 relativePos = new(
             Mathf.SmoothStep(instance.closedPosition.x, instance.openPosition.x, instance.timer),
@@ -293,5 +309,8 @@ public abstract class AbstractGameMode : IOptionable
     }
 
     /// <inheritdoc/>
-    public override string ToString() => Name;
+    public override string ToString()
+    {
+        return Name;
+    }
 }

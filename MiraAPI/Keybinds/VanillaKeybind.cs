@@ -8,7 +8,7 @@ namespace MiraAPI.Keybinds;
 public class VanillaKeybind : BaseKeybind
 {
     /// <summary>
-    /// Gets the <see cref="ActionButton"/> this keybind is binded to.
+    /// Gets the <see cref="ActionButton"/> this keybind is bound to.
     /// </summary>
     public ActionButton? Button { get; internal set; }
 

@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Reflection;
+﻿using System.Reflection;
 using HarmonyLib;
 using MiraAPI.Events;
 using MiraAPI.Events.Vanilla.Gameplay;
@@ -18,10 +17,8 @@ public static class FreeplayRoundStartPatch
 
     public static void Postfix(ref bool __result)
     {
-        if (!__result)
-        {
-            MeetingButtonManager.OnGameStart();
-            MiraEventManager.InvokeEvent(new RoundStartEvent(true));
-        }
+        if (__result) return;
+        MeetingButtonManager.OnGameStart();
+        MiraEventManager.InvokeEvent(new RoundStartEvent(true));
     }
 }

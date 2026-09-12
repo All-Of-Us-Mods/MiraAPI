@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using HarmonyLib;
 using Il2CppInterop.Runtime.Attributes;
@@ -19,6 +20,7 @@ namespace MiraAPI.Modifiers.ModifierDisplay;
 /// The code used to display <see cref="BaseModifier"/>s.
 /// </summary>
 [RegisterInIl2Cpp]
+[SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity Convention.")]
 public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
 {
     /// <summary>
@@ -97,15 +99,13 @@ public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
         IsOpen = false;
         _children.gameObject.SetActive(false);
 
-        if (LocalSettingsTabSingleton<MiraApiSettings>.Instance.ModifiersHudLeftSide.Value)
-        {
-            var aspect = GetComponent<AspectPosition>();
-            _toggleButton.transform.localPosition = new Vector3(-1f, 2.7f, 0f);
-            _children.transform.localPosition = new Vector3(-0.2f, -0.05f, 0f);
-            aspect.Alignment = AspectPosition.EdgeAlignments.LeftTop;
-            aspect.DistanceFromEdge = new Vector3(1.8f, 2.55f, -20f);
-            aspect.AdjustPosition();
-        }
+        if (!LocalSettingsTabSingleton<MiraApiSettings>.Instance.ModifiersHudLeftSide.Value) return;
+        var aspect = GetComponent<AspectPosition>();
+        _toggleButton.transform.localPosition = new Vector3(-1f, 2.7f, 0f);
+        _children.transform.localPosition = new Vector3(-0.2f, -0.05f, 0f);
+        aspect.Alignment = AspectPosition.EdgeAlignments.LeftTop;
+        aspect.DistanceFromEdge = new Vector3(1.8f, 2.55f, -20f);
+        aspect.AdjustPosition();
     }
 
     /// <summary>

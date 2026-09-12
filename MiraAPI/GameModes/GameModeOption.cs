@@ -1,22 +1,14 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using HarmonyLib;
-using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using MiraAPI.GameOptions;
 using MiraAPI.Networking;
 using MiraAPI.Patches.GameModes;
 using MiraAPI.Patches.Options;
 using MiraAPI.Translation;
-using MiraAPI.Utilities;
-using MiraAPI.Utilities.Assets;
-using Reactor.Localization.Utilities;
 using Reactor.Networking.Attributes;
-using Reactor.Utilities.Extensions;
-using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.ProBuilder;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.GameModes;
 
@@ -35,20 +27,23 @@ public static class GameModeOption
         get =>
             OptionBehaviour != null
                 ? OptionBehaviour.GetInt()
-                : _lastValue;
+                : LastValue;
         private set
         {
-            _lastValue = value;
+            LastValue = value;
             if (OptionBehaviour == null)
                 return;
             OptionBehaviour.Value = value;
             OptionBehaviour.UpdateValue();
-            _lastValue = value;
+            LastValue = value;
         }
     }
     internal static StringOption OptionBehaviour { get; set; } = null!;
 
-    internal static int _lastValue;
+    [SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
+    [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")] // why so many warnings???
+    internal static int LastValue;
+
     internal static readonly StringNames GamemodeName = MiraLocaleManager.GetOrCreateLocaleString("Gamemode");
     internal static readonly StringNames CustomName = MiraLocaleManager.GetOrCreateLocaleString("Custom");
     internal static readonly Dictionary<uint, StringNames> Values = new()
@@ -61,6 +56,7 @@ public static class GameModeOption
         if (!Values.ContainsKey(mode.ID))
             Values.Add(mode.ID, MiraLocaleManager.GetOrCreateLocaleString(mode.Name));
     }
+
     /*[HarmonyPatch(typeof(GameOptionsMenu), nameof(GameOptionsMenu.CreateSettings))]
     [HarmonyPostfix]
     private static void CreateSettingsPatch(GameOptionsMenu __instance)
@@ -112,7 +108,7 @@ public static class GameModeOption
         Value = val;
         var previousMode = CustomGameModeManager.ActiveMode;
         CustomGameModeManager.GetAndSetGameMode();
-        HudPatches.SetGameModeText(CustomGameModeManager.GetMode(Values.ElementAt(_lastValue).Key).ColoredName);
+        HudPatches.SetGameModeText(CustomGameModeManager.GetMode(Values.ElementAt(LastValue).Key).ColoredName);
         var gm = CustomGameModeManager.ActiveMode!;
         if (gm != previousMode)
         {
@@ -121,8 +117,7 @@ public static class GameModeOption
                 GamemodeName,
                 gm.ColoredName,
                 new Color(0.7333f, 0.7333f, 0.7333f, 1),
-                gm.TmpIcon,
-                true);
+                gm.TmpIcon);
             if (MenuState.Instance)
             {
                 // should force reset roles for gamemodes properly
@@ -132,28 +127,29 @@ public static class GameModeOption
                 }
             }
         }
-        // could make Values a dict of AbstractGameMode too
+        // TODO: could make Values a dict of AbstractGameMode too
     }
 
     [HarmonyPatch(typeof(GameOptionsMenu), nameof(GameOptionsMenu.ValueChanged))]
     [HarmonyPrefix]
     private static bool ValueChanged(GameOptionsMenu __instance, OptionBehaviour option)
     {
-        if (OptionBehaviour.Equals(option))
+        if (!OptionBehaviour.Equals(option))
+            return true;
+
+        Info($"Game mode changed to {option.GetInt()}");
+        RpcSyncGamemode(PlayerControl.LocalPlayer, option.GetInt());
+
+        if (GameSettingMenu.Instance && CustomGameModeManager.ActiveMode != null)
         {
-            Info($"Game mode changed to {option.GetInt()}");
-            RpcSyncGamemode(PlayerControl.LocalPlayer, option.GetInt());
-            if (GameSettingMenu.Instance && CustomGameModeManager.ActiveMode != null)
-            {
-                GameOptionsMenuPatch.ToggleGamemodeOptions(CustomGameModeManager.ActiveMode, __instance);
-                GameSettingMenu.Instance.RoleSettingsButton.gameObject.SetActive(CustomGameModeManager.ActiveMode.ShowNormalRoleSettings);
-            }
-            return false;
+            GameOptionsMenuPatch.ToggleGamemodeOptions(CustomGameModeManager.ActiveMode, __instance);
+            GameSettingMenu.Instance.RoleSettingsButton.gameObject.SetActive(CustomGameModeManager.ActiveMode.ShowNormalRoleSettings);
         }
-        return true;
+        return false;
     }
 
-    [MethodRpc((uint) MiraRpc.SyncGamemodeOption)]
+    [MethodRpc((uint)MiraRpc.SyncGamemodeOption)]
+    [SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Intentionally unused because the main intent is for it to be used by dependent mods to add to a blacklist.")]
     internal static void RpcSyncGamemode(PlayerControl host, int data)
     {
         Set(data);

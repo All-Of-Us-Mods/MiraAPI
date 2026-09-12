@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -37,7 +38,7 @@ public abstract class ModdedOptionListAttribute(string title) : PropertyOptionAt
             throw new InvalidOperationException($"Value set to option list cannot change the list's length.");
         }
 
-        for (int i = 0; i < list!.Count; i++)
+        for (int i = 0; i < list.Count; i++)
         {
             SetValue(i, list[i]!);
         }
@@ -73,10 +74,10 @@ public abstract class ModdedOptionListAttribute(string title) : PropertyOptionAt
     /// </summary>
     /// <param name="index">The option's index.</param>
     /// <returns>The formatted option's title.</returns>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1305:Specify IFormatProvider", Justification = "I don't even know if this is worth it.")]
+    [SuppressMessage("Globalization", "CA1305:Specify IFormatProvider", Justification = "I don't even know if this is worth it.")]
     protected string GetFormattedTitle(int index)
     {
-        Match match = Regex.Match(Title, @"\{(\d+)(?::[^}]+)?\}");
+        Match match = Regex.Match(Title, @"\{(\d+)(?::[^}]+)?\}", default, Regex.InfiniteMatchTimeout);
 
         if (match.Success)
         {

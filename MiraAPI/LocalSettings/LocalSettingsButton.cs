@@ -29,7 +29,7 @@ public class LocalSettingsButton(string text, Action onClick)
     /// </summary>
     public LocalSettingsTab? Tab { get; internal set; }
 
-    private TextMeshPro _btnText { get; set; }
+    private TextMeshPro _btnText;
 
     internal GameObject CreateButton(ToggleButtonBehaviour toggle, Transform parent, ref float offset, ref int order, bool last)
     {
@@ -59,9 +59,9 @@ public class LocalSettingsButton(string text, Action onClick)
         button.name = Text;
         button.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
         rollover.OutColor = Tab!.TabAppearance.ButtonColor;
-        rollover.OverColor = Tab!.TabAppearance.ButtonHoverColor;
+        rollover.OverColor = Tab.TabAppearance.ButtonHoverColor;
         rollover.Target = background;
-        background.color = Tab!.TabAppearance.ButtonColor;
+        background.color = Tab.TabAppearance.ButtonColor;
         button.OnClick.AddListener((UnityAction)OnClick);
 
         background.transform.localScale = new Vector3(1, 1.25f, 1);
@@ -79,6 +79,9 @@ public class LocalSettingsButton(string text, Action onClick)
         return button.gameObject;
     }
 
+    /// <summary>
+    /// Refreshes the button.
+    /// </summary>
     public void RefreshButton()
     {
         _btnText.text = Text.Translate();

@@ -36,7 +36,7 @@ internal static class ConsolePatches
     }
 
     [HarmonyPrefix, HarmonyPatch(typeof(SystemConsole), nameof(SystemConsole.CanUse))]
-    public static bool SystemCanUsePatch(SystemConsole __instance, [HarmonyArgument(0)] NetworkedPlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse)
+    public static bool SystemCanUsePatch(SystemConsole __instance, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse)
     {
         if (AmongUsClient.Instance.GameState == InnerNetClient.GameStates.Started && ShipStatus.Instance)
         {
@@ -55,7 +55,7 @@ internal static class ConsolePatches
     }
 
     [HarmonyPrefix, HarmonyPatch(typeof(MapConsole), nameof(MapConsole.CanUse))]
-    public static bool MapCanUsePatch(MapConsole __instance, [HarmonyArgument(0)] NetworkedPlayerInfo pc, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse)
+    public static bool MapCanUsePatch(MapConsole __instance, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(2)] out bool couldUse)
     {
         if (AmongUsClient.Instance.GameState == InnerNetClient.GameStates.Started && ShipStatus.Instance)
         {
@@ -76,36 +76,21 @@ internal static class ConsolePatches
     [HarmonyPrefix, HarmonyPatch(typeof(MapConsole), nameof(MapConsole.Use))]
     public static bool MapUsePatch(MapConsole __instance)
     {
-        if (AmongUsClient.Instance.GameState == InnerNetClient.GameStates.Started && ShipStatus.Instance)
-        {
-            return CustomGameModeManager.ActiveMode == null ||
+        return AmongUsClient.Instance.GameState != InnerNetClient.GameStates.Started || !ShipStatus.Instance || CustomGameModeManager.ActiveMode == null ||
                    CustomGameModeManager.ActiveMode.CanUseMapConsole(__instance);
-        }
-
-        return true;
     }
 
     [HarmonyPrefix, HarmonyPatch(typeof(SystemConsole), nameof(SystemConsole.Use))]
     public static bool SystemUsePatch(SystemConsole __instance)
     {
-        if (AmongUsClient.Instance.GameState == InnerNetClient.GameStates.Started && ShipStatus.Instance)
-        {
-            return CustomGameModeManager.ActiveMode == null ||
+        return AmongUsClient.Instance.GameState != InnerNetClient.GameStates.Started || !ShipStatus.Instance || CustomGameModeManager.ActiveMode == null ||
                    CustomGameModeManager.ActiveMode.CanUseSystemConsole(__instance);
-        }
-
-        return true;
     }
 
     [HarmonyPrefix, HarmonyPatch(typeof(Console), nameof(Console.Use))]
     public static bool ConsoleUsePatch(Console __instance)
     {
-        if (AmongUsClient.Instance.GameState == InnerNetClient.GameStates.Started && ShipStatus.Instance)
-        {
-            return CustomGameModeManager.ActiveMode == null ||
+        return AmongUsClient.Instance.GameState != InnerNetClient.GameStates.Started || !ShipStatus.Instance || CustomGameModeManager.ActiveMode == null ||
                    CustomGameModeManager.ActiveMode.CanUseTasks(__instance);
-        }
-
-        return true;
     }
 }

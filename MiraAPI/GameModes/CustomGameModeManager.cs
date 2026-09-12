@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using MiraAPI.Translation;
 using MiraAPI.PluginLoading;
-using Reactor.Utilities;
 
 namespace MiraAPI.GameModes;
 
@@ -14,7 +12,10 @@ public static class CustomGameModeManager
 {
     internal static readonly Dictionary<uint, AbstractGameMode> IdToModeMap = [];
 
-    private static uint GetNextId() => ++LastId;
+    private static uint GetNextId()
+    {
+        return ++LastId;
+    }
 
     private static uint LastId { get; set; }
 
@@ -40,13 +41,13 @@ public static class CustomGameModeManager
             return false;
         }
 
-        if (!mode.HideMode)
-        {
-            IdToModeMap.Add(GetNextId(), mode);
-            pluginInfo.GameModes.Add(LastId, mode);
-            mode.ID = LastId;
-            GameModeOption.AddOption(mode);
-        }
+        if (mode.HideMode)
+            return true;
+
+        IdToModeMap.Add(GetNextId(), mode);
+        pluginInfo.GameModes.Add(LastId, mode);
+        mode.ID = LastId;
+        GameModeOption.AddOption(mode);
         return true;
     }
 
@@ -54,20 +55,29 @@ public static class CustomGameModeManager
     /// Checks to see if the current game mode is an instance of the classic mode.
     /// </summary>
     /// <returns>True if the classic mode is the current one.</returns>
-    public static bool IsClassic() => ActiveMode != null && ActiveMode.GetType().IsAssignableTo(typeof(ClassicMode));
+    public static bool IsClassic()
+    {
+        return ActiveMode != null && ActiveMode.GetType().IsAssignableTo(typeof(ClassicMode));
+    }
 
     /// <summary>
     /// Checks to see if the current game mode is an instance of the HNS mode.
     /// </summary>
     /// <returns>True if the Hide n Seek mode is the current one.</returns>
-    public static bool IsHideNSeek() => ActiveMode != null && ActiveMode.GetType().IsAssignableTo(typeof(HideAndSeekMode));
+    public static bool IsHideNSeek()
+    {
+        return ActiveMode != null && ActiveMode.GetType().IsAssignableTo(typeof(HideAndSeekMode));
+    }
 
     /// <summary>
     /// Checks if a provided GameMode is the current active one.
     /// </summary>
     /// <typeparam name="T">The AbstractGameMode subclass being checked.</typeparam>
     /// <returns>Whether the provided mode is the current active one.</returns>
-    public static bool IsActiveGameMode<T>() where T : AbstractGameMode => ActiveMode is T;
+    public static bool IsActiveGameMode<T>() where T : AbstractGameMode
+    {
+        return ActiveMode is T;
+    }
 
     /// <summary>
     /// Gets the current gamemode.
@@ -79,7 +89,10 @@ public static class CustomGameModeManager
     /// </summary>
     /// <param name="id">The ID of the gamemode to fetch.</param>
     /// <returns>The gamemode matching that ID.</returns>
-    public static AbstractGameMode GetMode(uint id) => IdToModeMap[id];
+    public static AbstractGameMode GetMode(uint id)
+    {
+        return IdToModeMap[id];
+    }
 
     /// <summary>
     /// Finds the parent mod of a custom gamemode.
@@ -99,13 +112,14 @@ public static class CustomGameModeManager
         // because we cannot have the option be created with no values
         defaultMode.ID = 0;
         var hnsMode = new HideAndSeekMode();
-        if (!hnsMode.HideMode)
-        {
-            IdToModeMap.Add(1, hnsMode);
-            hnsMode.ID = 1;
-            GameModeOption.AddOption(hnsMode);
-            LastId++;
-        }
+
+        if (hnsMode.HideMode)
+            return;
+
+        IdToModeMap.Add(1, hnsMode);
+        hnsMode.ID = 1;
+        GameModeOption.AddOption(hnsMode);
+        LastId++;
     }
 
     internal static void GetAndSetGameMode()
@@ -119,6 +133,6 @@ public static class CustomGameModeManager
         }
 
         ActiveMode = IdToModeMap[0];
-        Logger<MiraApiPlugin>.Warning($"Unable to find game mode of id {id}!");
+        Warning($"Unable to find game mode of id {id}!");
     }
 }

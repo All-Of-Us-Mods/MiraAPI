@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Reactor.Utilities.Attributes;
 using UnityEngine;
@@ -11,76 +12,80 @@ namespace MiraAPI.Utilities.Components;
 /// </summary>
 /// <param name="iPtr">The <see cref="IntPtr"/> for the component.</param>
 [RegisterInIl2Cpp]
+[SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity Convention.")]
 public class CenteredGridArrange(IntPtr iPtr) : MonoBehaviour(iPtr)
 {
     /// <summary>
     /// Gets or sets the cell size, which is used for spacing.
     /// </summary>
-    public Vector2 CellSize;
+    public Vector2 CellSize { get; set; }
 
     /// <summary>
     /// Gets or sets the maximum amount of columns.
     /// </summary>
-    public int MaxColumns = 6;
+    public int MaxColumns { get; set; } = 6;
 
     private List<Transform> cells;
-    private static List<Transform> currentChildren = new List<Transform>();
+    private static readonly List<Transform> CurrentChildren = [];
 
     private void Start()
     {
-        cells = new List<Transform>();
-        GetChildsActive();
+        cells = [];
+        GetChildrenActive();
         CheckCurrentChildren();
     }
 
-    private void FixedUpdate() => CheckCurrentChildren();
+    private void FixedUpdate()
+    {
+        CheckCurrentChildren();
+    }
 
     private void CheckCurrentChildren()
     {
-        GetChildsActive();
-        if (cells.SequenceEqual(currentChildren))
+        GetChildrenActive();
+        if (cells.SequenceEqual(CurrentChildren))
             return;
         cells.Clear();
-        foreach (Transform currentChild in currentChildren)
+        foreach (var currentChild in CurrentChildren)
             cells.Add(currentChild);
-        ArrangeChilds();
+        ArrangeChildren();
     }
 
-    private void GetChildsActive()
+    private void GetChildrenActive()
     {
-        currentChildren.Clear();
+        CurrentChildren.Clear();
         foreach (var obj in transform)
         {
             var child = obj.TryCast<Transform>();
             if (child == null) continue;
             if (child.gameObject.activeSelf)
-                currentChildren.Add(child);
+                CurrentChildren.Add(child);
         }
     }
 
-    private void ArrangeChilds()
+    private void ArrangeChildren()
     {
         if (cells.Count == 0)
             return;
 
-        int totalRows = Mathf.CeilToInt((float)cells.Count / MaxColumns);
-        float totalHeight = (totalRows - 1) * CellSize.y;
-        float startY = transform.position.y + totalHeight * 0.5f;
+        var totalRows = Mathf.CeilToInt((float)cells.Count / MaxColumns);
+        var totalHeight = (totalRows - 1) * CellSize.y;
+        var startY = transform.position.y + totalHeight * 0.5f;
 
-        for (int index = 0; index < cells.Count; ++index)
+        for (var index = 0; index < cells.Count; ++index)
         {
-            int row = index / MaxColumns;
-            int rowStartIndex = row * MaxColumns;
-            int itemsInRow = Mathf.Min(MaxColumns, cells.Count - rowStartIndex);
-            int col = index - rowStartIndex;
+            var row = index / MaxColumns;
+            var rowStartIndex = row * MaxColumns;
+            var itemsInRow = Mathf.Min(MaxColumns, cells.Count - rowStartIndex);
+            var col = index - rowStartIndex;
 
-            float rowWidth = (itemsInRow - 1) * CellSize.x;
-            float startX = transform.position.x - rowWidth * 0.5f;
+            var rowWidth = (itemsInRow - 1) * CellSize.x;
+            var startX = transform.position.x - rowWidth * 0.5f;
 
-            float x = startX + col * CellSize.x;
-            float y = startY - row * CellSize.y;
+            var x = startX + col * CellSize.x;
+            var y = startY - row * CellSize.y;
 
-            Transform cell = cells[index];
+            var cell = cells[index];
             cell.position = new Vector3(x, y, cell.position.z);
         }
     }

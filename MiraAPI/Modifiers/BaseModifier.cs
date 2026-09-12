@@ -78,7 +78,10 @@ public abstract class BaseModifier : IOptionable
     /// Gets the HUD description for this modifier. Does nothing if <see cref="HideOnUi"/> is <see langword="true"/>. Required to be visible on UI.
     /// </summary>
     /// <returns>The description string for the HUD.</returns>
-    public virtual string GetDescription() => string.Empty;
+    public virtual string GetDescription()
+    {
+        return string.Empty;
+    }
 
     /// <summary>
     /// Called when the modifier is activated.
@@ -127,7 +130,10 @@ public abstract class BaseModifier : IOptionable
     /// Determines whether the player can vent.
     /// </summary>
     /// <returns><see langword="true"/> if the player can vent, <see langword="false"/> otherwise. <see langword="null"/> for no effect.</returns>
-    public virtual bool? CanVent() => null;
+    public virtual bool? CanVent()
+    {
+        return null;
+    }
 
     /// <summary>
     /// Removes this modifier instance from the player.

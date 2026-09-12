@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using MiraAPI.Utilities.Assets;
@@ -8,12 +7,12 @@ using UnityEngine.UI;
 namespace MiraAPI.MeetingAbilities;
 
 /// <summary>
-/// Abstract class for creating multi target meeting abilities
+/// Abstract class for creating multi target meeting abilities.
 /// </summary>
 public abstract class MultiTargetMeetingButton : TargetedMeetingButton
 {
     /// <summary>
-    /// The <see cref="LoadableAsset{Sprite}"/> used for when the button is on.
+    /// Gets he <see cref="LoadableAsset{Sprite}"/> used for when the button is on.
     /// </summary>
     public abstract LoadableAsset<Sprite> SpriteActive { get; }
 
@@ -25,7 +24,7 @@ public abstract class MultiTargetMeetingButton : TargetedMeetingButton
     /// <summary>
     /// Gets or sets all selected targets.
     /// </summary>
-    public Dictionary<PlayerVoteArea, MeetingAbilityBehaviour> Targets { get; set; } = new();
+    public Dictionary<PlayerVoteArea, MeetingAbilityBehaviour> Targets { get; set; } = [];
 
     /// <inheritdoc />
     public override void ClickHandler(MeetingAbilityBehaviour button, PlayerVoteArea playerVoteArea)
@@ -57,7 +56,7 @@ public abstract class MultiTargetMeetingButton : TargetedMeetingButton
         Timer = Cooldown;
         UsesLeft -= 1;
         OnFinish();
-        Targets = new();
+        Targets = [];
     }
 
     /// <summary>
@@ -84,7 +83,7 @@ public abstract class MultiTargetMeetingButton : TargetedMeetingButton
     /// <inheritdoc />
     public override MeetingAbilityBehaviour CreateButton(PlayerVoteArea playerVoteArea)
     {
-        Targets = new();
+        Targets = [];
         var button = base.CreateButton(playerVoteArea);
         button.Button.OnClick = new Button.ButtonClickedEvent();
         button.Button.OnClick.AddListener(new System.Action(() => { ClickHandler(button, playerVoteArea); }));

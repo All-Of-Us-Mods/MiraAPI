@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 
 namespace MiraAPI.Patches.Stubs;
@@ -7,6 +8,7 @@ namespace MiraAPI.Patches.Stubs;
 /// Reverse patches for <see cref="Minigame"/>s.
 /// </summary>
 [HarmonyPatch]
+[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Stub parameters.")]
 public static class MinigameStubs
 {
     /// <summary>
@@ -29,6 +31,7 @@ public static class MinigameStubs
     [HarmonyReversePatch]
     [HarmonyPatch(typeof(Minigame), nameof(Minigame.Close), [])]
     [MethodImpl(MethodImplOptions.NoInlining)]
+    [SuppressMessage("Minor Code Smell", "S3878:Arrays should not be created for params parameters", Justification = "Prevents ambiguity errors.")]
     public static void Close(Minigame instance)
     {
         // nothing needed

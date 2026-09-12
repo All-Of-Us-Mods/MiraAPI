@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using BepInEx.Configuration;
 using HarmonyLib;
-using MiraAPI.GameOptions;
 using MiraAPI.PluginLoading;
 using MiraAPI.Presets;
 using MiraAPI.Roles;
@@ -232,7 +231,7 @@ internal static class GamePresetsTabPatches
                                 option.SaveToPreset(presetFile);
                             }
 
-                            foreach (var role in MenuState.Instance.CurrentMod.InternalRoles.Values.OfType<ICustomRole>().Where(x=>!x.Configuration.HideSettings))
+                            foreach (var role in MenuState.Instance.CurrentMod.InternalRoles.Values.OfType<ICustomRole>().Where(x => !x.Configuration.HideSettings))
                             {
                                 role.SaveToPreset(presetFile);
                             }

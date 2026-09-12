@@ -1,4 +1,5 @@
 ﻿global using static Reactor.Utilities.Logger<MiraAPI.MiraApiPlugin>;
+
 using System;
 using System.Globalization;
 using BepInEx;
@@ -24,16 +25,11 @@ namespace MiraAPI;
 [BepInProcess("Among Us.exe")]
 [BepInDependency(ReactorPlugin.Id)]
 [ReactorModFlags(ModFlags.RequireOnAllClients)]
+// ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated by BepInEx.)
 public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
 {
-    /// <inheritdoc />
-    public ConfigFile GetConfigFile()
-    {
-        return Config;
-    }
-
     /// <summary>
-    ///     Gets the specified Culture for string manipulations.
+    /// Gets the specified Culture for string manipulations.
     /// </summary>
     public static CultureInfo Culture { get; internal set; } = new("en-US");
 
@@ -84,5 +80,11 @@ public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
         IL2CPPChainloader.Instance.Finished +=
             ModCompatibility
                 .Initialize; // Initialise AFTER the mods are loaded to ensure maximum parity (no need for the soft dependency either then)
+    }
+
+    /// <inheritdoc />
+    public ConfigFile GetConfigFile()
+    {
+        return Config;
     }
 }

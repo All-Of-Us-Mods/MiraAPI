@@ -1,27 +1,44 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml;
 using MiraAPI.Utilities;
-using MonoMod.Utils;
 using Reactor.Localization.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.Translation;
 
+/// <summary>
+/// The locale manager to handle translations and more.
+/// </summary>
 public static class MiraLocaleManager
 {
     private const string LangDirectory = "mira_languages";
 
-    // Language, Xml Name, then Value
+    // Language, XML Name, then Value
+
+    /// <summary>
+    /// Gets the dictionary containing all loaded localization strings, organized by language and XML name.
+    /// </summary>
     public static Dictionary<MiraLanguage, Dictionary<string, string>> Locale { get; } = [];
+
+    /// <summary>
+    /// Gets the list of mod GUIDs that have been registered with the localization manager.
+    /// </summary>
     public static readonly List<string> RegisteredModIds = [];
 
+    /// <summary>
+    /// Gets a dictionary mapping registered string keys to their corresponding <see cref="StringNames"/> enum values.
+    /// </summary>
     public static readonly Dictionary<string, StringNames> RegisteredStringNames = [];
     internal static readonly Dictionary<StringNames, string> StringNamesLookup = [];
 
+    /// <summary>
+    /// Gets a dictionary mapping <see cref="MiraLanguage"/> values to their standard language codes.
+    /// </summary>
     public static Dictionary<MiraLanguage, string> LangList { get; } = new()
     {
         { MiraLanguage.English, "en_US" },
@@ -46,6 +63,10 @@ public static class MiraLocaleManager
         { MiraLanguage.Lithuanian, "lt_LT" }, // Custom
         { MiraLanguage.Czech, "cs_CZ" }, // Custom
     };
+
+    /// <summary>
+    /// Gets a dictionary mapping <see cref="MiraLanguage"/> values to their standard language codes.
+    /// </summary>
     public static Dictionary<MiraLanguage, string> LangCultureList { get; } = new()
     {
         { MiraLanguage.English, "en-US" },
@@ -133,6 +154,7 @@ public static class MiraLocaleManager
     /// <param name="key">The string id to find.</param>
     /// <param name="fallback">Fallback string to use if no translation is found.</param>
     /// <returns>A <see cref="string"/> based on the key provided.</returns>
+    [SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "Warning cascades into forcing the entire tree to be ternary operators.")]
     public static string Get(MiraLanguage language, string key, string fallback = "")
     {
         if (Locale.TryGetValue(language, out var translations) &&
@@ -202,11 +224,24 @@ public static class MiraLocaleManager
         return text;
     }
 
+    /// <summary>
+    /// Builds a formatted translation ID string using a mod ID, a specific ID part, and a suffix.
+    /// </summary>
+    /// <param name="modId">The mod GUID.</param>
+    /// <param name="idPart">The core part of the ID. If it starts with '#', the character is stripped.</param>
+    /// <param name="suffix">The suffix to append to the ID.</param>
+    /// <returns>A formatted translation ID <see cref="string"/>.</returns>
     public static string BuildTranslationId(string modId, string idPart, string suffix)
     {
         return idPart.StartsWith('#') ? idPart[1..] : $"{modId}.{idPart}.{suffix}";
     }
 
+    /// <summary>
+    /// Builds a formatted translation ID string using a mod ID and a specific ID part.
+    /// </summary>
+    /// <param name="modId">The mod GUID.</param>
+    /// <param name="idPart">The core part of the ID. If it starts with '#', the character is stripped.</param>
+    /// <returns>A formatted translation ID <see cref="string"/>.</returns>
     public static string BuildTranslationId(string modId, string idPart)
     {
         return idPart.StartsWith('#') ? idPart[1..] : $"{modId}.{idPart}";
@@ -217,6 +252,11 @@ public static class MiraLocaleManager
         return Path.Combine(Application.persistentDataPath, LangDirectory, modGuid);
     }
 
+    /// <summary>
+    /// Retrieves the <see cref="StringNames"/> value for a given locale string name, creating and registering a new one if it does not already exist.
+    /// </summary>
+    /// <param name="name">The name of the locale string.</param>
+    /// <returns>The corresponding <see cref="StringNames"/> value.</returns>
     public static StringNames GetOrCreateLocaleString(string name)
     {
         if (RegisteredStringNames.TryGetValue(name, out var stringName))
@@ -230,6 +270,9 @@ public static class MiraLocaleManager
         return newString;
     }
 
+    /// <summary>
+    /// Loads external locale XML files by checking predefined directories, including the plugin path, BepInEx root, game root, and registered mod directories.
+    /// </summary>
     public static void LoadExternalLocale()
     {
         CheckExternalDirectory("mira.api", BepInEx.Paths.PluginPath);
@@ -241,6 +284,11 @@ public static class MiraLocaleManager
         }
     }
 
+    /// <summary>
+    /// Checks a specific directory for XML language files and parses their contents into the <see cref="Locale"/> dictionary.
+    /// </summary>
+    /// <param name="modGuid">The mod GUID associated with the directory.</param>
+    /// <param name="dir">The directory path to search for XML files.</param>
     public static void CheckExternalDirectory(string modGuid, string dir)
     {
         Directory.CreateDirectory(dir);
@@ -262,7 +310,7 @@ public static class MiraLocaleManager
             }
             catch (Exception e)
             {
-                Error($"Failed to load external translation {filePath}: {e.Message}");
+                Error($"Failed to load external translation {filePath} for mod {modGuid}: {e.Message}");
             }
         }
     }
@@ -285,7 +333,7 @@ public static class MiraLocaleManager
             }
 
             using StreamReader reader = new(resourceStream);
-            string xmlContent = reader.ReadToEnd();
+            var xmlContent = reader.ReadToEnd();
             try
             {
                 Locale.TryAdd(locale.Key, []);
@@ -311,42 +359,47 @@ public static class MiraLocaleManager
         try
         {
             xmlDoc.LoadXml(xmlContent);
-            XmlNodeList? stringNodes = xmlDoc.SelectNodes("/resources/string");
+            var stringNodes = xmlDoc.SelectNodes("/resources/string");
 
-            if (stringNodes != null)
+            if (stringNodes == null)
             {
-                var total = 0;
-                foreach (XmlNode node in stringNodes)
-                {
-                    if (node.Attributes?["name"] != null)
-                    {
-                        string name = node.Attributes["name"]!.Value;
-                        string value = node.InnerText;
-
-                        if (string.IsNullOrEmpty(name)) continue;
-
-                        if (value.Contains('['))
-                        {
-                            value = value.Replace("[", "<");
-                        }
-
-                        if (value.Contains(']'))
-                        {
-                            value = value.Replace("]", ">");
-                        }
-
-                        value = value.Replace("<nl>", "\n").Replace("<and>", "&");
-
-                        if (loadingInternal && Locale[language].ContainsKey(name))
-                        {
-                            Error($"String for \"{name}\" in {language} was overwritten by duplicate!");
-                        }
-                        dict[name] = value;
-                        total++;
-                    }
-                }
-                Info($"Loaded {language.ToDisplayString()} translation with ({total} keys)");
+                return;
             }
+
+            var total = 0;
+
+            foreach (XmlNode node in stringNodes)
+            {
+                if (node.Attributes?["name"] == null)
+                {
+                    continue;
+                }
+
+                var name = node.Attributes["name"]!.Value;
+                var value = node.InnerText;
+
+                if (string.IsNullOrEmpty(name)) continue;
+
+                if (value.Contains('['))
+                {
+                    value = value.Replace('[', '<');
+                }
+
+                if (value.Contains(']'))
+                {
+                    value = value.Replace(']', '>');
+                }
+
+                value = value.Replace("<nl>", "\n").Replace("<and>", "&");
+
+                if (loadingInternal && Locale[language].ContainsKey(name))
+                {
+                    Error($"String for \"{name}\" in {language} was overwritten by duplicate!");
+                }
+                dict[name] = value;
+                total++;
+            }
+            Info($"Loaded {language.ToDisplayString()} translation with ({total} keys)");
         }
         catch (XmlException ex)
         {

@@ -16,5 +16,6 @@ public class ClassicMode : AbstractGameMode
     /// <inheritdoc/>
     public override string Description => "MiraApi.Gamemode.Classic.Description";
 
-    public override LoadableAsset<Sprite>? Icon => MiraAssets.ClassicGamemodeIcon;
+    /// <inheritdoc/>
+    public override LoadableAsset<Sprite> Icon => MiraAssets.ClassicGamemodeIcon;
 }

@@ -1,7 +1,3 @@
-using System;
-using MiraAPI.Events;
-using MiraAPI.Events.Mira;
-using MiraAPI.Hud;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using UnityEngine;
@@ -77,17 +73,17 @@ public abstract class MeetingActionButton
     public int UsesSoFar { get; set; }
 
     /// <summary>
-    /// Gets a value determining if the abiity is disabled upon being used.
+    /// Gets a value indicating whether the ability is disabled upon being used.
     /// </summary>
     public virtual bool DisableUponUse => false;
 
     /// <summary>
-    /// Gets a value determining if the abiity is disabled upon voting.
+    /// Gets a value indicating whether the ability is disabled upon voting.
     /// </summary>
     public virtual bool DisableUponVoting => false;
 
     /// <summary>
-    /// Gets a value determining if the abiity is hidden when votes wrapping up.
+    /// Gets a value indicating whether the ability is hidden when votes wrapping up.
     /// </summary>
     public virtual bool HideUponWrapUp => false;
 

@@ -3,6 +3,7 @@ using MiraAPI.Utilities.Assets;
 using TMPro;
 
 namespace MiraAPI.Patches;
+
 [HarmonyPatch]
 public static class TmpAwakePatch
 {

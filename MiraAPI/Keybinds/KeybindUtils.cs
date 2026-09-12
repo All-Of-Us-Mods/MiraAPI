@@ -20,12 +20,7 @@ public static class KeybindUtils
     /// <returns>The currently assigned keycode.</returns>
     public static KeyboardKeyCode GetKeycodeByKeybind(BaseKeybind keybind)
     {
-        if (keybind.RewiredInputAction == null)
-        {
-            return KeyboardKeyCode.None;
-        }
-
-        return GetKeycodeByActionId(keybind.RewiredInputAction.id);
+        return keybind.RewiredInputAction == null ? KeyboardKeyCode.None : GetKeycodeByActionId(keybind.RewiredInputAction.id);
     }
 
     /// <summary>
@@ -69,10 +64,10 @@ public static class KeybindUtils
     /// </returns>
     public static KeyboardKeyCode FindAvailableKey(KeyboardKeyCode exclude)
     {
-        foreach (KeyboardKeyCode key in Enum.GetValues<KeyboardKeyCode>())
+        foreach (var key in Enum.GetValues<KeyboardKeyCode>())
         {
             if (key == exclude) continue;
-            bool used = KeybindManager.Keybinds.Exists(e => e.DefaultKey == key);
+            var used = KeybindManager.Keybinds.Exists(e => e.DefaultKey == key);
             if (!used) return key;
         }
         return KeyboardKeyCode.None;

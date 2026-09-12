@@ -24,7 +24,8 @@ namespace MiraAPI.Patches.Freeplay;
 public static class TaskAdderPatches
 {
     private static Scroller _scroller = null!;
-    private static Dictionary<string, TaskFolder> folders = new();
+    private static readonly Dictionary<string, TaskFolder> Folders = [];
+
     public static string CrewmateName => TranslationController.Instance.GetString(StringNames.Crewmate);
     public static string ImpostorName => TranslationController.Instance.GetString(StringNames.Impostor);
     public static string NeutralName => "Neutral";
@@ -75,13 +76,13 @@ public static class TaskAdderPatches
         // var neutralFolder = __instance.CreateFolder("Neutral", __instance.Root, 2, Color.gray);
         var modifiersFolder = __instance.CreateFolder(ModifiersName, __instance.Root, 0, Color.blue);
 
-        folders.Clear();
-        folders.Add(crewmateFolder.FolderName, crewmateFolder);
-        folders.Add(impostorFolder.FolderName, impostorFolder);
+        Folders.Clear();
+        Folders.Add(crewmateFolder.FolderName, crewmateFolder);
+        Folders.Add(impostorFolder.FolderName, impostorFolder);
         // folders.Add("Neutrals", neutralFolder);
-        folders.Add(ModifiersName, modifiersFolder);
+        Folders.Add(ModifiersName, modifiersFolder);
 
-        int folderIdx = 2;
+        var folderIdx = 2;
         foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins)
         {
             var pluginFolders = new Dictionary<string, TaskFolder>();
@@ -92,10 +93,10 @@ public static class TaskAdderPatches
             {
                 var customRole = role as ICustomRole;
                 var folderName = customRole!.Configuration.FreeplayFolder;
-                if (!folders.TryGetValue(folderName, out var teamFolder))
+                if (!Folders.TryGetValue(folderName, out var teamFolder))
                 {
                     teamFolder = __instance.CreateFolder(folderName, __instance.Root, folderIdx++, customRole.IntroConfiguration?.IntroTeamColor ?? Color.gray);
-                    folders.Add(folderName, teamFolder);
+                    Folders.Add(folderName, teamFolder);
                 }
 
                 if (!pluginFolders.TryGetValue(folderName, out var pluginFolder))
@@ -130,11 +131,11 @@ public static class TaskAdderPatches
                 return false;
             }
 
-            TaskFolder crewFolder = folders["Crewmates"] =
+            var crewFolder = folders["Crewmates"] =
                 Object.Instantiate(__instance.RootFolderPrefab, __instance.transform);
             crewFolder.gameObject.SetActive(false);
             crewFolder.SetFolderColor(TaskFolder.FolderColor.Blue);
-            TaskFolder impFolder = folders["Impostors"] =
+            var impFolder = folders["Impostors"] =
                 Object.Instantiate(__instance.RootFolderPrefab, __instance.transform);
             impFolder.gameObject.SetActive(false);
             impFolder.SetFolderColor(TaskFolder.FolderColor.Red);
@@ -164,14 +165,15 @@ public static class TaskAdderPatches
             return false;
         }
 
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract (Justification: Nullable annotations of reference types do not survive compilation.)
         if (taskList == null)
         {
             return false;
         }
 
-        foreach (NormalPlayerTask normalPlayerTask in taskList)
+        foreach (var normalPlayerTask in taskList)
         {
-            SystemTypes systemTypes = normalPlayerTask.StartAt;
+            var systemTypes = normalPlayerTask.StartAt;
             if (normalPlayerTask is DivertPowerTask task)
             {
                 systemTypes = task.TargetSystem;
@@ -187,14 +189,9 @@ public static class TaskAdderPatches
                 taskFolder3 = folders[systemTypes.ToString()] = Object.Instantiate(__instance.RootFolderPrefab, __instance.transform);
                 taskFolder3.SetFolderColor(TaskFolder.FolderColor.Tan);
                 taskFolder3.gameObject.SetActive(false);
-                if (systemTypes == SystemTypes.UpperEngine)
-                {
-                    taskFolder3.FolderName = TranslationController.Instance.GetString(StringNames.Engines);
-                }
-                else
-                {
-                    taskFolder3.FolderName = TranslationController.Instance.GetString(systemTypes);
-                }
+                taskFolder3.FolderName = systemTypes == SystemTypes.UpperEngine
+                    ? TranslationController.Instance.GetString(StringNames.Engines)
+                    : TranslationController.Instance.GetString(systemTypes);
 
                 rootFolder.SubFolders.Add(taskFolder3);
             }
@@ -204,7 +201,6 @@ public static class TaskAdderPatches
 
         return false;
     }
-
 
     private static TaskFolder CreateFolder(this TaskAdderGame instance, string name, TaskFolder parent, int idx = -1, Color? color = null)
     {
@@ -250,17 +246,20 @@ public static class TaskAdderPatches
         instance.ActiveItems.Add(item.transform);
     }
 
-    private static bool IsChildOf(this TaskFolder child, TaskFolder parent) => parent.SubFolders
-        .ToArray()
-        .Any(x => x.FolderName == child.FolderName);
+    private static bool IsChildOf(this TaskFolder child, TaskFolder parent)
+    {
+        return parent.SubFolders
+            .ToArray()
+            .Any(x => x.FolderName == child.FolderName);
+    }
 
-    // yes it might be crazy patching the entire method, but i tried so many other methods and only this works :cry:
+    // yes it might be crazy patching the entire method, but I tried so many other methods and only this works :cry:
     // true -chip
     [HarmonyPrefix]
     [HarmonyPatch(nameof(TaskAdderGame.ShowFolder))]
     public static bool ShowPatch(TaskAdderGame __instance, TaskFolder taskFolder)
     {
-        StringBuilder stringBuilder = new StringBuilder(64);
+        var stringBuilder = new StringBuilder(64);
         __instance.Hierarchy.Add(taskFolder);
         foreach (var t in __instance.Hierarchy)
         {
@@ -275,12 +274,12 @@ public static class TaskAdderPatches
         __instance.ActiveItems.ToArray().Do(x => x.gameObject.DeepDestroy(false));
         __instance.ActiveItems.Clear();
 
-        float num = 0f;
-        float num2 = 0f;
-        float num3 = 0f;
+        var num = 0f;
+        var num2 = 0f;
+        var num3 = 0f;
         foreach (var t in taskFolder.SubFolders)
         {
-            TaskFolder taskFolder2 = Object.Instantiate(t, __instance.TaskParent);
+            var taskFolder2 = Object.Instantiate(t, __instance.TaskParent);
             taskFolder2.gameObject.SetActive(true);
             taskFolder2.Parent = __instance;
             taskFolder2.transform.localPosition = new Vector3(num, num2, 0f);
@@ -307,20 +306,17 @@ public static class TaskAdderPatches
             .ToArray();
         foreach (var task in list)
         {
-            TaskAddButton taskAddButton = Object.Instantiate(__instance.TaskPrefab);
+            var taskAddButton = Object.Instantiate(__instance.TaskPrefab);
             taskAddButton.MyTask = task;
             switch (task.TaskType)
             {
                 case TaskTypes.DivertPower:
-                {
                     var targetSystem = task.Cast<DivertPowerTask>().TargetSystem;
                     taskAddButton.Text.text = TranslationController.Instance.GetString(
                         StringNames.DivertPowerTo,
                         TranslationController.Instance.GetString(targetSystem));
                     break;
-                }
                 case TaskTypes.FixWeatherNode:
-                {
                     var nodeId = task.Cast<WeatherNodeTask>().NodeId;
                     taskAddButton.Text.text =
                         TranslationController.Instance.GetString(
@@ -328,7 +324,6 @@ public static class TaskAdderPatches
                         TranslationController.Instance.GetString(
                             WeatherSwitchGame.ControlNames[nodeId]);
                     break;
-                }
                 default:
                     taskAddButton.Text.text =
                         TranslationController.Instance.GetString(task.TaskType);
@@ -338,7 +333,7 @@ public static class TaskAdderPatches
             __instance.AddFileAsChildCustom(taskAddButton, ref num, ref num2, ref num3);
             if (taskAddButton != null && taskAddButton.Button != null)
             {
-                ControllerManager.Instance.AddSelectableUiElement(taskAddButton.Button, false);
+                ControllerManager.Instance.AddSelectableUiElement(taskAddButton.Button);
             }
         }
 
@@ -348,7 +343,7 @@ public static class TaskAdderPatches
             .ToArray();
         foreach (var role in roleChildren)
         {
-            TaskAddButton roleAddButton = Object.Instantiate(__instance.RoleButton);
+            var roleAddButton = Object.Instantiate(__instance.RoleButton);
             roleAddButton.SafePositionWorld = __instance.SafePositionWorld;
             roleAddButton.Text.text = role.GetRoleName();
             roleAddButton.Role = role;
@@ -373,7 +368,7 @@ public static class TaskAdderPatches
         {
             // I hate you
         }
-        if (split is ["Roles", _, _] && folders.Any(x => taskFolder.IsChildOf(x.Value)))
+        if (split is ["Roles", _, _] && Folders.Any(x => taskFolder.IsChildOf(x.Value)))
         {
             var plugin = MiraPluginManager.GetPluginByGuid(split[2]);
             if (plugin != null)
@@ -431,7 +426,7 @@ public static class TaskAdderPatches
             }
         }
 
-        if (folders.TryGetValue(ModifiersName, out var modifiersFolder) && taskFolder.IsChildOf(modifiersFolder))
+        if (Folders.TryGetValue(ModifiersName, out var modifiersFolder) && taskFolder.IsChildOf(modifiersFolder))
         {
             var plugin = MiraPluginManager.GetPluginByGuid(taskFolder.name.Replace("(Clone)", string.Empty));
             if (plugin != null)
