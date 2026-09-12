@@ -34,4 +34,10 @@
   <string name="MiraApi.RoleTeam.Impostor.Group">偽裝者職業</string>
   <string name="MiraApi.RoleTeam.Neutral.Group">中立職業</string>
   <string name="MiraApi.RoleTeam.Other">其他職業</string>
+  <string name="MiraApi.Gamemode.Classic">經典</string>
+  <string name="MiraApi.Gamemode.Classic.Description">經典的 Among Us 模式體驗!
+找出偽裝者, 或者瞞過船員。</string>
+  <string name="MiraApi.Gamemode.HideAndSeek">捉迷藏</string>
+  <string name="MiraApi.Gamemode.HideAndSeek.Description">你可以逃, 但你躲不掉!
+撐過倒計時, 或消滅所有船員。</string>
 </resources>
