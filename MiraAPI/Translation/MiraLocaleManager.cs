@@ -352,7 +352,7 @@ public static class MiraLocaleManager
         }
     }
 
-    private static void ParseXmlFile(string xmlContent, MiraLanguage language, bool loadingInternal)
+    public static void ParseXmlFile(string xmlContent, MiraLanguage language, bool loadingInternal)
     {
         var dict = Locale[language];
         XmlDocument xmlDoc = new();
