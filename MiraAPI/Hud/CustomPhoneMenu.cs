@@ -13,22 +13,6 @@ using Object = UnityEngine.Object;
 namespace MiraAPI.Hud;
 
 /// <summary>
-/// Component registered in Il2Cpp domain to handle Unity events for custom menus.
-/// </summary>
-[RegisterInIl2Cpp]
-public class CustomPhoneMenuComponent(IntPtr cppPtr) : Minigame(cppPtr)
-{
-    [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity convention.")]
-    private void OnDisable()
-    {
-        if (ControllerManager.Instance)
-        {
-            ControllerManager.Instance.CloseOverlayMenu(name);
-        }
-    }
-}
-
-/// <summary>
 /// Defines an entry in a <see cref="CustomPhoneMenu"/> with a Panel.
 /// </summary>
 public interface IMenuEntry
@@ -110,7 +94,7 @@ public abstract class CustomPhoneMenu : ICustomMenu
     /// <summary>
     /// Gets the wrapped component that the menu modifies.
     /// </summary>
-    public CustomPhoneMenuComponent Component { get; internal set; } = null!;
+    public ShapeshifterMinigame Component { get; internal set; } = null!;
 
     /// <inheritdoc/>
     public List<IMenuEntry> MenuEntries { get; protected set; } = [];
@@ -171,10 +155,9 @@ public abstract class CustomPhoneMenu : ICustomMenu
 
         var ogMenu = shapeShifterRole.TryCast<ShapeshifterRole>()!.ShapeshifterMenu;
         var newMenu = Object.Instantiate(ogMenu);
-        var component = newMenu.gameObject.AddComponent<CustomPhoneMenuComponent>();
         var customMenu = new TMenu
         {
-            Component = component,
+            Component = newMenu,
             panelPrefab = newMenu.PanelPrefab,
             xStart = newMenu.XStart,
             yStart = newMenu.YStart,
@@ -187,10 +170,6 @@ public abstract class CustomPhoneMenu : ICustomMenu
         var back = customMenu.backButton.GetComponent<PassiveButton>();
         back.OnClick.RemoveAllListeners();
         back.OnClick.AddListener((UnityAction)customMenu.Close);
-
-        component.CloseSound = newMenu.CloseSound;
-        component.logger = newMenu.logger;
-        component.OpenSound = newMenu.OpenSound;
 
         newMenu.DestroyImmediate();
 
