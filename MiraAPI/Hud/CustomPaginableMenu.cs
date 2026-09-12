@@ -1,8 +1,6 @@
-﻿using Il2CppInterop.Runtime.Attributes;
-using MiraAPI.Patches.Stubs;
+﻿using MiraAPI.Patches.Stubs;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities;
-using Reactor.Utilities.Attributes;
 using Reactor.Utilities.Extensions;
 using System;
 using System.Collections;
@@ -13,37 +11,48 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-#pragma warning disable S2365 // Properties should not make collection or array copies
+using CppCollections = Il2CppSystem.Collections.Generic;
+using Object = UnityEngine.Object;
 
 namespace MiraAPI.Hud;
 
 /// <summary>
 /// Paginable <see cref="CustomPhoneMenu"/> using the <see cref="ShapeshifterPanel"/> as a base.
 /// </summary>
-/// <param name="il2CppPtr">Used by Il2Cpp. Do not use constructor, this is a <see cref="MonoBehaviour"/>.</param>
-[RegisterInIl2Cpp]
-[SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Unity Convention")]
-[SuppressMessage("StyleCop.CSharp.NamingRules", "SA1307:Accessible fields should begin with upper-case letter", Justification = "Unity Convention")]
-[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Unity Convention")]
-public abstract class CustomPaginableMenu(IntPtr il2CppPtr) : CustomPhoneMenu<CustomPaginableMenu.MenuEntry>(il2CppPtr)
+[SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Unity convention.")]
+[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
+[SuppressMessage("StyleCop.CSharp.NamingRules", "SA1307:Accessible fields should begin with upper-case letter", Justification = "Read above.")]
+public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.MenuEntry>
 {
+    /// <summary>
+    /// Menu Entry used for when multiple pages are needed.
+    /// </summary>
+    /// <param name="Panel">The panel.</param>
+    /// <param name="SortKey">The key by which the panels are sorted.</param>
+    public record MenuEntry(ShapeshifterPanel Panel, string SortKey) : IMenuEntry;
+
+    /// <summary>
+    /// Gets the name of the menu.
+    /// </summary>
     protected abstract string Name { get; }
 
-    protected int currentPage;
-
+    /// <summary>
+    /// Gets the prefab used to generate the search field.
+    /// </summary>
     protected abstract TextBoxTMP? PrefabTextbox { get; }
+
+    /// <inheritdoc/>
+    protected override float MenuDepth => -60f;
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+    protected int currentPage;
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
     private TextBoxTMP? searchTextbox;
     private string searchText = string.Empty;
     private TextMeshPro? noResultsText;
 
     private const int ItemsPerPage = 15;
-
-    protected override float MenuDepth => -60f;
-
-    public record MenuEntry(ShapeshifterPanel Panel, string SortKey) : IMenuEntry;
 
     /// <summary>
     /// Creates a <typeparamref name="TMenu"/>.
@@ -52,14 +61,11 @@ public abstract class CustomPaginableMenu(IntPtr il2CppPtr) : CustomPhoneMenu<Cu
     /// <param name="onMouseOut">Function that can optionally be run when the mouse is moved outside a menu panel.</param>
     /// <param name="onMouseOver">Function that can optionally be run when the mouse is moved over a menu panel.</param>
     /// <returns>New <typeparamref name="TMenu"/> object.</returns>
-    protected static new TMenu Create<TMenu>(
-        PanelButtonOnMouse? onMouseOut = null,
-        PanelButtonOnMouse? onMouseOver = null
-        ) where TMenu : CustomPaginableMenu
+    protected static new TMenu Create<TMenu>(PanelButtonOnMouse? onMouseOut = null, PanelButtonOnMouse? onMouseOver = null) where TMenu : CustomPaginableMenu, new()
     {
         TMenu customMenu = CustomPhoneMenu.Create<TMenu>(onMouseOut, onMouseOver);
 
-        var nextButton = Instantiate(customMenu.backButton, customMenu.transform).gameObject;
+        var nextButton = Object.Instantiate(customMenu.backButton, customMenu.transform).gameObject;
         nextButton.transform.localPosition = new Vector3(1.85f, -2.185f, customMenu.MenuDepth);
         nextButton.transform.localScale = new Vector3(0.65f, 0.65f, 1);
         nextButton.name = "RightArrowButton";
@@ -70,7 +76,7 @@ public abstract class CustomPaginableMenu(IntPtr il2CppPtr) : CustomPhoneMenu<Cu
         passiveButton.OnClick = new Button.ButtonClickedEvent();
         passiveButton.OnClick.AddListener((UnityAction)customMenu.NextPage);
 
-        var backButton = Instantiate(nextButton, customMenu.transform).gameObject;
+        var backButton = Object.Instantiate(nextButton, customMenu.transform).gameObject;
         backButton.transform.localPosition = new Vector3(-1.85f, -2.185f, customMenu.MenuDepth);
         backButton.name = "LeftArrowButton";
         backButton.gameObject.GetComponent<CloseButtonConsoleBehaviour>().Destroy();
@@ -93,22 +99,19 @@ public abstract class CustomPaginableMenu(IntPtr il2CppPtr) : CustomPhoneMenu<Cu
             : text.Trim().ToLowerInvariant();
     }
 
-    [HideFromIl2Cpp]
     private List<MenuEntry> GetFilteredEntries()
     {
         var query = NormalizeForSearch(searchText);
-        if (string.IsNullOrEmpty(query))
-        {
-            return MenuEntries;
-        }
 
-        return MenuEntries
+        if (string.IsNullOrEmpty(query))
+            return MenuEntries;
+
+        return [.. MenuEntries
             .Where(e => e.SortKey.Contains(query, StringComparison.OrdinalIgnoreCase))
             .OrderByDescending(e => e.SortKey.Equals(query, StringComparison.OrdinalIgnoreCase))
             .ThenByDescending(e => e.SortKey.StartsWith(query, StringComparison.OrdinalIgnoreCase))
             .ThenByDescending(e => e.SortKey.Contains(query, StringComparison.OrdinalIgnoreCase))
-            .ThenBy(e => e.SortKey, StringComparer.OrdinalIgnoreCase)
-            .ToList();
+            .ThenBy(e => e.SortKey, StringComparer.OrdinalIgnoreCase)];
     }
 
     private static int GetTotalPages(int itemCount)
@@ -116,7 +119,7 @@ public abstract class CustomPaginableMenu(IntPtr il2CppPtr) : CustomPhoneMenu<Cu
         return Mathf.Max(1, Mathf.CeilToInt(itemCount / (float)ItemsPerPage));
     }
 
-    private void RefreshControllerOverlay(Il2CppSystem.Collections.Generic.List<UiElement> list)
+    private void RefreshControllerOverlay(CppCollections.List<UiElement> list)
     {
         if (ControllerManager.Instance && backButton != null)
         {
@@ -124,7 +127,6 @@ public abstract class CustomPaginableMenu(IntPtr il2CppPtr) : CustomPhoneMenu<Cu
         }
     }
 
-    [HideFromIl2Cpp]
     private IEnumerator CoRestoreFocus()
     {
         yield return null;
@@ -149,7 +151,11 @@ public abstract class CustomPaginableMenu(IntPtr il2CppPtr) : CustomPhoneMenu<Cu
         RefreshControllerOverlay(list);
     }
 
-    public Il2CppSystem.Collections.Generic.List<UiElement> ShowPage()
+    /// <summary>
+    /// Shows the current page.
+    /// </summary>
+    /// <returns>The Il2CPP list of ui elements displayed on the page.</returns>
+    public CppCollections.List<UiElement> ShowPage()
     {
         foreach (var entry in MenuEntries)
         {
@@ -162,7 +168,7 @@ public abstract class CustomPaginableMenu(IntPtr il2CppPtr) : CustomPhoneMenu<Cu
         currentPage = Mathf.Clamp(currentPage, 0, totalPages - 1);
 
         var list = filtered.Skip(currentPage * ItemsPerPage).Take(ItemsPerPage).ToList();
-        var list2 = new Il2CppSystem.Collections.Generic.List<UiElement>();
+        var list2 = new CppCollections.List<UiElement>();
 
         for (var i = 0; i < list.Count; i++)
         {
@@ -178,7 +184,9 @@ public abstract class CustomPaginableMenu(IntPtr il2CppPtr) : CustomPhoneMenu<Cu
         return list2;
     }
 
-    [HideFromIl2Cpp]
+    /// <summary>
+    /// Ensures that the search UI exists.
+    /// </summary>
     protected void EnsureSearchUi()
     {
         if (searchTextbox != null)
@@ -195,7 +203,7 @@ public abstract class CustomPaginableMenu(IntPtr il2CppPtr) : CustomPhoneMenu<Cu
         }
 
         var searchRoot = PrefabTextbox.transform.parent != null ? PrefabTextbox.transform.parent.gameObject : PrefabTextbox.gameObject;
-        var searchObj = Instantiate(searchRoot, transform);
+        var searchObj = Object.Instantiate(searchRoot, transform);
         searchObj.name = $"{Name}SearchBar";
 
         foreach (var aspect in searchObj.GetComponentsInChildren<AspectPosition>(true))
@@ -265,7 +273,7 @@ public abstract class CustomPaginableMenu(IntPtr il2CppPtr) : CustomPhoneMenu<Cu
             }
         }));
 
-        var label = Instantiate(HudManager.Instance?.TaskPanel.taskText, transform);
+        var label = Object.Instantiate(HudManager.Instance?.TaskPanel.taskText, transform);
         if (label != null)
         {
             label.name = $"{Name}SearchLabel";
@@ -282,7 +290,7 @@ public abstract class CustomPaginableMenu(IntPtr il2CppPtr) : CustomPhoneMenu<Cu
             }
         }
 
-        noResultsText = Instantiate(HudManager.Instance?.TaskPanel.taskText, transform);
+        noResultsText = Object.Instantiate(HudManager.Instance?.TaskPanel.taskText, transform);
         if (noResultsText != null)
         {
             noResultsText.name = $"{Name}NoResultsText";
@@ -294,47 +302,47 @@ public abstract class CustomPaginableMenu(IntPtr il2CppPtr) : CustomPhoneMenu<Cu
             noResultsText.gameObject.SetActive(false);
         }
 
-        if (backButton != null && searchTextbox != null)
+        if (backButton == null || searchTextbox == null)
+            return;
+
+        var clearButtonX = searchBounds.max.x + 0.2f;
+        var clearButtonY = searchBounds.center.y;
+
+        var clearObj = Object.Instantiate(backButton.gameObject, transform);
+        clearObj.name = "ClearSearchButton";
+        clearObj.transform.localScale = new Vector3(0.35f, 0.35f, 1f);
+        clearObj.transform.localPosition = new Vector3(clearButtonX, clearButtonY, -1f);
+
+        clearObj.GetComponent<CloseButtonConsoleBehaviour>()?.DestroyImmediate();
+        clearObj.GetComponent<AspectPosition>()?.DestroyImmediate();
+
+        var clearSearchButton = clearObj.GetComponent<PassiveButton>();
+        if (clearSearchButton == null)
         {
-            var clearButtonX = searchBounds.max.x + 0.2f;
-            var clearButtonY = searchBounds.center.y;
-
-            var clearObj = Instantiate(backButton.gameObject, transform);
-            clearObj.name = "ClearSearchButton";
-            clearObj.transform.localScale = new Vector3(0.35f, 0.35f, 1f);
-            clearObj.transform.localPosition = new Vector3(clearButtonX, clearButtonY, -1f);
-
-            clearObj.GetComponent<CloseButtonConsoleBehaviour>()?.DestroyImmediate();
-            clearObj.GetComponent<AspectPosition>()?.DestroyImmediate();
-
-            var clearSearchButton = clearObj.GetComponent<PassiveButton>();
-            if (clearSearchButton != null)
-            {
-                if (wikiClickSound != null)
-                {
-                    clearSearchButton.ClickSound = wikiClickSound;
-                }
-
-                clearSearchButton.OnClick.RemoveAllListeners();
-                clearSearchButton.OnClick = new Button.ButtonClickedEvent();
-                clearSearchButton.OnClick.AddListener((UnityAction)(() =>
-                {
-                    if (searchTextbox == null)
-                    {
-                        return;
-                    }
-
-                    searchTextbox.SetText(string.Empty);
-                    searchText = string.Empty;
-                    currentPage = 0;
-                    var list = ShowPage();
-                    RefreshControllerOverlay(list);
-                }));
-            }
+            return;
         }
+        if (wikiClickSound != null)
+        {
+            clearSearchButton.ClickSound = wikiClickSound;
+        }
+
+        clearSearchButton.OnClick.RemoveAllListeners();
+        clearSearchButton.OnClick = new Button.ButtonClickedEvent();
+        clearSearchButton.OnClick.AddListener((UnityAction)(() =>
+        {
+            if (searchTextbox == null)
+            {
+                return;
+            }
+
+            searchTextbox.SetText(string.Empty);
+            searchText = string.Empty;
+            currentPage = 0;
+            var list = ShowPage();
+            RefreshControllerOverlay(list);
+        }));
     }
 
-    [HideFromIl2Cpp]
     private static Bounds CalcSpriteBoundsInParentSpace(Transform parent, GameObject root)
     {
         var first = true;
@@ -342,7 +350,8 @@ public abstract class CustomPaginableMenu(IntPtr il2CppPtr) : CustomPhoneMenu<Cu
 
         foreach (var r in root.GetComponentsInChildren<SpriteRenderer>(true))
         {
-            if (r == null || r.sprite == null) continue;
+            if (r == null || r.sprite == null)
+                continue;
 
             var b = r.bounds;
             var c = b.center;
@@ -372,10 +381,9 @@ public abstract class CustomPaginableMenu(IntPtr il2CppPtr) : CustomPhoneMenu<Cu
     /// Begins/opens the custom player menu. After registering panels, it will prepare the search, pages, and open the menu.
     /// </summary>
     /// <param name="registerEntryPanels">Function where all panels should be registered.</param>
-    [HideFromIl2Cpp]
     protected void Begin(Action registerEntryPanels)
     {
-        MinigameStubs.Begin(this, null);
+        MinigameStubs.Begin(Component, null);
 
         searchText = string.Empty;
         currentPage = 0;

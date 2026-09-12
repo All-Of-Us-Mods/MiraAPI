@@ -1,30 +1,22 @@
-﻿using Il2CppInterop.Runtime.Attributes;
-using MiraAPI.Patches.Stubs;
+﻿using MiraAPI.Patches.Stubs;
 using MiraAPI.Utilities.Assets;
-using Reactor.Utilities.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-#pragma warning disable S2365 // Properties should not make collection or array copies
 
 namespace MiraAPI.Hud;
 
 /// <summary>
 /// Multi-select <see cref="CustomPhoneMenu"/> using the <see cref="ShapeshifterPanel"/> as a base.
 /// </summary>
-/// <param name="il2CppPtr">Used by Il2Cpp. Do not use constructor, this is a <see cref="MonoBehaviour"/>.</param>
 /// <typeparam name="TEntry">The type of object each entry represents.</typeparam>
-[RegisterInIl2Cpp]
-[SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Unity Convention")]
-[SuppressMessage("StyleCop.CSharp.NamingRules", "SA1307:Accessible fields should begin with upper-case letter", Justification = "Unity Convention")]
-[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Unity Convention")]
-public abstract class CustomMultiSelectMenu<TEntry>(IntPtr il2CppPtr)
-    : CustomPhoneMenu<CustomMultiSelectMenu<TEntry>.MenuEntry>(il2CppPtr) where TEntry : class
+[SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Unity convention.")]
+[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
+[SuppressMessage("StyleCop.CSharp.NamingRules", "SA1307:Accessible fields should begin with upper-case letter", Justification = "Read above.")]
+public abstract class CustomMultiSelectMenu<TEntry> : CustomPhoneMenu<CustomMultiSelectMenu<TEntry>.MenuEntry> where TEntry : class
 {
     private int totalSelections;
     private bool shouldConfirm;
@@ -37,10 +29,18 @@ public abstract class CustomMultiSelectMenu<TEntry>(IntPtr il2CppPtr)
     private Color? hoverSelectColor;
     private Color? hoverDeselectColor;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+    [SuppressMessage("Minor Code Smell", "S1104:Fields should not have public accessibility", Justification = "Unity convention.")]
     public UiElement confirmButton;
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
     private Action<List<TEntry>>? onSelection;
 
+    /// <summary>
+    /// Menu Entry used when multiple entries are at play.
+    /// </summary>
+    /// <param name="Panel">The panel of the entry.</param>
+    /// <param name="Entry">The entry itself.</param>
     public record MenuEntry(ShapeshifterPanel Panel, TEntry Entry) : IMenuEntry;
 
     /// <summary>
@@ -63,7 +63,7 @@ public abstract class CustomMultiSelectMenu<TEntry>(IntPtr il2CppPtr)
         Color? hoverDeselectColor = null,
         PanelButtonOnMouse? onMouseOut = null,
         PanelButtonOnMouse? onMouseOver = null
-        ) where TMenu : CustomMultiSelectMenu<TEntry>
+        ) where TMenu : CustomMultiSelectMenu<TEntry>, new()
     {
         TMenu customMenu = Create<TMenu>(onMouseOut, onMouseOver);
 
@@ -101,10 +101,9 @@ public abstract class CustomMultiSelectMenu<TEntry>(IntPtr il2CppPtr)
     /// <param name="totalSelections">The number of selections required.</param>
     /// <param name="shouldConfirm">Whether the entire selection should be confirmed manually.</param>
     /// <param name="canRepeat">If the same entry can be selected multiple times, else unselect entry on click.</param>
-    [HideFromIl2Cpp]
     protected void Begin(IEnumerable<TEntry> entries, Action<List<TEntry>?> onClick, int totalSelections, bool shouldConfirm, bool canRepeat = false)
     {
-        MinigameStubs.Begin(this, null);
+        MinigameStubs.Begin(Component, null);
 
         this.totalSelections = totalSelections;
         this.shouldConfirm = shouldConfirm;
@@ -118,7 +117,7 @@ public abstract class CustomMultiSelectMenu<TEntry>(IntPtr il2CppPtr)
             onClick(null);
         }));
 
-        DebugAnalytics.Instance.Analytics.MinigameOpened(PlayerControl.LocalPlayer.Data, TaskType);
+        DebugAnalytics.Instance.Analytics.MinigameOpened(PlayerControl.LocalPlayer.Data, Component.TaskType);
         var list2 = new Il2CppSystem.Collections.Generic.List<UiElement>();
         RegisterPanels(
             entries,
@@ -140,7 +139,6 @@ public abstract class CustomMultiSelectMenu<TEntry>(IntPtr il2CppPtr)
     /// <param name="entries">All entries to give the custom menu.</param>
     /// <param name="onClick">Function called when the selection is made.</param>
     /// <param name="shouldConfirm">Whether the set of both selections should be confirmed manually.</param>
-    [HideFromIl2Cpp]
     protected void Begin(IEnumerable<TEntry> entries, Action<TEntry?> onClick, bool shouldConfirm)
     {
         Begin(entries, list => onClick(list?[0]), 1, shouldConfirm);
@@ -153,7 +151,6 @@ public abstract class CustomMultiSelectMenu<TEntry>(IntPtr il2CppPtr)
     /// <param name="onClick">Function called when both selections are made.</param>
     /// <param name="shouldConfirm">Whether the set of both selections should be confirmed manually.</param>
     /// <param name="canRepeat">If the same entry can be selected both times, else unselect entry on click.</param>
-    [HideFromIl2Cpp]
     protected void Begin(IEnumerable<TEntry> entries, Action<TEntry?, TEntry?> onClick, bool shouldConfirm, bool canRepeat = false)
     {
         Begin(entries, list => onClick(list?[0], list?[1]), 2, shouldConfirm, canRepeat);
@@ -198,7 +195,7 @@ public abstract class CustomMultiSelectMenu<TEntry>(IntPtr il2CppPtr)
 
     private void OnCompleteSelection()
     {
-        onSelection!(selectedEntries.Select(se => se.Entry).ToList());
+        onSelection!([.. selectedEntries.Select(se => se.Entry)]);
     }
 
     /// <inheritdoc/>
@@ -210,7 +207,6 @@ public abstract class CustomMultiSelectMenu<TEntry>(IntPtr il2CppPtr)
     /// <inheritdoc cref="CustomPhoneMenu.SetNameplateAppearance(IMenuEntry, LoadableAsset{Sprite}?, Color?, Color?)"/>
     /// <param name="menuEntry"></param>
     /// <param name="isSelected">Whether the menu entry is actively selected.</param>
-    [HideFromIl2Cpp]
     protected void SetNameplateAppearance(IMenuEntry menuEntry, bool isSelected)
     {
         SetNameplateAppearance(
