@@ -1,8 +1,8 @@
 using System;
+using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
 using Il2CppSystem.Collections.Generic;
-using System.Linq;
 using MiraAPI.Roles;
 
 namespace MiraAPI.Patches.Roles;
@@ -71,6 +71,7 @@ public static class LogicRoleSelectionHnsPatch
                     newImpostors.Add(networkedPlayerInfo);
                     Info($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: Seeker is {networkedPlayerInfo.PlayerName}, ID: {networkedPlayerInfo.PlayerId}");
                 }
+
                 // Random Seeker
                 else
                 {
@@ -83,6 +84,7 @@ public static class LogicRoleSelectionHnsPatch
                         {
                             pseudoRandomList.PickRandom();
                         }
+
                         var networkedPlayerInfo = pseudoRandomList.PickRandom();
                         players.Remove(networkedPlayerInfo);
                         newImpostors.Add(networkedPlayerInfo);
@@ -90,6 +92,7 @@ public static class LogicRoleSelectionHnsPatch
                         Info($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: Seeker is {networkedPlayerInfo.PlayerName}, ID: {networkedPlayerInfo.PlayerId}");
                     }
                 }
+
                 Info($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: After Guaranteed Assignment");
 
                 AddGuaranteedRoles(guaranteedRoles, opts, list);
@@ -106,6 +109,7 @@ public static class LogicRoleSelectionHnsPatch
             default:
                 throw new ArgumentOutOfRangeException(nameof(team), team, null);
         }
+
         return false;
     }
 

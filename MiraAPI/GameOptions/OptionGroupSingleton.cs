@@ -7,7 +7,8 @@ namespace MiraAPI.GameOptions;
 /// Singleton for <see cref="AbstractOptionGroup"/>s.
 /// </summary>
 /// <typeparam name="T">The option group type.</typeparam>
-public static class OptionGroupSingleton<T> where T : AbstractOptionGroup
+public static class OptionGroupSingleton<T>
+    where T : AbstractOptionGroup
 {
     private static T? _instance;
 

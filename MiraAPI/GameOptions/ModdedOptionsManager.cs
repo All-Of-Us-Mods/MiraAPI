@@ -48,24 +48,14 @@ public static class ModdedOptionsManager
     public static void AddSettingsChangeMessage(NotificationPopper notif, StringNames key, string value, Color textColor, TMP_SpriteAsset? sprite, bool playSound = true)
     {
         var text = textColor.ToTextColor();
-        var item = sprite != null
-            ? TranslationController.Instance.GetString(
-                StringNames.LobbyChangeSettingNotification,
-                string.Concat(
-                    "<sprite name=\"",
-                    sprite.name,
-                    "\"><font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">",
-                    text,
-                    TranslationController.Instance.GetString(key),
-                    "</color></font>"),
-                "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">" + value + "</font>"
-            )
-            : TranslationController.Instance.GetString(
-                StringNames.LobbyChangeSettingNotification,
-                "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">" +
-                text +
-                TranslationController.Instance.GetString(key) + "</color></font>",
-                "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">" + value + "</font>");
+        var translatedKey = TranslationController.Instance.GetString(key);
+        var fontTag = "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">";
+        var spritePrefix = sprite != null ? $"<sprite name=\"{sprite.name}\">" : string.Empty;
+
+        var item = TranslationController.Instance.GetString(
+            StringNames.LobbyChangeSettingNotification,
+            $"{spritePrefix}{fontTag}{text}{translatedKey}</color></font>",
+            $"{fontTag}{value}</font>");
         notif.SettingsChangeMessageLogic(key, item, playSound);
     }
 
@@ -110,6 +100,7 @@ public static class ModdedOptionsManager
                 GameModeOptionGroups.Add(group.OptionableType, [group]);
             }
         }
+
         pluginInfo.InternalOptionGroups.Add(group);
 
         RegisterGroupInternal(group, type);
@@ -119,8 +110,7 @@ public static class ModdedOptionsManager
     [SuppressMessage(
         "Major Code Smell",
         "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields",
-        Justification = "Dynamic singleton initialization requires reflection to bypass the private field access modifier because the type is only known at runtime."
-    )]
+        Justification = "Dynamic singleton initialization requires reflection to bypass the private field access modifier because the type is only known at runtime.")]
     private static void RegisterGroupInternal(AbstractOptionGroup group, Type type)
     {
         Groups.Add(group);
@@ -248,6 +238,7 @@ public static class ModdedOptionsManager
             Error($"Failed to get option for {property.Name}");
             return;
         }
+
         if (propertyList.Count != optionList.Count)
         {
             Error("Mismatch in count between values and created options.");
@@ -285,6 +276,7 @@ public static class ModdedOptionsManager
             {
                 option.Visible = () => visibilityFunc(i);
             }
+
             RegisterOption(option, group, property.Name + i, pluginInfo);
         }
     }

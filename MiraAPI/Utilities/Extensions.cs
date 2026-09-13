@@ -59,18 +59,22 @@ public static class Extensions
             self.gameObject.Destroy();
             return;
         }
+
         if (self.CloseSound && Constants.ShouldPlaySfx())
         {
             SoundManager.Instance.PlaySound(self.CloseSound, false);
         }
+
         if (PlayerControl.LocalPlayer.Data.Role.TeamType == RoleTeamTypes.Crewmate)
         {
             GameManager.Instance.LogicMinigame.OnMinigameClose();
         }
+
         if (PlayerControl.LocalPlayer)
         {
             PlayerControl.HideCursorTemporarily();
         }
+
         self.amClosing = Minigame.CloseState.Closing;
         self.logger.Info(string.Concat("Closing minigame ", self.GetType().Name));
         var analytics = DebugAnalytics.Instance.Analytics;
@@ -101,6 +105,7 @@ public static class Extensions
             button.cooldownTimerText.gameObject.SetActive(true);
             return;
         }
+
         button.cooldownTimerText.gameObject.SetActive(false);
     }
 
@@ -125,6 +130,7 @@ public static class Extensions
         {
             button.graphic.transform.localPosition = button.position;
         }
+
         button.SetCooldownFill(num);
     }
 
@@ -222,6 +228,7 @@ public static class Extensions
     public static void DeepDestroy(this GameObject obj, bool clearGc = true)
     {
         obj.Destroy();
+
         // Nuke(obj, clearGc);
     }
 
@@ -266,9 +273,12 @@ public static class Extensions
     // Left as is intentionally, did you guys mean to use it in DeepDestroy?
     [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Not known until intent it clear.")]
     [SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Unclear, but please shut up.")]
+
+#pragma warning disable SA1515 // Single-line comment should be preceded by blank line (Justification: ReSharper suppressions.)
     // ReSharper disable once UnusedParameter.Local (Justification: Read above.)
     // ReSharper disable once UnusedMember.Local (Justification: Read above.)
     private static IEnumerator Nuke(GameObject? go, bool clearGc)
+#pragma warning restore SA1515 // Single-line comment should be preceded by blank line
     {
         if (go == null)
             yield break;
@@ -477,6 +487,7 @@ public static class Extensions
                 tie = true;
             }
         }
+
         return result;
     }
 
@@ -502,6 +513,7 @@ public static class Extensions
                 tie = true;
             }
         }
+
         return result;
     }
 
@@ -571,6 +583,7 @@ public static class Extensions
             type = type.BaseType;
             distance++;
         }
+
         return type == to ? distance : int.MaxValue;
     }
 
@@ -747,7 +760,8 @@ public static class Extensions
         float radius,
         ContactFilter2D filter,
         string? colliderTag = null,
-        Predicate<T>? predicate = null) where T : Component
+        Predicate<T>? predicate = null)
+        where T : Component
     {
         return Helpers.GetNearestObjectsOfType<T>(playerControl.GetTruePosition(), radius, filter, colliderTag)
             .Find(predicate ?? (component => component));

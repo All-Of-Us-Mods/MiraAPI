@@ -23,10 +23,14 @@ namespace MiraAPI.Modifiers.ModifierDisplay;
 [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity Convention.")]
 public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
 {
+    private const int ItemsPerPage = 3;
+
     /// <summary>
     /// Gets the instance of the <see cref="ModifierDisplayComponent"/>.
     /// </summary>
     public static ModifierDisplayComponent? Instance { get; private set; }
+
+    private readonly Dictionary<BaseModifier, ModifierUiComponent> _modifiers = [];
 
     private RectTransform _children = null!;
     private GameObject _modTemplate = null!;
@@ -39,9 +43,6 @@ public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
     private PassiveButton _backButton = null!;
 
     private int _currentPage;
-    private const int ItemsPerPage = 3;
-
-    private readonly Dictionary<BaseModifier, ModifierUiComponent> _modifiers = [];
 
     /// <summary>
     /// Gets a <see cref="ReadOnlyDictionary{TKey, TValue}"/> of the created <see cref="ModifierUiComponent"/>s.

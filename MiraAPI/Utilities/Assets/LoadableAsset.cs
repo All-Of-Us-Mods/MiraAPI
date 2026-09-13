@@ -8,7 +8,8 @@ namespace MiraAPI.Utilities.Assets;
 /// You can create your own implementation of this class to load assets in different ways.
 /// </summary>
 /// <typeparam name="T">The type of the asset to be loaded.</typeparam>
-public abstract class LoadableAsset<T> where T : UnityEngine.Object
+public abstract class LoadableAsset<T>
+    where T : UnityEngine.Object
 {
     /// <summary>
     /// Gets or sets reference to the loaded asset. Intended to be used for caching purposes.

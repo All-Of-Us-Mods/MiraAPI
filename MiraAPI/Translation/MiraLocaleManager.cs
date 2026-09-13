@@ -402,9 +402,11 @@ public static class MiraLocaleManager
                 {
                     Error($"String for \"{name}\" in {language} was overwritten by duplicate!");
                 }
+
                 dict[name] = value;
                 total++;
             }
+
             Info($"Loaded {language.ToDisplayString()} translation with ({total} keys)");
         }
         catch (XmlException ex)

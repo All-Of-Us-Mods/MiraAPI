@@ -16,6 +16,7 @@ internal static class HowToPlayPatch
         {
             return;
         }
+
         __instance.sceneIndex = 0;
         __instance.category = HowToPlayScene.HowToPlayCategory.RolesSelection;
         __instance.startPage.SetActive(false);
@@ -35,16 +36,20 @@ internal static class HowToPlayPatch
                     __instance.controllerSelectables.Add(component.GetComponent<PassiveButton>());
                 }
             }
+
             foreach (var uiElement in __instance.controllerSelectables)
             {
                 uiElement.ReceiveMouseOut();
             }
+
             ControllerManager.Instance.NewScene(__instance.name, __instance.closeButton, __instance.defaultButtonSelected, __instance.controllerSelectables);
         }
+
         __instance.DisableAllScenes();
         __instance.roleSelectionScene.SetActive(true);
         ControllerManager.Instance.SetDefaultSelection(__instance.defaultButtonSelected);
     }
+
     public static void OpenRolePage(HowToPlayScene instance, RoleTypes roleType)
     {
         instance.category = HowToPlayScene.HowToPlayCategory.Roles;
@@ -61,6 +66,7 @@ internal static class HowToPlayPatch
                 }
             }
         }
+
         instance.SetupDots(instance.rolesScenes[instance.sceneIndex].rolePages.Count);
         instance.ChangeScene(0);
     }

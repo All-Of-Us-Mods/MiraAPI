@@ -57,6 +57,7 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
                 HudManagerPatches.ResizeUI(1f / OldButtonScaleFactor);
                 HudManagerPatches.ResizeUI(ButtonUIFactorSlider.Value);
             }
+
             OldButtonScaleFactor = ButtonUIFactorSlider.Value;
         }
         else if (configEntry == TopRightButtonsFactorSlider)
@@ -65,6 +66,7 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
             {
                 ResizeUI(TopRightButtonsFactorSlider.Value);
             }
+
             OldUiButtonScaleFactor = TopRightButtonsFactorSlider.Value;
         }
         else if (configEntry == WikiOnBottomRow)
@@ -134,6 +136,7 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
                 {
                     continue;
                 }
+
                 if (button.transform.name.Contains("Friends List Button"))
                 {
                     button.gameObject.transform.localScale = new Vector3(0.2675f * actualScaleVal, 0.2675f * actualScaleVal, 1);
@@ -148,6 +151,7 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
             {
                 baseGrid.ArrangeChilds();
             }
+
             baseAspect.AdjustPosition();
         }
 
@@ -163,6 +167,7 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
             {
                 continue;
             }
+
             if (button.transform.name.Contains("Modifiers"))
             {
                 button.gameObject.transform.localScale = new Vector3(0.65f * scaleFactor, 0.65f * scaleFactor, 1);
@@ -177,6 +182,7 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
         {
             extraGrid.ArrangeChilds();
         }
+
         extraAspect.AdjustPosition();
     }
 

@@ -66,8 +66,9 @@ internal static class MeetingHudPatches
             var button = selectableElements[i];
             var endPos = 1.3f - 0.65f * i;
             var duration = 0.25f + 0.1f * i;
-            __instance.StartCoroutine(Effects.All(Effects.Lerp(duration, (Action<float>)(t =>
-                button.transform.localPosition = Vector2.Lerp(Vector2.right * startPos, Vector2.right * endPos, Effects.ExpOut(t))))));
+            __instance.StartCoroutine(Effects.All(Effects.Lerp(
+                duration,
+                (Action<float>)(t => button.transform.localPosition = Vector2.Lerp(Vector2.right * startPos, Vector2.right * endPos, Effects.ExpOut(t))))));
         }
 
         ControllerManager.Instance.OpenOverlayMenu(__instance.name, __instance.CancelButton, selectableElements[1], selectableElements);
@@ -121,6 +122,7 @@ internal static class MeetingHudPatches
                 meetingAbility.Button!.SetDisabled();
             }
         }
+
         MiraEventManager.InvokeEvent(new VotingCompleteEvent(__instance));
     }
 
@@ -254,7 +256,7 @@ internal static class MeetingHudPatches
 
         var voterStates = new Il2CppStructArray<MeetingHud.VoterState>([
             .. votes.Select(
-            v=> new MeetingHud.VoterState
+            v => new MeetingHud.VoterState
             {
                 VoterId = v.Voter,
                 VotedForId = v.Suspect,
@@ -276,9 +278,9 @@ internal static class MeetingHudPatches
     }
 
     // TODO: figure out a way to do host-authorization since right now any player can send RpcCastVote
+    // Although this method is inlined in MeetingHud.Confirm, the next patch fixes that.
     [HarmonyPrefix]
     [HarmonyPatch(nameof(MeetingHud.CmdCastVote))]
-    // Although this method is inlined in MeetingHud.Confirm, the next patch fixes that.
     public static bool CmdCastVoteOverridePatch(byte playerId, byte suspectIdx)
     {
         VotingUtils.RpcCastVote(PlayerControl.LocalPlayer, playerId, suspectIdx);
@@ -286,9 +288,9 @@ internal static class MeetingHudPatches
     }
 
     // TODO: figure out a way to do host-authorization since right now any player can send RpcQueueOverruleVotes
+    // Although this method is inlined in MeetingHud.Confirm, the next patch fixes that.
     [HarmonyPrefix]
     [HarmonyPatch(nameof(MeetingHud.CmdQueueOverruleVotes))]
-    // Although this method is inlined in MeetingHud.Confirm, the next patch fixes that.
     public static bool CmdQueueOverruleVotesPatch(PlayerId judgePlayerId, PlayerId targetPlayerId, ushort overruleNonce)
     {
         VotingUtils.RpcQueueOverruleVotes(PlayerControl.LocalPlayer, judgePlayerId.Value, targetPlayerId.Value, overruleNonce);

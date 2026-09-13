@@ -163,10 +163,10 @@ public static class LobbyViewPanePatches
         menu.scrollBar.ScrollToTop();
     }
 
+    // CHANGED BECAUSE OF INLINING
     [HarmonyPostfix]
     [HarmonyPatch(nameof(LobbyViewSettingsPane.ChangeTab))]
     [HarmonyPatch(nameof(LobbyViewSettingsPane.RefreshTab))]
-    // CHANGED BECAUSE OF INLINING
     public static void SetTabPatch(LobbyViewSettingsPane __instance)
     {
         if (__instance.currentTab != ModifiersTabName || SelectedMod == null)
@@ -408,8 +408,7 @@ public static class LobbyViewPanePatches
                     if (viewSettingsInfoPanel.titleText.text.Contains("Game Mode"))
                     {
                         viewSettingsInfoPanel.titleText.text = TranslationController.Instance.GetString(
-                            data.Title, CustomGameModeManager.ActiveMode != null ? $"<color=#{CustomGameModeManager.ActiveMode.Color.ToHtmlStringRGBA()}>{CustomGameModeManager.ActiveMode.Name}</color>" : "Classic"
-                        );
+                            data.Title, CustomGameModeManager.ActiveMode != null ? $"<color=#{CustomGameModeManager.ActiveMode.Color.ToHtmlStringRGBA()}>{CustomGameModeManager.ActiveMode.Name}</color>" : "Classic");
                     }
                 }
 
@@ -598,6 +597,7 @@ public static class LobbyViewPanePatches
             header.Divider.color = Color.grey;
             header.Title.color = new Color32(50, 50, 50, 255);
         }
+
         if (roleIcon != null && header.icon != null)
         {
             header.icon.material.SetInt(PlayerMaterial.MaskLayer, maskLayer);

@@ -13,8 +13,10 @@ namespace MiraAPI.Networking.Modifiers;
 /// <param name="plugin">Mira plugin.</param>
 /// <param name="id">RPC ID.</param>
 [RegisterCustomRpc((uint)MiraRpc.AddModifier)]
+#pragma warning disable SA1515 // Single-line comment should be preceded by blank line (Justification: ReSharper suppression.)
 // ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated by Reactor.)
 public class AddModifierRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<MiraApiPlugin, ModifierData>(plugin, id)
+#pragma warning restore SA1515 // Single-line comment should be preceded by blank line
 {
     /// <inheritdoc />
     public override RpcLocalHandling LocalHandling => RpcLocalHandling.Before;

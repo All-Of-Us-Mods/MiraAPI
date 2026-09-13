@@ -5,7 +5,8 @@ using System.Linq;
 
 namespace MiraAPI.Utilities;
 
-internal sealed class ControllableComparer<T>(T[] forcedToBottom, T[] forcedToTop, IComparer<T> fallbackComparer) : IComparer<T> where T : IComparable
+internal sealed class ControllableComparer<T>(T[] forcedToBottom, T[] forcedToTop, IComparer<T> fallbackComparer) : IComparer<T>
+    where T : IComparable
 {
     /// <inheritdoc/>
     [SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "Warning cascades into forcing the entire tree to be ternary operators.")]

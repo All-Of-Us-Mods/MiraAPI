@@ -35,7 +35,7 @@ public abstract class AbstractOptionGroup
     /// Gets a value indicating whether the group should be shown in the modifiers menu.
     /// </summary>
     // Completed: make this not a boolean
-    [Obsolete("Use ParentMenu instead.")]
+    [Obsolete("Use ParentMenu instead.", true)]
     [SuppressMessage("Info Code Smell", "S1133:Deprecated code should be removed", Justification = "Retained.")]
     public virtual bool ShowInModifiersMenu => false;
 
@@ -76,7 +76,8 @@ public abstract class AbstractOptionGroup
 /// Base class for option groups. An option group is a collection of options that are displayed together in the options menu.
 /// </summary>
 /// <typeparam name="T">The type of the optionable that this group contains.</typeparam>
-public abstract class AbstractOptionGroup<T> : AbstractOptionGroup where T : IOptionable
+public abstract class AbstractOptionGroup<T> : AbstractOptionGroup
+    where T : IOptionable
 {
     /// <inheritdoc />
     public override Type OptionableType => typeof(T);
@@ -95,6 +96,7 @@ public abstract class AbstractOptionGroup<T> : AbstractOptionGroup where T : IOp
             {
                 return MenuCategory.Roles;
             }
+
             return MenuCategory.Game;
         }
     }
@@ -104,7 +106,8 @@ public abstract class AbstractOptionGroup<T> : AbstractOptionGroup where T : IOp
 /// Base class for option groups. An option group is a collection of options that are displayed together in the options menu.
 /// </summary>
 /// <typeparam name="T">The custom role that the group is for.</typeparam>
-public abstract class AbstractRoleOptionGroup<T> : AbstractOptionGroup<T> where T : ICustomRole
+public abstract class AbstractRoleOptionGroup<T> : AbstractOptionGroup<T>
+    where T : ICustomRole
 {
     /// <inheritdoc />
     public override Type OptionableType => typeof(T);

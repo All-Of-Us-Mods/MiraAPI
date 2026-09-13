@@ -68,6 +68,7 @@ internal sealed class MiraHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
         {
             return;
         }
+
         UpdateSubmergedButtons(instance);
     }
 
@@ -122,6 +123,7 @@ internal sealed class MiraHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
                 listButton.GetComponent<AspectPosition>().Destroy();
                 listButton.localPosition = new Vector3(0, 0, 0);
             }
+
             settingsButton.transform.SetAsLastSibling();
             chatButton.transform.SetParent(UiTopRight.transform, false);
             instance.Chat.chatButton = chatButton.GetComponent<PassiveButton>();
@@ -182,6 +184,7 @@ internal sealed class MiraHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
             oldPos = ModifierDisplayObject.transform.GetChild(1).localPosition;
             ModifierDisplayObject.transform.GetChild(1).localPosition = new Vector3(-0.45f, 0.3f, oldPos.z);
         }
+
         MiraApiSettings.SetUpButtonPositions();
     }
 

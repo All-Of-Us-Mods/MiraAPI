@@ -7,7 +7,8 @@ namespace MiraAPI.Events.Mira;
 /// </summary>
 /// <typeparam name="T">The <see cref="CustomActionButton"/> type.</typeparam>
 /// <param name="button">The <see cref="CustomActionButton"/> whose click was cancelled.</param>
-public sealed class MiraButtonCancelledEvent<T>(T button) : MiraEvent where T : CustomActionButton
+public sealed class MiraButtonCancelledEvent<T>(T button) : MiraEvent
+    where T : CustomActionButton
 {
     /// <summary>
     /// Gets the <see cref="CustomActionButton"/> whose click was cancelled.

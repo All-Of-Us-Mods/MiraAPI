@@ -6,7 +6,8 @@ namespace MiraAPI.Utilities.Assets;
 /// Wrapper class to turn any <see cref="UnityEngine.Object"/> into a <see cref="LoadableAsset{T}"/>.
 /// </summary>
 /// <typeparam name="T">The type of the asset to be loaded. Must be a subclass of <see cref="UnityEngine.Object"/>.</typeparam>
-public class LoadableAssetWrapper<T> : LoadableAsset<T> where T : UnityEngine.Object
+public class LoadableAssetWrapper<T> : LoadableAsset<T>
+    where T : UnityEngine.Object
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="LoadableAssetWrapper{T}"/> class.

@@ -31,11 +31,9 @@ public static class NotificationPopperPatch
                 "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">",
                 textColor,
                 TranslationController.Instance.GetString(key),
-                "</color></font>"
-            ),
+                "</color></font>"),
             "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">" + roleCount + "</font>",
-            "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">" + roleChance + "%"
-        );
+            "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">" + roleChance + "%");
 
         __instance.SettingsChangeMessageLogic(key, item, playSound);
         return false;

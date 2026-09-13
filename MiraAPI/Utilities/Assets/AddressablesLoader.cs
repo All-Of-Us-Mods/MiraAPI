@@ -1,9 +1,9 @@
-﻿using Il2CppInterop.Runtime.Attributes;
-using MiraAPI.Patches.Menu;
-using Reactor.Utilities;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Il2CppInterop.Runtime.Attributes;
+using MiraAPI.Patches.Menu;
+using Reactor.Utilities;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
@@ -14,8 +14,6 @@ namespace MiraAPI.Utilities.Assets;
 /// </summary>
 public static class AddressablesLoader
 {
-    private static bool _isInitialized;
-
     private static readonly List<(string Location, string ProviderSuffix)> CatalogLocations = [];
     private static readonly List<string> LoadedLocations = [];
 
@@ -23,6 +21,8 @@ public static class AddressablesLoader
     private static readonly List<(string, string)> RegisteredVisorKeys = [];
     private static readonly List<(string, string)> RegisteredNameplateKeys = [];
     private static readonly List<string> RegisteredSkinKeys = [];
+
+    private static bool _isInitialized;
 
     /// <summary>
     /// Gets a value indicating whether hats have been loaded by the addressables system.
@@ -146,6 +146,7 @@ public static class AddressablesLoader
     internal static IEnumerator CoLoadAddressables(string location, string suffix = "")
     {
         while (!AmongUsClient.Instance) yield return null;
+
         // Load the local/remote content catalog
         var catalogOperation = Addressables.LoadContentCatalog(location, suffix);
         yield return catalogOperation;
@@ -195,7 +196,8 @@ public static class AddressablesLoader
         HatManager.Instance.allNamePlates = PrepareArray(namePlateData, [.. namePlateBehaviours.Select(x => x.Data)]);
     }
 
-    private static T[] PrepareArray<T>(List<T> data, List<T> behaviours) where T : CosmeticData
+    private static T[] PrepareArray<T>(List<T> data, List<T> behaviours)
+        where T : CosmeticData
     {
         var count = data.Count;
         for (var i = 0; i < behaviours.Count; i++)
@@ -203,6 +205,7 @@ public static class AddressablesLoader
             behaviours[i].displayOrder = count + i;
             data.Add(behaviours[i]);
         }
+
         return [.. data];
     }
 
@@ -224,6 +227,7 @@ public static class AddressablesLoader
                 Error($"Failed to find tag {tag}");
             }
         }
+
         return behaviours;
     }
 
@@ -245,6 +249,7 @@ public static class AddressablesLoader
                 Error($"Failed to find tag {tag}");
             }
         }
+
         return behaviours;
     }
 }

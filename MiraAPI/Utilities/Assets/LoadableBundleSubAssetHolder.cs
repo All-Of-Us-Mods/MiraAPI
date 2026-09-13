@@ -93,6 +93,7 @@ public class LoadableBundleSubAssetHolder
         {
             sprite.DestroyImmediate();
         }
+
         SubSprites = [];
         return true;
     }

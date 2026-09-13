@@ -56,6 +56,7 @@ public static class SabotageButtonPatch
             __instance.SetDisabled();
             return false;
         }
+
         __instance.SetEnabled();
         return false;
     }

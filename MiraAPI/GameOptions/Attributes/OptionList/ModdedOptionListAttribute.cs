@@ -85,8 +85,10 @@ public abstract class ModdedOptionListAttribute(string title) : PropertyOptionAt
             {
                 return string.Format(Title, index);
             }
+
             Error("ModdedOptionList Title cannot contain more than the first parameter for formatting.");
         }
+
         return Title + index;
     }
 }

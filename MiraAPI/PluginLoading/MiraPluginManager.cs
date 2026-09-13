@@ -356,6 +356,7 @@ public sealed class MiraPluginManager
         {
             Error($"Failed to register options for {type.Name}: {e.ToString()}");
         }
+
         return false;
     }
 
@@ -382,6 +383,7 @@ public sealed class MiraPluginManager
         {
             Error($"Failed to register role for {type.Name}: {e}");
         }
+
         return false;
     }
 
@@ -465,6 +467,7 @@ public sealed class MiraPluginManager
         {
             Error($"Failed to register gamemode {type.Name}: {e}");
         }
+
         return false;
     }
 
@@ -601,6 +604,7 @@ public sealed class MiraPluginManager
             return false;
         }
     }
+
     private static bool RegisterTargetedMeetingAbility(Type type, MiraPluginInfo info)
     {
         try

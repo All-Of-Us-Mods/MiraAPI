@@ -1,8 +1,8 @@
-﻿using MiraAPI.GameOptions.OptionTypes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using MiraAPI.GameOptions.OptionTypes;
 
 namespace MiraAPI.GameOptions.Attributes;
 
@@ -52,6 +52,7 @@ public sealed class ModdedOptionVisibilityAttribute(Type? holderType = null, str
 
             return () => (bool)vProperty.GetValue(instanceGet?.Invoke())!;
         }
+
         if (member is MethodInfo vMethod)
         {
             if (vMethod.ReturnType != typeof(bool))
@@ -114,6 +115,7 @@ public sealed class ModdedOptionVisibilityAttribute(Type? holderType = null, str
             {
                 return _ => (bool)vProperty.GetValue(instanceGet?.Invoke())!;
             }
+
             if (indexParams[0].ParameterType != typeof(int))
             {
                 Error($"Indexer {memberName}'s parameter is not an int.");
@@ -122,6 +124,7 @@ public sealed class ModdedOptionVisibilityAttribute(Type? holderType = null, str
 
             return i => (bool)vProperty.GetValue(instanceGet?.Invoke(), [i])!;
         }
+
         if (member is MethodInfo vMethod)
         {
             if (vMethod.ReturnType != typeof(bool))
@@ -141,6 +144,7 @@ public sealed class ModdedOptionVisibilityAttribute(Type? holderType = null, str
             {
                 return _ => (bool)vMethod.Invoke(instanceGet?.Invoke(), null)!;
             }
+
             if (paramList[0].ParameterType != typeof(int))
             {
                 Error($"Method {memberName}'s parameter is not an int.");
@@ -179,6 +183,7 @@ public sealed class ModdedOptionVisibilityAttribute(Type? holderType = null, str
                 instanceGet = () => instanceProp.GetValue(null)!;
             }
         }
+
         MemberInfo? member = type.GetMember(memberName, flags).FirstOrDefault();
         if (instanceGet != null)
         {
@@ -189,6 +194,7 @@ public sealed class ModdedOptionVisibilityAttribute(Type? holderType = null, str
                 instanceGet = null;
             }
         }
+
         return member;
     }
 #pragma warning restore S3011 // Reflection should not be used to increase accessibility of classes, methods, or fields

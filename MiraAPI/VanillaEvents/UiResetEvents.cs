@@ -24,10 +24,12 @@ internal static class UiResetEvents
         {
             wikiButton.transform.SetParent(null);
         }
+
         if (subButton)
         {
             subButton.transform.SetParent(null);
         }
+
         if (modDisplay)
         {
             modDisplay.transform.SetParent(null);
@@ -41,6 +43,7 @@ internal static class UiResetEvents
         {
             return;
         }
+
         var firstRow = @event.MainTopUiRow;
         var secondRow = @event.SecondTopUiRow;
         var opts = LocalSettingsTabSingleton<MiraApiSettings>.Instance;
@@ -54,6 +57,7 @@ internal static class UiResetEvents
         {
             return;
         }
+
         var secondRow = @event.SecondTopUiRow;
         subButton.transform.SetParent(secondRow.transform);
     }
@@ -65,6 +69,7 @@ internal static class UiResetEvents
         {
             return;
         }
+
         var secondRow = @event.SecondTopUiRow;
         modDisplay.transform.SetParent(secondRow.transform);
     }

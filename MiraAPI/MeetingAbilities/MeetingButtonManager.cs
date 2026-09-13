@@ -57,6 +57,7 @@ public static class MeetingButtonManager
         {
             ability.UsesLeft = ability.MaxUses;
         }
+
         foreach (var ability in UntargetedButtons.Where(x => x.UsesMode == MeetingButtonUsesMode.PerGame))
         {
             ability.UsesLeft = ability.MaxUses;
@@ -101,6 +102,7 @@ public static class MeetingButtonManager
                     var btn = ability.CreateButton(playerVoteArea);
                     btn.transform.SetParent(playerVoteArea.Buttons.transform);
                 }
+
                 var btn2 = ability.CreateButton(meetingHud.SkipVoteButton);
                 btn2.transform.SetParent(meetingHud.SkipVoteButton.Buttons.transform);
 
@@ -112,10 +114,12 @@ public static class MeetingButtonManager
                 Error($"Failed to create targeted meeting button {ability.Name}: {e.Message}");
             }
         }
+
         foreach (var playerVoteArea in meetingHud.playerStates)
         {
             playerVoteArea.CancelButton.transform.SetAsFirstSibling();
         }
+
         meetingHud.SkipVoteButton.CancelButton.transform.SetAsFirstSibling();
     }
 }

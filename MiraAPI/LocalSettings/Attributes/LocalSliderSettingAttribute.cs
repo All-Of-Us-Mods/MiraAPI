@@ -26,8 +26,8 @@ public class LocalSliderSettingAttribute(
     bool displayValue = false,
     string? formatString = null,
     bool roundValue = false,
-    MiraNumberSuffixes suffixType = MiraNumberSuffixes.None
-    ) : LocalSettingAttribute(name, description)
+    MiraNumberSuffixes suffixType = MiraNumberSuffixes.None)
+    : LocalSettingAttribute(name, description)
 {
     private readonly string? _name = name;
     private readonly string? _description = description;

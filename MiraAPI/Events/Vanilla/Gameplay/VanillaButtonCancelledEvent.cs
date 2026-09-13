@@ -7,7 +7,8 @@ namespace MiraAPI.Events.Vanilla.Gameplay;
 /// </summary>
 /// <typeparam name="T">The vanilla <see cref="AbilityButton"/> type.</typeparam>
 /// <param name="button">The vanilla <see cref="AbilityButton"/> whose click was cancelled.</param>
-public sealed class VanillaButtonCancelledEvent<T>(T button) : MiraEvent where T : AbilityButton
+public sealed class VanillaButtonCancelledEvent<T>(T button) : MiraEvent
+    where T : AbilityButton
 {
     /// <summary>
     /// Gets the Vanilla <see cref="AbilityButton"/> whose click was cancelled.

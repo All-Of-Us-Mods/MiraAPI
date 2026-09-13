@@ -9,7 +9,8 @@ namespace MiraAPI.GameOptions.OptionTypes;
 /// Represents a modded option list.
 /// </summary>
 /// <typeparam name="T">The type of options.</typeparam>
-public class ModdedOptionList<T> : IModdedOptionList where T : IModdedOption
+public class ModdedOptionList<T> : IModdedOptionList
+    where T : IModdedOption
 {
     /// <inheritdoc/>
     public int Count { get; }

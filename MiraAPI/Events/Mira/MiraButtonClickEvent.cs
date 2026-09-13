@@ -8,7 +8,8 @@ namespace MiraAPI.Events.Mira;
 /// <typeparam name="T">The <see cref="CustomActionButton"/> type.</typeparam>
 /// <param name="button">The <see cref="CustomActionButton"/> that was clicked.</param>
 /// <param name="genericClickEvent">The generic <see cref="MiraButtonClickEvent"/> invoked before button-specific events.</param>
-public class MiraButtonClickEvent<T>(T button, MiraButtonClickEvent genericClickEvent) : MiraCancelableEvent where T : CustomActionButton
+public class MiraButtonClickEvent<T>(T button, MiraButtonClickEvent genericClickEvent) : MiraCancelableEvent
+    where T : CustomActionButton
 {
     /// <summary>
     /// Gets the <see cref="CustomActionButton"/> that was clicked.

@@ -7,7 +7,8 @@ namespace MiraAPI.LocalSettings;
 /// Singleton for <see cref="LocalSettingsTab"/>s.
 /// </summary>
 /// <typeparam name="T">The settings tab type.</typeparam>
-public static class LocalSettingsTabSingleton<T> where T : LocalSettingsTab
+public static class LocalSettingsTabSingleton<T>
+    where T : LocalSettingsTab
 {
     private static T? _instance;
 

@@ -20,7 +20,6 @@ internal static class PlayerControlPatches
 {
     [HarmonyPostfix]
     [HarmonyPatch(nameof(PlayerControl.Start))]
-    // ReSharper disable once InconsistentNaming
     public static void PlayerControlStartPostfix(PlayerControl __instance)
     {
         if (__instance.gameObject.TryGetComponent<ModifierComponent>(out var modifierComp))
@@ -39,7 +38,6 @@ internal static class PlayerControlPatches
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(PlayerControl.Die))]
-    // ReSharper disable once InconsistentNaming
     public static void PlayerControlDiePostfix(PlayerControl __instance, DeathReason reason)
     {
         var deathEvent = new PlayerDeathEvent(__instance, reason, Helpers.GetBodyById(__instance.PlayerId));
@@ -55,7 +53,6 @@ internal static class PlayerControlPatches
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(PlayerControl.CompleteTask))]
-    // ReSharper disable once InconsistentNaming
     public static void PlayerCompleteTaskPostfix(PlayerControl __instance, uint idx)
     {
         var playerTask = __instance.myTasks.ToArray().First(playerTask => playerTask.Id == idx);
@@ -126,7 +123,6 @@ internal static class PlayerControlPatches
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(PlayerControl.FixedUpdate))]
-    // ReSharper disable once InconsistentNaming
     public static void PlayerControlFixedUpdatePostfix(PlayerControl __instance)
     {
         if (!__instance.AmOwner)

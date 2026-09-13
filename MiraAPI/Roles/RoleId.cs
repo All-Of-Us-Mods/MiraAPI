@@ -1,5 +1,5 @@
-﻿using AmongUs.GameOptions;
-using System;
+﻿using System;
+using AmongUs.GameOptions;
 
 namespace MiraAPI.Roles;
 
@@ -14,7 +14,8 @@ public static class RoleId
     /// <typeparam name="T">The type of the role.</typeparam>
     /// <returns>The role ID as a ushort.</returns>
     /// <exception cref="InvalidOperationException">Thrown when the role is not registered.</exception>
-    public static ushort Get<T>() where T : ICustomRole
+    public static ushort Get<T>()
+        where T : ICustomRole
     {
         return !CustomRoleManager.RoleIds.TryGetValue(typeof(T), out var roleId)
             ? throw new InvalidOperationException($"Role {typeof(T)} is not registered")
@@ -51,7 +52,8 @@ public static class RoleId
     /// <typeparam name="T">The type of the role.</typeparam>
     /// <returns>The role ID as a <see cref="RoleTypes"/>.</returns>
     /// <exception cref="InvalidOperationException">Thrown when the role is not registered.</exception>
-    public static RoleTypes GetType<T>() where T : ICustomRole
+    public static RoleTypes GetType<T>()
+        where T : ICustomRole
     {
         return (RoleTypes)Get<T>();
     }
@@ -73,7 +75,8 @@ public static class RoleId
     /// <typeparam name="T">The type of the role.</typeparam>
     /// <returns>The <see cref="RoleBehaviour"/> object.</returns>
     /// <exception cref="InvalidOperationException">Thrown when the role is not registered.</exception>
-    public static RoleBehaviour GetRole<T>() where T : ICustomRole
+    public static RoleBehaviour GetRole<T>()
+        where T : ICustomRole
     {
         return RoleManager.Instance.GetRole(GetType<T>());
     }

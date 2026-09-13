@@ -71,6 +71,7 @@ public static class VotingUtils
         {
             voteData.DecreaseRemainingVotes(1);
         }
+
         voteData.VoteForPlayer(suspectIdx);
     }
 
@@ -121,8 +122,7 @@ public static class VotingUtils
     [SuppressMessage(
         "Style",
         "IDE0060:Remove unused parameter",
-        Justification = "Required parameter: The MethodRpc system mandates an InnerNetObject (or its derived class) as the first parameter for sender context, even if unused in the method body."
-    )]
+        Justification = "Required parameter: The MethodRpc system mandates an InnerNetObject (or its derived class) as the first parameter for sender context, even if unused in the method body.")]
     public static void RpcQueueOverruleVotes(PlayerControl source, byte srcPlayerId, byte suspectPlayerId, ushort overruleNonce)
     {
         CustomCastJudgeVote(srcPlayerId, suspectPlayerId, overruleNonce);
@@ -192,8 +192,7 @@ public static class VotingUtils
     [SuppressMessage(
         "Style",
         "IDE0060:Remove unused parameter",
-        Justification = "Required parameter: The MethodRpc system mandates an InnerNetObject (or its derived class) as the first parameter for sender context, even if unused in the method body."
-    )]
+        Justification = "Required parameter: The MethodRpc system mandates an InnerNetObject (or its derived class) as the first parameter for sender context, even if unused in the method body.")]
     public static void RpcCastVote(PlayerControl source, byte srcPlayerId, byte suspectPlayerId)
     {
         CustomCastVote(srcPlayerId, suspectPlayerId);

@@ -25,6 +25,7 @@ public class ModifierUiComponent(nint cppPtr) : MonoBehaviour(cppPtr)
     private SpriteRenderer icon = null!;
     private TextMeshPro nameText = null!;
     private RectTransform descRect = null!;
+
     // ReSharper restore InconsistentNaming
     private void Awake()
     {

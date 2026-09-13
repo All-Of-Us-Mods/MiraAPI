@@ -93,6 +93,7 @@ public static class ColorExtensions
                 low = t;
             }
         }
+
         return bestColor;
     }
 }

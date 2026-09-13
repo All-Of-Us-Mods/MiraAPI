@@ -18,8 +18,7 @@ public static class LocalSettingsManager
     [SuppressMessage(
         "Major Code Smell",
         "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields",
-        Justification = "Dynamic singleton initialization requires reflection to bypass the private field access modifier because the type is only known at runtime."
-    )]
+        Justification = "Dynamic singleton initialization requires reflection to bypass the private field access modifier because the type is only known at runtime.")]
     internal static bool RegisterTab(Type type, BasePlugin pluginInfo)
     {
         if (Activator.CreateInstance(type, pluginInfo.Config) is not LocalSettingsTab tab)
@@ -38,6 +37,7 @@ public static class LocalSettingsManager
         {
             AvailableTabs.Add(tab);
         }
+
         TypeToTab.Add(type, tab);
 
         typeof(LocalSettingsTabSingleton<>).MakeGenericType(type)

@@ -21,6 +21,26 @@ public sealed class HnsMusicHandler(nint cppPtr) : MonoBehaviour(cppPtr)
     /// </summary>
     public static HnsMusicHandler Instance { get; private set; }
 
+    private static readonly Dictionary<LogicHnSMusic.HideAndSeekMusicTrack, string> MusicNames = new()
+    {
+        {
+            LogicHnSMusic.HideAndSeekMusicTrack.Normal,
+            "HnS_Music_Normal"
+        },
+        {
+            LogicHnSMusic.HideAndSeekMusicTrack.Task,
+            "HnS_Music_Task"
+        },
+        {
+            LogicHnSMusic.HideAndSeekMusicTrack.DangerLevel1,
+            "HnS_Music_DangerLevel1"
+        },
+        {
+            LogicHnSMusic.HideAndSeekMusicTrack.DangerLevel2,
+            "HnS_Music_DangerLevel2"
+        },
+    };
+
     private HideAndSeekMusicCollection musicCollection;
 
     private float lastMusicSyncTime;
@@ -44,26 +64,6 @@ public sealed class HnsMusicHandler(nint cppPtr) : MonoBehaviour(cppPtr)
     private AudioSource dangerLevel2Source;
 
     private float musicLerpSpeed = 5f;
-
-    private readonly Dictionary<LogicHnSMusic.HideAndSeekMusicTrack, string> musicNames = new()
-    {
-        {
-            LogicHnSMusic.HideAndSeekMusicTrack.Normal,
-            "HnS_Music_Normal"
-        },
-        {
-            LogicHnSMusic.HideAndSeekMusicTrack.Task,
-            "HnS_Music_Task"
-        },
-        {
-            LogicHnSMusic.HideAndSeekMusicTrack.DangerLevel1,
-            "HnS_Music_DangerLevel1"
-        },
-        {
-            LogicHnSMusic.HideAndSeekMusicTrack.DangerLevel2,
-            "HnS_Music_DangerLevel2"
-        },
-    };
 
     private void Awake()
     {
@@ -94,7 +94,7 @@ public sealed class HnsMusicHandler(nint cppPtr) : MonoBehaviour(cppPtr)
         if (normalSource == null)
         {
             normalSource =
-                SoundManager.Instance.GetNamedSfxSource(musicNames[LogicHnSMusic.HideAndSeekMusicTrack.Normal]);
+                SoundManager.Instance.GetNamedSfxSource(MusicNames[LogicHnSMusic.HideAndSeekMusicTrack.Normal]);
         }
 
         normalSource.outputAudioMixerGroup = SoundManager.Instance.MusicChannel;
@@ -103,7 +103,7 @@ public sealed class HnsMusicHandler(nint cppPtr) : MonoBehaviour(cppPtr)
         if (taskSource == null)
         {
             taskSource =
-                SoundManager.Instance.GetNamedSfxSource(musicNames[LogicHnSMusic.HideAndSeekMusicTrack.Task]);
+                SoundManager.Instance.GetNamedSfxSource(MusicNames[LogicHnSMusic.HideAndSeekMusicTrack.Task]);
         }
 
         taskSource.outputAudioMixerGroup = SoundManager.Instance.MusicChannel;
@@ -114,7 +114,7 @@ public sealed class HnsMusicHandler(nint cppPtr) : MonoBehaviour(cppPtr)
         {
             dangerLevel1Source =
                 SoundManager.Instance.GetNamedSfxSource(
-                    musicNames[LogicHnSMusic.HideAndSeekMusicTrack.DangerLevel1]);
+                    MusicNames[LogicHnSMusic.HideAndSeekMusicTrack.DangerLevel1]);
         }
 
         dangerLevel1Source.outputAudioMixerGroup = SoundManager.Instance.MusicChannel;
@@ -125,7 +125,7 @@ public sealed class HnsMusicHandler(nint cppPtr) : MonoBehaviour(cppPtr)
         {
             dangerLevel2Source =
                 SoundManager.Instance.GetNamedSfxSource(
-                    musicNames[LogicHnSMusic.HideAndSeekMusicTrack.DangerLevel2]);
+                    MusicNames[LogicHnSMusic.HideAndSeekMusicTrack.DangerLevel2]);
         }
 
         dangerLevel2Source.outputAudioMixerGroup = SoundManager.Instance.MusicChannel;

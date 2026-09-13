@@ -22,6 +22,7 @@ public static class TmpAwakePatch
             __instance.UpdateMeshPadding();
             return;
         }
+
         __instance.m_spriteAsset.fallbackSpriteAssets.Add(TmpSpriteUtils.AssetHolder);
         __instance.UpdateMeshPadding();
     }

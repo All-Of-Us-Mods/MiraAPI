@@ -8,7 +8,8 @@ namespace MiraAPI.Events.Vanilla.Gameplay;
 /// <typeparam name="T">The vanilla <see cref="AbilityButton"/> type.</typeparam>
 /// <param name="button">The vanilla <see cref="AbilityButton"/> that was clicked.</param>
 /// <param name="genericClickEvent">The generic <see cref="VanillaButtonClickEvent"/> invoked before button-specific events.</param>
-public sealed class VanillaButtonClickEvent<T>(T button, VanillaButtonClickEvent genericClickEvent) : MiraCancelableEvent where T : AbilityButton
+public sealed class VanillaButtonClickEvent<T>(T button, VanillaButtonClickEvent genericClickEvent) : MiraCancelableEvent
+    where T : AbilityButton
 {
     /// <summary>
     /// Gets the vanilla <see cref="AbilityButton"/> that was clicked.

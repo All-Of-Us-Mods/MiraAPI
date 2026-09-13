@@ -11,7 +11,8 @@ namespace MiraAPI.Utilities;
 /// A wrapper for state machine objects to access their parent instance and state.
 /// </summary>
 /// <typeparam name="T">The type of the parent class that owns the state machine.</typeparam>
-public class StateMachineWrapper<T> where T : Il2CppObjectBase
+public class StateMachineWrapper<T>
+    where T : Il2CppObjectBase
 {
     private readonly Il2CppObjectBase _stateMachine;
 

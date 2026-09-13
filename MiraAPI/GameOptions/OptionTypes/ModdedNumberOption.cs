@@ -77,7 +77,8 @@ public class ModdedNumberOption : ModdedOption<float>
         MiraNumberSuffixes suffixType,
         string? formatString = null,
         bool halfIncrements = false,
-        bool includeInPreset = true) : base(title, defaultValue, includeInPreset)
+        bool includeInPreset = true)
+        : base(title, defaultValue, includeInPreset)
     {
         Min = min;
         Max = max;
@@ -130,7 +131,8 @@ public class ModdedNumberOption : ModdedOption<float>
         MiraNumberSuffixes suffixType,
         string? formatString = null,
         bool zeroInfinity = false,
-        bool includeInPreset = true) : base(title, defaultValue, includeInPreset)
+        bool includeInPreset = true)
+        : base(title, defaultValue, includeInPreset)
     {
         Min = min;
         Max = max;

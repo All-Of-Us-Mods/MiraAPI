@@ -36,7 +36,6 @@ internal static class GameOptionsMenuPatch
 
     [HarmonyPrefix]
     [HarmonyPatch(nameof(GameOptionsMenu.Initialize))]
-    // ReSharper disable once InconsistentNaming
     public static bool InitPatch(GameOptionsMenu __instance)
     {
         __instance.Children ??= new List<OptionBehaviour>();
@@ -101,8 +100,7 @@ internal static class GameOptionsMenuPatch
                 texture,
                 new Rect(0, 0, texture.width, texture.height),
                 Vector2.one / 2,
-                100f / scale
-            );
+                100f / scale);
 
             _modIcon.sprite = newSprite;
             _modIcon.drawMode = SpriteDrawMode.Simple;
@@ -122,6 +120,7 @@ internal static class GameOptionsMenuPatch
                 num -= 0.63f;
                 opt.gameObject.SetActive(true);
             }
+
             foreach (var opt in VanillaOptions)
             {
                 opt.gameObject.SetActive(true);
@@ -135,6 +134,7 @@ internal static class GameOptionsMenuPatch
             {
                 opt.gameObject.SetActive(false);
             }
+
             foreach (var opt in VanillaOptions)
             {
                 opt.gameObject.SetActive(false);
@@ -183,6 +183,7 @@ internal static class GameOptionsMenuPatch
                 instance.ControllerSelectable.Add(obj);
             }
         }
+
         instance.scrollBar.SetYBoundsMax(-num - 1.65f);
     }
 
@@ -217,6 +218,7 @@ internal static class GameOptionsMenuPatch
         {
             MainOptions.Add(optionBehaviour);
         }
+
         for (var i = 1; i < GameModeOption.Values.Count; i++)
         {
             GameModeOption.OptionBehaviour.Values =
@@ -296,12 +298,14 @@ internal static class GameOptionsMenuPatch
                 additionalVanillaScrollNum -= 0.45f;
             }
         }
+
         foreach (var optionBehaviour in VanillaOptions)
         {
             if (AmongUsClient.Instance && !AmongUsClient.Instance.AmHost)
             {
                 optionBehaviour.SetAsPlayer();
             }
+
             instance.Children.Add(optionBehaviour);
         }
 
@@ -328,6 +332,7 @@ internal static class GameOptionsMenuPatch
                 CreateGroup(instance, group, container, ref newNum, ref optionBehaviours, ref categoryHeaders);
                 group.Ready = true;
             }
+
             GameModeHeaders.Add(mode, categoryHeaders);
             GameModeOptions.Add(mode, optionBehaviours);
         }
@@ -337,6 +342,7 @@ internal static class GameOptionsMenuPatch
         {
             instance.ControllerSelectable.Add(obj);
         }
+
         instance.scrollBar.SetYBoundsMax(-num - 1.65f);
     }
 
@@ -356,13 +362,13 @@ internal static class GameOptionsMenuPatch
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(GameOptionsMenu.Update))]
-    // ReSharper disable once InconsistentNaming
     public static void UpdatePatch(GameOptionsMenu __instance)
     {
         if (MenuState.Instance.CurrentModIdx == 0 && GameModeGroups.Count <= 0)
         {
             return;
         }
+
         var num = 2.1f;
 
         switch (MenuState.Instance.CurrentMenu)
@@ -383,6 +389,7 @@ internal static class GameOptionsMenuPatch
                     GamemodeOptionsUpdate(ref num);
                     break;
                 }
+
                 var filteredGroups =
                     MenuState.Instance.CurrentMod.InternalOptionGroups
                         .Where(x => (x.OptionableType == null || CustomGameModeManager.ActiveMode!.GetType().IsAssignableTo(x.OptionableType)) &&
@@ -398,6 +405,7 @@ internal static class GameOptionsMenuPatch
 
         __instance.scrollBar.SetYBoundsMax(-num - 1.65f);
     }
+
     private static void CreateGroup(GameOptionsMenu menu, AbstractOptionGroup group, Transform container, ref float num, ref System.Collections.Generic.List<OptionBehaviour> optionBehaviours, ref System.Collections.Generic.List<CategoryHeaderMasked> categoryHeaders)
     {
         var categoryHeaderMasked = Object.Instantiate(
@@ -569,6 +577,7 @@ internal static class GameOptionsMenuPatch
             UpdateGroup(group, ref num);
         }
     }
+
     private static void CustomMenuOneUpdate(ref float num)
     {
         var groups = MenuState.Instance.CurrentMod.InternalOptionGroups
@@ -696,14 +705,13 @@ internal static class GameOptionsMenuPatch
             group.Header = categoryHeaderMasked;
         }
 
-        var options = group.Options.Where(opt => opt.OptionBehaviour == null || !opt.OptionBehaviour
-        ).Select(opt => opt.CreateOption(
-            menu.checkboxOrigin,
-            menu.numberOptionOrigin,
-            menu.stringOptionOrigin,
-            menu.playerOptionOrigin,
-            container)
-        );
+        var options = group.Options.Where(opt => opt.OptionBehaviour == null || !opt.OptionBehaviour)
+            .Select(opt => opt.CreateOption(
+                menu.checkboxOrigin,
+                menu.numberOptionOrigin,
+                menu.stringOptionOrigin,
+                menu.playerOptionOrigin,
+                container));
 
         OptionPreset? defaultPreset = null;
         if (PresetManager.DefaultPresets.TryGetValue(MenuState.Instance.CurrentMod, out var preset))

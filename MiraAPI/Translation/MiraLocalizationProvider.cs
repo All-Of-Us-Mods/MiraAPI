@@ -25,6 +25,7 @@ public class MiraLocalizationProvider : LocalizationProvider
             result = MiraLocaleManager.Get(key);
             return true;
         }
+
         result = null;
         return false;
     }
@@ -47,6 +48,7 @@ public class MiraLocalizationProvider : LocalizationProvider
         {
             MiraApiPlugin.Culture = new(culture);
         }
+
         if (!_loadedStrings)
         {
             MiraLocaleManager.LoadExternalLocale();
@@ -62,6 +64,7 @@ public class MiraLocalizationProvider : LocalizationProvider
 
             tab.Key.text = $"<b>{LocalSettingsTab.GetShortName(tab.Value.Translate())}</b>";
         }
+
         /*Warning($"<?xml version='1.0' encoding='UTF-8'?>");
         Warning($"<resources>");
         foreach (var stringName in TranslationController.Instance.currentLanguage.AllStrings)

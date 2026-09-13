@@ -103,6 +103,7 @@ public static class PresetManager
 
             plugin.InternalPresets.Add(new OptionPreset(presetName, plugin, presetConfig));
         }
+
         plugin.Presets = [.. plugin.InternalPresets];
     }
 
@@ -159,6 +160,7 @@ public static class PresetManager
 
             // InternalMasterPresets.Add(new OptionPreset(presetName, plugin, presetConfig));
         }
+
         MasterPresets = [.. InternalMasterPresets];
     }
 }

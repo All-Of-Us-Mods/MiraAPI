@@ -26,8 +26,9 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
 
     private AudioClip finalHideAlertSfx;
     private AudioClip finalHideCountdownSfx;
-    [SuppressMessage("Style", "IDE0052:Remove unread private members", Justification = "Ignore for now; tentative code.")]
+
     // ReSharper disable once NotAccessedField.Local (Justification: Read above.)
+    [SuppressMessage("Style", "IDE0052:Remove unread private members", Justification = "Ignore for now; tentative code.")]
     private AudioClip taskFinishedSound;
 
     // private const int SECONDS_TO_BEEP = 10;
@@ -166,11 +167,13 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
             HudManager.Instance.TaskPanel.SetTaskText(string.Empty);
             return;
         }
+
         var data = PlayerControl.LocalPlayer.Data;
         if (data == null)
         {
             return;
         }
+
         var flag = data.Role != null && data.Role.IsImpostor;
         HudManager.Instance.tasksString.Clear();
         if (PlayerControl.LocalPlayer.myTasks == null || PlayerControl.LocalPlayer.myTasks.Count == 0)
@@ -190,20 +193,25 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
                         playerTask.AppendTaskText(HudManager.Instance.tasksString);
                         break;
                     }
+
                     playerTask.AppendTaskText(HudManager.Instance.tasksString);
                 }
             }
+
             if (data.Role != null)
             {
                 data.Role.AppendTaskHint(HudManager.Instance.tasksString);
             }
+
             if (HideCountdown > 0f)
             {
                 HideCountdown -= num;
                 HudManager.Instance.tasksString.Append("\n\n" + ((int)HideCountdown));
             }
+
             HudManager.Instance.tasksString.TrimEnd();
         }
+
         HudManager.Instance.TaskPanel.SetTaskText(HudManager.Instance.tasksString.ToString());
     }
 

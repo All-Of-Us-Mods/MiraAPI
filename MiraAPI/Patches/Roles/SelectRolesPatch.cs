@@ -37,10 +37,12 @@ public static class SelectRolesPatch
                 return false;
             }
         }
+
         if (!ApiHandlesRoleSelect)
         {
             return true;
         }
+
         CppCollections.List<ClientData> list = new();
         AmongUsClient.Instance.GetAllClients(list);
         List<NetworkedPlayerInfo> list2 = [.. list.ToArray()
@@ -54,6 +56,7 @@ public static class SelectRolesPatch
                 list2.Add(networkedPlayerInfo);
             }
         }
+
         var currentGameOptions = GameOptionsManager.Instance.CurrentGameOptions;
         var adjustedNumImpostors = GameOptionsManager.Instance.CurrentGameOptions.GetAdjustedNumImpostors(list2.Count);
         AssignRolesForTeam(list2, currentGameOptions, RoleTeamTypes.Impostor, adjustedNumImpostors, RoleTypes.Impostor);
@@ -116,6 +119,7 @@ public static class SelectRolesPatch
             AssignRolesFromList(players, teamMax, list, ref num);
         }
     }
+
     private static void AssignRolesFromList(List<NetworkedPlayerInfo> players, int teamMax, List<RoleTypes> roleList, ref int rolesAssigned)
     {
         while (roleList.Count > 0 && players.Count > 0 && rolesAssigned < teamMax)

@@ -63,6 +63,7 @@ public class LocalEnumSetting(
             highlight.color = Tab!.TabAppearance.EnumHoverColor;
             highlight.gameObject.SetActive(false);
         }
+
         toggleComp.Destroy();
 
         if (last && order == 1)
@@ -100,6 +101,7 @@ public class LocalEnumSetting(
             {
                 tmp.text = Description;
             }
+
             highlight?.gameObject.SetActive(true);
         }));
         button.OnMouseOut.AddListener((UnityAction)(() =>
@@ -116,6 +118,7 @@ public class LocalEnumSetting(
             offset += 0.5f;
             order = 1;
         }
+
         if (last)
             offset += 0.6f;
 

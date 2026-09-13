@@ -179,7 +179,8 @@ public static class Helpers
     /// <param name="position">The position of where you want to check from. For example: <c>PlayerControl.LocalPlayer.transform.position</c>.</param>
     /// <typeparam name="T">The object type.</typeparam>
     /// <returns>The closest object.</returns>
-    public static T? FindClosestObjectOfType<T>(List<T> objectList, Vector3 position) where T : MonoBehaviour
+    public static T? FindClosestObjectOfType<T>(List<T> objectList, Vector3 position)
+        where T : MonoBehaviour
     {
         T? closest = null;
         var closestDistanceSqr = Mathf.Infinity;
@@ -388,6 +389,7 @@ public static class Helpers
                 Constants.ShipAndObjectsMask))
             select playerControl);
 
+#pragma warning disable SA1008 // Opening parenthesis should be spaced correctly (Justification: Formatting.)
         outputList.Sort(
             delegate (PlayerControl a, PlayerControl b)
             {
@@ -399,6 +401,7 @@ public static class Helpers
                         ? -1
                         : 0;
             });
+#pragma warning restore SA1008 // Opening parenthesis should be spaced correctly
         return outputList;
     }
 

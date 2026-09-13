@@ -11,8 +11,8 @@ namespace MiraAPI.Utilities.Assets;
 /// </summary>
 public static class TmpSpriteUtils
 {
-    private static Shader _spriteShader;
     private static readonly Dictionary<string, TMP_SpriteAsset> LoadedSprites = [];
+    private static Shader _spriteShader;
 
     [SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
     [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
@@ -67,6 +67,7 @@ public static class TmpSpriteUtils
             name = assetName + " Material",
         };
         material.SetTexture(ShaderUtilities.ID_MainTex, sourceTexture);
+
         // TODO: Using these values, the icons will NOT clip through chat boxes. However, this breaks quite literally every other tmp text that isn't masked. Please fix this if a good solution is found.
         /*material.SetFloat(ShaderUtilities.ID_StencilComp, 4);
         material.SetFloat(ShaderUtilities.ID_StencilID, 1);*/

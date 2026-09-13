@@ -41,8 +41,8 @@ public abstract class BaseModifier : IOptionable
     /// </summary>
     public MiraPluginInfo ParentMod => Array.Find(
         MiraPluginManager.Instance.RegisteredPlugins,
-        x => x.InternalModifiers.Exists(y => y.TypeId == TypeId)
-        ) ?? throw new InvalidOperationException("Modifier is not registered.");
+        x => x.InternalModifiers.Exists(y => y.TypeId == TypeId))
+        ?? throw new InvalidOperationException("Modifier is not registered.");
 
     /// <summary>
     /// Gets the modifier name.

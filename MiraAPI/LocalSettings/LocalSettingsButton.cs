@@ -73,6 +73,7 @@ public class LocalSettingsButton(string text, Action onClick)
             offset += 0.5f;
             order = 1;
         }
+
         if (last)
             offset += 0.6f;
 

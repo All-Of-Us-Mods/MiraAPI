@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using MiraAPI.Voting;
 
@@ -11,7 +12,7 @@ namespace MiraAPI.Events.Vanilla.Meeting.Voting;
 /// <param name="exiledPlayer">The player to be exiled. Will be <see langword="null"/> if no player is to be exiled.</param>
 public class ProcessVotesEvent(List<CustomVote> votes, NetworkedPlayerInfo? exiledPlayer = null) : MiraEvent
 {
-    private readonly List<CustomVote> _originalVotes = [.. votes];
+    private readonly List<CustomVote> originalVotes = [.. votes];
 
     /// <summary>
     /// Gets a value indicating whether the exiled player has been modified by the event.
@@ -21,7 +22,7 @@ public class ProcessVotesEvent(List<CustomVote> votes, NetworkedPlayerInfo? exil
     /// <summary>
     /// Gets a value indicating whether the votes have been modified by the event.
     /// </summary>
-    public bool VotesModified => !Votes.SequenceEqual(_originalVotes);
+    public bool VotesModified => !Votes.SequenceEqual(originalVotes);
 
     /// <summary>
     /// Gets the list of <see cref="CustomVote"/>s that are being processed.
@@ -41,6 +42,7 @@ public class ProcessVotesEvent(List<CustomVote> votes, NetworkedPlayerInfo? exil
     /// <summary>
     /// Gets or sets the player to be exiled. Will be <see langword="null"/> if no player is to be exiled.
     /// </summary>
+    [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1513:Closing brace should be followed by blank line", Justification = "Looks weird.")]
     public NetworkedPlayerInfo? ExiledPlayer
     {
         get;

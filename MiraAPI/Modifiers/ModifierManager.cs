@@ -136,6 +136,7 @@ public static class ModifierManager
                 {
                     Warning($"No valid players for modifier {modifier.ModifierName.Translate()}");
                 }
+
                 continue;
             }
 
@@ -188,6 +189,7 @@ public static class ModifierManager
                !player.HasModifier(modifierId) && modifier.IsModifierValidOn(player.Data.Role) &&
                modifier.CanSpawnOnCurrentMode();
     }
+
     private static bool IsGameModifierPostCheck(PlayerControl player, GameModifier modifier, uint modifierId)
     {
         return (player.Data.Role is not ICustomRole role || role.IsModifierApplicable(modifier)) &&

@@ -672,6 +672,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     public void NextMod()
     {
         CurrentModIdx++;
+
         // The existence of vanilla settings offsets the off-by-one errors.
         if (CurrentModIdx > ModCount) CurrentModIdx = 0;
         CurrentMenu = GetNewPageIfNeeded();
@@ -682,6 +683,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     public void PreviousMod()
     {
         CurrentModIdx--;
+
         // The existence of vanilla settings offsets the off-by-one errors.
         if (CurrentModIdx < 0) CurrentModIdx = ModCount;
         CurrentMenu = GetNewPageIfNeeded();

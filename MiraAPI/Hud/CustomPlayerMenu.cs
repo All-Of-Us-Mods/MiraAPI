@@ -112,6 +112,7 @@ public class CustomPlayerMenu(IntPtr il2CppPtr) : Minigame(il2CppPtr)
             potentialVictims.Add(shapeshifterPanel);
             list2.Add(shapeshifterPanel.Button);
         }
+
         ControllerManager.Instance.OpenOverlayMenu(name, backButton, defaultButtonSelected, list2);
     }
 }

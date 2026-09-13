@@ -125,6 +125,7 @@ public abstract class ModdedOption<T> : IModdedOption
             Error($"Attempted to save {Title} to preset, but ConfigDefinition is null.");
             return;
         }
+
         Bind(presetConfig);
         presetConfig[ConfigDefinition].BoxedValue = saveDefault ? DefaultValue : Value;
     }

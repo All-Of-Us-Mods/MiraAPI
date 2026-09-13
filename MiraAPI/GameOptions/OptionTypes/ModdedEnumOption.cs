@@ -28,7 +28,8 @@ public class ModdedEnumOption : ModdedOption<int>
     /// <param name="enumType">The <see cref="Enum"/> type.</param>
     /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
     /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
-    public ModdedEnumOption(string title, int defaultValue, Type enumType, string[]? values = null, bool includeInPreset = true) : base(title, defaultValue, includeInPreset)
+    public ModdedEnumOption(string title, int defaultValue, Type enumType, string[]? values = null, bool includeInPreset = true)
+        : base(title, defaultValue, includeInPreset)
     {
         Values = values ?? Enum.GetNames(enumType);
 
@@ -111,7 +112,8 @@ public class ModdedEnumOption : ModdedOption<int>
 /// An option for selecting an <see langword="enum"/> value.
 /// </summary>
 /// <typeparam name="T">The <see cref="Enum"/> type.</typeparam>
-public class ModdedEnumOption<T> : ModdedOption<T> where T : Enum
+public class ModdedEnumOption<T> : ModdedOption<T>
+    where T : Enum
 {
     /// <summary>
     /// Gets the string values of the <see langword="enum"/>.
@@ -125,7 +127,8 @@ public class ModdedEnumOption<T> : ModdedOption<T> where T : Enum
     /// <param name="defaultValue">The default value as an <see langword="int"/>.</param>
     /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
     /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
-    public ModdedEnumOption(string title, T defaultValue, string[]? values = null, bool includeInPreset = true) : base(title, defaultValue, includeInPreset)
+    public ModdedEnumOption(string title, T defaultValue, string[]? values = null, bool includeInPreset = true)
+        : base(title, defaultValue, includeInPreset)
     {
         Values = values ?? Enum.GetNames(typeof(T));
 

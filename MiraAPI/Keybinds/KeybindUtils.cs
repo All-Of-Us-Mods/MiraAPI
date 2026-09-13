@@ -70,6 +70,7 @@ public static class KeybindUtils
             var used = KeybindManager.Keybinds.Exists(e => e.DefaultKey == key);
             if (!used) return key;
         }
+
         return KeyboardKeyCode.None;
     }
 }

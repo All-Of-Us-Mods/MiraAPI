@@ -9,12 +9,12 @@ namespace MiraAPI.Example.Roles;
 
 public class ChameleonRole : CrewmateRole, ICustomRole
 {
+    private bool shouldHide;
+
     public string IdPart => "Chameleon";
     public string IdPrefix => "ApiExample.Role.Crewmate";
     public Color RoleColor => Palette.AcceptedGreen;
     public ModdedRoleTeams Team => ModdedRoleTeams.Crewmate;
-
-    private bool _shouldHide;
 
     public CustomRoleConfiguration Configuration => new(this)
     {
@@ -30,12 +30,12 @@ public class ChameleonRole : CrewmateRole, ICustomRole
     {
         Logger<ExamplePlugin>.Info("Initializing ChameleonRole for player: " + player.PlayerId);
         RoleBehaviourStubs.Initialize(this, player);
-        _shouldHide = true;
+        shouldHide = true;
     }
 
     public void FixedUpdate()
     {
-        if (!Player || !_shouldHide)
+        if (!Player || !shouldHide)
         {
             return;
         }
@@ -76,7 +76,7 @@ public class ChameleonRole : CrewmateRole, ICustomRole
     {
         Logger<ExamplePlugin>.Info("Deinitializing ChameleonRole for player: " + targetPlayer.PlayerId);
         RoleBehaviourStubs.Deinitialize(this, targetPlayer);
-        _shouldHide = false;
+        shouldHide = false;
         foreach (var cosmetic in Player.cosmetics.transform.GetComponentsInChildren<SpriteRenderer>(true))
         {
             cosmetic.color = Color.white;

@@ -336,6 +336,7 @@ public abstract class MeetingActionButton
             {
                 Button!.SetDisabled();
             }
+
             Button.SetCooldownFormat(Timer, Cooldown, CooldownTimerFormatString);
             Button.SetCoolDown(Timer, Cooldown);
         }

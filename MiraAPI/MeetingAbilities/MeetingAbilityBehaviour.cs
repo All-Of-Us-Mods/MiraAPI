@@ -69,6 +69,7 @@ public class MeetingAbilityBehaviour : MonoBehaviour
             Error($"Could not initialize MeetingButtonBehaviour for {Button.GetType().Name}, Destroying...");
             Destroy(this);
         }
+
         _init = true;
         Button = but;
         CooldownText = Instantiate(HudManager.Instance.KillButton.cooldownTimerText, transform);
@@ -113,6 +114,7 @@ public class MeetingAbilityBehaviour : MonoBehaviour
             CooldownText.text = _button.Timer.ToString(_button.CooldownTimerFormatString, NumberFormatInfo.InvariantInfo);
             UsesText.text = string.Empty;
         }
+
         SetFillUp(_button.Timer, _button.InitialCooldown);
     }
 

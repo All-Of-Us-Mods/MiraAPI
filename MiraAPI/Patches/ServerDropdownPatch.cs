@@ -44,6 +44,7 @@ public static class ServerDropdownPatch
                 {
                     x += 2;
                 }
+
                 var y = -0.55f * (num / 2f);
                 serverListButton.transform.localPosition = new Vector3(x, __instance.y_posButton + y, -1f);
                 serverListButton.transform.localScale = Vector3.one;

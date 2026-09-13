@@ -33,6 +33,7 @@ public static class KillButtonPatches
         {
             __instance.currentTarget.cosmetics.SetOutline(false, new Nullable<Color>(Color.clear));
         }
+
         __instance.currentTarget = target;
         if (__instance.currentTarget)
         {
@@ -40,6 +41,7 @@ public static class KillButtonPatches
             __instance.SetEnabled();
             return false;
         }
+
         __instance.SetDisabled();
 
         return false;

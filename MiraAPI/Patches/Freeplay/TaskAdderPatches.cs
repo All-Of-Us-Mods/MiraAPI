@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -23,8 +24,8 @@ namespace MiraAPI.Patches.Freeplay;
 [HarmonyPatch(typeof(TaskAdderGame))]
 public static class TaskAdderPatches
 {
-    private static Scroller _scroller = null!;
     private static readonly Dictionary<string, TaskFolder> Folders = [];
+    private static Scroller _scroller = null!;
 
     public static string CrewmateName => TranslationController.Instance.GetString(StringNames.Crewmate);
     public static string ImpostorName => TranslationController.Instance.GetString(StringNames.Impostor);
@@ -33,6 +34,7 @@ public static class TaskAdderPatches
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(TaskAdderGame.Begin))]
+    [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1515:Single-line comment should be preceded by blank line", Justification = "Don't know, but seems important enough to keep.")]
     public static void AddRolesFolder(TaskAdderGame __instance)
     {
         GameObject inner = new("Inner");
@@ -73,13 +75,13 @@ public static class TaskAdderPatches
         __instance.TaskParent = inner.transform;
         var crewmateFolder = __instance.Root.SubFolders.ToArray().FirstOrDefault(x => x.FolderName == CrewmateName)!;
         var impostorFolder = __instance.Root.SubFolders.ToArray().FirstOrDefault(x => x.FolderName == ImpostorName)!;
-        // var neutralFolder = __instance.CreateFolder("Neutral", __instance.Root, 2, Color.gray);
+        // var neutralFolder = __instance.CreateFolder(NeutralName, __instance.Root, 2, Color.gray);
         var modifiersFolder = __instance.CreateFolder(ModifiersName, __instance.Root, 0, Color.blue);
 
         Folders.Clear();
         Folders.Add(crewmateFolder.FolderName, crewmateFolder);
         Folders.Add(impostorFolder.FolderName, impostorFolder);
-        // folders.Add("Neutrals", neutralFolder);
+        // Folders.Add(NeutralName, neutralFolder);
         Folders.Add(ModifiersName, modifiersFolder);
 
         var folderIdx = 2;
@@ -266,6 +268,7 @@ public static class TaskAdderPatches
             stringBuilder.Append(t.FolderName);
             stringBuilder.Append('\\');
         }
+
         __instance.PathText.text = stringBuilder.ToString();
         __instance.PathText.fontSizeMin = 3;
         __instance.PathText.fontSizeMax = 3;
@@ -368,6 +371,7 @@ public static class TaskAdderPatches
         {
             // I hate you
         }
+
         if (split is ["Roles", _, _] && Folders.Any(x => taskFolder.IsChildOf(x.Value)))
         {
             var plugin = MiraPluginManager.GetPluginByGuid(split[2]);
@@ -381,6 +385,7 @@ public static class TaskAdderPatches
                     {
                         continue;
                     }
+
                     var crewLocale = TranslationController.Instance.GetString(StringNames.Crewmate);
                     var impLocale = TranslationController.Instance.GetString(StringNames.Impostor);
 
@@ -389,6 +394,7 @@ public static class TaskAdderPatches
                     {
                         teamFolder = cs.Configuration.FreeplayFolder;
                     }
+
                     if (split[1] != teamFolder)
                     {
                         continue;
@@ -416,6 +422,7 @@ public static class TaskAdderPatches
                         {
                             customColor = Palette.ImpostorRed;
                         }
+
                         roleAddButton.FileImage.color = customColor;
                         roleAddButton.RolloverHandler.OutColor = customColor;
                     }

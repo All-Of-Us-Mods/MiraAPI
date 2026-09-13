@@ -1,11 +1,11 @@
-﻿using AmongUs.Data;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using AmongUs.Data;
 using HarmonyLib;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -49,6 +49,7 @@ public static class VisorsTabPatches
         {
             return true;
         }
+
         __instance.visorId = HatManager.Instance.GetVisorById(DataManager.Player.Customization.Visor).ProdId;
 
         if (!SortedVisors.ContainsKey("Vanilla")) AddRange(HatManager.Instance.GetUnlockedVisors().Select(x => ("Vanilla", x)));
@@ -69,6 +70,7 @@ public static class VisorsTabPatches
         {
             return;
         }
+
         if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl) || Input.GetKeyDown(KeyCode.LeftArrow))
         {
             PreviousPage(__instance);
@@ -108,6 +110,7 @@ public static class VisorsTabPatches
         foreach (var visor in visors.OrderBy(HatManager.Instance.allVisors.IndexOf))
         {
             var hatXPosition = __instance.XRange.Lerp(hatIndex % __instance.NumPerRow / (__instance.NumPerRow - 1f));
+
             // ReSharper disable once PossibleLossOfFraction (Justification: Intended.)
             var hatYPosition = __instance.YStart - hatIndex / __instance.NumPerRow * __instance.YOffset;
             GenerateColorChip(__instance, new Vector2(hatXPosition, hatYPosition), visor);

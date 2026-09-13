@@ -10,7 +10,8 @@ namespace MiraAPI.Utilities.Assets;
 /// A utility class for loading groups of assets from ALL addressable locations.
 /// </summary>
 /// <typeparam name="T">The type of the asset to be loaded.</typeparam>
-public class LoadableAddressableAssets<T>(string key) where T : UnityEngine.Object
+public class LoadableAddressableAssets<T>(string key)
+    where T : UnityEngine.Object
 {
     private readonly Action<LoadableAddressableAssets<T>>? _gcAction;
 
@@ -25,7 +26,8 @@ public class LoadableAddressableAssets<T>(string key) where T : UnityEngine.Obje
     /// </summary>
     /// <param name="key">The key of the assets.</param>
     /// <param name="garbageCollection">A lambda that allows GCHandle.Alloc calls without garbage collection interferences.</param>
-    public LoadableAddressableAssets(string key, Action<LoadableAddressableAssets<T>> garbageCollection) : this(key)
+    public LoadableAddressableAssets(string key, Action<LoadableAddressableAssets<T>> garbageCollection)
+        : this(key)
     {
         _gcAction = garbageCollection;
     }

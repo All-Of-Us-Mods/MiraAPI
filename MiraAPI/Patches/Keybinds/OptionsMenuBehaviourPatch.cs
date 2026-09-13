@@ -36,6 +36,7 @@ public static class OptionsMenuBehaviourPatch
         {
             return;
         }
+
         if (_remapBackground == null)
         {
             return;

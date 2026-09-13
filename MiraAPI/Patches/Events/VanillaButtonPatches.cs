@@ -31,6 +31,7 @@ public static class VanillaButtonPatches
         {
             ventTarget = role.Cast<EngineerRole>().currentTarget;
         }
+
         var genericEvent = new VanillaButtonClickEvent(__instance, playerTarget, ventTarget);
         MiraEventManager.InvokeEvent(genericEvent);
         if (genericEvent.IsCancelled)
@@ -52,6 +53,7 @@ public static class VanillaButtonPatches
         {
             playerTarget = role.Cast<DetectiveRole>().currentTarget;
         }
+
         var genericEvent = new VanillaButtonClickEvent(__instance, playerTarget);
         MiraEventManager.InvokeEvent(genericEvent);
         if (genericEvent.IsCancelled)

@@ -81,6 +81,7 @@ public static class CustomMurderRpc
         {
             return;
         }
+
         var murderResultFlags = didSucceed ? MurderResultFlags.Succeeded : MurderResultFlags.FailedError;
 
         var beforeMurderEvent = new BeforeMurderEvent(source, target, inMeeting);
@@ -222,6 +223,7 @@ public static class CustomMurderRpc
         {
             return;
         }
+
         var murderResultFlags = didSucceed ? MurderResultFlags.Succeeded : MurderResultFlags.FailedError;
 
         var beforeMurderEvent = new BeforeMurderEvent(source, target, isIndirect, ignoreDefense, inMeeting);
@@ -351,6 +353,7 @@ public static class CustomMurderRpc
         {
             return;
         }
+
         var murderResultFlags = didSucceed ? MurderResultFlags.Succeeded : MurderResultFlags.FailedError;
 
         var beforeMurderEvent = new BeforeMurderEvent(source, target, framed, isIndirect, ignoreDefense, inMeeting);
@@ -745,6 +748,7 @@ public static class CustomMurderRpc
         {
             yield break;
         }
+
         var cam = Camera.main?.GetComponent<FollowerCamera>();
         var playerToLunge = framed ?? source;
         var isParticipant = playerToLunge.AmOwner || target.AmOwner;

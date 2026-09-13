@@ -14,14 +14,16 @@ namespace MiraAPI.Patches.LocalSettings;
 [HarmonyPatch(typeof(OptionsMenuBehaviour))]
 public static class OptionsMenuPatches
 {
+    private static readonly Dictionary<int, List<GameObject>> TabButtons = [];
+    private static int currentPage = 1;
+
     internal static OptionsMenuBehaviour? Instance { get; private set; }
+
     [SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
     [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
     internal static BoxCollider2D MaskCollider = null!;
-    private static SpriteRenderer? background;
 
-    private static int currentPage = 1;
-    private static readonly Dictionary<int, List<GameObject>> TabButtons = [];
+    private static SpriteRenderer? background;
 
     /// <summary>
     /// Creates the <see cref="LocalSettingsTab"/>s and their content.
@@ -31,6 +33,7 @@ public static class OptionsMenuPatches
     public static void StartPostfix(OptionsMenuBehaviour __instance)
     {
         Instance = __instance;
+
         // Fix for tabs not being clickable in the main menu
         if (!AmongUsClient.Instance.IsInGame)
         {
@@ -87,11 +90,13 @@ public static class OptionsMenuPatches
                     TabButtons.Add(page, []);
                     list = TabButtons[page];
                 }
+
                 list.Add(button);
                 yOffset += 0.6f;
                 tabIdx++;
                 i++;
             }
+
             if (i > 7)
             {
                 i = 0;
@@ -107,6 +112,7 @@ public static class OptionsMenuPatches
             {
                 currentPage = 1;
             }
+
             if (currentPage < 1)
             {
                 currentPage = TabButtons.Count;
@@ -220,6 +226,7 @@ public static class OptionsMenuPatches
 
         tab.Open();
     }
+
     private static void CustomClose(LocalSettingsTab tab)
     {
         if (tab.TabButton?.Button)

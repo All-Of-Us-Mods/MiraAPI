@@ -63,14 +63,17 @@ public static class RoleGuidePatches
         {
             Minigame.Instance.Close();
         }
+
         if (MapBehaviour.Instance)
         {
             MapBehaviour.Instance.Close();
         }
+
         if (HudManager.InstanceExists)
         {
             ConsoleJoystick.SetMode_MenuAdditive();
         }
+
         ControllerManager.Instance.OpenOverlayMenu("MatchInfoGuide", __instance.closeButton);
         var enabled = ActiveInputManager.currentControlType == ActiveInputManager.InputType.Joystick;
         __instance.glyphL.enabled = enabled;
@@ -112,6 +115,7 @@ public static class RoleGuidePatches
             __instance.TabButtons[0].SelectButton(true);
             __instance.CreateHnSModeSettings();
         }
+
         PlayerControl.LocalPlayer.NetTransform.Halt();
         __instance.MatchInfoParent.SetActive(true);
         var instance = ControllerManager.Instance;
@@ -244,6 +248,7 @@ public static class RoleGuidePatches
 
         return false;
     }
+
     [HarmonyPrefix]
     [HarmonyPriority(Priority.First)]
     [HarmonyPatch(typeof(MatchInfoRolePanel), nameof(MatchInfoRolePanel.SetPanel))]

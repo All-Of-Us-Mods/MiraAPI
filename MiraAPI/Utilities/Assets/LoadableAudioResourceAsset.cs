@@ -63,6 +63,7 @@ public class LoadableAudioResourceAsset(string path) : LoadableAsset<AudioClip>
                 if (audioFormat != 1) // Only PCM supported
                     throw new NotSupportedException("Only PCM WAV files are supported.");
             }
+
             // Data chunk
             else if (chunkId == "data")
             {

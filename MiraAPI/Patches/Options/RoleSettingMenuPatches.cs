@@ -85,13 +85,16 @@ public static class RoleSettingMenuPatches
             {
                 Object.Destroy(child.gameObject);
             }
+
             foreach (var child in headers)
             {
                 Object.Destroy(child.gameObject);
             }
+
             yield return new WaitForEndOfFrame();
             MenuState.Instance.QueuedRoleMenuRefresh[MenuState.Instance.CurrentModIdx] = false;
         }
+
         if (!queuedRefresh && MenuState.Instance.FinishedRoleMenus.TryGetValue(MenuState.Instance.CurrentModIdx, out var finished) && finished)
         {
             var roleOptionSettings = roleMenu.scrollBar.Inner.GetComponentsInChildren<RoleOptionSetting>(true);
@@ -177,10 +180,12 @@ public static class RoleSettingMenuPatches
                 {
                     Object.Destroy(child.gameObject);
                 }
+
                 foreach (var child in headers)
                 {
                     Object.Destroy(child.gameObject);
                 }
+
                 yield return new WaitForEndOfFrame();
 
                 var roleGroups = MenuState.Instance.CurrentMod.InternalRoles.Values.OfType<ICustomRole>()
@@ -351,6 +356,7 @@ public static class RoleSettingMenuPatches
                     }
                 }
             }
+
             MenuState.Instance.QueuedRoleMenuRefresh[MenuState.Instance.CurrentModIdx] = false;
             MenuState.Instance.FinishedRoleMenus[MenuState.Instance.CurrentModIdx] = true;
         }
@@ -399,11 +405,13 @@ public static class RoleSettingMenuPatches
                     ControllerManager.Instance.SetDefaultSelection(__instance.ControllerSelectable[0]);
                 }
             }
+
             var passiveButton = __instance.currentTabButton;
             if (passiveButton)
             {
                 passiveButton.SelectButton(false);
             }
+
             __instance.AllButton.SelectButton(true);
             __instance.currentTabButton = __instance.AllButton;
         }
@@ -423,8 +431,8 @@ public static class RoleSettingMenuPatches
         scroller.SetYBoundsMax(-ScrollerNum - 2);
     }
 
-    [HarmonyPrefix]
     // TODO: turn this into a fixed update
+    [HarmonyPrefix]
     [HarmonyPatch(nameof(RolesSettingsMenu.Update))]
     public static bool UpdatePatch(RolesSettingsMenu __instance)
     {
@@ -549,6 +557,7 @@ public static class RoleSettingMenuPatches
         var categoryHeaderMasked = __instance.AdvancedRolesSettings.transform.Find("CategoryHeaderMasked").GetComponent<CategoryHeaderMasked>();
         categoryHeaderMasked.Title.text = TranslationController.Instance.GetString(StringNames.RoleSettingsLabel);
         var labelBg = __instance.AdvancedRolesSettings.transform.FindChild("InfoLabelBackground");
+
         // ReSharper disable once StringLiteralTypo (Justification: Actual name in-game.)
         var imgBg = __instance.AdvancedRolesSettings.transform.FindChild("Imagebackground");
         imgBg.gameObject.SetActive(true);

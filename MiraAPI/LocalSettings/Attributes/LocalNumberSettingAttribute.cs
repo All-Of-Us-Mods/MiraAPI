@@ -24,8 +24,8 @@ public class LocalNumberSettingAttribute(
     float max = 5,
     float increment = 1,
     MiraNumberSuffixes suffixType = MiraNumberSuffixes.None,
-    string? formatString = null
-    ) : LocalSettingAttribute(name, description)
+    string? formatString = null)
+    : LocalSettingAttribute(name, description)
 {
     private readonly string? _name = name;
     private readonly string? _description = description;

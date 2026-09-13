@@ -1,7 +1,7 @@
-﻿using MiraAPI.GameOptions;
+﻿using System.Collections.Generic;
+using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.Attributes;
 using MiraAPI.Utilities;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace MiraAPI.Example.Options;

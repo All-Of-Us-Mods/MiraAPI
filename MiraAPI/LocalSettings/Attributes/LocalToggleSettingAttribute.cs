@@ -12,8 +12,8 @@ namespace MiraAPI.LocalSettings.Attributes;
 [AttributeUsage(AttributeTargets.Property)]
 public class LocalToggleSettingAttribute(
     string? name = null,
-    string? description = null
-    ) : LocalSettingAttribute(name, description)
+    string? description = null)
+    : LocalSettingAttribute(name, description)
 {
     private readonly string? _name = name;
     private readonly string? _description = description;

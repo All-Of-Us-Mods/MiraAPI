@@ -209,6 +209,7 @@ public abstract class CustomActionButton
         Keybind.OnActivate(() =>
         {
             if (!Enabled(PlayerControl.LocalPlayer.Data.Role)) return;
+
             // Invoke the generic button click event.
             var genericEvent = new MiraButtonClickEvent(this);
             MiraEventManager.InvokeEvent(genericEvent);
@@ -248,8 +249,7 @@ public abstract class CustomActionButton
             Helpers.CreateKeybindIcon(
                 Button.gameObject,
                 Keybind.CurrentKey,
-                new Vector3(0.4f, 0.45f, -9f)
-            );
+                new Vector3(0.4f, 0.45f, -9f));
         KeybindText = KeybindIcon.transform.GetChild(0).GetComponent<TextMeshPro>();
         HudManagerPatches.ModdedKeybindIcons.Add(KeybindText);
         Button.usesRemainingSprite.transform.localPosition = new(-0.341f, 0.45f, -0.1f);
@@ -584,7 +584,8 @@ public abstract class CustomActionButton
 /// Custom action button that has a target <typeparamref name="T"/>.
 /// </summary>
 /// <typeparam name="T">The type of the target object.</typeparam>
-public abstract class CustomActionButton<T> : CustomActionButton where T : MonoBehaviour
+public abstract class CustomActionButton<T> : CustomActionButton
+    where T : MonoBehaviour
 {
     /// <summary>
     /// Gets or sets the target <typeparamref name="T"/> of the button.

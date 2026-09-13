@@ -12,9 +12,9 @@ namespace MiraAPI.LocalSettings.Attributes;
 public abstract class LocalSettingAttribute(
 #pragma warning disable CS9113 // Parameter is unread (Justification: No idea why they exist, but they probably do for a reason unknown to me.)
     string? name = null,
-    string? description = null
+    string? description = null)
 #pragma warning restore CS9113 // Parameter is unread
-    ) : Attribute
+    : Attribute
 {
     /// <summary>
     /// Returns the created <see cref="ILocalSetting"/> object.

@@ -35,8 +35,7 @@ public static class CustomButtonManager
     [SuppressMessage(
         "Major Code Smell",
         "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields",
-        Justification = "Dynamic singleton initialization requires reflection to bypass the private field access modifier because the type is only known at runtime."
-    )]
+        Justification = "Dynamic singleton initialization requires reflection to bypass the private field access modifier because the type is only known at runtime.")]
     internal static bool RegisterButton(Type buttonType, MiraPluginInfo pluginInfo)
     {
         if (!buttonType.IsAssignableTo(typeof(CustomActionButton)) || Activator.CreateInstance(buttonType) is not CustomActionButton button)

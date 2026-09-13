@@ -108,7 +108,8 @@ public static class CustomRoleUtils
     /// </summary>
     /// <typeparam name="T">The <see cref="RoleBehaviour"/> you would like to check for.</typeparam>
     /// <returns>An <see cref="IEnumerable{T}"/> of <typeparamref name="T"/>s.</returns>
-    public static IEnumerable<T> GetActiveRolesOfType<T>() where T : RoleBehaviour
+    public static IEnumerable<T> GetActiveRolesOfType<T>()
+        where T : RoleBehaviour
     {
         return GetActiveRoles().OfType<T>();
     }

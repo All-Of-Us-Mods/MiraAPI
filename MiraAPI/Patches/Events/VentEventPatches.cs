@@ -35,6 +35,7 @@ public static class VentEventPatches
         {
             _showButtons = !@event.IsCancelled;
         }
+
         return !@event.IsCancelled;
     }
 
@@ -52,6 +53,7 @@ public static class VentEventPatches
         {
             _showButtons = @event.IsCancelled;
         }
+
         return !@event.IsCancelled;
     }
 }

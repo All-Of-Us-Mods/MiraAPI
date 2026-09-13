@@ -50,6 +50,7 @@ public static class IntroCutscenePatches
         public static void Postfix(Il2CppObjectBase __instance)
         {
             var wrapper = new StateMachineWrapper<IntroCutscene>(__instance);
+
             // run before the first yield
             if (wrapper.GetState() != 1)
             {
@@ -117,17 +118,20 @@ public static class IntroCutscenePatches
             if (_usedFallback)
             {
                 var wrapper = new StateMachineWrapper<IntroCutscene>(__instance);
+
                 // run after the final yield
                 if (wrapper.GetState() != -1)
                 {
                     return;
                 }
+
                 introCutscene = wrapper.Instance;
             }
             else
             {
                 introCutscene = __instance.Cast<IntroCutscene>();
             }
+
             Info("IntroCutscene ended");
 
             MeetingButtonManager.OnGameStart();

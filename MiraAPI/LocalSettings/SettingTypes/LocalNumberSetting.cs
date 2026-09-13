@@ -73,6 +73,7 @@ public class LocalNumberSetting(
             highlight.color = Tab!.TabAppearance.NumberHoverColor;
             highlight.gameObject.SetActive(false);
         }
+
         toggleComp.Destroy();
 
         if (last && order == 1)
@@ -110,6 +111,7 @@ public class LocalNumberSetting(
             {
                 tmp.text = Description;
             }
+
             highlight?.gameObject.SetActive(true);
         }));
         button.OnMouseOut.AddListener((UnityAction)(() =>
@@ -126,6 +128,7 @@ public class LocalNumberSetting(
             offset += 0.5f;
             order = 1;
         }
+
         if (last)
             offset += 0.6f;
 

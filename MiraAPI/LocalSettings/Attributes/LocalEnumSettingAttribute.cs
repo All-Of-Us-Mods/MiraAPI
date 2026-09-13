@@ -14,8 +14,8 @@ namespace MiraAPI.LocalSettings.Attributes;
 public class LocalEnumSettingAttribute(
     string? name = null,
     string? description = null,
-    string[]? names = null
-    ) : LocalSettingAttribute(name, description)
+    string[]? names = null)
+    : LocalSettingAttribute(name, description)
 {
     private readonly string? _name = name;
     private readonly string? _description = description;

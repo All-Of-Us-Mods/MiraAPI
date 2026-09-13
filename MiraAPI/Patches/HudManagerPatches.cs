@@ -50,6 +50,7 @@ public static class HudManagerPatches
         {
             _storedButtonsParent = HudManager.Instance.transform.FindChild("Buttons");
         }
+
         if (_storedButtonsParent)
         {
             foreach (var aspect in _storedButtonsParent.GetComponentsInChildren<AspectPosition>(true))
@@ -146,6 +147,7 @@ public static class HudManagerPatches
         {
             return;
         }
+
         __instance.chatButton.transform.localPosition = MiraHudHelper.ClonedChatButton.transform.localPosition + new Vector3(-0.3f, 0);
     }
 
@@ -219,6 +221,7 @@ public static class HudManagerPatches
             fakeButton.ToggleVisible(true);
             fakeButton.Destroy();
         }
+
         ModdedKeybindIcons = [];
 
         foreach (var button in CustomButtonManager.CustomButtons)
@@ -244,6 +247,7 @@ public static class HudManagerPatches
                 Error($"Failed to create custom button {button.GetType().Name}: {e}");
             }
         }
+
         __instance.ImpostorVentButton.transform.SetParent(null);
         __instance.ImpostorVentButton.transform.SetParent(BottomRight.transform);
 
@@ -273,6 +277,7 @@ public static class HudManagerPatches
             {
                 continue;
             }
+
             var icon = Helpers.CreateKeybindIcon(buttonObj, key, keybindIconPos);
             vanillaKeybindIcons.Add(icon.transform.GetChild(0).GetComponent<TextMeshPro>(), actionId);
             if (!MiraApiPlugin.IsMobile)
@@ -281,6 +286,7 @@ public static class HudManagerPatches
                 KeybindManager.VanillaKeybinds[comp.GetType()].Button = comp;
             }
         }
+
         MiraApiSettings.OldButtonScaleFactor =
             LocalSettingsTabSingleton<MiraApiSettings>.Instance.ButtonUIFactorSlider.Value;
         MiraApiSettings.OldUiButtonScaleFactor =

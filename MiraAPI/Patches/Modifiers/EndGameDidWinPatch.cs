@@ -33,6 +33,7 @@ internal static class EndGameDidWinPatch
                 {
                     CachedWinners.Add(new CachedPlayerData(networkedPlayerInfo));
                 }
+
                 continue;
             }
 

@@ -34,7 +34,8 @@ public class ModdedPlayerOption : ModdedOption<int>
     /// </summary>
     /// <param name="title">The title of the option.</param>
     /// <param name="allowNone">Whether the option includes a none option. If None is selected, value will return -1.</param>
-    public ModdedPlayerOption(string title, bool allowNone = true) : base(title, allowNone ? -1 : 0, false)
+    public ModdedPlayerOption(string title, bool allowNone = true)
+        : base(title, allowNone ? -1 : 0, false)
     {
         Data = ScriptableObject.CreateInstance<PlayerSelectionGameSetting>();
         var data = (PlayerSelectionGameSetting)Data;

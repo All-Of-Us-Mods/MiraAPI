@@ -21,6 +21,7 @@ public static class CanUsePatches
         yield return AccessTools.Method(typeof(PlatformConsole), nameof(PlatformConsole.CanUse));
         yield return AccessTools.Method(typeof(SystemConsole), nameof(SystemConsole.CanUse));
         yield return AccessTools.Method(typeof(ZiplineConsole), nameof(ZiplineConsole.CanUse));
+
         // vent is not necessary as it has its own patch
     }
 

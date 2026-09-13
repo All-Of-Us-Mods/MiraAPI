@@ -74,7 +74,8 @@ public static class CustomGameModeManager
     /// </summary>
     /// <typeparam name="T">The AbstractGameMode subclass being checked.</typeparam>
     /// <returns>Whether the provided mode is the current active one.</returns>
-    public static bool IsActiveGameMode<T>() where T : AbstractGameMode
+    public static bool IsActiveGameMode<T>()
+        where T : AbstractGameMode
     {
         return ActiveMode is T;
     }
@@ -108,6 +109,7 @@ public static class CustomGameModeManager
     {
         var defaultMode = new ClassicMode();
         IdToModeMap.Add(0, defaultMode);
+
         // no need to add to game mode option as it already contains it
         // because we cannot have the option be created with no values
         defaultMode.ID = 0;

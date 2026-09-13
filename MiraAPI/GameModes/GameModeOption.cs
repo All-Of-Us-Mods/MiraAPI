@@ -19,7 +19,7 @@ namespace MiraAPI.GameModes;
 public static class GameModeOption
 {
     /// <summary>
-    /// Gets the current index of the Game Mode Option
+    /// Gets the current index of the Game Mode Option.<br/>
     /// For the value as an <see cref="AbstractGameMode"/>, see <see cref="CustomGameModeManager.ActiveMode"/>.
     /// </summary>
     public static int Value
@@ -38,11 +38,6 @@ public static class GameModeOption
             LastValue = value;
         }
     }
-    internal static StringOption OptionBehaviour { get; set; } = null!;
-
-    [SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
-    [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")] // why so many warnings???
-    internal static int LastValue;
 
     internal static readonly StringNames GamemodeName = MiraLocaleManager.GetOrCreateLocaleString("Gamemode");
     internal static readonly StringNames CustomName = MiraLocaleManager.GetOrCreateLocaleString("Custom");
@@ -50,6 +45,12 @@ public static class GameModeOption
     {
         [0] = MiraLocaleManager.GetOrCreateLocaleString("MiraApi.Gamemode.Classic"),
     };
+
+    internal static StringOption OptionBehaviour { get; set; } = null!;
+
+    [SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
+    [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")] // why so many warnings???
+    internal static int LastValue;
 
     internal static void AddOption(AbstractGameMode mode)
     {
@@ -110,6 +111,7 @@ public static class GameModeOption
         CustomGameModeManager.GetAndSetGameMode();
         HudPatches.SetGameModeText(CustomGameModeManager.GetMode(Values.ElementAt(LastValue).Key).ColoredName);
         var gm = CustomGameModeManager.ActiveMode!;
+
         if (gm != previousMode)
         {
             ModdedOptionsManager.AddSettingsChangeMessage(
@@ -127,6 +129,7 @@ public static class GameModeOption
                 }
             }
         }
+
         // TODO: could make Values a dict of AbstractGameMode too
     }
 
@@ -145,6 +148,7 @@ public static class GameModeOption
             GameOptionsMenuPatch.ToggleGamemodeOptions(CustomGameModeManager.ActiveMode, __instance);
             GameSettingMenu.Instance.RoleSettingsButton.gameObject.SetActive(CustomGameModeManager.ActiveMode.ShowNormalRoleSettings);
         }
+
         return false;
     }
 

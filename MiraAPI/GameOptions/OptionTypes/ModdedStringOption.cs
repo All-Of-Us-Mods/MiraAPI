@@ -36,6 +36,7 @@ public class ModdedStringOption : ModdedOption<string>
         {
             return Array.IndexOf(Values, value);
         }
+
         Info($"Cannot find a valid index for {value}. Returning -1 instead. Values: {string.Join(", ", Values)}");
         return -1;
     }
@@ -79,12 +80,14 @@ public class ModdedStringOption : ModdedOption<string>
                 {
                     Error("StringOption is null.");
                 }
+
                 Warning("OptionBehaviour is valid");
             }
             else
             {
                 Error("OptionBehaviour is null.");
             }
+
             Warning("Data is valid");
         }
         else
@@ -100,7 +103,8 @@ public class ModdedStringOption : ModdedOption<string>
     /// <param name="defaultValue">The default value as a string.</param>
     /// <param name="values">An option list of string values to use.</param>
     /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
-    public ModdedStringOption(string title, string defaultValue, string[] values, bool includeInPreset = true) : base(title, defaultValue, includeInPreset)
+    public ModdedStringOption(string title, string defaultValue, string[] values, bool includeInPreset = true)
+        : base(title, defaultValue, includeInPreset)
     {
         Values = values;
         Data = ScriptableObject.CreateInstance<StringGameSetting>();

@@ -9,10 +9,10 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-[RegisterInIl2Cpp]
+namespace MiraAPI.Presets;
+
 // TODO: Give proper reasoning
-[SuppressMessage("Design", "CA1050:Declare types in namespaces", Justification = "Reason pending.")]
-[SuppressMessage("Major Bug", "S3903:Types should be defined in named namespaces", Justification = "Reason pending.")]
+[RegisterInIl2Cpp]
 [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity Convention.")]
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (Justification: Unity fields; ignore.)
 public class SavePresetPopup(nint cppPtr) : Minigame(cppPtr)

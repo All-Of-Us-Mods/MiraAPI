@@ -1,12 +1,12 @@
-﻿using AmongUs.Data;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using AmongUs.Data;
 using HarmonyLib;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -41,6 +41,7 @@ public static class SkinsTabPatches
         {
             return true;
         }
+
         __instance.skinId = HatManager.Instance.GetSkinById(DataManager.Player.Customization.Skin).ProdId;
         var allSkins = HatManager.Instance.GetUnlockedSkins().ToImmutableList();
 
@@ -71,6 +72,7 @@ public static class SkinsTabPatches
         {
             return;
         }
+
         if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl) || Input.GetKeyDown(KeyCode.LeftArrow))
         {
             PreviousPage(__instance);
@@ -110,6 +112,7 @@ public static class SkinsTabPatches
         foreach (var skin in skins.OrderBy(HatManager.Instance.allSkins.IndexOf))
         {
             var hatXPosition = __instance.XRange.Lerp(hatIndex % __instance.NumPerRow / (__instance.NumPerRow - 1f));
+
             // ReSharper disable once PossibleLossOfFraction (Justification: Intended.)
             var hatYPosition = __instance.YStart - hatIndex / __instance.NumPerRow * __instance.YOffset;
             GenerateColorChip(__instance, new Vector2(hatXPosition, hatYPosition), skin);
@@ -136,6 +139,7 @@ public static class SkinsTabPatches
         {
             colorChip.Button.OnClick.AddListener((Action)(() => __instance.SelectSkin(skin)));
         }
+
         colorChip.Button.ClickMask = __instance.scroller.Hitbox;
         colorChip.ProductId = skin.ProductId;
         colorChip.SelectionHighlight.gameObject.SetActive(false);

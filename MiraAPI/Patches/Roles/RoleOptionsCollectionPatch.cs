@@ -24,6 +24,7 @@ public static class RoleOptionsCollectionPatch
                 return true;
             }
         }
+
         return false;
     }
 

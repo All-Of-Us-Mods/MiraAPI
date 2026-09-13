@@ -20,8 +20,8 @@ public class LocalToggleSetting(
     Type tab,
     ConfigEntryBase configEntry,
     string? name = null,
-    string? description = null
-) : LocalSettingBase<bool>(tab, configEntry, name, description)
+    string? description = null)
+    : LocalSettingBase<bool>(tab, configEntry, name, description)
 {
     private ToggleButtonBehaviour _toggle;
 
@@ -79,6 +79,7 @@ public class LocalToggleSetting(
             offset += 0.5f;
             order = 1;
         }
+
         if (last)
             offset += 0.6f;
 

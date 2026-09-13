@@ -17,7 +17,8 @@ public static class MiraEventManager
     /// <param name="eventInstance">The <typeparamref name="T"/> instance.</param>
     /// <typeparam name="T">Type of Event.</typeparam>
     /// <returns>If there was an event handler invoked for this event, return <see langword="true"/>. Otherwise, return <see langword="false"/>.</returns>
-    public static bool InvokeEvent<T>(this T eventInstance) where T : MiraEvent
+    public static bool InvokeEvent<T>(this T eventInstance)
+        where T : MiraEvent
     {
         EventWrappers.TryGetValue(typeof(T), out var handlers);
 
@@ -109,7 +110,8 @@ public static class MiraEventManager
     /// <param name="priority">The priority of the event handler. Lower values are called first.</param>
     /// <typeparam name="T">Type of <see cref="MiraEvent"/> event.</typeparam>
     /// <returns>A <see cref="MiraEventHandle"/> to use when unregistering the event.</returns>
-    public static MiraEventHandle RegisterEventHandler<T>(Action<T> handler, int priority = 0) where T : MiraEvent
+    public static MiraEventHandle RegisterEventHandler<T>(Action<T> handler, int priority = 0)
+        where T : MiraEvent
     {
         EventWrappers.TryAdd(typeof(T), []);
 

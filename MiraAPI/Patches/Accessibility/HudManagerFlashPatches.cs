@@ -9,8 +9,10 @@ namespace MiraAPI.Patches.Accessibility;
 
 [HarmonyPatch]
 [SuppressMessage("Style", "IDE0074:Use compound assignment", Justification = "Using compound assignment bypasses Unity lifetime checks.")]
+#pragma warning disable SA1515 // Single-line comment should be preceded by blank line (Justification: ReSharper suppression.)
 // ReSharper disable ConvertIfStatementToNullCoalescingAssignment (Justification: Read above.)
 public static class HudManagerFlashPatches
+#pragma warning restore SA1515 // Single-line comment should be preceded by blank line
 {
     [HarmonyPatch(typeof(HudManager), nameof(HudManager.StartReactorFlash))]
     [HarmonyPrefix]
@@ -42,6 +44,7 @@ public static class HudManagerFlashPatches
         {
             yield break;
         }
+
         var hudManager = HudManager.Instance;
         var wait = new WaitForSeconds(1f);
         var light = false;
@@ -55,6 +58,7 @@ public static class HudManagerFlashPatches
             {
                 SoundManager.Instance.PlaySound(ShipStatus.Instance.SabotageSound, false);
             }
+
             light = !light;
 
             /*if (!MiraApiPlugin.IsMobile)

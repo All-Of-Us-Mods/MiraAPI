@@ -104,6 +104,7 @@ public class HideAndSeekMode : AbstractGameMode
                 list2.Add(networkedPlayerInfo);
             }
         }
+
         var currentGameOptions = GameOptionsManager.Instance.CurrentGameOptions;
         var adjustedNumImpostors = GameOptionsManager.Instance.CurrentGameOptions.GetAdjustedNumImpostors(list2.Count);
         AssignRolesForTeam(list2, currentGameOptions, RoleTeamTypes.Impostor, Math.Max(adjustedNumImpostors, 1), RoleTypes.Impostor);
@@ -204,19 +205,19 @@ public class HideAndSeekMode : AbstractGameMode
                 Info($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: Before Guaranteed Assignment");
                 var newImpostors = new List<NetworkedPlayerInfo>();
 
-                // Specified Seeker
                 if (HasImpostorPlayerID() &&
                     ValidateImpostorPlayerID(players) &&
                     !AmongUsClient.Instance.IsGamePublic)
                 {
+                    // Specified Seeker
                     var networkedPlayerInfo = players.First(p => p.PlayerId == ImpostorPlayerID());
                     players.Remove(networkedPlayerInfo);
                     newImpostors.Add(networkedPlayerInfo);
                     Info($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: Seeker is {networkedPlayerInfo.PlayerName}, ID: {networkedPlayerInfo.PlayerId}");
                 }
-                // Random Seeker
                 else
                 {
+                    // Random Seeker
                     var num2 = 0;
                     while (num2 < teamMax && players.Count > 0)
                     {
@@ -226,6 +227,7 @@ public class HideAndSeekMode : AbstractGameMode
                         {
                             pseudoRandomList.PickRandom();
                         }
+
                         var networkedPlayerInfo = pseudoRandomList.PickRandom();
                         players.Remove(networkedPlayerInfo);
                         newImpostors.Add(networkedPlayerInfo);
@@ -233,6 +235,7 @@ public class HideAndSeekMode : AbstractGameMode
                         Info($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: Seeker is {networkedPlayerInfo.PlayerName}, ID: {networkedPlayerInfo.PlayerId}");
                     }
                 }
+
                 Info($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: After Guaranteed Assignment");
 
                 AddGuaranteedRoles(guaranteedRoles, opts, list);
@@ -301,6 +304,7 @@ public class HideAndSeekMode : AbstractGameMode
         {
             introCutscene.ImpostorTitle.text = impostor.Data.Role.GetRoleName();
         }
+
         PoolablePlayer? playerSlot = null;
         if (impostor != null)
         {
@@ -397,6 +401,7 @@ public class HideAndSeekMode : AbstractGameMode
                 impostor.cosmetics.SetBodyCosmeticsVisible(false);
             }
         }
+
         ShipStatus.Instance.StartSFX();
         HnsMusicHandler.Instance.OnGameStart();
         HnsDangerMeter.Instance.OnGameStart();
@@ -429,6 +434,7 @@ public class HideAndSeekMode : AbstractGameMode
             mapOptions.IncludeDeadBodies = false;
             mapOptions.ShowLivePlayerPosition = false;
         }
+
         return mapOptions;
     }
 
@@ -441,14 +447,17 @@ public class HideAndSeekMode : AbstractGameMode
         {
             instance.Manager.RpcEndGame(GameOverReason.ImpostorDisconnect, !DataManager.Player.Ads.HasPurchasedAdRemoval);
         }
+
         if (players.Any(x => !x.Data.Role.IsImpostor))
         {
             if (HideAndSeekHudHelper.Instance.AllTimersExpired())
             {
                 instance.Manager.RpcEndGame(GameOverReason.HideAndSeek_CrewmatesByTimer, !DataManager.Player.Ads.HasPurchasedAdRemoval);
             }
+
             return;
         }
+
         instance.Manager.RpcEndGame(GameOverReason.HideAndSeek_ImpostorsByKills, !DataManager.Player.Ads.HasPurchasedAdRemoval);
     }
 
@@ -462,10 +471,12 @@ public class HideAndSeekMode : AbstractGameMode
             {
                 return PlayerBodyTypes.Horse;
             }
+
             if (AprilFoolsMode.ShouldLongAround())
             {
                 return PlayerBodyTypes.Long;
             }
+
             return PlayerBodyTypes.Normal;
         }
 
@@ -507,8 +518,8 @@ public class HideAndSeekMode : AbstractGameMode
         instance.closedPosition = new Vector3(xPos, yPos, instance.closedPosition.z);
         instance.openPosition = new Vector3(instance.openPosition.x, yPos, instance.openPosition.z);
         instance.timer = instance.open
-            ? Mathf.Min(1f, instance.timer + Time.deltaTime / instance.animationTimeSeconds)
-            : Mathf.Max(0f, instance.timer - Time.deltaTime / instance.animationTimeSeconds);
+            ? Mathf.Min(1f, instance.timer + (Time.deltaTime / instance.animationTimeSeconds))
+            : Mathf.Max(0f, instance.timer - (Time.deltaTime / instance.animationTimeSeconds));
 
         Vector3 relativePos = new(
             Mathf.SmoothStep(instance.closedPosition.x, instance.openPosition.x, instance.timer),

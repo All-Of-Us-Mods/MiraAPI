@@ -30,6 +30,7 @@ internal static class GameLogicPatches
         {
             return true;
         }
+
         __result = CustomGameModeManager.ActiveMode.GetBodyType(player);
         return false;
     }

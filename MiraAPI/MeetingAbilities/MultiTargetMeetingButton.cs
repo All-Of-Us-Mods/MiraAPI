@@ -40,6 +40,7 @@ public abstract class MultiTargetMeetingButton : TargetedMeetingButton
             HandleFinish();
             return;
         }
+
         OnSelect(playerVoteArea, toggle);
     }
 
@@ -53,6 +54,7 @@ public abstract class MultiTargetMeetingButton : TargetedMeetingButton
         {
             button.Renderer.sprite = Sprite.LoadAsset();
         }
+
         Timer = Cooldown;
         UsesLeft -= 1;
         OnFinish();
