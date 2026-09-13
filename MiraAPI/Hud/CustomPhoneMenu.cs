@@ -26,6 +26,17 @@ public class CustomPhoneMenuComponent(IntPtr cppPtr) : Minigame(cppPtr)
             ControllerManager.Instance.CloseOverlayMenu(name);
         }
     }
+
+    [Obsolete("Should not be called, see the respective Begin methods instead.", true)]
+    [SuppressMessage("Info Code Smell", "S1133:Deprecated code should be removed", Justification = "Retained.")]
+#pragma warning disable CS0809 // Obsolete member overrides non-obsolete member (Justification: Intentional to avoid mods calling Begin when they are not supposed to.)
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (Justification: Base game code.)
+    public override void Begin(PlayerTask task)
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+#pragma warning restore CS0809 // Obsolete member overrides non-obsolete member
+    {
+        throw new NotSupportedException("Should not be called, see the respective Begin methods instead.");
+    }
 }
 
 /// <summary>
