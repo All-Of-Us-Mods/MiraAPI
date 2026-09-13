@@ -175,7 +175,7 @@ public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
         _pagination.gameObject.SetActive(true);
         if (_pageText != null)
         {
-            _pageText.text = $"Page {_currentPage + 1}/{Mathf.Max(totalPages, 1)}";
+            _pageText.text = $"{MiraLocaleManager.Get("MiraApi.ModifierDisplay.Page", "Page")} {_currentPage + 1}/{Mathf.Max(totalPages, 1)}";
         }
 
         _nextButton.gameObject.SetActive(true);
@@ -212,7 +212,7 @@ public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
             _modifiers.Remove(mod.Key);
         }
 
-        _toggleBtnText.text = $"Modifiers ({filteredModifiers.Count})";
+        _toggleBtnText.text = $"{MiraLocaleManager.Get("Modifiers", "Modifiers")} ({filteredModifiers.Count})";
 
         _toggleButton.gameObject.SetActive(filteredModifiers.Count != 0);
 
