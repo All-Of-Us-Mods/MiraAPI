@@ -41,7 +41,7 @@ public static class SelectRolesPatch
         {
             return true;
         }
-        Il2CppSystem.Collections.Generic.List<ClientData> list = new();
+        CppCollections.List<ClientData> list = new();
         AmongUsClient.Instance.GetAllClients(list);
         List<NetworkedPlayerInfo> list2 = [.. list.ToArray()
             .Where(c => c.Character != null && c.Character.Data != null && !c.Character.Data.Disconnected &&

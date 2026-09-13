@@ -20,6 +20,7 @@ public static class MiraEventManager
     public static bool InvokeEvent<T>(this T eventInstance) where T : MiraEvent
     {
         EventWrappers.TryGetValue(typeof(T), out var handlers);
+
         if (handlers == null || handlers.Count == 0)
         {
             return false;
@@ -49,6 +50,7 @@ public static class MiraEventManager
     public static bool InvokeEvent(this MiraEvent eventInstance, Type type)
     {
         EventWrappers.TryGetValue(type, out var handlers);
+
         if (handlers == null || handlers.Count == 0)
         {
             return false;
@@ -146,6 +148,7 @@ public static class MiraEventManager
         {
             EventWrappers.Remove(eventHandle.EventType);
         }
+
         return true;
     }
 }

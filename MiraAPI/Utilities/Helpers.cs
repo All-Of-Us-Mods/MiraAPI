@@ -277,7 +277,7 @@ public static class Helpers
     /// <returns>A <see cref="List{T}"/> of <see cref="DeadBody"/>s.</returns>
     public static List<DeadBody> GetNearestDeadBodies(Vector2 source, float radius, ContactFilter2D filter)
     {
-        var results = new Il2CppSystem.Collections.Generic.List<Collider2D>();
+        var results = new CppCollections.List<Collider2D>();
         Physics2D.OverlapCircle(source, radius, filter, results);
         return [.. results.ToArray()
             .Where(collider2D => collider2D.CompareTag("DeadBody"))
@@ -296,7 +296,7 @@ public static class Helpers
     public static List<T> GetNearestObjectsOfType<T>(Vector2 source, float radius, ContactFilter2D filter, string? colliderTag = null)
         where T : Component
     {
-        var results = new Il2CppSystem.Collections.Generic.List<Collider2D>();
+        var results = new CppCollections.List<Collider2D>();
         Physics2D.OverlapCircle(source, radius, filter, results);
         return [.. results.ToArray()
             .Where(collider2D => colliderTag == null || collider2D.CompareTag(colliderTag))

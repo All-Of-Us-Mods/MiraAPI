@@ -53,7 +53,7 @@ public class LoadableAddressableAssets<T>(string key) where T : UnityEngine.Obje
             throw new InvalidOperationException($"INVALID ASSET/s: {key}");
         }
 
-        var assetsList = new Il2CppSystem.Collections.Generic.List<T>(assetsIList.Pointer);
+        var assetsList = new CppCollections.List<T>(assetsIList.Pointer);
         LoadedAssets = assetsList.ToArray().ToList();
 
         _gcAction?.Invoke(this);

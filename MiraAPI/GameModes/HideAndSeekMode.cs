@@ -91,7 +91,7 @@ public class HideAndSeekMode : AbstractGameMode
     public override void AssignRoles(out bool runOriginal, LogicRoleSelectionNormal instance)
     {
         runOriginal = false;
-        Il2CppSystem.Collections.Generic.List<ClientData> list = new();
+        CppCollections.List<ClientData> list = new();
         AmongUsClient.Instance.GetAllClients(list);
         List<NetworkedPlayerInfo> list2 = [.. list.ToArray()
             .Where(c => c.Character != null && c.Character.Data != null && !c.Character.Data.Disconnected &&

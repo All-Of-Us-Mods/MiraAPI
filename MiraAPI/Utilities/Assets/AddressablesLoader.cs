@@ -216,7 +216,7 @@ public static class AddressablesLoader
             {
                 var allLocations = Addressables.LoadResourceLocationsAsync(tag).WaitForCompletion();
                 var assets = Addressables.LoadAssetsAsync<T>(allLocations, null, false).WaitForCompletion();
-                var array = new Il2CppSystem.Collections.Generic.List<T>(assets.Pointer);
+                var array = new CppCollections.List<T>(assets.Pointer);
                 behaviours.AddRange(array.ToArray());
             }
             catch
@@ -237,7 +237,7 @@ public static class AddressablesLoader
             {
                 var allLocations = Addressables.LoadResourceLocationsAsync(tag.Tag).WaitForCompletion();
                 var assets = Addressables.LoadAssetsAsync<T>(allLocations, null, false).WaitForCompletion();
-                var array = new Il2CppSystem.Collections.Generic.List<T>(assets.Pointer);
+                var array = new CppCollections.List<T>(assets.Pointer);
                 behaviours.AddRange(array.ToArray().Select(x => (tag.Category, x)));
             }
             catch

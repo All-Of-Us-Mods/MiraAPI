@@ -352,6 +352,12 @@ public static class MiraLocaleManager
         }
     }
 
+    /// <summary>
+    /// Parses the provided xml file into translation keys and values and registers them to the locale manager.
+    /// </summary>
+    /// <param name="xmlContent">The xml file being parsed.</param>
+    /// <param name="language">The language that the xml file corresponds to.</param>
+    /// <param name="loadingInternal">Flag that indicates if the xml being parsed is internal or not.</param>
     public static void ParseXmlFile(string xmlContent, MiraLanguage language, bool loadingInternal)
     {
         var dict = Locale[language];

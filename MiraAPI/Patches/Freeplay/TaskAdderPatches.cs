@@ -122,7 +122,7 @@ public static class TaskAdderPatches
 
     [HarmonyPrefix]
     [HarmonyPatch(nameof(TaskAdderGame.PopulateRoot))]
-    private static bool PopulateRootPrefix(TaskAdderGame __instance, TaskAdderGame.FolderType folderType, TaskFolder rootFolder, Il2CppSystem.Collections.Generic.Dictionary<string, TaskFolder> folders, Il2CppReferenceArray<NormalPlayerTask> taskList)
+    private static bool PopulateRootPrefix(TaskAdderGame __instance, TaskAdderGame.FolderType folderType, TaskFolder rootFolder, CppCollections.Dictionary<string, TaskFolder> folders, Il2CppReferenceArray<NormalPlayerTask> taskList)
     {
         if (folderType != TaskAdderGame.FolderType.Tasks)
         {
@@ -143,8 +143,8 @@ public static class TaskAdderPatches
             impFolder.FolderName = ImpostorName;
             rootFolder.SubFolders.Insert(0, crewFolder);
             rootFolder.SubFolders.Insert(0, impFolder);
-            Il2CppSystem.Collections.Generic.List<RoleBehaviour> impRoles = new();
-            Il2CppSystem.Collections.Generic.List<RoleBehaviour> crewRoles = new();
+            CppCollections.List<RoleBehaviour> impRoles = new();
+            CppCollections.List<RoleBehaviour> crewRoles = new();
             foreach (var role in RoleManager.Instance.AllRoles)
             {
                 if (role.Role != RoleTypes.ImpostorGhost && role.Role != RoleTypes.CrewmateGhost && !role.IsCustomRole())

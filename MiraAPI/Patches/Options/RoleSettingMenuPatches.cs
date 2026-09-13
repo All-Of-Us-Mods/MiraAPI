@@ -98,7 +98,7 @@ public static class RoleSettingMenuPatches
             foreach (var r in roleOptionSettings)
             {
                 roleMenu.roleChances.Add(r);
-                roleMenu.QuotaTabSelectables.AddRange(new Il2CppSystem.Collections.Generic.IEnumerable<UiElement>(r.ControllerSelectable.Pointer));
+                roleMenu.QuotaTabSelectables.AddRange(new CppCollections.IEnumerable<UiElement>(r.ControllerSelectable.Pointer));
             }
 
             Info($"Already created role options for {MenuState.Instance.CurrentModIdx}");
@@ -387,7 +387,7 @@ public static class RoleSettingMenuPatches
             if (controllerSelected)
             {
                 __instance.ControllerSelectable.AddRange(
-                    new Il2CppSystem.Collections.Generic.IEnumerable<UiElement>(
+                    new CppCollections.IEnumerable<UiElement>(
                         __instance.QuotaTabSelectables.Pointer));
             }
 

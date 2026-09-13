@@ -3,11 +3,8 @@
 namespace MiraAPI.Events.Mira;
 
 /// <summary>
-/// Button click event for <see cref="CustomActionButton"/>s only.
+/// Button click event for <see cref="CustomActionButton"/>s only. Do not use for vanilla <see cref="AbilityButton"/>s.
 /// </summary>
-/// <remarks>
-/// Do not use for vanilla <see cref="AbilityButton"/>s.
-/// </remarks>
 /// <typeparam name="T">The <see cref="CustomActionButton"/> type.</typeparam>
 /// <param name="button">The <see cref="CustomActionButton"/> that was clicked.</param>
 /// <param name="genericClickEvent">The generic <see cref="MiraButtonClickEvent"/> invoked before button-specific events.</param>
@@ -25,11 +22,8 @@ public class MiraButtonClickEvent<T>(T button, MiraButtonClickEvent genericClick
 }
 
 /// <summary>
-/// Button click event for <see cref="CustomActionButton"/>s only.
+/// Button click event for <see cref="CustomActionButton"/>s only. Do not use for vanilla <see cref="AbilityButton"/>s.
 /// </summary>
-/// <remarks>
-/// Do not use for vanilla <see cref="AbilityButton"/>s.
-/// </remarks>
 /// <param name="button">The <see cref="CustomActionButton"/> that was clicked.</param>
 public class MiraButtonClickEvent(CustomActionButton button) : MiraCancelableEvent
 {

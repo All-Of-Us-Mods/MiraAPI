@@ -51,12 +51,10 @@ public class CustomPlayerMenu(IntPtr il2CppPtr) : Minigame(il2CppPtr)
         customMenu.xOffset = newMenu.XOffset;
         customMenu.yOffset = newMenu.YOffset;
         customMenu.backButton = newMenu.BackButton;
+
         var back = customMenu.backButton.GetComponent<PassiveButton>();
         back.OnClick.RemoveAllListeners();
-        back.OnClick.AddListener((UnityAction)(() =>
-        {
-            Instance.Close();
-        }));
+        back.OnClick.AddListener((UnityAction)Instance.Close);
 
         customMenu.CloseSound = newMenu.CloseSound;
         customMenu.logger = newMenu.logger;
@@ -99,7 +97,7 @@ public class CustomPlayerMenu(IntPtr il2CppPtr) : Minigame(il2CppPtr)
         DebugAnalytics.Instance.Analytics.MinigameOpened(PlayerControl.LocalPlayer.Data, TaskType);
         var list = PlayerControl.AllPlayerControls.ToArray().Where(playerMatch).ToList();
         potentialVictims = [];
-        var list2 = new Il2CppSystem.Collections.Generic.List<UiElement>();
+        var list2 = new CppCollections.List<UiElement>();
 
         for (var i = 0; i < list.Count; i++)
         {
@@ -109,7 +107,7 @@ public class CustomPlayerMenu(IntPtr il2CppPtr) : Minigame(il2CppPtr)
             var flag = PlayerControl.LocalPlayer.Data.Role.NameColor == player.Data.Role.NameColor;
             var shapeshifterPanel = Instantiate(panelPrefab, transform);
             shapeshifterPanel.transform.localPosition = new Vector3(xStart + num * xOffset, yStart + num2 * yOffset, -1f);
-            shapeshifterPanel.SetPlayer(i, player.Data, (Il2CppSystem.Action)(() => { onClick(player); }));
+            shapeshifterPanel.SetPlayer(i, player.Data, (Il2CppSystem.Action)(() => onClick(player)));
             shapeshifterPanel.NameText.color = flag ? player.Data.Role.NameColor : Color.white;
             potentialVictims.Add(shapeshifterPanel);
             list2.Add(shapeshifterPanel.Button);

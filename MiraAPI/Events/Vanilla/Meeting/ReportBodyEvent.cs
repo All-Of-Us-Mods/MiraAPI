@@ -1,7 +1,7 @@
 ﻿namespace MiraAPI.Events.Vanilla.Meeting;
 
 /// <summary>
-/// The event that is invoked when a body is reported.
+/// The event that is invoked when a body is reported.<br/>
 /// This is invoked in <see cref="PlayerControl.CmdReportDeadBody(NetworkedPlayerInfo)"/>.
 /// </summary>
 /// <param name="reporter">The player who reported the body.</param>

@@ -78,7 +78,7 @@ public static class TmpSpriteUtils
         material.SetFloat(ShaderUtilities.ShaderTag_CullMode, 0);
         spriteAsset.material = material;
 
-        spriteAsset.spriteInfoList = new Il2CppSystem.Collections.Generic.List<TMP_Sprite>();
+        spriteAsset.spriteInfoList = new CppCollections.List<TMP_Sprite>();
 
         AddSpriteToAsset(spriteAsset, rect, assetName, scale);
 

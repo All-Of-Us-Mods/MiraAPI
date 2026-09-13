@@ -16,7 +16,7 @@ using UnityEngine;
 namespace MiraAPI.Patches.Voting;
 
 [HarmonyPatch(typeof(MeetingHud))]
-[SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony Convention.")]
+[SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony convention.")]
 internal static class MeetingHudPatches
 {
     [HarmonyPrefix]
@@ -55,7 +55,7 @@ internal static class MeetingHudPatches
 
         var startPos = __instance.AnimateButtonsFromLeft ? 0.2f : 1.95f;
 
-        Il2CppSystem.Collections.Generic.List<UiElement> selectableElements = new();
+        CppCollections.List<UiElement> selectableElements = new();
         foreach (var btn in __instance.Buttons.GetComponentsInChildren<PassiveButton>())
         {
             selectableElements.Add(btn);

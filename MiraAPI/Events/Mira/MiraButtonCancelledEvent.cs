@@ -3,11 +3,8 @@
 namespace MiraAPI.Events.Mira;
 
 /// <summary>
-/// Invoked when a <see cref="CustomActionButton"/> click is cancelled.
+/// Invoked when a <see cref="CustomActionButton"/> click is cancelled. Do not use for vanilla <see cref="AbilityButton"/>s.
 /// </summary>
-/// <remarks>
-/// Do not use for vanilla <see cref="AbilityButton"/>s.
-/// </remarks>
 /// <typeparam name="T">The <see cref="CustomActionButton"/> type.</typeparam>
 /// <param name="button">The <see cref="CustomActionButton"/> whose click was cancelled.</param>
 public sealed class MiraButtonCancelledEvent<T>(T button) : MiraEvent where T : CustomActionButton
@@ -19,11 +16,8 @@ public sealed class MiraButtonCancelledEvent<T>(T button) : MiraEvent where T : 
 }
 
 /// <summary>
-/// Invoked when a <see cref="CustomActionButton"/> click is cancelled.
+/// Invoked when a <see cref="CustomActionButton"/> click is cancelled. Do not use for vanilla <see cref="AbilityButton"/>s.
 /// </summary>
-/// <remarks>
-/// Do not use for vanilla <see cref="AbilityButton"/>s.
-/// </remarks>
 /// <param name="button">The <see cref="CustomActionButton"/> whose click was cancelled.</param>
 public sealed class MiraButtonCancelledEvent(CustomActionButton button) : MiraEvent
 {

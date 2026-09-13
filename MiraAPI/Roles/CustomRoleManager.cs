@@ -53,7 +53,7 @@ public static class CustomRoleManager
     internal static readonly Dictionary<ushort, RoleBehaviour> CustomRoles = [];
     internal static readonly Dictionary<Type, ushort> RoleIds = [];
 
-    private static Il2CppSystem.Collections.Generic.List<BaseGameSetting>? _emptySettings;
+    private static CppCollections.List<BaseGameSetting>? _emptySettings;
     private static Il2CppReferenceArray<OverlayKillAnimation>? _emptyKillAnimations;
 
     private static ushort _roleId = 100;

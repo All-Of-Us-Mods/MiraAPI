@@ -185,15 +185,15 @@ public static class Extensions
     }
 
     /// <summary>
-    /// Used to convert a <see cref="List{T}"/> to <see cref="Il2CppSystem.Collections.Generic.List{T}"/>.
+    /// Used to convert a <see cref="List{T}"/> to <see cref="CppCollections.List{T}"/>.
     /// </summary>
     /// <param name="systemList">The <see cref="List{T}"/>.</param>
     /// <typeparam name="T">The type in the list.</typeparam>
     /// <returns>The converted list.</returns>
-    public static Il2CppSystem.Collections.Generic.List<T> ToIl2CppList<T>(this List<T> systemList)
+    public static CppCollections.List<T> ToIl2CppList<T>(this List<T> systemList)
     {
         // ReSharper disable once InconsistentNaming (Justification: Acronym.)
-        var il2cppList = new Il2CppSystem.Collections.Generic.List<T>();
+        var il2cppList = new CppCollections.List<T>();
 
         foreach (var item in systemList)
         {

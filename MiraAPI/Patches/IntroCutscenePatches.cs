@@ -67,7 +67,7 @@ public static class IntroCutscenePatches
     [HarmonyPrefix]
     [HarmonyPatch(nameof(IntroCutscene.BeginImpostor))]
     [HarmonyPatch(nameof(IntroCutscene.BeginCrewmate))]
-    public static bool BeginPrefix(IntroCutscene __instance, [HarmonyArgument(0)] ref Il2CppSystem.Collections.Generic.List<PlayerControl> yourTeam)
+    public static bool BeginPrefix(IntroCutscene __instance, [HarmonyArgument(0)] ref CppCollections.List<PlayerControl> yourTeam)
     {
         return PlayerControl.LocalPlayer.Data.Role is not ICustomRole customRole || customRole.SetupIntroTeam(__instance, ref yourTeam);
     }

@@ -275,7 +275,7 @@ public abstract class AbstractGameMode : IOptionable
     /// <param name="instance">The task panel to update.</param>
     public virtual void UpdateTaskPanel(TaskPanelBehaviour instance)
     {
-        instance.background.transform.localScale = (instance.taskText.textBounds.size.x > 0f)
+        instance.background.transform.localScale = instance.taskText.textBounds.size.x > 0f
             ? new Vector3(instance.taskText.textBounds.size.x + 0.2f, instance.taskText.textBounds.size.y + 0.2f, 1f)
             : Vector3.zero;
         var vector = instance.background.sprite.bounds.extents;
@@ -287,6 +287,7 @@ public abstract class AbstractGameMode : IOptionable
         vector2.y = -vector2.y;
         vector2.x += vector.x * 2f;
         instance.tab.transform.localPosition = vector2;
+
         if (GameManager.Instance == null)
         {
             return;

@@ -249,11 +249,11 @@ public interface ICustomRole : IOptionable
     /// <param name="instance">The intro cutscene instance.</param>
     /// <param name="yourTeam">The reference to the list of player in the team.</param>
     /// <returns><see langword="true"/> to use the original team intro code, <see langword="false"/> to skip.</returns>
-    bool SetupIntroTeam(IntroCutscene instance, ref Il2CppSystem.Collections.Generic.List<PlayerControl> yourTeam)
+    bool SetupIntroTeam(IntroCutscene instance, ref CppCollections.List<PlayerControl> yourTeam)
     {
         if (Team == ModdedRoleTeams.Custom)
         {
-            var team = new Il2CppSystem.Collections.Generic.List<PlayerControl>();
+            var team = new CppCollections.List<PlayerControl>();
 
             team.Add(PlayerControl.LocalPlayer);
 
