@@ -389,9 +389,8 @@ public static class Helpers
                 Constants.ShipAndObjectsMask))
             select playerControl);
 
-#pragma warning disable SA1008 // Opening parenthesis should be spaced correctly (Justification: Formatting.)
         outputList.Sort(
-            delegate (PlayerControl a, PlayerControl b)
+            (a, b) =>
             {
                 var magnitude2 = (a.GetTruePosition() - source).magnitude;
                 var magnitude3 = (b.GetTruePosition() - source).magnitude;
@@ -401,7 +400,6 @@ public static class Helpers
                         ? -1
                         : 0;
             });
-#pragma warning restore SA1008 // Opening parenthesis should be spaced correctly
         return outputList;
     }
 

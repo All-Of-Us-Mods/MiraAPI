@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using MiraAPI.GameOptions.OptionTypes;
@@ -158,7 +159,7 @@ public sealed class ModdedOptionVisibilityAttribute(Type? holderType = null, str
         return null;
     }
 
-#pragma warning disable S3011 // Reflection should not be used to increase accessibility of classes, methods, or fields
+    [SuppressMessage("Major Code Smell", "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields", Justification = "It is safe.")]
     private MemberInfo? GetVisibilityMember(AbstractOptionGroup group, PropertyInfo property, out Type type, out Func<object>? instanceGet)
     {
         Type groupType = group.GetType();
@@ -197,5 +198,4 @@ public sealed class ModdedOptionVisibilityAttribute(Type? holderType = null, str
 
         return member;
     }
-#pragma warning restore S3011 // Reflection should not be used to increase accessibility of classes, methods, or fields
 }

@@ -376,10 +376,9 @@ public static class ModdedOptionsManager
     /// <param name="__instance">The list's instance.</param>
     /// <param name="index">The index to find in the list.</param>
     /// <param name="value">The new object value.</param>
-#pragma warning disable CA1707
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony naming convention")]
+    [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Read above.")]
     public static void PropertyListSetterPatch(object __instance, int index, object value)
-#pragma warning restore CA1707
     {
         var attribute = (ModdedOptionListAttribute)OptionAttributes.First(
             pair => pair.Value is ModdedOptionListAttribute list && ReferenceEquals(list.Value, __instance)).Value;
@@ -393,10 +392,9 @@ public static class ModdedOptionsManager
     /// <param name="index">The index to find in the list.</param>
     /// <param name="__result">The result of the property getter.</param>
     /// <returns>False so the original getter gets skipped.</returns>
-#pragma warning disable CA1707
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony naming convention")]
+    [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Read above.")]
     public static bool PropertyListGetterPatch(object __instance, int index, ref object __result)
-#pragma warning restore CA1707
     {
         var attribute = (ModdedOptionListAttribute)OptionAttributes.First(
             pair => pair.Value is ModdedOptionListAttribute list && ReferenceEquals(list.Value, __instance)).Value;

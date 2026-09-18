@@ -238,9 +238,9 @@ public static class RoleGuidePatches
             continue;
 #pragma warning restore S1751 // Loops with at most one iteration should be refactored
 
-            void LoadNameplate(NamePlateViewData viewdata)
+            void LoadNameplate(NamePlateViewData viewData)
             {
-                component.buttonSprite.sprite = viewdata.Image;
+                component.buttonSprite.sprite = viewData.Image;
                 component.buttonSprite.transform.localScale = new Vector3(0.7f, 1.075f, 1);
                 component.buttonSprite.transform.localPosition = new Vector3(-0.395f, 0, 0.1f);
             }

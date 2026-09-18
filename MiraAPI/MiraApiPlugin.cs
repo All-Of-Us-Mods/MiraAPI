@@ -23,7 +23,7 @@ namespace MiraAPI;
 [BepInProcess("Among Us.exe")]
 [BepInDependency(ReactorPlugin.Id)]
 [ReactorModFlags(ModFlags.RequireOnAllClients)]
-#pragma warning disable SA1515 // Single-line comment should be preceded by blank line (Justification: ReSharper suppression,)
+#pragma warning disable SA1515 // Single-line comment should be preceded by blank line (Justification: ReSharper suppression.)
 // ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated by BepInEx.)
 public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
 #pragma warning restore SA1515 // Single-line comment should be preceded by blank line
