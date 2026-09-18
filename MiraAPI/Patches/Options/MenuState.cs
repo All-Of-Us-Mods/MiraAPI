@@ -383,6 +383,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     private void UpdateUi()
     {
         var pageText = "MiraApi.Page".Translate();
+
         // Update mod text
         if (CurrentModIdx == 0)
         {

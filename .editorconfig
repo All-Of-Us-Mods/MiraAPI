@@ -83,3 +83,6 @@ dotnet_diagnostic.SA1407.severity = none
 
 # SA1133: Each attribute should be placed in its own set of square brackets
 dotnet_diagnostic.SA1133.severity = none
+
+# IDE0001: Simplify Names
+dotnet_diagnostic.IDE0001.severity = warning

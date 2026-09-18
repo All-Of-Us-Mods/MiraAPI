@@ -1,17 +1,16 @@
-﻿using MiraAPI.Patches.Stubs;
-using MiraAPI.Utilities.Assets;
-using Reactor.Utilities;
-using Reactor.Utilities.Extensions;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using MiraAPI.Patches.Stubs;
+using MiraAPI.Utilities.Assets;
+using Reactor.Utilities;
+using Reactor.Utilities.Extensions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using CppCollections = Il2CppSystem.Collections.Generic;
 using Object = UnityEngine.Object;
 
 namespace MiraAPI.Hud;
@@ -24,6 +23,8 @@ namespace MiraAPI.Hud;
 [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1307:Accessible fields should begin with upper-case letter", Justification = "Read above.")]
 public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.MenuEntry>
 {
+    private const int ItemsPerPage = 15;
+
     /// <summary>
     /// Menu Entry used for when multiple pages are needed.
     /// </summary>
@@ -52,8 +53,6 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
     private string searchText = string.Empty;
     private TextMeshPro? noResultsText;
 
-    private const int ItemsPerPage = 15;
-
     /// <summary>
     /// Creates a <typeparamref name="TMenu"/>.
     /// </summary>
@@ -61,7 +60,8 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
     /// <param name="onMouseOut">Function that can optionally be run when the mouse is moved outside a menu panel.</param>
     /// <param name="onMouseOver">Function that can optionally be run when the mouse is moved over a menu panel.</param>
     /// <returns>New <typeparamref name="TMenu"/> object.</returns>
-    protected static new TMenu Create<TMenu>(PanelButtonOnMouse? onMouseOut = null, PanelButtonOnMouse? onMouseOver = null) where TMenu : CustomPaginableMenu, new()
+    protected static new TMenu Create<TMenu>(PanelButtonOnMouse? onMouseOut = null, PanelButtonOnMouse? onMouseOver = null)
+        where TMenu : CustomPaginableMenu, new()
     {
         TMenu customMenu = CustomPhoneMenu.Create<TMenu>(onMouseOut, onMouseOver);
 
@@ -99,6 +99,7 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
             : text.Trim().ToLowerInvariant();
     }
 
+    [SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "Creates a rather large ternary operation.")]
     private List<MenuEntry> GetFilteredEntries()
     {
         var query = NormalizeForSearch(searchText);
@@ -252,6 +253,7 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
         {
             searchFocusButton.ClickSound = wikiClickSound;
         }
+
         searchFocusButton.OnClick.RemoveAllListeners();
         searchFocusButton.OnClick.AddListener((UnityAction)(Action)(() =>
         {
@@ -321,6 +323,7 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
         {
             return;
         }
+
         if (wikiClickSound != null)
         {
             clearSearchButton.ClickSound = wikiClickSound;
