@@ -7,7 +7,8 @@ namespace MiraAPI.Hud;
 /// A utility class to get the instance of a <see cref="CustomActionButton"/>.
 /// </summary>
 /// <typeparam name="T">The type of the button you are trying to access.</typeparam>
-public static class CustomButtonSingleton<T> where T : CustomActionButton
+public static class CustomButtonSingleton<T>
+    where T : CustomActionButton
 {
     private static T? _instance;
 

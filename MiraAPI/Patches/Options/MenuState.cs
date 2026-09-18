@@ -7,8 +7,8 @@ using MiraAPI.GameOptions;
 using MiraAPI.Modifiers;
 using MiraAPI.PluginLoading;
 using MiraAPI.Presets;
-using MiraAPI.Translation;
 using MiraAPI.Roles;
+using MiraAPI.Translation;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities.Attributes;
 using Reactor.Utilities.Extensions;
@@ -368,7 +368,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
 
         // Game / Modifier / Custom Settings tab
         // GST.settingsContainer is same as GST.scrollBar.Inner
-        if (CurrentMenu != MenuCategory.Preset && CurrentMenu != MenuCategory.Roles)
+        if (CurrentMenu is not (MenuCategory.Preset or MenuCategory.Roles))
         {
             Gsm.GameSettingsTab.settingsContainer = Gsm.GameSettingsTab.scrollBar.Inner = CurrentContainer.transform;
             CurrentContainer.SetActive(true);
@@ -383,6 +383,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     private void UpdateUi()
     {
         var pageText = "MiraApi.Page".Translate();
+
         // Update mod text
         if (CurrentModIdx == 0)
         {
@@ -673,6 +674,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     public void NextMod()
     {
         CurrentModIdx++;
+
         // The existence of vanilla settings offsets the off-by-one errors.
         if (CurrentModIdx > ModCount) CurrentModIdx = 0;
         CurrentMenu = GetNewPageIfNeeded();
@@ -683,6 +685,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     public void PreviousMod()
     {
         CurrentModIdx--;
+
         // The existence of vanilla settings offsets the off-by-one errors.
         if (CurrentModIdx < 0) CurrentModIdx = ModCount;
         CurrentMenu = GetNewPageIfNeeded();

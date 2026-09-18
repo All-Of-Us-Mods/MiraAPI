@@ -12,7 +12,6 @@ using MiraAPI.Roles;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
-using Reactor.Localization.Utilities;
 using Reactor.Networking.Rpc;
 using Reactor.Utilities.Extensions;
 using TMPro;
@@ -35,7 +34,7 @@ public static class RoleSettingMenuPatches
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(RolesSettingsMenu.OnEnable))]
-    public static void OpenPatch(RolesSettingsMenu __instance)
+    public static void OpenPatch()
     {
         HudManager.Instance.PlayerCam.OverrideScreenShakeEnabled = false;
     }
@@ -86,20 +85,23 @@ public static class RoleSettingMenuPatches
             {
                 Object.Destroy(child.gameObject);
             }
+
             foreach (var child in headers)
             {
                 Object.Destroy(child.gameObject);
             }
+
             yield return new WaitForEndOfFrame();
             MenuState.Instance.QueuedRoleMenuRefresh[MenuState.Instance.CurrentModIdx] = false;
         }
+
         if (!queuedRefresh && MenuState.Instance.FinishedRoleMenus.TryGetValue(MenuState.Instance.CurrentModIdx, out var finished) && finished)
         {
             var roleOptionSettings = roleMenu.scrollBar.Inner.GetComponentsInChildren<RoleOptionSetting>(true);
             foreach (var r in roleOptionSettings)
             {
                 roleMenu.roleChances.Add(r);
-                roleMenu.QuotaTabSelectables.AddRange(new Il2CppSystem.Collections.Generic.IEnumerable<UiElement>(r.ControllerSelectable.Pointer));
+                roleMenu.QuotaTabSelectables.AddRange(new CppCollections.IEnumerable<UiElement>(r.ControllerSelectable.Pointer));
             }
 
             Info($"Already created role options for {MenuState.Instance.CurrentModIdx}");
@@ -178,10 +180,12 @@ public static class RoleSettingMenuPatches
                 {
                     Object.Destroy(child.gameObject);
                 }
+
                 foreach (var child in headers)
                 {
                     Object.Destroy(child.gameObject);
                 }
+
                 yield return new WaitForEndOfFrame();
 
                 var roleGroups = MenuState.Instance.CurrentMod.InternalRoles.Values.OfType<ICustomRole>()
@@ -206,7 +210,7 @@ public static class RoleSettingMenuPatches
                     foreach (var grouping in sortedRoleGroups)
                     {
                         if (!grouping.Any() ||
-                            grouping.All(x=> x.Configuration.HideSettings || !x.VisibleInSettings() || !x.Configuration.AssociatedGameMode.IsInstanceOfType(CustomGameModeManager.ActiveMode)))
+                            grouping.All(x => x.Configuration.HideSettings || !x.VisibleInSettings() || !x.Configuration.AssociatedGameMode.IsInstanceOfType(CustomGameModeManager.ActiveMode)))
                         {
                             continue;
                         }
@@ -352,6 +356,7 @@ public static class RoleSettingMenuPatches
                     }
                 }
             }
+
             MenuState.Instance.QueuedRoleMenuRefresh[MenuState.Instance.CurrentModIdx] = false;
             MenuState.Instance.FinishedRoleMenus[MenuState.Instance.CurrentModIdx] = true;
         }
@@ -388,7 +393,7 @@ public static class RoleSettingMenuPatches
             if (controllerSelected)
             {
                 __instance.ControllerSelectable.AddRange(
-                    new Il2CppSystem.Collections.Generic.IEnumerable<UiElement>(
+                    new CppCollections.IEnumerable<UiElement>(
                         __instance.QuotaTabSelectables.Pointer));
             }
 
@@ -400,11 +405,13 @@ public static class RoleSettingMenuPatches
                     ControllerManager.Instance.SetDefaultSelection(__instance.ControllerSelectable[0]);
                 }
             }
+
             var passiveButton = __instance.currentTabButton;
             if (passiveButton)
             {
                 passiveButton.SelectButton(false);
             }
+
             __instance.AllButton.SelectButton(true);
             __instance.currentTabButton = __instance.AllButton;
         }
@@ -424,8 +431,8 @@ public static class RoleSettingMenuPatches
         scroller.SetYBoundsMax(-ScrollerNum - 2);
     }
 
-    [HarmonyPrefix]
     // TODO: turn this into a fixed update
+    [HarmonyPrefix]
     [HarmonyPatch(nameof(RolesSettingsMenu.Update))]
     public static bool UpdatePatch(RolesSettingsMenu __instance)
     {
@@ -550,6 +557,8 @@ public static class RoleSettingMenuPatches
         var categoryHeaderMasked = __instance.AdvancedRolesSettings.transform.Find("CategoryHeaderMasked").GetComponent<CategoryHeaderMasked>();
         categoryHeaderMasked.Title.text = TranslationController.Instance.GetString(StringNames.RoleSettingsLabel);
         var labelBg = __instance.AdvancedRolesSettings.transform.FindChild("InfoLabelBackground");
+
+        // ReSharper disable once StringLiteralTypo (Justification: Actual name in-game.)
         var imgBg = __instance.AdvancedRolesSettings.transform.FindChild("Imagebackground");
         imgBg.gameObject.SetActive(true);
         __instance.roleScreenshot.gameObject.SetActive(true);
@@ -574,6 +583,7 @@ public static class RoleSettingMenuPatches
         __instance.roleDescriptionText.text = customRole.RoleMedDescription;
         __instance.roleTitleText.text = role.GetRoleName();
 
+        // ReSharper disable once StringLiteralTypo (Justification: Actual name in-game.)
         var imgBg = __instance.AdvancedRolesSettings.transform.FindChild("Imagebackground");
         var labelBg = __instance.AdvancedRolesSettings.transform.FindChild("InfoLabelBackground");
         if (role.RoleScreenshot == null)
@@ -627,7 +637,7 @@ public static class RoleSettingMenuPatches
 
             IEnumerator CoReturnToRoleSettings()
             {
-                // set gameobjects
+                // set game objects
                 __instance.RoleChancesSettings.SetActive(true);
                 __instance.AdvancedRolesSettings.SetActive(false);
 
@@ -707,11 +717,16 @@ public static class RoleSettingMenuPatches
 
         if (customRole.Configuration.Icon != null)
         {
-            var roleIcon = new GameObject("RoleIcon");
-            roleIcon.transform.parent = roleOptionSetting.transform;
-            roleIcon.transform.localScale = new(.25f, .25f, 1);
-            roleIcon.layer = LayerMask.NameToLayer("UI");
-            roleIcon.transform.localPosition = new Vector3(-1.3f, -0.3f, -2f);
+            var roleIcon = new GameObject("RoleIcon")
+            {
+                transform =
+                {
+                    parent = roleOptionSetting.transform,
+                    localScale = new(.25f, .25f, 1),
+                    localPosition = new Vector3(-1.3f, -0.3f, -2f),
+                },
+                layer = LayerMask.NameToLayer("UI"),
+            };
             var rend = roleIcon.AddComponent<SpriteRenderer>();
             rend.sprite = customRole.Configuration.Icon.LoadAsset();
 

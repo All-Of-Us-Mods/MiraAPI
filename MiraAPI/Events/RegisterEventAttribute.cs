@@ -5,20 +5,12 @@ namespace MiraAPI.Events;
 /// <summary>
 /// Register a <see cref="MiraEvent"/> handler.
 /// </summary>
+/// <param name="priority">The priority of the event. Lower values are called first.</param>
 [AttributeUsage(AttributeTargets.Method)]
-public class RegisterEventAttribute : Attribute
+public class RegisterEventAttribute(int priority = 0) : Attribute
 {
     /// <summary>
     /// Gets the priority of the event. Lower values are called first.
     /// </summary>
-    public int Priority { get; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="RegisterEventAttribute"/> class.
-    /// </summary>
-    /// <param name="priority">The priority of the event. Lower values are called first.</param>
-    public RegisterEventAttribute(int priority = 0)
-    {
-        Priority = priority;
-    }
+    public int Priority { get; } = priority;
 }

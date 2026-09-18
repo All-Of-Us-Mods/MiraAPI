@@ -8,8 +8,8 @@ namespace MiraAPI.Patches.Roles;
 /// <summary>
 /// Patches the <see cref="HauntMenuMinigame"/> to show the actual role name rather than team.
 /// </summary>
-[HarmonyPatch(typeof(HauntMenuMinigame), nameof(HauntMenuMinigame.SetHauntTarget))]
 // SetFilterText was INLINED
+[HarmonyPatch(typeof(HauntMenuMinigame), nameof(HauntMenuMinigame.SetHauntTarget))]
 public static class HauntMenuMinigamePatch
 {
     public static void Postfix(HauntMenuMinigame __instance)

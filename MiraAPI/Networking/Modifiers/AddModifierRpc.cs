@@ -13,7 +13,10 @@ namespace MiraAPI.Networking.Modifiers;
 /// <param name="plugin">Mira plugin.</param>
 /// <param name="id">RPC ID.</param>
 [RegisterCustomRpc((uint)MiraRpc.AddModifier)]
+#pragma warning disable SA1515 // Single-line comment should be preceded by blank line (Justification: ReSharper suppression.)
+// ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated by Reactor.)
 public class AddModifierRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<MiraApiPlugin, ModifierData>(plugin, id)
+#pragma warning restore SA1515 // Single-line comment should be preceded by blank line
 {
     /// <inheritdoc />
     public override RpcLocalHandling LocalHandling => RpcLocalHandling.Before;
@@ -57,19 +60,10 @@ public class AddModifierRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<Mir
     public override void Handle(PlayerControl player, ModifierData data)
     {
         var type = ModifierManager.GetModifierType(data.TypeId) ?? throw new InvalidOperationException($"Modifier type not found for ID {data.TypeId}.");
-        BaseModifier? modifier;
-        if (data.Args.Length > 0)
-        {
-            modifier = ModifierFactory.CreateInstance(type, data.Args);
-        }
-        else
-        {
-            modifier = Activator.CreateInstance(type) as BaseModifier;
-            if (modifier == null)
-            {
-                throw new InvalidOperationException($"Cannot add modifier {type.Name} because it is not a valid modifier.");
-            }
-        }
+        var modifier = data.Args.Length > 0
+            ? ModifierFactory.CreateInstance(type, data.Args)
+            : Activator.CreateInstance(type) as BaseModifier
+                ?? throw new InvalidOperationException($"Cannot add modifier {type.Name} because it is not a valid modifier.");
         modifier.UniqueId = data.UniqueId;
         player.AddModifier(modifier);
     }

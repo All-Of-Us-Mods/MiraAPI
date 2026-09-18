@@ -21,10 +21,16 @@ public partial class ExamplePlugin : BasePlugin, IMiraPlugin
     {
         MiraLocaleManager.Register("mira.example");
     }
+
     public Harmony Harmony { get; } = new(Id);
-    public string OptionsTitleText => "Mira API\nExample Mod";
-    public string CustomOptionMenuNameTwo => "angxl's Options";
-    public ConfigFile GetConfigFile() => Config;
+    public string OptionsTitleText { get; } = "Mira API\nExample Mod";
+    public string CustomOptionMenuNameTwo { get; } = "Example Options";
+
+    public ConfigFile GetConfigFile()
+    {
+        return Config;
+    }
+
     public override void Load()
     {
         ExampleEventHandlers.Initialize();

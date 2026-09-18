@@ -14,10 +14,9 @@ public static class NotificationPopperPatch
         [HarmonyArgument(0)] StringNames key,
         [HarmonyArgument(1)] int roleCount,
         [HarmonyArgument(2)] int roleChance,
-        [HarmonyArgument(3)] RoleTeamTypes teamType,
         [HarmonyArgument(4)] bool playSound)
     {
-        if (CustomRoleManager.CustomRoles.Values.FirstOrDefault(x=>x.StringName==key) is not ICustomRole customRole)
+        if (CustomRoleManager.CustomRoles.Values.FirstOrDefault(x => x.StringName == key) is not ICustomRole customRole)
         {
             return true;
         }
@@ -32,11 +31,9 @@ public static class NotificationPopperPatch
                 "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">",
                 textColor,
                 TranslationController.Instance.GetString(key),
-                "</color></font>"
-            ),
+                "</color></font>"),
             "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">" + roleCount + "</font>",
-            "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">" + roleChance + "%"
-        );
+            "<font=\"Barlow-Black SDF\" material=\"Barlow-Black Outline\">" + roleChance + "%");
 
         __instance.SettingsChangeMessageLogic(key, item, playSound);
         return false;

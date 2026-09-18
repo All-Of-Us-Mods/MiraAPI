@@ -1,11 +1,10 @@
-﻿using System.Linq;
-using System.Reflection;
+﻿using System.Reflection;
 using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes;
 using MiraAPI.Events;
 using MiraAPI.Events.Vanilla.Gameplay;
-using MiraAPI.MeetingAbilities;
 using MiraAPI.GameModes;
+using MiraAPI.MeetingAbilities;
 using MiraAPI.Roles;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;
@@ -51,6 +50,7 @@ public static class IntroCutscenePatches
         public static void Postfix(Il2CppObjectBase __instance)
         {
             var wrapper = new StateMachineWrapper<IntroCutscene>(__instance);
+
             // run before the first yield
             if (wrapper.GetState() != 1)
             {
@@ -68,7 +68,7 @@ public static class IntroCutscenePatches
     [HarmonyPrefix]
     [HarmonyPatch(nameof(IntroCutscene.BeginImpostor))]
     [HarmonyPatch(nameof(IntroCutscene.BeginCrewmate))]
-    public static bool BeginPrefix(IntroCutscene __instance, [HarmonyArgument(0)] ref Il2CppSystem.Collections.Generic.List<PlayerControl> yourTeam)
+    public static bool BeginPrefix(IntroCutscene __instance, [HarmonyArgument(0)] ref CppCollections.List<PlayerControl> yourTeam)
     {
         return PlayerControl.LocalPlayer.Data.Role is not ICustomRole customRole || customRole.SetupIntroTeam(__instance, ref yourTeam);
     }
@@ -118,17 +118,20 @@ public static class IntroCutscenePatches
             if (_usedFallback)
             {
                 var wrapper = new StateMachineWrapper<IntroCutscene>(__instance);
+
                 // run after the final yield
                 if (wrapper.GetState() != -1)
                 {
                     return;
                 }
+
                 introCutscene = wrapper.Instance;
             }
             else
             {
                 introCutscene = __instance.Cast<IntroCutscene>();
             }
+
             Info("IntroCutscene ended");
 
             MeetingButtonManager.OnGameStart();

@@ -1,8 +1,8 @@
-﻿using MiraAPI.GameOptions.OptionTypes;
-using MiraAPI.Utilities;
-using System;
+﻿using System;
 using System.Collections;
 using System.Reflection;
+using MiraAPI.GameOptions.OptionTypes;
+using MiraAPI.Utilities;
 
 namespace MiraAPI.GameOptions.Attributes;
 
@@ -46,10 +46,8 @@ public class ModdedNumberOptionListAttribute(
     /// <inheritdoc />
     public override object GetValue(int idx)
     {
-        if (HolderOptionList?[idx] is ModdedNumberOption opt)
-        {
-            return opt.Value;
-        }
-        throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" is not a ModdedNumberOption");
+        return HolderOptionList?[idx] is ModdedNumberOption opt
+            ? (object)opt.Value
+            : throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" is not a ModdedNumberOption");
     }
 }

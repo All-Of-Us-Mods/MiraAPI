@@ -15,9 +15,10 @@ public static class ModifierUtils
     /// <param name="predicate">Select if <typeparamref name="T"/> is valid to be added to list.</param>
     /// <typeparam name="T">The <see cref="BaseModifier"/> type.</typeparam>
     /// <returns>An <see cref="IEnumerable{T}"/> of <typeparamref name="T"/>s.</returns>
-    public static IEnumerable<T> GetActiveModifiers<T>(Func<T, bool>? predicate = null) where T : BaseModifier
+    public static IEnumerable<T> GetActiveModifiers<T>(Func<T, bool>? predicate = null)
+        where T : BaseModifier
     {
-        return PlayerControl.AllPlayerControls.ToArray().SelectMany(x => x.GetModifiers<T>(predicate)).OfType<T>();
+        return PlayerControl.AllPlayerControls.ToArray().SelectMany(x => x.GetModifiers(predicate));
     }
 
     /// <summary>
@@ -26,8 +27,9 @@ public static class ModifierUtils
     /// <param name="predicate">Select if <typeparamref name="T"/> is valid.</param>
     /// <typeparam name="T">The <see cref="BaseModifier"/> type.</typeparam>
     /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="PlayerControl"/>s with that <typeparamref name="T"/>.</returns>
-    public static IEnumerable<PlayerControl> GetPlayersWithModifier<T>(Func<T, bool>? predicate = null) where T : BaseModifier
+    public static IEnumerable<PlayerControl> GetPlayersWithModifier<T>(Func<T, bool>? predicate = null)
+        where T : BaseModifier
     {
-        return PlayerControl.AllPlayerControls.ToArray().Where(x => x.HasModifier<T>(predicate));
+        return PlayerControl.AllPlayerControls.ToArray().Where(x => x.HasModifier(predicate));
     }
 }

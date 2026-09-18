@@ -3,26 +3,17 @@
 /// <summary>
 /// Event that is invoked before the local player confirms a vote on a player or when skipping. This event is cancelable.
 /// </summary>
-public class BeforeVoteEvent : MiraCancelableEvent
+/// <param name="playerVoteArea">The <see cref="PlayerVoteArea"/> that was voted on.</param>
+/// <param name="voter">The player who voted.</param>
+public class BeforeVoteEvent(PlayerVoteArea playerVoteArea, PlayerControl voter) : MiraCancelableEvent
 {
     /// <summary>
     /// Gets the instance of the voter's <see cref="PlayerVoteArea"/>.
     /// </summary>
-    public PlayerVoteArea VoteArea { get; }
+    public PlayerVoteArea VoteArea { get; } = playerVoteArea;
 
     /// <summary>
     /// Gets the player who voted.
     /// </summary>
-    public PlayerControl Player { get; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="BeforeVoteEvent"/> class.
-    /// </summary>
-    /// <param name="playerVoteArea">The <see cref="PlayerVoteArea"/> that was voted on.</param>
-    /// <param name="voter">The player who voted.</param>
-    public BeforeVoteEvent(PlayerVoteArea playerVoteArea, PlayerControl voter)
-    {
-        VoteArea = playerVoteArea;
-        Player = voter;
-    }
+    public PlayerControl Player { get; } = voter;
 }

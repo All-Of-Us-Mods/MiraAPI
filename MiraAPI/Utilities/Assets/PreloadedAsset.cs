@@ -7,7 +7,8 @@ namespace MiraAPI.Utilities.Assets;
 /// <inheritdoc />
 /// </summary>
 /// <inheritdoc cref="LoadableAsset{T}"/>
-public class PreloadedAsset<T>(T asset) : LoadableAsset<T> where T : UnityEngine.Object
+public class PreloadedAsset<T>(T asset) : LoadableAsset<T>
+    where T : UnityEngine.Object
 {
     private readonly T _loadedAsset = asset ?? throw new ArgumentNullException(nameof(asset));
 

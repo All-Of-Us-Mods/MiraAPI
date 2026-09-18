@@ -9,7 +9,8 @@ namespace MiraAPI.GameOptions.OptionTypes;
 /// Represents a modded option list.
 /// </summary>
 /// <typeparam name="T">The type of options.</typeparam>
-public class ModdedOptionList<T> : IModdedOptionList where T : IModdedOption
+public class ModdedOptionList<T> : IModdedOptionList
+    where T : IModdedOption
 {
     /// <inheritdoc/>
     public int Count { get; }
@@ -27,7 +28,7 @@ public class ModdedOptionList<T> : IModdedOptionList where T : IModdedOption
     public ModdedOptionList(int count, Func<int, T> optionFactory)
     {
         Count = count;
-        Options = Enumerable.Range(0, Count).Select(optionFactory).ToArray();
+        Options = [.. Enumerable.Range(0, Count).Select(optionFactory)];
     }
 
     /// <summary>
@@ -37,7 +38,7 @@ public class ModdedOptionList<T> : IModdedOptionList where T : IModdedOption
     public ModdedOptionList(IEnumerable<T> options)
     {
         Count = options.Count();
-        Options = options.ToArray();
+        Options = [.. options];
     }
 
     /// <inheritdoc/>

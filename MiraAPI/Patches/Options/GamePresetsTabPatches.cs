@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using BepInEx.Configuration;
 using HarmonyLib;
-using MiraAPI.GameOptions;
 using MiraAPI.PluginLoading;
 using MiraAPI.Presets;
 using MiraAPI.Roles;
@@ -21,12 +20,12 @@ namespace MiraAPI.Patches.Options;
 
 internal static class GamePresetsTabPatches
 {
+    private static readonly object Lock = new();
+
     private static GameObject _saveButton = null!;
     private static GameObject _refreshButton = null!;
     private static GameObject _folderButton = null!;
     private static GameObject _newDivider = null!;
-
-    private static readonly object Lock = new();
 
     [HarmonyPatch(typeof(GamePresetsTab), nameof(GamePresetsTab.OnEnable))]
     public static class GamePresetsOnEnablePatch
@@ -58,14 +57,17 @@ internal static class GamePresetsTabPatches
             {
                 _saveButton.SetActive(MenuState.Instance.CurrentModIdx != 0);
             }
+
             if (_refreshButton)
             {
                 _refreshButton.SetActive(MenuState.Instance.CurrentModIdx != 0);
             }
+
             if (_folderButton)
             {
                 _folderButton.SetActive(MenuState.Instance.CurrentModIdx != 0);
             }
+
             if (_newDivider)
             {
                 _newDivider.SetActive(MenuState.Instance.CurrentModIdx != 0);
@@ -124,10 +126,12 @@ internal static class GamePresetsTabPatches
             {
                 _saveButton.SetActive(false);
             }
+
             if (_refreshButton)
             {
                 _refreshButton.SetActive(false);
             }
+
             if (_folderButton)
             {
                 _folderButton.SetActive(false);
@@ -232,7 +236,7 @@ internal static class GamePresetsTabPatches
                                 option.SaveToPreset(presetFile);
                             }
 
-                            foreach (var role in MenuState.Instance.CurrentMod.InternalRoles.Values.OfType<ICustomRole>().Where(x=>!x.Configuration.HideSettings))
+                            foreach (var role in MenuState.Instance.CurrentMod.InternalRoles.Values.OfType<ICustomRole>().Where(x => !x.Configuration.HideSettings))
                             {
                                 role.SaveToPreset(presetFile);
                             }
@@ -268,6 +272,7 @@ internal static class GamePresetsTabPatches
             refreshButton.OnClick = new Button.ButtonClickedEvent();
             refreshButton.OnClick.AddListener((UnityAction)Refresh);
         }
+
         refreshButton = _refreshButton.GetComponent<PassiveButton>();
 
         if (!_folderButton)
@@ -318,6 +323,7 @@ internal static class GamePresetsTabPatches
         {
             PresetManager.LoadPresets(MenuState.Instance.CurrentMod);
         }
+
         GameSettingMenu.Instance.ChangeTab(0, false); // refresh the tab
     }
 }

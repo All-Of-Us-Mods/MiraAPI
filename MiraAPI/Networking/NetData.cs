@@ -21,5 +21,8 @@ public readonly struct NetData(uint id, byte[] data)
     /// Gets the length of the data in bytes.
     /// </summary>
     /// <returns>An int representing the number of bytes this NetData takes up.</returns>
-    public int GetLength() => 4 + Data.Length;
+    public int GetLength()
+    {
+        return 4 + Data.Length;
+    }
 }

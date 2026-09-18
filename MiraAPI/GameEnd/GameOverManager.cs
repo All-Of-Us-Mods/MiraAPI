@@ -12,7 +12,7 @@ public static class GameOverManager
     private static readonly Dictionary<Type, int> GameOverIds = [];
     private static readonly Dictionary<int, Type> GameOverTypes = [];
 
-    private static int _nextId = Enum.GetNames<GameOverReason>().Length;
+    private static int nextId = Enum.GetNames<GameOverReason>().Length;
 
     /// <summary>
     /// Register a <see cref="CustomGameOver"/>.
@@ -39,9 +39,9 @@ public static class GameOverManager
             return false;
         }
 
-        GameOverIds.Add(gameOverType, _nextId);
-        GameOverTypes.Add(_nextId, gameOverType);
-        _nextId++;
+        GameOverIds.Add(gameOverType, nextId);
+        GameOverTypes.Add(nextId, gameOverType);
+        nextId++;
         return true;
     }
 
@@ -68,7 +68,8 @@ public static class GameOverManager
     /// </summary>
     /// <typeparam name="T">Type of the <see cref="CustomGameOver"/>.</typeparam>
     /// <returns>The ID of the <see cref="CustomGameOver"/>.</returns>
-    public static int GetGameOverId<T>() where T : CustomGameOver
+    public static int GetGameOverId<T>()
+        where T : CustomGameOver
     {
         return GetGameOverId(typeof(T));
     }
@@ -81,9 +82,8 @@ public static class GameOverManager
     /// <exception cref="ArgumentException">Thrown when the type is not registered.</exception>
     public static int GetGameOverId(Type gameOverType)
     {
-        if (GameOverIds.TryGetValue(gameOverType, out var id))
-            return id;
-
-        throw new ArgumentException($"{gameOverType.FullName} is not a registered custom game over!");
+        return GameOverIds.TryGetValue(gameOverType, out var id)
+            ? id
+            : throw new ArgumentException($"{gameOverType.FullName} is not a registered custom game over!");
     }
 }

@@ -1,5 +1,16 @@
 [*.{cs,vb}]
+
+# CA1707: Identifiers should not contain underscores.
 dotnet_diagnostic.CA1707.severity = none
+
+# CS1591: Missing XML comment for publicly visible type or member.
 dotnet_diagnostic.CS1591.severity = none
+
+# SA1611: Element parameters should be documented.
 dotnet_diagnostic.SA1611.severity = none
+
+# SA1615: Element return value should be documented.
 dotnet_diagnostic.SA1615.severity = none
+
+# S125: Sections of code should not be commented out.
+dotnet_diagnostic.S125.severity = none
