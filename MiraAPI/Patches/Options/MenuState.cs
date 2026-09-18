@@ -262,7 +262,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
         var smC1Btn = Instantiate(smModBtn, smModBtn.transform.parent);
         _smallButtons[MenuButton.CustomOne] = smC1Btn;
         smC1Btn.name = "SmallCustomOneButton";
-        smC1Btn.buttonText.text = "Custom 1";
+        smC1Btn.buttonText.text = "MiraApi.CustomCategory1".Translate();
         smC1Btn.OnClick = new Button.ButtonClickedEvent();
         smC1Btn.OnClick.AddListener(
             (UnityAction)(() =>
@@ -280,7 +280,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
         var smC2Btn = Instantiate(smModBtn, smModBtn.transform.parent);
         _smallButtons[MenuButton.CustomTwo] = smC2Btn;
         smC2Btn.name = "SmallCustomTwoButton";
-        smC2Btn.buttonText.text = "Custom 2";
+        smC2Btn.buttonText.text = "MiraApi.CustomCategory2".Translate();
         smC2Btn.OnClick = new Button.ButtonClickedEvent();
         smC2Btn.OnClick.AddListener(
             (UnityAction)(() =>
@@ -382,15 +382,16 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
 
     private void UpdateUi()
     {
+        var pageText = "MiraApi.Page".Translate();
         // Update mod text
         if (CurrentModIdx == 0)
         {
-            _text.text = $"<size=40%>(Page 1/{ModCount + 1})</size>\nMain";
+            _text.text = $"<size=40%>({pageText} 1/{ModCount + 1})</size>\n{"MiraApi.Main".Translate()}";
         }
         else
         {
             var modName = CurrentMod.MiraPlugin.OptionsTitleText.Translate();
-            _text.text = $"<size=40%>(Page {CurrentModIdx + 1}/{ModCount + 1})</size>\n" +
+            _text.text = $"<size=40%>({pageText} {CurrentModIdx + 1}/{ModCount + 1})</size>\n" +
                          modName[..Math.Min(modName.Length, 25)];
         }
 

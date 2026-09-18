@@ -40,4 +40,7 @@ Outlive the timer or eliminate the crew.</string>
     <string name="MiraApi.RoleTeam.Neutral.Short">Neut</string>
     <string name="MiraApi.RoleTeam.Neutral.Group">Neutral Roles</string>
     <string name="MiraApi.RoleTeam.Other">Other</string>
+    <string name="MiraApi.ModifierDisplay.Page">Page</string>
+    <string name="MiraApi.Page">Page</string>
+    <string name="MiraApi.Main">Main</string>
 </resources>
