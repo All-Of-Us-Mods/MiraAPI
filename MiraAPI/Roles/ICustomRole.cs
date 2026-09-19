@@ -48,7 +48,7 @@ public interface ICustomRole : IOptionable
     /// <summary>
     /// Gets the medium description of the role. Used in the role guide and options menu.
     /// </summary>
-    string RoleMedDescription => MiraLocaleManager.Get(RoleMedDescriptionLocale);
+    string RoleMedDescription => MiraLocaleManager.Get(RoleMedDescriptionLocale, RoleLongDescription);
 
     /// <summary>
     /// Gets the role's medium description id for localization.
