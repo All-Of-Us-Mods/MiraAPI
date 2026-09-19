@@ -69,9 +69,10 @@ public abstract class CustomMultiSelectMenu<TEntry> : CustomPhoneMenu<CustomMult
 
         customMenu.confirmButton = null!; // TODO: create/add confirm button
 
+        /*
         var button = customMenu.confirmButton.GetComponent<PassiveButton>();
         button.OnClick.RemoveAllListeners();
-        button.OnClick.AddListener((UnityAction)customMenu.OnCompleteSelection);
+        button.OnClick.AddListener((UnityAction)customMenu.OnCompleteSelection);*/
 
         customMenu.activeColor = activeColor;
 

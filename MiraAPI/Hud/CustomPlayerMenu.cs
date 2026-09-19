@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using MiraAPI.Utilities.Assets;
 using UnityEngine;
 
 namespace MiraAPI.Hud;
@@ -26,6 +27,36 @@ public class CustomPlayerMenu : CustomMultiSelectMenu<PlayerControl>
     public static CustomPlayerMenu Create()
     {
         return Create<CustomPlayerMenu>();
+    }
+
+    /// <summary>
+    /// Creates a <see cref="CustomPlayerMenu"/>.
+    /// </summary>
+    /// <returns>New <see cref="CustomPlayerMenu"/> object.</returns>
+    /// <param name="activeColor">The <see cref="Color"/> to use when an entry is selected but not hovered over.</param>
+    /// <param name="hoverSelectSprite">The <see cref="Sprite"/> to use when an entry is hovered over while not selected.</param>
+    /// <param name="hoverSelectColor">The <see cref="Color"/> to use when an entry is hovered over while not selected.</param>
+    /// <param name="hoverDeselectSprite">The <see cref="Sprite"/> to use when an entry is hovered over while selected.</param>
+    /// <param name="hoverDeselectColor">The <see cref="Color"/> to use when an entry is hovered over while selected.</param>
+    /// <param name="onMouseOut">Function that can optionally be run when the mouse is moved outside a menu panel.</param>
+    /// <param name="onMouseOver">Function that can optionally be run when the mouse is moved over a menu panel.</param>
+    public static CustomPlayerMenu Create(
+        Color? activeColor,
+        LoadableAsset<Sprite>? hoverSelectSprite = null,
+        Color? hoverSelectColor = null,
+        LoadableAsset<Sprite>? hoverDeselectSprite = null,
+        Color? hoverDeselectColor = null,
+        PanelButtonOnMouse? onMouseOut = null,
+        PanelButtonOnMouse? onMouseOver = null)
+    {
+        return Create<CustomPlayerMenu>(
+            activeColor,
+            hoverSelectSprite,
+            hoverSelectColor,
+            hoverDeselectSprite,
+            hoverDeselectColor,
+            onMouseOut,
+            onMouseOver);
     }
 
     /// <summary>
