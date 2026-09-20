@@ -111,4 +111,24 @@ public enum MiraLanguage
     /// Czech.
     /// </summary>
     Czech,
+
+    /// <summary>
+    /// Literary Chinese.
+    /// </summary>
+    LiteraryChinese,
+
+    /// <summary>
+    /// Greek.
+    /// </summary>
+    Greek,
+
+    /// <summary>
+    /// Arabic.
+    /// </summary>
+    Arabic,
+
+    /// <summary>
+    /// Hebrew.
+    /// </summary>
+    Hebrew,
 }
