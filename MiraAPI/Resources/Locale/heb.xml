@@ -1,4 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
-
+  <string name="MiraApi.VisualsUi">ויזואליה/ממשק משתמש</string>
+  <string name="MiraApi.Accessibility">נגישות</string>
+  <string name="MiraApi.MiraApiBrand">ממשק התכנות של מירה</string>
 </resources>
