@@ -29,7 +29,7 @@
   <string name="MiraApi.Gamemode.Classic">Clássico</string>
   <string name="MiraApi.Gamemode.Classic.Description">A experiencia clássica do Among Us!
 Encontra os Impostores ou engana a Tripulação.</string>
-  <string name="MiraApi.Gamemode.HideAndSeek">Escondidinhas</string>
+  <string name="MiraApi.Gamemode.HideAndSeek">Escondidas</string>
   <string name="MiraApi.Gamemode.HideAndSeek.Description">Podes fugir, mas não podes esconder!
 Vive até o tempo acabar ou elimina a tripulação.</string>
   <string name="MiraApi.GameSetting.Global.ClickToClose">Clica para fechar</string>

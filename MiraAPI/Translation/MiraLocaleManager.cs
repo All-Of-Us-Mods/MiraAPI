@@ -62,6 +62,10 @@ public static class MiraLocaleManager
         { MiraLanguage.Swedish, "sv_SE" }, // Custom
         { MiraLanguage.Lithuanian, "lt_LT" }, // Custom
         { MiraLanguage.Czech, "cs_CZ" }, // Custom
+        { MiraLanguage.LiteraryChinese, "lzh_CN" }, // Custom
+        { MiraLanguage.Greek, "el_GR" }, // Custom
+        { MiraLanguage.Arabic, "arb" }, // Custom
+        { MiraLanguage.Hebrew, "heb" }, // Custom
     };
 
     /// <summary>
@@ -90,6 +94,10 @@ public static class MiraLocaleManager
         { MiraLanguage.Swedish, "sv-SE" }, // Custom
         { MiraLanguage.Lithuanian, "lt-LT" }, // Custom
         { MiraLanguage.Czech, "cs-CZ" }, // Custom
+        { MiraLanguage.LiteraryChinese, "lzh-CN" }, // Custom
+        { MiraLanguage.Greek, "el-GR" }, // Custom
+        { MiraLanguage.Arabic, "arb" }, // Custom
+        { MiraLanguage.Hebrew, "heb" }, // Custom
     };
 
     /// <summary>
