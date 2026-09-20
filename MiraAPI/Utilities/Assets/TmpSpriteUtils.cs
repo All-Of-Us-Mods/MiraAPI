@@ -71,6 +71,8 @@ public static class TmpSpriteUtils
             name = assetName + " Material",
         };
         material.SetTexture(ShaderUtilities.ID_MainTex, sourceTexture);
+        /*material.SetFloat(ShaderUtilities.ID_StencilComp, 4);
+        material.SetFloat(ShaderUtilities.ID_StencilID, 1);*/
         material.SetFloat(ShaderUtilities.ID_StencilComp, 0);
         material.SetFloat(ShaderUtilities.ID_StencilID, 0);
         material.SetFloat(ShaderUtilities.ID_StencilOp, 0);
