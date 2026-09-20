@@ -173,6 +173,14 @@ public abstract class CustomPhoneMenu : ICustomMenu
     }
 
     /// <summary>
+    /// Forcibly closes the menu.
+    /// </summary>
+    public void ForceClose()
+    {
+        Component.ForceClose();
+    }
+
+    /// <summary>
     /// Creates a <typeparamref name="TMenu"/>.
     /// </summary>
     /// <typeparam name="TMenu">The type of <see cref="CustomPhoneMenu"/>.</typeparam>

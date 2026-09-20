@@ -56,6 +56,10 @@ public static class TmpSpriteUtils
         spriteAsset.name = assetName;
         spriteAsset.spriteSheet = sourceTexture;
 
+        var spriteAssetMasked = ScriptableObject.CreateInstance<TMP_SpriteAsset>();
+        spriteAssetMasked.name = assetName + ".Masked";
+        spriteAssetMasked.spriteSheet = sourceTexture;
+
         if (!_spriteShader)
         {
             // ReSharper disable once ShaderLabShaderReferenceNotResolved (Justification: Unnecessary.)
@@ -67,10 +71,6 @@ public static class TmpSpriteUtils
             name = assetName + " Material",
         };
         material.SetTexture(ShaderUtilities.ID_MainTex, sourceTexture);
-
-        // TODO: Using these values, the icons will NOT clip through chat boxes. However, this breaks quite literally every other tmp text that isn't masked. Please fix this if a good solution is found.
-        /*material.SetFloat(ShaderUtilities.ID_StencilComp, 4);
-        material.SetFloat(ShaderUtilities.ID_StencilID, 1);*/
         material.SetFloat(ShaderUtilities.ID_StencilComp, 0);
         material.SetFloat(ShaderUtilities.ID_StencilID, 0);
         material.SetFloat(ShaderUtilities.ID_StencilOp, 0);
@@ -81,15 +81,36 @@ public static class TmpSpriteUtils
 
         spriteAsset.spriteInfoList = new CppCollections.List<TMP_Sprite>();
 
+        var maskedMaterial = new Material(_spriteShader)
+        {
+            name = assetName + " Masked Material",
+        };
+        maskedMaterial.SetTexture(ShaderUtilities.ID_MainTex, sourceTexture);
+        maskedMaterial.SetFloat(ShaderUtilities.ID_StencilComp, 4);
+        maskedMaterial.SetFloat(ShaderUtilities.ID_StencilID, 1);
+        maskedMaterial.SetFloat(ShaderUtilities.ID_StencilOp, 0);
+        maskedMaterial.SetFloat(ShaderUtilities.ID_StencilWriteMask, 255);
+        maskedMaterial.SetFloat(ShaderUtilities.ID_StencilReadMask, 255);
+        maskedMaterial.SetFloat(ShaderUtilities.ShaderTag_CullMode, 0);
+        spriteAssetMasked.material = maskedMaterial;
+
+        spriteAssetMasked.spriteInfoList = new CppCollections.List<TMP_Sprite>();
+
         AddSpriteToAsset(spriteAsset, rect, assetName, scale);
+        AddSpriteToAsset(spriteAssetMasked, rect, assetName + ".Masked", scale);
 
         spriteAsset.DontUnload().DontDestroy();
         spriteAsset.UpdateLookupTables();
         spriteAsset.fallbackSpriteAssets = new();
+        spriteAssetMasked.DontUnload().DontDestroy();
+        spriteAssetMasked.UpdateLookupTables();
+        spriteAssetMasked.fallbackSpriteAssets = new();
         AssetHolder.fallbackSpriteAssets.Add(spriteAsset);
+        AssetHolder.fallbackSpriteAssets.Add(spriteAssetMasked);
         AssetHolder.UpdateLookupTables();
 
         LoadedSprites.Add(assetName, spriteAsset);
+        LoadedSprites.Add(assetName + ".Masked", spriteAssetMasked);
         return spriteAsset;
     }
 
