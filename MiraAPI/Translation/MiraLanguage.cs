@@ -1,8 +1,8 @@
 namespace MiraAPI.Translation;
 
 /// <summary>
-/// Supported languages for Mira translation system.
-/// Maps to Among Us's SupportedLangs enum values.
+/// Supported languages for Mira translation system.<br/>
+/// Maps to Among Us's <see cref="SupportedLangs"/> enum values.
 /// </summary>
 public enum MiraLanguage
 {
@@ -72,12 +72,12 @@ public enum MiraLanguage
     Spanish,
 
     /// <summary>
-    /// SChinese.
+    /// Simplified Chinese.
     /// </summary>
     SChinese,
 
     /// <summary>
-    /// TChinese.
+    /// Traditional Chinese.
     /// </summary>
     // ReSharper disable once InconsistentNaming (Justification: Language name.)
     TChinese,
@@ -115,7 +115,7 @@ public enum MiraLanguage
     /// <summary>
     /// Literary Chinese.
     /// </summary>
-    LiteraryChinese,
+    LChinese,
 
     /// <summary>
     /// Greek.
