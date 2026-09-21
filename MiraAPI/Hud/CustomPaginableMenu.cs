@@ -1,4 +1,5 @@
 ﻿using MiraAPI.Patches.Stubs;
+using MiraAPI.Translation;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities;
 using Reactor.Utilities.Extensions;
@@ -277,7 +278,7 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
         if (label != null)
         {
             label.name = $"{Name}SearchLabel";
-            label.text = "Search";
+            label.text = MiraLocaleManager.Get("Search", "Search");
             label.alignment = TextAlignmentOptions.Center;
             label.fontSize = label.fontSizeMin = label.fontSizeMax = 2.1f;
             label.color = Color.white;
@@ -294,7 +295,7 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
         if (noResultsText != null)
         {
             noResultsText.name = $"{Name}NoResultsText";
-            noResultsText.text = "No results";
+            noResultsText.text = MiraLocaleManager.Get($"{Name}NoResults", "No results");
             noResultsText.alignment = TextAlignmentOptions.Center;
             noResultsText.fontSize = noResultsText.fontSizeMin = noResultsText.fontSizeMax = 2.25f;
             noResultsText.color = Color.white;

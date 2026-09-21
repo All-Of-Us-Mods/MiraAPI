@@ -328,6 +328,15 @@ public abstract class CustomPhoneMenu : ICustomMenu
             button.UnselectedColor = uColor;
         }
     }
+
+    /// <summary>
+    /// Implicitly converts to the <see cref="Minigame"/> the <see cref="CustomPhoneMenu"/> wraps.
+    /// </summary>
+    /// <param name="menu">The menu instance.</param>
+    public static implicit operator Minigame(CustomPhoneMenu menu)
+    {
+        return menu.Component;
+    }
 }
 
 /// <inheritdoc cref="CustomPhoneMenu"/>
