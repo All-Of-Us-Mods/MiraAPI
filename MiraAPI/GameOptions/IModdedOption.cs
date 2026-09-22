@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using BepInEx.Configuration;
+﻿using BepInEx.Configuration;
 using MiraAPI.Networking;
 using MiraAPI.PluginLoading;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MiraAPI.GameOptions;
@@ -121,4 +121,17 @@ public interface IModdedOption
 /// </summary>
 public interface IModdedOptionList : IReadOnlyList<IModdedOption>
 {
+}
+
+/// <summary>
+/// Interface for list of <typeparamref name="T"/> options.
+/// </summary>
+/// <typeparam name="T">The type of <see cref="IModdedOption"/>.</typeparam>
+public interface IModdedOptionList<out T> : IModdedOptionList where T : IModdedOption
+{
+    /// <inheritdoc/>
+    new T this[int index] { get; }
+
+    /// <inheritdoc/>
+    new IEnumerator<T> GetEnumerator();
 }
