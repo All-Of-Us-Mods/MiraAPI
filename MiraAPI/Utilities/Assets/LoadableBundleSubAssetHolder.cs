@@ -19,7 +19,7 @@ public class LoadableBundleSubAssetHolder
     /// <summary>
     /// Gets the sprites contained within the asset.
     /// </summary>
-    public Sprite[] SubSprites { get; private set; }
+    public Sprite[] SubSprites { get; private set; } = [];
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LoadableBundleSubAssetHolder"/> class.
