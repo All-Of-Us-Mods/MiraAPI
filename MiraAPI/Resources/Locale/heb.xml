@@ -29,4 +29,15 @@
   <string name="MiraApi.GameSetting.Preset.Hint">בחר או צור ערכת הגדרות למשחק</string>
   <string name="MiraApi.GameSetting.Preset.Save">שמירה</string>
   <string name="Roles">תפקידים</string>
+  <string name="MiraApi.RoleTeam.Neutral">נטרלי</string>
+  <string name="MiraApi.RoleTeam.Neutral.Short">ניוט</string>
+  <string name="MiraApi.RoleTeam.Neutral.Group">תפקידים נטרלים</string>
+  <string name="MiraApi">התכנות של מירה</string>
+  <string name="MiraApi.ModifierMenuDescription">הגדר כאן את המאפיינים הנוספים ואת ההגדרות שלהם!</string>
+  <string name="MiraApi.CustomOptionMenuDescription">החל הגדרות משחק עבור מוד זה!</string>
+  <string name="MiraApi.Gamemode.Classic">קלאסי</string>
+  <string name="MiraApi.Gamemode.Classic.Description">חווית אמונג אס הקלאסית.
+מצאו את המתחזים או הטעו את הצוות.</string>
+  <string name="Modifiers">תוספים</string>
+  <string name="Modifier">תוסף</string>
 </resources>
