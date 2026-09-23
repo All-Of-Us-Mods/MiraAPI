@@ -328,6 +328,8 @@ public interface ICustomRole : IOptionable
         desc.alignment = TextAlignmentOptions.TopLeft;
         obj.transform.SetParent(parent.Inner.transform);
         desc.transform.localPosition = new Vector3(0, 1.125f, 0);
+        desc.ForceMeshUpdate();
+        parent.SetYBoundsMax(Mathf.Clamp(desc.textBounds.size.y - 2, 0f, 999f));
         return obj;
     }
 
