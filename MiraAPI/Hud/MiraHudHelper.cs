@@ -13,7 +13,7 @@ namespace MiraAPI.Hud;
 [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity Convention.")]
 [SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Is internal code. Property-level protections are not required.")]
 [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
-internal sealed class MiraHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
+public sealed class MiraHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
 {
     public static MiraHudHelper Instance { get; private set; }
 
