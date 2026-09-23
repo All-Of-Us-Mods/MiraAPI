@@ -6,7 +6,9 @@ using MiraAPI.GameOptions;
 using MiraAPI.Modifiers;
 using MiraAPI.PluginLoading;
 using MiraAPI.Translation;
+using TMPro;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace MiraAPI.Roles;
 
@@ -68,7 +70,7 @@ public interface ICustomRole : IOptionable
     /// <summary>
     /// Gets the wiki description of the role. Used in the wiki, but not currently required.
     /// </summary>
-    string RoleWikiDescription => MiraLocaleManager.Get(RoleLongDescriptionLocale);
+    string RoleWikiDescription => MiraLocaleManager.Get(RoleWikiDescriptionLocale, RoleLongDescription);
 
     /// <summary>
     /// Gets the role's wiki description id for localization.
@@ -309,6 +311,24 @@ public interface ICustomRole : IOptionable
     /// </summary>
     /// <returns><see langword="true"/> if the role is always displayed, otherwise <see langword="false"/> if it is never displayable, or <see langword="null"/> if it is dictated by amount and chance.</returns>
     public virtual bool? ForceShowRoleOnWiki => null;
+
+    /// <summary>
+    /// Gets the information to display in the wiki.
+    /// </summary>
+    public virtual GameObject GetAdvancedWiki(MatchInfoGuide guide, TextMeshPro titleText, Scroller parent)
+    {
+        parent.ScrollToTop();
+        var obj = new GameObject(RoleNameLocale);
+        titleText.text = RoleName + $" ({RoleFactionTitle})";
+        var desc = Object.Instantiate(guide.MatchInfoRolePanelPrefab.roleCount, obj.transform);
+        desc.fontSizeMin = desc.fontSizeMax = desc.fontSize = 2f;
+        desc.text = RoleWikiDescription;
+        desc.transform.localPosition = new Vector3(0, 0.925f, 0);
+        desc.rectTransform.sizeDelta = new Vector2(7.5f, 0.3f);
+        desc.alignment = TextAlignmentOptions.TopLeft;
+        obj.transform.SetParent(parent.Inner.transform);
+        return obj;
+    }
 
     /// <summary>
     /// Gets the function that determines whether the role should be toggled on or off in the game settings.
