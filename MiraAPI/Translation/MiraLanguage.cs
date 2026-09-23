@@ -27,4 +27,8 @@ public enum MiraLanguage
     Swedish,
     Lithuanian,
     Czech,
+    LiteraryChinese,
+    Greek,
+    Arabic,
+    Hebrew,
 }
