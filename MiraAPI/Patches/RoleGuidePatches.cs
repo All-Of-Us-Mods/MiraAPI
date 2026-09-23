@@ -345,6 +345,8 @@ public static class RoleGuidePatches
             CurrentAdvancedTabObject.transform.SetParent(AdvancedWikiTab.Inner.transform);
             desc.transform.localPosition = new Vector3(0, 1.125f, 0);
             CurrentAdvancedTabObject.transform.localPosition = new Vector3(0f, 0f, 0f);
+            desc.ForceMeshUpdate();
+            AdvancedWikiTab.SetYBoundsMax(Mathf.Clamp(desc.textBounds.size.y- 2, 0f, 999f));
         }
     }
     [HarmonyPrefix]
