@@ -7,7 +7,11 @@ using HarmonyLib;
 using Innersloth.Assets;
 using MiraAPI.Roles;
 using MiraAPI.Utilities;
+using Reactor.Utilities.Extensions;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace MiraAPI.Patches;
@@ -39,6 +43,8 @@ public static class RoleGuidePatches
                 __instance.MatchInfoRoleMaskArea.transform.parent.GetAllChildren()
                     .First(x => x.name.Contains("BG_Gradient")).GetComponent<SpriteRenderer>()
                     .maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+        var wikiTab = Object.Instantiate(__instance.settingsTabs[2], __instance.settingsTabs[2].transform.parent);
+        advancedWikiTab = wikiTab.GetComponent<Scroller>();
     }
 
     [HarmonyPrefix]
@@ -78,13 +84,26 @@ public static class RoleGuidePatches
         var enabled = ActiveInputManager.currentControlType == ActiveInputManager.InputType.Joystick;
         __instance.glyphL.enabled = enabled;
         __instance.glyphR.enabled = enabled;
+        if (!titleText)
+        {
+            titleText = __instance.transitionOpen.transform.FindChild("Text_Title")?.GetComponent<TextMeshPro>()!;
+            if (titleText)
+            {
+                titleText.transform.GetComponent<TextTranslatorTMP>().Destroy();
+            }
+        }
+
+        if (titleText)
+        {
+            titleText.text = TranslationController.Instance.GetString(StringNames.MatchInfoGuideTitle);
+        }
+
         if (GameManager.Instance.TryCast<NormalGameManager>() != null)
         {
             if (__instance.NormalModeSettings.Count == 0)
             {
                 __instance.numOfTabs = 3;
                 __instance.TabButtons[0].SelectButton(true);
-                DisplayNormalRoleSettings(__instance, true);
                 __instance.MatchInfoRoleMaskArea.transform.localPosition = new Vector3(-0.0184f, 0.15f, -0.1f);
 
                 __instance.matchInfoPlayersMaskArea.transform.localPosition =
@@ -103,6 +122,12 @@ public static class RoleGuidePatches
                         __instance.MatchInfoRoleMaskArea.transform.parent.GetAllChildren()
                             .First(x => x.name.Contains("BG_Gradient")).GetComponent<SpriteRenderer>()
                             .maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                __instance.MatchInfoRoleMaskArea.material.SetInt(PlayerMaterial.MaskLayer, 50);
+                __instance.matchInfoSettingsMaskArea.material.SetInt(PlayerMaterial.MaskLayer, 50);
+                var wikiTab = Object.Instantiate(__instance.settingsTabs[2], __instance.settingsTabs[2].transform.parent);
+                wikiTab.transform.FindChild("MaskArea")?.transform.localPosition = new Vector3(-0.0184f, 0.15f, -0.1f);
+                advancedWikiTab = wikiTab.GetComponent<Scroller>();
+                DisplayNormalRoleSettings(__instance, true);
             }
             else
             {
@@ -130,6 +155,9 @@ public static class RoleGuidePatches
     }
 
     private static readonly Dictionary<RoleBehaviour, MatchInfoRolePanel> RolePanels = [];
+    private static Scroller advancedWikiTab;
+    private static GameObject currentAdvancedTabObject;
+    private static TextMeshPro titleText;
 
     public static void DisplayNormalRoleSettings(MatchInfoGuide instance, bool reset)
     {
@@ -160,6 +188,8 @@ public static class RoleGuidePatches
             instance.CreateSettingsEntry(
                 StringNames.GameTaskBarMode,
                 GameManager.Instance.LogicOptions.GetTaskBarMode().ToString());
+
+            var hoverColor = new Color32(255, 255, 255, 150);
             foreach (var roleBehaviour in RoleManager.Instance.AllRoles)
             {
                 if (roleBehaviour.Role is not RoleTypes.Crewmate and not RoleTypes.Impostor and
@@ -169,10 +199,32 @@ public static class RoleGuidePatches
                     var panel = Object.Instantiate(
                         instance.MatchInfoRolePanelPrefab,
                         instance.settingsTabs[2].GetComponent<Scroller>().Inner);
+                    var collider = panel.roleIcon.gameObject.AddComponent<BoxCollider2D>();
+                    collider.size = new Vector2(0.13f, 0.13f);
+                    collider.offset = new Vector2(0, 0);
+                    var passiveButton = panel.roleIcon.gameObject.AddComponent<PassiveButton>();
+                    passiveButton.OnMouseOver = new UnityEvent();
+                    passiveButton.OnMouseOver.AddListener(
+                        (UnityAction)(() =>
+                        {
+                            panel.roleIcon.color = hoverColor;
+                        }));
+                    passiveButton.OnMouseOut = new UnityEvent();
+                    passiveButton.OnMouseOut.AddListener(
+                        (UnityAction)(() =>
+                        {
+                            panel.roleIcon.color = Color.white;
+                        }));
+
+                    passiveButton.OnClick = new Button.ButtonClickedEvent();
+                    passiveButton.OnClick.AddListener(
+                        (Action)(() => { DisplayAdvancedWiki(instance, roleBehaviour); }));
                     RolePanels.Add(roleBehaviour, panel);
                 }
             }
         }
+
+        advancedWikiTab?.gameObject.SetActive(false);
 
         var num = 0;
         foreach (var (roleData, panel) in RolePanels)
@@ -202,8 +254,7 @@ public static class RoleGuidePatches
         }
 
         instance.MatchInfoRoleScroller.SetYBoundsMax(Mathf.Clamp(Mathf.Ceil(num / 2f) * 1.3f - 1.5f, 0f, 999f));
-        instance.MatchInfoRoleMaskArea.material.SetInt(PlayerMaterial.MaskLayer, 50);
-        instance.matchInfoSettingsMaskArea.material.SetInt(PlayerMaterial.MaskLayer, 50);
+        instance.MatchInfoRoleScroller.SetYBoundsMax(Mathf.Clamp(Mathf.Ceil(num / 2f) * 1.3f - 1.5f, 0f, 999f));
         if (reset)
         {
             instance.CreatePlayerEntries();
@@ -234,9 +285,6 @@ public static class RoleGuidePatches
                 __instance.CoLoadAssetAsync<NamePlateViewData>(
                     namePlate.GetAssetReference(),
                     (Action<NamePlateViewData>?)LoadNameplate));
-#pragma warning disable S1751 // Loops with at most one iteration should be refactored (Justification: No idea why it's behaving this way.)
-            continue;
-#pragma warning restore S1751 // Loops with at most one iteration should be refactored
 
             void LoadNameplate(NamePlateViewData viewData)
             {
@@ -247,6 +295,67 @@ public static class RoleGuidePatches
         }
 
         return false;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPriority(Priority.First)]
+    [HarmonyPatch(typeof(MatchInfoGuide), nameof(MatchInfoGuide.SetActiveTab))]
+    private static void SetActiveTab()
+    {
+        if (titleText)
+        {
+            titleText.text = TranslationController.Instance.GetString(StringNames.MatchInfoGuideTitle);
+        }
+
+        advancedWikiTab?.gameObject.SetActive(false);
+    }
+
+    public static void DisplayAdvancedWiki(MatchInfoGuide instance, RoleBehaviour role)
+    {
+        Warning($"Opening advanced tab for {role.GetRoleName()}.");
+        instance.settingsTabs[2].SetActive(false);
+        advancedWikiTab?.gameObject.SetActive(true);
+        if (currentAdvancedTabObject)
+        {
+            currentAdvancedTabObject.SetActive(false);
+            currentAdvancedTabObject.Destroy();
+        }
+
+        if (advancedWikiTab == null)
+        {
+            Warning($"Wiki tab is null.");
+            return;
+        }
+
+        if (role is ICustomRole custom)
+        {
+            currentAdvancedTabObject = custom.GetAdvancedWiki(instance, titleText, advancedWikiTab);
+            currentAdvancedTabObject.transform.localPosition = new Vector3(0f, 0f, 0f);
+        }
+        else
+        {
+            advancedWikiTab.ScrollToTop();
+            currentAdvancedTabObject = new GameObject($"{role.Role}");
+            titleText.text = role.GetRoleName() + $" ({TranslationController.Instance.GetString(role.TeamType is RoleTeamTypes.Crewmate ? StringNames.Crewmate : StringNames.Impostor)})";
+            var desc = Object.Instantiate(instance.MatchInfoRolePanelPrefab.roleCount, currentAdvancedTabObject.transform);
+            desc.fontSizeMin = desc.fontSizeMax = desc.fontSize = 2f;
+            var description = TranslationController.Instance.GetString(role.BlurbNameLong);
+            if (description.Contains("STRMISS"))
+            {
+                var baseName = $"{role.StringName}".Replace("Role", string.Empty);
+                if (Enum.TryParse<StringNames>($"RolesHelp_{baseName}_01", out var helpName))
+                {
+                    description = TranslationController.Instance.GetString(helpName);
+                }
+            }
+
+            desc.text = description;
+            desc.rectTransform.sizeDelta = new Vector2(7.5f, 0.3f);
+            desc.alignment = TextAlignmentOptions.TopLeft;
+            currentAdvancedTabObject.transform.SetParent(advancedWikiTab.Inner.transform);
+            desc.transform.localPosition = new Vector3(0, 1.125f, 0);
+            currentAdvancedTabObject.transform.localPosition = new Vector3(0f, 0f, 0f);
+        }
     }
 
     [HarmonyPrefix]
