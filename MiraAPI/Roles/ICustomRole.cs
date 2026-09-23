@@ -323,10 +323,10 @@ public interface ICustomRole : IOptionable
         var desc = Object.Instantiate(guide.MatchInfoRolePanelPrefab.roleCount, obj.transform);
         desc.fontSizeMin = desc.fontSizeMax = desc.fontSize = 2f;
         desc.text = RoleWikiDescription;
-        desc.transform.localPosition = new Vector3(0, 0.925f, 0);
         desc.rectTransform.sizeDelta = new Vector2(7.5f, 0.3f);
         desc.alignment = TextAlignmentOptions.TopLeft;
         obj.transform.SetParent(parent.Inner.transform);
+        desc.transform.localPosition = new Vector3(0, 1.125f, 0);
         return obj;
     }
 

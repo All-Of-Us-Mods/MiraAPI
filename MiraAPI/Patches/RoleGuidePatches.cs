@@ -120,6 +120,7 @@ public static class RoleGuidePatches
                 __instance.MatchInfoRoleMaskArea.material.SetInt(PlayerMaterial.MaskLayer, 50);
                 __instance.matchInfoSettingsMaskArea.material.SetInt(PlayerMaterial.MaskLayer, 50);
                 var wikiTab = Object.Instantiate(__instance.settingsTabs[2], __instance.settingsTabs[2].transform.parent);
+                wikiTab.transform.FindChild("MaskArea")?.transform.localPosition = new Vector3(-0.0184f, 0.15f, -0.1f);
                 AdvancedWikiTab = wikiTab.GetComponent<Scroller>();
                 DisplayNormalRoleSettings(__instance, true);
             }
@@ -339,10 +340,10 @@ public static class RoleGuidePatches
             }
 
             desc.text = description;
-            desc.transform.localPosition = new Vector3(0, 0.925f, 0);
             desc.rectTransform.sizeDelta = new Vector2(7.5f, 0.3f);
             desc.alignment = TextAlignmentOptions.TopLeft;
             CurrentAdvancedTabObject.transform.SetParent(AdvancedWikiTab.Inner.transform);
+            desc.transform.localPosition = new Vector3(0, 1.125f, 0);
             CurrentAdvancedTabObject.transform.localPosition = new Vector3(0f, 0f, 0f);
         }
     }
