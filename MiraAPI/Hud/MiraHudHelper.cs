@@ -9,27 +9,82 @@ using UnityEngine;
 
 namespace MiraAPI.Hud;
 
+/// <summary>
+/// A mono script to handle hud behaviour.
+/// </summary>
+/// <param name="cppPtr">The Il2Cpp pointer to the script's object.</param>
 [RegisterInIl2Cpp]
 [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity Convention.")]
 [SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Is internal code. Property-level protections are not required.")]
 [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
 public sealed class MiraHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
 {
+    /// <summary>
+    /// Gets the static instance of <see cref="MiraHudHelper"/>.
+    /// </summary>
     public static MiraHudHelper Instance { get; private set; }
 
-    public static GameObject ModifierDisplayObject;
-    public static GameObject VanillaMatchInfoButton;
-    public static bool ModifierDisplayOnRight;
-    public static GameObject ClonedChatButton;
-    public static GameObject ExtraUiTopRight;
-    public static GridArrange ExtraUiGrid;
-    public static AspectPosition ExtraUiAspectPos;
-    public static GameObject UiTopRight;
-    public static GridArrange UiGrid;
-    public static AspectPosition UiAspectPos;
-    public static GameObject SubmergedFloorButton;
-    public static SpriteRenderer SubmergedFloorButtonRenderer;
-    public static SpriteRenderer SubmergedFloorButtonRendererHover;
+    /// <summary>
+    /// Gets or sets the vanilla match info button.
+    /// </summary>
+    public static GameObject VanillaMatchInfoButton { get; set; }
+
+    /// <summary>
+    /// Gets or sets the modifier display menu.
+    /// </summary>
+    public static GameObject ModifierDisplayObject { get; set; }
+
+    /// <summary>
+    /// Gets the cloned chat button.
+    /// </summary>
+    public static GameObject ClonedChatButton { get; private set; }
+
+    /// <summary>
+    /// Gets the object for extra top right buttons.
+    /// </summary>
+    public static GameObject ExtraUiTopRight { get; private set; }
+
+    /// <summary>
+    /// Gets the arranger object for the extra ui grid.
+    /// </summary>
+    public static GridArrange ExtraUiGrid { get; private set; }
+
+    /// <summary>
+    /// Gets the aspect position for the extra ui grid.
+    /// </summary>
+    public static AspectPosition ExtraUiAspectPos { get; private set; }
+
+    /// <summary>
+    /// Gets the top right ui object.
+    /// </summary>
+    public static GameObject UiTopRight { get; private set; }
+
+    /// <summary>
+    /// Gets the arranger object for the ui grid.
+    /// </summary>
+    public static GridArrange UiGrid { get; private set; }
+
+    /// <summary>
+    /// Gets the aspect position for the ui grid.
+    /// </summary>
+    public static AspectPosition UiAspectPos { get; private set; }
+
+    /// <summary>
+    /// Gets the game object of the Submerged map floor change button.
+    /// </summary>
+    public static GameObject SubmergedFloorButton { get; private set; }
+
+    /// <summary>
+    /// Gets the normal sprite renderer of the Submerged floor change button.
+    /// </summary>
+    public static SpriteRenderer SubmergedFloorButtonRenderer { get; private set; }
+
+    /// <summary>
+    /// Gets the hover sprite renderer of the Submerged floor change button.
+    /// </summary>
+    public static SpriteRenderer SubmergedFloorButtonRendererHover { get; private set; }
+
+    internal static bool ModifierDisplayOnRight;
 
     private static readonly Vector3 BelowOptionPos = new(0.435f, 1.25f, 0f);
     private static readonly Vector3 FullTopPos = new(0.435f, 0.475f, 0f);
