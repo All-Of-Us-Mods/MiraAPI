@@ -1,4 +1,17 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
-
+  <string name="MiraApi.VisualsUi">ויזואליה/ממשק משתמש</string>
+  <string name="MiraApi.Accessibility">נגישות</string>
+  <string name="MiraApi.MiraApiBrand">ממשק התכנות של מירה</string>
+  <string name="MiraApi.ShowKeybindsOnButtons">הצג מקשי קיצור על הכפתורים</string>
+  <string name="MiraApi.ShowModifiersHudOnLeftSide">הצג שינויים HUD מופעל בצד שמאל</string>
+  <string name="MiraApi.ButtonScaleFactor">­מקדם גודל הכפתורים</string>
+  <string name="MiraApi.TopRightButtonScaleFactor">‫מקדם גודל ממשק המשתמש בפינה הימנית העליונה</string>
+  <string name="MiraApi.MaxFps">מקסימום פריימים לשנייה</string>
+  <string name="MiraApi.WikiOnBottomRow">הצג את הוויקי בשורה התחתונה</string>
+  <string name="MiraApi.EnableSabotageFlashes">הפעל הבהובי חבלה</string>
+  <string name="MiraApi.EnableSabotageBlare">הפעל צליל חבלה</string>
+  <string name="MiraApi.ReturnToRoleSettings">חזור להגדרות התפקיד</string>
+  <string name="MiraApi.CustomCategory1">קטגוריה מותאמת אישית 1</string>
+  <string name="MiraApi.CustomCategory2">קטגוריה מותאמת אישית 2</string>
 </resources>
