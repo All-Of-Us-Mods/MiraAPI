@@ -594,4 +594,21 @@ public static class Helpers
         // This should be patchable by mods when a vanilla role is meant to be replaced by a custom role.
         return false;
     }
+    public static GameObject CreateAdvancedWikiTab(MatchInfoGuide guide, string objName, string title, string description, TextMeshPro titleTmp, out TextMeshPro descriptionTmp)
+    {
+        var obj = new GameObject(objName);
+        titleTmp.text = title;
+        descriptionTmp = Object.Instantiate(guide.MatchInfoRolePanelPrefab.roleCount, obj.transform);
+        descriptionTmp.fontSizeMin = descriptionTmp.fontSizeMax = descriptionTmp.fontSize = 2f;
+        var sourceTmp = HudManager.Instance.TaskPanel.taskText;
+        descriptionTmp.font = sourceTmp.font;
+        descriptionTmp.fontMaterial = sourceTmp.fontMaterial;
+        descriptionTmp.EnableStencilMasking();
+        descriptionTmp.text = description;
+        descriptionTmp.rectTransform.sizeDelta = new Vector2(7.5f, 0.3f);
+        descriptionTmp.alignment = TextAlignmentOptions.TopLeft;
+        descriptionTmp.transform.localPosition = new Vector3(0, 1.125f, 0);
+        descriptionTmp.ForceMeshUpdate();
+        return obj;
+    }
 }
