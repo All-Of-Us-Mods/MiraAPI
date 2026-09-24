@@ -6,6 +6,7 @@ using MiraAPI.GameOptions;
 using MiraAPI.Modifiers;
 using MiraAPI.PluginLoading;
 using MiraAPI.Translation;
+using MiraAPI.Utilities;
 using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -318,16 +319,15 @@ public interface ICustomRole : IOptionable
     public virtual GameObject GetAdvancedWiki(MatchInfoGuide guide, TextMeshPro titleText, Scroller parent)
     {
         parent.ScrollToTop();
-        var obj = new GameObject(RoleNameLocale);
-        titleText.text = RoleName + $" ({RoleFactionTitle})";
-        var desc = Object.Instantiate(guide.MatchInfoRolePanelPrefab.roleCount, obj.transform);
-        desc.fontSizeMin = desc.fontSizeMax = desc.fontSize = 2f;
-        desc.text = RoleWikiDescription;
-        desc.rectTransform.sizeDelta = new Vector2(7.5f, 0.3f);
-        desc.alignment = TextAlignmentOptions.TopLeft;
+        var obj = Helpers.CreateAdvancedWikiTab(
+            guide,
+            RoleNameLocale,
+            RoleName + $" ({RoleFactionTitle})",
+            RoleWikiDescription,
+            titleText,
+            out var desc);
         obj.transform.SetParent(parent.Inner.transform);
-        desc.transform.localPosition = new Vector3(0, 1.125f, 0);
-        desc.ForceMeshUpdate();
+        obj.transform.localPosition = new Vector3(0f, 0f, 0f);
         parent.SetYBoundsMax(Mathf.Clamp(desc.textBounds.size.y - 2, 0f, 999f));
         return obj;
     }
