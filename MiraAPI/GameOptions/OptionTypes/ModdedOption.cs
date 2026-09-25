@@ -12,16 +12,19 @@ namespace MiraAPI.GameOptions.OptionTypes;
 /// Represents a modded option.
 /// </summary>
 /// <typeparam name="T">The value type.</typeparam>
-public abstract class ModdedOption<T> : IModdedOption
+/// <param name="title">The option title.</param>
+/// <param name="defaultValue">The default value.</param>
+/// <param name="includeInPreset">Whether to include the option in the preset.</param>
+public abstract class ModdedOption<T>(string title, T defaultValue, bool includeInPreset = true) : IModdedOption
 {
     /// <inheritdoc />
-    public uint Id { get; }
+    public uint Id { get; } = ModdedOptionsManager.NextId;
 
     /// <inheritdoc />
-    public string Title { get; set; }
+    public string Title { get; set; } = title;
 
     /// <inheritdoc />
-    public StringNames StringName { get; }
+    public StringNames StringName { get; private set; }
 
     /// <inheritdoc />
     public BaseGameSetting Data { get; protected set; } = null!;
@@ -34,6 +37,7 @@ public abstract class ModdedOption<T> : IModdedOption
         {
             if (field != null || value == null) return;
             field = value;
+            OnParentModSet(value);
 
             var entry = field.GetConfigFile().Bind(ConfigDefinition, DefaultValue);
             Value = entry.Value;
@@ -43,12 +47,12 @@ public abstract class ModdedOption<T> : IModdedOption
     /// <summary>
     /// Gets or sets the value of the option.
     /// </summary>
-    public T Value { get; protected set; }
+    public T Value { get; protected set; } = defaultValue;
 
     /// <summary>
     /// Gets the default value of the option.
     /// </summary>
-    public T DefaultValue { get; }
+    public T DefaultValue { get; } = defaultValue;
 
     /// <summary>
     /// Gets or sets the event that is invoked when the value of the option changes.
@@ -56,10 +60,10 @@ public abstract class ModdedOption<T> : IModdedOption
     public Action<T>? ChangedEvent { get; set; }
 
     /// <inheritdoc />
-    public Func<bool> Visible { get; set; }
+    public Func<bool> Visible { get; set; } = () => true;
 
     /// <inheritdoc />
-    public bool IncludeInPreset { get; set; }
+    public bool IncludeInPreset { get; set; } = includeInPreset;
 
     /// <inheritdoc />
     public OptionBehaviour? OptionBehaviour { get; protected set; }
@@ -67,22 +71,11 @@ public abstract class ModdedOption<T> : IModdedOption
     /// <inheritdoc />
     public ConfigDefinition? ConfigDefinition { get; set; }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedOption{T}"/> class.
-    /// </summary>
-    /// <param name="title">The option title.</param>
-    /// <param name="defaultValue">The default value.</param>
-    /// <param name="includeInPreset">Whether to include the option in the preset.</param>
-    protected ModdedOption(string title, T defaultValue, bool includeInPreset = true)
-    {
-        Id = ModdedOptionsManager.NextId;
-        Title = title.Translate();
-        DefaultValue = defaultValue;
-        Value = defaultValue;
-        StringName = MiraLocaleManager.GetOrCreateLocaleString(Title);
-        Visible = () => true;
-        IncludeInPreset = includeInPreset;
-    }
+    /// <inheritdoc />
+    public AbstractOptionGroup ParentGroup { get; set; }
+
+    /// <inheritdoc />
+    public virtual OptionNotifConfiguration Configuration => new(ParentGroup);
 
     internal void ValueChanged(OptionBehaviour optionBehaviour)
     {
@@ -149,6 +142,15 @@ public abstract class ModdedOption<T> : IModdedOption
         }
     }
 
+    /// <summary>
+    /// An event that is invoked when the option's parent mod as been assigned to the option.
+    /// </summary>
+    /// <param name="plugin">The plugin that was assigned.</param>
+    protected virtual void OnParentModSet(IMiraPlugin plugin)
+    {
+        StringName = MiraLocaleManager.GetOrCreateLocaleString(plugin.IdBuilder.CreateOptionTitleId(Title));
+    }
+
     /// <inheritdoc />
     public abstract float GetFloatData();
 
@@ -188,10 +190,4 @@ public abstract class ModdedOption<T> : IModdedOption
     {
         return option.Value;
     }
-
-    /// <inheritdoc />
-    public AbstractOptionGroup ParentGroup { get; set; }
-
-    /// <inheritdoc />
-    public virtual OptionNotifConfiguration Configuration => new(ParentGroup);
 }

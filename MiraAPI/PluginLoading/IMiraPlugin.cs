@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Linq;
 using BepInEx.Configuration;
+using MiraAPI.Translation;
 
 namespace MiraAPI.PluginLoading;
 
@@ -57,6 +58,11 @@ public interface IMiraPlugin
     /// Gets the description for the second custom category in the game options menu, if any.
     /// </summary>
     string CustomOptionMenuTwoDescription => "Apply game settings for this mod!";
+
+    /// <summary>
+    /// Gets the translation id builder for this mod.
+    /// </summary>
+    TranslationIdBuilder IdBuilder => TranslationIdBuilder.Default;
 
     /// <summary>
     /// Gets the <see cref="ConfigFile"/> for the plugin.

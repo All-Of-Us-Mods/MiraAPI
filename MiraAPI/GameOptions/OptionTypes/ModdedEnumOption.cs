@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using MiraAPI.Networking;
+using MiraAPI.PluginLoading;
 using MiraAPI.Translation;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -36,7 +37,7 @@ public class ModdedEnumOption : ModdedOption<int>
         var data = ScriptableObject.CreateInstance<StringGameSetting>();
         data.Title = StringName;
         data.Type = global::OptionTypes.String;
-        data.Values = Values.Select(MiraLocaleManager.GetOrCreateLocaleString).ToArray();
+        data.Values = Values.Select(x => MiraLocaleManager.GetOrCreateLocaleString(ParentMod!.IdBuilder.CreateEnumOptionId(x, enumType))).ToArray();
         data.Index = Value;
 
         Data = data;
@@ -135,10 +136,16 @@ public class ModdedEnumOption<T> : ModdedOption<T>
         var data = ScriptableObject.CreateInstance<StringGameSetting>();
         data.Title = StringName;
         data.Type = global::OptionTypes.String;
-        data.Values = Values.Select(MiraLocaleManager.GetOrCreateLocaleString).ToArray();
         data.Index = Convert.ToInt32(Value, NumberFormatInfo.InvariantInfo);
 
         Data = data;
+    }
+
+    /// <inheritdoc />
+    protected override void OnParentModSet(IMiraPlugin plugin)
+    {
+        base.OnParentModSet(plugin);
+        ((StringGameSetting)Data).Values = Values.Select(x => MiraLocaleManager.GetOrCreateLocaleString(ParentMod!.IdBuilder.CreateEnumOptionId<T>(x))).ToArray();
     }
 
     /// <inheritdoc />

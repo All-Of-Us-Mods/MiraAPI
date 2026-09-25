@@ -35,7 +35,7 @@ public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
     public static CultureInfo Culture { get; internal set; } = new("en-US");
 
     /// <inheritdoc />
-    public string OptionsTitleText => "MiraAPI";
+    public string OptionsTitleText { get; } = "MiraAPI";
 
     /// <inheritdoc />
     public bool DisplayOnOptionsMenu => false;

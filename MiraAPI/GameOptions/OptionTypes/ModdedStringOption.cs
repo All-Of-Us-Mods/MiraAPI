@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using MiraAPI.Networking;
+using MiraAPI.PluginLoading;
 using MiraAPI.Translation;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -57,43 +58,41 @@ public class ModdedStringOption : ModdedOption<string>
             newVals.Insert(index, value);
             Values = [.. newVals];
             var newStrVals = StringNameValues.ToList();
-            newStrVals.Insert(index, MiraLocaleManager.GetOrCreateLocaleString(value));
+            newStrVals.Insert(index, MiraLocaleManager.GetOrCreateLocaleString(ParentMod!.IdBuilder.CreateStringOptionId(value)));
             StringNameValues = [.. newStrVals];
         }
 
-        if (Data != null)
-        {
-            var data = (StringGameSetting)Data;
-            data.Values = StringNameValues;
-
-            data.Index = GetIndex(Value);
-            if (OptionBehaviour != null)
-            {
-                var strOpt = OptionBehaviour.TryCast<StringOption>();
-                if (strOpt != null)
-                {
-                    strOpt.Values = StringNameValues;
-                    strOpt.Value = GetIndex(Value);
-                    Warning("StringOption is valid");
-                }
-                else
-                {
-                    Error("StringOption is null.");
-                }
-
-                Warning("OptionBehaviour is valid");
-            }
-            else
-            {
-                Error("OptionBehaviour is null.");
-            }
-
-            Warning("Data is valid");
-        }
-        else
+        if (Data == null)
         {
             Error("Data is null.");
+            return;
         }
+
+        var data = (StringGameSetting)Data;
+        data.Values = StringNameValues;
+        data.Index = GetIndex(Value);
+
+        Warning("Data is valid");
+
+        if (OptionBehaviour == null)
+        {
+            Error("OptionBehaviour is null.");
+            return;
+        }
+
+        Warning("OptionBehaviour is valid");
+        var strOpt = OptionBehaviour.TryCast<StringOption>();
+
+        if (strOpt == null)
+        {
+            Error("StringOption is null.");
+            return;
+        }
+
+        strOpt.Values = StringNameValues;
+        strOpt.Value = GetIndex(Value);
+        Warning("StringOption is valid");
+        return;
     }
 
     /// <summary>
@@ -112,10 +111,16 @@ public class ModdedStringOption : ModdedOption<string>
 
         data.Title = StringName;
         data.Type = global::OptionTypes.String;
-        StringNameValues = [.. values.Select(MiraLocaleManager.GetOrCreateLocaleString)];
-        data.Values = StringNameValues;
-
         data.Index = GetIndex(Value);
+    }
+
+    /// <inheritdoc />
+    protected override void OnParentModSet(IMiraPlugin plugin)
+    {
+        base.OnParentModSet(plugin);
+
+        StringNameValues = [.. Values.Select(x => MiraLocaleManager.GetOrCreateLocaleString(plugin.IdBuilder.CreateStringOptionId(x)))];
+        ((StringGameSetting)Data).Values = StringNameValues;
     }
 
     /// <inheritdoc />
