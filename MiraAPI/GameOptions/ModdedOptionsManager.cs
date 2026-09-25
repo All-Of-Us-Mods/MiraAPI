@@ -198,9 +198,11 @@ public static class ModdedOptionsManager
             return;
         }
 
+        Func<int, string> configName = optionList.ConfigName ?? (i => property.Name + i);
+
         for (int i = 0; i < optionList.Count; i++)
         {
-            RegisterOption(optionList[i], group, property.Name + i, pluginInfo);
+            RegisterOption(optionList[i], group, configName(i), pluginInfo);
         }
     }
 
