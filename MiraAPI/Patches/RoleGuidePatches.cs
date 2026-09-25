@@ -190,7 +190,7 @@ public static class RoleGuidePatches
                 GameManager.Instance.LogicOptions.GetTaskBarMode().ToString());
 
             var hoverColor = new Color32(255, 255, 255, 150);
-            foreach (var roleBehaviour in RoleManager.Instance.AllRoles)
+            foreach (var roleBehaviour in RoleManager.Instance.AllRoles.ToArray().OrderBy(x => x.GetRoleName()))
             {
                 if (roleBehaviour.Role is not RoleTypes.Crewmate and not RoleTypes.Impostor and
                     not RoleTypes.CrewmateGhost and
@@ -203,6 +203,7 @@ public static class RoleGuidePatches
                     collider.size = new Vector2(0.13f, 0.13f);
                     collider.offset = new Vector2(0, 0);
                     var passiveButton = panel.roleIcon.gameObject.AddComponent<PassiveButton>();
+                    passiveButton.ClickSound = HudManager.Instance.MapButton.ClickSound;
                     passiveButton.OnMouseOver = new UnityEvent();
                     passiveButton.OnMouseOver.AddListener(
                         (UnityAction)(() =>
@@ -330,15 +331,11 @@ public static class RoleGuidePatches
         if (role is ICustomRole custom)
         {
             currentAdvancedTabObject = custom.GetAdvancedWiki(instance, titleText, advancedWikiTab);
-            currentAdvancedTabObject.transform.localPosition = new Vector3(0f, 0f, 0f);
         }
         else
         {
             advancedWikiTab.ScrollToTop();
-            currentAdvancedTabObject = new GameObject($"{role.Role}");
-            titleText.text = role.GetRoleName() + $" ({TranslationController.Instance.GetString(role.TeamType is RoleTeamTypes.Crewmate ? StringNames.Crewmate : StringNames.Impostor)})";
-            var desc = Object.Instantiate(instance.MatchInfoRolePanelPrefab.roleCount, currentAdvancedTabObject.transform);
-            desc.fontSizeMin = desc.fontSizeMax = desc.fontSize = 2f;
+            var titleTxt = role.GetRoleName() + $" ({TranslationController.Instance.GetString(role.TeamType is RoleTeamTypes.Crewmate ? StringNames.Crewmate : StringNames.Impostor)})";
             var description = TranslationController.Instance.GetString(role.BlurbNameLong);
             if (description.Contains("STRMISS"))
             {
@@ -349,13 +346,15 @@ public static class RoleGuidePatches
                 }
             }
 
-            desc.text = description;
-            desc.rectTransform.sizeDelta = new Vector2(7.5f, 0.3f);
-            desc.alignment = TextAlignmentOptions.TopLeft;
+            currentAdvancedTabObject = Helpers.CreateAdvancedWikiTab(
+                instance,
+                role.Role.ToString(),
+                titleTxt,
+                description,
+                titleText,
+                out var desc);
             currentAdvancedTabObject.transform.SetParent(advancedWikiTab.Inner.transform);
-            desc.transform.localPosition = new Vector3(0, 1.125f, 0);
             currentAdvancedTabObject.transform.localPosition = new Vector3(0f, 0f, 0f);
-            desc.ForceMeshUpdate();
             advancedWikiTab.SetYBoundsMax(Mathf.Clamp(desc.textBounds.size.y - 2, 0f, 999f));
         }
     }
