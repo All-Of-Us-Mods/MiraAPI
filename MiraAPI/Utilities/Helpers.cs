@@ -563,6 +563,17 @@ public static class Helpers
         // This should be patchable by mods when a vanilla role is meant to be replaced by a custom role.
         return false;
     }
+
+    /// <summary>
+    /// Creates a tab in the advanced wiki.
+    /// </summary>
+    /// <param name="guide">The guide panel to attach the tab to.</param>
+    /// <param name="objName">The name of the tab.</param>
+    /// <param name="title">The title of the tab.</param>
+    /// <param name="description">The description of the tab.</param>
+    /// <param name="titleTmp">The <see cref="TextMeshPro"/> instance of the title.</param>
+    /// <param name="descriptionTmp">The <see cref="TextMeshPro"/> instance of the description.</param>
+    /// <returns>The <see cref="GameObject"/> of the tab.</returns>
     public static GameObject CreateAdvancedWikiTab(MatchInfoGuide guide, string objName, string title, string description, TextMeshPro titleTmp, out TextMeshPro descriptionTmp)
     {
         var obj = new GameObject(objName);

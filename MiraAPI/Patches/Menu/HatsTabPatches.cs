@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using AmongUs.Data;
 using HarmonyLib;
@@ -38,6 +39,7 @@ public static class HatsTabPatches
 
     [HarmonyPatch(nameof(HatsTab.OnEnable))]
     [HarmonyPrefix]
+    [SuppressMessage("Style", "IDE0028:Collection initialization can be simplified", Justification = "Preview feature.")]
     public static bool OnEnablePrefix(HatsTab __instance)
     {
         if (!AddressablesLoader.AddressableHatsExist)

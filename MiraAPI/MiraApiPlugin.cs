@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using AmongUs.GameOptions;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;

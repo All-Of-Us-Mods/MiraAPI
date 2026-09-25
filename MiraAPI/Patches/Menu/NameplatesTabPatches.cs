@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using AmongUs.Data;
 using HarmonyLib;
@@ -16,6 +17,7 @@ namespace MiraAPI.Patches.Menu;
 [HarmonyPatch(typeof(NameplatesTab))]
 public static class NameplatesTabPatches
 {
+    [SuppressMessage("Style", "IDE0028:Collection initialization can be simplified", Justification = "Preview feature.")]
     private static readonly SortedList<string, List<NamePlateData>> SortedNameplates = new(new ControllableComparer<string>(["vanilla"], [], StringComparer.InvariantCulture));
     private static int currentPage;
 

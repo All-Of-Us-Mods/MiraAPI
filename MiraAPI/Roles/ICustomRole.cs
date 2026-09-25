@@ -9,7 +9,6 @@ using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using TMPro;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.Roles;
 
