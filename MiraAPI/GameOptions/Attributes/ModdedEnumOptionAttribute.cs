@@ -8,6 +8,9 @@ namespace MiraAPI.GameOptions.Attributes;
 /// <summary>
 /// Attribute for creating a <see cref="ModdedEnumOption"/>.
 /// </summary>
+/// <param name="title">The title of the option.</param>
+/// <param name="enumType">The <see cref="Enum"/> type.</param>
+/// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
 [AttributeUsage(AttributeTargets.Property)]
 public class ModdedEnumOptionAttribute(string title, Type enumType, string[]? values = null)
     : ModdedOptionAttribute(title)
@@ -40,7 +43,8 @@ public class ModdedEnumOptionAttribute(string title, Type enumType, string[]? va
 /// <typeparam name="T">The enum type.</typeparam>
 [AttributeUsage(AttributeTargets.Property)]
 public class ModdedEnumOptionAttribute<T>(string title, string[]? values = null)
-    : ModdedOptionAttribute(title) where T : Enum
+    : ModdedOptionAttribute(title)
+    where T : Enum
 {
     internal override IModdedOption CreateOption(object? value, PropertyInfo property)
     {

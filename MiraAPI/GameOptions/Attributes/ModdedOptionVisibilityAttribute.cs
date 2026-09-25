@@ -1,8 +1,9 @@
-﻿using MiraAPI.GameOptions.OptionTypes;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using MiraAPI.GameOptions.OptionTypes;
 
 namespace MiraAPI.GameOptions.Attributes;
 
@@ -10,18 +11,18 @@ namespace MiraAPI.GameOptions.Attributes;
 /// Attribute to modify a property with a <see cref="ModdedOptionAttribute"/> or <see cref="ModdedOptionListAttribute"/>.
 /// </summary>
 /// <remarks>
-/// Initializes a new instance of the <see cref="ModdedOptionVisiblityAttribute"/> class.
+/// Initializes a new instance of the <see cref="ModdedOptionVisibilityAttribute"/> class.
 /// </remarks>
 /// <param name="holderType">The type the member is in.</param>
 /// <param name="memberName">The member to get the visibility function from.</param>
 [AttributeUsage(AttributeTargets.Property)]
-public sealed class ModdedOptionVisiblityAttribute(Type? holderType = null, string? memberName = null) : Attribute
+public sealed class ModdedOptionVisibilityAttribute(Type? holderType = null, string? memberName = null) : Attribute
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedOptionVisiblityAttribute"/> class.
+    /// Initializes a new instance of the <see cref="ModdedOptionVisibilityAttribute"/> class.
     /// </summary>
     /// <param name="memberName">The member to get the visibility function from.</param>
-    public ModdedOptionVisiblityAttribute(string memberName)
+    public ModdedOptionVisibilityAttribute(string memberName)
         : this(null, memberName)
     {
     }
@@ -52,6 +53,7 @@ public sealed class ModdedOptionVisiblityAttribute(Type? holderType = null, stri
 
             return () => (bool)vProperty.GetValue(instanceGet?.Invoke())!;
         }
+
         if (member is MethodInfo vMethod)
         {
             if (vMethod.ReturnType != typeof(bool))
@@ -114,6 +116,7 @@ public sealed class ModdedOptionVisiblityAttribute(Type? holderType = null, stri
             {
                 return _ => (bool)vProperty.GetValue(instanceGet?.Invoke())!;
             }
+
             if (indexParams[0].ParameterType != typeof(int))
             {
                 Error($"Indexer {memberName}'s parameter is not an int.");
@@ -122,6 +125,7 @@ public sealed class ModdedOptionVisiblityAttribute(Type? holderType = null, stri
 
             return i => (bool)vProperty.GetValue(instanceGet?.Invoke(), [i])!;
         }
+
         if (member is MethodInfo vMethod)
         {
             if (vMethod.ReturnType != typeof(bool))
@@ -141,6 +145,7 @@ public sealed class ModdedOptionVisiblityAttribute(Type? holderType = null, stri
             {
                 return _ => (bool)vMethod.Invoke(instanceGet?.Invoke(), null)!;
             }
+
             if (paramList[0].ParameterType != typeof(int))
             {
                 Error($"Method {memberName}'s parameter is not an int.");
@@ -154,7 +159,7 @@ public sealed class ModdedOptionVisiblityAttribute(Type? holderType = null, stri
         return null;
     }
 
-#pragma warning disable S3011 // Reflection should not be used to increase accessibility of classes, methods, or fields
+    [SuppressMessage("Major Code Smell", "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields", Justification = "It is safe.")]
     private MemberInfo? GetVisibilityMember(AbstractOptionGroup group, PropertyInfo property, out Type type, out Func<object>? instanceGet)
     {
         Type groupType = group.GetType();
@@ -179,6 +184,7 @@ public sealed class ModdedOptionVisiblityAttribute(Type? holderType = null, stri
                 instanceGet = () => instanceProp.GetValue(null)!;
             }
         }
+
         MemberInfo? member = type.GetMember(memberName, flags).FirstOrDefault();
         if (instanceGet != null)
         {
@@ -189,7 +195,7 @@ public sealed class ModdedOptionVisiblityAttribute(Type? holderType = null, stri
                 instanceGet = null;
             }
         }
+
         return member;
     }
-#pragma warning restore S3011 // Reflection should not be used to increase accessibility of classes, methods, or fields
 }

@@ -37,6 +37,7 @@ internal static class GameSettingMenuPatches
         {
             Error("MenuState instance is null. Cannot change tab.");
         }
+
         return false;
     }
 }

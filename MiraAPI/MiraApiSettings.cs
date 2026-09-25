@@ -6,7 +6,6 @@ using MiraAPI.Hud;
 using MiraAPI.LocalSettings;
 using MiraAPI.LocalSettings.Attributes;
 using MiraAPI.Patches;
-using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using UnityEngine;
@@ -58,6 +57,7 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
                 HudManagerPatches.ResizeUI(1f / OldButtonScaleFactor);
                 HudManagerPatches.ResizeUI(ButtonUIFactorSlider.Value);
             }
+
             OldButtonScaleFactor = ButtonUIFactorSlider.Value;
         }
         else if (configEntry == TopRightButtonsFactorSlider)
@@ -66,6 +66,7 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
             {
                 ResizeUI(TopRightButtonsFactorSlider.Value);
             }
+
             OldUiButtonScaleFactor = TopRightButtonsFactorSlider.Value;
         }
         else if (configEntry == WikiOnBottomRow)
@@ -78,22 +79,30 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
         }
     }
 
+    /// <summary>
+    /// Sets up the button positions in the UI.
+    /// </summary>
     public static void SetUpButtonPositions()
     {
         var topUi = MiraHudHelper.UiTopRight;
         var extraTopUi = MiraHudHelper.ExtraUiTopRight;
-        if (topUi && extraTopUi)
-        {
-            var genericEvent = new UiButtonResetEvent();
-            MiraEventManager.InvokeEvent(genericEvent);
 
-            var genericEvent2 = new UiButtonPostResetEvent(topUi, extraTopUi);
-            MiraEventManager.InvokeEvent(genericEvent2);
-            MiraHudHelper.UiGrid.ArrangeChilds();
-            MiraHudHelper.ExtraUiGrid.ArrangeChilds();
-        }
+        if (!topUi || !extraTopUi)
+            return;
+
+        var genericEvent = new UiButtonResetEvent();
+        MiraEventManager.InvokeEvent(genericEvent);
+
+        var genericEvent2 = new UiButtonPostResetEvent(topUi, extraTopUi);
+        MiraEventManager.InvokeEvent(genericEvent2);
+        MiraHudHelper.UiGrid.ArrangeChilds();
+        MiraHudHelper.ExtraUiGrid.ArrangeChilds();
     }
 
+    /// <summary>
+    /// Resizes the UI as a coroutine.
+    /// </summary>
+    /// <returns>The coroutine that resizes the UI.</returns>
     public static IEnumerator CoResizeSettingsUI()
     {
         while (!HudManager.Instance || !MiraHudHelper.UiGrid || !MiraHudHelper.ExtraUiGrid)
@@ -105,6 +114,10 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
         ResizeUI(LocalSettingsTabSingleton<MiraApiSettings>.Instance.TopRightButtonsFactorSlider.Value);
     }
 
+    /// <summary>
+    /// Resizes the UI based on the provided scaling factor.
+    /// </summary>
+    /// <param name="scaleFactor">The factor by which the UI needs to be scaled with.</param>
     public static void ResizeUI(float scaleFactor)
     {
         var alteredScale = scaleFactor * 0.85f;
@@ -123,6 +136,7 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
                 {
                     continue;
                 }
+
                 if (button.transform.name.Contains("Friends List Button"))
                 {
                     button.gameObject.transform.localScale = new Vector3(0.2675f * actualScaleVal, 0.2675f * actualScaleVal, 1);
@@ -137,60 +151,58 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
             {
                 baseGrid.ArrangeChilds();
             }
+
             baseAspect.AdjustPosition();
         }
 
         var extraAspect = MiraHudHelper.ExtraUiAspectPos;
         var extraGrid = MiraHudHelper.ExtraUiGrid;
         var extraUi = MiraHudHelper.ExtraUiTopRight;
-        if (extraUi && extraAspect && extraGrid)
+        if (!extraUi || !extraAspect || !extraGrid) return;
+        extraAspect.DistanceFromEdge = new Vector3(0.435f * scaleFactor, 1.25f * scaleFactor, 0f);
+
+        foreach (var button in extraUi.GetAllChildren())
         {
-            extraAspect.DistanceFromEdge = new Vector3(0.435f * scaleFactor, 1.25f * scaleFactor, 0f);
-
-            foreach (var button in extraUi.GetAllChildren())
+            if (button.gameObject == null)
             {
-                if (button.gameObject == null)
-                {
-                    continue;
-                }
-                if (button.transform.name.Contains("Modifiers"))
-                {
-                    button.gameObject.transform.localScale = new Vector3(0.65f * scaleFactor, 0.65f * scaleFactor, 1);
-                    continue;
-                }
-
-                button.gameObject.transform.localScale = actualScale;
+                continue;
             }
 
-            extraGrid.CellSize = new Vector2(alteredScale, alteredScale);
-            if (extraGrid.gameObject.transform.childCount != 0)
+            if (button.transform.name.Contains("Modifiers"))
             {
-                extraGrid.ArrangeChilds();
+                button.gameObject.transform.localScale = new Vector3(0.65f * scaleFactor, 0.65f * scaleFactor, 1);
+                continue;
             }
-            extraAspect.AdjustPosition();
+
+            button.gameObject.transform.localScale = actualScale;
         }
+
+        extraGrid.CellSize = new Vector2(alteredScale, alteredScale);
+        if (extraGrid.gameObject.transform.childCount != 0)
+        {
+            extraGrid.ArrangeChilds();
+        }
+
+        extraAspect.AdjustPosition();
     }
 
     /// <summary>
     /// Gets the scale of the ability buttons.
     /// </summary>
     [LocalSliderSetting(min: 0.5f, max: 1.5f, suffixType: MiraNumberSuffixes.Multiplier, formatString: "0.00", displayValue: true)]
-    public ConfigEntry<float> ButtonUIFactorSlider { get; private set; } =
-        config.Bind("MiraApi.VisualsUi", "MiraApi.ButtonScaleFactor", 0.75f);
+    public ConfigEntry<float> ButtonUIFactorSlider { get; private set; } = config.Bind("MiraApi.VisualsUi", "MiraApi.ButtonScaleFactor", 0.75f);
 
     /// <summary>
     /// Gets the scale of the UI buttons.
     /// </summary>
     [LocalSliderSetting(min: 0.3f, max: 2f, suffixType: MiraNumberSuffixes.Multiplier, formatString: "0.00", displayValue: true)]
-    public ConfigEntry<float> TopRightButtonsFactorSlider { get; private set; } =
-        config.Bind("MiraApi.VisualsUi", "MiraApi.TopRightButtonScaleFactor", 1f);
+    public ConfigEntry<float> TopRightButtonsFactorSlider { get; private set; } = config.Bind("MiraApi.VisualsUi", "MiraApi.TopRightButtonScaleFactor", 1f);
 
     /// <summary>
     /// Gets the fps specified by the player.
     /// </summary>
     [LocalSliderSetting(min: 60f, max: 240f, suffixType: MiraNumberSuffixes.None, formatString: "0", displayValue: true, roundValue: true)]
-    public ConfigEntry<float> SetFpsSlider { get; private set; } =
-        config.Bind("MiraApi.VisualsUi", "Max FPS", 120f);
+    public ConfigEntry<float> SetFpsSlider { get; private set; } = config.Bind("MiraApi.VisualsUi", "Max FPS", 120f);
 
     /// <summary>
     /// Gets whether the modifiers hud should be on the left side of the screen (under roles/task tab). Recommended for streamers.
@@ -204,9 +216,11 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
     [LocalToggleSetting]
     public ConfigEntry<bool> ShowKeybinds { get; private set; } = config.Bind("MiraApi.VisualsUi", "MiraApi.ShowKeybindsOnButtons", true);
 
+    /// <summary>
+    /// Gets the flag indicating whether the wiki is on the bottom row.
+    /// </summary>
     [LocalToggleSetting]
-    public ConfigEntry<bool> WikiOnBottomRow { get; private set; } =
-        config.Bind("MiraApi.VisualsUi", "MiraApi.WikiOnBottomRow", true);
+    public ConfigEntry<bool> WikiOnBottomRow { get; private set; } = config.Bind("MiraApi.VisualsUi", "MiraApi.WikiOnBottomRow", true);
 
     /// <summary>
     /// Gets whether to show the red flash from sabotages.

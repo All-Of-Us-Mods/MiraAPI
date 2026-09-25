@@ -3,6 +3,7 @@ using MiraAPI.Utilities.Assets;
 using TMPro;
 
 namespace MiraAPI.Patches;
+
 [HarmonyPatch]
 public static class TmpAwakePatch
 {
@@ -21,6 +22,7 @@ public static class TmpAwakePatch
             __instance.UpdateMeshPadding();
             return;
         }
+
         __instance.m_spriteAsset.fallbackSpriteAssets.Add(TmpSpriteUtils.AssetHolder);
         __instance.UpdateMeshPadding();
     }

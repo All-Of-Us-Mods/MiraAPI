@@ -1,7 +1,7 @@
-﻿using MiraAPI.GameOptions.OptionTypes;
-using System;
+﻿using System;
 using System.Collections;
 using System.Reflection;
+using MiraAPI.GameOptions.OptionTypes;
 
 namespace MiraAPI.GameOptions.Attributes;
 
@@ -29,10 +29,8 @@ public class ModdedToggleOptionListAttribute(string title) : ModdedOptionListAtt
     /// <inheritdoc />
     public override object GetValue(int idx)
     {
-        if (HolderOptionList?[idx] is ModdedToggleOption opt)
-        {
-            return opt.Value;
-        }
-        throw new InvalidOperationException($"Holder option for {GetFormattedTitle(idx)} is not a ModdedToggleOption.");
+        return HolderOptionList?[idx] is ModdedToggleOption opt
+            ? (object)opt.Value
+            : throw new InvalidOperationException($"Holder option for {GetFormattedTitle(idx)} is not a ModdedToggleOption.");
     }
 }

@@ -1,0 +1,29 @@
+<assembly name="0Harmony">
+  <member name="T:HarmonyLib.HarmonyPatch">
+    <attribute ctor="M:JetBrains.Annotations.MeansImplicitUseAttribute.#ctor(JetBrains.Annotations.ImplicitUseTargetFlags)">
+      <argument>3</argument>
+    </attribute>
+  </member>
+
+  <member name="T:HarmonyLib.HarmonyPrefix">
+    <attribute ctor="M:JetBrains.Annotations.MeansImplicitUseAttribute.#ctor" />
+  </member>
+  <member name="T:HarmonyLib.HarmonyPostfix">
+    <attribute ctor="M:JetBrains.Annotations.MeansImplicitUseAttribute.#ctor" />
+  </member>
+  <member name="T:HarmonyLib.HarmonyTranspiler">
+    <attribute ctor="M:JetBrains.Annotations.MeansImplicitUseAttribute.#ctor" />
+  </member>
+  <member name="T:HarmonyLib.HarmonyFinalizer">
+    <attribute ctor="M:JetBrains.Annotations.MeansImplicitUseAttribute.#ctor" />
+  </member>
+  <member name="T:HarmonyLib.HarmonyPrepare">
+    <attribute ctor="M:JetBrains.Annotations.MeansImplicitUseAttribute.#ctor" />
+  </member>
+  <member name="T:HarmonyLib.HarmonyTargetMethod">
+    <attribute ctor="M:JetBrains.Annotations.MeansImplicitUseAttribute.#ctor" />
+  </member>
+  <member name="T:HarmonyLib.HarmonyTargetMethods">
+    <attribute ctor="M:JetBrains.Annotations.MeansImplicitUseAttribute.#ctor" />
+  </member>
+</assembly>

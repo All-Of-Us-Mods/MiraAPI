@@ -1,6 +1,8 @@
-﻿using AmongUs.GameOptions;
+﻿using System;
+using System.Linq;
+using System.Reflection;
+using AmongUs.GameOptions;
 using HarmonyLib;
-using Il2CppSystem.Collections.Generic;
 using MiraAPI.Roles;
 
 namespace MiraAPI.Patches.Roles;
@@ -8,23 +10,76 @@ namespace MiraAPI.Patches.Roles;
 /// <summary>
 /// Patches to return the correct role counts.
 /// </summary>
-[HarmonyPatch(typeof(RoleOptionsCollectionV11))]
 public static class RoleOptionsCollectionPatch
 {
+    internal static Assembly BaseAssembly { get; private set; }
+    internal static Type[] BaseTypes { get; private set; }
+    internal static Type CollectionsType { get; private set; }
+    public static void PatchRoleMethods(Harmony harmony)
+    {
+        var assembly = Array.Find(
+            AppDomain.CurrentDomain.GetAssemblies(),
+            ass => ass.GetName().Name == "Assembly-CSharp");
+
+        if (assembly == null)
+            return;
+
+        var compatType = typeof(RoleOptionsCollectionPatch);
+        BaseAssembly = assembly;
+        BaseTypes = AccessTools.GetTypesFromAssembly(assembly);
+        var collections = BaseTypes.Where(x => x.Name.Contains("RoleOptionsCollectionV")).ToArray();
+        var pairings = new System.Collections.Generic.Dictionary<int, Type>();
+        var newestId = 0;
+        foreach (var collection in collections)
+        {
+            var remainder = collection.Name.Replace("RoleOptionsCollectionV", string.Empty);
+            if (!int.TryParse(remainder, out var id))
+            {
+                continue;
+            }
+
+            pairings.Add(id, collection);
+            if (newestId < id)
+            {
+                newestId = id;
+            }
+        }
+
+        if (pairings.TryGetValue(newestId, out var typeToGet))
+        {
+            CollectionsType = typeToGet;
+        }
+
+        var anyRolesEnabledMethod = AccessTools.Method(CollectionsType, "AnyRolesEnabled");
+        harmony.Patch(
+            anyRolesEnabledMethod,
+            new HarmonyMethod(AccessTools.Method(compatType, nameof(AnyRolesEnabledPrefix))));
+
+        var chancePerGameMethod = AccessTools.Method(CollectionsType, "GetChancePerGame");
+        harmony.Patch(
+            chancePerGameMethod,
+            new HarmonyMethod(AccessTools.Method(compatType, nameof(GetChancePrefix))));
+
+        var numPerGameMethod = AccessTools.Method(CollectionsType, "GetNumPerGame");
+        harmony.Patch(
+            numPerGameMethod,
+            new HarmonyMethod(AccessTools.Method(compatType, nameof(GetNumPrefix))));
+        Info($"Patched methods for RoleOptionsCollectionV{newestId}");
+    }
+
     /// <summary>
     /// This patch fixes <see cref="RoleOptionsCollectionV11.GetNumPerGame(RoleTypes)"/> being inlined (2025.9.9) in the original code.
     /// </summary>
-    [HarmonyPrefix]
-    [HarmonyPatch(nameof(RoleOptionsCollectionV11.AnyRolesEnabled))]
-    public static bool AnyRolesEnabledPrefix(RoleOptionsCollectionV11 __instance, ref bool __result)
+    public static bool AnyRolesEnabledPrefix(dynamic __instance)
     {
-        foreach (KeyValuePair<RoleTypes, RoleDataV11> keyValuePair in __instance.roles)
+        foreach (var keyValuePair in __instance.roles)
         {
             if (__instance.GetNumPerGame(keyValuePair.Key) > 0)
             {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -32,8 +87,6 @@ public static class RoleOptionsCollectionPatch
     /// Set the role chance for custom Launchpad roles based on config.
     /// </summary>
     /// <returns>Return <see langword="false"/> to skip original method, <see langword="true"/> to not.</returns>
-    [HarmonyPrefix]
-    [HarmonyPatch(nameof(RoleOptionsCollectionV11.GetChancePerGame))]
     public static bool GetChancePrefix(RoleTypes role, ref int __result)
     {
         if (!CustomRoleManager.GetCustomRoleBehaviour(role, out var customRole) || customRole == null)
@@ -62,8 +115,6 @@ public static class RoleOptionsCollectionPatch
     /// Set the amount for custom Launchpad roles based on config.
     /// </summary>
     /// <returns>Return <see langword="false"/> to skip original method, <see langword="true"/> to not.</returns>
-    [HarmonyPrefix]
-    [HarmonyPatch(nameof(RoleOptionsCollectionV11.GetNumPerGame))]
     public static bool GetNumPrefix(RoleTypes role, ref int __result)
     {
         if (!CustomRoleManager.GetCustomRoleBehaviour(role, out var customRole) || customRole == null)

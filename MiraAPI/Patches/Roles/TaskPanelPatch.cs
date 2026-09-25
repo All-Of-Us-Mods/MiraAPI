@@ -8,8 +8,8 @@ internal static class TaskPanelPatch
 {
     /// <summary>
     /// This patch is to override the automatic updating of the y position on the tab (which is in base game)
-    /// because I can't change the custom tab y pos if it's being overriden every frame.
-    /// Im sure there is an easier/better way, but this is the fix that worked for me.
+    /// because I can't change the custom tab y pos if it's being overridden every frame.
+    /// I'm sure there is an easier/better way, but this is the fix that worked for me.
     /// </summary>
     [HarmonyPrefix]
     [HarmonyPatch(nameof(TaskPanelBehaviour.Update))]

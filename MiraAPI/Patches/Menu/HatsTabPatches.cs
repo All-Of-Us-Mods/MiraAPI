@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using AmongUs.Data;
 using HarmonyLib;
@@ -18,8 +19,8 @@ namespace MiraAPI.Patches.Menu;
 [HarmonyPatch(typeof(HatsTab))]
 public static class HatsTabPatches
 {
+    private static readonly Dictionary<int, string> StoreNames = [];
     private static SortedList<string, List<HatData>> sortedHats = [];
-    private static Dictionary<int, string> storeNames = [];
     private static int currentPage;
 
     private static void PreviousPage(HatsTab hatsTab)
@@ -38,12 +39,14 @@ public static class HatsTabPatches
 
     [HarmonyPatch(nameof(HatsTab.OnEnable))]
     [HarmonyPrefix]
+    [SuppressMessage("Style", "IDE0028:Collection initialization can be simplified", Justification = "Preview feature.")]
     public static bool OnEnablePrefix(HatsTab __instance)
     {
         if (!AddressablesLoader.AddressableHatsExist)
         {
             return true;
         }
+
         __instance.currentHat = HatManager.Instance.GetHatById(DataManager.Player.Customization.Hat);
         var allHats = HatManager.Instance.GetUnlockedHats().ToImmutableList();
 
@@ -57,9 +60,9 @@ public static class HatsTabPatches
                 if (!sortedHats.ContainsKey(hat.StoreName)) sortedHats[hat.StoreName] = [];
                 sortedHats[hat.StoreName].Add(hat);
 
-                if (!storeNames.ContainsValue(hat.StoreName))
+                if (!StoreNames.ContainsValue(hat.StoreName))
                 {
-                    storeNames.Add(num, hat.StoreName);
+                    StoreNames.Add(num, hat.StoreName);
                     num++;
                 }
             }
@@ -80,6 +83,7 @@ public static class HatsTabPatches
         {
             return;
         }
+
         if (sortedHats.Count == 0) return;
 
         if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl) || Input.GetKeyDown(KeyCode.LeftArrow))
@@ -105,9 +109,9 @@ public static class HatsTabPatches
         __instance.scroller.Inner.GetComponentsInChildren<TextMeshPro>().Do(x => x.gameObject.DeepDestroy(false));
 
         var groupNameText = __instance.GetComponentInChildren<TextMeshPro>(false);
-        var group = sortedHats.Where(x => x.Key == storeNames[page]);
+        var group = sortedHats.Where(x => x.Key == StoreNames[page]);
 
-        foreach ((string groupName, List<HatData> hats) in group)
+        foreach (var (groupName, hats) in group)
         {
             var text = Object.Instantiate(groupNameText, __instance.scroller.Inner);
             text.enabled = true;
@@ -120,12 +124,16 @@ public static class HatsTabPatches
             text.fontSizeMax = 5f;
             text.fontSizeMin = 0f;
             var xLerp = __instance.XRange.Lerp(0.5f);
+
+            // ReSharper disable once PossibleLossOfFraction (Justification: Intended.)
             var yLerp = __instance.YStart - hatIndex / __instance.NumPerRow * __instance.YOffset;
             text.transform.localPosition = new Vector3(xLerp, yLerp, -1f);
 
             hatIndex += 5;
             loadRoutine = Coroutines.Start(CoGenerateChips(__instance, hats));
         }
+
+        // ReSharper disable once PossibleLossOfFraction (Justification: Intended.)
         __instance.scroller.ContentYBounds.max = -(__instance.YStart - (hatIndex + 1) / __instance.NumPerRow * __instance.YOffset) - 3f;
         __instance.currentHatIsEquipped = true;
     }
@@ -140,9 +148,11 @@ public static class HatsTabPatches
 
             foreach (var hat in batch.OrderBy(HatManager.Instance.allHats.IndexOf))
             {
-                var hatXposition = __instance.XRange.Lerp(hatIndex % __instance.NumPerRow / (__instance.NumPerRow - 1f));
-                var hatYposition = __instance.YStart - hatIndex / __instance.NumPerRow * __instance.YOffset;
-                GenerateColorChip(__instance, new Vector2(hatXposition, hatYposition), hat);
+                var hatXPosition = __instance.XRange.Lerp(hatIndex % __instance.NumPerRow / (__instance.NumPerRow - 1f));
+
+                // ReSharper disable once PossibleLossOfFraction (Justification: Intended.)
+                var hatYPosition = __instance.YStart - hatIndex / __instance.NumPerRow * __instance.YOffset;
+                GenerateColorChip(__instance, new Vector2(hatXPosition, hatYPosition), hat);
                 hatIndex += 1;
                 yield return null;
             }
@@ -150,6 +160,7 @@ public static class HatsTabPatches
             __instance.SetScrollerBounds();
             yield return new WaitForSeconds(0.01f);
         }
+
         __instance.currentHatIsEquipped = true;
         loadRoutine = null;
     }

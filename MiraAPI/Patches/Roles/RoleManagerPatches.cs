@@ -13,27 +13,30 @@ namespace MiraAPI.Patches.Roles;
 [HarmonyPatch(typeof(RoleManager))]
 public static class RoleManagerPatches
 {
-    [HarmonyPrefix]
-    [HarmonyPatch(nameof(RoleManager.SetRole))]
     // NOTE: As of 2025.5.20 update, this is INLINED in ONE place: GameManager::ReviveEveryoneFreeplay(void).
     // Should not affect normal gameplay, but may cause issues in Freeplay.
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(RoleManager.SetRole))]
     public static bool SetRolePatch(RoleManager __instance, PlayerControl targetPlayer, RoleTypes roleType)
     {
         if (!targetPlayer)
         {
             return false;
         }
+
         var data = targetPlayer.Data;
         if (data == null)
         {
             Error("It shouldn't be possible, but " + targetPlayer.name + " still doesn't have PlayerData during role selection.");
             return false;
         }
+
         if (data.Role)
         {
             data.Role.Deinitialize(targetPlayer);
             Object.Destroy(data.Role.gameObject);
         }
+
         var roleBehaviour = Object.Instantiate<RoleBehaviour>(__instance.AllRoles.ToArray().First(r => r.Role == roleType), data.gameObject.transform);
         roleBehaviour.Initialize(targetPlayer);
         targetPlayer.Data.Role = roleBehaviour;
@@ -45,6 +48,7 @@ public static class RoleManagerPatches
         {
             targetPlayer.Data.RoleWhenAlive = new Il2CppSystem.Nullable<RoleTypes>(roleType);
         }
+
         roleBehaviour.AdjustTasks(targetPlayer);
         switch (roleBehaviour.IsDead)
         {
@@ -64,13 +68,12 @@ public static class RoleManagerPatches
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(RoleManager.SelectRoles))]
-    public static void ModifierSelectionPatches(RoleManager __instance)
+    public static void ModifierSelectionPatches()
     {
         if (AmongUsClient.Instance.AmHost && ModifierManager.MiraAssignsModifiers)
         {
             ModifierManager.AssignModifiers(
-                PlayerControl.AllPlayerControls.ToArray().Where(plr => !plr.Data.IsDead && !plr.Data.Disconnected)
-                    .ToList());
+                [.. PlayerControl.AllPlayerControls.ToArray().Where(plr => !plr.Data.IsDead && !plr.Data.Disconnected)]);
         }
 
         var roleSelection = GameManager.Instance.LogicRoleSelection.Cast<LogicRoleSelectionNormal>();
@@ -84,7 +87,7 @@ public static class RoleManagerPatches
 
     [HarmonyPrefix]
     [HarmonyPatch(nameof(RoleManager.AssignRoleOnDeath))]
-    public static bool AssignRoleOnDeath(RoleManager __instance, [HarmonyArgument(0)] PlayerControl plr)
+    public static bool AssignRoleOnDeath([HarmonyArgument(0)] PlayerControl plr)
     {
         if (!plr || !plr.Data.IsDead)
         {
