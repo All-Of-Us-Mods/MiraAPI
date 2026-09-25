@@ -20,6 +20,9 @@ public class ModdedOptionList<T> : IModdedOptionList
     /// </summary>
     public IReadOnlyList<T> Options { get; }
 
+    /// <inheritdoc/>
+    public Func<int, string>? ConfigName { get; init; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ModdedOptionList{T}"/> class.
     /// </summary>
