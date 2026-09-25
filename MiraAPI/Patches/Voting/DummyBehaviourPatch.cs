@@ -19,7 +19,7 @@ internal static class DummyBehaviourPatches
     [HarmonyPatch(nameof(DummyBehaviour.Update))]
     public static bool DummyUpdatePatch(DummyBehaviour __instance)
     {
-        NetworkedPlayerInfo data = __instance.myPlayer.Data;
+        var data = __instance.myPlayer.Data;
         if (data == null || data.IsDead) return false;
 
         if (MeetingHud.Instance)
@@ -51,19 +51,21 @@ internal static class DummyBehaviourPatches
             yield break;
         }
 
-        List<byte> potentialSuspects = new();
-        potentialSuspects.AddRange(PlayerControl.AllPlayerControls
-            .ToArray()
-            .Where(p => p != dummy.myPlayer)
-            .Where(p => dummyVoteEvent.PlayerIsValid(p))
-            .Select(p => p.PlayerId));
+        List<byte> potentialSuspects =
+        [
+            .. PlayerControl.AllPlayerControls
+                .ToArray()
+                .Where(p => p != dummy.myPlayer)
+                .Where(p => dummyVoteEvent.PlayerIsValid(p))
+                .Select(p => p.PlayerId),
+        ];
 
         if (dummyVoteEvent.CanSkip)
         {
             potentialSuspects.Add(253);
         }
 
-        if (CanVote(dummy))
+        if (dummy.CanVote())
         {
             VotingUtils.RpcCastVote(PlayerControl.LocalPlayer, dummy.myPlayer.PlayerId, potentialSuspects.Random());
         }

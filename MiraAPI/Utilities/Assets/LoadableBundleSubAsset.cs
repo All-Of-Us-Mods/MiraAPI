@@ -27,11 +27,12 @@ public class LoadableBundleSubAsset(string name, LoadableBundleSubAssetHolder as
 
         var loadedAsset = assetHolder.SubSprites.FirstOrDefault(x => x.name == name);
 
-        if (loadedAsset == null)
+        if (!loadedAsset)
         {
             throw new InvalidOperationException($"INVALID ASSETS: {name}");
         }
-        LoadedAsset = loadedAsset;
+
+        LoadedAsset = loadedAsset!;
         return LoadedAsset;
     }
 }

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
   <string name="MiraApi.TopRightButtonScaleFactor">Skala Przycisków w Prawym Górnym</string>
-  <string name="MiraApi.WikiOnBottomRow">Przycisk Wiki Poniżej Głównego UI</string>
+  <string name="MiraApi.WikiOnBottomRow">Pokaż Wiki w Dolnym Rzędzie</string>
   <string name="Roles">Role</string>
   <string name="Modifier">Modyfikator</string>
   <string name="Modifiers">Modyfikatory</string>
@@ -30,8 +30,14 @@ Znajdź Intruzów, bądź oszukaj Załogę.</string>
   <string name="MiraApi.Gamemode.HideAndSeek.Description">Możesz uciekać, ale nie możesz się schować!
 Przeżyj przez wymagany czas, albo zabij chowających.</string>
   <string name="MiraApi.CustomOptionMenuDescription">Zastosuj ustawienia gry dla tego moda!</string>
-  <string name="MiraApi.GameSetting.Global.ClickToClose">Kliknij by zamknąć</string>
-  <string name="MiraApi.GameSetting.Global.ClickToOpen">Kliknij by otworzyć</string>
-  <string name="MiraApi.GameSetting.Preset.Hint">Stwórz lub wybierz zestaw ustawień na tą grę</string>
+  <string name="MiraApi.GameSetting.Global.ClickToClose">Naciśnij aby zamknąć</string>
+  <string name="MiraApi.GameSetting.Global.ClickToOpen">Naciśnij aby otworzyć</string>
+  <string name="MiraApi.GameSetting.Preset.Hint">Stwórz lub wybierz preset ustawień na tą grę</string>
   <string name="MiraApi.GameSetting.Preset.Save">Zapisz</string>
+  <string name="MiraApi">Mira API</string>
+  <string name="MiraApi.MiraApiBrand">MiraAPI</string>
+  <string name="MiraApi.RoleTeam.Crewmate.Group">Role Załogi</string>
+  <string name="MiraApi.RoleTeam.Impostor.Group">Role Intruzów</string>
+  <string name="MiraApi.RoleTeam.Neutral.Group">Role Neutralne</string>
+  <string name="MiraApi.RoleTeam.Other">Inne</string>
 </resources>

@@ -8,8 +8,6 @@ using MiraAPI.LocalSettings;
 using MiraAPI.Modifiers.ModifierDisplay;
 using MiraAPI.Modifiers.Types;
 using MiraAPI.Patches.Roles;
-using MiraAPI.Translation;
-using Reactor.Utilities;
 using Reactor.Utilities.Attributes;
 using UnityEngine;
 
@@ -19,6 +17,7 @@ namespace MiraAPI.Modifiers;
 /// The component for handling <see cref="BaseModifier"/>s.
 /// </summary>
 [RegisterInIl2Cpp]
+[SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity Convention.")]
 public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
 {
     /// <summary>
@@ -27,16 +26,16 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     [HideFromIl2Cpp]
     public ImmutableList<BaseModifier> ActiveModifiers { get; private set; } = ImmutableList<BaseModifier>.Empty;
 
+    private readonly List<BaseModifier> _toRemove = [];
+
+    private readonly List<BaseModifier> _toAdd = [];
+
     private ModifierDisplayComponent? ModifierDisplay { get; set; }
 
     [HideFromIl2Cpp]
     private List<BaseModifier> Modifiers { get; set; } = [];
 
     private PlayerControl _player = null!;
-
-    private readonly List<BaseModifier> _toRemove = [];
-
-    private readonly List<BaseModifier> _toAdd = [];
 
     internal void ClearModifiers()
     {
@@ -172,7 +171,8 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <typeparam name="T">The Type of the <see cref="BaseModifier"/>e.</typeparam>
     /// <returns>An <see cref="IEnumerable{T}"/> of <typeparamref name="T"/>s.</returns>
     [HideFromIl2Cpp]
-    public IEnumerable<T> GetModifiers<T>(Func<T, bool>? predicate=null) where T : BaseModifier
+    public IEnumerable<T> GetModifiers<T>(Func<T, bool>? predicate = null)
+        where T : BaseModifier
     {
         return ActiveModifiers.OfType<T>().Where(x => predicate == null || predicate(x));
     }
@@ -184,7 +184,7 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/> by.</param>
     /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="BaseModifier"/>s.</returns>
     [HideFromIl2Cpp]
-    public IEnumerable<BaseModifier> GetModifiers(Type type, Func<BaseModifier, bool>? predicate=null)
+    public IEnumerable<BaseModifier> GetModifiers(Type type, Func<BaseModifier, bool>? predicate = null)
     {
         return ActiveModifiers.Where(x => x.GetType() == type && (predicate == null || predicate(x)));
     }
@@ -196,7 +196,7 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/> by.</param>
     /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="BaseModifier"/>s.</returns>
     [HideFromIl2Cpp]
-    public IEnumerable<BaseModifier> GetModifiers(uint id, Func<BaseModifier, bool>? predicate=null)
+    public IEnumerable<BaseModifier> GetModifiers(uint id, Func<BaseModifier, bool>? predicate = null)
     {
         var type = ModifierManager.GetModifierType(id) ?? throw new InvalidOperationException(
             $"Cannot get modifier with id {id} because it is not registered.");
@@ -211,7 +211,8 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <typeparam name="T">The Type of the interface of the <see cref="BaseModifier"/>.</typeparam>
     /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="BaseModifier"/>s of type <typeparamref name="T"/>.</returns>
     [HideFromIl2Cpp]
-    public IEnumerable<T> GetModifiersOfType<T>(Func<T, bool>? predicate = null) where T : class
+    public IEnumerable<T> GetModifiersOfType<T>(Func<T, bool>? predicate = null)
+        where T : class
     {
         return ActiveModifiers.OfType<T>().Where(x => predicate == null || predicate(x));
     }
@@ -224,7 +225,8 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <typeparam name="T">The Type of the <see cref="BaseModifier"/>.</typeparam>
     /// <returns><see langword="true"/> if the <typeparamref name="T"/> was found, <see langword="false"/> otherwise.</returns>
     [HideFromIl2Cpp]
-    public bool TryGetModifier<T>([NotNullWhen(true)] out T? modifier, Func<T, bool>? predicate = null) where T : BaseModifier
+    public bool TryGetModifier<T>([NotNullWhen(true)] out T? modifier, Func<T, bool>? predicate = null)
+        where T : BaseModifier
     {
         modifier = GetModifier(predicate);
         return modifier != null;
@@ -279,7 +281,8 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <typeparam name="T">The Type of the interface of the <see cref="BaseModifier"/>.</typeparam>
     /// <returns><see langword="true"/> if the <see cref="BaseModifier"/> of type <typeparamref name="T"/> was found, <see langword="false"/> otherwise.</returns>
     [HideFromIl2Cpp]
-    public bool TryGetModifierOfType<T>([NotNullWhen(true)] out T? modifier, Func<T, bool>? predicate = null) where T : class
+    public bool TryGetModifierOfType<T>([NotNullWhen(true)] out T? modifier, Func<T, bool>? predicate = null)
+        where T : class
     {
         modifier = GetModifierOfType(predicate);
         return modifier != null;
@@ -292,7 +295,8 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <typeparam name="T">The Type of the <see cref="BaseModifier"/>.</typeparam>
     /// <returns>The <typeparamref name="T"/> if it is found, <see langword="null"/> otherwise.</returns>
     [HideFromIl2Cpp]
-    public T? GetModifier<T>(Func<T, bool>? predicate = null) where T : BaseModifier
+    public T? GetModifier<T>(Func<T, bool>? predicate = null)
+        where T : BaseModifier
     {
         return GetModifiers(predicate).FirstOrDefault();
     }
@@ -342,7 +346,8 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <typeparam name="T">The Type of the interface of the <see cref="BaseModifier"/>.</typeparam>
     /// <returns>The <see cref="BaseModifier"/> of type <typeparamref name="T"/> if it is found, <see langword="null"/> otherwise.</returns>
     [HideFromIl2Cpp]
-    public T? GetModifierOfType<T>(Func<T, bool>? predicate = null) where T : class
+    public T? GetModifierOfType<T>(Func<T, bool>? predicate = null)
+        where T : class
     {
         return GetModifiersOfType(predicate).FirstOrDefault();
     }
@@ -353,7 +358,8 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <typeparam name="T">The <see cref="BaseModifier"/> type.</typeparam>
     /// <param name="predicate">The predicate to check the <typeparamref name="T"/> by.</param>
     [HideFromIl2Cpp]
-    public void RemoveModifier<T>(Func<T, bool>? predicate = null) where T : BaseModifier
+    public void RemoveModifier<T>(Func<T, bool>? predicate = null)
+        where T : BaseModifier
     {
         RemoveModifier(typeof(T), x => predicate == null || predicate((T)x));
     }
@@ -436,7 +442,8 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <returns><see langword="false"/> if the <typeparamref name="T"/> is not active on this player, or there are multiple instances;
     ///     else <see langword="true"/>.</returns>
     [HideFromIl2Cpp]
-    public bool TryRemoveModifier<T>(Func<T, bool>? predicate = null) where T : BaseModifier
+    public bool TryRemoveModifier<T>(Func<T, bool>? predicate = null)
+        where T : BaseModifier
     {
         return TryGetModifier(out var modifier, predicate) &&
                TryRemoveModifier(modifier);
@@ -506,7 +513,8 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <typeparam name="T">The Type of the <see cref="BaseModifier"/>.</typeparam>
     /// <returns>The new <typeparamref name="T"/>.</returns>
     [HideFromIl2Cpp]
-    public T? AddModifier<T>(params object[] args) where T : BaseModifier
+    public T? AddModifier<T>(params object[] args)
+        where T : BaseModifier
     {
         return AddModifier(typeof(T), args) as T;
     }
@@ -545,6 +553,7 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
         {
             modifier.UniqueId = Guid.NewGuid();
         }
+
         return modifier;
     }
 
@@ -557,20 +566,10 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     [HideFromIl2Cpp]
     public BaseModifier? AddModifier(Type type, params object[] args)
     {
-        BaseModifier? modifier;
-        if (args.Length > 0)
-        {
-            modifier = ModifierFactory.CreateInstance(type, args);
-        }
-        else
-        {
-            modifier = Activator.CreateInstance(type) as BaseModifier;
-            if (modifier == null)
-            {
-                throw new InvalidOperationException($"Cannot add modifier {type.Name} because it is not a valid modifier.");
-            }
-        }
-
+        var modifier = args.Length > 0
+            ? ModifierFactory.CreateInstance(type, args)
+            : Activator.CreateInstance(type) as BaseModifier
+                ?? throw new InvalidOperationException($"Cannot add modifier {type.Name} because it is not a valid modifier.");
         return AddModifier(modifier);
     }
 
@@ -596,7 +595,8 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <typeparam name="T">The Type of the <see cref="BaseModifier"/>.</typeparam>
     /// <returns><see langword="true"/> if the <typeparamref name="T"/> is present, <see langword="false"/> otherwise.</returns>
     [HideFromIl2Cpp]
-    public bool HasModifier<T>(Func<T, bool>? predicate=null) where T : BaseModifier
+    public bool HasModifier<T>(Func<T, bool>? predicate = null)
+        where T : BaseModifier
     {
         return ActiveModifiers.Exists(x => x is T modifier && (predicate == null || predicate(modifier)));
     }
@@ -608,7 +608,7 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/>.</param>
     /// <returns><see langword="true"/> if the <see cref="BaseModifier"/> is present, <see langword="false"/> otherwise.</returns>
     [HideFromIl2Cpp]
-    public bool HasModifier(Type type, Func<BaseModifier, bool>? predicate=null)
+    public bool HasModifier(Type type, Func<BaseModifier, bool>? predicate = null)
     {
         return ActiveModifiers.Exists(x => x.GetType() == type && (predicate == null || predicate(x)));
     }
@@ -620,7 +620,7 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/>.</param>
     /// <returns><see langword="true"/> if the <see cref="BaseModifier"/> is present, <see langword="false"/> otherwise.</returns>
     [HideFromIl2Cpp]
-    public bool HasModifier(uint id, Func<BaseModifier, bool>? predicate=null)
+    public bool HasModifier(uint id, Func<BaseModifier, bool>? predicate = null)
     {
         var type = ModifierManager.GetModifierType(id) ?? throw new InvalidOperationException(
             $"Cannot get modifier with id {id} because it is not registered.");
@@ -647,10 +647,14 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <typeparam name="T">The Type of the <see cref="BaseModifier"/>.</typeparam>
     /// <returns><see langword="true"/> if the <typeparamref name="T"/> is present, <see langword="false"/> otherwise.</returns>
     [HideFromIl2Cpp]
-    public bool HasModifier<T>(bool checkInactive, Func<T, bool>? predicate=null) where T : BaseModifier
+    public bool HasModifier<T>(bool checkInactive, Func<T, bool>? predicate = null)
+        where T : BaseModifier
     {
         return ActiveModifiers.Exists(MatchExpr) || (checkInactive && _toAdd.Exists(MatchExpr));
-        bool MatchExpr(BaseModifier bm) => bm is T modifier && (predicate == null || predicate(modifier));
+        bool MatchExpr(BaseModifier bm)
+        {
+            return bm is T modifier && (predicate == null || predicate(modifier));
+        }
     }
 
     /// <summary>
@@ -661,10 +665,13 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/>.</param>
     /// <returns><see langword="true"/> if the <see cref="BaseModifier"/> is present, <see langword="false"/> otherwise.</returns>
     [HideFromIl2Cpp]
-    public bool HasModifier(Type type, bool checkInactive, Func<BaseModifier, bool>? predicate=null)
+    public bool HasModifier(Type type, bool checkInactive, Func<BaseModifier, bool>? predicate = null)
     {
         return ActiveModifiers.Exists(MatchExpr) || (checkInactive && _toAdd.Exists(MatchExpr));
-        bool MatchExpr(BaseModifier bm) => bm.GetType() == type && (predicate == null || predicate(bm));
+        bool MatchExpr(BaseModifier bm)
+        {
+            return bm.GetType() == type && (predicate == null || predicate(bm));
+        }
     }
 
     /// <summary>
@@ -675,7 +682,7 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/>.</param>
     /// <returns><see langword="true"/> if the <see cref="BaseModifier"/> is present, <see langword="false"/> otherwise.</returns>
     [HideFromIl2Cpp]
-    public bool HasModifier(uint id, bool checkInactive, Func<BaseModifier, bool>? predicate=null)
+    public bool HasModifier(uint id, bool checkInactive, Func<BaseModifier, bool>? predicate = null)
     {
         var type = ModifierManager.GetModifierType(id) ?? throw new InvalidOperationException(
             $"Cannot get modifier with id {id} because it is not registered.");
@@ -693,7 +700,10 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     public bool HasModifier(Guid id, bool checkInactive)
     {
         return ActiveModifiers.Exists(MatchExpr) || (checkInactive && _toAdd.Exists(MatchExpr));
-        bool MatchExpr(BaseModifier bm) => bm.UniqueId == id;
+        bool MatchExpr(BaseModifier bm)
+        {
+            return bm.UniqueId == id;
+        }
     }
 
     /// <summary>
@@ -703,7 +713,8 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <typeparam name="T">The Type of the interface of the Modifier.</typeparam>
     /// <returns>True if the Modifier is present, false otherwise.</returns>
     [HideFromIl2Cpp]
-    public bool HasModifierOfType<T>(Func<T, bool>? predicate=null) where T : class
+    public bool HasModifierOfType<T>(Func<T, bool>? predicate = null)
+        where T : class
     {
         return ActiveModifiers.Exists(x => x is T modifier && (predicate == null || predicate(modifier)));
     }
@@ -716,9 +727,13 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <typeparam name="T">The Type of the interface of the Modifier.</typeparam>
     /// <returns>True if the Modifier is present, false otherwise.</returns>
     [HideFromIl2Cpp]
-    public bool HasModifierOfType<T>(bool checkInactive, Func<T, bool>? predicate=null) where T : class
+    public bool HasModifierOfType<T>(bool checkInactive, Func<T, bool>? predicate = null)
+        where T : class
     {
         return ActiveModifiers.Exists(MatchExpr) || (checkInactive && _toAdd.Exists(MatchExpr));
-        bool MatchExpr(BaseModifier bm) => bm is T modifier && (predicate == null || predicate(modifier));
+        bool MatchExpr(BaseModifier bm)
+        {
+            return bm is T modifier && (predicate == null || predicate(modifier));
+        }
     }
 }

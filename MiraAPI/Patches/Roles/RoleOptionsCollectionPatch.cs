@@ -3,7 +3,6 @@ using System.Linq;
 using System.Reflection;
 using AmongUs.GameOptions;
 using HarmonyLib;
-using Il2CppSystem.Collections.Generic;
 using MiraAPI.Roles;
 
 namespace MiraAPI.Patches.Roles;
@@ -20,63 +19,67 @@ public static class RoleOptionsCollectionPatch
     {
         var assembly = Array.Find(
             AppDomain.CurrentDomain.GetAssemblies(),
-            ass => ass.GetName().Name == "Assembly-CSharp"
-        );
-        if (assembly != null)
+            ass => ass.GetName().Name == "Assembly-CSharp");
+
+        if (assembly == null)
+            return;
+
+        var compatType = typeof(RoleOptionsCollectionPatch);
+        BaseAssembly = assembly;
+        BaseTypes = AccessTools.GetTypesFromAssembly(assembly);
+        var collections = BaseTypes.Where(x => x.Name.Contains("RoleOptionsCollectionV")).ToArray();
+        var pairings = new System.Collections.Generic.Dictionary<int, Type>();
+        var newestId = 0;
+        foreach (var collection in collections)
         {
-            var compatType = typeof(RoleOptionsCollectionPatch);
-            BaseAssembly = assembly;
-            BaseTypes = AccessTools.GetTypesFromAssembly(assembly);
-            var collections = BaseTypes.Where(x => x.Name.Contains("RoleOptionsCollectionV")).ToArray();
-            var pairings = new System.Collections.Generic.Dictionary<int, Type>();
-            var newestId = 0;
-            foreach (var collection in collections)
+            var remainder = collection.Name.Replace("RoleOptionsCollectionV", string.Empty);
+            if (!int.TryParse(remainder, out var id))
             {
-                var remainer = collection.Name.Replace("RoleOptionsCollectionV", string.Empty);
-                if (int.TryParse(remainer, out var id))
-                {
-                    pairings.Add(id, collection);
-                    if (newestId < id)
-                    {
-                        newestId = id;
-                    }
-                }
+                continue;
             }
 
-            if (pairings.TryGetValue(newestId, out var typeToGet))
+            pairings.Add(id, collection);
+            if (newestId < id)
             {
-                CollectionsType = typeToGet;
+                newestId = id;
             }
-
-            var anyRolesEnabledMethod = AccessTools.Method(CollectionsType, "AnyRolesEnabled");
-            harmony.Patch(
-                anyRolesEnabledMethod,
-                new HarmonyMethod(AccessTools.Method(compatType, nameof(AnyRolesEnabledPrefix))));
-
-            var chancePerGameMethod = AccessTools.Method(CollectionsType, "GetChancePerGame");
-            harmony.Patch(
-                chancePerGameMethod,
-                new HarmonyMethod(AccessTools.Method(compatType, nameof(GetChancePrefix))));
-
-            var numPerGameMethod = AccessTools.Method(CollectionsType, "GetNumPerGame");
-            harmony.Patch(
-                numPerGameMethod,
-                new HarmonyMethod(AccessTools.Method(compatType, nameof(GetNumPrefix))));
-            Info($"Patched methods for RoleOptionsCollectionV{newestId}");
         }
+
+        if (pairings.TryGetValue(newestId, out var typeToGet))
+        {
+            CollectionsType = typeToGet;
+        }
+
+        var anyRolesEnabledMethod = AccessTools.Method(CollectionsType, "AnyRolesEnabled");
+        harmony.Patch(
+            anyRolesEnabledMethod,
+            new HarmonyMethod(AccessTools.Method(compatType, nameof(AnyRolesEnabledPrefix))));
+
+        var chancePerGameMethod = AccessTools.Method(CollectionsType, "GetChancePerGame");
+        harmony.Patch(
+            chancePerGameMethod,
+            new HarmonyMethod(AccessTools.Method(compatType, nameof(GetChancePrefix))));
+
+        var numPerGameMethod = AccessTools.Method(CollectionsType, "GetNumPerGame");
+        harmony.Patch(
+            numPerGameMethod,
+            new HarmonyMethod(AccessTools.Method(compatType, nameof(GetNumPrefix))));
+        Info($"Patched methods for RoleOptionsCollectionV{newestId}");
     }
+
     /// <summary>
     /// This patch fixes <see cref="RoleOptionsCollectionV11.GetNumPerGame(RoleTypes)"/> being inlined (2025.9.9) in the original code.
     /// </summary>
-    public static bool AnyRolesEnabledPrefix(dynamic __instance, ref bool __result)
+    public static bool AnyRolesEnabledPrefix(dynamic __instance)
     {
-        foreach (KeyValuePair<RoleTypes, dynamic> keyValuePair in __instance.roles)
+        foreach (var keyValuePair in __instance.roles)
         {
             if (__instance.GetNumPerGame(keyValuePair.Key) > 0)
             {
                 return true;
             }
         }
+
         return false;
     }
 

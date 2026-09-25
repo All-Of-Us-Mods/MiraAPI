@@ -1,9 +1,5 @@
-﻿global using static Reactor.Utilities.Logger<MiraAPI.MiraApiPlugin>;
-using System;
+﻿using System;
 using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using AmongUs.GameOptions;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
@@ -28,16 +24,13 @@ namespace MiraAPI;
 [BepInProcess("Among Us.exe")]
 [BepInDependency(ReactorPlugin.Id)]
 [ReactorModFlags(ModFlags.RequireOnAllClients)]
+#pragma warning disable SA1515 // Single-line comment should be preceded by blank line (Justification: ReSharper suppression.)
+// ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated by BepInEx.)
 public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
+#pragma warning restore SA1515 // Single-line comment should be preceded by blank line
 {
-    /// <inheritdoc />
-    public ConfigFile GetConfigFile()
-    {
-        return Config;
-    }
-
     /// <summary>
-    ///     Gets the specified Culture for string manipulations.
+    /// Gets the specified Culture for string manipulations.
     /// </summary>
     public static CultureInfo Culture { get; internal set; } = new("en-US");
 
@@ -89,5 +82,11 @@ public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
         IL2CPPChainloader.Instance.Finished +=
             ModCompatibility
                 .Initialize; // Initialise AFTER the mods are loaded to ensure maximum parity (no need for the soft dependency either then)
+    }
+
+    /// <inheritdoc />
+    public ConfigFile GetConfigFile()
+    {
+        return Config;
     }
 }

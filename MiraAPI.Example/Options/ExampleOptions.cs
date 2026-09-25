@@ -1,7 +1,7 @@
-﻿using MiraAPI.GameOptions;
+﻿using System.Collections.Generic;
+using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.Attributes;
 using MiraAPI.Utilities;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace MiraAPI.Example.Options;
@@ -18,7 +18,7 @@ public class ExampleOptions : AbstractOptionGroup
     public bool ToggleOpt2 { get; set; } = true;
 
     [ModdedToggleOption("Toggle Opt 3")]
-    [ModdedOptionVisiblity(nameof(ToggleOpt2))] // ToggleOpt3 will be visible only when ToggleOpt2 is true
+    [ModdedOptionVisibility(nameof(ToggleOpt2))] // ToggleOpt3 will be visible only when ToggleOpt2 is true
     public bool ToggleOpt3 { get; set; } = true;
 
     [ModdedNumberOption("options.exampleOptions1.numberOpt", min: 0, max: 10, increment: .25f, formatString: "0.00", suffixType: MiraNumberSuffixes.Percent)]

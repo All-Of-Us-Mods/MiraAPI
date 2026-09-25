@@ -10,7 +10,7 @@ using Object = UnityEngine.Object;
 namespace MiraAPI.GameOptions.OptionTypes;
 
 /// <summary>
-/// An option for selecting an ingame player. It returns an index of the values list, NOT A PLAYER ID. To get a player out of this, index the <see cref="Values"/> list.
+/// An option for selecting an in-game player. It returns an index of the values list, NOT A PLAYER ID. To get a player out of this, index the <see cref="Values"/> list.
 /// </summary>
 public class ModdedPlayerOption : ModdedOption<int>
 {
@@ -34,7 +34,8 @@ public class ModdedPlayerOption : ModdedOption<int>
     /// </summary>
     /// <param name="title">The title of the option.</param>
     /// <param name="allowNone">Whether the option includes a none option. If None is selected, value will return -1.</param>
-    public ModdedPlayerOption(string title, bool allowNone = true) : base(title, allowNone ? -1 : 0, false)
+    public ModdedPlayerOption(string title, bool allowNone = true)
+        : base(title, allowNone ? -1 : 0, false)
     {
         Data = ScriptableObject.CreateInstance<PlayerSelectionGameSetting>();
         var data = (PlayerSelectionGameSetting)Data;
@@ -86,9 +87,7 @@ public class ModdedPlayerOption : ModdedOption<int>
     /// <returns>A list of filtered players.</returns>
     public System.Collections.Generic.List<NetworkedPlayerInfo> GetFilteredPlayers()
     {
-        return GameData.Instance.AllPlayers.ToArray()
-            .Where(x => PlayerFilter?.Invoke(x) ?? true)
-            .ToList();
+        return [.. GameData.Instance.AllPlayers.ToArray().Where(x => PlayerFilter?.Invoke(x) ?? true)];
     }
 
     /// <summary>

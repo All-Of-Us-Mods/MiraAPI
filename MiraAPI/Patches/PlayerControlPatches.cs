@@ -20,7 +20,6 @@ internal static class PlayerControlPatches
 {
     [HarmonyPostfix]
     [HarmonyPatch(nameof(PlayerControl.Start))]
-    // ReSharper disable once InconsistentNaming
     public static void PlayerControlStartPostfix(PlayerControl __instance)
     {
         if (__instance.gameObject.TryGetComponent<ModifierComponent>(out var modifierComp))
@@ -39,7 +38,6 @@ internal static class PlayerControlPatches
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(PlayerControl.Die))]
-    // ReSharper disable once InconsistentNaming
     public static void PlayerControlDiePostfix(PlayerControl __instance, DeathReason reason)
     {
         var deathEvent = new PlayerDeathEvent(__instance, reason, Helpers.GetBodyById(__instance.PlayerId));
@@ -55,7 +53,6 @@ internal static class PlayerControlPatches
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(PlayerControl.CompleteTask))]
-    // ReSharper disable once InconsistentNaming
     public static void PlayerCompleteTaskPostfix(PlayerControl __instance, uint idx)
     {
         var playerTask = __instance.myTasks.ToArray().First(playerTask => playerTask.Id == idx);
@@ -82,13 +79,13 @@ internal static class PlayerControlPatches
 
         if (!target || __instance.Data.IsDead || !__instance.Data.Role.IsImpostor || __instance.Data.Disconnected)
         {
-            int num = target ? target!.PlayerId : -1;
+            var num = target ? target!.PlayerId : -1;
             __instance.logger.Warning($"Bad kill from {__instance.PlayerId} to {num}");
             __instance.RpcMurderPlayer(target, false);
             return;
         }
 
-        NetworkedPlayerInfo data = target!.Data;
+        var data = target!.Data;
         if (data == null || data.IsDead || target.inVent || target.MyPhysics.Animations.IsPlayingEnterVentAnimation() ||
             target.MyPhysics.Animations.IsPlayingAnyLadderAnimation() || target.inMovingPlat)
         {
@@ -119,20 +116,13 @@ internal static class PlayerControlPatches
     [HarmonyPrefix]
     [HarmonyPatch(nameof(PlayerControl.RpcMurderPlayer))]
     [HarmonyPatch(nameof(PlayerControl.MurderPlayer))]
-    // ReSharper disable once InconsistentNaming
-    public static bool MurderPlayerPrefix(PlayerControl __instance)
+    public static bool MurderPlayerPrefix()
     {
-        if (LobbyBehaviour.Instance)
-        {
-            return false;
-        }
-
-        return true;
+        return !LobbyBehaviour.Instance;
     }
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(PlayerControl.FixedUpdate))]
-    // ReSharper disable once InconsistentNaming
     public static void PlayerControlFixedUpdatePostfix(PlayerControl __instance)
     {
         if (!__instance.AmOwner)

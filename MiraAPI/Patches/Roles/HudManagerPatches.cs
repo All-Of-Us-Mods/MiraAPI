@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using System.Diagnostics.CodeAnalysis;
+using HarmonyLib;
 using InnerNet;
 using MiraAPI.Roles;
 using Reactor.Utilities.Extensions;
@@ -12,6 +13,10 @@ namespace MiraAPI.Patches.Roles;
 public static class HudManagerPatches
 {
     // Custom role tab.
+    [SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
+    [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
+    [SuppressMessage("Usage", "CA2211:Non-constant fields should not be visible", Justification = "Read above.")]
+    [SuppressMessage("Minor Code Smell", "S1104:Fields should not have public accessibility", Justification = "Read above.")] // why so many warnings???
     public static TaskPanelBehaviour? RoleTab;
 
     /// <summary>
@@ -49,7 +54,7 @@ public static class HudManagerPatches
     /// </summary>
     [HarmonyPostfix]
     [HarmonyPatch(nameof(HudManager.Update))]
-    public static void UpdatePostfix(HudManager __instance)
+    public static void UpdatePostfix()
     {
         var local = PlayerControl.LocalPlayer;
 

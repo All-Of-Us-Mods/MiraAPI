@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using HarmonyLib;
 using Il2CppInterop.Runtime.Attributes;
@@ -19,12 +20,17 @@ namespace MiraAPI.Modifiers.ModifierDisplay;
 /// The code used to display <see cref="BaseModifier"/>s.
 /// </summary>
 [RegisterInIl2Cpp]
+[SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity Convention.")]
 public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
 {
+    private const int ItemsPerPage = 3;
+
     /// <summary>
     /// Gets the instance of the <see cref="ModifierDisplayComponent"/>.
     /// </summary>
     public static ModifierDisplayComponent? Instance { get; private set; }
+
+    private readonly Dictionary<BaseModifier, ModifierUiComponent> _modifiers = [];
 
     private RectTransform _children = null!;
     private GameObject _modTemplate = null!;
@@ -37,9 +43,6 @@ public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
     private PassiveButton _backButton = null!;
 
     private int _currentPage;
-    private const int ItemsPerPage = 3;
-
-    private readonly Dictionary<BaseModifier, ModifierUiComponent> _modifiers = [];
 
     /// <summary>
     /// Gets a <see cref="ReadOnlyDictionary{TKey, TValue}"/> of the created <see cref="ModifierUiComponent"/>s.
@@ -97,15 +100,13 @@ public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
         IsOpen = false;
         _children.gameObject.SetActive(false);
 
-        if (LocalSettingsTabSingleton<MiraApiSettings>.Instance.ModifiersHudLeftSide.Value)
-        {
-            var aspect = GetComponent<AspectPosition>();
-            _toggleButton.transform.localPosition = new Vector3(-1f, 2.7f, 0f);
-            _children.transform.localPosition = new Vector3(-0.2f, -0.05f, 0f);
-            aspect.Alignment = AspectPosition.EdgeAlignments.LeftTop;
-            aspect.DistanceFromEdge = new Vector3(1.8f, 2.55f, -20f);
-            aspect.AdjustPosition();
-        }
+        if (!LocalSettingsTabSingleton<MiraApiSettings>.Instance.ModifiersHudLeftSide.Value) return;
+        var aspect = GetComponent<AspectPosition>();
+        _toggleButton.transform.localPosition = new Vector3(-1f, 2.7f, 0f);
+        _children.transform.localPosition = new Vector3(-0.2f, -0.05f, 0f);
+        aspect.Alignment = AspectPosition.EdgeAlignments.LeftTop;
+        aspect.DistanceFromEdge = new Vector3(1.8f, 2.55f, -20f);
+        aspect.AdjustPosition();
     }
 
     /// <summary>

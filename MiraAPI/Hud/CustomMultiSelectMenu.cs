@@ -1,9 +1,9 @@
-﻿using MiraAPI.Patches.Stubs;
-using MiraAPI.Utilities.Assets;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using MiraAPI.Patches.Stubs;
+using MiraAPI.Utilities.Assets;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -16,12 +16,13 @@ namespace MiraAPI.Hud;
 [SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Unity convention.")]
 [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
 [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1307:Accessible fields should begin with upper-case letter", Justification = "Read above.")]
-public abstract class CustomMultiSelectMenu<TEntry> : CustomPhoneMenu<CustomMultiSelectMenu<TEntry>.MenuEntry> where TEntry : class
+public abstract class CustomMultiSelectMenu<TEntry> : CustomPhoneMenu<CustomMultiSelectMenu<TEntry>.MenuEntry>
+    where TEntry : class
 {
+    private readonly List<MenuEntry> selectedEntries = [];
     private int totalSelections;
     private bool shouldConfirm;
     private bool canRepeat;
-    private readonly List<MenuEntry> selectedEntries = [];
 
     private LoadableAsset<Sprite>? hoverSelectSprite;
     private LoadableAsset<Sprite>? hoverDeselectSprite;
@@ -62,8 +63,8 @@ public abstract class CustomMultiSelectMenu<TEntry> : CustomPhoneMenu<CustomMult
         LoadableAsset<Sprite>? hoverDeselectSprite = null,
         Color? hoverDeselectColor = null,
         PanelButtonOnMouse? onMouseOut = null,
-        PanelButtonOnMouse? onMouseOver = null
-        ) where TMenu : CustomMultiSelectMenu<TEntry>, new()
+        PanelButtonOnMouse? onMouseOver = null)
+        where TMenu : CustomMultiSelectMenu<TEntry>, new()
     {
         TMenu customMenu = Create<TMenu>(onMouseOut, onMouseOver);
 
@@ -119,7 +120,7 @@ public abstract class CustomMultiSelectMenu<TEntry> : CustomPhoneMenu<CustomMult
         }));
 
         DebugAnalytics.Instance.Analytics.MinigameOpened(PlayerControl.LocalPlayer.Data, Component.TaskType);
-        var list2 = new Il2CppSystem.Collections.Generic.List<UiElement>();
+        var list2 = new CppCollections.List<UiElement>();
         RegisterPanels(
             entries,
             (shapeshifterPanel, i, entry) =>
@@ -161,23 +162,28 @@ public abstract class CustomMultiSelectMenu<TEntry> : CustomPhoneMenu<CustomMult
     {
         MenuEntry menuEntry = MenuEntries.First(e => e.Entry == entry);
 
-        if (!canRepeat && selectedEntries.Remove(menuEntry)) // Unselect previous choice
+        // Unselect previous choice
+        if (!canRepeat && selectedEntries.Remove(menuEntry))
         {
             // TODO: if confirm button is enabled, disable it
             SetNameplateAppearance(menuEntry, false);
             return;
         }
 
-        if (selectedEntries.Count >= totalSelections) // Do not go past total selections.
+        // Do not go past total selections
+        if (selectedEntries.Count >= totalSelections)
         {
             return;
         }
 
         selectedEntries.Add(menuEntry);
-        if (selectedEntries.Count <= totalSelections) // Add choice to list of selections
+
+        // Add choice to list of selections
+        if (selectedEntries.Count <= totalSelections)
         {
             SetNameplateAppearance(menuEntry, true);
         }
+
         if (selectedEntries.Count < totalSelections)
         {
             return;

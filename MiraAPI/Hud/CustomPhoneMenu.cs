@@ -1,11 +1,11 @@
-﻿using AmongUs.GameOptions;
-using MiraAPI.Utilities.Assets;
-using Reactor.Utilities.Attributes;
-using Reactor.Utilities.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using AmongUs.GameOptions;
+using MiraAPI.Utilities.Assets;
+using Reactor.Utilities.Attributes;
+using Reactor.Utilities.Extensions;
 using UnityEngine;
 using UnityEngine.Events;
 using Object = UnityEngine.Object;
@@ -68,7 +68,8 @@ public interface ICustomMenu
 /// Must reference the member of the <see cref="CustomPhoneMenu"/> superclass that is being hidden by this one to work.
 /// </summary>
 /// <typeparam name="TMenu">The type of menu entry.</typeparam>
-public interface ICustomMenu<TMenu> : ICustomMenu where TMenu : IMenuEntry
+public interface ICustomMenu<TMenu> : ICustomMenu
+    where TMenu : IMenuEntry
 {
     /// <summary>
     /// Gets all registered <typeparamref name="TMenu"/>s.
@@ -133,9 +134,11 @@ public abstract class CustomPhoneMenu : ICustomMenu
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (Justification: Unity convention.)
 #pragma warning disable S1104 // Fields should not have public accessibility (Justification: Read above.)
+#pragma warning disable SA1300 // Element should begin with upper-case letter (Justification: Read above.)
     public Transform transform => Component.transform;
     public GameObject gameObject => Component.gameObject;
     public string name => Component.name;
+#pragma warning restore SA1300 // Element should begin with upper-case letter
 
     public float xStart = -0.8f;
     public float yStart = 2.15f;
@@ -184,7 +187,8 @@ public abstract class CustomPhoneMenu : ICustomMenu
     /// <param name="onMouseOut">Function that can optionally be run when the mouse is moved outside a menu panel.</param>
     /// <param name="onMouseOver">Function that can optionally be run when the mouse is moved over a menu panel.</param>
     /// <returns>New <typeparamref name="TMenu"/> object.</returns>
-    protected static TMenu Create<TMenu>(PanelButtonOnMouse? onMouseOut = null, PanelButtonOnMouse? onMouseOver = null) where TMenu : CustomPhoneMenu, new()
+    protected static TMenu Create<TMenu>(PanelButtonOnMouse? onMouseOut = null, PanelButtonOnMouse? onMouseOver = null)
+        where TMenu : CustomPhoneMenu, new()
     {
         var shapeShifterRole = RoleManager.Instance.GetRole(RoleTypes.Shapeshifter);
 
@@ -261,15 +265,14 @@ public abstract class CustomPhoneMenu : ICustomMenu
             {
                 button.OnMouseOver.RemoveAllListeners();
                 button.OnMouseOver = new UnityEvent();
-                button.OnMouseOver.AddListener((UnityAction)
-                    (() => onMouseOverAction(highlight, icon, IsEntrySelected(menuEntry))));
+                button.OnMouseOver.AddListener((UnityAction)(() => onMouseOverAction(highlight, icon, IsEntrySelected(menuEntry))));
             }
+
             if (onMouseOutAction != null)
             {
                 button.OnMouseOut.RemoveAllListeners();
                 button.OnMouseOut = new UnityEvent();
-                button.OnMouseOut.AddListener((UnityAction)
-                    (() => onMouseOutAction(highlight, icon, IsEntrySelected(menuEntry))));
+                button.OnMouseOut.AddListener((UnityAction)(() => onMouseOutAction(highlight, icon, IsEntrySelected(menuEntry))));
             }
         }
     }
@@ -318,11 +321,13 @@ public abstract class CustomPhoneMenu : ICustomMenu
         {
             icon.sprite = sprite.LoadAsset();
         }
+
         var button = nameplate.GetComponent<ButtonRolloverHandler>();
         if (overColor is { } oColor)
         {
             button.OverColor = oColor;
         }
+
         if (unselectedColor is { } uColor)
         {
             button.UnselectedColor = uColor;
@@ -341,7 +346,8 @@ public abstract class CustomPhoneMenu : ICustomMenu
 
 /// <inheritdoc cref="CustomPhoneMenu"/>
 /// <typeparam name="TMenu">The type of menu entries.</typeparam>
-public abstract class CustomPhoneMenu<TMenu> : CustomPhoneMenu, ICustomMenu<TMenu> where TMenu : IMenuEntry
+public abstract class CustomPhoneMenu<TMenu> : CustomPhoneMenu, ICustomMenu<TMenu>
+    where TMenu : IMenuEntry
 {
     /// <inheritdoc/>
     public new List<TMenu> MenuEntries

@@ -31,6 +31,7 @@ public static class VanillaButtonPatches
         {
             ventTarget = role.Cast<EngineerRole>().currentTarget;
         }
+
         var genericEvent = new VanillaButtonClickEvent(__instance, playerTarget, ventTarget);
         MiraEventManager.InvokeEvent(genericEvent);
         if (genericEvent.IsCancelled)
@@ -38,13 +39,9 @@ public static class VanillaButtonPatches
             MiraEventManager.InvokeEvent(new VanillaButtonCancelledEvent(__instance));
         }
 
-        if (!genericEvent.IsCancelled)
-        {
-            return true;
-        }
-
-        return false;
+        return !genericEvent.IsCancelled;
     }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(SecondaryAbilityButton), nameof(SecondaryAbilityButton.DoClick))]
     public static bool SecondaryDoClickPrefix(AbilityButton __instance)
@@ -56,6 +53,7 @@ public static class VanillaButtonPatches
         {
             playerTarget = role.Cast<DetectiveRole>().currentTarget;
         }
+
         var genericEvent = new VanillaButtonClickEvent(__instance, playerTarget);
         MiraEventManager.InvokeEvent(genericEvent);
         if (genericEvent.IsCancelled)
@@ -63,11 +61,6 @@ public static class VanillaButtonPatches
             MiraEventManager.InvokeEvent(new VanillaButtonCancelledEvent(__instance));
         }
 
-        if (!genericEvent.IsCancelled)
-        {
-            return true;
-        }
-
-        return false;
+        return !genericEvent.IsCancelled;
     }
 }

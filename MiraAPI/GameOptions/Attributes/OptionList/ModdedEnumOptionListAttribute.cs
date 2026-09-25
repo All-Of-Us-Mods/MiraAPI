@@ -1,7 +1,7 @@
-﻿using MiraAPI.GameOptions.OptionTypes;
-using System;
+﻿using System;
 using System.Collections;
 using System.Reflection;
+using MiraAPI.GameOptions.OptionTypes;
 
 namespace MiraAPI.GameOptions.Attributes;
 
@@ -41,7 +41,8 @@ public class ModdedEnumOptionListAttribute(string title, Type enumType, string[]
 /// <typeparam name="T">The enum type.</typeparam>
 [AttributeUsage(AttributeTargets.Property)]
 public class ModdedEnumOptionListAttribute<T>(string title, string[]? values = null)
-    : ModdedOptionListAttribute(title) where T : Enum
+    : ModdedOptionListAttribute(title)
+    where T : Enum
 {
     internal override IModdedOptionList CreateOptionList(IList value, PropertyInfo property)
     {

@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MiraAPI.Modifiers;
-using MiraAPI.Modifiers.Types;
 using MiraAPI.PluginLoading;
-using MiraAPI.Utilities.Assets;
 using MiraAPI.Utilities.Components;
 using UnityEngine;
 
@@ -18,12 +15,12 @@ public static class MeetingButtonManager
     /// <summary>
     /// Gets a list if==of all registered <see cref="TargetedMeetingButton"/>.
     /// </summary>
-    public static List<TargetedMeetingButton> TargetedButtons { get; internal set; } = new();
+    public static List<TargetedMeetingButton> TargetedButtons { get; internal set; } = [];
 
     /// <summary>
     /// Gets a list if==of all registered <see cref="MeetingActionButton"/>.
     /// </summary>
-    public static List<MeetingActionButton> UntargetedButtons { get; internal set; } = new();
+    public static List<MeetingActionButton> UntargetedButtons { get; internal set; } = [];
 
     internal static bool RegisterTargetedMeetingButton(Type type, MiraPluginInfo info)
     {
@@ -32,7 +29,7 @@ public static class MeetingButtonManager
             return false;
         }
 
-        var button = Activator.CreateInstance(type) as TargetedMeetingButton;
+        var button = (Activator.CreateInstance(type) as TargetedMeetingButton)!;
         info.InternalTargetedMeetingButtons.Add(button);
         TargetedButtons.Add(button);
         return true;
@@ -45,20 +42,22 @@ public static class MeetingButtonManager
             return false;
         }
 
-        var button = Activator.CreateInstance(type) as MeetingActionButton;
+        var button = (Activator.CreateInstance(type) as MeetingActionButton)!;
         info.InternalMeetingButtons.Add(button);
         UntargetedButtons.Add(button);
         return true;
     }
 
-    private static CenteredGridArrange? actionButtonsParent = null!;
-
+    /// <summary>
+    /// Called on <see cref="TutorialManager.RunTutorial"/> and <see cref="IntroCutscene.CoBegin"/>/<see cref="IntroCutscene.OnDestroy"/>.
+    /// </summary>
     public static void OnGameStart()
     {
         foreach (var ability in TargetedButtons.Where(x => x.UsesMode == MeetingButtonUsesMode.PerGame))
         {
             ability.UsesLeft = ability.MaxUses;
         }
+
         foreach (var ability in UntargetedButtons.Where(x => x.UsesMode == MeetingButtonUsesMode.PerGame))
         {
             ability.UsesLeft = ability.MaxUses;
@@ -72,7 +71,7 @@ public static class MeetingButtonManager
     public static void OnMeetingStart(MeetingHud meetingHud)
     {
         // Untargeted buttons parent.
-        actionButtonsParent = new GameObject("ActionsButtonParent").AddComponent<CenteredGridArrange>();
+        var actionButtonsParent = new GameObject("ActionsButtonParent").AddComponent<CenteredGridArrange>();
         actionButtonsParent.transform.SetParent(meetingHud.MeetingAbilityButton.transform.parent, meetingHud.MeetingAbilityButton.transform.parent);
         actionButtonsParent.CellSize = new Vector2(0.7f, 0.7f);
         actionButtonsParent.transform.localPosition = new Vector3(0, -2.1f, -10);
@@ -103,21 +102,24 @@ public static class MeetingButtonManager
                     var btn = ability.CreateButton(playerVoteArea);
                     btn.transform.SetParent(playerVoteArea.Buttons.transform);
                 }
+
                 var btn2 = ability.CreateButton(meetingHud.SkipVoteButton);
                 btn2.transform.SetParent(meetingHud.SkipVoteButton.Buttons.transform);
 
                 if (ability.UsesMode == MeetingButtonUsesMode.PerMeeting) ability.UsesLeft = ability.MaxUses;
-                if (ability is MultiTargetMeetingButton multiAbility) multiAbility.Targets = new();
+                if (ability is MultiTargetMeetingButton multiAbility) multiAbility.Targets = [];
             }
             catch (Exception e)
             {
                 Error($"Failed to create targeted meeting button {ability.Name}: {e.Message}");
             }
         }
+
         foreach (var playerVoteArea in meetingHud.playerStates)
         {
             playerVoteArea.CancelButton.transform.SetAsFirstSibling();
         }
+
         meetingHud.SkipVoteButton.CancelButton.transform.SetAsFirstSibling();
     }
 }

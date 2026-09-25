@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using MiraAPI.Utilities.Assets;
 using UnityEngine;
 using UnityEngine.UI;

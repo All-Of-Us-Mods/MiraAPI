@@ -4,7 +4,6 @@ using Il2CppSystem;
 using MiraAPI.GameModes;
 using MiraAPI.Translation;
 using Reactor.Utilities;
-using Reactor.Utilities.Extensions;
 using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -23,7 +22,6 @@ internal static class HudPatches
             CustomGameModeManager.ActiveMode.HudUpdate(__instance);
         }
     }
-
 
     [HarmonyPatch(typeof(HudManager), nameof(HudManager.Start))]
     [HarmonyPostfix]
