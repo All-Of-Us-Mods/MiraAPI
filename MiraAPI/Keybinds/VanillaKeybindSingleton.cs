@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MiraAPI.Keybinds;
 
@@ -6,8 +6,7 @@ namespace MiraAPI.Keybinds;
 /// Singleton for getting a <see cref="VanillaKeybind"/> by <see cref="ActionButton"/>.
 /// </summary>
 /// <typeparam name="T"><see cref="ActionButton"/> type.</typeparam>
-public static class VanillaKeybinding<T>
-    where T : ActionButton
+public static class VanillaKeybinding<T> where T : ActionButton
 {
     [SuppressMessage("Major Code Smell", "S2743:Static fields should not be used in generic types", Justification = "The instance holds a reference to the button that defines the class's type parameter.")]
     private static VanillaKeybind? _instance;

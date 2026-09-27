@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Rewired;
 
 namespace MiraAPI.Keybinds;
@@ -22,6 +22,11 @@ public class BaseKeybind
     /// Gets the currently assigned keycode.
     /// </summary>
     public KeyboardKeyCode CurrentKey => KeybindUtils.GetKeycodeByKeybind(this);
+
+    /// <summary>
+    /// Gets the display label of the currently assigned button on the active controller.
+    /// </summary>
+    public string CurrentControllerButton => KeybindUtils.GetControllerButtonByKeybind(this);
 
     /// <summary>
     /// Gets or sets the handler of the keybind. Invoked when the keybind is activated.

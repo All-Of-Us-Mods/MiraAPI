@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using MiraAPI.Keybinds;
 using UnityEngine;
 
@@ -10,7 +10,7 @@ public static class OptionsMenuBehaviourPatch
     private static ButtonRolloverHandler? _remapRollover;
     private static SpriteRenderer? _remapBackground;
 
-    private static bool Conflicts => KeybindManager.GetConflicts().Count > 0;
+    private static bool Conflicts => KeybindManager.GetConflicts().Count > 0 || KeybindManager.GetControllerConflicts().Count > 0;
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(OptionsMenuBehaviour.Open))]
@@ -32,18 +32,14 @@ public static class OptionsMenuBehaviourPatch
     [HarmonyPatch(nameof(OptionsMenuBehaviour.Update))]
     private static void UpdatePostfix()
     {
-        if (_remapRollover == null)
-        {
-            return;
-        }
+        if (_remapRollover == null) return;
 
-        if (_remapBackground == null)
-        {
-            return;
-        }
+        if (_remapBackground == null) return;
 
-        _remapRollover.OutColor = Conflicts ? Color.red : Color.white;
-        _remapRollover.UnselectedColor = Conflicts ? Color.red : Color.white;
-        _remapRollover.OverColor = Conflicts ? new Color32(255, 55, 55, 255) : Palette.AcceptedGreen;
+        var conflicts = Conflicts;
+        _remapRollover.OutColor = conflicts ? Color.red : Color.white;
+        _remapRollover.UnselectedColor = conflicts ? Color.red : Color.white;
+        _remapRollover.OverColor = conflicts ? new Color32(255, 55, 55, 255) : Palette.AcceptedGreen;
+        if (!conflicts && _remapBackground.color == Color.red) _remapBackground.color = Color.white;
     }
 }

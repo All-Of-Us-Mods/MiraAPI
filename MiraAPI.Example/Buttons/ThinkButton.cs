@@ -1,4 +1,5 @@
 ﻿using MiraAPI.Hud;
+using MiraAPI.Keybinds;
 using MiraAPI.Translation;
 using MiraAPI.Utilities.Assets;
 using UnityEngine;
@@ -13,6 +14,8 @@ public class ThinkButton : CustomActionButton
     public override int MaxUses => 1;
     public override ButtonUsesMode UsesMode => ButtonUsesMode.PerRound;
     public override LoadableAsset<Sprite> Sprite => ExampleAssets.ExampleButton;
+    public override MiraKeybind Keybind => MiraGlobalKeybinds.SecondaryAbility;
+
     protected override void OnClick()
     {
         Button!.OverrideText("button.think.thinking".Translate());

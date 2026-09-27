@@ -1,6 +1,7 @@
-﻿using System.Linq;
+using System.Linq;
 using HarmonyLib;
 using MiraAPI.Keybinds;
+using Rewired;
 using Rewired.UI.ControlMapper;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,53 +11,71 @@ namespace MiraAPI.Patches.Keybinds;
 [HarmonyPatch(typeof(ControlMapper))]
 public static class ControlMapperPatches
 {
-    // Patching this crashes for Epic Games users
-    /*[HarmonyPrefix]
-    [HarmonyPatch(nameof(ControlMapper.Start))]
-    private static void StartPrefix(ControlMapper __instance)
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(ControlMapper.Initialize))]
+    private static void InitializePrefix(ControlMapper __instance)
     {
-        var doneButton = GameObject.Find("DoneButton")?.GetComponent<CustomButton>();
-        if (doneButton == null)
-        {
-            return;
-        }
+        __instance.showControllers = true;
+        __instance.showGlyphs = false;
+    }
 
-        var toggle = Object.Instantiate(doneButton, doneButton.transform.parent);
-        var text = toggle.GetComponentInChildren<TextMeshProUGUI>();
-        var entry = LocalSettingsTabSingleton<MiraApiSettings>.Instance.ShowKeybinds;
-        toggle.gameObject.name = "KeybindsVisibleToggle";
-        text.text = $"Show Keybinds: {(entry.Value ? "On" : "Off")}";
-        toggle.onClick.RemoveAllListeners();
-        toggle.GetComponent<ButtonInfo>().identifier = "KeybindsVisibleToggle";
-        toggle.onClick.AddListener((UnityAction)(() =>
-        {
-            entry.Value = !entry.Value;
-            text.text = $"Show Keybinds: {(entry.Value ? "On" : "Off")}";
-        }));
-    }*/
+    [HarmonyPostfix]
+    [HarmonyPatch(nameof(ControlMapper.CreateLayout))]
+    private static void CreateLayoutPostfix(ControlMapper __instance)
+    {
+        __instance.references.controllerGroup.gameObject.SetActive(false);
+        __instance.references.assignedControllersGroup.gameObject.SetActive(false);
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(ControlMapper.GetControllerMap))]
+    private static bool GetControllerMapPrefix(ControlMapper __instance, ControllerType type, ref ControllerMap? __result)
+    {
+        if (type != ControllerType.Joystick) return true;
+
+        __result = __instance.currentPlayer?.controllers.maps.GetFirstMapInCategory(type, __instance.currentJoystickId, 1);
+        return false;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(ControlMapper.HasElementAssignmentConflicts))]
+    private static bool HasElementAssignmentConflictsPrefix(ControlMapper.InputMapping mapping, ref bool __result)
+    {
+        if (mapping == null || mapping.controllerType != ControllerType.Joystick || !KeybindManager.Keybinds.Any(x => x.RewiredInputAction?.id == mapping.fieldInfo.actionId)) return true;
+
+        __result = false;
+        return false;
+    }
 
     [HarmonyPrefix]
     [HarmonyPatch(nameof(ControlMapper.Update))]
     private static void UpdatePrefix(ControlMapper __instance)
     {
+        var conflicts = KeybindManager.GetConflicts();
+        var controllerConflicts = KeybindManager.GetControllerConflicts();
         foreach (var element in __instance.themedElements)
         {
             var info = element.GetComponent<InputFieldInfo>();
-            if (info == null)
-            {
-                continue;
-            }
+            if (info == null) continue;
 
-            var key = info.glyphOrText?.actionElementMap?.keyboardKeyCode;
-            if (key == null)
-            {
-                continue;
-            }
+            var map = ReInput.mapping.GetActionElementMap(info.actionElementMapId);
+            var image = element.GetComponent<Image>();
+            if (image == null) continue;
 
-            var conflicts = KeybindManager.GetConflicts();
-            if (conflicts.Any(x => x.Key.ToString() == key.ToString()))
+            var hasConflict = map?.controllerMap.controllerType switch
             {
-                element.GetComponent<Image>().color = Color.red;
+                ControllerType.Keyboard => conflicts.ContainsKey(map.keyboardKeyCode),
+                ControllerType.Joystick => controllerConflicts.Any(x => x.controllerMap.id == map.controllerMap.id && x.id == map.id),
+                _ => false
+            };
+            if (hasConflict)
+            {
+                image.color = Color.red;
+            }
+            else if (image.color == Color.red)
+            {
+                image.color = Color.white;
+                element.ApplyTheme();
             }
         }
     }

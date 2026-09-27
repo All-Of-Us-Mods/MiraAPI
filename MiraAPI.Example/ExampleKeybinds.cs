@@ -1,4 +1,4 @@
-﻿using MiraAPI.Keybinds;
+using MiraAPI.Keybinds;
 using Rewired;
 
 namespace MiraAPI.Example;
@@ -6,5 +6,5 @@ namespace MiraAPI.Example;
 [RegisterCustomKeybinds]
 public static class ExampleKeybinds
 {
-    public static MiraKeybind NeutralWinKeybind { get; } = new("Neutral Win", KeyboardKeyCode.C, [ModifierKey.Shift]);
+    public static MiraKeybind NeutralWinKeybind { get; } = new("Neutral Win", KeyboardKeyCode.C, ControllerButton.RightStick, [ModifierKey.Shift]);
 }
