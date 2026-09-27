@@ -30,7 +30,7 @@ public static class KeybindMenuPatch
             { typeof(ReportButton), new VanillaKeybind(7) },
             { typeof(VentButton), new VanillaKeybind(50) },
             { typeof(SabotageButton), new VanillaKeybind(4) },
-            { typeof(AbilityButton), new VanillaKeybind(49) }
+            { typeof(AbilityButton), new VanillaKeybind(49) },
         };
     }
 }

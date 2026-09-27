@@ -49,7 +49,8 @@ public class MiraKeybind(string name, KeyboardKeyCode? defaultKeycode, ModifierK
     /// <param name="defaultControllerButton">The default controller button.</param>
     /// <param name="modifierKeys">Up to 3 optional <see cref="ModifierKey"/>s for the keyboard binding.</param>
     /// <param name="exclusive">Is exclusive.</param>
-    public MiraKeybind(string name, KeyboardKeyCode? defaultKeycode, ControllerButton defaultControllerButton, ModifierKey[]? modifierKeys = null, bool exclusive = true) : this(name, defaultKeycode, modifierKeys, exclusive)
+    public MiraKeybind(string name, KeyboardKeyCode? defaultKeycode, ControllerButton defaultControllerButton, ModifierKey[]? modifierKeys = null, bool exclusive = true)
+        : this(name, defaultKeycode, modifierKeys, exclusive)
     {
         DefaultControllerButton = defaultControllerButton;
     }

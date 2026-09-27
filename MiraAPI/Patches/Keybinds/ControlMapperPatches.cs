@@ -66,7 +66,7 @@ public static class ControlMapperPatches
             {
                 ControllerType.Keyboard => conflicts.ContainsKey(map.keyboardKeyCode),
                 ControllerType.Joystick => controllerConflicts.Any(x => x.controllerMap.id == map.controllerMap.id && x.id == map.id),
-                _ => false
+                _ => false,
             };
             if (hasConflict)
             {

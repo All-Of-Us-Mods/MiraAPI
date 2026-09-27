@@ -217,7 +217,7 @@ public abstract class CustomActionButton
         {
             ActiveInputManager.InputType.Keyboard when Keybind.CurrentKey != KeyboardKeyCode.None => Keybind.CurrentKey.ToString(),
             ActiveInputManager.InputType.Joystick => Keybind.CurrentControllerButton,
-            _ => string.Empty
+            _ => string.Empty,
         };
 
         KeybindText.text = text;
@@ -516,7 +516,8 @@ public abstract class CustomActionButton
 /// Custom action button that has a target <typeparamref name="T"/>.
 /// </summary>
 /// <typeparam name="T">The type of the target object.</typeparam>
-public abstract class CustomActionButton<T> : CustomActionButton where T : MonoBehaviour
+public abstract class CustomActionButton<T> : CustomActionButton
+    where T : MonoBehaviour
 {
     /// <summary>
     /// Gets or sets the target <typeparamref name="T"/> of the button.

@@ -40,7 +40,7 @@ public static class KeybindUtils
             "square" => "□",
             "circle" => "○",
             "triangle" => "△",
-            _ => name
+            _ => name,
         };
     }
 

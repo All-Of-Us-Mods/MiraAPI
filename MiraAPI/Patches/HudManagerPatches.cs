@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using HarmonyLib;
 using MiraAPI.Hud;
 using MiraAPI.Keybinds;
@@ -43,6 +42,7 @@ public static class HudManagerPatches
         if (!_storedButtonsParent) _storedButtonsParent = HudManager.Instance.transform.FindChild("Buttons");
 
         if (_storedButtonsParent)
+        {
             foreach (var aspect in _storedButtonsParent.GetComponentsInChildren<AspectPosition>(true))
             {
                 if (!aspect.gameObject) continue;
@@ -55,6 +55,7 @@ public static class HudManagerPatches
                 aspect.DistanceFromEdge *= new Vector2(scaleFactor, scaleFactor);
                 aspect.gameObject.SetActive(!aspect.isActiveAndEnabled);
             }
+        }
 
         foreach (var button in HudManager.Instance.GetComponentsInChildren<ActionButton>(true))
         {
@@ -181,7 +182,7 @@ public static class HudManagerPatches
             {
                 ButtonLocation.BottomLeft => BottomLeft.transform,
                 ButtonLocation.BottomRight => BottomRight,
-                _ => null
+                _ => null,
             };
 
             if (location is null) continue;
@@ -212,7 +213,7 @@ public static class HudManagerPatches
             { __instance.ReportButton.gameObject, 7 },
             { __instance.ImpostorVentButton.gameObject, 50 },
             { __instance.SabotageButton.gameObject, 4 },
-            { __instance.AbilityButton.gameObject, 49 }
+            { __instance.AbilityButton.gameObject, 49 },
         };
 
         foreach (var kvp in vanillaButtons)
@@ -253,6 +254,7 @@ public static class HudManagerPatches
         if (localPlayer.Data == null) return;
 
         foreach (var button in CustomButtonManager.CustomButtons)
+        {
             try
             {
                 button.SetActive(isActive, role);
@@ -261,6 +263,7 @@ public static class HudManagerPatches
             {
                 Error($"Failed to set custom button {button.GetType().Name} active: {e}");
             }
+        }
     }
 
     [HarmonyPatch(nameof(HudManager.Update))]
@@ -279,11 +282,15 @@ public static class HudManagerPatches
 
         var player = ReInput.players.GetPlayer(0);
         foreach (var entry in KeybindManager.Keybinds)
+        {
             if (entry.RewiredInputAction != null && player.GetButtonDown(entry.RewiredInputAction.id))
                 entry.Invoke();
+        }
 
         foreach (var entry in KeybindManager.VanillaKeybinds.Values)
+        {
             if (player.GetButtonDown(entry.Id))
                 entry.Invoke();
+        }
     }
 }

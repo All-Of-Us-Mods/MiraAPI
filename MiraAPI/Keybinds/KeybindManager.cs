@@ -17,7 +17,8 @@ public static class KeybindManager
     /// </summary>
     public static List<MiraKeybind> Keybinds { get; } = [];
 
-    [HideFromIl2Cpp] internal static Dictionary<Type, VanillaKeybind> VanillaKeybinds { get; set; } = [];
+    [HideFromIl2Cpp]
+    internal static Dictionary<Type, VanillaKeybind> VanillaKeybinds { get; set; } = [];
 
     internal static void RewiredInit()
     {
@@ -63,7 +64,7 @@ public static class KeybindManager
                         _elementIdentifierId = elementId,
                         _elementType = elementType,
                         _axisRange = AxisRange.Positive,
-                        _axisContribution = Pole.Positive
+                        _axisContribution = Pole.Positive,
                     });
                 }
             }
@@ -154,8 +155,10 @@ public static class KeybindManager
     {
         var all = new List<MiraKeybind>();
         foreach (var keybind in Keybinds)
+        {
             if (keybind.CurrentKey == keyCode && (keybind.Exclusive || !exclusiveCheck))
                 all.Add(keybind);
+        }
 
         return [.. all];
     }

@@ -316,8 +316,10 @@ public static class Extensions
             try
             {
                 foreach (var mat in renderer.materials)
+                {
                     if (mat != null)
                         UnityEngine.Object.Destroy(mat);
+                }
             }
             catch
             {
@@ -437,6 +439,7 @@ public static class Extensions
         tie = true;
         var result = new KeyValuePair<byte, int>(byte.MaxValue, int.MinValue);
         foreach (var keyValuePair in self)
+        {
             if (keyValuePair.Value > result.Value)
             {
                 result = keyValuePair;
@@ -446,6 +449,7 @@ public static class Extensions
             {
                 tie = true;
             }
+        }
 
         return result;
     }
@@ -461,6 +465,7 @@ public static class Extensions
         tie = true;
         var result = new KeyValuePair<byte, float>(byte.MaxValue, int.MinValue);
         foreach (var keyValuePair in self)
+        {
             if (keyValuePair.Value > result.Value)
             {
                 result = keyValuePair;
@@ -470,6 +475,7 @@ public static class Extensions
             {
                 tie = true;
             }
+        }
 
         return result;
     }
@@ -687,7 +693,8 @@ public static class Extensions
     /// <param name="predicate">Optional predicate to test if the <typeparamref name="T"/> is valid.</param>
     /// <typeparam name="T">The type of the object.</typeparam>
     /// <returns>The <typeparamref name="T"/> if it was found, or <see langword="null"/> if there is none within the radius.</returns>
-    public static T? GetNearestObjectOfType<T>(this PlayerControl playerControl, float radius, ContactFilter2D filter, string? colliderTag = null, Predicate<T>? predicate = null) where T : Component
+    public static T? GetNearestObjectOfType<T>(this PlayerControl playerControl, float radius, ContactFilter2D filter, string? colliderTag = null, Predicate<T>? predicate = null)
+        where T : Component
     {
         return Helpers.GetNearestObjectsOfType<T>(playerControl.GetTruePosition(), radius, filter, colliderTag).Find(predicate ?? (component => component));
     }
@@ -709,7 +716,7 @@ public static class Extensions
     }
 
     /// <summary>
-    /// Fixed version of <see cref="Reactor.Utilities.Extensions.UnityExtensions.SetOutline(Renderer, Color?)"/>.
+    /// Fixed version of <see cref="UnityExtensions.SetOutline(Renderer, Color?)"/>.
     /// </summary>
     /// <param name="renderer">The <see cref="Renderer"/> you want to update the outline for.</param>
     /// <param name="color">The outline <see cref="Color"/>.</param>
@@ -752,7 +759,7 @@ public static class Extensions
             _actionId = action.id,
             _elementType = ControllerElementType.Button,
             _axisContribution = Pole.Positive,
-            _keyboardKeyCode = key
+            _keyboardKeyCode = key,
         };
 
         if (modifiers != null)
