@@ -34,6 +34,11 @@ public static class OptionsPatches
             __instance.roleChance = 0;
         }
 
+        if (__instance.roleChance == 0)
+        {
+            __instance.roleMaxCount = 0;
+        }
+
         __instance.OnValueChanged.Invoke(__instance);
         return false;
     }
@@ -60,6 +65,11 @@ public static class OptionsPatches
             __instance.roleChance = 100;
         }
 
+        if (__instance.roleChance == 0)
+        {
+            __instance.roleMaxCount = 0;
+        }
+
         __instance.OnValueChanged.Invoke(__instance);
         return false;
     }
@@ -84,6 +94,11 @@ public static class OptionsPatches
             __instance.roleMaxCount = 0;
         }
 
+        if (__instance.roleMaxCount == 0)
+        {
+            __instance.roleChance = 0;
+        }
+
         __instance.OnValueChanged.Invoke(__instance);
         return false;
     }
@@ -106,6 +121,11 @@ public static class OptionsPatches
         if (__instance.roleMaxCount < 0)
         {
             __instance.roleMaxCount = __instance.role.MaxCount;
+        }
+
+        if (__instance.roleMaxCount == 0)
+        {
+            __instance.roleChance = 0;
         }
 
         __instance.OnValueChanged.Invoke(__instance);
