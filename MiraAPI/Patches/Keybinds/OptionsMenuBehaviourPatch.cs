@@ -1,3 +1,4 @@
+using System.Linq;
 using HarmonyLib;
 using MiraAPI.Keybinds;
 using UnityEngine;
@@ -14,18 +15,24 @@ public static class OptionsMenuBehaviourPatch
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(OptionsMenuBehaviour.Open))]
-    private static void OpenPostfix()
+    private static void OpenPostfix(OptionsMenuBehaviour __instance)
     {
-        _remapRollover = GameObject.Find("Remap Controls")?.GetComponent<ButtonRolloverHandler>()!;
-        try
-        {
-            _remapBackground = _remapRollover.transform.FindChild("Background").GetComponent<SpriteRenderer>();
-            _remapBackground.color = Conflicts ? Color.red : Color.white;
-        }
-        catch
-        {
-            // ignored, this normally breaks when on mobile since there's no remap button screen.
-        }
+        _remapRollover = __instance.GetComponentsInChildren<ButtonRolloverHandler>(true).FirstOrDefault(x => x.name == "Remap Controls");
+        _remapBackground = _remapRollover?.transform.FindChild("Background")?.GetComponent<SpriteRenderer>();
+        if (_remapBackground != null) _remapBackground.color = Conflicts ? Color.red : Color.white;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(nameof(OptionsMenuBehaviour.Update))]
+    private static bool UpdatePrefix(OptionsMenuBehaviour __instance)
+    {
+        if (MiraApiPlugin.IsMobile || ActiveInputManager.currentControlType != ActiveInputManager.InputType.Joystick) return true;
+
+        if (Input.GetKeyUp(KeyCode.Escape) && !__instance.KeyboardOptions.activeSelf) __instance.Close();
+
+        __instance.KeyboardOptions.SetActive(true);
+        __instance.MouseAndKeyboardOptions.SetActive(true);
+        return false;
     }
 
     [HarmonyPostfix]
