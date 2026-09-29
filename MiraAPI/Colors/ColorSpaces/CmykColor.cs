@@ -21,7 +21,7 @@ public record struct CmykColor(float c, float m, float y, float k, float a = 1f)
     /// Implicitly converts a <see cref="CmykColor"/> to a Unity <see cref="Color"/>.
     /// </summary>
     /// <param name="c">The color being converted.</param>
-    public static implicit operator Color(in CmykColor c)
+    public static implicit operator Color(CmykColor c)
     {
         return ToColor(c);
     }
@@ -30,7 +30,7 @@ public record struct CmykColor(float c, float m, float y, float k, float a = 1f)
     /// Implicitly converts a Unity <see cref="Color"/> to a <see cref="CmykColor"/>.
     /// </summary>
     /// <param name="c">The color being converted.</param>
-    public static implicit operator CmykColor(in Color c)
+    public static implicit operator CmykColor(Color c)
     {
         return FromColor(c);
     }
@@ -40,7 +40,7 @@ public record struct CmykColor(float c, float m, float y, float k, float a = 1f)
     /// </summary>
     /// <param name="cmyk">The CMYK color to convert.</param>
     /// <returns>A Unity <see cref="Color"/> representing the same visual color.</returns>
-    public static Color ToColor(in CmykColor cmyk)
+    public static Color ToColor(CmykColor cmyk)
     {
         var r = (1f - cmyk.c) * (1f - cmyk.k);
         var g = (1f - cmyk.m) * (1f - cmyk.k);
@@ -54,7 +54,7 @@ public record struct CmykColor(float c, float m, float y, float k, float a = 1f)
     /// </summary>
     /// <param name="color">The Unity Color to convert.</param>
     /// <returns>A <see cref="CmykColor"/> representing the same visual color.</returns>
-    public static CmykColor FromColor(in Color color)
+    public static CmykColor FromColor(Color color)
     {
         var r = color.r;
         var g = color.g;
@@ -81,7 +81,7 @@ public record struct CmykColor(float c, float m, float y, float k, float a = 1f)
     /// <param name="b">The ending color.</param>
     /// <param name="t">The interpolation value between the two colors, clamped to a 0 to 1 range.</param>
     /// <returns>The interpolated <see cref="CmykColor"/>.</returns>
-    public static CmykColor Lerp(in CmykColor a, in CmykColor b, float t)
+    public static CmykColor Lerp(CmykColor a, CmykColor b, float t)
     {
         return LerpUnclamped(a, b, MathUtilities.Clamp01(t));
     }
@@ -93,7 +93,7 @@ public record struct CmykColor(float c, float m, float y, float k, float a = 1f)
     /// <param name="b">The ending color.</param>
     /// <param name="t">The interpolation value between the two colors.</param>
     /// <returns>The interpolated <see cref="CmykColor"/>.</returns>
-    public static CmykColor LerpUnclamped(in CmykColor a, in CmykColor b, float t)
+    public static CmykColor LerpUnclamped(CmykColor a, CmykColor b, float t)
     {
         return new CmykColor(
             MathUtilities.LerpUnclamped(a.c, b.c, t),

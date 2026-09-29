@@ -3,6 +3,8 @@ using System.Text.RegularExpressions;
 using AmongUs.Data;
 using HarmonyLib;
 using MiraAPI.Colors;
+using MiraAPI.Utilities;
+using Reactor.Utilities.Extensions;
 using UnityEngine;
 
 namespace MiraAPI.Patches.Hud;
@@ -13,18 +15,17 @@ internal static class SetPlayerMaterialPatch
     [HarmonyPatch(nameof(PlayerMaterial.SetColors), typeof(int), typeof(Renderer))]
     public static bool Prefix(int colorId, Renderer rend)
     {
-        var r = rend.gameObject.GetComponent<VariableColorBehaviour>()
-             ?? rend.gameObject.AddComponent<VariableColorBehaviour>();
-        r.SetColor(PaletteManager.IsVariable(colorId) ? (VariableColor)PaletteManager.ColorIdToColorMap[colorId] : null);
+        rend.gameObject.GetOrAddComponent<VariableColorBehaviour>().SetColor(
+            PaletteManager.ColorIdToColorMap.TryGetValue(colorId, out var color) && color is VariableColor variable
+                ? variable
+                : null);
         return !PaletteManager.IsVariable(colorId);
     }
 
     [HarmonyPatch(nameof(PlayerMaterial.SetColors), typeof(Color), typeof(Renderer))]
     public static void Prefix(Renderer rend)
     {
-        var r = rend.gameObject.GetComponent<VariableColorBehaviour>()
-             ?? rend.gameObject.AddComponent<VariableColorBehaviour>();
-        r.SetColor(null);
+        rend.gameObject.GetOrAddComponent<VariableColorBehaviour>().SetColor(null);
     }
 }
 
@@ -48,7 +49,7 @@ internal static class ChatNotifRainbowPatch
         if (!__instance.gameObject.active || !PaletteManager.IsVariable(__instance.player.cosmetics.ColorId))
             return;
 
-        var str = ColorUtility.ToHtmlStringRGB(PaletteManager.GetMainColor(__instance.player.cosmetics.ColorId));
+        var str = PaletteManager.GetMainColor(__instance.player.cosmetics.ColorId).ToHtmlStringRGBA();
         __instance.playerNameText.text = "<color=#" + str + ">" + __instance.playerNameText.text.WithoutRichText();
     }
 
@@ -71,9 +72,9 @@ internal static class RainbowLobbyInfoPanePatch
         }
 
         var host = GameData.Instance.GetHost();
-        var text = ColorUtility.ToHtmlStringRGB(PaletteManager.GetMainColor(__instance.player.cosmetics.ColorId));
-        __instance.hostLabel.text =
-            TranslationController.Instance.GetString(StringNames.HostNounLabel);
+        var text = PaletteManager.GetMainColor(__instance.player.cosmetics.ColorId).ToHtmlStringRGBA();
+        __instance.hostLabel.text = TranslationController.Instance.GetString(StringNames.HostNounLabel);
+
         if (__instance.ShouldBoldenHostLabel(DataManager.Settings.Language.CurrentLanguage))
         {
             __instance.hostLabel.text = __instance.hostLabel.text.Insert(0, "<b>");

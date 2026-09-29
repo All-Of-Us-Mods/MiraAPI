@@ -871,4 +871,17 @@ public static class Extensions
         userData.joystickMaps[0].actionElementMaps.Add(map);
         return action;
     }
+
+    /// <summary>
+    /// Gets a component that is attached to the provided <see cref="GameObject"/>, attaching and returning the component if it wasn't found.
+    /// </summary>
+    /// <typeparam name="T">The component type.</typeparam>
+    /// <param name="go">The <see cref="GameObject"/> to get the component from.</param>
+    /// <returns>The component.</returns>
+    public static T GetOrAddComponent<T>(this GameObject go)
+        where T : Component
+    {
+        var comp = go.GetComponent<T>();
+        return comp ? comp : go.AddComponent<T>();
+    }
 }

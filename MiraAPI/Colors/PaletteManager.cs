@@ -34,7 +34,7 @@ public static class PaletteManager
         Palette.TextColors = Palette.TextColors.ToArray().AddRangeToArray(colors);
         Palette.TextOutlineColors = Palette.TextOutlineColors.ToArray().AddRangeToArray(shadowColors);
 
-        for (var i = 0; i < originalLength + CustomColors.Count; i++)
+        for (var i = 0; i < CustomColors.Count; i++)
             ColorIdToColorMap[i + originalLength] = CustomColors[i];
     }
 
@@ -68,7 +68,7 @@ public static class PaletteManager
         return !ColorIdToColorMap.TryGetValue(colorId, out var custom)
             ? Palette.PlayerColors[colorId]
             : (custom is VariableColor variable
-                ? variable.EvaluateMainColor()
+                ? variable.EvaluateMainColor(Time.time)
                 : custom.InternalMainColor);
     }
 
@@ -82,7 +82,7 @@ public static class PaletteManager
         return !ColorIdToColorMap.TryGetValue(colorId, out var custom)
             ? Palette.ShadowColors[colorId]
             : (custom is VariableColor variable
-                ? variable.EvaluateShadowColor()
+                ? variable.EvaluateShadowColor(Time.time)
                 : custom.InternalShadowColor);
     }
 }

@@ -404,7 +404,7 @@ public sealed class MiraPluginManager
 
             foreach (var property in type.GetProperties())
             {
-                if (property.PropertyType.IsAssignableTo(typeof(CustomColor)))
+                if (!property.PropertyType.IsAssignableTo(typeof(CustomColor)))
                 {
                     continue;
                 }

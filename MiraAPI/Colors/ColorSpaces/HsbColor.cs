@@ -20,7 +20,7 @@ public record struct HsbColor(float h, float s, float b, float a = 1f)
     /// Implicitly converts an <see cref="HsbColor"/> to a Unity <see cref="Color"/>.
     /// </summary>
     /// <param name="c">The color being converted.</param>
-    public static implicit operator Color(in HsbColor c)
+    public static implicit operator Color(HsbColor c)
     {
         return ToColor(c);
     }
@@ -29,7 +29,7 @@ public record struct HsbColor(float h, float s, float b, float a = 1f)
     /// Implicitly converts a Unity <see cref="Color"/> to an <see cref="HsbColor"/>.
     /// </summary>
     /// <param name="c">The color being converted.</param>
-    public static implicit operator HsbColor(in Color c)
+    public static implicit operator HsbColor(Color c)
     {
         return FromColor(c);
     }
@@ -39,7 +39,7 @@ public record struct HsbColor(float h, float s, float b, float a = 1f)
     /// </summary>
     /// <param name="hsb">The HSB color to convert.</param>
     /// <returns>A Unity <see cref="Color"/> representing the same visual color.</returns>
-    public static Color ToColor(in HsbColor hsb)
+    public static Color ToColor(HsbColor hsb)
     {
         if (hsb.s <= float.Epsilon)
             return new Color(MathUtilities.Clamp01(hsb.b), MathUtilities.Clamp01(hsb.b), MathUtilities.Clamp01(hsb.b), hsb.a);
@@ -72,7 +72,7 @@ public record struct HsbColor(float h, float s, float b, float a = 1f)
     /// </summary>
     /// <param name="color">The Unity Color to convert.</param>
     /// <returns>An <see cref="HsbColor"/> representing the same visual color.</returns>
-    public static HsbColor FromColor(in Color color)
+    public static HsbColor FromColor(Color color)
     {
         var max = MathF.Max(color.r, MathF.Max(color.g, color.b));
         var min = MathF.Min(color.r, MathF.Min(color.g, color.b));
@@ -108,7 +108,7 @@ public record struct HsbColor(float h, float s, float b, float a = 1f)
     /// <param name="b">The ending color.</param>
     /// <param name="t">The interpolation value between the two colors, clamped to a 0 to 1 range.</param>
     /// <returns>The interpolated <see cref="HsbColor"/>.</returns>
-    public static HsbColor Lerp(in HsbColor a, in HsbColor b, float t)
+    public static HsbColor Lerp(HsbColor a, HsbColor b, float t)
     {
         return LerpUnclamped(a, b, MathUtilities.Clamp01(t));
     }
@@ -120,7 +120,7 @@ public record struct HsbColor(float h, float s, float b, float a = 1f)
     /// <param name="b">The ending color.</param>
     /// <param name="t">The interpolation value between the two colors.</param>
     /// <returns>The interpolated <see cref="HsbColor"/>.</returns>
-    public static HsbColor LerpUnclamped(in HsbColor a, in HsbColor b, float t)
+    public static HsbColor LerpUnclamped(HsbColor a, HsbColor b, float t)
     {
         var hueDifference = MathUtilities.Repeat(b.h - a.h, 1f);
 
