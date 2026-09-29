@@ -1,0 +1,46 @@
+using System.Diagnostics.CodeAnalysis;
+using Il2CppInterop.Runtime.Attributes;
+using MiraAPI.Colors;
+using MiraAPI.Utilities;
+using UnityEngine;
+
+namespace MiraAPI;
+
+/// <summary>
+/// A mono script that adjusts the material colors of a <see cref="SpriteRenderer"/> component that it's attached to based on the provided variable color.
+/// </summary>
+[SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity methods.")]
+[SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Unity fields.")]
+[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
+public sealed class VariableColorBehaviour : MonoBehaviour
+{
+    private SpriteRenderer rend;
+    private Material material;
+    private VariableColor? color;
+
+    /// <summary>
+    /// Sets the current variant color.
+    /// </summary>
+    /// <param name="col">The new variant color.</param>
+    [HideFromIl2Cpp]
+    public void SetColor(VariableColor? col)
+    {
+        color = col;
+    }
+
+    private void Awake()
+    {
+        rend = GetComponent<SpriteRenderer>();
+        material = rend.material;
+    }
+
+    private void Update()
+    {
+        if (!rend || color == null)
+            return;
+
+        material.SetColor(ShaderID.BodyColor, color.EvaluateMainColor());
+        material.SetColor(ShaderID.BackColor, color.EvaluateShadowColor());
+        material.SetColor(ShaderID.VisorColor, Palette.VisorColor);
+    }
+}

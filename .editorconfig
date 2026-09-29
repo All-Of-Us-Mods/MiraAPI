@@ -86,3 +86,6 @@ dotnet_diagnostic.SA1133.severity = none
 
 # IDE0001: Simplify Names
 dotnet_diagnostic.IDE0001.severity = warning
+
+# IDE0079: Remove unnecessary suppression
+dotnet_diagnostic.IDE0079.severity = none

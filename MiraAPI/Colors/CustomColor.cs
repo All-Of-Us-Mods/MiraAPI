@@ -10,7 +10,7 @@ namespace MiraAPI.Colors;
 /// <param name="name">The name of the option.</param>
 /// <param name="mainColor">The main color.</param>
 /// <param name="shadowColor">The shadow color.</param>
-public sealed class CustomColor(StringNames name, Color32 mainColor, Color32 shadowColor)
+public class CustomColor(StringNames name, Color32 mainColor, Color32 shadowColor)
 {
     /// <summary>
     /// Gets or sets the main color.

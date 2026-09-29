@@ -404,7 +404,7 @@ public sealed class MiraPluginManager
 
             foreach (var property in type.GetProperties())
             {
-                if (property.PropertyType != typeof(CustomColor))
+                if (property.PropertyType.IsAssignableTo(typeof(CustomColor)))
                 {
                     continue;
                 }
@@ -416,6 +416,9 @@ public sealed class MiraPluginManager
                 }
 
                 PaletteManager.CustomColors.Add(color);
+
+                if (color is VariableColor)
+                    PaletteManager.VariableColorNames.Add(color.Name);
             }
 
             foreach (var field in type.GetFields().Where(f => f.FieldType.IsAssignableTo(typeof(CustomColor))))
