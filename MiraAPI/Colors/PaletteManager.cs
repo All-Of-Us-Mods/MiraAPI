@@ -63,13 +63,13 @@ public static class PaletteManager
     /// </summary>
     /// <param name="colorId">The id of the color.</param>
     /// <returns>The main color associated with the provided ID.</returns>
-    public static Color32 GetMainColor(int colorId)
+    public static Color GetMainColor(int colorId)
     {
         return !ColorIdToColorMap.TryGetValue(colorId, out var custom)
             ? Palette.PlayerColors[colorId]
             : (custom is VariableColor variable
                 ? variable.EvaluateMainColor()
-                : custom.MainColor);
+                : custom.InternalMainColor);
     }
 
     /// <summary>
@@ -77,12 +77,12 @@ public static class PaletteManager
     /// </summary>
     /// <param name="colorId">The id of the color.</param>
     /// <returns>The shadow color associated with the provided ID.</returns>
-    public static Color32 GetShadowColor(int colorId)
+    public static Color GetShadowColor(int colorId)
     {
         return !ColorIdToColorMap.TryGetValue(colorId, out var custom)
             ? Palette.ShadowColors[colorId]
             : (custom is VariableColor variable
                 ? variable.EvaluateShadowColor()
-                : custom.ShadowColor);
+                : custom.InternalShadowColor);
     }
 }

@@ -89,3 +89,9 @@ dotnet_diagnostic.IDE0001.severity = warning
 
 # IDE0079: Remove unnecessary suppression
 dotnet_diagnostic.IDE0079.severity = none
+
+# S1244: Floating point numbers should not be tested for equality
+dotnet_diagnostic.S1244.severity = none
+
+# IDE0045: Convert to conditional expression
+dotnet_diagnostic.IDE0045.severity = none

@@ -18,6 +18,8 @@ public sealed class VariableColorBehaviour : MonoBehaviour
     private Material material;
     private VariableColor? color;
 
+    private static readonly Color VisorColor = Palette.VisorColor;
+
     /// <summary>
     /// Sets the current variant color.
     /// </summary>
@@ -41,6 +43,6 @@ public sealed class VariableColorBehaviour : MonoBehaviour
 
         material.SetColor(ShaderID.BodyColor, color.EvaluateMainColor());
         material.SetColor(ShaderID.BackColor, color.EvaluateShadowColor());
-        material.SetColor(ShaderID.VisorColor, Palette.VisorColor);
+        material.SetColor(ShaderID.VisorColor, VisorColor);
     }
 }

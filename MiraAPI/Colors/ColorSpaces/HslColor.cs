@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
+using MiraAPI.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.Colors.ColorSpaces;
@@ -19,7 +20,7 @@ public record struct HslColor(float h, float s, float l, float a = 1f)
     /// Implicitly converts an <see cref="HslColor"/> to a Unity <see cref="Color"/>.
     /// </summary>
     /// <param name="c">The color being converted.</param>
-    public static implicit operator Color(HslColor c)
+    public static implicit operator Color(in HslColor c)
     {
         return ToColor(c);
     }
@@ -28,7 +29,7 @@ public record struct HslColor(float h, float s, float l, float a = 1f)
     /// Implicitly converts a Unity <see cref="Color"/> to an <see cref="HslColor"/>.
     /// </summary>
     /// <param name="c">The color being converted.</param>
-    public static implicit operator HslColor(Color c)
+    public static implicit operator HslColor(in Color c)
     {
         return FromColor(c);
     }
@@ -38,14 +39,14 @@ public record struct HslColor(float h, float s, float l, float a = 1f)
     /// </summary>
     /// <param name="hsl">The HSL color to convert.</param>
     /// <returns>A Unity <see cref="Color"/> representing the same visual color.</returns>
-    public static Color ToColor(HslColor hsl)
+    public static Color ToColor(in HslColor hsl)
     {
-        if (hsl.s <= Mathf.Epsilon)
-            return new Color(Mathf.Clamp01(hsl.l), Mathf.Clamp01(hsl.l), Mathf.Clamp01(hsl.l), hsl.a);
+        if (hsl.s <= float.Epsilon)
+            return new Color(MathUtilities.Clamp01(hsl.l), MathUtilities.Clamp01(hsl.l), MathUtilities.Clamp01(hsl.l), hsl.a);
 
-        var c = (1f - Mathf.Abs(2f * hsl.l - 1f)) * hsl.s;
+        var c = (1f - MathF.Abs(2f * hsl.l - 1f)) * hsl.s;
         var hPrime = hsl.h * 6f;
-        var x = c * (1f - Mathf.Abs((hPrime % 2f) - 1f));
+        var x = c * (1f - MathF.Abs((hPrime % 2f) - 1f));
         var m = hsl.l - c / 2f;
 
         var (r, g, b) = hPrime switch
@@ -55,11 +56,11 @@ public record struct HslColor(float h, float s, float l, float a = 1f)
             < 3f => (0f, c, x),
             < 4f => (0f, x, c),
             < 5f => (x, 0f, c),
-            < 6f => (c, 0f, x),
+            <= 6f => (c, 0f, x),
             _ => (0f, 0f, 0f),
         };
 
-        return new Color(Mathf.Clamp01(r + m), Mathf.Clamp01(g + m), Mathf.Clamp01(b + m), hsl.a);
+        return new Color(MathUtilities.Clamp01(r + m), MathUtilities.Clamp01(g + m), MathUtilities.Clamp01(b + m), hsl.a);
     }
 
     /// <summary>
@@ -67,16 +68,31 @@ public record struct HslColor(float h, float s, float l, float a = 1f)
     /// </summary>
     /// <param name="color">The Unity Color to convert.</param>
     /// <returns>An <see cref="HslColor"/> representing the same visual color.</returns>
-    public static HslColor FromColor(Color color)
+    public static HslColor FromColor(in Color color)
     {
-        var max = Mathf.Max(color.r, Mathf.Max(color.g, color.b));
-        var min = Mathf.Min(color.r, Mathf.Min(color.g, color.b));
+        var max = MathF.Max(color.r, MathF.Max(color.g, color.b));
+        var min = MathF.Min(color.r, MathF.Min(color.g, color.b));
         var l = (max + min) / 2f;
         var delta = max - min;
 
-        var s = delta == 0f ? 0f : delta / (1f - Mathf.Abs(2f * l - 1f));
+        var s = delta == 0f ? 0f : delta / (1f - MathF.Abs(2f * l - 1f));
 
-        Color.RGBToHSV(color, out var h, out _, out _);
+        var h = 0f;
+
+        if (delta > 0f)
+        {
+            if (max == color.r)
+                h = (color.g - color.b) / delta % 6f;
+            else if (max == color.g)
+                h = (color.b - color.r) / delta + 2f;
+            else
+                h = (color.r - color.g) / delta + 4f;
+
+            h /= 6f;
+
+            if (h < 0f)
+                h += 1f;
+        }
 
         return new HslColor(h, s, l, color.a);
     }
@@ -88,10 +104,9 @@ public record struct HslColor(float h, float s, float l, float a = 1f)
     /// <param name="b">The ending color.</param>
     /// <param name="t">The interpolation value between the two colors, clamped to a 0 to 1 range.</param>
     /// <returns>The interpolated <see cref="HslColor"/>.</returns>
-    public static HslColor Lerp(HslColor a, HslColor b, float t)
+    public static HslColor Lerp(in HslColor a, in HslColor b, float t)
     {
-        t = Mathf.Clamp01(t);
-        return LerpUnclamped(a, b, t);
+        return LerpUnclamped(a, b, MathUtilities.Clamp01(t));
     }
 
     /// <summary>
@@ -101,17 +116,17 @@ public record struct HslColor(float h, float s, float l, float a = 1f)
     /// <param name="b">The ending color.</param>
     /// <param name="t">The interpolation value between the two colors.</param>
     /// <returns>The interpolated <see cref="HslColor"/>.</returns>
-    public static HslColor LerpUnclamped(HslColor a, HslColor b, float t)
+    public static HslColor LerpUnclamped(in HslColor a, in HslColor b, float t)
     {
-        var hueDifference = Mathf.Repeat(b.h - a.h, 1f);
+        var hueDifference = MathUtilities.Repeat(b.h - a.h, 1f);
 
         if (hueDifference > 0.5f)
             hueDifference -= 1f;
 
         return new HslColor(
-            Mathf.Repeat(a.h + (hueDifference * t), 1f),
-            Mathf.LerpUnclamped(a.s, b.s, t),
-            Mathf.LerpUnclamped(a.l, b.l, t),
-            Mathf.LerpUnclamped(a.a, b.a, t));
+            MathUtilities.Repeat(a.h + (hueDifference * t), 1f),
+            MathUtilities.LerpUnclamped(a.s, b.s, t),
+            MathUtilities.LerpUnclamped(a.l, b.l, t),
+            MathUtilities.LerpUnclamped(a.a, b.a, t));
     }
 }

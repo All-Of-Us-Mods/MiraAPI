@@ -1,4 +1,5 @@
-﻿using MiraAPI.Translation;
+﻿using System.Diagnostics.CodeAnalysis;
+using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using UnityEngine;
 
@@ -10,17 +11,37 @@ namespace MiraAPI.Colors;
 /// <param name="name">The name of the option.</param>
 /// <param name="mainColor">The main color.</param>
 /// <param name="shadowColor">The shadow color.</param>
+[SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1513:Closing brace should be followed by blank line", Justification = "Looks weird.")]
+[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Internal code.")]
 public class CustomColor(StringNames name, Color32 mainColor, Color32 shadowColor)
 {
     /// <summary>
     /// Gets or sets the main color.
     /// </summary>
-    public Color32 MainColor { get; set; } = mainColor;
+    public Color32 MainColor
+    {
+        get;
+        set
+        {
+            field = value;
+            InternalMainColor = value;
+        }
+    }
+    = mainColor;
 
     /// <summary>
     /// Gets or sets the shadow color.
     /// </summary>
-    public Color32 ShadowColor { get; set; } = shadowColor;
+    public Color32 ShadowColor
+    {
+        get;
+        set
+        {
+            field = value;
+            InternalShadowColor = value;
+        }
+    }
+    = shadowColor;
 
     /// <summary>
     /// Gets or sets the name of the color.
@@ -31,6 +52,9 @@ public class CustomColor(StringNames name, Color32 mainColor, Color32 shadowColo
     /// Gets or sets whether the color is lighter or darker. Can be used to help with colorblind stuff.
     /// </summary>
     public CustomColorBrightness ColorBrightness { get; set; } = CustomColorBrightness.Darker;
+
+    internal Color InternalMainColor = mainColor;
+    internal Color InternalShadowColor = shadowColor;
 
     /// <inheritdoc cref="CustomColor"/>
     public CustomColor(StringNames name, Color32 mainColor)

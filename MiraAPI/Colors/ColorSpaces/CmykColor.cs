@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
+using MiraAPI.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.Colors.ColorSpaces;
@@ -20,7 +21,7 @@ public record struct CmykColor(float c, float m, float y, float k, float a = 1f)
     /// Implicitly converts a <see cref="CmykColor"/> to a Unity <see cref="Color"/>.
     /// </summary>
     /// <param name="c">The color being converted.</param>
-    public static implicit operator Color(CmykColor c)
+    public static implicit operator Color(in CmykColor c)
     {
         return ToColor(c);
     }
@@ -29,7 +30,7 @@ public record struct CmykColor(float c, float m, float y, float k, float a = 1f)
     /// Implicitly converts a Unity <see cref="Color"/> to a <see cref="CmykColor"/>.
     /// </summary>
     /// <param name="c">The color being converted.</param>
-    public static implicit operator CmykColor(Color c)
+    public static implicit operator CmykColor(in Color c)
     {
         return FromColor(c);
     }
@@ -39,13 +40,13 @@ public record struct CmykColor(float c, float m, float y, float k, float a = 1f)
     /// </summary>
     /// <param name="cmyk">The CMYK color to convert.</param>
     /// <returns>A Unity <see cref="Color"/> representing the same visual color.</returns>
-    public static Color ToColor(CmykColor cmyk)
+    public static Color ToColor(in CmykColor cmyk)
     {
         var r = (1f - cmyk.c) * (1f - cmyk.k);
         var g = (1f - cmyk.m) * (1f - cmyk.k);
         var b = (1f - cmyk.y) * (1f - cmyk.k);
 
-        return new Color(Mathf.Clamp01(r), Mathf.Clamp01(g), Mathf.Clamp01(b), cmyk.a);
+        return new Color(MathUtilities.Clamp01(r), MathUtilities.Clamp01(g), MathUtilities.Clamp01(b), cmyk.a);
     }
 
     /// <summary>
@@ -53,22 +54,24 @@ public record struct CmykColor(float c, float m, float y, float k, float a = 1f)
     /// </summary>
     /// <param name="color">The Unity Color to convert.</param>
     /// <returns>A <see cref="CmykColor"/> representing the same visual color.</returns>
-    public static CmykColor FromColor(Color color)
+    public static CmykColor FromColor(in Color color)
     {
         var r = color.r;
         var g = color.g;
         var b = color.b;
 
-        var k = 1f - Mathf.Max(r, g, b);
+        var k = 1f - MathF.Max(r, MathF.Max(g, b));
 
         if (k >= 1f)
             return new CmykColor(0f, 0f, 0f, 1f, color.a);
 
-        var c = (1f - r - k) / (1f - k);
-        var m = (1f - g - k) / (1f - k);
-        var y = (1f - b - k) / (1f - k);
+        var invK = 1f / (1f - k);
 
-        return new CmykColor(Mathf.Clamp01(c), Mathf.Clamp01(m), Mathf.Clamp01(y), Mathf.Clamp01(k), color.a);
+        var c = (1f - r - k) * invK;
+        var m = (1f - g - k) * invK;
+        var y = (1f - b - k) * invK;
+
+        return new CmykColor(MathUtilities.Clamp01(c), MathUtilities.Clamp01(m), MathUtilities.Clamp01(y), MathUtilities.Clamp01(k), color.a);
     }
 
     /// <summary>
@@ -78,10 +81,9 @@ public record struct CmykColor(float c, float m, float y, float k, float a = 1f)
     /// <param name="b">The ending color.</param>
     /// <param name="t">The interpolation value between the two colors, clamped to a 0 to 1 range.</param>
     /// <returns>The interpolated <see cref="CmykColor"/>.</returns>
-    public static CmykColor Lerp(CmykColor a, CmykColor b, float t)
+    public static CmykColor Lerp(in CmykColor a, in CmykColor b, float t)
     {
-        t = Mathf.Clamp01(t);
-        return LerpUnclamped(a, b, t);
+        return LerpUnclamped(a, b, MathUtilities.Clamp01(t));
     }
 
     /// <summary>
@@ -91,13 +93,13 @@ public record struct CmykColor(float c, float m, float y, float k, float a = 1f)
     /// <param name="b">The ending color.</param>
     /// <param name="t">The interpolation value between the two colors.</param>
     /// <returns>The interpolated <see cref="CmykColor"/>.</returns>
-    public static CmykColor LerpUnclamped(CmykColor a, CmykColor b, float t)
+    public static CmykColor LerpUnclamped(in CmykColor a, in CmykColor b, float t)
     {
         return new CmykColor(
-            Mathf.LerpUnclamped(a.c, b.c, t),
-            Mathf.LerpUnclamped(a.m, b.m, t),
-            Mathf.LerpUnclamped(a.y, b.y, t),
-            Mathf.LerpUnclamped(a.k, b.k, t),
-            Mathf.LerpUnclamped(a.a, b.a, t));
+            MathUtilities.LerpUnclamped(a.c, b.c, t),
+            MathUtilities.LerpUnclamped(a.m, b.m, t),
+            MathUtilities.LerpUnclamped(a.y, b.y, t),
+            MathUtilities.LerpUnclamped(a.k, b.k, t),
+            MathUtilities.LerpUnclamped(a.a, b.a, t));
     }
 }

@@ -620,7 +620,23 @@ public static class Extensions
                 (byte)Mathf.Clamp(color.r - darknessAmount, 0, 255),
                 (byte)Mathf.Clamp(color.g - darknessAmount, 0, 255),
                 (byte)Mathf.Clamp(color.b - darknessAmount, 0, 255),
-                byte.MaxValue);
+                color.a);
+    }
+
+    /// <summary>
+    /// Gets a darkened version of a <see cref="Color"/>.
+    /// </summary>
+    /// <param name="color">The original <see cref="Color"/>.</param>
+    /// <param name="darknessAmount">A darkness amount between 0 and 1.</param>
+    /// <returns>The darkened <see cref="Color"/>.</returns>
+    public static Color GetShadowColor(this Color color, float darknessAmount)
+    {
+        return
+            new Color(
+                MathUtilities.Clamp01(color.r - darknessAmount),
+                MathUtilities.Clamp01(color.g - darknessAmount),
+                MathUtilities.Clamp01(color.b - darknessAmount),
+                color.a);
     }
 
     /// <summary>
@@ -796,7 +812,7 @@ public static class Extensions
     }
 
     /// <summary>
-    /// Fixed version of <see cref="Reactor.Utilities.Extensions.UnityExtensions.SetOutline(Renderer, Color?)"/>.
+    /// Fixed version of <see cref="UnityExtensions.SetOutline(Renderer, Color?)"/>.
     /// </summary>
     /// <param name="renderer">The <see cref="Renderer"/> you want to update the outline for.</param>
     /// <param name="color">The outline <see cref="Color"/>.</param>
