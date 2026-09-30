@@ -44,19 +44,15 @@ internal static class PlayerTabPatch
 [HarmonyPatch(typeof(ChatNotification), nameof(ChatNotification.Update))]
 internal static class ChatNotifRainbowPatch
 {
+    private static readonly Regex RichTags = new(@"<[^>]*>", default, Regex.InfiniteMatchTimeout);
+
     public static void Postfix(ChatNotification __instance)
     {
         if (!__instance.gameObject.active || !PaletteManager.IsVariable(__instance.player.cosmetics.ColorId))
             return;
 
         var str = PaletteManager.GetMainColor(__instance.player.cosmetics.ColorId).ToHtmlStringRGBA();
-        __instance.playerNameText.text = "<color=#" + str + ">" + __instance.playerNameText.text.WithoutRichText();
-    }
-
-    private static string WithoutRichText(this string text)
-    {
-        var richTagRegex = new Regex(@"<[^>]*>", default, Regex.InfiniteMatchTimeout);
-        return richTagRegex.Replace(text, string.Empty);
+        __instance.playerNameText.text = "<color=#" + str + ">" + RichTags.Replace(__instance.playerNameText.text, string.Empty);
     }
 }
 

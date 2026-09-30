@@ -17,7 +17,6 @@ namespace MiraAPI;
 public sealed class VariableColorBehaviour : MonoBehaviour
 {
     private SpriteRenderer rend;
-    private Material material;
     private VariableColor? color;
 
     private static readonly Color VisorColor = Palette.VisorColor;
@@ -35,8 +34,7 @@ public sealed class VariableColorBehaviour : MonoBehaviour
     private void Awake()
     {
         rend = GetComponent<SpriteRenderer>();
-        material = rend.material;
-        material.SetColor(ShaderID.VisorColor, VisorColor);
+        rend.material.SetColor(ShaderID.VisorColor, VisorColor);
     }
 
     private void Update()
@@ -45,6 +43,7 @@ public sealed class VariableColorBehaviour : MonoBehaviour
             return;
 
         var time = Time.time;
+        var material = rend.material;
         material.SetColor(ShaderID.BodyColor, color.EvaluateMainColor(time));
         material.SetColor(ShaderID.BackColor, color.EvaluateShadowColor(time));
     }

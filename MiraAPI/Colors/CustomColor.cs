@@ -11,8 +11,8 @@ namespace MiraAPI.Colors;
 /// <param name="name">The name of the option.</param>
 /// <param name="mainColor">The main color.</param>
 /// <param name="shadowColor">The shadow color.</param>
-[SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1513:Closing brace should be followed by blank line", Justification = "Looks weird.")]
 [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Internal code.")]
+[SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1513:Closing brace should be followed by blank line", Justification = "Looks weird.")]
 public class CustomColor(StringNames name, Color32 mainColor, Color32 shadowColor)
 {
     /// <summary>
