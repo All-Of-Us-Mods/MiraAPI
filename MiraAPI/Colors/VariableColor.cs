@@ -18,12 +18,12 @@ public sealed class VariableColor(StringNames name, Func<float, Color> mainEvalu
     : CustomColor(name, mainColor ?? mainEvaluator(0f), shadowColor ?? shadowEvaluator?.Invoke(0f) ?? (mainColor ?? mainEvaluator(0f)).GetShadowColor(60))
 {
     /// <summary>
-    /// Gets or sets a delegate that takes a normalized time value and returns the dynamic main color.
+    /// Gets or sets a delegate that takes in a time value and returns the dynamic main color.
     /// </summary>
     public Func<float, Color> MainEvaluator { get; set; } = mainEvaluator;
 
     /// <summary>
-    /// Gets or sets a delegate that takes a normalized time value and returns the dynamic shadow color.
+    /// Gets or sets a delegate that takes in a time value and returns the dynamic shadow color.
     /// </summary>
     public Func<float, Color> ShadowEvaluator { get; set; } = shadowEvaluator ?? (t => mainEvaluator(t).GetShadowColor(0.24f));
 
@@ -46,7 +46,7 @@ public sealed class VariableColor(StringNames name, Func<float, Color> mainEvalu
     }
 
     /// <summary>
-    /// Evaluates the dynamic main color based on the current in-game time.
+    /// Evaluates the dynamic main color based on the provided time value.
     /// </summary>
     /// <param name="time">The time to evaluate the color against.</param>
     /// <returns>The dynamically evaluated color, or the static <see cref="CustomColor.MainColor"/> if static variable colors are enabled in the user's settings.</returns>
@@ -58,7 +58,7 @@ public sealed class VariableColor(StringNames name, Func<float, Color> mainEvalu
     }
 
     /// <summary>
-    /// Evaluates the dynamic shadow color based on the current in-game time.
+    /// Evaluates the dynamic shadow color based on the provided time value.
     /// </summary>
     /// <param name="time">The time to evaluate the color against.</param>
     /// <returns>The dynamically evaluated color, or the static <see cref="CustomColor.ShadowColor"/> if static variable colors are enabled in the user's settings.</returns>
