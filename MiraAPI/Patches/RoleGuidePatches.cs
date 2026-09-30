@@ -19,6 +19,7 @@ namespace MiraAPI.Patches;
 [HarmonyPatch]
 public static class RoleGuidePatches
 {
+    public static PassiveButton ViewButton;
     [HarmonyPostfix]
     [HarmonyPriority(Priority.First)]
     [HarmonyPatch(typeof(MatchInfoGuide), nameof(MatchInfoGuide.CreateNormalModeSettings))]
@@ -102,6 +103,16 @@ public static class RoleGuidePatches
         {
             if (__instance.NormalModeSettings.Count == 0)
             {
+                var settingsButton = Object.Instantiate(
+                    HudManager.Instance.SettingsButton,
+                    __instance.TabButtons[2].transform.parent);
+                ViewButton = settingsButton.GetComponent<PassiveButton>();
+                ViewButton.OnClick = new Button.ButtonClickedEvent();
+                ViewButton.OnClick.AddListener(new Action(SwitchOrder));
+                ViewButton.name = "ViewButton";
+                settingsButton.transform.localPosition = new Vector3(2.4f, 0.765f, -0.1f);
+                settingsButton.transform.localScale = Vector3.one;
+                settingsButton.transform.GetChild(2).gameObject.SetActive(false);
                 __instance.numOfTabs = 3;
                 __instance.TabButtons[0].SelectButton(true);
                 __instance.MatchInfoRoleMaskArea.transform.localPosition = new Vector3(-0.0184f, 0.15f, -0.1f);
@@ -154,13 +165,89 @@ public static class RoleGuidePatches
         return false;
     }
 
-    private static readonly Dictionary<RoleBehaviour, MatchInfoRolePanel> RolePanels = [];
+    private static readonly Dictionary<RoleBehaviour, DetailedPanel> RolePanels = [];
     private static Scroller advancedWikiTab;
     private static GameObject currentAdvancedTabObject;
     private static TextMeshPro titleText;
 
+    public sealed class DetailedPanel(MatchInfoRolePanel panel, string title, string category, string modId)
+    {
+        public MatchInfoRolePanel Panel = panel;
+        public string Title = title;
+        public string Category = category;
+        public string ModId = modId;
+        public int Amount { get; set; }
+        public int Chance { get; set; }
+        public float LikelyhoodOfRole { get; set; }
+    }
+
+    private static SortingFilter sortFilter = SortingFilter.EnabledOnly;
+    private static SortingMethod sortMethod = SortingMethod.Alphabetical;
+    private static SortingOrder sortOrder = SortingOrder.RoleName;
+
+    public static void SwitchFilter()
+    {
+        var stepUp = (SortingFilter)((int)sortFilter + 1);
+        if (Enum.IsDefined(stepUp))
+        {
+            sortFilter = stepUp;
+        }
+        else
+        {
+            sortFilter = SortingFilter.EnabledOnly;
+        }
+
+        var newSorted = sortMethod is SortingMethod.Alphabetical ? RolePanels.OrderBy(GetSortingOrder()) : RolePanels.OrderByDescending(GetSortingOrder());
+
+        foreach (var pair in newSorted)
+        {
+            pair.Value.Panel.transform.SetAsLastSibling();
+        }
+    }
+
+    public static void SwitchMethod()
+    {
+        var stepUp = (SortingMethod)((int)sortMethod + 1);
+        if (Enum.IsDefined(stepUp))
+        {
+            sortMethod = stepUp;
+        }
+        else
+        {
+            sortMethod = SortingMethod.Alphabetical;
+        }
+
+        var newSorted = sortMethod is SortingMethod.Alphabetical ? RolePanels.OrderBy(GetSortingOrder()) : RolePanels.OrderByDescending(GetSortingOrder());
+
+        foreach (var pair in newSorted)
+        {
+            pair.Value.Panel.transform.SetAsLastSibling();
+        }
+    }
+
+    public static void SwitchOrder()
+    {
+        var stepUp = (SortingOrder)((int)sortOrder + 1);
+        if (Enum.IsDefined(stepUp))
+        {
+            sortOrder = stepUp;
+        }
+        else
+        {
+            sortOrder = SortingOrder.RoleName;
+        }
+
+        var newSorted = sortMethod is SortingMethod.Alphabetical ? RolePanels.OrderBy(GetSortingOrder()) : RolePanels.OrderByDescending(GetSortingOrder());
+
+        foreach (var pair in newSorted)
+        {
+            pair.Value.Panel.transform.SetAsLastSibling();
+        }
+    }
+
     public static void DisplayNormalRoleSettings(MatchInfoGuide instance, bool reset)
     {
+        var inner = instance.settingsTabs[2].GetComponent<Scroller>().Inner;
         if (reset)
         {
             RolePanels.Clear();
@@ -198,7 +285,13 @@ public static class RoleGuidePatches
                 {
                     var panel = Object.Instantiate(
                         instance.MatchInfoRolePanelPrefab,
-                        instance.settingsTabs[2].GetComponent<Scroller>().Inner);
+                        inner);
+                    var amount = GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetNumPerGame(roleBehaviour.Role);
+                    var chance = GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetChancePerGame(roleBehaviour.Role);
+                    panel.SetPanel(
+                        roleBehaviour,
+                        amount,
+                        chance);
                     var collider = panel.roleIcon.gameObject.AddComponent<BoxCollider2D>();
                     collider.size = new Vector2(0.13f, 0.13f);
                     collider.offset = new Vector2(0, 0);
@@ -220,7 +313,13 @@ public static class RoleGuidePatches
                     passiveButton.OnClick = new Button.ButtonClickedEvent();
                     passiveButton.OnClick.AddListener(
                         (Action)(() => { DisplayAdvancedWiki(instance, roleBehaviour); }));
-                    RolePanels.Add(roleBehaviour, panel);
+                    RolePanels.Add(
+                        roleBehaviour,
+                        new DetailedPanel(
+                            panel,
+                            roleBehaviour.GetRoleName(),
+                            roleBehaviour.GetCategoryTitle(),
+                            roleBehaviour is ICustomRole custom ? custom.ParentMod.MiraPlugin.GetAbbreviatedModName() : "AU"));
                 }
             }
         }
@@ -228,11 +327,19 @@ public static class RoleGuidePatches
         advancedWikiTab?.gameObject.SetActive(false);
 
         var num = 0;
-        foreach (var (roleData, panel) in RolePanels)
+        foreach (var (roleData, holder) in RolePanels)
         {
+            var panel = holder.Panel;
             var amount = GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetNumPerGame(roleData.Role);
             var chance = GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetChancePerGame(roleData.Role);
             var forciblyShow = roleData is ICustomRole custom ? custom.ForceShowRoleOnWiki : null;
+            panel.SetPanel(
+                roleData,
+                amount,
+                chance);
+            holder.Amount = amount;
+            holder.Chance = chance;
+            holder.LikelyhoodOfRole = amount * chance;
             if (amount == 0 || chance == 0 || (Enum.IsDefined(roleData.Role) && roleData.IsRoleBlacklisted()) ||
                 (roleData is ICustomRole custom2 && ((!custom2.CanSpawnOnCurrentMode() && forciblyShow == null) ||
                                                                     (forciblyShow.HasValue && !forciblyShow.Value))))
@@ -242,11 +349,14 @@ public static class RoleGuidePatches
             }
 
             panel.gameObject.SetActive(true);
-            panel.SetPanel(
-                roleData,
-                amount,
-                chance);
             num++;
+        }
+
+        var newSorted = sortMethod is SortingMethod.Alphabetical ? RolePanels.OrderBy(GetSortingOrder()) : RolePanels.OrderByDescending(GetSortingOrder());
+
+        foreach (var pair in newSorted)
+        {
+            pair.Value.Panel.transform.SetAsLastSibling();
         }
 
         if (num == 0)
@@ -259,6 +369,19 @@ public static class RoleGuidePatches
         if (reset)
         {
             instance.CreatePlayerEntries();
+        }
+    }
+
+    public static Func<KeyValuePair<RoleBehaviour, DetailedPanel>, string> GetSortingOrder()
+    {
+        switch (sortOrder)
+        {
+            case SortingOrder.Faction:
+                return x => $"{x.Value.Category} ({x.Value.Title}) {x.Value.LikelyhoodOfRole.ToString("0000.0", CultureInfo.InvariantCulture)}";
+            case SortingOrder.AmountChance:
+                return x => $"{x.Value.LikelyhoodOfRole.ToString("0000.0", CultureInfo.InvariantCulture)} {x.Value.Title} ({x.Value.Category})";
+            default:
+                return x => $"{x.Value.Title} ({x.Value.Category}) {x.Value.LikelyhoodOfRole.ToString("0000.0", CultureInfo.InvariantCulture)}";
         }
     }
 
@@ -368,14 +491,14 @@ public static class RoleGuidePatches
         if (role is ICustomRole customRole)
         {
             __instance.roleName.text = customRole.RoleName;
-            __instance.roleDescription.text = $"<size=60%>{customRole.RoleFactionTitle}</size>\n" + customRole.RoleMedDescription;
+            __instance.roleDescription.text = $"<size=60%>{role.GetCategoryTitle()}</size>\n" + customRole.RoleMedDescription;
             __instance.roleIcon.sprite = customRole.Configuration.Icon?.LoadAsset();
             __instance.roleCount.text += $" ({customRole.ParentMod.MiraPlugin.GetAbbreviatedModName()})";
         }
         else
         {
             __instance.roleName.text = role.NiceName;
-            __instance.roleDescription.text = $"<size=60%>{TranslationController.Instance.GetString(role.TeamType is RoleTeamTypes.Crewmate ? StringNames.Crewmate : StringNames.Impostor)}</size>\n" + role.BlurbMed;
+            __instance.roleDescription.text = $"<size=60%>{role.GetCategoryTitle()}</size>\n" + role.BlurbMed;
             __instance.roleIcon.sprite = role.RoleIconColor;
             __instance.roleCount.text += " (AU)";
         }
@@ -388,4 +511,40 @@ public static class RoleGuidePatches
         __instance.roleIcon.transform.localScale = new Vector3(4f, 4f, 1f);
         return false;
     }
+
+    public static string GetCategoryTitle(this RoleBehaviour role)
+    {
+        if (role is ICustomRole customRole)
+        {
+            return customRole.GetCategoryTitle();
+        }
+
+        return TranslationController.Instance.GetString(
+            role.TeamType is RoleTeamTypes.Crewmate ? StringNames.Crewmate : StringNames.Impostor);
+    }
+
+    public static string GetCategoryTitle(this ICustomRole customRole)
+    {
+        return customRole.RoleFactionTitle;
+    }
+}
+
+public enum SortingOrder
+{
+    RoleName,
+    Faction,
+    AmountChance
+}
+
+public enum SortingMethod
+{
+    Alphabetical,
+    AlphabeticalDescending
+}
+
+public enum SortingFilter
+{
+    EnabledOnly,
+    DisabledOnly,
+    AllRoles
 }
