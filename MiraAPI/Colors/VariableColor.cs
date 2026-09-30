@@ -49,7 +49,7 @@ public sealed class VariableColor(StringNames name, Func<float, Color> mainEvalu
     /// Evaluates the dynamic main color based on the current in-game time.
     /// </summary>
     /// <param name="time">The time to evaluate the color against.</param>
-    /// <returns>The dynamically evaluated color, or the static <see cref="CustomColor.MainColor"/> if static variant colors are enabled in the user's settings.</returns>
+    /// <returns>The dynamically evaluated color, or the static <see cref="CustomColor.MainColor"/> if static variable colors are enabled in the user's settings.</returns>
     public Color EvaluateMainColor(float time)
     {
         return LocalSettingsTabSingleton<MiraApiSettings>.Instance.EnableVariableColors.Value
@@ -61,7 +61,7 @@ public sealed class VariableColor(StringNames name, Func<float, Color> mainEvalu
     /// Evaluates the dynamic shadow color based on the current in-game time.
     /// </summary>
     /// <param name="time">The time to evaluate the color against.</param>
-    /// <returns>The dynamically evaluated color, or the static <see cref="CustomColor.ShadowColor"/> if static variant colors are enabled in the user's settings.</returns>
+    /// <returns>The dynamically evaluated color, or the static <see cref="CustomColor.ShadowColor"/> if static variable colors are enabled in the user's settings.</returns>
     public Color EvaluateShadowColor(float time)
     {
         return LocalSettingsTabSingleton<MiraApiSettings>.Instance.EnableVariableColors.Value

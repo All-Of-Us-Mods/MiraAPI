@@ -22,9 +22,9 @@ public sealed class VariableColorBehaviour : MonoBehaviour
     private static readonly Color VisorColor = Palette.VisorColor;
 
     /// <summary>
-    /// Sets the current variant color.
+    /// Sets the current variable color.
     /// </summary>
-    /// <param name="col">The new variant color.</param>
+    /// <param name="col">The new variable color.</param>
     [HideFromIl2Cpp]
     public void SetColor(VariableColor? col)
     {

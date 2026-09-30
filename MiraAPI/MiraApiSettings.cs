@@ -235,7 +235,7 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
     public ConfigEntry<bool> EnableSabotageBlares { get; private set; } = config.Bind("MiraApi.Accessibility", "MiraApi.EnableSabotageBlare", true);
 
     /// <summary>
-    /// Gets whether variant colors will remain static or not.
+    /// Gets whether variable colors will remain static or not.
     /// </summary>
     [LocalToggleSetting]
     public ConfigEntry<bool> EnableVariableColors { get; private set; } = config.Bind("MiraApi.Accessibility", "MiraApi.EnableVariableColors", true);

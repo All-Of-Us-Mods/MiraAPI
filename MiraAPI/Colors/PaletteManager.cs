@@ -39,7 +39,7 @@ public static class PaletteManager
     }
 
     /// <summary>
-    /// Checks to see if the provided color ID belongs to a variant color.
+    /// Checks to see if the provided color ID belongs to a variable color.
     /// </summary>
     /// <param name="colorId">The id of the color.</param>
     /// <returns><c>true</c> if the color is a variable color; <c>false</c> otherwise.</returns>
