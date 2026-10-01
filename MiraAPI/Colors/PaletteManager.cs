@@ -45,6 +45,9 @@ public static class PaletteManager
     /// <returns><c>true</c> if the color is a variable color; <c>false</c> otherwise.</returns>
     public static bool IsVariable(int colorId)
     {
+        if (colorId < 0 || colorId >= Palette.ColorNames.Length)
+            return false;
+
         return VariableColorNames.Contains(Palette.ColorNames[colorId]);
     }
 
@@ -65,6 +68,9 @@ public static class PaletteManager
     /// <returns>The main color associated with the provided ID.</returns>
     public static Color GetMainColor(int colorId)
     {
+        if (colorId < 0 || colorId >= Palette.ColorNames.Length)
+            return Color.white;
+
         return !ColorIdToColorMap.TryGetValue(colorId, out var custom)
             ? Palette.PlayerColors[colorId]
             : (custom is VariableColor variable
@@ -79,6 +85,9 @@ public static class PaletteManager
     /// <returns>The shadow color associated with the provided ID.</returns>
     public static Color GetShadowColor(int colorId)
     {
+        if (colorId < 0 || colorId >= Palette.ColorNames.Length)
+            return Color.white;
+
         return !ColorIdToColorMap.TryGetValue(colorId, out var custom)
             ? Palette.ShadowColors[colorId]
             : (custom is VariableColor variable
