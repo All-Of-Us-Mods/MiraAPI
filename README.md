@@ -1,6 +1,5 @@
-[![](https://dcbadge.limes.pink/api/server/AEfHJGwggC)](https://discord.gg/AEfHJGwggC)
-
-[English] | [简体中文](Translated/README_zh.md)
+[![Starlight badge](https://img.shields.io/badge/Download%20On-Starlight-d3b65e?style=for-the-badge)](https://starlight.allofus.dev/mods/mira.api)
+[![](https://dcbadge.limes.pink/api/server/AEfHJGwggC)](https://discord.gg/AEfHJGwggC) 
 
 > This mod is not affiliated with Among Us or Innersloth LLC, and the content contained therein is not endorsed or otherwise sponsored by Innersloth LLC. Portions of the materials contained herein are property of Innersloth LLC. © Innersloth LLC.
 
