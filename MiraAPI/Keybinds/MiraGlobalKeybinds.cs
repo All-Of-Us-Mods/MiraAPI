@@ -1,4 +1,4 @@
-﻿using Rewired;
+using Rewired;
 
 namespace MiraAPI.Keybinds;
 
@@ -12,12 +12,12 @@ public static class MiraGlobalKeybinds
     /// <summary>
     /// Gets the keybind for primary abilities.
     /// </summary>
-    public static MiraKeybind PrimaryAbility { get; } = new("Primary Ability", KeyboardKeyCode.T);
+    public static MiraKeybind PrimaryAbility { get; } = new("Primary Ability", KeyboardKeyCode.T, ControllerButton.RightTrigger);
 
     /// <summary>
     /// Gets the keybind for secondary abilities.
     /// </summary>
-    public static MiraKeybind SecondaryAbility { get; } = new("Secondary Ability", KeyboardKeyCode.Y);
+    public static MiraKeybind SecondaryAbility { get; } = new("Secondary Ability", KeyboardKeyCode.Y, ControllerButton.RightBumper);
 
     /// <summary>
     /// Gets the keybind for Tertiary abilities.
@@ -27,7 +27,7 @@ public static class MiraGlobalKeybinds
     /// <summary>
     /// Gets the keybind for primary modifier abilities.
     /// </summary>
-    public static MiraKeybind ModifierPrimaryAbility { get; } = new("Modifier Primary Ability", KeyboardKeyCode.I);
+    public static MiraKeybind ModifierPrimaryAbility { get; } = new("Modifier Primary Ability", KeyboardKeyCode.I, ControllerButton.LeftTrigger);
 
     /// <summary>
     /// Gets the keybind for secondary modifier abilities.

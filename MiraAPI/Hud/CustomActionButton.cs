@@ -139,10 +139,7 @@ public abstract class CustomActionButton
     /// <param name="parent">The parent of the button.</param>
     public virtual void CreateButton(Transform parent)
     {
-        if (Button)
-        {
-            return;
-        }
+        if (Button) return;
 
         UsesLeft = MaxUses;
         Timer = AmongUsClient.Instance?.NetworkMode == NetworkModes.FreePlay ? 0 : InitialCooldown;
@@ -152,19 +149,15 @@ public abstract class CustomActionButton
         Button = Object.Instantiate(HudManager.Instance.AbilityButton, parent);
         Button.name = Name + "Button";
         Button.OverrideText(Name.Translate().ToUpperInvariant());
+        Object.Destroy(Button.glyph.GetComponent<SpriteRenderer>());
+        Object.Destroy(Button.glyph.GetComponent<Image>());
 
         Button.graphic.sprite = Sprite.LoadAsset();
 
         Button.SetUsesRemaining(MaxUses);
-        if (MaxUses <= 0)
-        {
-            Button.SetInfiniteUses();
-        }
+        if (MaxUses <= 0) Button.SetInfiniteUses();
 
-        if (TextOutlineColor != Color.clear)
-        {
-            SetTextOutline(TextOutlineColor);
-        }
+        if (TextOutlineColor != Color.clear) SetTextOutline(TextOutlineColor);
 
         var pb = Button.GetComponent<PassiveButton>();
         pb.OnClick = new Button.ButtonClickedEvent();
@@ -173,10 +166,7 @@ public abstract class CustomActionButton
             // Invoke the generic button click event.
             var genericEvent = new MiraButtonClickEvent(this);
             MiraEventManager.InvokeEvent(genericEvent);
-            if (genericEvent.IsCancelled)
-            {
-                MiraEventManager.InvokeEvent(new MiraButtonCancelledEvent(this));
-            }
+            if (genericEvent.IsCancelled) MiraEventManager.InvokeEvent(new MiraButtonCancelledEvent(this));
 
             // Invoke the button click event for specific button.
             var eventType = CustomButtonManager.ButtonEventTypes[GetType()];
@@ -191,68 +181,47 @@ public abstract class CustomActionButton
 
             if (specificInvoked)
             {
-                if (!@event.IsCancelled)
-                {
-                    ClickHandler();
-                }
+                if (!@event.IsCancelled) ClickHandler();
             }
             else
             {
-                if (!genericEvent.IsCancelled)
-                {
-                    ClickHandler();
-                }
+                if (!genericEvent.IsCancelled) ClickHandler();
             }
         }));
 
         if (Keybind == null) return;
-        Keybind.OnActivate(() =>
-        {
-            if (!Enabled(PlayerControl.LocalPlayer.Data.Role)) return;
+        Keybind.RemoveOnActivate(OnKeybind);
+        Keybind.OnActivate(OnKeybind);
 
-            // Invoke the generic button click event.
-            var genericEvent = new MiraButtonClickEvent(this);
-            MiraEventManager.InvokeEvent(genericEvent);
-            if (genericEvent.IsCancelled)
-            {
-                MiraEventManager.InvokeEvent(new MiraButtonCancelledEvent(this));
-            }
-
-            // Invoke the button click event for specific button.
-            var eventType = CustomButtonManager.ButtonEventTypes[GetType()];
-            var @event = (MiraCancelableEvent)Activator.CreateInstance(eventType, this, genericEvent)!;
-            var specificInvoked = MiraEventManager.InvokeEvent(@event, eventType);
-            if (@event.IsCancelled)
-            {
-                var cancelEventType = CustomButtonManager.ButtonCancelledEventTypes[GetType()];
-                var cancelEvent = (MiraEvent)Activator.CreateInstance(cancelEventType, this)!;
-                MiraEventManager.InvokeEvent(cancelEvent, cancelEventType);
-            }
-
-            if (specificInvoked)
-            {
-                if (!@event.IsCancelled)
-                {
-                    ClickHandler();
-                }
-            }
-            else
-            {
-                if (!genericEvent.IsCancelled)
-                {
-                    ClickHandler();
-                }
-            }
-        });
-
-        KeybindIcon =
-            Helpers.CreateKeybindIcon(
-                Button.gameObject,
-                Keybind.CurrentKey,
-                new Vector3(0.4f, 0.45f, -9f));
+        KeybindIcon = Helpers.CreateKeybindIcon(Button.gameObject, Keybind.CurrentKey, new Vector3(0.4f, 0.45f, -9f));
         KeybindText = KeybindIcon.transform.GetChild(0).GetComponent<TextMeshPro>();
-        HudManagerPatches.ModdedKeybindIcons.Add(KeybindText);
-        Button.usesRemainingSprite.transform.localPosition = new(-0.341f, 0.45f, -0.1f);
+        KeybindText.fontSizeMax = KeybindText.fontSize;
+        KeybindText.fontSizeMin = KeybindText.fontSize * 0.5f;
+        KeybindText.enableAutoSizing = true;
+        Button.usesRemainingSprite.transform.localPosition = new Vector3(-0.341f, 0.45f, -0.1f);
+        UpdateKeybindIcon();
+    }
+
+    private void OnKeybind()
+    {
+        if (Button == null || !Enabled(PlayerControl.LocalPlayer.Data.Role)) return;
+
+        Button.GetComponent<PassiveButton>().OnClick.Invoke();
+    }
+
+    internal void UpdateKeybindIcon()
+    {
+        if (Keybind == null || KeybindText == null) return;
+
+        var text = ActiveInputManager.currentControlType switch
+        {
+            ActiveInputManager.InputType.Keyboard when Keybind.CurrentKey != KeyboardKeyCode.None => Keybind.CurrentKey.ToString(),
+            ActiveInputManager.InputType.Joystick => Keybind.CurrentControllerButton,
+            _ => string.Empty,
+        };
+
+        KeybindText.text = text;
+        KeybindIcon?.SetActive(text.Length > 0 && LocalSettingsTabSingleton<MiraApiSettings>.Instance.ShowKeybinds.Value);
     }
 
     /// <summary>
@@ -262,22 +231,13 @@ public abstract class CustomActionButton
     /// <param name="moveButton">Whether the button's position should change in-game.</param>
     public virtual void SetButtonLocation(ButtonLocation location, bool moveButton = true)
     {
-        if (!HudManager.InstanceExists || Button == null)
-        {
-            return;
-        }
+        if (!HudManager.InstanceExists || Button == null) return;
 
         Location = location;
 
-        if (!moveButton)
-        {
-            return;
-        }
+        if (!moveButton) return;
 
-        if (HudManagerPatches.BottomLeft == null || HudManagerPatches.BottomRight == null)
-        {
-            return;
-        }
+        if (HudManagerPatches.BottomLeft == null || HudManagerPatches.BottomRight == null) return;
 
         switch (location)
         {
@@ -305,10 +265,7 @@ public abstract class CustomActionButton
     public virtual void ResetCooldownAndOrEffect()
     {
         Timer = Cooldown;
-        if (EffectActive)
-        {
-            OnEffectEnd();
-        }
+        if (EffectActive) OnEffectEnd();
 
         EffectActive = false;
     }
@@ -328,10 +285,7 @@ public abstract class CustomActionButton
     /// <param name="sprite">The new <see cref="UnityEngine.Sprite"/> to override with.</param>
     public virtual void OverrideSprite(Sprite sprite)
     {
-        if (Button != null)
-        {
-            Button.graphic.sprite = sprite;
-        }
+        if (Button != null) Button.graphic.sprite = sprite;
     }
 
     /// <summary>
@@ -388,10 +342,7 @@ public abstract class CustomActionButton
         UsesLeft = Mathf.Clamp(amount, 0, int.MaxValue);
         Button?.SetUsesRemaining(UsesLeft);
 
-        if (Button != null)
-        {
-            Button.usesRemainingSprite.color = UsesLeft == 0 ? Color.red : Color.white;
-        }
+        if (Button != null) Button.usesRemainingSprite.color = UsesLeft == 0 ? Color.red : Color.white;
     }
 
     /// <summary>
@@ -469,8 +420,7 @@ public abstract class CustomActionButton
     /// <returns>A value that represents whether the button should light up or not.</returns>
     public virtual bool CanUse()
     {
-        return PlayerControl.LocalPlayer.moveable &&
-               ((EffectActive && IsEffectCancellable()) || (!EffectActive && (!LimitedUses || UsesLeft > 0)));
+        return PlayerControl.LocalPlayer.moveable && ((EffectActive && IsEffectCancellable()) || (!EffectActive && (!LimitedUses || UsesLeft > 0)));
     }
 
     /// <summary>
@@ -498,10 +448,7 @@ public abstract class CustomActionButton
             return;
         }
 
-        if (!CanClick())
-        {
-            return;
-        }
+        if (!CanClick()) return;
 
         if (LimitedUses)
         {
@@ -530,20 +477,9 @@ public abstract class CustomActionButton
     /// <param name="playerControl">The local PlayerControl.</param>
     public virtual void FixedUpdateHandler(PlayerControl playerControl)
     {
-        if (Keybind != null && KeybindText != null)
-        {
-            KeybindText.text = Keybind.CurrentKey.ToString();
-            KeybindIcon?.SetActive(ActiveInputManager.currentControlType is ActiveInputManager.InputType.Keyboard &&
-                                   LocalSettingsTabSingleton<MiraApiSettings>.Instance.ShowKeybinds.Value &&
-                                   Keybind.CurrentKey != KeyboardKeyCode.None);
-        }
-
         if (Timer >= 0)
         {
-            if (!TimerPaused && (!PauseTimerInVent || !playerControl.inVent))
-            {
-                Timer -= Time.deltaTime;
-            }
+            if (!TimerPaused && (!PauseTimerInVent || !playerControl.inVent)) Timer -= Time.deltaTime;
         }
         else if (HasEffect && EffectActive && EffectDuration > 0)
         {
@@ -555,13 +491,9 @@ public abstract class CustomActionButton
         if (Button)
         {
             if (CanUse())
-            {
                 Button!.SetEnabled();
-            }
             else
-            {
                 Button!.SetDisabled();
-            }
 
             if (EffectActive && EffectDuration > 0)
             {
@@ -623,10 +555,7 @@ public abstract class CustomActionButton<T> : CustomActionButton
     public override bool CanUse()
     {
         var newTarget = GetTarget();
-        if (newTarget != Target)
-        {
-            SetOutline(false);
-        }
+        if (newTarget != Target) SetOutline(false);
 
         Target = IsTargetValid(newTarget) ? newTarget : null;
         SetOutline(true);

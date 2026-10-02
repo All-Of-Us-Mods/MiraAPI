@@ -43,9 +43,7 @@ public static class Extensions
             chance = 0;
         }
 
-        return new NetData(
-            RoleId.Get(role),
-            BitConverter.GetBytes(count.Value).AddRangeToArray(BitConverter.GetBytes(chance.Value)));
+        return new NetData(RoleId.Get(role), BitConverter.GetBytes(count.Value).AddRangeToArray(BitConverter.GetBytes(chance.Value)));
     }
 
     /// <summary>
@@ -60,20 +58,11 @@ public static class Extensions
             return;
         }
 
-        if (self.CloseSound && Constants.ShouldPlaySfx())
-        {
-            SoundManager.Instance.PlaySound(self.CloseSound, false);
-        }
+        if (self.CloseSound && Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(self.CloseSound, false);
 
-        if (PlayerControl.LocalPlayer.Data.Role.TeamType == RoleTeamTypes.Crewmate)
-        {
-            GameManager.Instance.LogicMinigame.OnMinigameClose();
-        }
+        if (PlayerControl.LocalPlayer.Data.Role.TeamType == RoleTeamTypes.Crewmate) GameManager.Instance.LogicMinigame.OnMinigameClose();
 
-        if (PlayerControl.LocalPlayer)
-        {
-            PlayerControl.HideCursorTemporarily();
-        }
+        if (PlayerControl.LocalPlayer) PlayerControl.HideCursorTemporarily();
 
         self.amClosing = Minigame.CloseState.Closing;
         self.logger.Info(string.Concat("Closing minigame ", self.GetType().Name));
@@ -145,9 +134,7 @@ public static class Extensions
     {
         var list = input.ToList();
 
-        return list.Count == 0
-            ? throw new InvalidOperationException("Cannot get random element from an empty collection.")
-            : list[UnityEngine.Random.Range(0, list.Count)];
+        return list.Count == 0 ? throw new InvalidOperationException("Cannot get random element from an empty collection.") : list[UnityEngine.Random.Range(0, list.Count)];
     }
 
     /// <summary>
@@ -201,10 +188,7 @@ public static class Extensions
         // ReSharper disable once InconsistentNaming (Justification: Acronym.)
         var il2cppList = new CppCollections.List<T>();
 
-        foreach (var item in systemList)
-        {
-            il2cppList.Add(item);
-        }
+        foreach (var item in systemList) il2cppList.Add(item);
 
         return il2cppList;
     }
@@ -273,7 +257,6 @@ public static class Extensions
     // Left as is intentionally, did you guys mean to use it in DeepDestroy?
     [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Not known until intent it clear.")]
     [SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Unclear, but please shut up.")]
-
 #pragma warning disable SA1515 // Single-line comment should be preceded by blank line (Justification: ReSharper suppressions.)
     // ReSharper disable once UnusedParameter.Local (Justification: Read above.)
     // ReSharper disable once UnusedMember.Local (Justification: Read above.)
@@ -383,10 +366,7 @@ public static class Extensions
     /// <returns>An <see cref="IEnumerable"/> that contains <see cref="GameObject"/>s.</returns>
     public static IEnumerable<GameObject> GetAllChildren(this GameObject go)
     {
-        for (var i = 0; i < go.transform.childCount; i++)
-        {
-            yield return go.transform.GetChild(i).gameObject;
-        }
+        for (var i = 0; i < go.transform.childCount; i++) yield return go.transform.GetChild(i).gameObject;
     }
 
     /// <summary>
@@ -396,10 +376,7 @@ public static class Extensions
     /// <returns>An <see cref="IEnumerable"/> that contains <see cref="GameObject"/>s.</returns>
     public static IEnumerable<GameObject> GetAllChildren(this Transform go)
     {
-        for (var i = 0; i < go.transform.childCount; i++)
-        {
-            yield return go.transform.GetChild(i).gameObject;
-        }
+        for (var i = 0; i < go.transform.childCount; i++) yield return go.transform.GetChild(i).gameObject;
     }
 
     /// <summary>
@@ -410,17 +387,12 @@ public static class Extensions
     public static void SetSizeLimit(this SpriteRenderer sprite, float pixelSize)
     {
         sprite.drawMode = SpriteDrawMode.Sliced;
-        if (!sprite.sprite)
-        {
-            return;
-        }
+        if (!sprite.sprite) return;
 
         var spriteWidth = sprite.sprite.rect.width;
         var spriteHeight = sprite.sprite.rect.height;
 
-        sprite.size = spriteWidth < spriteHeight
-            ? new Vector2(pixelSize * spriteWidth / spriteHeight, pixelSize)
-            : new Vector2(pixelSize, pixelSize * spriteHeight / spriteWidth);
+        sprite.size = spriteWidth < spriteHeight ? new Vector2(pixelSize * spriteWidth / spriteHeight, pixelSize) : new Vector2(pixelSize, pixelSize * spriteHeight / spriteWidth);
     }
 
     /// <summary>
@@ -430,10 +402,7 @@ public static class Extensions
     /// <param name="pixelSize">The scale for the sprite to be adjusted to.</param>
     public static void SetSizeLimit(this GameObject spriteObj, float pixelSize)
     {
-        if (!spriteObj.TryGetComponent<SpriteRenderer>(out var sprite))
-        {
-            return;
-        }
+        if (!spriteObj.TryGetComponent<SpriteRenderer>(out var sprite)) return;
 
         sprite.SetSizeLimit(pixelSize);
     }
@@ -450,16 +419,10 @@ public static class Extensions
     /// <returns>A <see cref="PlayerVoteData"/> if there is one, <see langword="null"/> otherwise.</returns>
     public static PlayerVoteData GetVoteData(this PlayerControl player)
     {
-        if (VoteDataComponents.TryGetValue(player, out var component))
-        {
-            return component;
-        }
+        if (VoteDataComponents.TryGetValue(player, out var component)) return component;
 
         component = player.GetComponent<PlayerVoteData>();
-        if (!component)
-        {
-            throw new InvalidOperationException("PlayerVoteData is not attached to the player.");
-        }
+        if (!component) throw new InvalidOperationException("PlayerVoteData is not attached to the player.");
 
         VoteDataComponents[player] = component;
         return component;
@@ -525,12 +488,7 @@ public static class Extensions
     /// <returns>The best constructor.</returns>
     public static ConstructorInfo? GetBestConstructor(this Type type, params object[] args)
     {
-        return type.GetValidConstructors(args)
-            .OrderBy(
-                ctor => ctor.GetParameters()
-                    .Select((p, i) => GetInheritanceDistance(args[i].GetType(), p.ParameterType))
-                    .Sum())
-            .FirstOrDefault();
+        return type.GetValidConstructors(args).OrderBy(ctor => ctor.GetParameters().Select((p, i) => GetInheritanceDistance(args[i].GetType(), p.ParameterType)).Sum()).FirstOrDefault();
     }
 
     /// <summary>
@@ -552,14 +510,11 @@ public static class Extensions
     /// <returns>A collection of valid constructors.</returns>
     public static IEnumerable<ConstructorInfo> GetValidConstructors(this Type type, params object[] args)
     {
-        return type.GetConstructors().Where(
-            x =>
-            {
-                var parameters = x.GetParameters();
-                return parameters.Length == args.Length && Array.TrueForAll(
-                    parameters,
-                    t => t.ParameterType.IsInstanceOfType(args[t.Position]));
-            });
+        return type.GetConstructors().Where(x =>
+        {
+            var parameters = x.GetParameters();
+            return parameters.Length == args.Length && Array.TrueForAll(parameters, t => t.ParameterType.IsInstanceOfType(args[t.Position]));
+        });
     }
 
     /// <summary>
@@ -571,10 +526,7 @@ public static class Extensions
     /// <returns>The distance between the types.</returns>
     public static int GetInheritanceDistance(Type from, Type to)
     {
-        if (!from.IsAssignableFrom(to))
-        {
-            return int.MaxValue;
-        }
+        if (!from.IsAssignableFrom(to)) return int.MaxValue;
 
         var type = from;
         var distance = 0;
@@ -615,12 +567,7 @@ public static class Extensions
     /// <returns>The darkened <see cref="Color32"/>.</returns>
     public static Color32 GetShadowColor(this Color32 color, byte darknessAmount)
     {
-        return
-            new Color32(
-                (byte)Mathf.Clamp(color.r - darknessAmount, 0, 255),
-                (byte)Mathf.Clamp(color.g - darknessAmount, 0, 255),
-                (byte)Mathf.Clamp(color.b - darknessAmount, 0, 255),
-                byte.MaxValue);
+        return new Color32((byte)Mathf.Clamp(color.r - darknessAmount, 0, 255), (byte)Mathf.Clamp(color.g - darknessAmount, 0, 255), (byte)Mathf.Clamp(color.b - darknessAmount, 0, 255), byte.MaxValue);
     }
 
     /// <summary>
@@ -632,9 +579,7 @@ public static class Extensions
     /// <returns>A truncated string of maxLength with the attached suffix.</returns>
     public static string? Truncate(this string? value, int maxLength, string truncationSuffix = "…")
     {
-        return value?.Length > maxLength
-            ? value[..maxLength] + truncationSuffix
-            : value;
+        return value?.Length > maxLength ? value[..maxLength] + truncationSuffix : value;
     }
 
     /// <summary>
@@ -670,10 +615,7 @@ public static class Extensions
             count += length;
         }
 
-        if (current.Count > 0)
-        {
-            chunks.Enqueue([.. current]);
-        }
+        if (current.Count > 0) chunks.Enqueue([.. current]);
 
         return chunks;
     }
@@ -685,9 +627,7 @@ public static class Extensions
     /// <returns><see langword="true"/> if the <see cref="OptionBehaviour"/> is for a custom options, <see langword="false"/> otherwise.</returns>
     public static bool IsCustom(this OptionBehaviour optionBehaviour)
     {
-        return ModdedOptionsManager.ModdedOptions.Values.Any(
-            opt => opt.OptionBehaviour && opt.OptionBehaviour == optionBehaviour)
-            || optionBehaviour.Equals(GameModeOption.OptionBehaviour);
+        return ModdedOptionsManager.ModdedOptions.Values.Any(opt => opt.OptionBehaviour && opt.OptionBehaviour == optionBehaviour) || optionBehaviour.Equals(GameModeOption.OptionBehaviour);
     }
 
     /// <summary>
@@ -740,9 +680,7 @@ public static class Extensions
     /// <returns>The <see cref="DeadBody"/> if it is found, or <see langword="null"/> there is none within the radius.</returns>
     public static DeadBody? GetNearestDeadBody(this PlayerControl playerControl, float radius)
     {
-        return Helpers
-            .GetNearestDeadBodies(playerControl.GetTruePosition(), radius, Helpers.CreateFilter(Constants.NotShipMask))
-            .Find(component => component && !component.Reported);
+        return Helpers.GetNearestDeadBodies(playerControl.GetTruePosition(), radius, Helpers.CreateFilter(Constants.NotShipMask)).Find(component => component && !component.Reported);
     }
 
     /// <summary>
@@ -755,16 +693,10 @@ public static class Extensions
     /// <param name="predicate">Optional predicate to test if the <typeparamref name="T"/> is valid.</param>
     /// <typeparam name="T">The type of the object.</typeparam>
     /// <returns>The <typeparamref name="T"/> if it was found, or <see langword="null"/> if there is none within the radius.</returns>
-    public static T? GetNearestObjectOfType<T>(
-        this PlayerControl playerControl,
-        float radius,
-        ContactFilter2D filter,
-        string? colliderTag = null,
-        Predicate<T>? predicate = null)
+    public static T? GetNearestObjectOfType<T>(this PlayerControl playerControl, float radius, ContactFilter2D filter, string? colliderTag = null, Predicate<T>? predicate = null)
         where T : Component
     {
-        return Helpers.GetNearestObjectsOfType<T>(playerControl.GetTruePosition(), radius, filter, colliderTag)
-            .Find(predicate ?? (component => component));
+        return Helpers.GetNearestObjectsOfType<T>(playerControl.GetTruePosition(), radius, filter, colliderTag).Find(predicate ?? (component => component));
     }
 
     /// <summary>
@@ -777,26 +709,14 @@ public static class Extensions
     /// <param name="includeGhosts">Determines if Ghosts are included.</param>
     /// <param name="predicate">Optional predicate to test if the <see cref="PlayerControl"/> is valid.</param>
     /// <returns>The closest <see cref="PlayerControl"/> if there is one, <see langword="false"/> otherwise.</returns>
-    public static PlayerControl? GetClosestPlayer(
-        this PlayerControl playerControl,
-        bool includeImpostors,
-        float distance,
-        bool ignoreColliders = false,
-        bool includeGhosts = false,
-        Predicate<PlayerControl>? predicate = null)
+    public static PlayerControl? GetClosestPlayer(this PlayerControl playerControl, bool includeImpostors, float distance, bool ignoreColliders = false, bool includeGhosts = false, Predicate<PlayerControl>? predicate = null)
     {
-        var filteredPlayers = Helpers.GetClosestPlayers(playerControl, distance, ignoreColliders)
-            .Where(
-                playerInfo => !playerInfo.Data.Disconnected &&
-                              playerInfo.PlayerId != playerControl.PlayerId &&
-                              (includeGhosts || !playerInfo.Data.IsDead) &&
-                              (includeImpostors || !playerInfo.Data.Role.IsImpostor))
-            .ToList();
+        var filteredPlayers = Helpers.GetClosestPlayers(playerControl, distance, ignoreColliders).Where(playerInfo => !playerInfo.Data.Disconnected && playerInfo.PlayerId != playerControl.PlayerId && (includeGhosts || !playerInfo.Data.IsDead) && (includeImpostors || !playerInfo.Data.Role.IsImpostor)).ToList();
         return predicate != null ? filteredPlayers.Find(predicate) : filteredPlayers.FirstOrDefault();
     }
 
     /// <summary>
-    /// Fixed version of <see cref="Reactor.Utilities.Extensions.UnityExtensions.SetOutline(Renderer, Color?)"/>.
+    /// Fixed version of <see cref="UnityExtensions.SetOutline(Renderer, Color?)"/>.
     /// </summary>
     /// <param name="renderer">The <see cref="Renderer"/> you want to update the outline for.</param>
     /// <param name="color">The outline <see cref="Color"/>.</param>
@@ -828,9 +748,7 @@ public static class Extensions
         var action = userData.GetAction(userData.actions.Count - 1)!;
 
         action.name = id;
-        action.descriptiveName = group != null
-            ? $"<b><size=70%>{Palette.CrewmateRoleHeaderDarkBlue.ToTextColor()}{group.ReplaceLineEndings(" ")}</color></size></b>\n{name}"
-            : name;
+        action.descriptiveName = group != null ? $"<b><size=70%>{Palette.CrewmateRoleHeaderDarkBlue.ToTextColor()}{group.ReplaceLineEndings(" ")}</color></size></b>\n{name}" : name;
         action.categoryId = category;
         action.type = type;
         action.userAssignable = true;
@@ -852,7 +770,6 @@ public static class Extensions
         }
 
         userData.keyboardMaps[0].actionElementMaps.Add(map);
-        userData.joystickMaps[0].actionElementMaps.Add(map);
         return action;
     }
 }
