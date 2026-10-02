@@ -1,3 +1,5 @@
+[English] | [简体中文](Translated/README_zh.md)
+
 [![Starlight badge](https://img.shields.io/badge/Download%20On-Starlight-d3b65e?style=for-the-badge)](https://starlight.allofus.dev/mods/mira.api)
 [![](https://dcbadge.limes.pink/api/server/AEfHJGwggC)](https://discord.gg/AEfHJGwggC) 
 
