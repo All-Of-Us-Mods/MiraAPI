@@ -7,6 +7,7 @@ using HarmonyLib;
 using Innersloth.Assets;
 using MiraAPI.Roles;
 using MiraAPI.Utilities;
+using MiraAPI.Utilities.Assets;
 using Reactor.Utilities.Extensions;
 using TMPro;
 using UnityEngine;
@@ -160,10 +161,15 @@ public static class RoleGuidePatches
                 var searchButton = searchBox.GetComponent<MatchInfoGuideTabButton>();
                 var tmpText = searchButton.transform.GetChild(0).GetComponent<TextMeshPro>();
                 tmpText.GetComponent<TextTranslatorTMP>().Destroy();
-                tmpText.transform.localPosition = new Vector3(-1.33f, 0.0343f, -0.2f);
-                tmpText.color = new Color(0, 0.9656f, 0.8679f, 1);
+                tmpText.color = new Color(0, 0.9656f, 0.8679f, 0.6f);
                 tmpText.text = string.Empty;
-                tmpText.color = new Color(0, 0.9656f, 0.8679f, 0.5f);
+                tmpText.fontSizeMax = 4;
+                tmpText.overflowMode = TextOverflowModes.Ellipsis;
+                tmpText.alignment = TextAlignmentOptions.Left;
+                tmpText.horizontalAlignment = HorizontalAlignmentOptions.Left;
+                tmpText.rectTransform.offsetMax = new Vector2(-0.1531f, 0.2972f);
+                tmpText.rectTransform.sizeDelta = new Vector2(3, 1);
+                tmpText.transform.localPosition = new Vector3(0, 0.0343f, -0.2f);
                 var inactive = searchButton.inactiveSprites;
                 var selected = searchButton.selectedSprites;
                 var highlight = searchButton.activeSprites;
@@ -185,7 +191,7 @@ public static class RoleGuidePatches
                     }));
                 button.OnMouseOver = new UnityEvent();
                 button.OnMouseOut = new UnityEvent();
-                button.OnClick = new Button.ButtonClickedEvent();
+                var mainScroller = __instance.settingsTabs[2].GetComponent<Scroller>();
                 searchBoxTmp.OnChange = new Button.ButtonClickedEvent();
                 searchBoxTmp.OnChange.AddListener(
                     (UnityAction)(() =>
@@ -193,8 +199,8 @@ public static class RoleGuidePatches
                         var text = searchBoxTmp.outputText.text;
                         var newSorted = RolePanels
                             .OrderByDescending(child =>
-                                child.Value.Panel.name.Equals(text, StringComparison.OrdinalIgnoreCase))
-                            .ThenByDescending(child => child.Value.Panel.name.Contains(
+                                child.Value.GetTitle().Equals(text, StringComparison.OrdinalIgnoreCase))
+                            .ThenByDescending(child => child.Value.GetTitle().Contains(
                                 text,
                                 StringComparison.InvariantCultureIgnoreCase))
                             .ThenBy(GetSortingOrder());
@@ -204,8 +210,64 @@ public static class RoleGuidePatches
                             pair.Value.Panel.transform.SetAsLastSibling();
                         }
 
-                        advancedWikiTab.ScrollToTop();
+                        mainScroller.ScrollToTop();
                     }));
+                searchBoxTmp.transform.localPosition = new Vector3(-1.438f, 0.756f, -0.2f);
+
+                var playerButton = __instance.TabButtons[0];
+                var playerCollider = playerButton.GetComponent<BoxCollider2D>();
+                playerButton.transform.GetChild(0).gameObject.SetActive(false);
+                var playerBtnInactive = playerButton.inactiveSprites.GetComponent<SpriteRenderer>();
+                playerBtnInactive.sprite = MiraAssets.WikiPlayersButtonIdleSprite;
+                playerBtnInactive.size = Vector2.one;
+                playerBtnInactive.transform.GetChild(0).gameObject.SetActive(false);
+                var playerBtnSelected = playerButton.selectedSprites.GetComponent<SpriteRenderer>();
+                playerBtnSelected.sprite = MiraAssets.WikiPlayersButtonOpenSprite;
+                playerBtnSelected.size = Vector2.one;
+                playerBtnSelected.transform.GetChild(0).gameObject.SetActive(false);
+                var playerBtnHighlight = playerButton.activeSprites.GetComponent<SpriteRenderer>();
+                playerBtnHighlight.sprite = MiraAssets.WikiPlayersButtonHoverSprite;
+                playerBtnHighlight.size = Vector2.one;
+                playerBtnHighlight.transform.GetChild(0).gameObject.SetActive(false);
+
+                var settingButton = __instance.TabButtons[1];
+                var settingsCollider = settingButton.GetComponent<BoxCollider2D>();
+                settingButton.transform.GetChild(0).gameObject.SetActive(false);
+                var settingBtnInactive = settingButton.inactiveSprites.GetComponent<SpriteRenderer>();
+                settingBtnInactive.sprite = MiraAssets.WikiSettingsButtonIdleSprite;
+                settingBtnInactive.size = Vector2.one;
+                settingBtnInactive.transform.GetChild(0).gameObject.SetActive(false);
+                var settingBtnSelected = settingButton.selectedSprites.GetComponent<SpriteRenderer>();
+                settingBtnSelected.sprite = MiraAssets.WikiSettingsButtonOpenSprite;
+                settingBtnSelected.size = Vector2.one;
+                settingBtnSelected.transform.GetChild(0).gameObject.SetActive(false);
+                var settingBtnHighlight = settingButton.activeSprites.GetComponent<SpriteRenderer>();
+                settingBtnHighlight.sprite = MiraAssets.WikiSettingsButtonHoverSprite;
+                settingBtnHighlight.size = Vector2.one;
+                settingBtnHighlight.transform.GetChild(0).gameObject.SetActive(false);
+
+                var rolesButton = __instance.TabButtons[2];
+                var rolesCollider = rolesButton.GetComponent<BoxCollider2D>();
+                rolesButton.transform.GetChild(0).gameObject.SetActive(false);
+                var rolesBtnInactive = rolesButton.inactiveSprites.GetComponent<SpriteRenderer>();
+                rolesBtnInactive.sprite = MiraAssets.WikiRolesButtonIdleSprite;
+                rolesBtnInactive.size = Vector2.one;
+                rolesBtnInactive.transform.GetChild(0).gameObject.SetActive(false);
+                var rolesBtnSelected = rolesButton.selectedSprites.GetComponent<SpriteRenderer>();
+                rolesBtnSelected.sprite = MiraAssets.WikiRolesButtonOpenSprite;
+                rolesBtnSelected.size = Vector2.one;
+                rolesBtnSelected.transform.GetChild(0).gameObject.SetActive(false);
+                var rolesBtnHighlight = rolesButton.activeSprites.GetComponent<SpriteRenderer>();
+                rolesBtnHighlight.sprite = MiraAssets.WikiRolesButtonHoverSprite;
+                rolesBtnHighlight.size = Vector2.one;
+                rolesBtnHighlight.transform.GetChild(0).gameObject.SetActive(false);
+
+                playerCollider.size = settingsCollider.size = rolesCollider.size = new Vector2(0.8f, 0.74f);
+                playerCollider.offset = settingsCollider.offset = rolesCollider.offset = Vector2.zero;
+                playerButton.transform.localScale = settingButton.transform.localScale = rolesButton.transform.localScale = new Vector3(0.7f, 0.7f, 1);
+                playerButton.transform.localPosition = new Vector3(-3.6f, 0.656f, -0.2f);
+                settingButton.transform.localPosition = new Vector3(-3.6f, 0.056f, -0.2f);
+                rolesButton.transform.localPosition = new Vector3(-3.6f, -0.544f, -0.2f);
             }
             else
             {
@@ -451,6 +513,19 @@ public static class RoleGuidePatches
                 return x => $"{x.Value.LikelyhoodOfRole.ToString("0000.0", CultureInfo.InvariantCulture)} {x.Value.Title} ({x.Value.Category})";
             default:
                 return x => $"{x.Value.Title} ({x.Value.Category}) {x.Value.LikelyhoodOfRole.ToString("0000.0", CultureInfo.InvariantCulture)}";
+        }
+    }
+
+    public static string GetTitle(this DetailedPanel panel)
+    {
+        switch (sortOrder)
+        {
+            case SortingOrder.Faction:
+                return $"{panel.Category} ({panel.Title}) {panel.LikelyhoodOfRole.ToString("0000.0", CultureInfo.InvariantCulture)}";
+            case SortingOrder.AmountChance:
+                return $"{panel.LikelyhoodOfRole.ToString("0000.0", CultureInfo.InvariantCulture)} {panel.Title} ({panel.Category})";
+            default:
+                return $"{panel.Title} ({panel.Category}) {panel.LikelyhoodOfRole.ToString("0000.0", CultureInfo.InvariantCulture)}";
         }
     }
 
