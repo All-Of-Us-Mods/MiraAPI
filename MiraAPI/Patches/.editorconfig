@@ -11,6 +11,3 @@ dotnet_diagnostic.SA1611.severity = none
 
 # SA1615: Element return value should be documented.
 dotnet_diagnostic.SA1615.severity = none
-
-# S125: Sections of code should not be commented out.
-dotnet_diagnostic.S125.severity = none

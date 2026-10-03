@@ -1,4 +1,6 @@
 ﻿using MiraAPI.Colors;
+using MiraAPI.Colors.ColorSpaces;
+using MiraAPI.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.Example;
@@ -14,4 +16,9 @@ public static class ExampleColors
     public static CustomColor Rose { get; } = new("color.rose", new Color(0.98f, 0.26f, 0.62f));
 
     public static CustomColor Gold { get; } = new("color.gold", new Color(1.0f, 0.84f, 0.0f));
+
+    public static VariableColor Rainbow { get; } = new("color.rainbow", t => new HsbColor(MathUtilities.PingPong(t, 1f), 1f, 1f))
+    {
+        ColorBrightness = CustomColorBrightness.Lighter,
+    };
 }
