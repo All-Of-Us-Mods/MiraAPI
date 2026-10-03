@@ -161,7 +161,7 @@ public static class RoleGuidePatches
                 var searchButton = searchBox.GetComponent<MatchInfoGuideTabButton>();
                 var tmpText = searchButton.transform.GetChild(0).GetComponent<TextMeshPro>();
                 tmpText.GetComponent<TextTranslatorTMP>().Destroy();
-                tmpText.color = new Color(0, 0.9656f, 0.8679f, 0.6f);
+                tmpText.color = new Color(0.75f, 0.75f, 0.75f);
                 tmpText.text = string.Empty;
                 tmpText.fontSizeMax = 4;
                 tmpText.overflowMode = TextOverflowModes.Ellipsis;
