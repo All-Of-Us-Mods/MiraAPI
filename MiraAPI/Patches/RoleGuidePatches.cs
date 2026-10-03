@@ -20,7 +20,19 @@ namespace MiraAPI.Patches;
 [HarmonyPatch]
 public static class RoleGuidePatches
 {
-    public static PassiveButton ViewButton;
+    public static PassiveButton SearchIconButton;
+    private static SpriteRenderer _searchIconIdle;
+    private static SpriteRenderer _searchIconHover;
+    public static PassiveButton SearchSortingOrderButton;
+    private static SpriteRenderer _searchSortingOrderIdle;
+    private static SpriteRenderer _searchSortingOrderHover;
+    public static PassiveButton SearchSortingGroupButton;
+    private static SpriteRenderer _searchSortingGroupIdle;
+    private static SpriteRenderer _searchSortingGroupHover;
+    public static PassiveButton SearchSortingFilterButton;
+    private static SpriteRenderer _searchSortingFilterIdle;
+    private static SpriteRenderer _searchSortingFilterHover;
+    private static Scroller _rolesScroller;
     [HarmonyPostfix]
     [HarmonyPriority(Priority.First)]
     [HarmonyPatch(typeof(MatchInfoGuide), nameof(MatchInfoGuide.CreateNormalModeSettings))]
@@ -110,16 +122,49 @@ public static class RoleGuidePatches
         {
             if (__instance.NormalModeSettings.Count == 0)
             {
-                var settingsButton = Object.Instantiate(
+                var sortingOrderButton = Object.Instantiate(
                     HudManager.Instance.SettingsButton,
                     __instance.TabButtons[2].transform.parent);
-                ViewButton = settingsButton.GetComponent<PassiveButton>();
-                ViewButton.OnClick = new Button.ButtonClickedEvent();
-                ViewButton.OnClick.AddListener(new Action(SwitchOrder));
-                ViewButton.name = "ViewButton";
-                settingsButton.transform.localPosition = new Vector3(2.4f, 0.765f, -0.1f);
-                settingsButton.transform.localScale = Vector3.one;
-                settingsButton.transform.GetChild(2).gameObject.SetActive(false);
+                SearchSortingOrderButton = sortingOrderButton.GetComponent<PassiveButton>();
+                SearchSortingOrderButton.name = "SearchSortingOrderButton";
+                _searchSortingOrderIdle = SearchSortingOrderButton.inactiveSprites.GetComponent<SpriteRenderer>();
+                _searchSortingOrderIdle.sprite = MiraAssets.SortingAzIdleSprite;
+                _searchSortingOrderHover = SearchSortingOrderButton.activeSprites.GetComponent<SpriteRenderer>();
+                _searchSortingOrderHover.sprite = MiraAssets.SortingAzHoverSprite;
+                SearchSortingOrderButton.OnClick = new Button.ButtonClickedEvent();
+                SearchSortingOrderButton.OnClick.AddListener(new Action(SwitchMethod));
+                sortingOrderButton.transform.localPosition = new Vector3(2.4f, 0.765f, -0.1f);
+                sortingOrderButton.transform.localScale = Vector3.one;
+                sortingOrderButton.transform.GetChild(2).gameObject.SetActive(false);
+
+                var sortingGroupButton = Object.Instantiate(
+                    sortingOrderButton,
+                    sortingOrderButton.transform.parent);
+                SearchSortingGroupButton = sortingGroupButton.GetComponent<PassiveButton>();
+                SearchSortingGroupButton.name = "SearchSortingGroupButton";
+                _searchSortingGroupIdle = SearchSortingGroupButton.inactiveSprites.GetComponent<SpriteRenderer>();
+                _searchSortingGroupIdle.sprite = MiraAssets.GroupNoneIdleSprite;
+                _searchSortingGroupHover = SearchSortingGroupButton.activeSprites.GetComponent<SpriteRenderer>();
+                _searchSortingGroupHover.sprite = MiraAssets.GroupNoneHoverSprite;
+                SearchSortingGroupButton.OnClick = new Button.ButtonClickedEvent();
+                SearchSortingGroupButton.OnClick.AddListener(new Action(SwitchGrouping));
+                sortingGroupButton.transform.localPosition = new Vector3(1.8f, 0.765f, -0.1f);
+                sortingGroupButton.transform.localScale = Vector3.one;
+
+                var sortingFilterButton = Object.Instantiate(
+                    sortingOrderButton,
+                    sortingOrderButton.transform.parent);
+                SearchSortingFilterButton = sortingFilterButton.GetComponent<PassiveButton>();
+                SearchSortingFilterButton.name = "SearchSortingFilterButton";
+                _searchSortingFilterIdle = SearchSortingFilterButton.inactiveSprites.GetComponent<SpriteRenderer>();
+                _searchSortingFilterIdle.sprite = MiraAssets.VisibleOnIdleSprite;
+                _searchSortingFilterHover = SearchSortingFilterButton.activeSprites.GetComponent<SpriteRenderer>();
+                _searchSortingFilterHover.sprite = MiraAssets.VisibleOnHoverSprite;
+                SearchSortingFilterButton.OnClick = new Button.ButtonClickedEvent();
+                SearchSortingFilterButton.OnClick.AddListener(new Action(SwitchFilter));
+                sortingFilterButton.transform.localPosition = new Vector3(1f, 0.765f, -0.1f);
+                sortingFilterButton.transform.localScale = Vector3.one;
+
                 __instance.numOfTabs = 3;
                 __instance.TabButtons[0].SelectButton(true);
                 __instance.MatchInfoRoleMaskArea.transform.localPosition = new Vector3(-0.0184f, 0.15f, -0.1f);
@@ -157,6 +202,20 @@ public static class RoleGuidePatches
 
                 DisplayNormalRoleSettings(__instance, true);
 
+                var searchIconButton = Object.Instantiate(
+                    sortingOrderButton,
+                    sortingOrderButton.transform.parent);
+                SearchIconButton = searchIconButton.GetComponent<PassiveButton>();
+                SearchIconButton.name = "SearchIconButton";
+                _searchIconIdle = SearchIconButton.inactiveSprites.GetComponent<SpriteRenderer>();
+                _searchIconIdle.sprite = MiraAssets.SearchIconIdleSprite;
+                _searchIconHover = SearchIconButton.activeSprites.GetComponent<SpriteRenderer>();
+                _searchIconHover.sprite = MiraAssets.SearchIconHoverSprite;
+                SearchIconButton.OnClick = new Button.ButtonClickedEvent();
+                SearchIconButton.OnClick.AddListener(new Action(ClearSearchText));
+                searchIconButton.transform.localPosition = new Vector3(-2.79f, 0.765f, -0.1f);
+                searchIconButton.transform.localScale = Vector3.one;
+
                 var searchBox = Object.Instantiate(__instance.TabButtons[2].gameObject, __instance.TabButtons[2].transform.parent);
                 var searchButton = searchBox.GetComponent<MatchInfoGuideTabButton>();
                 var tmpText = searchButton.transform.GetChild(0).GetComponent<TextMeshPro>();
@@ -191,12 +250,22 @@ public static class RoleGuidePatches
                     }));
                 button.OnMouseOver = new UnityEvent();
                 button.OnMouseOut = new UnityEvent();
-                var mainScroller = __instance.settingsTabs[2].GetComponent<Scroller>();
+                _rolesScroller = __instance.settingsTabs[2].GetComponent<Scroller>();
                 searchBoxTmp.OnChange = new Button.ButtonClickedEvent();
                 searchBoxTmp.OnChange.AddListener(
                     (UnityAction)(() =>
                     {
                         var text = searchBoxTmp.outputText.text;
+                        if (text != string.Empty)
+                        {
+                            _searchIconIdle.sprite = MiraAssets.SearchClearIdleSprite;
+                            _searchIconHover.sprite = MiraAssets.SearchClearHoverSprite;
+                        }
+                        else
+                        {
+                            _searchIconIdle.sprite = MiraAssets.SearchIconIdleSprite;
+                            _searchIconHover.sprite = MiraAssets.SearchIconHoverSprite;
+                        }
                         var newSorted = RolePanels
                             .OrderByDescending(child =>
                                 child.Value.GetTitle().Equals(text, StringComparison.OrdinalIgnoreCase))
@@ -210,7 +279,7 @@ public static class RoleGuidePatches
                             pair.Value.Panel.transform.SetAsLastSibling();
                         }
 
-                        mainScroller.ScrollToTop();
+                        _rolesScroller.ScrollToTop();
                     }));
                 searchBoxTmp.transform.localPosition = new Vector3(-1.438f, 0.756f, -0.2f);
 
@@ -272,7 +341,7 @@ public static class RoleGuidePatches
             else
             {
                 DisplayNormalRoleSettings(__instance, false);
-                searchBoxTmp.SetText(string.Empty);
+                ClearSearchText();
             }
         }
         else if (__instance.HnSModeSettings.Count == 0)
@@ -314,7 +383,22 @@ public static class RoleGuidePatches
 
     private static SortingFilter sortFilter = SortingFilter.EnabledOnly;
     private static SortingMethod sortMethod = SortingMethod.Alphabetical;
-    private static SortingOrder sortOrder = SortingOrder.RoleName;
+    private static SortingGroups sortOrder = SortingGroups.Ungrouped;
+
+    public static void ClearSearchText()
+    {
+        _searchIconIdle.sprite = MiraAssets.SearchIconIdleSprite;
+        _searchIconHover.sprite = MiraAssets.SearchIconHoverSprite;
+        searchBoxTmp.SetText(string.Empty);
+        var newSorted = sortMethod is SortingMethod.Alphabetical ? RolePanels.OrderBy(GetSortingOrder()) : RolePanels.OrderByDescending(GetSortingOrder());
+
+        foreach (var pair in newSorted)
+        {
+            pair.Value.Panel.transform.SetAsLastSibling();
+        }
+
+        _rolesScroller.ScrollToTop();
+    }
 
     public static void SwitchFilter()
     {
@@ -328,6 +412,23 @@ public static class RoleGuidePatches
             sortFilter = SortingFilter.EnabledOnly;
         }
 
+        switch (sortFilter)
+        {
+            case SortingFilter.AllRoles:
+                _searchSortingFilterIdle.sprite = MiraAssets.VisibleAllIdleSprite;
+                _searchSortingFilterHover.sprite = MiraAssets.VisibleAllHoverSprite;
+                break;
+            case SortingFilter.DisabledOnly:
+                _searchSortingFilterIdle.sprite = MiraAssets.VisibleOffIdleSprite;
+                _searchSortingFilterHover.sprite = MiraAssets.VisibleOffHoverSprite;
+                break;
+            default:
+                _searchSortingFilterIdle.sprite = MiraAssets.VisibleOnIdleSprite;
+                _searchSortingFilterHover.sprite = MiraAssets.VisibleOnHoverSprite;
+                break;
+        }
+
+        ToggleRoleVisibility();
         var newSorted = sortMethod is SortingMethod.Alphabetical ? RolePanels.OrderBy(GetSortingOrder()) : RolePanels.OrderByDescending(GetSortingOrder());
 
         foreach (var pair in newSorted)
@@ -348,6 +449,9 @@ public static class RoleGuidePatches
             sortMethod = SortingMethod.Alphabetical;
         }
 
+        _searchSortingOrderIdle.sprite = sortMethod is SortingMethod.Alphabetical ? MiraAssets.SortingAzIdleSprite : MiraAssets.SortingZaIdleSprite;
+        _searchSortingOrderHover.sprite = sortMethod is SortingMethod.Alphabetical ? MiraAssets.SortingAzHoverSprite : MiraAssets.SortingZaHoverSprite;
+
         var newSorted = sortMethod is SortingMethod.Alphabetical ? RolePanels.OrderBy(GetSortingOrder()) : RolePanels.OrderByDescending(GetSortingOrder());
 
         foreach (var pair in newSorted)
@@ -356,16 +460,32 @@ public static class RoleGuidePatches
         }
     }
 
-    public static void SwitchOrder()
+    public static void SwitchGrouping()
     {
-        var stepUp = (SortingOrder)((int)sortOrder + 1);
+        var stepUp = (SortingGroups)((int)sortOrder + 1);
         if (Enum.IsDefined(stepUp))
         {
             sortOrder = stepUp;
         }
         else
         {
-            sortOrder = SortingOrder.RoleName;
+            sortOrder = SortingGroups.Ungrouped;
+        }
+
+        switch (sortOrder)
+        {
+            case SortingGroups.Faction:
+                _searchSortingGroupIdle.sprite = MiraAssets.GroupFactionIdleSprite;
+                _searchSortingGroupHover.sprite = MiraAssets.GroupFactionHoverSprite;
+                break;
+            case SortingGroups.AmountChance:
+                _searchSortingGroupIdle.sprite = MiraAssets.GroupCountIdleSprite;
+                _searchSortingGroupHover.sprite = MiraAssets.GroupCountHoverSprite;
+                break;
+            default:
+                _searchSortingGroupIdle.sprite = MiraAssets.GroupNoneIdleSprite;
+                _searchSortingGroupHover.sprite = MiraAssets.GroupNoneHoverSprite;
+                break;
         }
 
         var newSorted = sortMethod is SortingMethod.Alphabetical ? RolePanels.OrderBy(GetSortingOrder()) : RolePanels.OrderByDescending(GetSortingOrder());
@@ -457,13 +577,28 @@ public static class RoleGuidePatches
 
         advancedWikiTab?.gameObject.SetActive(false);
 
+        ToggleRoleVisibility();
+        if (reset)
+        {
+            instance.CreatePlayerEntries();
+        }
+    }
+
+    public static void ToggleRoleVisibility()
+    {
         var num = 0;
         foreach (var (roleData, holder) in RolePanels)
         {
             var panel = holder.Panel;
             var amount = GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetNumPerGame(roleData.Role);
             var chance = GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetChancePerGame(roleData.Role);
-            var forciblyShow = roleData is ICustomRole custom ? custom.ForceShowRoleOnWiki : null;
+            var showVal = roleData is ICustomRole custom ? custom.ForceShowRoleOnWiki : null;
+            var forciblyShow = showVal switch
+            {
+                true => 2,
+                false => 1,
+                _ => 0,
+            };
             panel.SetPanel(
                 roleData,
                 amount,
@@ -471,9 +606,14 @@ public static class RoleGuidePatches
             holder.Amount = amount;
             holder.Chance = chance;
             holder.LikelyhoodOfRole = amount * chance;
-            if (amount == 0 || chance == 0 || (Enum.IsDefined(roleData.Role) && roleData.IsRoleBlacklisted()) ||
-                (roleData is ICustomRole custom2 && ((!custom2.CanSpawnOnCurrentMode() && forciblyShow == null) ||
-                                                                    (forciblyShow.HasValue && !forciblyShow.Value))))
+            var isRoleDisabled = amount == 0 || chance == 0;
+            var isRoleNotVisible = (roleData is ICustomRole custom2 &&
+                                    !custom2.CanSpawnOnCurrentMode()) ||
+                                    (Enum.IsDefined(roleData.Role) && roleData.IsRoleBlacklisted());
+            if ((forciblyShow == 0 && ((isRoleDisabled && sortFilter is SortingFilter.EnabledOnly) ||
+                                       (!isRoleDisabled && sortFilter is SortingFilter.DisabledOnly) ||
+                                       isRoleNotVisible))
+                || forciblyShow == 1)
             {
                 panel.gameObject.SetActive(false);
                 continue;
@@ -490,6 +630,7 @@ public static class RoleGuidePatches
             pair.Value.Panel.transform.SetAsLastSibling();
         }
 
+        var instance = MatchInfoGuide.Instance;
         if (num == 0)
         {
             instance.rolesEnabledMessage.SetActive(true);
@@ -497,19 +638,15 @@ public static class RoleGuidePatches
 
         instance.MatchInfoRoleScroller.SetYBoundsMax(Mathf.Clamp(Mathf.Ceil(num / 2f) * 1.3f - 1.5f, 0f, 999f));
         instance.MatchInfoRoleScroller.SetYBoundsMax(Mathf.Clamp(Mathf.Ceil(num / 2f) * 1.3f - 1.5f, 0f, 999f));
-        if (reset)
-        {
-            instance.CreatePlayerEntries();
-        }
     }
 
     public static Func<KeyValuePair<RoleBehaviour, DetailedPanel>, string> GetSortingOrder()
     {
         switch (sortOrder)
         {
-            case SortingOrder.Faction:
+            case SortingGroups.Faction:
                 return x => $"{x.Value.Category} ({x.Value.Title}) {x.Value.LikelyhoodOfRole.ToString("0000.0", CultureInfo.InvariantCulture)}";
-            case SortingOrder.AmountChance:
+            case SortingGroups.AmountChance:
                 return x => $"{x.Value.LikelyhoodOfRole.ToString("0000.0", CultureInfo.InvariantCulture)} {x.Value.Title} ({x.Value.Category})";
             default:
                 return x => $"{x.Value.Title} ({x.Value.Category}) {x.Value.LikelyhoodOfRole.ToString("0000.0", CultureInfo.InvariantCulture)}";
@@ -520,9 +657,9 @@ public static class RoleGuidePatches
     {
         switch (sortOrder)
         {
-            case SortingOrder.Faction:
+            case SortingGroups.Faction:
                 return $"{panel.Category} ({panel.Title}) {panel.LikelyhoodOfRole.ToString("0000.0", CultureInfo.InvariantCulture)}";
-            case SortingOrder.AmountChance:
+            case SortingGroups.AmountChance:
                 return $"{panel.LikelyhoodOfRole.ToString("0000.0", CultureInfo.InvariantCulture)} {panel.Title} ({panel.Category})";
             default:
                 return $"{panel.Title} ({panel.Category}) {panel.LikelyhoodOfRole.ToString("0000.0", CultureInfo.InvariantCulture)}";
@@ -673,9 +810,9 @@ public static class RoleGuidePatches
     }
 }
 
-public enum SortingOrder
+public enum SortingGroups
 {
-    RoleName,
+    Ungrouped,
     Faction,
     AmountChance
 }
