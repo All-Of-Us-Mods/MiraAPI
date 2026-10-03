@@ -160,5 +160,50 @@ public static class MiraAssets
     /// </summary>
     public static LoadableResourceAsset ChatOpenSprite { get; } = new("MiraAPI.Resources.NormalChatOpen.png");
 
+    /// <summary>
+    /// Gets the sprite used for players button while hovering.
+    /// </summary>
+    public static LoadableResourceAsset WikiPlayersButtonHoverSprite { get; } = new("MiraAPI.Resources.WikiPlayersButtonHover.png");
+
+    /// <summary>
+    /// Gets the sprite used for the players button while hovering.
+    /// </summary>
+    public static LoadableResourceAsset WikiPlayersButtonIdleSprite { get; } = new("MiraAPI.Resources.WikiPlayersButtonIdle.png");
+
+    /// <summary>
+    /// Gets the sprite used for the players button while hovering.
+    /// </summary>
+    public static LoadableResourceAsset WikiPlayersButtonOpenSprite { get; } = new("MiraAPI.Resources.WikiPlayersButtonOpen.png");
+
+    /// <summary>
+    /// Gets the sprite used for the settings button while hovering.
+    /// </summary>
+    public static LoadableResourceAsset WikiSettingsButtonHoverSprite { get; } = new("MiraAPI.Resources.WikiSettingsButtonHover.png");
+
+    /// <summary>
+    /// Gets the sprite used for the settings button while hovering.
+    /// </summary>
+    public static LoadableResourceAsset WikiSettingsButtonIdleSprite { get; } = new("MiraAPI.Resources.WikiSettingsButtonIdle.png");
+
+    /// <summary>
+    /// Gets the sprite used for the settings button while hovering.
+    /// </summary>
+    public static LoadableResourceAsset WikiSettingsButtonOpenSprite { get; } = new("MiraAPI.Resources.WikiSettingsButtonOpen.png");
+
+    /// <summary>
+    /// Gets the sprite used for the roles button while hovering.
+    /// </summary>
+    public static LoadableResourceAsset WikiRolesButtonHoverSprite { get; } = new("MiraAPI.Resources.WikiRolesButtonHover.png");
+
+    /// <summary>
+    /// Gets the sprite used for the roles button while hovering.
+    /// </summary>
+    public static LoadableResourceAsset WikiRolesButtonIdleSprite { get; } = new("MiraAPI.Resources.WikiRolesButtonIdle.png");
+
+    /// <summary>
+    /// Gets the sprite used for the roles button while hovering.
+    /// </summary>
+    public static LoadableResourceAsset WikiRolesButtonOpenSprite { get; } = new("MiraAPI.Resources.WikiRolesButtonOpen.png");
+
     internal static LoadableResourceAsset BlankSprite { get; } = new("MiraAPI.Resources.BlankSprite.png");
 }

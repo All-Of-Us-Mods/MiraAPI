@@ -35,15 +35,21 @@ public static class RoleGuidePatches
             __instance.matchInfoSettingsMaskArea.size =
                 __instance.MatchInfoRoleMaskArea.size = new Vector2(-6, 1.8f);
 
-        __instance.matchInfoPlayersMaskArea.transform.parent.GetAllChildren().First(x => x.name.Contains("BG_Gradient"))
+        var playerMenuGradient = __instance.matchInfoPlayersMaskArea.transform.parent.GetAllChildren()
+            .First(x => x.name.Contains("BG_Gradient"));
+        var settingsenuGradient = __instance.matchInfoSettingsMaskArea.transform.parent.GetAllChildren()
+            .First(x => x.name.Contains("BG_Gradient"));
+        var roleMenuGradient = __instance.MatchInfoRoleMaskArea.transform.parent.GetAllChildren()
+            .First(x => x.name.Contains("BG_Gradient"));
+        playerMenuGradient
                 .GetComponent<SpriteRenderer>()
                 .maskInteraction =
-            __instance.matchInfoSettingsMaskArea.transform.parent.GetAllChildren()
-                    .First(x => x.name.Contains("BG_Gradient")).GetComponent<SpriteRenderer>()
+            settingsenuGradient.GetComponent<SpriteRenderer>()
                     .maskInteraction =
-                __instance.MatchInfoRoleMaskArea.transform.parent.GetAllChildren()
-                    .First(x => x.name.Contains("BG_Gradient")).GetComponent<SpriteRenderer>()
+                roleMenuGradient.GetComponent<SpriteRenderer>()
                     .maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+        roleMenuGradient.transform.localScale = new Vector3(0.5297f, 0.1565f, 1);
+        roleMenuGradient.transform.localPosition = new Vector3(0, -0.62f, -5);
         var wikiTab = Object.Instantiate(__instance.settingsTabs[2], __instance.settingsTabs[2].transform.parent);
         advancedWikiTab = wikiTab.GetComponent<Scroller>();
     }
@@ -124,25 +130,87 @@ public static class RoleGuidePatches
                     __instance.matchInfoSettingsMaskArea.size =
                         __instance.MatchInfoRoleMaskArea.size = new Vector2(-6, 1.8f);
 
-                __instance.matchInfoPlayersMaskArea.transform.parent.GetAllChildren().First(x => x.name.Contains("BG_Gradient"))
+                var playerMenuGradient = __instance.matchInfoPlayersMaskArea.transform.parent.GetAllChildren()
+                    .First(x => x.name.Contains("BG_Gradient"));
+                var settingsenuGradient = __instance.matchInfoSettingsMaskArea.transform.parent.GetAllChildren()
+                    .First(x => x.name.Contains("BG_Gradient"));
+                var roleMenuGradient = __instance.MatchInfoRoleMaskArea.transform.parent.GetAllChildren()
+                    .First(x => x.name.Contains("BG_Gradient"));
+                playerMenuGradient
                         .GetComponent<SpriteRenderer>()
                         .maskInteraction =
-                    __instance.matchInfoSettingsMaskArea.transform.parent.GetAllChildren()
-                            .First(x => x.name.Contains("BG_Gradient")).GetComponent<SpriteRenderer>()
+                    settingsenuGradient.GetComponent<SpriteRenderer>()
                             .maskInteraction =
-                        __instance.MatchInfoRoleMaskArea.transform.parent.GetAllChildren()
-                            .First(x => x.name.Contains("BG_Gradient")).GetComponent<SpriteRenderer>()
+                        roleMenuGradient.GetComponent<SpriteRenderer>()
                             .maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                roleMenuGradient.transform.localScale = new Vector3(0.5297f, 0.1565f, 1);
+                roleMenuGradient.transform.localPosition = new Vector3(0, -0.62f, -5);
                 __instance.MatchInfoRoleMaskArea.material.SetInt(PlayerMaterial.MaskLayer, 50);
                 __instance.matchInfoSettingsMaskArea.material.SetInt(PlayerMaterial.MaskLayer, 50);
+
                 var wikiTab = Object.Instantiate(__instance.settingsTabs[2], __instance.settingsTabs[2].transform.parent);
                 wikiTab.transform.FindChild("MaskArea")?.transform.localPosition = new Vector3(-0.0184f, 0.15f, -0.1f);
+                wikiTab.transform.GetAllChildren()
+                    .First(x => x.name.Contains("BG_Gradient")).transform.localPosition = new Vector3(0, -0.62f, -5);
                 advancedWikiTab = wikiTab.GetComponent<Scroller>();
+
                 DisplayNormalRoleSettings(__instance, true);
+
+                var searchBox = Object.Instantiate(__instance.TabButtons[2].gameObject, __instance.TabButtons[2].transform.parent);
+                var searchButton = searchBox.GetComponent<MatchInfoGuideTabButton>();
+                var tmpText = searchButton.transform.GetChild(0).GetComponent<TextMeshPro>();
+                tmpText.GetComponent<TextTranslatorTMP>().Destroy();
+                tmpText.transform.localPosition = new Vector3(-1.33f, 0.0343f, -0.2f);
+                tmpText.color = new Color(0, 0.9656f, 0.8679f, 1);
+                tmpText.text = string.Empty;
+                tmpText.color = new Color(0, 0.9656f, 0.8679f, 0.5f);
+                var inactive = searchButton.inactiveSprites;
+                var selected = searchButton.selectedSprites;
+                var highlight = searchButton.activeSprites;
+                var disabledSprite = searchButton.disabledSprites;
+                disabledSprite.GetComponent<SpriteRenderer>().size = new Vector2(3, 0.6f);
+                searchButton.Destroy();
+                inactive.gameObject.SetActive(false);
+                selected.gameObject.SetActive(false);
+                highlight.gameObject.SetActive(false);
+                disabledSprite.gameObject.SetActive(true);
+                var button = searchBox.AddComponent<PassiveButton>();
+                button.OnUp = true;
+                searchBoxTmp = searchBox.AddComponent<TextBoxTMP>();
+                searchBoxTmp.outputText = tmpText;
+                button.OnClick.AddListener(
+                    (UnityAction)(() =>
+                    {
+                        searchBoxTmp.GiveFocus();
+                    }));
+                button.OnMouseOver = new UnityEvent();
+                button.OnMouseOut = new UnityEvent();
+                button.OnClick = new Button.ButtonClickedEvent();
+                searchBoxTmp.OnChange = new Button.ButtonClickedEvent();
+                searchBoxTmp.OnChange.AddListener(
+                    (UnityAction)(() =>
+                    {
+                        var text = searchBoxTmp.outputText.text;
+                        var newSorted = RolePanels
+                            .OrderByDescending(child =>
+                                child.Value.Panel.name.Equals(text, StringComparison.OrdinalIgnoreCase))
+                            .ThenByDescending(child => child.Value.Panel.name.Contains(
+                                text,
+                                StringComparison.InvariantCultureIgnoreCase))
+                            .ThenBy(GetSortingOrder());
+
+                        foreach (var pair in newSorted)
+                        {
+                            pair.Value.Panel.transform.SetAsLastSibling();
+                        }
+
+                        advancedWikiTab.ScrollToTop();
+                    }));
             }
             else
             {
                 DisplayNormalRoleSettings(__instance, false);
+                searchBoxTmp.SetText(string.Empty);
             }
         }
         else if (__instance.HnSModeSettings.Count == 0)
@@ -167,6 +235,7 @@ public static class RoleGuidePatches
 
     private static readonly Dictionary<RoleBehaviour, DetailedPanel> RolePanels = [];
     private static Scroller advancedWikiTab;
+    private static TextBoxTMP searchBoxTmp;
     private static GameObject currentAdvancedTabObject;
     private static TextMeshPro titleText;
 
