@@ -23,9 +23,17 @@ public static class VanillaButtonPatches
         {
             playerTarget = role.Cast<TrackerRole>().currentTarget;
         }
+        else if (role.Role is RoleTypes.Detective)
+        {
+            playerTarget = role.Cast<DetectiveRole>().currentTarget;
+        }
         else if (role.Role is RoleTypes.GuardianAngel)
         {
             playerTarget = role.Cast<GuardianAngelRole>().currentTarget;
+        }
+        else if (role.Role is RoleTypes.SpiritGuide)
+        {
+            playerTarget = role.Cast<SpiritGuideRole>().currentTarget;
         }
         else if (role.Role is RoleTypes.Engineer)
         {
@@ -52,6 +60,10 @@ public static class VanillaButtonPatches
         if (role.Role is RoleTypes.Detective)
         {
             playerTarget = role.Cast<DetectiveRole>().currentTarget;
+        }
+        else if (role.Role is RoleTypes.SpiritGuide)
+        {
+            playerTarget = role.Cast<SpiritGuideRole>().currentTarget;
         }
 
         var genericEvent = new VanillaButtonClickEvent(__instance, playerTarget);

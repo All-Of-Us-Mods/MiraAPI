@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using Il2CppSystem.Collections.Generic;
 using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
 using MiraAPI.Modifiers;
@@ -28,9 +28,9 @@ internal static class GameOptionsMenuPatch
     private static readonly List<CategoryHeaderMasked> VanillaHeaders = new();
     private static readonly List<OptionBehaviour> VanillaOptions = new();
     private static readonly List<OptionBehaviour> MainOptions = new();
-    private static readonly System.Collections.Generic.Dictionary<AbstractGameMode, System.Collections.Generic.List<AbstractOptionGroup>> GameModeGroups = [];
-    private static readonly System.Collections.Generic.Dictionary<AbstractGameMode, System.Collections.Generic.List<OptionBehaviour>> GameModeOptions = [];
-    private static readonly System.Collections.Generic.Dictionary<AbstractGameMode, System.Collections.Generic.List<CategoryHeaderMasked>> GameModeHeaders = [];
+    private static readonly Dictionary<AbstractGameMode, List<AbstractOptionGroup>> GameModeGroups = [];
+    private static readonly Dictionary<AbstractGameMode, List<OptionBehaviour>> GameModeOptions = [];
+    private static readonly Dictionary<AbstractGameMode, List<CategoryHeaderMasked>> GameModeHeaders = [];
     private static TextMeshPro _gamemodeDescription = null!;
     private static SpriteRenderer _modIcon = null!;
 
@@ -38,7 +38,7 @@ internal static class GameOptionsMenuPatch
     [HarmonyPatch(nameof(GameOptionsMenu.Initialize))]
     public static bool InitPatch(GameOptionsMenu __instance)
     {
-        __instance.Children ??= new List<OptionBehaviour>();
+        __instance.Children ??= new();
         __instance.Children.Clear();
 
         if (MenuState.Instance.CurrentModIdx == 0)
@@ -324,8 +324,8 @@ internal static class GameOptionsMenuPatch
                     .ToList();
             GameModeGroups.Add(mode, [.. filteredGroups]);
 
-            var optionBehaviours = new System.Collections.Generic.List<OptionBehaviour>();
-            var categoryHeaders = new System.Collections.Generic.List<CategoryHeaderMasked>();
+            var optionBehaviours = new List<OptionBehaviour>();
+            var categoryHeaders = new List<CategoryHeaderMasked>();
             var newNum = mode.ShowNormalGameSettings ? num : num - additionalVanillaScrollNum;
             foreach (var group in filteredGroups)
             {
@@ -406,7 +406,7 @@ internal static class GameOptionsMenuPatch
         __instance.scrollBar.SetYBoundsMax(-num - 1.65f);
     }
 
-    private static void CreateGroup(GameOptionsMenu menu, AbstractOptionGroup group, Transform container, ref float num, ref System.Collections.Generic.List<OptionBehaviour> optionBehaviours, ref System.Collections.Generic.List<CategoryHeaderMasked> categoryHeaders)
+    private static void CreateGroup(GameOptionsMenu menu, AbstractOptionGroup group, Transform container, ref float num, ref List<OptionBehaviour> optionBehaviours, ref List<CategoryHeaderMasked> categoryHeaders)
     {
         var categoryHeaderMasked = Object.Instantiate(
             menu.categoryHeaderOrigin,
