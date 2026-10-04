@@ -35,6 +35,10 @@ public static class RoleGuidePatches
     private static SpriteRenderer _searchSortingFilterIdle;
     private static SpriteRenderer _searchSortingFilterHover;
     private static Scroller _rolesScroller;
+    private static bool _needsRoleRefresh;
+    private static bool _needsModifierRefresh;
+    private static bool _needsToggledRoleRefresh;
+    private static bool _needsToggledModifierRefresh;
 
     [HarmonyPostfix]
     [HarmonyPriority(Priority.First)]
@@ -67,7 +71,7 @@ public static class RoleGuidePatches
         roleMenuGradient.transform.localScale = new Vector3(0.5297f, 0.1565f, 1);
         roleMenuGradient.transform.localPosition = new Vector3(0, -0.62f, -5);
         var wikiTab = Object.Instantiate(__instance.settingsTabs[2], __instance.settingsTabs[2].transform.parent);
-        advancedWikiTab = wikiTab.GetComponent<Scroller>();
+        _advancedInfoTabScroller = wikiTab.GetComponent<Scroller>();
     }
 
     [HarmonyPrefix]
@@ -202,10 +206,11 @@ public static class RoleGuidePatches
                     __instance.settingsTabs[2],
                     __instance.settingsTabs[2].transform.parent);
                 modifiersTab.name = "ModifiersPanel";
-                modifiersTab.transform.FindChild("MaskArea")?.transform.localPosition = new Vector3(-0.0184f, 0.15f, -0.1f);
+                modifiersTab.transform.FindChild("MaskArea")?.transform.localPosition =
+                    new Vector3(-0.0184f, 0.15f, -0.1f);
                 modifiersTab.transform.GetAllChildren()
                     .First(x => x.name.Contains("BG_Gradient")).transform.localPosition = new Vector3(0, -0.62f, -5);
-                modifiersWikiTab = modifiersTab.GetComponent<Scroller>();
+                _modifiersScroller = modifiersTab.GetComponent<Scroller>();
                 __instance.settingsTabs.Add(modifiersTab);
 
                 var wikiTab = Object.Instantiate(
@@ -215,7 +220,7 @@ public static class RoleGuidePatches
                 wikiTab.transform.FindChild("MaskArea")?.transform.localPosition = new Vector3(-0.0184f, 0.15f, -0.1f);
                 wikiTab.transform.GetAllChildren()
                     .First(x => x.name.Contains("BG_Gradient")).transform.localPosition = new Vector3(0, -0.62f, -5);
-                advancedWikiTab = wikiTab.GetComponent<Scroller>();
+                _advancedInfoTabScroller = wikiTab.GetComponent<Scroller>();
 
                 DisplayNormalRoleSettings(__instance, true);
 
@@ -282,11 +287,16 @@ public static class RoleGuidePatches
                             _searchIconHover.sprite = MiraAssets.SearchIconHoverSprite;
                         }
 
-                        SortAllModifiers(text);
-                        SortAllRoles(text);
-
-                        _rolesScroller.ScrollToTop();
-                        modifiersWikiTab.ScrollToTop();
+                        if (MatchInfoGuide.Instance.activeTabIndex != 3)
+                        {
+                            SortAllRoles(text);
+                            _rolesScroller.ScrollToTop();
+                        }
+                        else
+                        {
+                            SortAllModifiers(text);
+                            _modifiersScroller.ScrollToTop();
+                        }
                     }));
                 searchBoxTmp.transform.localPosition = new Vector3(-1.438f, 0.756f, -0.2f);
 
@@ -323,6 +333,8 @@ public static class RoleGuidePatches
                 settingBtnHighlight.transform.GetChild(0).gameObject.SetActive(false);
 
                 var rolesButton = __instance.TabButtons[2];
+                rolesButton.OnClick = new Button.ButtonClickedEvent();
+                rolesButton.OnClick.AddListener((Action)(() => OpenRolesTab()));
                 var rolesCollider = rolesButton.GetComponent<BoxCollider2D>();
                 rolesButton.transform.GetChild(0).gameObject.SetActive(false);
                 var rolesBtnInactive = rolesButton.inactiveSprites.GetComponent<SpriteRenderer>();
@@ -338,7 +350,9 @@ public static class RoleGuidePatches
                 rolesBtnHighlight.size = Vector2.one;
                 rolesBtnHighlight.transform.GetChild(0).gameObject.SetActive(false);
 
-                var modifiersButton = Object.Instantiate(__instance.TabButtons[2], __instance.TabButtons[2].transform.parent);
+                var modifiersButton = Object.Instantiate(
+                    __instance.TabButtons[2],
+                    __instance.TabButtons[2].transform.parent);
                 modifiersButton.OnClick = new Button.ButtonClickedEvent();
                 modifiersButton.OnClick.AddListener((Action)(() => OpenModifiersTab()));
                 var modifiersCollider = modifiersButton.GetComponent<BoxCollider2D>();
@@ -357,10 +371,13 @@ public static class RoleGuidePatches
                 modifiersBtnHighlight.transform.GetChild(0).gameObject.SetActive(false);
                 __instance.TabButtons.Add(modifiersButton);
 
-                playerCollider.size = settingsCollider.size = rolesCollider.size = modifiersCollider.size = new Vector2(0.8f, 0.74f);
-                playerCollider.offset = settingsCollider.offset = rolesCollider.offset = modifiersCollider.offset = Vector2.zero;
+                playerCollider.size = settingsCollider.size =
+                    rolesCollider.size = modifiersCollider.size = new Vector2(0.8f, 0.74f);
+                playerCollider.offset = settingsCollider.offset =
+                    rolesCollider.offset = modifiersCollider.offset = Vector2.zero;
                 playerButton.transform.localScale = settingButton.transform.localScale =
-                    rolesButton.transform.localScale = modifiersButton.transform.localScale = new Vector3(0.7f, 0.7f, 1);
+                    rolesButton.transform.localScale =
+                        modifiersButton.transform.localScale = new Vector3(0.7f, 0.7f, 1);
                 playerButton.transform.localPosition = new Vector3(-3.6f, 0.656f, -0.2f);
                 settingButton.transform.localPosition = new Vector3(-3.6f, 0.056f, -0.2f);
                 rolesButton.transform.localPosition = new Vector3(-3.6f, -0.544f, -0.2f);
@@ -394,14 +411,64 @@ public static class RoleGuidePatches
 
     public static void OpenModifiersTab()
     {
-        advancedWikiTab?.gameObject.SetActive(false);
+        _advancedInfoTabScroller?.gameObject.SetActive(false);
         MatchInfoGuide.Instance.SetActiveTab(3);
+        if (_needsToggledModifierRefresh)
+        {
+            ToggleModifierVisibility();
+        }
+
+        if (_needsModifierRefresh)
+        {
+            var text = string.Empty;
+            try
+            {
+                text = searchBoxTmp.outputText.text;
+            }
+            catch
+            {
+                // ignored
+            }
+
+            SortAllModifiers(text);
+        }
+
+        _needsModifierRefresh = false;
+        _needsToggledModifierRefresh = false;
+    }
+
+    public static void OpenRolesTab()
+    {
+        _advancedInfoTabScroller?.gameObject.SetActive(false);
+        MatchInfoGuide.Instance.SetActiveTab(2);
+        if (_needsToggledRoleRefresh)
+        {
+            ToggleRoleVisibility();
+        }
+
+        if (_needsRoleRefresh)
+        {
+            var text = string.Empty;
+            try
+            {
+                text = searchBoxTmp.outputText.text;
+            }
+            catch
+            {
+                // ignored
+            }
+
+            SortAllRoles(text);
+        }
+
+        _needsRoleRefresh = false;
+        _needsToggledRoleRefresh = false;
     }
 
     private static readonly Dictionary<RoleBehaviour, DetailedPanel> RolePanels = [];
     private static readonly Dictionary<GameModifier, DetailedPanel> ModifierPanels = [];
-    private static Scroller modifiersWikiTab;
-    private static Scroller advancedWikiTab;
+    private static Scroller _modifiersScroller;
+    private static Scroller _advancedInfoTabScroller;
     private static TextBoxTMP searchBoxTmp;
     private static GameObject currentAdvancedTabObject;
     private static TextMeshPro titleText;
@@ -436,19 +503,19 @@ public static class RoleGuidePatches
         }
 
         var text = string.Empty;
-        try
-        {
-            text = searchBoxTmp.outputText.text;
-        }
-        catch
-        {
-            // ignored
-        }
 
-        SortAllRoles(text);
-        SortAllModifiers(text);
-
-        _rolesScroller.ScrollToTop();
+        if (MatchInfoGuide.Instance.activeTabIndex != 3)
+        {
+            SortAllRoles(text);
+            _rolesScroller.ScrollToTop();
+            _needsModifierRefresh = true;
+        }
+        else
+        {
+            SortAllModifiers(text);
+            _modifiersScroller.ScrollToTop();
+            _needsRoleRefresh = true;
+        }
     }
 
     public static void SwitchFilter()
@@ -479,8 +546,16 @@ public static class RoleGuidePatches
                 break;
         }
 
-        ToggleRoleVisibility();
-        ToggleModifierVisibility();
+        if (MatchInfoGuide.Instance.activeTabIndex != 3)
+        {
+            ToggleRoleVisibility();
+            _needsToggledModifierRefresh = _needsModifierRefresh = true;
+        }
+        else
+        {
+            ToggleModifierVisibility();
+            _needsToggledRoleRefresh = _needsRoleRefresh = true;
+        }
     }
 
     public static void SwitchMethod()
@@ -512,8 +587,16 @@ public static class RoleGuidePatches
             // ignored
         }
 
-        SortAllRoles(text);
-        SortAllModifiers(text);
+        if (MatchInfoGuide.Instance.activeTabIndex != 3)
+        {
+            SortAllRoles(text);
+            _needsModifierRefresh = true;
+        }
+        else
+        {
+            SortAllModifiers(text);
+            _needsRoleRefresh = true;
+        }
     }
 
     public static void SwitchGrouping()
@@ -554,8 +637,16 @@ public static class RoleGuidePatches
             // ignored
         }
 
-        SortAllRoles(text);
-        SortAllModifiers(text);
+        if (MatchInfoGuide.Instance.activeTabIndex != 3)
+        {
+            SortAllRoles(text);
+            _needsModifierRefresh = true;
+        }
+        else
+        {
+            SortAllModifiers(text);
+            _needsRoleRefresh = true;
+        }
     }
 
     public static void DisplayNormalRoleSettings(MatchInfoGuide instance, bool reset)
@@ -595,7 +686,7 @@ public static class RoleGuidePatches
             {
                 var panel = Object.Instantiate(
                     instance.MatchInfoRolePanelPrefab,
-                    modifiersWikiTab.Inner);
+                    _modifiersScroller.Inner);
                 var amount =
                     modifier.GetAmountPerGame();
                 var chance =
@@ -668,10 +759,17 @@ public static class RoleGuidePatches
             }
         }
 
-        advancedWikiTab?.gameObject.SetActive(false);
+        _advancedInfoTabScroller?.gameObject.SetActive(false);
 
-        ToggleModifierVisibility();
-        ToggleRoleVisibility();
+        if (MatchInfoGuide.Instance.activeTabIndex != 3)
+        {
+            ToggleRoleVisibility();
+        }
+        else
+        {
+            ToggleModifierVisibility();
+        }
+
         if (reset)
         {
             instance.CreatePlayerEntries();
@@ -728,12 +826,13 @@ public static class RoleGuidePatches
         }
 
         SortAllModifiers(text);
+        _needsRoleRefresh = true;
 
         /*var instance = MatchInfoGuide.Instance;
         instance.rolesEnabledMessage.SetActive(num == 0);*/
 
-        modifiersWikiTab.SetYBoundsMax(Mathf.Clamp(Mathf.Ceil(num / 2f) * 1.3f - 1.5f, 0f, 999f));
-        modifiersWikiTab.SetYBoundsMax(Mathf.Clamp(Mathf.Ceil(num / 2f) * 1.3f - 1.5f, 0f, 999f));
+        _modifiersScroller.SetYBoundsMax(Mathf.Clamp(Mathf.Ceil(num / 2f) * 1.3f - 1.5f, 0f, 999f));
+        _modifiersScroller.SetYBoundsMax(Mathf.Clamp(Mathf.Ceil(num / 2f) * 1.3f - 1.5f, 0f, 999f));
     }
 
     public static void ToggleRoleVisibility()
@@ -796,13 +895,21 @@ public static class RoleGuidePatches
 
     public static void SortAllRoles(string searchText)
     {
-        var newSorted = RolePanels
-            .OrderByDescending(child =>
-                child.Value.GetTitle().Equals(searchText, StringComparison.OrdinalIgnoreCase))
-            .ThenByDescending(child => child.Value.GetTitle().Contains(
-                searchText,
-                StringComparison.InvariantCultureIgnoreCase))
-            .ThenBy(GetSortingOrder());
+        var newSorted = sortMethod is SortingMethod.Alphabetical
+            ? RolePanels
+                .OrderByDescending(child =>
+                    child.Value.GetTitle().Equals(searchText, StringComparison.OrdinalIgnoreCase))
+                .ThenByDescending(child => child.Value.GetTitle().Contains(
+                    searchText,
+                    StringComparison.InvariantCultureIgnoreCase))
+                .ThenBy(GetSortingOrder())
+            : RolePanels
+                .OrderByDescending(child =>
+                    child.Value.GetTitle().Equals(searchText, StringComparison.OrdinalIgnoreCase))
+                .ThenByDescending(child => child.Value.GetTitle().Contains(
+                    searchText,
+                    StringComparison.InvariantCultureIgnoreCase))
+                .ThenByDescending(GetSortingOrder());
 
         foreach (var pair in newSorted)
         {
@@ -812,13 +919,21 @@ public static class RoleGuidePatches
 
     public static void SortAllModifiers(string searchText)
     {
-        var newSorted = ModifierPanels
-            .OrderByDescending(child =>
-                child.Value.GetTitle().Equals(searchText, StringComparison.OrdinalIgnoreCase))
-            .ThenByDescending(child => child.Value.GetTitle().Contains(
-                searchText,
-                StringComparison.InvariantCultureIgnoreCase))
-            .ThenBy(GetModifierSortingOrder());
+        var newSorted = sortMethod is SortingMethod.Alphabetical
+            ? ModifierPanels
+                .OrderByDescending(child =>
+                    child.Value.GetTitle().Equals(searchText, StringComparison.OrdinalIgnoreCase))
+                .ThenByDescending(child => child.Value.GetTitle().Contains(
+                    searchText,
+                    StringComparison.InvariantCultureIgnoreCase))
+                .ThenBy(GetModifierSortingOrder())
+            : ModifierPanels
+                .OrderByDescending(child =>
+                    child.Value.GetTitle().Equals(searchText, StringComparison.OrdinalIgnoreCase))
+                .ThenByDescending(child => child.Value.GetTitle().Contains(
+                    searchText,
+                    StringComparison.InvariantCultureIgnoreCase))
+                .ThenByDescending(GetModifierSortingOrder());
 
         foreach (var pair in newSorted)
         {
@@ -920,7 +1035,7 @@ public static class RoleGuidePatches
             titleText.text = TranslationController.Instance.GetString(StringNames.MatchInfoGuideTitle);
         }
 
-        advancedWikiTab?.gameObject.SetActive(false);
+        _advancedInfoTabScroller?.gameObject.SetActive(false);
     }
 
     public static void DisplayAdvancedWiki(MatchInfoGuide instance, BaseModifier modifier)
@@ -929,20 +1044,20 @@ public static class RoleGuidePatches
         Warning($"Opening advanced tab for {name}.");
         instance.settingsTabs[2].SetActive(false);
         instance.settingsTabs[3].SetActive(false);
-        advancedWikiTab?.gameObject.SetActive(true);
+        _advancedInfoTabScroller?.gameObject.SetActive(true);
         if (currentAdvancedTabObject)
         {
             currentAdvancedTabObject.SetActive(false);
             currentAdvancedTabObject.Destroy();
         }
 
-        if (advancedWikiTab == null)
+        if (_advancedInfoTabScroller == null)
         {
             Warning($"Wiki tab is null.");
             return;
         }
 
-        currentAdvancedTabObject = modifier.GetAdvancedWiki(instance, titleText, advancedWikiTab);
+        currentAdvancedTabObject = modifier.GetAdvancedWiki(instance, titleText, _advancedInfoTabScroller);
     }
 
     public static void DisplayAdvancedWiki(MatchInfoGuide instance, RoleBehaviour role)
@@ -950,14 +1065,14 @@ public static class RoleGuidePatches
         Warning($"Opening advanced tab for {role.GetRoleName()}.");
         instance.settingsTabs[2].SetActive(false);
         instance.settingsTabs[3].SetActive(false);
-        advancedWikiTab?.gameObject.SetActive(true);
+        _advancedInfoTabScroller?.gameObject.SetActive(true);
         if (currentAdvancedTabObject)
         {
             currentAdvancedTabObject.SetActive(false);
             currentAdvancedTabObject.Destroy();
         }
 
-        if (advancedWikiTab == null)
+        if (_advancedInfoTabScroller == null)
         {
             Warning($"Wiki tab is null.");
             return;
@@ -965,11 +1080,11 @@ public static class RoleGuidePatches
 
         if (role is ICustomRole custom)
         {
-            currentAdvancedTabObject = custom.GetAdvancedWiki(instance, titleText, advancedWikiTab);
+            currentAdvancedTabObject = custom.GetAdvancedWiki(instance, titleText, _advancedInfoTabScroller);
         }
         else
         {
-            advancedWikiTab.ScrollToTop();
+            _advancedInfoTabScroller.ScrollToTop();
             var titleTxt = role.GetRoleName() +
                            $" ({TranslationController.Instance.GetString(role.TeamType is RoleTeamTypes.Crewmate ? StringNames.Crewmate : StringNames.Impostor)})";
             var description = TranslationController.Instance.GetString(role.BlurbNameLong);
@@ -989,9 +1104,9 @@ public static class RoleGuidePatches
                 description,
                 titleText,
                 out var desc);
-            currentAdvancedTabObject.transform.SetParent(advancedWikiTab.Inner.transform);
+            currentAdvancedTabObject.transform.SetParent(_advancedInfoTabScroller.Inner.transform);
             currentAdvancedTabObject.transform.localPosition = new Vector3(0f, 0f, 0f);
-            advancedWikiTab.SetYBoundsMax(Mathf.Clamp(desc.textBounds.size.y - 2, 0f, 999f));
+            _advancedInfoTabScroller.SetYBoundsMax(Mathf.Clamp(desc.textBounds.size.y - 2, 0f, 999f));
         }
     }
 
