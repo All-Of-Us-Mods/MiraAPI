@@ -119,7 +119,8 @@ public static class RoleGuidePatches
             titleText.text = TranslationController.Instance.GetString(StringNames.MatchInfoGuideTitle);
         }
 
-        if (GameManager.Instance.TryCast<NormalGameManager>() != null)
+        var regGame = GameManager.Instance.TryCast<NormalGameManager>() != null;
+        if (regGame)
         {
             if (__instance.NormalModeSettings.Count == 0)
             {
@@ -167,7 +168,7 @@ public static class RoleGuidePatches
                 sortingFilterButton.transform.localScale = Vector3.one;
 
                 __instance.numOfTabs = 3;
-                __instance.TabButtons[0].SelectButton(true);
+                __instance.TabButtons[2].SelectButton(true);
                 __instance.MatchInfoRoleMaskArea.transform.localPosition = new Vector3(-0.0184f, 0.15f, -0.1f);
 
                 __instance.matchInfoPlayersMaskArea.transform.localPosition =
@@ -363,7 +364,7 @@ public static class RoleGuidePatches
         var instance2 = ControllerManager.Instance;
         var controllerSelectable2 = __instance.ControllerSelectable;
         instance2.SetCurrentSelected(controllerSelectable2[^1]);
-        __instance.SetActiveTab(0);
+        __instance.SetActiveTab(regGame ? 2 : 0);
         return false;
     }
 
