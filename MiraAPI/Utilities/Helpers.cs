@@ -1,17 +1,24 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using MiraAPI.GameOptions;
+using MiraAPI.GameOptions.OptionTypes;
 using MiraAPI.Roles;
+using MiraAPI.Translation;
 using MiraAPI.Utilities.Assets;
 using Rewired;
 using TMPro;
 using UnityEngine;
 using MethodBase = System.Reflection.MethodBase;
 using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 
 namespace MiraAPI.Utilities;
 
@@ -20,6 +27,152 @@ namespace MiraAPI.Utilities;
 /// </summary>
 public static class Helpers
 {
+    public static ReadOnlyCollection<IModdedOption>? GetModdedOptionsForType(Type classType)
+    {
+        var optionGroups =
+            AccessTools.Field(typeof(ModdedOptionsManager), "Groups").GetValue(null) as List<AbstractOptionGroup>;
+
+        return optionGroups?.FirstOrDefault(x => x.OptionableType == classType)?.Children;
+    }
+
+    public static string GetOptionsText(Type classType)
+    {
+        var options = GetModdedOptionsForType(classType);
+        if (options == null)
+        {
+            return string.Empty;
+        }
+
+        ISummarizedOptions? summaryProvider = null;
+        IReadOnlySet<StringNames>? hiddenKeys = null;
+        try
+        {
+            var optionGroups =
+                AccessTools.Field(typeof(ModdedOptionsManager), "Groups").GetValue(null) as List<AbstractOptionGroup>;
+            summaryProvider =
+                optionGroups?.FirstOrDefault(x => x.OptionableType == classType) as ISummarizedOptions;
+            hiddenKeys = summaryProvider?.WikiHiddenOptionKeys;
+        }
+        catch
+        {
+            summaryProvider = null;
+            hiddenKeys = null;
+        }
+
+        var builder = new StringBuilder();
+        builder.AppendLine(MiraApiPlugin.Culture,
+            $"\n<size=50%> \n</size><b><color=#21AA8C>{MiraLocaleManager.Get("Options")}</color></b>");
+
+        var insertedSummary = false;
+        foreach (var option in options)
+        {
+            if (!insertedSummary && summaryProvider != null && hiddenKeys != null)
+            {
+                StringNames? key = option switch
+                {
+                    ModdedToggleOption t => t.StringName,
+                    ModdedEnumOption e => e.StringName,
+                    ModdedNumberOption n => n.StringName,
+                    _ => null
+                };
+                if (key.HasValue && hiddenKeys.Contains(key.Value))
+                {
+                    foreach (var line in summaryProvider.GetWikiOptionSummaryLines())
+                    {
+                        if (!string.IsNullOrWhiteSpace(line))
+                        {
+                            builder.AppendLine(line);
+                        }
+                    }
+
+                    insertedSummary = true;
+                }
+            }
+
+            switch (option)
+            {
+                case ModdedToggleOption toggleOption:
+                    if (!toggleOption.Visible())
+                    {
+                        continue;
+                    }
+
+                    if (hiddenKeys != null && hiddenKeys.Contains(toggleOption.StringName))
+                    {
+                        continue;
+                    }
+
+                    builder.AppendLine(TranslationController.Instance.GetString(toggleOption.StringName) + ": " +
+                                       toggleOption.Value);
+                    break;
+                /*case ModdedMultiSelectOption<Enum> enumOption:
+                    if (!enumOption.Visible())
+                    {
+                        continue;
+                    }
+
+                    builder.AppendLine(enumOption.Title + ": " + enumOption.Values[enumOption.Value]);
+                    break;*/
+                case ModdedEnumOption enumOption:
+                    if (!enumOption.Visible())
+                    {
+                        continue;
+                    }
+
+                    if (hiddenKeys != null && hiddenKeys.Contains(enumOption.StringName))
+                    {
+                        continue;
+                    }
+
+                    builder.AppendLine(TranslationController.Instance.GetString(enumOption.StringName) + ": " +
+                                       MiraLocaleManager.Get(enumOption.Values[enumOption.Value],
+                                           enumOption.Values[enumOption.Value]));
+                    break;
+                case ModdedNumberOption numberOption:
+                    if (!numberOption.Visible())
+                    {
+                        continue;
+                    }
+
+                    if (hiddenKeys != null && hiddenKeys.Contains(numberOption.StringName))
+                    {
+                        continue;
+                    }
+
+                    var optionStr = numberOption.Data.GetValueString(numberOption.Value);
+                    if (optionStr.Contains(".000"))
+                    {
+                        optionStr = optionStr.Replace(".000", "");
+                    }
+                    else if (optionStr.Contains(".00"))
+                    {
+                        optionStr = optionStr.Replace(".00", "");
+                    }
+                    else if (optionStr.Contains(".0"))
+                    {
+                        optionStr = optionStr.Replace(".0", "");
+                    }
+
+                    var title = TranslationController.Instance.GetString(numberOption.StringName);
+                    if (numberOption is { NegativeWordValue: not "#", Value: -1 })
+                    {
+                        builder.AppendLine(title + $": {numberOption.NegativeWordValue}");
+                    }
+                    else if (numberOption is { ZeroWordValue: not "#", Value: 0 })
+                    {
+                        builder.AppendLine(title + $": {numberOption.ZeroWordValue}");
+                    }
+                    else
+                    {
+                        builder.AppendLine(title + ": " + optionStr);
+                    }
+
+                    break;
+            }
+        }
+
+        return builder.ToString();
+    }
     /// <summary>
     /// Get all living players.
     /// </summary>
