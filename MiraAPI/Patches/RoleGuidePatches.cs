@@ -653,10 +653,7 @@ public static class RoleGuidePatches
         }
 
         var instance = MatchInfoGuide.Instance;
-        if (num == 0)
-        {
-            instance.rolesEnabledMessage.SetActive(true);
-        }
+        instance.rolesEnabledMessage.SetActive(num == 0);
 
         instance.MatchInfoRoleScroller.SetYBoundsMax(Mathf.Clamp(Mathf.Ceil(num / 2f) * 1.3f - 1.5f, 0f, 999f));
         instance.MatchInfoRoleScroller.SetYBoundsMax(Mathf.Clamp(Mathf.Ceil(num / 2f) * 1.3f - 1.5f, 0f, 999f));
