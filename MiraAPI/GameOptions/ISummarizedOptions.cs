@@ -9,12 +9,12 @@ namespace MiraAPI.GameOptions;
 public interface ISummarizedOptions
 {
     /// <summary>
-    /// Option string keys (StringNames) to omit from the wiki options list (e.g., a large set of related options).
+    /// Gets the option string keys (StringNames) to omit from the wiki options list (e.g., a large set of related options).
     /// </summary>
     IReadOnlySet<StringNames> WikiHiddenOptionKeys { get; }
 
     /// <summary>
-    /// Summary lines to insert when the first hidden option would have appeared.
+    /// Gets summary lines to insert when the first hidden option would have appeared.
     /// Lines should already be formatted as "Title: Value".
     /// </summary>
     IEnumerable<string> GetWikiOptionSummaryLines();
