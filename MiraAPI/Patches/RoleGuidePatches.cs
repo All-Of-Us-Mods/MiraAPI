@@ -389,8 +389,19 @@ public static class RoleGuidePatches
     {
         _searchIconIdle.sprite = MiraAssets.SearchIconIdleSprite;
         _searchIconHover.sprite = MiraAssets.SearchIconHoverSprite;
-        searchBoxTmp.SetText(string.Empty);
-        var newSorted = sortMethod is SortingMethod.Alphabetical ? RolePanels.OrderBy(GetSortingOrder()) : RolePanels.OrderByDescending(GetSortingOrder());
+        try
+        {
+            searchBoxTmp.outputText.SetText(string.Empty);
+            searchBoxTmp.SetText(string.Empty);
+        }
+        catch
+        {
+            // ignored
+        }
+
+        var newSorted = sortMethod is SortingMethod.Alphabetical
+            ? RolePanels.OrderBy(GetSortingOrder())
+            : RolePanels.OrderByDescending(GetSortingOrder());
 
         foreach (var pair in newSorted)
         {
