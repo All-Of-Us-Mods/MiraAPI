@@ -18,6 +18,7 @@
     <string name="MiraApi.CustomCategory2">Custom Category 2</string>
     <string name="MiraApi.ModifierMenuDescription">Configure modifiers and their settings here!</string>
     <string name="MiraApi.CustomOptionMenuDescription">Apply game settings for this mod!</string>
+    <string name="MiraApi.Gamemode">Gamemode</string>
     <string name="MiraApi.Gamemode.Classic">Classic</string>
     <string name="MiraApi.Gamemode.Classic.Description">The classic Among Us experience!
 Find the Impostors or deceive the Crew.</string>
@@ -44,4 +45,13 @@ Outlive the timer or eliminate the crew.</string>
     <string name="MiraApi.ModifierDisplay.Page">Page</string>
     <string name="MiraApi.Page">Page</string>
     <string name="MiraApi.Main">Main</string>
+    <string name="MiraApi.AbilityType.Basic">Ability</string>
+    <string name="MiraApi.AbilityType.Indirect">Indirect Ability</string>
+    <string name="MiraApi.AbilityType.Interaction">Interaction Ability</string>
+    <string name="MiraApi.AbilityType.Radius">Radius Ability</string>
+    <string name="MiraApi.AbilityType.Menu">Menu Ability</string>
+    <string name="MiraApi.AbilityType.Meeting">Meeting Ability</string>
+    <string name="MiraApi.AbilityType.SelectiveMeeting">Selective Meeting Ability</string>
+    <string name="MiraApi.AbilityType.MeetingMenu">Meeting Menu Ability</string>
+    <string name="Options">Options</string>
 </resources>

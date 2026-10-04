@@ -1,8 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
-using Il2CppSystem.Collections.Generic;
 using MiraAPI.Roles;
 
 namespace MiraAPI.Patches.Roles;
@@ -14,7 +14,7 @@ public static class LogicRoleSelectionHnsPatch
     [HarmonyPatch(nameof(LogicRoleSelectionHnS.AssignRolesForTeam))]
     public static bool AssignRolesForTeam(
         LogicRoleSelectionHnS __instance,
-        List<NetworkedPlayerInfo> players,
+        Il2CppSystem.Collections.Generic.List<NetworkedPlayerInfo> players,
         IGameOptions opts,
         RoleTeamTypes team,
         int teamMax,
@@ -58,7 +58,7 @@ public static class LogicRoleSelectionHnsPatch
 
             case RoleTeamTypes.Impostor:
                 Info($"MiraAPI.Patches.Roles.LogicRoleSelectionHnsPatch - AssignRolesForTeam: Before Guaranteed Assignment");
-                var newImpostors = new List<NetworkedPlayerInfo>();
+                var newImpostors = new Il2CppSystem.Collections.Generic.List<NetworkedPlayerInfo>();
 
                 // Specified Seeker
                 if (__instance.hnsManager.LogicOptionsHnS.HasImpostorPlayerID() &&
@@ -113,7 +113,7 @@ public static class LogicRoleSelectionHnsPatch
         return false;
     }
 
-    public static void AssignRolesFromList(List<NetworkedPlayerInfo> players, int teamMax, List<RoleTypes> roleList, ref int rolesAssigned)
+    public static void AssignRolesFromList(Il2CppSystem.Collections.Generic.List<NetworkedPlayerInfo> players, int teamMax, List<RoleTypes> roleList, ref int rolesAssigned)
     {
         while (roleList.Count > 0 && players.Count > 0 && rolesAssigned < teamMax)
         {
@@ -128,7 +128,7 @@ public static class LogicRoleSelectionHnsPatch
     }
 
     private static void AddGuaranteedRoles(
-        System.Collections.Generic.IEnumerable<RoleBehaviour> guaranteedRoles,
+        IEnumerable<RoleBehaviour> guaranteedRoles,
         IGameOptions opts,
         List<RoleTypes> list)
     {
@@ -146,7 +146,7 @@ public static class LogicRoleSelectionHnsPatch
         }
     }
 
-    private static void AddPotentialRoles(System.Collections.Generic.IEnumerable<RoleBehaviour> source, IGameOptions opts, List<RoleTypes> list)
+    private static void AddPotentialRoles(IEnumerable<RoleBehaviour> source, IGameOptions opts, List<RoleTypes> list)
     {
         var roleOptions = opts.RoleOptions;
         var potentialRoles = source.Where(x => !x.IsDead).Select(role => new RoleManager.RoleAssignmentData(

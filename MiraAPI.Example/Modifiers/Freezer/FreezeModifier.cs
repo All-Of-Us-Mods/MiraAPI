@@ -1,5 +1,4 @@
-﻿using Il2CppSystem;
-using MiraAPI.Example.Roles;
+﻿using MiraAPI.Example.Roles;
 using MiraAPI.Modifiers.Types;
 using MiraAPI.Translation;
 using UnityEngine;
@@ -28,7 +27,7 @@ public class FreezeModifier : TimedModifier
 
         if (Player.AmOwner || PlayerControl.LocalPlayer.Data.Role is FreezerRole)
         {
-            Player.cosmetics.SetOutline(true, new Nullable<Color>(Palette.LightBlue));
+            Player.cosmetics.SetOutline(true, new Il2CppSystem.Nullable<Color>(Palette.LightBlue));
         }
     }
 
