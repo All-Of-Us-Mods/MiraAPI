@@ -832,7 +832,6 @@ public static class RoleGuidePatches
         instance.rolesEnabledMessage.SetActive(num == 0);*/
 
         _modifiersScroller.SetYBoundsMax(Mathf.Clamp(Mathf.Ceil(num / 2f) * 1.3f - 1.5f, 0f, 999f));
-        _modifiersScroller.SetYBoundsMax(Mathf.Clamp(Mathf.Ceil(num / 2f) * 1.3f - 1.5f, 0f, 999f));
     }
 
     public static void ToggleRoleVisibility()
@@ -889,7 +888,6 @@ public static class RoleGuidePatches
         var instance = MatchInfoGuide.Instance;
         instance.rolesEnabledMessage.SetActive(num == 0);
 
-        instance.MatchInfoRoleScroller.SetYBoundsMax(Mathf.Clamp(Mathf.Ceil(num / 2f) * 1.3f - 1.5f, 0f, 999f));
         instance.MatchInfoRoleScroller.SetYBoundsMax(Mathf.Clamp(Mathf.Ceil(num / 2f) * 1.3f - 1.5f, 0f, 999f));
     }
 
