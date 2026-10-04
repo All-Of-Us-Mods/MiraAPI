@@ -45,10 +45,12 @@ Outlive the timer or eliminate the crew.</string>
     <string name="MiraApi.Page">Page</string>
     <string name="MiraApi.Main">Main</string>
     <string name="MiraApi.AbilityType.Basic">Ability</string>
+    <string name="MiraApi.AbilityType.Indirect">Indirect Ability</string>
     <string name="MiraApi.AbilityType.Interaction">Interaction Ability</string>
     <string name="MiraApi.AbilityType.Radius">Radius Ability</string>
     <string name="MiraApi.AbilityType.Menu">Menu Ability</string>
     <string name="MiraApi.AbilityType.Meeting">Meeting Ability</string>
     <string name="MiraApi.AbilityType.SelectiveMeeting">Selective Meeting Ability</string>
+    <string name="MiraApi.AbilityType.MeetingMenu">Meeting Menu Ability</string>
     <string name="Options">Options</string>
 </resources>

@@ -43,8 +43,8 @@ public static class Helpers
             return string.Empty;
         }
 
-        ISummarizedOptions? summaryProvider = null;
-        IReadOnlySet<StringNames>? hiddenKeys = null;
+        ISummarizedOptions? summaryProvider;
+        IReadOnlySet<StringNames>? hiddenKeys;
         try
         {
             var optionGroups =
@@ -60,8 +60,9 @@ public static class Helpers
         }
 
         var builder = new StringBuilder();
-        builder.AppendLine(MiraApiPlugin.Culture,
-            $"\n<size=50%> \n</size><b><color=#21AA8C>{MiraLocaleManager.Get("Options")}</color></b>");
+        builder.AppendLine(
+            MiraApiPlugin.Culture,
+            $"\n<size=50%> \n</size><b><color=#29D7B5>{MiraLocaleManager.Get("Options")}</color></b>");
 
         var insertedSummary = false;
         foreach (var option in options)
@@ -73,7 +74,7 @@ public static class Helpers
                     ModdedToggleOption t => t.StringName,
                     ModdedEnumOption e => e.StringName,
                     ModdedNumberOption n => n.StringName,
-                    _ => null
+                    _ => null,
                 };
                 if (key.HasValue && hiddenKeys.Contains(key.Value))
                 {
@@ -102,8 +103,9 @@ public static class Helpers
                         continue;
                     }
 
-                    builder.AppendLine(TranslationController.Instance.GetString(toggleOption.StringName) + ": " +
-                                       toggleOption.Value);
+                    builder.AppendLine(
+                        TranslationController.Instance.GetString(toggleOption.StringName) + ": " +
+                        toggleOption.Value);
                     break;
                 /*case ModdedMultiSelectOption<Enum> enumOption:
                     if (!enumOption.Visible())
@@ -124,9 +126,11 @@ public static class Helpers
                         continue;
                     }
 
-                    builder.AppendLine(TranslationController.Instance.GetString(enumOption.StringName) + ": " +
-                                       MiraLocaleManager.Get(enumOption.Values[enumOption.Value],
-                                           enumOption.Values[enumOption.Value]));
+                    builder.AppendLine(
+                        TranslationController.Instance.GetString(enumOption.StringName) + ": " +
+                        MiraLocaleManager.Get(
+                            enumOption.Values[enumOption.Value],
+                            enumOption.Values[enumOption.Value]));
                     break;
                 case ModdedNumberOption numberOption:
                     if (!numberOption.Visible())
@@ -142,15 +146,15 @@ public static class Helpers
                     var optionStr = numberOption.Data.GetValueString(numberOption.Value);
                     if (optionStr.Contains(".000"))
                     {
-                        optionStr = optionStr.Replace(".000", "");
+                        optionStr = optionStr.Replace(".000", string.Empty);
                     }
                     else if (optionStr.Contains(".00"))
                     {
-                        optionStr = optionStr.Replace(".00", "");
+                        optionStr = optionStr.Replace(".00", string.Empty);
                     }
                     else if (optionStr.Contains(".0"))
                     {
-                        optionStr = optionStr.Replace(".0", "");
+                        optionStr = optionStr.Replace(".0", string.Empty);
                     }
 
                     var title = TranslationController.Instance.GetString(numberOption.StringName);
@@ -173,6 +177,7 @@ public static class Helpers
 
         return builder.ToString();
     }
+
     /// <summary>
     /// Get all living players.
     /// </summary>
@@ -381,7 +386,7 @@ public static class Helpers
         var popper = HudManager.Instance.Notifier;
         var newMessage = Object.Instantiate(popper.notificationMessageOrigin, Vector3.zero, Quaternion.identity, popper.transform);
         newMessage.transform.localPosition = localPos;
-        newMessage.SetUp(text, spr ?? null, color, new System.Action(() => popper.OnMessageDestroy(newMessage)));
+        newMessage.SetUp(text, spr ?? null, color, new Action(() => popper.OnMessageDestroy(newMessage)));
         popper.lastMessageKey = -1;
         popper.ShiftMessages();
         popper.AddMessageToQueue(newMessage);
@@ -433,9 +438,12 @@ public static class Helpers
     {
         var results = new CppCollections.List<Collider2D>();
         Physics2D.OverlapCircle(source, radius, filter, results);
-        return [.. results.ToArray()
-            .Where(collider2D => collider2D.CompareTag("DeadBody"))
-            .Select(collider2D => collider2D.GetComponent<DeadBody>())];
+        return
+        [
+            .. results.ToArray()
+                .Where(collider2D => collider2D.CompareTag("DeadBody"))
+                .Select(collider2D => collider2D.GetComponent<DeadBody>())
+        ];
     }
 
     /// <summary>
@@ -452,9 +460,12 @@ public static class Helpers
     {
         var results = new CppCollections.List<Collider2D>();
         Physics2D.OverlapCircle(source, radius, filter, results);
-        return [.. results.ToArray()
-            .Where(collider2D => colliderTag == null || collider2D.CompareTag(colliderTag))
-            .Select(collider2D => collider2D.GetComponent<T>())];
+        return
+        [
+            .. results.ToArray()
+                .Where(collider2D => colliderTag == null || collider2D.CompareTag(colliderTag))
+                .Select(collider2D => collider2D.GetComponent<T>())
+        ];
     }
 
     /// <summary>
@@ -473,15 +484,18 @@ public static class Helpers
 
         return !ignoreColliders
             ? newList
-            : [.. from player in newList
-                   let vector = player.GetTruePosition() - source
-                   let magnitude = vector.magnitude
-                   where !PhysicsHelpers.AnyNonTriggersBetween(
-                        source,
-                        vector.normalized,
-                        magnitude,
-                        Constants.ShipAndObjectsMask)
-                   select player];
+            :
+            [
+                .. from player in newList
+                let vector = player.GetTruePosition() - source
+                let magnitude = vector.magnitude
+                where !PhysicsHelpers.AnyNonTriggersBetween(
+                    source,
+                    vector.normalized,
+                    magnitude,
+                    Constants.ShipAndObjectsMask)
+                select player
+            ];
     }
 
     /// <summary>
@@ -542,17 +556,16 @@ public static class Helpers
                 Constants.ShipAndObjectsMask))
             select playerControl);
 
-        outputList.Sort(
-            (a, b) =>
-            {
-                var magnitude2 = (a.GetTruePosition() - source).magnitude;
-                var magnitude3 = (b.GetTruePosition() - source).magnitude;
-                return magnitude2 > magnitude3
-                    ? 1
-                    : magnitude2 < magnitude3
-                        ? -1
-                        : 0;
-            });
+        outputList.Sort((a, b) =>
+        {
+            var magnitude2 = (a.GetTruePosition() - source).magnitude;
+            var magnitude3 = (b.GetTruePosition() - source).magnitude;
+            return magnitude2 > magnitude3
+                ? 1
+                : magnitude2 < magnitude3
+                    ? -1
+                    : 0;
+        });
         return outputList;
     }
 

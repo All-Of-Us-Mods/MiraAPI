@@ -76,7 +76,7 @@ public interface ICustomRole : IOptionable
     /// Gets the wiki description of the role. Used in the wiki and normally appends the options text as well.
     /// </summary>
     string RoleWikiDescription => MiraLocaleManager.Get(RoleWikiDescriptionLocale, RoleLongDescription) +
-                                  Helpers.GetModdedOptionsForType(GetType());
+                                  Helpers.GetOptionsText(GetType());
 
     /// <summary>
     /// Gets the role's wiki description id for localization.
