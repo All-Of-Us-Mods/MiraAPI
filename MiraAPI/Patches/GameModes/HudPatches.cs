@@ -41,7 +41,7 @@ internal static class HudPatches
         var modelText = modeLabel!.Find("Text_TMP").gameObject;
         var modelTextClone = Object.Instantiate(modelText, modeLabel);
         Object.Destroy(modelTextClone.GetComponent<TextTranslatorTMP>());
-        modelTextClone.GetComponent<TextMeshPro>().text = "Gamemode";
+        modelTextClone.GetComponent<TextMeshPro>().text = MiraLocaleManager.Get("MiraApi.Gamemode", "Gamemode");
         var gmText = modeValue!.Find("GameModeText").gameObject;
         var gmTextClone = Object.Instantiate(gmText, modeValue);
         gmText.SetActive(false);
