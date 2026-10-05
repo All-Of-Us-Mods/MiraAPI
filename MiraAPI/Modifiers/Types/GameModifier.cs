@@ -10,6 +10,9 @@ namespace MiraAPI.Modifiers.Types;
 public abstract class GameModifier : BaseModifier
 {
     /// <inheritdoc />
+    public override bool? ForceShowModifierOnWiki => null;
+
+    /// <inheritdoc />
     public override bool ShowInFreeplay => true;
 
     /// <summary>

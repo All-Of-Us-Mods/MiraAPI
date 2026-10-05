@@ -300,10 +300,7 @@ public static class VotingUtils
         // If modified, these will visually change.
         votes = @event.Votes;
 
-        MeetingHud.Instance.TitleText.text =
-            TranslationController.Instance.GetString(
-                StringNames.MeetingVotingResults,
-                Il2CppSystem.Array.Empty<Il2CppSystem.Object>());
+        MeetingHud.Instance.TitleText.text = TranslationController.Instance.GetString(StringNames.MeetingVotingResults);
 
         var delays = new Dictionary<byte, int>();
         var num = 0;
