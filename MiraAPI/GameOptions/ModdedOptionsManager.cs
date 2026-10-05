@@ -198,7 +198,7 @@ public static class ModdedOptionsManager
             return;
         }
 
-        Func<int, string> configName = optionList.ConfigName ?? (i => property.Name + i);
+        Func<int, string> configName = optionList.ConfigName ?? (i => property.Name + (i + 1));
 
         for (int i = 0; i < optionList.Count; i++)
         {
@@ -279,7 +279,7 @@ public static class ModdedOptionsManager
                 option.Visible = () => visibilityFunc(i);
             }
 
-            RegisterOption(option, group, property.Name + i, pluginInfo);
+            RegisterOption(option, group, property.Name + (i + 1), pluginInfo);
         }
     }
 
