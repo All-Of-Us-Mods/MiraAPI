@@ -46,6 +46,11 @@ public static class CustomRoleManager
     public static IReadOnlyList<RoleBehaviour> CustomRoleBehaviours { get; private set; } = [];
 
     /// <summary>
+    /// Gets the <see cref="IReadOnlyList{T}"/> of all roles as <see cref="RoleBehaviour"/> objects.
+    /// </summary>
+    public static IReadOnlyList<RoleBehaviour> AllStoredRoleBehaviours { get; private set; } = [];
+
+    /// <summary>
     /// Gets the <see cref="IReadOnlyList{T}"/> of custom roles as <see cref="ICustomRole"/> objects.
     /// </summary>
     public static IReadOnlyList<ICustomRole> CustomMiraRoles { get; private set; } = [];
@@ -77,6 +82,7 @@ public static class CustomRoleManager
 
         CustomRoleBehaviours = [.. CustomRoles.Values];
         CustomMiraRoles = [.. CustomRoles.Values.OfType<ICustomRole>()];
+        AllStoredRoleBehaviours = [.. RoleManager.Instance.AllRoles];
     }
 
     internal static void RegisterRoleTypes(List<Type> roles, MiraPluginInfo pluginInfo)

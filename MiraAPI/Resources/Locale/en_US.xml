@@ -53,4 +53,6 @@ Outlive the timer or eliminate the crew.</string>
     <string name="MiraApi.AbilityType.SelectiveMeeting">Selective Meeting Ability</string>
     <string name="MiraApi.AbilityType.MeetingMenu">Meeting Menu Ability</string>
     <string name="Options">Options</string>
+    <string name="MiraApi.Wiki.PlayersTab">Player List</string>
+    <string name="MiraApi.Wiki.SettingsTab">Game Settings</string>
 </resources>
