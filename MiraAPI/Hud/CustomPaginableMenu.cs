@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using MiraAPI.Patches.Stubs;
 using MiraAPI.Translation;
+using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities;
 using Reactor.Utilities.Extensions;
@@ -248,8 +249,7 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
 
         var wikiClickSound = HudManager.Instance?.MapButton?.ClickSound;
 
-        var searchFocusButton = searchTextbox.gameObject.GetComponent<PassiveButton>()
-                             ?? searchTextbox.gameObject.AddComponent<PassiveButton>();
+        var searchFocusButton = searchTextbox.gameObject.GetOrAddComponent<PassiveButton>();
         if (wikiClickSound != null)
         {
             searchFocusButton.ClickSound = wikiClickSound;
