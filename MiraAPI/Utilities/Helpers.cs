@@ -14,7 +14,6 @@ using MiraAPI.GameOptions.OptionTypes;
 using MiraAPI.Roles;
 using MiraAPI.Translation;
 using MiraAPI.Utilities.Assets;
-using Reactor.Utilities.Extensions;
 using Rewired;
 using TMPro;
 using UnityEngine;
@@ -30,7 +29,7 @@ namespace MiraAPI.Utilities;
 /// </summary>
 public static class Helpers
 {
-    private static readonly Regex TrailingZeroRegex = new(@"\.0+(?!\d)", RegexOptions.Compiled);
+    private static readonly Regex TrailingZeroRegex = new(@"\.0+(?!\d)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
 
     public static ReadOnlyCollection<IModdedOption>? GetModdedOptionsForType(Type classType)
     {
