@@ -249,15 +249,6 @@ public static class RoleGuidePatches
                 var searchButton = searchBox.GetComponent<MatchInfoGuideTabButton>();
                 var tmpText = searchButton.transform.GetChild(0).GetComponent<TextMeshPro>();
                 tmpText.GetComponent<TextTranslatorTMP>().Destroy();
-                tmpText.color = new Color(0.75f, 0.75f, 0.75f);
-                tmpText.text = string.Empty;
-                tmpText.fontSizeMax = 4;
-                tmpText.overflowMode = TextOverflowModes.Ellipsis;
-                tmpText.alignment = TextAlignmentOptions.Left;
-                tmpText.horizontalAlignment = HorizontalAlignmentOptions.Left;
-                tmpText.rectTransform.offsetMax = new Vector2(-0.1531f, 0.2972f);
-                tmpText.rectTransform.sizeDelta = new Vector2(3, 1);
-                tmpText.transform.localPosition = new Vector3(0, 0.0343f, -0.2f);
                 var inactive = searchButton.inactiveSprites;
                 var selected = searchButton.selectedSprites;
                 var highlight = searchButton.activeSprites;
@@ -270,16 +261,70 @@ public static class RoleGuidePatches
                 disabledSprite.gameObject.SetActive(true);
                 var button = searchBox.AddComponent<PassiveButton>();
                 button.OnUp = true;
-                _searchBoxTmp = searchBox.AddComponent<TextBoxTMP>();
-                _searchBoxTmp.outputText = tmpText;
-                var pipe = new GameObject("Pipe") { layer = searchBox.layer };
-                pipe.transform.SetParent(_searchBoxTmp.transform, false);
-                _searchBoxTmp.Pipe = pipe.AddComponent<MeshRenderer>();
+                var template = HudManager.Instance.Chat.freeChatField.textArea;
+                _searchBoxTmp = Object.Instantiate(template, searchBox.transform);
+                _searchBoxTmp.name = "SearchField";
+                _searchBoxTmp.transform.localPosition = Vector3.zero;
+                _searchBoxTmp.OnEnter = new Button.ButtonClickedEvent();
+                _searchBoxTmp.OnChange = new Button.ButtonClickedEvent();
+                _searchBoxTmp.OnFocus = new Button.ButtonClickedEvent();
+                _searchBoxTmp.OnFocusLost = new Button.ButtonClickedEvent();
+                _searchBoxTmp.sendButtonGlyph = null;
+                _searchBoxTmp.SendOnFullChars = false;
+                _searchBoxTmp.ClearOnFocus = false;
+                _searchBoxTmp.characterLimit = 40;
+                _searchBoxTmp.AllowSymbols = true;
+                _searchBoxTmp.allowAllCharacters = true;
+                if (_searchBoxTmp.Background)
+                {
+                    _searchBoxTmp.Background.enabled = false;
+                }
+
+                var boxCollider = _searchBoxTmp.GetComponent<BoxCollider2D>();
+                if (boxCollider)
+                {
+                    boxCollider.size = new Vector2(3f, 0.6f);
+                    boxCollider.offset = Vector2.zero;
+                }
+
+                var outputText = _searchBoxTmp.outputText;
+                outputText.GetComponent<TextTranslatorTMP>()?.Destroy();
+                outputText.font = tmpText.font;
+                outputText.fontSharedMaterial = tmpText.fontSharedMaterial;
+                outputText.color = new Color(0.75f, 0.75f, 0.75f);
+                outputText.text = string.Empty;
+                outputText.fontSizeMax = 4;
+                outputText.overflowMode = TextOverflowModes.Ellipsis;
+                outputText.alignment = TextAlignmentOptions.Left;
+                outputText.horizontalAlignment = HorizontalAlignmentOptions.Left;
+                outputText.rectTransform.offsetMax = new Vector2(-0.1531f, 0.2972f);
+                outputText.rectTransform.sizeDelta = new Vector2(3, 1);
+                outputText.transform.localPosition = new Vector3(0, 0.0343f, -0.2f);
+
+                var placeholderText = _searchBoxTmp.placeholderText;
+                if (placeholderText)
+                {
+                    placeholderText.GetComponent<TextTranslatorTMP>()?.Destroy();
+                    placeholderText.font = tmpText.font;
+                    placeholderText.fontSharedMaterial = tmpText.fontSharedMaterial;
+                    placeholderText.color = new Color(0.55f, 0.55f, 0.55f);
+                    placeholderText.text = MiraLocaleManager.Get("MiraApi.Wiki.SearchPlaceholder");
+                    placeholderText.fontSizeMax = 4;
+                    placeholderText.overflowMode = TextOverflowModes.Ellipsis;
+                    placeholderText.alignment = TextAlignmentOptions.Left;
+                    placeholderText.horizontalAlignment = HorizontalAlignmentOptions.Left;
+                    placeholderText.rectTransform.offsetMax = new Vector2(-0.1531f, 0.2972f);
+                    placeholderText.rectTransform.sizeDelta = new Vector2(3, 1);
+                    placeholderText.transform.localPosition = new Vector3(0, 0.0343f, -0.2f);
+                    placeholderText.gameObject.SetActive(true);
+                }
+
+                tmpText.gameObject.Destroy();
+
                 button.OnClick.AddListener((UnityAction)(() => { _searchBoxTmp.GiveFocus(); }));
                 button.OnMouseOver = new UnityEvent();
                 button.OnMouseOut = new UnityEvent();
                 _rolesScroller = __instance.settingsTabs[RolesTabIndex].GetComponent<Scroller>();
-                _searchBoxTmp.OnChange = new Button.ButtonClickedEvent();
                 _searchBoxTmp.OnChange.AddListener(
                     (UnityAction)(() =>
                     {
@@ -296,14 +341,7 @@ public static class RoleGuidePatches
 
                         RefreshActiveTab(true);
                     }));
-                var placeholder = Object.Instantiate(tmpText, tmpText.transform.parent);
-                placeholder.name = "Placeholder";
-                placeholder.color = new Color(0.55f, 0.55f, 0.55f);
-                placeholder.text = MiraLocaleManager.Get("MiraApi.Wiki.SearchPlaceholder");
-                placeholder.GetComponent<TextTranslatorTMP>()?.Destroy();
-                _searchBoxTmp.placeholderText = placeholder;
-                _searchBoxTmp.transform.localPosition = new Vector3(-1.438f, 0.756f, -0.2f);
-                _searchBoxTmp.Clear();
+                searchBox.transform.localPosition = new Vector3(-1.438f, 0.756f, -0.2f);
 
                 var playerButton = __instance.TabButtons[0];
                 SetupTabButton(
