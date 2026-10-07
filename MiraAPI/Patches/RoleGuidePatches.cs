@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -11,6 +12,7 @@ using MiraAPI.Roles;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
+using Reactor.Utilities;
 using Reactor.Utilities.Extensions;
 using TMPro;
 using UnityEngine;
@@ -49,6 +51,8 @@ public static class RoleGuidePatches
     private static TextMeshPro _titleText;
     private static bool _rolesTabDirty;
     private static bool _modifiersTabDirty;
+    private static IEnumerator? _panelCreation;
+    private static bool _panelsReady;
     private static SortingFilter _sortFilter = SortingFilter.EnabledOnly;
     private static SortingMethod _sortMethod = SortingMethod.Alphabetical;
     private static SortingGroups _sortGrouping = SortingGroups.Ungrouped;
@@ -388,6 +392,11 @@ public static class RoleGuidePatches
     {
         _advancedInfoTabScroller?.gameObject.SetActive(false);
         MatchInfoGuide.Instance.SetActiveTab(ModifiersTabIndex);
+        if (!_panelsReady)
+        {
+            return;
+        }
+
         if (_modifiersTabDirty)
         {
             ToggleModifierVisibility();
@@ -399,6 +408,11 @@ public static class RoleGuidePatches
     {
         _advancedInfoTabScroller?.gameObject.SetActive(false);
         MatchInfoGuide.Instance.SetActiveTab(RolesTabIndex);
+        if (!_panelsReady)
+        {
+            return;
+        }
+
         if (_rolesTabDirty)
         {
             ToggleRoleVisibility();
@@ -449,6 +463,11 @@ public static class RoleGuidePatches
 
     private static void RefreshActiveTab(bool scrollToTop)
     {
+        if (!_panelsReady)
+        {
+            return;
+        }
+
         if (IsModifiersTabActive)
         {
             ToggleModifierVisibility();
@@ -589,7 +608,6 @@ public static class RoleGuidePatches
 
     public static void DisplayNormalRoleSettings(MatchInfoGuide instance, bool reset)
     {
-        var inner = instance.settingsTabs[RolesTabIndex].GetComponent<Scroller>().Inner;
         if (reset)
         {
             RolePanels.Clear();
@@ -619,96 +637,98 @@ public static class RoleGuidePatches
                 StringNames.GameTaskBarMode,
                 GameManager.Instance.LogicOptions.GetTaskBarMode().ToString());
 
-            foreach (var modifier in ModifierManager.Modifiers.OfType<GameModifier>())
+            _panelsReady = false;
+            if (_panelCreation != null)
             {
-                var panel = Object.Instantiate(
-                    instance.MatchInfoRolePanelPrefab,
-                    _modifiersScroller.Inner);
-                var amount =
-                    modifier.GetAmountPerGame();
-                var chance =
-                    modifier.GetAssignmentChance();
-                panel.SetModifierPanel(
-                    modifier,
-                    amount,
-                    chance);
-                SetupPanelButton(panel, () => { DisplayAdvancedWiki(instance, modifier); });
-                ModifierPanels.Add(
-                    modifier,
-                    new DetailedPanel(
-                        panel,
-                        modifier.ModifierName,
-                        modifier.ModifierCategoryTitle,
-                        modifier.ParentMod.MiraPlugin.GetAbbreviatedModName()));
+                Coroutines.Stop(_panelCreation);
             }
 
-            foreach (var roleBehaviour in CustomRoleManager.AllStoredRoleBehaviours)
-            {
-                if (roleBehaviour.Role is not RoleTypes.Crewmate and not RoleTypes.Impostor and
-                    not RoleTypes.CrewmateGhost and
-                    not RoleTypes.ImpostorGhost)
-                {
-                    var panel = Object.Instantiate(
-                        instance.MatchInfoRolePanelPrefab,
-                        inner);
-                    string abbreviation;
-                    int amount;
-                    int chance;
-                    if (roleBehaviour is ICustomRole custom)
-                    {
-                        amount = custom.GetCount().GetValueOrDefault(0);
-                        chance = custom.GetChance().GetValueOrDefault(0);
-                        abbreviation = custom.ParentMod.MiraPlugin.GetAbbreviatedModName();
-                    }
-                    else
-                    {
-                        abbreviation = "AU";
-                        amount =
-                            GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetNumPerGame(roleBehaviour.Role);
-                        chance =
-                            GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetChancePerGame(roleBehaviour.Role);
-                    }
-
-                    panel.SetRolePanel(
-                        roleBehaviour,
-                        amount,
-                        chance);
-                    SetupPanelButton(panel, () => { DisplayAdvancedWiki(instance, roleBehaviour); });
-                    RolePanels.Add(
-                        roleBehaviour,
-                        new DetailedPanel(
-                            panel,
-                            roleBehaviour.GetRoleName(),
-                            roleBehaviour.GetCategoryTitle(),
-                            abbreviation));
-                }
-            }
+            _panelCreation = Coroutines.Start(CoCreatePanels(instance));
         }
 
         _advancedInfoTabScroller?.gameObject.SetActive(false);
 
-        if (reset)
+        if (!_panelsReady)
         {
-            if (IsModifiersTabActive)
+            return;
+        }
+
+        _rolesTabDirty = true;
+        _modifiersTabDirty = true;
+        RefreshActiveTab(false);
+    }
+
+    private static IEnumerator CoCreatePanels(MatchInfoGuide instance)
+    {
+        var inner = instance.settingsTabs[RolesTabIndex].GetComponent<Scroller>().Inner;
+        yield return ModifierManager.Modifiers.OfType<GameModifier>().CoLoopWithBudget(modifier =>
+        {
+            var panel = Object.Instantiate(
+                instance.MatchInfoRolePanelPrefab,
+                _modifiersScroller.Inner);
+            var amount =
+                modifier.GetAmountPerGame();
+            var chance =
+                modifier.GetAssignmentChance();
+            panel.SetModifierPanel(
+                modifier,
+                amount,
+                chance);
+            SetupPanelButton(panel, () => { DisplayAdvancedWiki(instance, modifier); });
+            ModifierPanels.Add(
+                modifier,
+                new DetailedPanel(
+                    panel,
+                    modifier.ModifierName,
+                    modifier.ModifierCategoryTitle,
+                    modifier.ParentMod.MiraPlugin.GetAbbreviatedModName()));
+            panel.gameObject.SetActive(false);
+        });
+        yield return CustomRoleManager.AllStoredRoleBehaviours.Where(roleBehaviour =>
+            roleBehaviour.Role is not RoleTypes.Crewmate and not RoleTypes.Impostor and
+            not RoleTypes.CrewmateGhost and
+            not RoleTypes.ImpostorGhost).CoLoopWithBudget(roleBehaviour =>
+        {
+            var panel = Object.Instantiate(
+                instance.MatchInfoRolePanelPrefab,
+                inner);
+            string abbreviation;
+            int amount;
+            int chance;
+            if (roleBehaviour is ICustomRole custom)
             {
-                ToggleModifierVisibility();
+                amount = custom.GetCount().GetValueOrDefault(0);
+                chance = custom.GetChance().GetValueOrDefault(0);
+                abbreviation = custom.ParentMod.MiraPlugin.GetAbbreviatedModName();
             }
             else
             {
-                ToggleRoleVisibility();
+                abbreviation = "AU";
+                amount =
+                    GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetNumPerGame(roleBehaviour.Role);
+                chance =
+                    GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetChancePerGame(roleBehaviour.Role);
             }
-        }
-        else
-        {
-            _rolesTabDirty = true;
-            _modifiersTabDirty = true;
-            RefreshActiveTab(false);
-        }
 
-        if (reset)
-        {
-            instance.CreatePlayerEntries();
-        }
+            panel.SetRolePanel(
+                roleBehaviour,
+                amount,
+                chance);
+            SetupPanelButton(panel, () => { DisplayAdvancedWiki(instance, roleBehaviour); });
+            RolePanels.Add(
+                roleBehaviour,
+                new DetailedPanel(
+                    panel,
+                    roleBehaviour.GetRoleName(),
+                    roleBehaviour.GetCategoryTitle(),
+                    abbreviation));
+            panel.gameObject.SetActive(false);
+        });
+
+        _panelsReady = true;
+        _panelCreation = null;
+        RefreshActiveTab(false);
+        instance.CreatePlayerEntries();
     }
 
 
@@ -722,10 +742,7 @@ public static class RoleGuidePatches
                 modifier.GetAmountPerGame();
             var chance =
                 modifier.GetAssignmentChance();
-            panel.SetModifierPanel(
-                modifier,
-                amount,
-                chance);
+            SetPanelCount(panel, amount, chance, holder.ModId);
             holder.Amount = amount;
             holder.Chance = chance;
             holder.Likelihood = amount * chance;
@@ -772,10 +789,7 @@ public static class RoleGuidePatches
                     GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetChancePerGame(roleData.Role);
             }
 
-            panel.SetRolePanel(
-                roleData,
-                amount,
-                chance);
+            SetPanelCount(panel, amount, chance, holder.ModId);
             holder.Amount = amount;
             holder.Chance = chance;
             holder.Likelihood = amount * chance;
@@ -1003,31 +1017,36 @@ public static class RoleGuidePatches
         return false;
     }
 
+    private static void SetPanelCount(MatchInfoRolePanel panel, int amount, int chance, string modId)
+    {
+        panel.roleCount.text = string.Format(
+            CultureInfo.InvariantCulture,
+            "{0} at {1}% ({2})",
+            amount.ToString(CultureInfo.InvariantCulture),
+            chance,
+            modId);
+    }
+
     public static void SetRolePanel(
         this MatchInfoRolePanel instance,
         RoleBehaviour role,
         int numPerGame,
         int chancePerGame)
     {
-        instance.roleCount.text = string.Format(
-            CultureInfo.InvariantCulture,
-            "{0} at {1}%",
-            numPerGame.ToString(CultureInfo.InvariantCulture),
-            chancePerGame);
         if (role is ICustomRole customRole)
         {
             instance.roleName.text = customRole.RoleName;
             instance.roleDescription.text =
                 $"<size=60%>{role.GetCategoryTitle()}</size>\n" + customRole.RoleMedDescription;
             instance.roleIcon.sprite = customRole.Configuration.Icon?.LoadAsset();
-            instance.roleCount.text += $" ({customRole.ParentMod.MiraPlugin.GetAbbreviatedModName()})";
+            SetPanelCount(instance, numPerGame, chancePerGame, customRole.ParentMod.MiraPlugin.GetAbbreviatedModName());
         }
         else
         {
             instance.roleName.text = role.NiceName;
             instance.roleDescription.text = $"<size=60%>{role.GetCategoryTitle()}</size>\n" + role.BlurbMed;
             instance.roleIcon.sprite = role.RoleIconColor;
-            instance.roleCount.text += " (AU)";
+            SetPanelCount(instance, numPerGame, chancePerGame, "AU");
         }
 
         instance.roleIcon.SetSizeLimit(0.13f);
@@ -1044,16 +1063,11 @@ public static class RoleGuidePatches
         int numPerGame,
         int chancePerGame)
     {
-        instance.roleCount.text = string.Format(
-            CultureInfo.InvariantCulture,
-            "{0} at {1}%",
-            numPerGame.ToString(CultureInfo.InvariantCulture),
-            chancePerGame);
         instance.roleName.text = modifier.ModifierName;
         instance.roleDescription.text =
             $"<size=60%>{modifier.ModifierCategoryTitle}</size>\n" + modifier.ModifierMedDescription;
         instance.roleIcon.sprite = modifier.ModifierIcon?.LoadAsset();
-        instance.roleCount.text += $" ({modifier.ParentMod.MiraPlugin.GetAbbreviatedModName()})";
+        SetPanelCount(instance, numPerGame, chancePerGame, modifier.ParentMod.MiraPlugin.GetAbbreviatedModName());
 
         instance.roleIcon.SetSizeLimit(0.13f);
         instance.roleIcon.material.SetInt(PlayerMaterial.MaskLayer, 50);
