@@ -26,7 +26,11 @@ public class LoadingRing(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <returns>The created <see cref="LoadingRing"/>.</returns>
     public static LoadingRing Create(Transform parent, Vector3 localPosition, float scale)
     {
-        _ringSprite ??= CreateRingSprite();
+        if (!_ringSprite)
+        {
+            _ringSprite = CreateRingSprite();
+        }
+
         var obj = new GameObject("LoadingRing")
         {
             transform =
@@ -76,6 +80,9 @@ public class LoadingRing(IntPtr cppPtr) : MonoBehaviour(cppPtr)
 
         texture.SetPixels(pixels);
         texture.Apply();
-        return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+        texture.hideFlags = HideFlags.HideAndDontSave;
+        var sprite = Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+        sprite.hideFlags = HideFlags.HideAndDontSave;
+        return sprite;
     }
 }
