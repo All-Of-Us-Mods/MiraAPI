@@ -272,6 +272,9 @@ public static class RoleGuidePatches
                 button.OnUp = true;
                 _searchBoxTmp = searchBox.AddComponent<TextBoxTMP>();
                 _searchBoxTmp.outputText = tmpText;
+                var pipe = new GameObject("Pipe") { layer = searchBox.layer };
+                pipe.transform.SetParent(_searchBoxTmp.transform, false);
+                _searchBoxTmp.Pipe = pipe.AddComponent<MeshRenderer>();
                 button.OnClick.AddListener((UnityAction)(() => { _searchBoxTmp.GiveFocus(); }));
                 button.OnMouseOver = new UnityEvent();
                 button.OnMouseOut = new UnityEvent();
@@ -469,8 +472,11 @@ public static class RoleGuidePatches
 
     private static void UpdateSpinner()
     {
-        _loadingSpinner?.gameObject.SetActive(
-            !_panelsReady && MatchInfoGuide.Instance.activeTabIndex is RolesTabIndex or ModifiersTabIndex);
+        if (_loadingSpinner != null)
+        {
+            _loadingSpinner.gameObject.SetActive(
+                !_panelsReady && MatchInfoGuide.Instance.activeTabIndex is RolesTabIndex or ModifiersTabIndex);
+        }
     }
 
     private static float GetGridScrollBounds(int count)
@@ -515,8 +521,7 @@ public static class RoleGuidePatches
         _searchIconHover.sprite = MiraAssets.SearchIconHoverSprite;
         if (_searchBoxTmp)
         {
-            _searchBoxTmp.outputText.text = string.Empty;
-            _searchBoxTmp.text = string.Empty;
+            _searchBoxTmp.Clear();
         }
 
         RefreshActiveTab(true);
