@@ -13,9 +13,11 @@ using MiraAPI.GameOptions.OptionTypes;
 using MiraAPI.Roles;
 using MiraAPI.Translation;
 using MiraAPI.Utilities.Assets;
+using Reactor.Utilities.Extensions;
 using Rewired;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using MethodBase = System.Reflection.MethodBase;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
@@ -756,5 +758,77 @@ public static class Helpers
         descriptionTmp.transform.localPosition = new Vector3(0, 1.125f, 0);
         descriptionTmp.ForceMeshUpdate();
         return obj;
+    }
+
+    /// <summary>
+    /// Creates a full advanced wiki page with a title, a description, and an optional grid of ability panels.
+    /// </summary>
+    /// <param name="guide">The guide object.</param>
+    /// <param name="titleTmp">The <see cref="TextMeshPro"/> instance of the title.</param>
+    /// <param name="parent">The <see cref="Scroller"/> the page should be parented to.</param>
+    /// <param name="objName">The name of the page object.</param>
+    /// <param name="title">The title of the page.</param>
+    /// <param name="description">The description of the page.</param>
+    /// <param name="abilities">The abilities to display in a grid below the description.</param>
+    /// <returns>The <see cref="GameObject"/> of the wiki page.</returns>
+    public static GameObject CreateAdvancedWikiPage(
+        MatchInfoGuide guide,
+        TextMeshPro titleTmp,
+        Scroller parent,
+        string objName,
+        string title,
+        string description,
+        IReadOnlyCollection<AdvancedWikiAbilityDescription> abilities)
+    {
+        parent.ScrollToTop();
+        var obj = CreateAdvancedWikiTab(
+            guide,
+            objName,
+            title,
+            description,
+            titleTmp,
+            out var desc);
+        var num = 0;
+        if (abilities.Count != 0)
+        {
+            var grid = Object.Instantiate(parent.Inner, obj.transform);
+            var layoutGroup = grid.GetComponent<GridLayoutGroup>();
+            layoutGroup.startAxis = GridLayoutGroup.Axis.Vertical;
+            layoutGroup.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            layoutGroup.spacing = new Vector2(0.75f, 0.4f);
+            grid.DestroyChildren();
+            foreach (var ability in abilities)
+            {
+                num++;
+                SetupAbilityPanel(Object.Instantiate(guide.MatchInfoRolePanelPrefab, grid), ability);
+            }
+
+            grid.localPosition = new Vector3(-3.9f, 1.1f - desc.textBounds.size.y, 0f);
+            grid.localScale = new Vector3(1.3f, 1.3f, 1);
+        }
+
+        obj.transform.SetParent(parent.Inner.transform);
+        obj.transform.localPosition = new Vector3(0f, 0f, 0f);
+        parent.SetYBoundsMax(Mathf.Clamp(desc.textBounds.size.y - 2 + Mathf.Ceil(num / 2f) * 1.45f, 0f, 999f));
+        return obj;
+    }
+
+    private static void SetupAbilityPanel(MatchInfoRolePanel panel, AdvancedWikiAbilityDescription ability)
+    {
+        panel.roleCount.text = ability.AbilityType;
+        panel.roleCount.transform.localPosition += new Vector3(-0.04f, 0);
+        panel.roleName.text = ability.Name;
+        panel.roleName.transform.localPosition += new Vector3(-0.04f, 0);
+        panel.roleDescription.text = ability.Description;
+        panel.roleDescription.rectTransform.sizeDelta = new Vector2(2.601f, 0.8f);
+        panel.roleDescription.transform.localPosition += new Vector3(0, -0.1f);
+        panel.roleIcon.sprite = ability.Icon.LoadAsset();
+        panel.roleIcon.SetSizeLimit(0.13f);
+
+        panel.roleIcon.material.SetInt(PlayerMaterial.MaskLayer, 50);
+        panel.roleName.fontMaterial.SetFloat(panel.STENCIL_NAME, 50f);
+        panel.roleDescription.fontMaterial.SetFloat(panel.STENCIL_NAME, 50f);
+        panel.roleCount.fontMaterial.SetFloat(panel.STENCIL_NAME, 50f);
+        panel.roleIcon.transform.localScale = new Vector3(3.5f, 3.5f, 1f);
     }
 }
