@@ -27,6 +27,7 @@ public static class RoleGuidePatches
 {
     private const int RolesTabIndex = 2;
     private const int ModifiersTabIndex = 3;
+    private const int RevealPanelsPerFrame = 6;
 
     private static readonly Dictionary<RoleBehaviour, DetailedPanel> RolePanels = [];
     private static readonly Dictionary<GameModifier, DetailedPanel> ModifierPanels = [];
@@ -57,6 +58,7 @@ public static class RoleGuidePatches
     private static bool _suppressSearchRefresh;
     private static IEnumerator? _reveal;
     private static bool _pendingRefresh;
+    private static int _revealedThisFrame;
     private static LoadingRing? _loadingSpinner;
     private static SortingFilter _sortFilter = SortingFilter.EnabledOnly;
     private static SortingMethod _sortMethod = SortingMethod.Alphabetical;
@@ -575,17 +577,35 @@ public static class RoleGuidePatches
             Coroutines.Stop(_reveal);
         }
 
+        _panelsReady = false;
+        UpdateSpinner();
         _reveal = Coroutines.Start(CoRevealActiveTab());
     }
 
     private static IEnumerator CoRevealActiveTab()
     {
-        _panelsReady = false;
-        UpdateSpinner();
+        yield return null;
         var modifiers = IsModifiersTabActive;
         var toShow = modifiers ? UpdateModifierPanels(out _) : UpdateRolePanels(out _);
-        yield return toShow.Where(p => !p.Panel.gameObject.activeSelf)
-            .CoLoopWithBudget(p => p.Panel.gameObject.SetActive(true));
+        var batch = 0;
+        foreach (var holder in toShow)
+        {
+            var panel = holder.Panel.gameObject;
+            if (panel.activeSelf)
+            {
+                continue;
+            }
+
+            panel.SetActive(true);
+            _revealedThisFrame++;
+            if (++batch >= RevealPanelsPerFrame)
+            {
+                batch = 0;
+                yield return null;
+                _revealedThisFrame = 0;
+            }
+        }
+
         if (modifiers)
         {
             _modifiersTabDirty = false;
