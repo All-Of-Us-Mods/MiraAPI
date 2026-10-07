@@ -58,8 +58,6 @@ public static class RoleGuidePatches
     private static bool _suppressSearchRefresh;
     private static IEnumerator? _reveal;
     private static bool _pendingRefresh;
-    private static int _revealedThisFrame;
-    private static IEnumerator? _perfLogger;
     private static LoadingRing? _loadingSpinner;
     private static SortingFilter _sortFilter = SortingFilter.EnabledOnly;
     private static SortingMethod _sortMethod = SortingMethod.Alphabetical;
@@ -117,13 +115,6 @@ public static class RoleGuidePatches
     [HarmonyPatch(typeof(MatchInfoGuide), nameof(MatchInfoGuide.Open))]
     public static bool Open(MatchInfoGuide __instance)
     {
-        if (_perfLogger != null)
-        {
-            Coroutines.Stop(_perfLogger);
-        }
-
-        _perfLogger = Coroutines.Start(CoLogOpenFrames(__instance.NormalModeSettings.Count == 0 ? "first-open" : "reopen"));
-        var perfWatch = System.Diagnostics.Stopwatch.StartNew();
         if (HudManager.Instance.GameMenu.IsOpen || HudManager.Instance.Chat.IsOpenOrOpening)
         {
             return false;
@@ -421,8 +412,6 @@ public static class RoleGuidePatches
             __instance.CreateHnSModeSettings();
         }
 
-        var prepMs = perfWatch.ElapsedMilliseconds;
-        perfWatch.Restart();
         PlayerControl.LocalPlayer.NetTransform.Halt();
         __instance.MatchInfoParent.SetActive(true);
         if (__instance.ControllerSelectable.Count > 0)
@@ -435,16 +424,7 @@ public static class RoleGuidePatches
             controllerManager.SetCurrentSelected(__instance.ControllerSelectable[^1]);
         }
 
-        var showMs = perfWatch.ElapsedMilliseconds;
-        perfWatch.Restart();
         __instance.SetActiveTab(regGame ? RolesTabIndex : 0);
-        Debug(
-            $"[WikiPerf] open: prep {prepMs}ms, show {showMs}ms, tab {perfWatch.ElapsedMilliseconds}ms");
-        Debug(
-            $"[WikiPerf] panels: roles {RolePanels.Count} " +
-            $"({RolePanels.Values.Count(h => h.Panel.gameObject.activeSelf)}), " +
-            $"modifiers {ModifierPanels.Count} " +
-            $"({ModifierPanels.Values.Count(h => h.Panel.gameObject.activeSelf)})");
         return false;
     }
 
@@ -616,12 +596,10 @@ public static class RoleGuidePatches
             }
 
             panel.SetActive(true);
-            _revealedThisFrame++;
             if (++batch >= RevealPanelsPerFrame)
             {
                 batch = 0;
                 yield return null;
-                _revealedThisFrame = 0;
             }
         }
 
@@ -644,34 +622,6 @@ public static class RoleGuidePatches
             _pendingRefresh = false;
             RefreshActiveTab(true);
         }
-    }
-
-    private static IEnumerator CoLogOpenFrames(string label)
-    {
-        var frames = 0;
-        var worst = 0f;
-        var worstIdx = 0;
-        while (frames < 90)
-        {
-            yield return null;
-            frames++;
-            var ms = Time.unscaledDeltaTime * 1000f;
-            if (ms > worst)
-            {
-                worst = ms;
-                worstIdx = frames;
-            }
-
-            if (ms > 33f)
-            {
-                Debug(
-                    $"[WikiPerf] frame +{frames}: {ms:F0}ms (reveal={_reveal != null}, " +
-                    $"panelsReady={_panelsReady}, revealedThisFrame={_revealedThisFrame})");
-            }
-        }
-
-        Debug($"[WikiPerf] done ({label}): worst {worst:F0}ms at +{worstIdx}");
-        _perfLogger = null;
     }
 
     private static void RefreshActiveTab(bool scrollToTop)
