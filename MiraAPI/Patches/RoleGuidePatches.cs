@@ -350,13 +350,16 @@ public static class RoleGuidePatches
 
         PlayerControl.LocalPlayer.NetTransform.Halt();
         __instance.MatchInfoParent.SetActive(true);
-        var instance = ControllerManager.Instance;
-        var currentUiState = ControllerManager.Instance.CurrentUiState;
-        var controllerSelectable = __instance.ControllerSelectable;
-        instance.SetUpSelectables(currentUiState, controllerSelectable[^1], __instance.ControllerSelectable);
-        var instance2 = ControllerManager.Instance;
-        var controllerSelectable2 = __instance.ControllerSelectable;
-        instance2.SetCurrentSelected(controllerSelectable2[^1]);
+        if (__instance.ControllerSelectable.Count > 0)
+        {
+            var controllerManager = ControllerManager.Instance;
+            controllerManager.SetUpSelectables(
+                controllerManager.CurrentUiState,
+                __instance.ControllerSelectable[^1],
+                __instance.ControllerSelectable);
+            controllerManager.SetCurrentSelected(__instance.ControllerSelectable[^1]);
+        }
+
         __instance.SetActiveTab(regGame ? RolesTabIndex : 0);
         return false;
     }
@@ -373,6 +376,7 @@ public static class RoleGuidePatches
         settingBtnSelected.transform.GetChild(0).gameObject.SetActive(false);
         var settingBtnHighlight = button.activeSprites.GetComponent<SpriteRenderer>();
         settingBtnHighlight.sprite = hover;
+        settingBtnInactive.drawMode = settingBtnSelected.drawMode = settingBtnHighlight.drawMode = SpriteDrawMode.Sliced;
         settingBtnInactive.size = settingBtnSelected.size = settingBtnHighlight.size = Vector2.one;
         settingBtnHighlight.transform.GetChild(0).gameObject.SetActive(false);
         buttonCollider.size = new Vector2(0.8f, 0.74f);
@@ -649,6 +653,7 @@ public static class RoleGuidePatches
             instance.CreateSettingsEntry(
                 StringNames.GameTaskBarMode,
                 GameManager.Instance.LogicOptions.GetTaskBarMode().ToString());
+            instance.CreatePlayerEntries();
 
             _panelsReady = false;
             instance.rolesEnabledMessage.SetActive(false);
@@ -744,7 +749,6 @@ public static class RoleGuidePatches
         _panelCreation = null;
         RefreshActiveTab(false);
         UpdateSpinner();
-        instance.CreatePlayerEntries();
     }
 
 
