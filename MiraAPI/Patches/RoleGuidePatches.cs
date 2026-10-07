@@ -249,6 +249,15 @@ public static class RoleGuidePatches
                 var searchButton = searchBox.GetComponent<MatchInfoGuideTabButton>();
                 var tmpText = searchButton.transform.GetChild(0).GetComponent<TextMeshPro>();
                 tmpText.GetComponent<TextTranslatorTMP>().Destroy();
+                tmpText.color = new Color(0.75f, 0.75f, 0.75f);
+                tmpText.text = string.Empty;
+                tmpText.fontSizeMax = 4;
+                tmpText.overflowMode = TextOverflowModes.Ellipsis;
+                tmpText.alignment = TextAlignmentOptions.Left;
+                tmpText.horizontalAlignment = HorizontalAlignmentOptions.Left;
+                tmpText.rectTransform.offsetMax = new Vector2(-0.1531f, 0.2972f);
+                tmpText.rectTransform.sizeDelta = new Vector2(3, 1);
+                tmpText.transform.localPosition = new Vector3(0, 0.0343f, -0.2f);
                 var inactive = searchButton.inactiveSprites;
                 var selected = searchButton.selectedSprites;
                 var highlight = searchButton.activeSprites;
@@ -288,35 +297,32 @@ public static class RoleGuidePatches
                 }
 
                 var outputText = _searchBoxTmp.outputText;
+                var textParent = tmpText.transform.parent;
+                outputText.transform.SetParent(textParent, false);
                 outputText.GetComponent<TextTranslatorTMP>()?.Destroy();
-                outputText.font = tmpText.font;
-                outputText.fontSharedMaterial = tmpText.fontSharedMaterial;
+                CopyTextLayout(tmpText, outputText);
                 outputText.color = new Color(0.75f, 0.75f, 0.75f);
                 outputText.text = string.Empty;
-                outputText.fontSizeMax = 4;
-                outputText.overflowMode = TextOverflowModes.Ellipsis;
-                outputText.alignment = TextAlignmentOptions.Left;
-                outputText.horizontalAlignment = HorizontalAlignmentOptions.Left;
-                outputText.rectTransform.offsetMax = new Vector2(-0.1531f, 0.2972f);
-                outputText.rectTransform.sizeDelta = new Vector2(3, 1);
-                outputText.transform.localPosition = new Vector3(0, 0.0343f, -0.2f);
 
                 var placeholderText = _searchBoxTmp.placeholderText;
                 if (placeholderText)
                 {
+                    placeholderText.transform.SetParent(textParent, false);
                     placeholderText.GetComponent<TextTranslatorTMP>()?.Destroy();
-                    placeholderText.font = tmpText.font;
-                    placeholderText.fontSharedMaterial = tmpText.fontSharedMaterial;
+                    CopyTextLayout(tmpText, placeholderText);
                     placeholderText.color = new Color(0.55f, 0.55f, 0.55f);
                     placeholderText.text = MiraLocaleManager.Get("MiraApi.Wiki.SearchPlaceholder");
-                    placeholderText.fontSizeMax = 4;
-                    placeholderText.overflowMode = TextOverflowModes.Ellipsis;
-                    placeholderText.alignment = TextAlignmentOptions.Left;
-                    placeholderText.horizontalAlignment = HorizontalAlignmentOptions.Left;
-                    placeholderText.rectTransform.offsetMax = new Vector2(-0.1531f, 0.2972f);
-                    placeholderText.rectTransform.sizeDelta = new Vector2(3, 1);
-                    placeholderText.transform.localPosition = new Vector3(0, 0.0343f, -0.2f);
                     placeholderText.gameObject.SetActive(true);
+                }
+
+                if (_searchBoxTmp.Pipe)
+                {
+                    _searchBoxTmp.Pipe.transform.SetParent(textParent, false);
+                    _searchBoxTmp.Pipe.transform.localPosition = new Vector3(
+                        outputText.transform.localPosition.x -
+                        (outputText.rectTransform.sizeDelta.x * outputText.rectTransform.pivot.x),
+                        outputText.transform.localPosition.y + _searchBoxTmp.caretYOffset,
+                        -0.3f);
                 }
 
                 tmpText.gameObject.Destroy();
@@ -654,6 +660,32 @@ public static class RoleGuidePatches
         }
 
         RefreshActiveTab(false);
+    }
+
+    private static void CopyTextLayout(TextMeshPro source, TextMeshPro target)
+    {
+        target.font = source.font;
+        target.fontSharedMaterial = source.fontSharedMaterial;
+        target.fontSize = source.fontSize;
+        target.fontSizeMin = source.fontSizeMin;
+        target.fontSizeMax = source.fontSizeMax;
+        target.enableAutoSizing = source.enableAutoSizing;
+        target.overflowMode = source.overflowMode;
+        target.alignment = source.alignment;
+        target.horizontalAlignment = source.horizontalAlignment;
+        target.verticalAlignment = source.verticalAlignment;
+        target.margin = source.margin;
+        target.enableWordWrapping = source.enableWordWrapping;
+        var sourceRect = source.rectTransform;
+        var targetRect = target.rectTransform;
+        targetRect.anchorMin = sourceRect.anchorMin;
+        targetRect.anchorMax = sourceRect.anchorMax;
+        targetRect.pivot = sourceRect.pivot;
+        targetRect.sizeDelta = sourceRect.sizeDelta;
+        targetRect.anchoredPosition = sourceRect.anchoredPosition;
+        targetRect.localScale = sourceRect.localScale;
+        targetRect.localRotation = sourceRect.localRotation;
+        targetRect.localPosition = sourceRect.localPosition;
     }
 
     private static void SetupPanelButton(MatchInfoRolePanel panel, Action onClick)
