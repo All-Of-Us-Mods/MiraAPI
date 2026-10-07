@@ -296,7 +296,14 @@ public static class RoleGuidePatches
 
                         RefreshActiveTab(true);
                     }));
+                var placeholder = Object.Instantiate(tmpText, tmpText.transform.parent);
+                placeholder.name = "Placeholder";
+                placeholder.color = new Color(0.55f, 0.55f, 0.55f);
+                placeholder.text = MiraLocaleManager.Get("MiraApi.Wiki.SearchPlaceholder");
+                placeholder.GetComponent<TextTranslatorTMP>()?.Destroy();
+                _searchBoxTmp.placeholderText = placeholder;
                 _searchBoxTmp.transform.localPosition = new Vector3(-1.438f, 0.756f, -0.2f);
+                _searchBoxTmp.Clear();
 
                 var playerButton = __instance.TabButtons[0];
                 SetupTabButton(
