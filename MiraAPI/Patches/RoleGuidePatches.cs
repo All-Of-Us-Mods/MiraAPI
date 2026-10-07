@@ -55,6 +55,8 @@ public static class RoleGuidePatches
     private static IEnumerator? _panelCreation;
     private static bool _panelsReady;
     private static bool _suppressSearchRefresh;
+    private static IEnumerator? _reveal;
+    private static bool _pendingRefresh;
     private static LoadingRing? _loadingSpinner;
     private static SortingFilter _sortFilter = SortingFilter.EnabledOnly;
     private static SortingMethod _sortMethod = SortingMethod.Alphabetical;
@@ -151,8 +153,6 @@ public static class RoleGuidePatches
         }
 
         var regGame = GameManager.Instance.TryCast<NormalGameManager>() != null;
-        System.Diagnostics.Stopwatch? reopenWatch = null;
-        long reopenRefreshMs = 0;
         if (regGame)
         {
             if (__instance.NormalModeSettings.Count == 0)
@@ -400,11 +400,8 @@ public static class RoleGuidePatches
             }
             else
             {
-                reopenWatch = System.Diagnostics.Stopwatch.StartNew();
                 DisplayNormalRoleSettings(__instance, false);
                 ClearSearchText();
-                reopenRefreshMs = reopenWatch.ElapsedMilliseconds;
-                reopenWatch.Restart();
             }
         }
         else if (__instance.HnSModeSettings.Count == 0)
@@ -427,11 +424,6 @@ public static class RoleGuidePatches
         }
 
         __instance.SetActiveTab(regGame ? RolesTabIndex : 0);
-        if (reopenWatch != null)
-        {
-            Debug($"Wiki reopen: refresh {reopenRefreshMs} ms, show {reopenWatch.ElapsedMilliseconds} ms");
-        }
-
         return false;
     }
 
@@ -476,13 +468,25 @@ public static class RoleGuidePatches
         MatchInfoGuide.Instance.SetActiveTab(ModifiersTabIndex);
         if (!_panelsReady)
         {
+            if (_reveal != null)
+            {
+                StartReveal();
+            }
+
             return;
         }
 
         if (_modifiersTabDirty)
         {
-            ToggleModifierVisibility();
-            _modifiersTabDirty = false;
+            foreach (var holder in ModifierPanels.Values)
+            {
+                if (holder.Panel.gameObject.activeSelf)
+                {
+                    holder.Panel.gameObject.SetActive(false);
+                }
+            }
+
+            StartReveal();
         }
     }
 
@@ -492,13 +496,25 @@ public static class RoleGuidePatches
         MatchInfoGuide.Instance.SetActiveTab(RolesTabIndex);
         if (!_panelsReady)
         {
+            if (_reveal != null)
+            {
+                StartReveal();
+            }
+
             return;
         }
 
         if (_rolesTabDirty)
         {
-            ToggleRoleVisibility();
-            _rolesTabDirty = false;
+            foreach (var holder in RolePanels.Values)
+            {
+                if (holder.Panel.gameObject.activeSelf)
+                {
+                    holder.Panel.gameObject.SetActive(false);
+                }
+            }
+
+            StartReveal();
         }
     }
 
@@ -552,10 +568,50 @@ public static class RoleGuidePatches
         return Mathf.Clamp(Mathf.Ceil(count / 2f) * 1.3f - 1.5f, 0f, 999f);
     }
 
+    private static void StartReveal()
+    {
+        if (_reveal != null)
+        {
+            Coroutines.Stop(_reveal);
+        }
+
+        _reveal = Coroutines.Start(CoRevealActiveTab());
+    }
+
+    private static IEnumerator CoRevealActiveTab()
+    {
+        _panelsReady = false;
+        UpdateSpinner();
+        var modifiers = IsModifiersTabActive;
+        var toShow = modifiers ? UpdateModifierPanels(out _) : UpdateRolePanels(out _);
+        yield return toShow.Where(p => !p.Panel.gameObject.activeSelf)
+            .CoLoopWithBudget(p => p.Panel.gameObject.SetActive(true));
+        if (modifiers)
+        {
+            _modifiersTabDirty = false;
+            _rolesTabDirty = true;
+        }
+        else
+        {
+            _rolesTabDirty = false;
+            _modifiersTabDirty = true;
+        }
+
+        _reveal = null;
+        _panelsReady = true;
+        UpdateSpinner();
+        if (_pendingRefresh)
+        {
+            _pendingRefresh = false;
+            RefreshActiveTab(true);
+        }
+    }
+
     private static void RefreshActiveTab(bool scrollToTop)
     {
         if (!_panelsReady)
         {
+            _pendingRefresh = true;
             return;
         }
 
@@ -766,6 +822,18 @@ public static class RoleGuidePatches
             _panelCreation = Coroutines.Start(CoCreatePanels(instance));
             LastOrders.Clear();
         }
+        else
+        {
+            foreach (var holder in RolePanels.Values.Concat(ModifierPanels.Values))
+            {
+                if (holder.Panel.gameObject.activeSelf)
+                {
+                    holder.Panel.gameObject.SetActive(false);
+                }
+            }
+
+            StartReveal();
+        }
 
         _advancedInfoTabScroller?.gameObject.SetActive(false);
         _rolesTabDirty = true;
@@ -840,15 +908,26 @@ public static class RoleGuidePatches
             panel.gameObject.SetActive(false);
         });
 
-        _panelsReady = true;
         _panelCreation = null;
-        RefreshActiveTab(false);
-        UpdateSpinner();
+        yield return CoRevealActiveTab();
     }
 
 
     public static void ToggleModifierVisibility()
     {
+        var toShow = UpdateModifierPanels(out _);
+        foreach (var holder in toShow)
+        {
+            if (!holder.Panel.gameObject.activeSelf)
+            {
+                holder.Panel.gameObject.SetActive(true);
+            }
+        }
+    }
+
+    private static List<DetailedPanel> UpdateModifierPanels(out int shownCount)
+    {
+        var toShow = new List<DetailedPanel>();
         var num = 0;
         foreach (var (modifier, holder) in ModifierPanels)
         {
@@ -864,16 +943,17 @@ public static class RoleGuidePatches
             var isRoleDisabled = amount == 0 || chance == 0;
             var isRoleNotVisible = !modifier.CanSpawnOnCurrentMode() || modifier.GetDescription() == string.Empty;
             var show = ShouldShowPanel(modifier.ForceShowModifierOnWiki, isRoleDisabled, isRoleNotVisible);
-            if (panel.gameObject.activeSelf != show)
-            {
-                panel.gameObject.SetActive(show);
-            }
-
             if (!show)
             {
+                if (panel.gameObject.activeSelf)
+                {
+                    panel.gameObject.SetActive(false);
+                }
+
                 continue;
             }
 
+            toShow.Add(holder);
             num++;
         }
 
@@ -883,10 +963,25 @@ public static class RoleGuidePatches
         instance.rolesEnabledMessage.SetActive(num == 0);*/
 
         _modifiersScroller.SetYBoundsMax(GetGridScrollBounds(num));
+        shownCount = num;
+        return toShow;
     }
 
     public static void ToggleRoleVisibility()
     {
+        var toShow = UpdateRolePanels(out _);
+        foreach (var holder in toShow)
+        {
+            if (!holder.Panel.gameObject.activeSelf)
+            {
+                holder.Panel.gameObject.SetActive(true);
+            }
+        }
+    }
+
+    private static List<DetailedPanel> UpdateRolePanels(out int shownCount)
+    {
+        var toShow = new List<DetailedPanel>();
         var num = 0;
         foreach (var (roleData, holder) in RolePanels)
         {
@@ -917,16 +1012,17 @@ public static class RoleGuidePatches
                                     !custom2.CanSpawnOnCurrentMode()) ||
                                    (Enum.IsDefined(roleData.Role) && roleData.IsRoleBlacklisted());
             var show = ShouldShowPanel(forceShow, isRoleDisabled, isRoleNotVisible);
-            if (panel.gameObject.activeSelf != show)
-            {
-                panel.gameObject.SetActive(show);
-            }
-
             if (!show)
             {
+                if (panel.gameObject.activeSelf)
+                {
+                    panel.gameObject.SetActive(false);
+                }
+
                 continue;
             }
 
+            toShow.Add(holder);
             num++;
         }
 
@@ -936,6 +1032,8 @@ public static class RoleGuidePatches
         instance.rolesEnabledMessage.SetActive(num == 0);
 
         instance.MatchInfoRoleScroller.SetYBoundsMax(GetGridScrollBounds(num));
+        shownCount = num;
+        return toShow;
     }
 
     public static void SortAllRoles(string searchText)
