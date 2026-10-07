@@ -30,6 +30,7 @@ public static class RoleGuidePatches
 
     private static readonly Dictionary<RoleBehaviour, DetailedPanel> RolePanels = [];
     private static readonly Dictionary<GameModifier, DetailedPanel> ModifierPanels = [];
+    private static readonly Dictionary<object, List<DetailedPanel>> LastOrders = [];
 
     public static PassiveButton SearchIconButton;
     private static SpriteRenderer _searchIconIdle;
@@ -53,6 +54,7 @@ public static class RoleGuidePatches
     private static bool _modifiersTabDirty;
     private static IEnumerator? _panelCreation;
     private static bool _panelsReady;
+    private static bool _suppressSearchRefresh;
     private static LoadingRing? _loadingSpinner;
     private static SortingFilter _sortFilter = SortingFilter.EnabledOnly;
     private static SortingMethod _sortMethod = SortingMethod.Alphabetical;
@@ -149,6 +151,8 @@ public static class RoleGuidePatches
         }
 
         var regGame = GameManager.Instance.TryCast<NormalGameManager>() != null;
+        System.Diagnostics.Stopwatch? reopenWatch = null;
+        long reopenRefreshMs = 0;
         if (regGame)
         {
             if (__instance.NormalModeSettings.Count == 0)
@@ -345,6 +349,11 @@ public static class RoleGuidePatches
                             _searchIconHover.sprite = MiraAssets.SearchIconHoverSprite;
                         }
 
+                        if (_suppressSearchRefresh)
+                        {
+                            return;
+                        }
+
                         RefreshActiveTab(true);
                     }));
                 searchBox.transform.localPosition = new Vector3(-1.438f, 0.756f, -0.2f);
@@ -391,8 +400,11 @@ public static class RoleGuidePatches
             }
             else
             {
+                reopenWatch = System.Diagnostics.Stopwatch.StartNew();
                 DisplayNormalRoleSettings(__instance, false);
                 ClearSearchText();
+                reopenRefreshMs = reopenWatch.ElapsedMilliseconds;
+                reopenWatch.Restart();
             }
         }
         else if (__instance.HnSModeSettings.Count == 0)
@@ -415,6 +427,11 @@ public static class RoleGuidePatches
         }
 
         __instance.SetActiveTab(regGame ? RolesTabIndex : 0);
+        if (reopenWatch != null)
+        {
+            Debug($"Wiki reopen: refresh {reopenRefreshMs} ms, show {reopenWatch.ElapsedMilliseconds} ms");
+        }
+
         return false;
     }
 
@@ -570,9 +587,11 @@ public static class RoleGuidePatches
     {
         _searchIconIdle.sprite = MiraAssets.SearchIconIdleSprite;
         _searchIconHover.sprite = MiraAssets.SearchIconHoverSprite;
-        if (_searchBoxTmp)
+        if (_searchBoxTmp && GetSearchText().Length > 0)
         {
+            _suppressSearchRefresh = true;
             _searchBoxTmp.Clear();
+            _suppressSearchRefresh = false;
         }
 
         RefreshActiveTab(true);
@@ -745,19 +764,13 @@ public static class RoleGuidePatches
             }
 
             _panelCreation = Coroutines.Start(CoCreatePanels(instance));
+            LastOrders.Clear();
         }
 
         _advancedInfoTabScroller?.gameObject.SetActive(false);
-        UpdateSpinner();
-
-        if (!_panelsReady)
-        {
-            return;
-        }
-
         _rolesTabDirty = true;
         _modifiersTabDirty = true;
-        RefreshActiveTab(false);
+        UpdateSpinner();
     }
 
     private static IEnumerator CoCreatePanels(MatchInfoGuide instance)
@@ -850,13 +863,17 @@ public static class RoleGuidePatches
             holder.Likelihood = amount * chance;
             var isRoleDisabled = amount == 0 || chance == 0;
             var isRoleNotVisible = !modifier.CanSpawnOnCurrentMode() || modifier.GetDescription() == string.Empty;
-            if (!ShouldShowPanel(modifier.ForceShowModifierOnWiki, isRoleDisabled, isRoleNotVisible))
+            var show = ShouldShowPanel(modifier.ForceShowModifierOnWiki, isRoleDisabled, isRoleNotVisible);
+            if (panel.gameObject.activeSelf != show)
             {
-                panel.gameObject.SetActive(false);
+                panel.gameObject.SetActive(show);
+            }
+
+            if (!show)
+            {
                 continue;
             }
 
-            panel.gameObject.SetActive(true);
             num++;
         }
 
@@ -899,13 +916,17 @@ public static class RoleGuidePatches
             var isRoleNotVisible = (roleData is ICustomRole custom2 &&
                                     !custom2.CanSpawnOnCurrentMode()) ||
                                    (Enum.IsDefined(roleData.Role) && roleData.IsRoleBlacklisted());
-            if (!ShouldShowPanel(forceShow, isRoleDisabled, isRoleNotVisible))
+            var show = ShouldShowPanel(forceShow, isRoleDisabled, isRoleNotVisible);
+            if (panel.gameObject.activeSelf != show)
             {
-                panel.gameObject.SetActive(false);
+                panel.gameObject.SetActive(show);
+            }
+
+            if (!show)
+            {
                 continue;
             }
 
-            panel.gameObject.SetActive(true);
             num++;
         }
 
@@ -940,10 +961,18 @@ public static class RoleGuidePatches
             ? sorted.ThenBy(p => p.GetSortKey(_sortGrouping))
             : sorted.ThenByDescending(p => p.GetSortKey(_sortGrouping));
 
-        foreach (var panel in ordered)
+        var orderedList = ordered.ToList();
+        if (LastOrders.TryGetValue(panels, out var lastOrder) && lastOrder.SequenceEqual(orderedList))
+        {
+            return;
+        }
+
+        foreach (var panel in orderedList)
         {
             panel.Panel.transform.SetAsLastSibling();
         }
+
+        LastOrders[panels] = orderedList;
     }
 
     [HarmonyPrefix]
