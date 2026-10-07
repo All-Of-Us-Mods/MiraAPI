@@ -53,6 +53,7 @@ public static class RoleGuidePatches
     private static bool _modifiersTabDirty;
     private static IEnumerator? _panelCreation;
     private static bool _panelsReady;
+    private static LoadingRing? _loadingSpinner;
     private static SortingFilter _sortFilter = SortingFilter.EnabledOnly;
     private static SortingMethod _sortMethod = SortingMethod.Alphabetical;
     private static SortingGroups _sortGrouping = SortingGroups.Ungrouped;
@@ -219,6 +220,12 @@ public static class RoleGuidePatches
                 wikiTab.transform.GetAllChildren()
                     .First(x => x.name.Contains("BG_Gradient")).transform.localPosition = new Vector3(0, -0.62f, -5);
                 _advancedInfoTabScroller = wikiTab.GetComponent<Scroller>();
+
+                var spinnerParent = __instance.settingsTabs[RolesTabIndex].transform.parent;
+                var spinnerPos = spinnerParent.InverseTransformPoint(__instance.MatchInfoRoleMaskArea.transform.position);
+                spinnerPos.z = -5f;
+                _loadingSpinner = LoadingRing.Create(spinnerParent, spinnerPos, 0.6f);
+                _loadingSpinner.GetComponent<SpriteRenderer>().color = MiraAssets.AcceptedTeal;
 
                 DisplayNormalRoleSettings(__instance, true);
 
@@ -456,6 +463,12 @@ public static class RoleGuidePatches
                  (!isDisabled && _sortFilter is SortingFilter.DisabledOnly));
     }
 
+    private static void UpdateSpinner()
+    {
+        _loadingSpinner?.gameObject.SetActive(
+            !_panelsReady && MatchInfoGuide.Instance.activeTabIndex is RolesTabIndex or ModifiersTabIndex);
+    }
+
     private static float GetGridScrollBounds(int count)
     {
         return Mathf.Clamp(Mathf.Ceil(count / 2f) * 1.3f - 1.5f, 0f, 999f);
@@ -638,6 +651,7 @@ public static class RoleGuidePatches
                 GameManager.Instance.LogicOptions.GetTaskBarMode().ToString());
 
             _panelsReady = false;
+            instance.rolesEnabledMessage.SetActive(false);
             if (_panelCreation != null)
             {
                 Coroutines.Stop(_panelCreation);
@@ -647,6 +661,7 @@ public static class RoleGuidePatches
         }
 
         _advancedInfoTabScroller?.gameObject.SetActive(false);
+        UpdateSpinner();
 
         if (!_panelsReady)
         {
@@ -728,6 +743,7 @@ public static class RoleGuidePatches
         _panelsReady = true;
         _panelCreation = null;
         RefreshActiveTab(false);
+        UpdateSpinner();
         instance.CreatePlayerEntries();
     }
 
@@ -911,12 +927,14 @@ public static class RoleGuidePatches
         }
 
         _advancedInfoTabScroller?.gameObject.SetActive(false);
+        UpdateSpinner();
     }
 
     private static bool TryPrepareAdvancedWiki(MatchInfoGuide instance)
     {
         instance.settingsTabs[RolesTabIndex].SetActive(false);
         _modifiersScroller?.gameObject.SetActive(false);
+        UpdateSpinner();
         if (_currentAdvancedTabObject)
         {
             _currentAdvancedTabObject.SetActive(false);
