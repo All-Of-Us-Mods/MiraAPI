@@ -498,8 +498,8 @@ public static class RoleGuidePatches
         _searchIconHover.sprite = MiraAssets.SearchIconHoverSprite;
         if (_searchBoxTmp)
         {
-            _searchBoxTmp.outputText.SetText(string.Empty);
-            _searchBoxTmp.SetText(string.Empty);
+            _searchBoxTmp.outputText.text = string.Empty;
+            _searchBoxTmp.text = string.Empty;
         }
 
         RefreshActiveTab(true);
