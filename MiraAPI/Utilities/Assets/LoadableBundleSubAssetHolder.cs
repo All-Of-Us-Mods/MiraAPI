@@ -9,10 +9,12 @@ namespace MiraAPI.Utilities.Assets;
 /// <summary>
 /// A utility class for loading multiple assets from an <see cref="AssetBundle"/>.
 /// </summary>
-public class LoadableBundleSubAssetHolder
+/// <param name="names">The name of the assets to pull from.</param>
+/// <param name="bundle">The <see cref="AssetBundle"/> that contains the assets.</param>
+public class LoadableBundleSubAssetHolder(string[] names, AssetBundle bundle)
 {
-    private readonly string[] spriteNames;
-    private readonly AssetBundle bundle;
+    private readonly string[] spriteNames = names;
+    private readonly AssetBundle bundle = bundle;
 
     /// <summary>
     /// Gets the sprites contained within the asset.
@@ -22,23 +24,11 @@ public class LoadableBundleSubAssetHolder
     /// <summary>
     /// Initializes a new instance of the <see cref="LoadableBundleSubAssetHolder"/> class.
     /// </summary>
-    /// <param name="names">The name of the assets to pull from.</param>
-    /// <param name="bundle">The <see cref="AssetBundle"/> that contains the assets.</param>
-    public LoadableBundleSubAssetHolder(string[] names, AssetBundle bundle)
-    {
-        this.bundle = bundle;
-        spriteNames = names;
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="LoadableBundleSubAssetHolder"/> class.
-    /// </summary>
     /// <param name="name">The name of the asset.</param>
     /// <param name="bundle">The <see cref="AssetBundle"/> that contains the assets.</param>
     public LoadableBundleSubAssetHolder(string name, AssetBundle bundle)
+        : this([name], bundle)
     {
-        this.bundle = bundle;
-        spriteNames = [name];
     }
 
     /// <summary>
