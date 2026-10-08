@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Il2CppInterop.Runtime.Attributes;
 using MiraAPI.Patches.Menu;
 using Reactor.Utilities;
@@ -23,26 +24,36 @@ public static class AddressablesLoader
     private static readonly List<string> RegisteredSkinKeys = [];
 
     private static bool _isInitialized;
+    private static bool _addressableHatsExist;
+    private static bool _addressableVisorsExist;
+    private static bool _addressableNameplatesExist;
+    private static bool _addressableSkinsExist;
+    private static bool _catalogsExist;
 
     /// <summary>
     /// Gets a value indicating whether hats have been loaded by the addressables system.
     /// </summary>
-    public static bool AddressableHatsExist { get; private set; }
+    public static bool AddressableHatsExist => _addressableHatsExist;
 
     /// <summary>
     /// Gets a value indicating whether visors have been loaded by the addressables system.
     /// </summary>
-    public static bool AddressableVisorsExist { get; private set; }
+    public static bool AddressableVisorsExist => _addressableVisorsExist;
 
     /// <summary>
     /// Gets a value indicating whether nameplates have been loaded by the addressables system.
     /// </summary>
-    public static bool AddressableNameplatesExist { get; private set; }
+    public static bool AddressableNameplatesExist => _addressableNameplatesExist;
 
     /// <summary>
     /// Gets a value indicating whether skins have been loaded by the addressables system.
     /// </summary>
-    public static bool AddressableSkinsExist { get; private set; }
+    public static bool AddressableSkinsExist => _addressableSkinsExist;
+
+    /// <summary>
+    /// Gets a value indicating whether catalogs have been loaded by the addressables system.
+    /// </summary>
+    public static bool CatalogsExist => _catalogsExist;
 
     /// <summary>
     /// Registers a specific addressables package to load asynchronously at the start of the game, when possible.
@@ -51,13 +62,7 @@ public static class AddressablesLoader
     /// <param name="providerSuffix">The suffix of the provider for an addressables package.</param>
     public static void RegisterCatalog(string location, string providerSuffix = "")
     {
-        if (_isInitialized)
-        {
-            Error("AddressablesLoader has already been initialized, cannot register more catalogs.");
-            return;
-        }
-
-        CatalogLocations.Add((location, providerSuffix));
+        RegisterCosmetic((location, providerSuffix), CatalogLocations, "catalog", ref _catalogsExist);
     }
 
     /// <summary>
@@ -66,14 +71,7 @@ public static class AddressablesLoader
     /// <param name="addressablesKey">The key/label/group for a List <see cref="HatData"/>.</param>
     public static void RegisterHats(string addressablesKey)
     {
-        if (_isInitialized)
-        {
-            Error("AddressablesLoader has already been initialized, cannot register more keys for hats.");
-            return;
-        }
-
-        AddressableHatsExist = true;
-        RegisteredHatKeys.Add(addressablesKey);
+        RegisterCosmetic(addressablesKey, RegisteredHatKeys, "hat", ref _addressableHatsExist);
     }
 
     /// <summary>
@@ -82,14 +80,7 @@ public static class AddressablesLoader
     /// <param name="addressablesKey">The key/label/group for a List <see cref="SkinData"/>.</param>
     public static void RegisterSkins(string addressablesKey)
     {
-        if (_isInitialized)
-        {
-            Error("AddressablesLoader has already been initialized, cannot register more keys for skins.");
-            return;
-        }
-
-        AddressableSkinsExist = true;
-        RegisteredSkinKeys.Add(addressablesKey);
+        RegisterCosmetic(addressablesKey, RegisteredSkinKeys, "skin", ref _addressableSkinsExist);
     }
 
     /// <summary>
@@ -99,14 +90,7 @@ public static class AddressablesLoader
     /// /// <param name="groupTitle">The title of the group for visors.</param>
     public static void RegisterNameplates(string addressablesKey, string groupTitle)
     {
-        if (_isInitialized)
-        {
-            Error("AddressablesLoader has already been initialized, cannot register more keys for nameplates.");
-            return;
-        }
-
-        AddressableNameplatesExist = true;
-        RegisteredNameplateKeys.Add((addressablesKey, groupTitle));
+        RegisterCosmetic((addressablesKey, groupTitle), RegisteredNameplateKeys, "nameplate", ref _addressableNameplatesExist);
     }
 
     /// <summary>
@@ -116,14 +100,20 @@ public static class AddressablesLoader
     /// <param name="groupTitle">The title of the group for visors.</param>
     public static void RegisterVisors(string addressablesKey, string groupTitle)
     {
+        RegisterCosmetic((addressablesKey, groupTitle), RegisteredVisorKeys, "visor", ref _addressableVisorsExist);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void RegisterCosmetic<T>(T value, List<T> values, string type, ref bool flag)
+    {
         if (_isInitialized)
         {
-            Error("AddressablesLoader has already been initialized, cannot register more keys for visors.");
+            Error($"AddressablesLoader has already been initialized, cannot register more keys for {type}s.");
             return;
         }
 
-        AddressableVisorsExist = true;
-        RegisteredVisorKeys.Add((addressablesKey, groupTitle));
+        flag = true;
+        values.Add(value);
     }
 
     internal static void LoadAll()
