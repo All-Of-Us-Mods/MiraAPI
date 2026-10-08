@@ -13,9 +13,6 @@ namespace MiraAPI.Utilities.Assets;
 /// <param name="bundle">The <see cref="AssetBundle"/> that contains the assets.</param>
 public class LoadableBundleSubAssetHolder(string[] names, AssetBundle bundle)
 {
-    private readonly string[] spriteNames = names;
-    private readonly AssetBundle bundle = bundle;
-
     /// <summary>
     /// Gets the sprites contained within the asset.
     /// </summary>
@@ -42,7 +39,7 @@ public class LoadableBundleSubAssetHolder(string[] names, AssetBundle bundle)
 
         var newSprites = new List<Sprite>();
 
-        foreach (var name in spriteNames)
+        foreach (var name in names)
         {
             var loadedAssets = bundle.LoadAssetWithSubAssets(name, Il2CppType.From(typeof(Sprite)))
                 ?? throw new InvalidOperationException($"INVALID ASSETS: {name}");

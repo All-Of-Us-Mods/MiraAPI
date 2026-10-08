@@ -11,10 +11,6 @@ public class LoadableAudioResourceAsset(string path) : LoadableAsset<AudioClip>
 {
     private readonly Assembly _assembly = Assembly.GetCallingAssembly();
 
-    /// <summary>
-    /// Loads the asset from embedded resources.
-    /// </summary>
-    /// <returns>The asset to load.</returns>
     /// <inheritdoc />
     public override AudioClip LoadAsset()
     {
