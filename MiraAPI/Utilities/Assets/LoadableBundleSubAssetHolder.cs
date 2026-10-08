@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using HarmonyLib;
+using System.Collections.Generic;
 using Il2CppInterop.Runtime;
 using Reactor.Utilities.Extensions;
 using UnityEngine;
@@ -47,35 +45,31 @@ public class LoadableBundleSubAssetHolder
     /// Attempts to load all of the sprite assets within the sprite sheet.
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown if the asset is not actually a sprite sheet.</exception>
-    [SuppressMessage("Style", "IDE0270:Use coalesce expression", Justification = "Null coalescing bypasses Unity lifetime checks.")]
     public void TryInit()
     {
-        if (SubSprites.Length == 0)
+        if (SubSprites.Length != 0)
+            return;
+
+        var newSprites = new List<Sprite>();
+
+        foreach (var name in spriteNames)
         {
-            var newSprites = Array.Empty<Sprite>();
+            var loadedAssets = bundle.LoadAssetWithSubAssets(name, Il2CppType.From(typeof(Sprite)))
+                ?? throw new InvalidOperationException($"INVALID ASSETS: {name}");
 
-            foreach (var name in spriteNames)
+            foreach (var obj in loadedAssets)
             {
-                var loadedAssets = bundle.LoadAssetWithSubAssets(name, Il2CppType.From(typeof(Sprite))).ToArray();
+                var img = obj.TryCast<Sprite>();
 
-                if (loadedAssets == null)
-                {
-                    throw new InvalidOperationException($"INVALID ASSETS: {name}");
-                }
+                if (img == null)
+                    continue;
 
-                foreach (var obj in loadedAssets)
-                {
-                    var img = obj.TryCast<Sprite>();
-                    if (img != null)
-                    {
-                        img.DontDestroy().DontUnload();
-                        newSprites = newSprites.AddToArray(img);
-                    }
-                }
+                img.DontDestroy().DontUnload();
+                newSprites.Add(img);
             }
-
-            SubSprites = newSprites;
         }
+
+        SubSprites = [.. newSprites];
     }
 
     /// <summary>
