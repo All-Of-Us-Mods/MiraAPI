@@ -109,6 +109,56 @@ public static class RoleGuidePatches
     public static void Awake(MatchInfoGuide __instance)
     {
         __instance.transitionOpen.targetSize = 1.3f;
+        if (_guide != __instance)
+        {
+            ResetState();
+        }
+    }
+
+    /// <summary>
+    /// Clears all cached state tied to a previous <see cref="MatchInfoGuide"/> instance.
+    /// Every game spawns a fresh guide, so anything we cached from the old one is a destroyed Unity object.
+    /// </summary>
+    private static void ResetState()
+    {
+        if (_populate != null)
+        {
+            Coroutines.Stop(_populate);
+            _populate = null;
+        }
+
+        if (_searchDebounce != null)
+        {
+            Coroutines.Stop(_searchDebounce);
+            _searchDebounce = null;
+        }
+
+        RoleEntries.Clear();
+        ModifierEntries.Clear();
+        _guide = null;
+        _uiInitialized = false;
+        _loading = false;
+        _appliedSearch = string.Empty;
+        _suppressSearchRefresh = false;
+        _titleText = null!;
+        _searchBoxTmp = null!;
+        _rolesScroller = null!;
+        _modifiersScroller = null!;
+        _advancedInfoTabScroller = null!;
+        _currentAdvancedTabObject = null!;
+        _loadingSpinner = null;
+        SearchIconButton = null!;
+        SearchSortingOrderButton = null!;
+        SearchSortingGroupButton = null!;
+        SearchSortingFilterButton = null!;
+        _searchIconIdle = null!;
+        _searchIconHover = null!;
+        _searchSortingOrderIdle = null!;
+        _searchSortingOrderHover = null!;
+        _searchSortingGroupIdle = null!;
+        _searchSortingGroupHover = null!;
+        _searchSortingFilterIdle = null!;
+        _searchSortingFilterHover = null!;
     }
 
     [HarmonyPostfix]
@@ -156,6 +206,11 @@ public static class RoleGuidePatches
     [HarmonyPatch(typeof(MatchInfoGuide), nameof(MatchInfoGuide.Open))]
     public static bool Open(MatchInfoGuide __instance)
     {
+        if (!HudManager.InstanceExists || !GameManager.Instance || !PlayerControl.LocalPlayer)
+        {
+            return false;
+        }
+
         if (HudManager.Instance.GameMenu.IsOpen || HudManager.Instance.Chat.IsOpenOrOpening)
         {
             return false;
@@ -311,7 +366,7 @@ public static class RoleGuidePatches
             SwitchGrouping,
             MiraAssets.GroupNoneIdleSprite,
             MiraAssets.GroupNoneHoverSprite,
-            new Vector3(1.8f, 0.765f, -0.1f),
+            new Vector3(1.7f, 0.765f, -0.1f),
             out _searchSortingGroupIdle,
             out _searchSortingGroupHover);
 
@@ -894,8 +949,16 @@ public static class RoleGuidePatches
         }
 
         _appliedSearch = string.Empty;
-        _searchIconIdle.sprite = MiraAssets.SearchIconIdleSprite;
-        _searchIconHover.sprite = MiraAssets.SearchIconHoverSprite;
+        if (_searchIconIdle)
+        {
+            _searchIconIdle.sprite = MiraAssets.SearchIconIdleSprite;
+        }
+
+        if (_searchIconHover)
+        {
+            _searchIconHover.sprite = MiraAssets.SearchIconHoverSprite;
+        }
+
         if (_searchBoxTmp && GetSearchText().Length > 0)
         {
             _suppressSearchRefresh = true;
@@ -1177,7 +1240,7 @@ public static class RoleGuidePatches
         }
         else
         {
-            var titleTxt = role.GetRoleName() +
+            var titleTxt = $"{role.GetTmpIcon()} {role.GetRoleName()}" +
                            $" ({TranslationController.Instance.GetString(role.TeamType is RoleTeamTypes.Crewmate ? StringNames.Crewmate : StringNames.Impostor)})";
             var description = TranslationController.Instance.GetString(role.BlurbNameLong);
             if (description.Contains("STRMISS"))

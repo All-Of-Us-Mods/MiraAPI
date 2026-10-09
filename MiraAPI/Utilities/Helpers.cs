@@ -11,6 +11,7 @@ using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.OptionTypes;
+using MiraAPI.Modifiers;
 using MiraAPI.Roles;
 using MiraAPI.Translation;
 using MiraAPI.Utilities.Assets;
@@ -689,6 +690,40 @@ public static class Helpers
     }
 
     /// <summary>
+    /// Returns the TextMeshPro sprite tag for a role, matching how role names are shown in-game.
+    /// Uses the role's <see cref="CustomRoleConfiguration.IconTmp"/> if set, otherwise falls back to the faction icon.
+    /// </summary>
+    /// <param name="role">The <see cref="RoleBehaviour"/>.</param>
+    /// <returns>A <c>&lt;sprite&gt;</c> rich text tag.</returns>
+    public static string GetTmpIcon(this RoleBehaviour role)
+    {
+        return role is ICustomRole custom ? custom.GetTmpIcon() : $"<sprite name=\"AmongUs.Role.{role.Role}\">";
+    }
+
+    /// <summary>
+    /// Returns the TextMeshPro sprite tag for a custom role, matching how role names are shown in-game.
+    /// Uses the role's <see cref="CustomRoleConfiguration.IconTmp"/> if set, otherwise falls back to the faction icon.
+    /// </summary>
+    /// <param name="role">The <see cref="ICustomRole"/>.</param>
+    /// <returns>A <c>&lt;sprite&gt;</c> rich text tag.</returns>
+    public static string GetTmpIcon(this ICustomRole role)
+    {
+        return role.Configuration.IconTmp
+            ? $"<sprite name=\"{role.Configuration.IconTmp.name}\">"
+            : $"<sprite name=\"AmongUs.Role.{role.Team}\">";
+    }
+
+    /// <summary>
+    /// Returns the TextMeshPro sprite tag for a modifier, or an empty string if it has no <see cref="BaseModifier.IconTmp"/>.
+    /// </summary>
+    /// <param name="modifier">The <see cref="BaseModifier"/>.</param>
+    /// <returns>A <c>&lt;sprite&gt;</c> rich text tag, or <see cref="string.Empty"/>.</returns>
+    public static string GetTmpIcon(this BaseModifier modifier)
+    {
+        return modifier.IconTmp ? $"<sprite name=\"{modifier.IconTmp.name}\">" : string.Empty;
+    }
+
+    /// <summary>
     /// Returns whether the <see cref="RoleBehaviour"/> is blacklisted from appearing and spawning. (Only applicable to vanilla roles).
     /// </summary>
     /// <param name="role">The <see cref="RoleBehaviour"/> to check.</param>
@@ -713,6 +748,7 @@ public static class Helpers
     public static GameObject CreateAdvancedWikiTab(MatchInfoGuide guide, string objName, string title, string description, TextMeshPro titleTmp, out TextMeshPro descriptionTmp)
     {
         var obj = new GameObject(objName);
+        titleTmp.richText = true;
         titleTmp.text = title;
         descriptionTmp = Object.Instantiate(guide.MatchInfoRolePanelPrefab.roleCount, obj.transform);
         descriptionTmp.fontSizeMin = descriptionTmp.fontSizeMax = descriptionTmp.fontSize = 2f;
@@ -738,6 +774,7 @@ public static class Helpers
     /// <param name="title">The title of the page.</param>
     /// <param name="description">The description of the page.</param>
     /// <param name="abilities">The abilities to display in a grid below the description.</param>
+    /// <param name="variableTextSizing">Whether to use variable text sizing for ability descriptions (allows different heights).</param>
     /// <returns>The <see cref="GameObject"/> of the wiki page.</returns>
     public static GameObject CreateAdvancedWikiPage(
         MatchInfoGuide guide,
@@ -746,7 +783,8 @@ public static class Helpers
         string objName,
         string title,
         string description,
-        IReadOnlyCollection<AdvancedWikiAbilityDescription> abilities)
+        IReadOnlyCollection<AdvancedWikiAbilityDescription> abilities,
+        bool variableTextSizing = false)
     {
         parent.ScrollToTop();
         var obj = CreateAdvancedWikiTab(
@@ -757,6 +795,7 @@ public static class Helpers
             titleTmp,
             out var desc);
         var num = 0;
+        var maxTextSize = 0f;
         if (abilities.Count != 0)
         {
             var grid = Object.Instantiate(parent.Inner, obj.transform);
@@ -768,7 +807,16 @@ public static class Helpers
             foreach (var ability in abilities)
             {
                 num++;
-                SetupAbilityPanel(Object.Instantiate(guide.MatchInfoRolePanelPrefab, grid), ability);
+                var panel = Object.Instantiate(guide.MatchInfoRolePanelPrefab, grid);
+                SetupAbilityPanel(panel, ability, variableTextSizing);
+                if (variableTextSizing)
+                {
+                    var descSize = panel.roleDescription.textBounds.size.y;
+                    if (maxTextSize < descSize)
+                    {
+                        maxTextSize = descSize;
+                    }
+                }
             }
 
             grid.localPosition = new Vector3(-3.9f, 1.1f - desc.textBounds.size.y, 0f);
@@ -777,11 +825,14 @@ public static class Helpers
 
         obj.transform.SetParent(parent.Inner.transform);
         obj.transform.localPosition = new Vector3(0f, 0f, 0f);
-        parent.SetYBoundsMax(Mathf.Clamp(desc.textBounds.size.y - 2 + Mathf.Ceil(num / 2f) * 1.45f, 0f, 999f));
+        var scrollHeight = variableTextSizing
+            ? (desc.textBounds.size.y - 2) + maxTextSize + 0.475f
+            : desc.textBounds.size.y - 2 + Mathf.Ceil(num / 2f) * 1.45f;
+        parent.SetYBoundsMax(Mathf.Clamp(scrollHeight, 0f, 999f));
         return obj;
     }
 
-    private static void SetupAbilityPanel(MatchInfoRolePanel panel, AdvancedWikiAbilityDescription ability)
+    private static void SetupAbilityPanel(MatchInfoRolePanel panel, AdvancedWikiAbilityDescription ability, bool variableTextSizing = false)
     {
         panel.roleCount.text = ability.AbilityType;
         panel.roleCount.transform.localPosition += new Vector3(-0.04f, 0);
@@ -790,6 +841,12 @@ public static class Helpers
         panel.roleDescription.text = ability.Description;
         panel.roleDescription.rectTransform.sizeDelta = new Vector2(2.601f, 0.8f);
         panel.roleDescription.transform.localPosition += new Vector3(0, -0.1f);
+        if (variableTextSizing)
+        {
+            panel.roleDescription.alignment = TextAlignmentOptions.Top;
+            panel.roleDescription.fontSizeMin = 1.5f;
+            panel.roleDescription.ForceMeshUpdate();
+        }
         panel.roleIcon.sprite = ability.Icon.LoadAsset();
         panel.roleIcon.SetSizeLimit(0.13f);
 

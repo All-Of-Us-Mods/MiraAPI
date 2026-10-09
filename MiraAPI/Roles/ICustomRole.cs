@@ -328,7 +328,7 @@ public interface ICustomRole : IOptionable
             titleText,
             parent,
             RoleNameLocale,
-            RoleName + $" ({RoleFactionTitle})",
+            $"{this.GetTmpIcon()} {RoleName} ({RoleFactionTitle})",
             RoleWikiDescription,
             abilities);
     }

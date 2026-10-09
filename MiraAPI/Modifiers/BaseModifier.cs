@@ -117,7 +117,7 @@ public abstract class BaseModifier : IOptionable
             titleText,
             parent,
             ModifierNameLocale,
-            ModifierName + $" ({ModifierCategoryTitle})",
+            $"{this.GetTmpIcon()} {ModifierName} ({ModifierCategoryTitle})".TrimStart(),
             ModifierWikiDescription,
             abilities);
     }
