@@ -168,6 +168,16 @@ public static class RoleGuidePatches
         Coroutines.Start(CoPreload(__instance));
     }
 
+    public static void TriggerPreload(MatchInfoGuide instance)
+    {
+        if (!instance || _populate != null)
+        {
+            return;
+        }
+
+        Coroutines.Start(CoPreload(instance));
+    }
+
     private static IEnumerator CoPreload(MatchInfoGuide instance)
     {
         while (instance && (!HudManager.InstanceExists || !GameManager.Instance))
@@ -801,9 +811,18 @@ public static class RoleGuidePatches
             return;
         }
 
-        var panel = Object.Instantiate(
-            _guide!.MatchInfoRolePanelPrefab,
-            entry.Modifier != null ? _modifiersScroller.Inner : _rolesScroller.Inner);
+        if (!_guide || !_guide!.MatchInfoRolePanelPrefab)
+        {
+            return;
+        }
+
+        var parent = entry.Modifier != null ? _modifiersScroller?.Inner : _rolesScroller?.Inner;
+        if (parent == null)
+        {
+            return;
+        }
+
+        var panel = Object.Instantiate(_guide!.MatchInfoRolePanelPrefab, parent);
         if (entry.Modifier != null)
         {
             panel.SetModifierPanel(entry.Modifier, entry.Amount, entry.Chance);
