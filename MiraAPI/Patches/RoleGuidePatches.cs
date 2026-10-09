@@ -202,6 +202,11 @@ public static class RoleGuidePatches
                 Initialize(__instance);
             }
 
+            if (RoleEntries.Count == 0)
+            {
+                BuildEntries();
+            }
+
             if (__instance.NormalModeSettings.Count == 0)
             {
                 __instance.CreateSettingsEntry(
@@ -523,7 +528,6 @@ public static class RoleGuidePatches
         settingButton.transform.localPosition = new Vector3(-3.6f, 0.056f, -0.2f);
         rolesButton.transform.localPosition = new Vector3(-3.6f, -0.544f, -0.2f);
         modifiersButton.transform.localPosition = new Vector3(-3.6f, -1.144f, -0.2f);
-        BuildEntries();
         _uiInitialized = true;
     }
 
