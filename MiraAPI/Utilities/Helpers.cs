@@ -775,7 +775,7 @@ public static class Helpers
             grid.localScale = new Vector3(1.3f, 1.3f, 1);
         }
 
-        obj.transform.SetParent(parent.Inner.transform, false);
+        obj.transform.SetParent(parent.Inner.transform);
         obj.transform.localPosition = new Vector3(0f, 0f, 0f);
         parent.SetYBoundsMax(Mathf.Clamp(desc.textBounds.size.y - 2 + Mathf.Ceil(num / 2f) * 1.45f, 0f, 999f));
         return obj;

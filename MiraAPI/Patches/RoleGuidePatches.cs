@@ -28,6 +28,7 @@ public static class RoleGuidePatches
 {
     private const int RolesTabIndex = 2;
     private const int ModifiersTabIndex = 3;
+    private const float SearchDebounceSeconds = 0.3f;
 
     private static readonly List<DetailedPanel> RoleEntries = [];
     private static readonly List<DetailedPanel> ModifierEntries = [];
@@ -51,6 +52,10 @@ public static class RoleGuidePatches
     private static GameObject _currentAdvancedTabObject;
     private static TextMeshPro _titleText;
     private static bool _suppressSearchRefresh;
+    private static IEnumerator? _searchDebounce;
+    private static string _appliedSearch = string.Empty;
+    private static float _openedAt;
+    private static bool _uiInitialized;
     private static MatchInfoGuide? _guide;
     private static IEnumerator? _populate;
     private static bool _loading;
@@ -125,7 +130,12 @@ public static class RoleGuidePatches
             yield break;
         }
 
-        Initialize(instance);
+        _guide = instance;
+        if (RoleEntries.Count == 0)
+        {
+            BuildEntries();
+        }
+
         if (_populate != null)
         {
             yield break;
@@ -187,7 +197,11 @@ public static class RoleGuidePatches
         var regGame = GameManager.Instance.TryCast<NormalGameManager>() != null;
         if (regGame)
         {
-            Initialize(__instance);
+            if (!_uiInitialized)
+            {
+                Initialize(__instance);
+            }
+
             if (__instance.NormalModeSettings.Count == 0)
             {
                 __instance.CreateSettingsEntry(
@@ -231,6 +245,7 @@ public static class RoleGuidePatches
         HidePanels(RoleEntries);
         HidePanels(ModifierEntries);
         __instance.MatchInfoParent.SetActive(true);
+        _openedAt = Time.time;
         if (__instance.ControllerSelectable.Count > 0)
         {
             var controllerManager = ControllerManager.Instance;
@@ -252,7 +267,7 @@ public static class RoleGuidePatches
 
     private static void Initialize(MatchInfoGuide instance)
     {
-        if (_guide == instance)
+        if (_uiInitialized)
         {
             return;
         }
@@ -265,11 +280,10 @@ public static class RoleGuidePatches
 
         _guide = instance;
         _loading = false;
-        RoleEntries.Clear();
-        ModifierEntries.Clear();
         var sortingOrderButton = Object.Instantiate(
             HudManager.Instance.SettingsButton,
             instance.TabButtons[2].transform.parent);
+        sortingOrderButton.gameObject.SetActive(true);
         SearchSortingOrderButton = sortingOrderButton.GetComponent<PassiveButton>();
         SetupSearchButton(
             SearchSortingOrderButton,
@@ -284,6 +298,7 @@ public static class RoleGuidePatches
         var sortingGroupButton = Object.Instantiate(
             sortingOrderButton,
             sortingOrderButton.transform.parent);
+        sortingGroupButton.gameObject.SetActive(true);
         SearchSortingGroupButton = sortingGroupButton.GetComponent<PassiveButton>();
         SetupSearchButton(
             SearchSortingGroupButton,
@@ -298,6 +313,7 @@ public static class RoleGuidePatches
         var sortingFilterButton = Object.Instantiate(
             sortingOrderButton,
             sortingOrderButton.transform.parent);
+        sortingFilterButton.gameObject.SetActive(true);
         SearchSortingFilterButton = sortingFilterButton.GetComponent<PassiveButton>();
         SetupSearchButton(
             SearchSortingFilterButton,
@@ -344,6 +360,7 @@ public static class RoleGuidePatches
         var searchIconButton = Object.Instantiate(
             sortingOrderButton,
             sortingOrderButton.transform.parent);
+        searchIconButton.gameObject.SetActive(true);
         SearchIconButton = searchIconButton.GetComponent<PassiveButton>();
         SetupSearchButton(
             SearchIconButton,
@@ -384,6 +401,7 @@ public static class RoleGuidePatches
         button.OnUp = true;
         var template = HudManager.Instance.Chat.freeChatField.textArea;
         _searchBoxTmp = Object.Instantiate(template, searchBox.transform);
+        _searchBoxTmp.gameObject.SetActive(true);
         _searchBoxTmp.name = "SearchField";
         _searchBoxTmp.transform.localPosition = Vector3.zero;
         _searchBoxTmp.OnEnter = new Button.ButtonClickedEvent();
@@ -462,7 +480,7 @@ public static class RoleGuidePatches
                     return;
                 }
 
-                RefreshActiveTab(true);
+                QueueSearchRefresh();
             }));
         searchBox.transform.localPosition = new Vector3(-1.438f, 0.756f, -0.2f);
 
@@ -506,6 +524,7 @@ public static class RoleGuidePatches
         rolesButton.transform.localPosition = new Vector3(-3.6f, -0.544f, -0.2f);
         modifiersButton.transform.localPosition = new Vector3(-3.6f, -1.144f, -0.2f);
         BuildEntries();
+        _uiInitialized = true;
     }
 
     private static void BuildEntries()
@@ -838,8 +857,39 @@ public static class RoleGuidePatches
         }
     }
 
+    private static void QueueSearchRefresh()
+    {
+        if (_searchDebounce != null)
+        {
+            Coroutines.Stop(_searchDebounce);
+        }
+
+        _searchDebounce = Coroutines.Start(CoSearchRefresh());
+    }
+
+    private static IEnumerator CoSearchRefresh()
+    {
+        yield return new WaitForSeconds(SearchDebounceSeconds);
+        _searchDebounce = null;
+        var text = GetSearchText();
+        if (text == _appliedSearch)
+        {
+            yield break;
+        }
+
+        _appliedSearch = text;
+        RefreshActiveTab(true);
+    }
+
     private static void ResetSearchBox()
     {
+        if (_searchDebounce != null)
+        {
+            Coroutines.Stop(_searchDebounce);
+            _searchDebounce = null;
+        }
+
+        _appliedSearch = string.Empty;
         _searchIconIdle.sprite = MiraAssets.SearchIconIdleSprite;
         _searchIconHover.sprite = MiraAssets.SearchIconHoverSprite;
         if (_searchBoxTmp && GetSearchText().Length > 0)
@@ -1074,8 +1124,24 @@ public static class RoleGuidePatches
         return true;
     }
 
+    private static IEnumerator CoDisplayAdvancedWikiLater(float delay, Action display)
+    {
+        yield return new WaitForSeconds(delay);
+        if (_guide && MatchInfoGuide.Instance && MatchInfoGuide.Instance.MatchInfoParent.activeSelf)
+        {
+            display();
+        }
+    }
+
     public static void DisplayAdvancedWiki(MatchInfoGuide instance, BaseModifier modifier)
     {
+        var remaining = _openedAt + instance.transitionOpen.duration - Time.time;
+        if (remaining > 0f)
+        {
+            Coroutines.Start(CoDisplayAdvancedWikiLater(remaining, () => DisplayAdvancedWiki(instance, modifier)));
+            return;
+        }
+
         var name = modifier.ModifierName;
         Info($"Opening advanced tab for {name}.");
         if (!TryPrepareAdvancedWiki(instance))
@@ -1088,6 +1154,13 @@ public static class RoleGuidePatches
 
     public static void DisplayAdvancedWiki(MatchInfoGuide instance, RoleBehaviour role)
     {
+        var remaining = _openedAt + instance.transitionOpen.duration - Time.time;
+        if (remaining > 0f)
+        {
+            Coroutines.Start(CoDisplayAdvancedWikiLater(remaining, () => DisplayAdvancedWiki(instance, role)));
+            return;
+        }
+
         Info($"Opening advanced tab for {role.GetRoleName()}.");
         if (!TryPrepareAdvancedWiki(instance))
         {
