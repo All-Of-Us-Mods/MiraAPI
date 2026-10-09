@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using AmongUs.GameOptions;
@@ -27,11 +28,9 @@ public static class RoleGuidePatches
 {
     private const int RolesTabIndex = 2;
     private const int ModifiersTabIndex = 3;
-    private const int RevealPanelsPerFrame = 6;
 
-    private static readonly Dictionary<RoleBehaviour, DetailedPanel> RolePanels = [];
-    private static readonly Dictionary<GameModifier, DetailedPanel> ModifierPanels = [];
-    private static readonly Dictionary<object, List<DetailedPanel>> LastOrders = [];
+    private static readonly List<DetailedPanel> RoleEntries = [];
+    private static readonly List<DetailedPanel> ModifierEntries = [];
 
     public static PassiveButton SearchIconButton;
     private static SpriteRenderer _searchIconIdle;
@@ -51,13 +50,10 @@ public static class RoleGuidePatches
     private static TextBoxTMP _searchBoxTmp;
     private static GameObject _currentAdvancedTabObject;
     private static TextMeshPro _titleText;
-    private static bool _rolesTabDirty;
-    private static bool _modifiersTabDirty;
-    private static IEnumerator? _panelCreation;
-    private static bool _panelsReady;
     private static bool _suppressSearchRefresh;
-    private static IEnumerator? _reveal;
-    private static bool _pendingRefresh;
+    private static MatchInfoGuide? _guide;
+    private static IEnumerator? _populate;
+    private static bool _loading;
     private static LoadingRing? _loadingSpinner;
     private static SortingFilter _sortFilter = SortingFilter.EnabledOnly;
     private static SortingMethod _sortMethod = SortingMethod.Alphabetical;
@@ -110,6 +106,41 @@ public static class RoleGuidePatches
         __instance.transitionOpen.targetSize = 1.3f;
     }
 
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(MatchInfoGuide), nameof(MatchInfoGuide.Awake))]
+    private static void AwakePostfix(MatchInfoGuide __instance)
+    {
+        Coroutines.Start(CoPreload(__instance));
+    }
+
+    private static IEnumerator CoPreload(MatchInfoGuide instance)
+    {
+        while (instance && (!HudManager.InstanceExists || !GameManager.Instance))
+        {
+            yield return null;
+        }
+
+        if (!instance || GameManager.Instance.TryCast<NormalGameManager>() == null)
+        {
+            yield break;
+        }
+
+        Initialize(instance);
+        if (_populate != null)
+        {
+            yield break;
+        }
+
+        _populate = Coroutines.Start(CoPreloadPanels());
+    }
+
+    private static IEnumerator CoPreloadPanels()
+    {
+        yield return CoForEachBudgeted(RoleEntries, PreloadPanel);
+        yield return CoForEachBudgeted(ModifierEntries, PreloadPanel);
+        _populate = null;
+    }
+
     [HarmonyPrefix]
     [HarmonyPriority(Priority.First)]
     [HarmonyPatch(typeof(MatchInfoGuide), nameof(MatchInfoGuide.Open))]
@@ -156,254 +187,38 @@ public static class RoleGuidePatches
         var regGame = GameManager.Instance.TryCast<NormalGameManager>() != null;
         if (regGame)
         {
+            Initialize(__instance);
             if (__instance.NormalModeSettings.Count == 0)
             {
-                var sortingOrderButton = Object.Instantiate(
-                    HudManager.Instance.SettingsButton,
-                    __instance.TabButtons[2].transform.parent);
-                SearchSortingOrderButton = sortingOrderButton.GetComponent<PassiveButton>();
-                SetupSearchButton(
-                    SearchSortingOrderButton,
-                    "SearchSortingOrderButton",
-                    SwitchMethod,
-                    MiraAssets.SortingAzIdleSprite,
-                    MiraAssets.SortingAzHoverSprite,
-                    new Vector3(2.4f, 0.765f, -0.1f),
-                    out _searchSortingOrderIdle,
-                    out _searchSortingOrderHover);
-
-                var sortingGroupButton = Object.Instantiate(
-                    sortingOrderButton,
-                    sortingOrderButton.transform.parent);
-                SearchSortingGroupButton = sortingGroupButton.GetComponent<PassiveButton>();
-                SetupSearchButton(
-                    SearchSortingGroupButton,
-                    "SearchSortingGroupButton",
-                    SwitchGrouping,
-                    MiraAssets.GroupNoneIdleSprite,
-                    MiraAssets.GroupNoneHoverSprite,
-                    new Vector3(1.8f, 0.765f, -0.1f),
-                    out _searchSortingGroupIdle,
-                    out _searchSortingGroupHover);
-
-                var sortingFilterButton = Object.Instantiate(
-                    sortingOrderButton,
-                    sortingOrderButton.transform.parent);
-                SearchSortingFilterButton = sortingFilterButton.GetComponent<PassiveButton>();
-                SetupSearchButton(
-                    SearchSortingFilterButton,
-                    "SearchSortingFilterButton",
-                    SwitchFilter,
-                    MiraAssets.VisibleOnIdleSprite,
-                    MiraAssets.VisibleOnHoverSprite,
-                    new Vector3(1f, 0.765f, -0.1f),
-                    out _searchSortingFilterIdle,
-                    out _searchSortingFilterHover);
-
-                __instance.numOfTabs = 4;
-                __instance.TabButtons[2].SelectButton(true);
-                ApplyPanelLayout(__instance);
-                __instance.MatchInfoRoleMaskArea.material.SetInt(PlayerMaterial.MaskLayer, 50);
-                __instance.matchInfoSettingsMaskArea.material.SetInt(PlayerMaterial.MaskLayer, 50);
-
-                var modifiersTab = Object.Instantiate(
-                    __instance.settingsTabs[RolesTabIndex],
-                    __instance.settingsTabs[RolesTabIndex].transform.parent);
-                modifiersTab.name = "ModifiersPanel";
-                modifiersTab.transform.FindChild("MaskArea")?.transform.localPosition =
-                    new Vector3(-0.0184f, 0.15f, -0.1f);
-                modifiersTab.transform.GetAllChildren()
-                    .First(x => x.name.Contains("BG_Gradient")).transform.localPosition = new Vector3(0, -0.62f, -5);
-                _modifiersScroller = modifiersTab.GetComponent<Scroller>();
-                __instance.settingsTabs.Add(modifiersTab);
-
-                var wikiTab = Object.Instantiate(
-                    __instance.settingsTabs[RolesTabIndex],
-                    __instance.settingsTabs[RolesTabIndex].transform.parent);
-                wikiTab.name = "AdvancedWikiPanels";
-                wikiTab.transform.FindChild("MaskArea")?.transform.localPosition = new Vector3(-0.0184f, 0.15f, -0.1f);
-                wikiTab.transform.GetAllChildren()
-                    .First(x => x.name.Contains("BG_Gradient")).transform.localPosition = new Vector3(0, -0.62f, -5);
-                _advancedInfoTabScroller = wikiTab.GetComponent<Scroller>();
-
-                var spinnerParent = __instance.settingsTabs[RolesTabIndex].transform.parent;
-                var spinnerPos = spinnerParent.InverseTransformPoint(__instance.MatchInfoRoleMaskArea.transform.position);
-                spinnerPos.z = -5f;
-                _loadingSpinner = LoadingRing.Create(spinnerParent, spinnerPos, 0.6f);
-                _loadingSpinner.GetComponent<SpriteRenderer>().color = MiraAssets.AcceptedTeal;
-
-                DisplayNormalRoleSettings(__instance, true);
-
-                var searchIconButton = Object.Instantiate(
-                    sortingOrderButton,
-                    sortingOrderButton.transform.parent);
-                SearchIconButton = searchIconButton.GetComponent<PassiveButton>();
-                SetupSearchButton(
-                    SearchIconButton,
-                    "SearchIconButton",
-                    ClearSearchText,
-                    MiraAssets.SearchIconIdleSprite,
-                    MiraAssets.SearchIconHoverSprite,
-                    new Vector3(-2.79f, 0.765f, -0.1f),
-                    out _searchIconIdle,
-                    out _searchIconHover);
-
-                var searchBox = Object.Instantiate(
-                    __instance.TabButtons[2].gameObject,
-                    __instance.TabButtons[2].transform.parent);
-                var searchButton = searchBox.GetComponent<MatchInfoGuideTabButton>();
-                var tmpText = searchButton.transform.GetChild(0).GetComponent<TextMeshPro>();
-                tmpText.GetComponent<TextTranslatorTMP>().Destroy();
-                tmpText.color = new Color(0.75f, 0.75f, 0.75f);
-                tmpText.text = string.Empty;
-                tmpText.fontSizeMax = 4;
-                tmpText.overflowMode = TextOverflowModes.Ellipsis;
-                tmpText.alignment = TextAlignmentOptions.Left;
-                tmpText.horizontalAlignment = HorizontalAlignmentOptions.Left;
-                tmpText.rectTransform.offsetMax = new Vector2(-0.1531f, 0.2972f);
-                tmpText.rectTransform.sizeDelta = new Vector2(3, 1);
-                tmpText.transform.localPosition = new Vector3(0, 0.0343f, -0.2f);
-                var inactive = searchButton.inactiveSprites;
-                var selected = searchButton.selectedSprites;
-                var highlight = searchButton.activeSprites;
-                var disabledSprite = searchButton.disabledSprites;
-                disabledSprite.GetComponent<SpriteRenderer>().size = new Vector2(3, 0.6f);
-                searchButton.Destroy();
-                inactive.gameObject.SetActive(false);
-                selected.gameObject.SetActive(false);
-                highlight.gameObject.SetActive(false);
-                disabledSprite.gameObject.SetActive(true);
-                var button = searchBox.AddComponent<PassiveButton>();
-                button.OnUp = true;
-                var template = HudManager.Instance.Chat.freeChatField.textArea;
-                _searchBoxTmp = Object.Instantiate(template, searchBox.transform);
-                _searchBoxTmp.name = "SearchField";
-                _searchBoxTmp.transform.localPosition = Vector3.zero;
-                _searchBoxTmp.OnEnter = new Button.ButtonClickedEvent();
-                _searchBoxTmp.OnChange = new Button.ButtonClickedEvent();
-                _searchBoxTmp.OnFocus = new Button.ButtonClickedEvent();
-                _searchBoxTmp.OnFocusLost = new Button.ButtonClickedEvent();
-                _searchBoxTmp.sendButtonGlyph = null;
-                _searchBoxTmp.SendOnFullChars = false;
-                _searchBoxTmp.ClearOnFocus = false;
-                _searchBoxTmp.characterLimit = 40;
-                _searchBoxTmp.AllowSymbols = true;
-                _searchBoxTmp.allowAllCharacters = true;
-                if (_searchBoxTmp.Background)
-                {
-                    _searchBoxTmp.Background.enabled = false;
-                }
-
-                var boxCollider = _searchBoxTmp.GetComponent<BoxCollider2D>();
-                if (boxCollider)
-                {
-                    boxCollider.size = new Vector2(3f, 0.6f);
-                    boxCollider.offset = Vector2.zero;
-                }
-
-                var outputText = _searchBoxTmp.outputText;
-                var textParent = tmpText.transform.parent;
-                outputText.transform.SetParent(textParent, false);
-                outputText.GetComponent<TextTranslatorTMP>()?.Destroy();
-                CopyTextLayout(tmpText, outputText);
-                outputText.color = new Color(0.75f, 0.75f, 0.75f);
-                outputText.text = string.Empty;
-
-                var placeholderText = _searchBoxTmp.placeholderText;
-                if (placeholderText)
-                {
-                    placeholderText.transform.SetParent(textParent, false);
-                    placeholderText.GetComponent<TextTranslatorTMP>()?.Destroy();
-                    CopyTextLayout(tmpText, placeholderText);
-                    placeholderText.color = new Color(0.55f, 0.55f, 0.55f);
-                    placeholderText.text = MiraLocaleManager.Get("MiraApi.Wiki.SearchPlaceholder");
-                    placeholderText.gameObject.SetActive(true);
-                }
-
-                if (_searchBoxTmp.Pipe)
-                {
-                    _searchBoxTmp.Pipe.transform.SetParent(textParent, false);
-                    _searchBoxTmp.Pipe.transform.localPosition = new Vector3(
-                        outputText.transform.localPosition.x -
-                        (outputText.rectTransform.sizeDelta.x * outputText.rectTransform.pivot.x),
-                        outputText.transform.localPosition.y + _searchBoxTmp.caretYOffset,
-                        -0.3f);
-                }
-
-                tmpText.gameObject.Destroy();
-
-                button.OnClick.AddListener((UnityAction)(() => { _searchBoxTmp.GiveFocus(); }));
-                button.OnMouseOver = new UnityEvent();
-                button.OnMouseOut = new UnityEvent();
-                _rolesScroller = __instance.settingsTabs[RolesTabIndex].GetComponent<Scroller>();
-                _searchBoxTmp.OnChange.AddListener(
-                    (UnityAction)(() =>
-                    {
-                        if (GetSearchText() != string.Empty)
-                        {
-                            _searchIconIdle.sprite = MiraAssets.SearchClearIdleSprite;
-                            _searchIconHover.sprite = MiraAssets.SearchClearHoverSprite;
-                        }
-                        else
-                        {
-                            _searchIconIdle.sprite = MiraAssets.SearchIconIdleSprite;
-                            _searchIconHover.sprite = MiraAssets.SearchIconHoverSprite;
-                        }
-
-                        if (_suppressSearchRefresh)
-                        {
-                            return;
-                        }
-
-                        RefreshActiveTab(true);
-                    }));
-                searchBox.transform.localPosition = new Vector3(-1.438f, 0.756f, -0.2f);
-
-                var playerButton = __instance.TabButtons[0];
-                SetupTabButton(
-                    playerButton,
-                    MiraAssets.WikiPlayersButtonIdleSprite,
-                    MiraAssets.WikiPlayersButtonOpenSprite,
-                    MiraAssets.WikiPlayersButtonHoverSprite);
-
-                var settingButton = __instance.TabButtons[1];
-                SetupTabButton(
-                    settingButton,
-                    MiraAssets.WikiSettingsButtonIdleSprite,
-                    MiraAssets.WikiSettingsButtonOpenSprite,
-                    MiraAssets.WikiSettingsButtonHoverSprite);
-
-                var rolesButton = __instance.TabButtons[2];
-                SetupTabButton(
-                    rolesButton,
-                    MiraAssets.WikiRolesButtonIdleSprite,
-                    MiraAssets.WikiRolesButtonOpenSprite,
-                    MiraAssets.WikiRolesButtonHoverSprite);
-                rolesButton.OnClick = new Button.ButtonClickedEvent();
-                rolesButton.OnClick.AddListener((Action)(() => OpenRolesTab()));
-
-                var modifiersButton = Object.Instantiate(
-                    __instance.TabButtons[2],
-                    __instance.TabButtons[2].transform.parent);
-                SetupTabButton(
-                    modifiersButton,
-                    MiraAssets.WikiRolesButtonIdleSprite,
-                    MiraAssets.WikiRolesButtonOpenSprite,
-                    MiraAssets.WikiRolesButtonHoverSprite);
-                modifiersButton.OnClick = new Button.ButtonClickedEvent();
-                modifiersButton.OnClick.AddListener((Action)(() => OpenModifiersTab()));
-                __instance.TabButtons.Add(modifiersButton);
-
-                playerButton.transform.localPosition = new Vector3(-3.6f, 0.656f, -0.2f);
-                settingButton.transform.localPosition = new Vector3(-3.6f, 0.056f, -0.2f);
-                rolesButton.transform.localPosition = new Vector3(-3.6f, -0.544f, -0.2f);
-                modifiersButton.transform.localPosition = new Vector3(-3.6f, -1.144f, -0.2f);
+                __instance.CreateSettingsEntry(
+                    StringNames.GameNumImpostors,
+                    GameManager.Instance.AllGameSettingData[StringNames.GameNumImpostors]
+                        .GetValueString(GameManager.Instance.LogicOptions.NumImpostors));
+                __instance.CreateSettingsEntry(
+                    StringNames.GameKillCooldown,
+                    GameManager.Instance.AllGameSettingData[StringNames.GameKillCooldown]
+                        .GetValueString(GameManager.Instance.LogicOptions.GetKillCooldown()));
+                __instance.CreateSettingsEntry(
+                    StringNames.GameEmergencyCooldown,
+                    GameManager.Instance.AllGameSettingData[StringNames.GameEmergencyCooldown]
+                        .GetValueString(GameManager.Instance.LogicOptions.GetEmergencyCooldown()));
+                __instance.CreateSettingsEntry(
+                    StringNames.GameVisualTasks,
+                    __instance.GetBoolString(GameManager.Instance.LogicOptions.GetVisualTasks()));
+                __instance.CreateSettingsEntry(
+                    StringNames.GameAnonymousVotes,
+                    __instance.GetBoolString(GameManager.Instance.LogicOptions.GetAnonymousVotes()));
+                __instance.CreateSettingsEntry(
+                    StringNames.GameConfirmImpostor,
+                    __instance.GetBoolString(GameManager.Instance.LogicOptions.GetConfirmImpostor()));
+                __instance.CreateSettingsEntry(
+                    StringNames.GameTaskBarMode,
+                    GameManager.Instance.LogicOptions.GetTaskBarMode().ToString());
+                __instance.CreatePlayerEntries();
+                __instance.rolesEnabledMessage.SetActive(false);
             }
-            else
-            {
-                DisplayNormalRoleSettings(__instance, false);
-                ClearSearchText();
-            }
+
+            ResetSearchBox();
         }
         else if (__instance.HnSModeSettings.Count == 0)
         {
@@ -425,7 +240,298 @@ public static class RoleGuidePatches
         }
 
         __instance.SetActiveTab(regGame ? RolesTabIndex : 0);
+        if (regGame)
+        {
+            OpenTab(RolesTabIndex);
+        }
+
         return false;
+    }
+
+    private static void Initialize(MatchInfoGuide instance)
+    {
+        if (_guide == instance)
+        {
+            return;
+        }
+
+        if (_populate != null)
+        {
+            Coroutines.Stop(_populate);
+            _populate = null;
+        }
+
+        _guide = instance;
+        _loading = false;
+        RoleEntries.Clear();
+        ModifierEntries.Clear();
+        var sortingOrderButton = Object.Instantiate(
+            HudManager.Instance.SettingsButton,
+            instance.TabButtons[2].transform.parent);
+        SearchSortingOrderButton = sortingOrderButton.GetComponent<PassiveButton>();
+        SetupSearchButton(
+            SearchSortingOrderButton,
+            "SearchSortingOrderButton",
+            SwitchMethod,
+            MiraAssets.SortingAzIdleSprite,
+            MiraAssets.SortingAzHoverSprite,
+            new Vector3(2.4f, 0.765f, -0.1f),
+            out _searchSortingOrderIdle,
+            out _searchSortingOrderHover);
+
+        var sortingGroupButton = Object.Instantiate(
+            sortingOrderButton,
+            sortingOrderButton.transform.parent);
+        SearchSortingGroupButton = sortingGroupButton.GetComponent<PassiveButton>();
+        SetupSearchButton(
+            SearchSortingGroupButton,
+            "SearchSortingGroupButton",
+            SwitchGrouping,
+            MiraAssets.GroupNoneIdleSprite,
+            MiraAssets.GroupNoneHoverSprite,
+            new Vector3(1.8f, 0.765f, -0.1f),
+            out _searchSortingGroupIdle,
+            out _searchSortingGroupHover);
+
+        var sortingFilterButton = Object.Instantiate(
+            sortingOrderButton,
+            sortingOrderButton.transform.parent);
+        SearchSortingFilterButton = sortingFilterButton.GetComponent<PassiveButton>();
+        SetupSearchButton(
+            SearchSortingFilterButton,
+            "SearchSortingFilterButton",
+            SwitchFilter,
+            MiraAssets.VisibleOnIdleSprite,
+            MiraAssets.VisibleOnHoverSprite,
+            new Vector3(1f, 0.765f, -0.1f),
+            out _searchSortingFilterIdle,
+            out _searchSortingFilterHover);
+
+        instance.numOfTabs = 4;
+        instance.TabButtons[2].SelectButton(true);
+        ApplyPanelLayout(instance);
+        instance.MatchInfoRoleMaskArea.material.SetInt(PlayerMaterial.MaskLayer, 50);
+        instance.matchInfoSettingsMaskArea.material.SetInt(PlayerMaterial.MaskLayer, 50);
+
+        var modifiersTab = Object.Instantiate(
+            instance.settingsTabs[RolesTabIndex],
+            instance.settingsTabs[RolesTabIndex].transform.parent);
+        modifiersTab.name = "ModifiersPanel";
+        modifiersTab.transform.FindChild("MaskArea")?.transform.localPosition =
+            new Vector3(-0.0184f, 0.15f, -0.1f);
+        modifiersTab.transform.GetAllChildren()
+            .First(x => x.name.Contains("BG_Gradient")).transform.localPosition = new Vector3(0, -0.62f, -5);
+        _modifiersScroller = modifiersTab.GetComponent<Scroller>();
+        instance.settingsTabs.Add(modifiersTab);
+
+        var wikiTab = Object.Instantiate(
+            instance.settingsTabs[RolesTabIndex],
+            instance.settingsTabs[RolesTabIndex].transform.parent);
+        wikiTab.name = "AdvancedWikiPanels";
+        wikiTab.transform.FindChild("MaskArea")?.transform.localPosition = new Vector3(-0.0184f, 0.15f, -0.1f);
+        wikiTab.transform.GetAllChildren()
+            .First(x => x.name.Contains("BG_Gradient")).transform.localPosition = new Vector3(0, -0.62f, -5);
+        _advancedInfoTabScroller = wikiTab.GetComponent<Scroller>();
+
+        var spinnerParent = instance.settingsTabs[RolesTabIndex].transform.parent;
+        var spinnerPos = spinnerParent.InverseTransformPoint(instance.MatchInfoRoleMaskArea.transform.position);
+        spinnerPos.z = -5f;
+        _loadingSpinner = LoadingRing.Create(spinnerParent, spinnerPos, 0.6f);
+        _loadingSpinner.GetComponent<SpriteRenderer>().color = MiraAssets.AcceptedTeal;
+
+        var searchIconButton = Object.Instantiate(
+            sortingOrderButton,
+            sortingOrderButton.transform.parent);
+        SearchIconButton = searchIconButton.GetComponent<PassiveButton>();
+        SetupSearchButton(
+            SearchIconButton,
+            "SearchIconButton",
+            ClearSearchText,
+            MiraAssets.SearchIconIdleSprite,
+            MiraAssets.SearchIconHoverSprite,
+            new Vector3(-2.79f, 0.765f, -0.1f),
+            out _searchIconIdle,
+            out _searchIconHover);
+
+        var searchBox = Object.Instantiate(
+            instance.TabButtons[2].gameObject,
+            instance.TabButtons[2].transform.parent);
+        var searchButton = searchBox.GetComponent<MatchInfoGuideTabButton>();
+        var tmpText = searchButton.transform.GetChild(0).GetComponent<TextMeshPro>();
+        tmpText.GetComponent<TextTranslatorTMP>().Destroy();
+        tmpText.color = new Color(0.75f, 0.75f, 0.75f);
+        tmpText.text = string.Empty;
+        tmpText.fontSizeMax = 4;
+        tmpText.overflowMode = TextOverflowModes.Ellipsis;
+        tmpText.alignment = TextAlignmentOptions.Left;
+        tmpText.horizontalAlignment = HorizontalAlignmentOptions.Left;
+        tmpText.rectTransform.offsetMax = new Vector2(-0.1531f, 0.2972f);
+        tmpText.rectTransform.sizeDelta = new Vector2(3, 1);
+        tmpText.transform.localPosition = new Vector3(0, 0.0343f, -0.2f);
+        var inactive = searchButton.inactiveSprites;
+        var selected = searchButton.selectedSprites;
+        var highlight = searchButton.activeSprites;
+        var disabledSprite = searchButton.disabledSprites;
+        disabledSprite.GetComponent<SpriteRenderer>().size = new Vector2(3, 0.6f);
+        searchButton.Destroy();
+        inactive.gameObject.SetActive(false);
+        selected.gameObject.SetActive(false);
+        highlight.gameObject.SetActive(false);
+        disabledSprite.gameObject.SetActive(true);
+        var button = searchBox.AddComponent<PassiveButton>();
+        button.OnUp = true;
+        var template = HudManager.Instance.Chat.freeChatField.textArea;
+        _searchBoxTmp = Object.Instantiate(template, searchBox.transform);
+        _searchBoxTmp.name = "SearchField";
+        _searchBoxTmp.transform.localPosition = Vector3.zero;
+        _searchBoxTmp.OnEnter = new Button.ButtonClickedEvent();
+        _searchBoxTmp.OnChange = new Button.ButtonClickedEvent();
+        _searchBoxTmp.OnFocus = new Button.ButtonClickedEvent();
+        _searchBoxTmp.OnFocusLost = new Button.ButtonClickedEvent();
+        _searchBoxTmp.sendButtonGlyph = null;
+        _searchBoxTmp.SendOnFullChars = false;
+        _searchBoxTmp.ClearOnFocus = false;
+        _searchBoxTmp.characterLimit = 40;
+        _searchBoxTmp.AllowSymbols = true;
+        _searchBoxTmp.allowAllCharacters = true;
+        if (_searchBoxTmp.Background)
+        {
+            _searchBoxTmp.Background.enabled = false;
+        }
+
+        var boxCollider = _searchBoxTmp.GetComponent<BoxCollider2D>();
+        if (boxCollider)
+        {
+            boxCollider.size = new Vector2(3f, 0.6f);
+            boxCollider.offset = Vector2.zero;
+        }
+
+        var outputText = _searchBoxTmp.outputText;
+        var textParent = tmpText.transform.parent;
+        outputText.transform.SetParent(textParent, false);
+        outputText.GetComponent<TextTranslatorTMP>()?.Destroy();
+        CopyTextLayout(tmpText, outputText);
+        outputText.color = new Color(0.75f, 0.75f, 0.75f);
+        outputText.text = string.Empty;
+
+        var placeholderText = _searchBoxTmp.placeholderText;
+        if (placeholderText)
+        {
+            placeholderText.transform.SetParent(textParent, false);
+            placeholderText.GetComponent<TextTranslatorTMP>()?.Destroy();
+            CopyTextLayout(tmpText, placeholderText);
+            placeholderText.color = new Color(0.55f, 0.55f, 0.55f);
+            placeholderText.text = MiraLocaleManager.Get("MiraApi.Wiki.SearchPlaceholder");
+            placeholderText.gameObject.SetActive(true);
+        }
+
+        if (_searchBoxTmp.Pipe)
+        {
+            _searchBoxTmp.Pipe.transform.SetParent(textParent, false);
+            _searchBoxTmp.Pipe.transform.localPosition = new Vector3(
+                outputText.transform.localPosition.x -
+                (outputText.rectTransform.sizeDelta.x * outputText.rectTransform.pivot.x),
+                outputText.transform.localPosition.y + _searchBoxTmp.caretYOffset,
+                -0.3f);
+        }
+
+        tmpText.gameObject.Destroy();
+
+        button.OnClick.AddListener((UnityAction)(() => { _searchBoxTmp.GiveFocus(); }));
+        button.OnMouseOver = new UnityEvent();
+        button.OnMouseOut = new UnityEvent();
+        _rolesScroller = instance.settingsTabs[RolesTabIndex].GetComponent<Scroller>();
+        _searchBoxTmp.OnChange.AddListener(
+            (UnityAction)(() =>
+            {
+                if (GetSearchText() != string.Empty)
+                {
+                    _searchIconIdle.sprite = MiraAssets.SearchClearIdleSprite;
+                    _searchIconHover.sprite = MiraAssets.SearchClearHoverSprite;
+                }
+                else
+                {
+                    _searchIconIdle.sprite = MiraAssets.SearchIconIdleSprite;
+                    _searchIconHover.sprite = MiraAssets.SearchIconHoverSprite;
+                }
+
+                if (_suppressSearchRefresh)
+                {
+                    return;
+                }
+
+                RefreshActiveTab(true);
+            }));
+        searchBox.transform.localPosition = new Vector3(-1.438f, 0.756f, -0.2f);
+
+        var playerButton = instance.TabButtons[0];
+        SetupTabButton(
+            playerButton,
+            MiraAssets.WikiPlayersButtonIdleSprite,
+            MiraAssets.WikiPlayersButtonOpenSprite,
+            MiraAssets.WikiPlayersButtonHoverSprite);
+
+        var settingButton = instance.TabButtons[1];
+        SetupTabButton(
+            settingButton,
+            MiraAssets.WikiSettingsButtonIdleSprite,
+            MiraAssets.WikiSettingsButtonOpenSprite,
+            MiraAssets.WikiSettingsButtonHoverSprite);
+
+        var rolesButton = instance.TabButtons[2];
+        SetupTabButton(
+            rolesButton,
+            MiraAssets.WikiRolesButtonIdleSprite,
+            MiraAssets.WikiRolesButtonOpenSprite,
+            MiraAssets.WikiRolesButtonHoverSprite);
+        rolesButton.OnClick = new Button.ButtonClickedEvent();
+        rolesButton.OnClick.AddListener((Action)(() => OpenRolesTab()));
+
+        var modifiersButton = Object.Instantiate(
+            instance.TabButtons[2],
+            instance.TabButtons[2].transform.parent);
+        SetupTabButton(
+            modifiersButton,
+            MiraAssets.WikiRolesButtonIdleSprite,
+            MiraAssets.WikiRolesButtonOpenSprite,
+            MiraAssets.WikiRolesButtonHoverSprite);
+        modifiersButton.OnClick = new Button.ButtonClickedEvent();
+        modifiersButton.OnClick.AddListener((Action)(() => OpenModifiersTab()));
+        instance.TabButtons.Add(modifiersButton);
+
+        playerButton.transform.localPosition = new Vector3(-3.6f, 0.656f, -0.2f);
+        settingButton.transform.localPosition = new Vector3(-3.6f, 0.056f, -0.2f);
+        rolesButton.transform.localPosition = new Vector3(-3.6f, -0.544f, -0.2f);
+        modifiersButton.transform.localPosition = new Vector3(-3.6f, -1.144f, -0.2f);
+        BuildEntries();
+    }
+
+    private static void BuildEntries()
+    {
+        foreach (var modifier in ModifierManager.Modifiers.OfType<GameModifier>())
+        {
+            ModifierEntries.Add(new DetailedPanel(
+                modifier.ModifierName,
+                modifier.ModifierCategoryTitle,
+                modifier.ParentMod.MiraPlugin.GetAbbreviatedModName(),
+                null,
+                modifier));
+        }
+
+        foreach (var roleBehaviour in CustomRoleManager.AllStoredRoleBehaviours.Where(x =>
+                     x.Role is not RoleTypes.Crewmate and not RoleTypes.Impostor and
+                     not RoleTypes.CrewmateGhost and not RoleTypes.ImpostorGhost))
+        {
+            var modId = roleBehaviour is ICustomRole custom
+                ? custom.ParentMod.MiraPlugin.GetAbbreviatedModName()
+                : "AU";
+            RoleEntries.Add(new DetailedPanel(
+                roleBehaviour.GetRoleName(),
+                roleBehaviour.GetCategoryTitle(),
+                modId,
+                roleBehaviour,
+                null));
+        }
     }
 
     private static void SetupTabButton(MatchInfoGuideTabButton button, Sprite inactive, Sprite selected, Sprite hover)
@@ -463,71 +569,37 @@ public static class RoleGuidePatches
         button.transform.GetChild(2).gameObject.SetActive(false);
     }
 
-    public static void OpenModifiersTab()
+    private static void OpenTab(int tabIndex)
     {
         _advancedInfoTabScroller?.gameObject.SetActive(false);
-        MatchInfoGuide.Instance.SetActiveTab(ModifiersTabIndex);
-        if (!_panelsReady)
+        MatchInfoGuide.Instance.SetActiveTab(tabIndex);
+        foreach (var entry in tabIndex == ModifiersTabIndex ? ModifierEntries : RoleEntries)
         {
-            if (_reveal != null)
+            if (entry.Panel && entry.Panel!.gameObject.activeSelf)
             {
-                StartReveal();
+                entry.Panel.gameObject.SetActive(false);
             }
-
-            return;
         }
 
-        if (_modifiersTabDirty)
-        {
-            foreach (var holder in ModifierPanels.Values)
-            {
-                if (holder.Panel.gameObject.activeSelf)
-                {
-                    holder.Panel.gameObject.SetActive(false);
-                }
-            }
-
-            StartReveal();
-        }
+        StartPopulate();
     }
 
-    public static void OpenRolesTab()
+    public static void OpenModifiersTab() => OpenTab(ModifiersTabIndex);
+
+    public static void OpenRolesTab() => OpenTab(RolesTabIndex);
+
+    public sealed class DetailedPanel(string title, string category, string modId, RoleBehaviour? role, GameModifier? modifier)
     {
-        _advancedInfoTabScroller?.gameObject.SetActive(false);
-        MatchInfoGuide.Instance.SetActiveTab(RolesTabIndex);
-        if (!_panelsReady)
-        {
-            if (_reveal != null)
-            {
-                StartReveal();
-            }
-
-            return;
-        }
-
-        if (_rolesTabDirty)
-        {
-            foreach (var holder in RolePanels.Values)
-            {
-                if (holder.Panel.gameObject.activeSelf)
-                {
-                    holder.Panel.gameObject.SetActive(false);
-                }
-            }
-
-            StartReveal();
-        }
-    }
-
-    public sealed class DetailedPanel(MatchInfoRolePanel panel, string title, string category, string modId)
-    {
-        public MatchInfoRolePanel Panel { get; } = panel;
+        public MatchInfoRolePanel? Panel { get; set; }
         public string Title { get; } = title;
         public string Category { get; } = category;
         public string ModId { get; } = modId;
+        public RoleBehaviour? Role { get; } = role;
+        public GameModifier? Modifier { get; } = modifier;
         public int Amount { get; set; }
         public int Chance { get; set; }
         public float Likelihood { get; set; }
+        public bool Visible { get; set; }
 
         public string GetSortKey(SortingGroups grouping)
         {
@@ -560,7 +632,8 @@ public static class RoleGuidePatches
         if (_loadingSpinner != null)
         {
             _loadingSpinner.gameObject.SetActive(
-                !_panelsReady && MatchInfoGuide.Instance.activeTabIndex is RolesTabIndex or ModifiersTabIndex);
+                _loading && MatchInfoGuide.Instance.activeTabIndex is RolesTabIndex or ModifiersTabIndex &&
+                !(_advancedInfoTabScroller && _advancedInfoTabScroller.gameObject.activeSelf));
         }
     }
 
@@ -569,94 +642,183 @@ public static class RoleGuidePatches
         return Mathf.Clamp(Mathf.Ceil(count / 2f) * 1.3f - 1.5f, 0f, 999f);
     }
 
-    private static void StartReveal()
+    private static void StartPopulate()
     {
-        if (_reveal != null)
+        if (_populate != null)
         {
-            Coroutines.Stop(_reveal);
+            Coroutines.Stop(_populate);
         }
 
-        _panelsReady = false;
+        _loading = true;
         UpdateSpinner();
-        _reveal = Coroutines.Start(CoRevealActiveTab());
+        _populate = Coroutines.Start(CoPopulate());
     }
 
-    private static IEnumerator CoRevealActiveTab()
+    private static IEnumerator CoPopulate()
     {
-        yield return null;
         var modifiers = IsModifiersTabActive;
-        var toShow = modifiers ? UpdateModifierPanels(out _) : UpdateRolePanels(out _);
-        var batch = 0;
-        foreach (var holder in toShow)
+        var entries = modifiers ? ModifierEntries : RoleEntries;
+        var shown = UpdateEntries(entries, modifiers);
+        yield return CoForEachBudgeted(shown, entry =>
         {
-            var panel = holder.Panel.gameObject;
-            if (panel.activeSelf)
+            EnsurePanel(entry);
+            entry.Panel!.transform.SetAsLastSibling();
+            if (!entry.Panel.gameObject.activeSelf)
             {
-                continue;
+                entry.Panel.gameObject.SetActive(true);
             }
+        });
+        _loading = false;
+        UpdateSpinner();
+        yield return CoForEachBudgeted(entries, EnsurePanel);
+        yield return CoForEachBudgeted(modifiers ? RoleEntries : ModifierEntries, PreloadPanel);
+        _populate = null;
+    }
 
-            panel.SetActive(true);
-            if (++batch >= RevealPanelsPerFrame)
+    private static IEnumerator CoForEachBudgeted<T>(IEnumerable<T> collection, Action<T> action)
+    {
+        var fps = Application.targetFrameRate > 0 ? Application.targetFrameRate : 60;
+        var budget = 1000L / (fps * 2);
+        var timer = new Stopwatch();
+        timer.Start();
+        foreach (var item in collection)
+        {
+            action(item);
+            if (timer.ElapsedMilliseconds > budget)
             {
-                batch = 0;
+                timer.Restart();
                 yield return null;
+                if (!_guide)
+                {
+                    yield break;
+                }
             }
         }
+    }
 
-        if (modifiers)
+    private static void EnsurePanel(DetailedPanel entry)
+    {
+        if (entry.Panel)
         {
-            _modifiersTabDirty = false;
-            _rolesTabDirty = true;
+            return;
+        }
+
+        var panel = Object.Instantiate(
+            _guide!.MatchInfoRolePanelPrefab,
+            entry.Modifier != null ? _modifiersScroller.Inner : _rolesScroller.Inner);
+        if (entry.Modifier != null)
+        {
+            panel.SetModifierPanel(entry.Modifier, entry.Amount, entry.Chance);
+            SetupPanelButton(panel, () => DisplayAdvancedWiki(MatchInfoGuide.Instance, entry.Modifier));
         }
         else
         {
-            _rolesTabDirty = false;
-            _modifiersTabDirty = true;
+            panel.SetRolePanel(entry.Role!, entry.Amount, entry.Chance);
+            SetupPanelButton(panel, () => DisplayAdvancedWiki(MatchInfoGuide.Instance, entry.Role!));
         }
 
-        _reveal = null;
-        _panelsReady = true;
-        UpdateSpinner();
-        if (_pendingRefresh)
+        panel.gameObject.SetActive(false);
+        entry.Panel = panel;
+    }
+
+    private static void PreloadPanel(DetailedPanel entry)
+    {
+        if (!entry.Panel)
         {
-            _pendingRefresh = false;
-            RefreshActiveTab(true);
+            ComputeCounts(entry);
+            EnsurePanel(entry);
         }
+    }
+
+    private static void ComputeCounts(DetailedPanel entry)
+    {
+        int amount;
+        int chance;
+        bool? forceShow = null;
+        bool isHidden;
+        if (entry.Modifier is { } modifier)
+        {
+            amount = modifier.GetAmountPerGame();
+            chance = modifier.GetAssignmentChance();
+            forceShow = modifier.ForceShowModifierOnWiki;
+            isHidden = !modifier.CanSpawnOnCurrentMode() || modifier.GetDescription() == string.Empty;
+        }
+        else
+        {
+            var role = entry.Role!;
+            if (role is ICustomRole custom)
+            {
+                amount = custom.GetCount().GetValueOrDefault(0);
+                chance = custom.GetChance().GetValueOrDefault(0);
+                forceShow = custom.ForceShowRoleOnWiki;
+            }
+            else
+            {
+                amount = GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetNumPerGame(role.Role);
+                chance = GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetChancePerGame(role.Role);
+            }
+
+            isHidden = (role is ICustomRole custom2 && !custom2.CanSpawnOnCurrentMode()) ||
+                       (Enum.IsDefined(role.Role) && role.IsRoleBlacklisted());
+        }
+
+        entry.Amount = amount;
+        entry.Chance = chance;
+        entry.Likelihood = amount * chance;
+        entry.Visible = ShouldShowPanel(forceShow, amount == 0 || chance == 0, isHidden);
+    }
+
+    private static List<DetailedPanel> UpdateEntries(List<DetailedPanel> entries, bool modifiers)
+    {
+        foreach (var entry in entries)
+        {
+            ComputeCounts(entry);
+            if (entry.Panel)
+            {
+                SetPanelCount(entry.Panel!, entry.Amount, entry.Chance, entry.ModId);
+                if (!entry.Visible && entry.Panel!.gameObject.activeSelf)
+                {
+                    entry.Panel.gameObject.SetActive(false);
+                }
+            }
+        }
+
+        var searchText = GetSearchText();
+        var sorted = entries.Where(p => p.Visible)
+            .OrderByDescending(p => p.Title.Equals(searchText, StringComparison.OrdinalIgnoreCase))
+            .ThenByDescending(p =>
+                p.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                p.Category.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+        var shown = (_sortMethod is SortingMethod.Alphabetical
+                ? sorted.ThenBy(p => p.GetSortKey(_sortGrouping))
+                : sorted.ThenByDescending(p => p.GetSortKey(_sortGrouping)))
+            .ToList();
+
+        var instance = MatchInfoGuide.Instance;
+        if (modifiers)
+        {
+            _modifiersScroller.SetYBoundsMax(GetGridScrollBounds(shown.Count));
+            /*instance.rolesEnabledMessage.SetActive(shown.Count == 0);*/
+        }
+        else
+        {
+            instance.MatchInfoRoleScroller.SetYBoundsMax(GetGridScrollBounds(shown.Count));
+            instance.rolesEnabledMessage.SetActive(shown.Count == 0);
+        }
+
+        return shown;
     }
 
     private static void RefreshActiveTab(bool scrollToTop)
     {
-        if (!_panelsReady)
+        StartPopulate();
+        if (scrollToTop)
         {
-            _pendingRefresh = true;
-            return;
-        }
-
-        if (IsModifiersTabActive)
-        {
-            ToggleModifierVisibility();
-            if (scrollToTop)
-            {
-                _modifiersScroller.ScrollToTop();
-            }
-
-            _modifiersTabDirty = false;
-            _rolesTabDirty = true;
-        }
-        else
-        {
-            ToggleRoleVisibility();
-            if (scrollToTop)
-            {
-                _rolesScroller.ScrollToTop();
-            }
-
-            _rolesTabDirty = false;
-            _modifiersTabDirty = true;
+            (IsModifiersTabActive ? _modifiersScroller : _rolesScroller).ScrollToTop();
         }
     }
 
-    public static void ClearSearchText()
+    private static void ResetSearchBox()
     {
         _searchIconIdle.sprite = MiraAssets.SearchIconIdleSprite;
         _searchIconHover.sprite = MiraAssets.SearchIconHoverSprite;
@@ -666,7 +828,11 @@ public static class RoleGuidePatches
             _searchBoxTmp.Clear();
             _suppressSearchRefresh = false;
         }
+    }
 
+    public static void ClearSearchText()
+    {
+        ResetSearchBox();
         RefreshActiveTab(true);
     }
 
@@ -797,299 +963,6 @@ public static class RoleGuidePatches
         passiveButton.OnClick.AddListener(onClick);
     }
 
-    public static void DisplayNormalRoleSettings(MatchInfoGuide instance, bool reset)
-    {
-        if (reset)
-        {
-            RolePanels.Clear();
-            ModifierPanels.Clear();
-            instance.CreateSettingsEntry(
-                StringNames.GameNumImpostors,
-                GameManager.Instance.AllGameSettingData[StringNames.GameNumImpostors]
-                    .GetValueString(GameManager.Instance.LogicOptions.NumImpostors));
-            instance.CreateSettingsEntry(
-                StringNames.GameKillCooldown,
-                GameManager.Instance.AllGameSettingData[StringNames.GameKillCooldown]
-                    .GetValueString(GameManager.Instance.LogicOptions.GetKillCooldown()));
-            instance.CreateSettingsEntry(
-                StringNames.GameEmergencyCooldown,
-                GameManager.Instance.AllGameSettingData[StringNames.GameEmergencyCooldown]
-                    .GetValueString(GameManager.Instance.LogicOptions.GetEmergencyCooldown()));
-            instance.CreateSettingsEntry(
-                StringNames.GameVisualTasks,
-                instance.GetBoolString(GameManager.Instance.LogicOptions.GetVisualTasks()));
-            instance.CreateSettingsEntry(
-                StringNames.GameAnonymousVotes,
-                instance.GetBoolString(GameManager.Instance.LogicOptions.GetAnonymousVotes()));
-            instance.CreateSettingsEntry(
-                StringNames.GameConfirmImpostor,
-                instance.GetBoolString(GameManager.Instance.LogicOptions.GetConfirmImpostor()));
-            instance.CreateSettingsEntry(
-                StringNames.GameTaskBarMode,
-                GameManager.Instance.LogicOptions.GetTaskBarMode().ToString());
-            instance.CreatePlayerEntries();
-
-            _panelsReady = false;
-            instance.rolesEnabledMessage.SetActive(false);
-            if (_panelCreation != null)
-            {
-                Coroutines.Stop(_panelCreation);
-            }
-
-            _panelCreation = Coroutines.Start(CoCreatePanels(instance));
-            LastOrders.Clear();
-        }
-        else
-        {
-            foreach (var holder in RolePanels.Values.Concat(ModifierPanels.Values))
-            {
-                if (holder.Panel.gameObject.activeSelf)
-                {
-                    holder.Panel.gameObject.SetActive(false);
-                }
-            }
-
-            StartReveal();
-        }
-
-        _advancedInfoTabScroller?.gameObject.SetActive(false);
-        _rolesTabDirty = true;
-        _modifiersTabDirty = true;
-        UpdateSpinner();
-    }
-
-    private static IEnumerator CoCreatePanels(MatchInfoGuide instance)
-    {
-        var inner = instance.settingsTabs[RolesTabIndex].GetComponent<Scroller>().Inner;
-        yield return ModifierManager.Modifiers.OfType<GameModifier>().CoLoopWithBudget(modifier =>
-        {
-            var panel = Object.Instantiate(
-                instance.MatchInfoRolePanelPrefab,
-                _modifiersScroller.Inner);
-            var amount =
-                modifier.GetAmountPerGame();
-            var chance =
-                modifier.GetAssignmentChance();
-            panel.SetModifierPanel(
-                modifier,
-                amount,
-                chance);
-            SetupPanelButton(panel, () => { DisplayAdvancedWiki(instance, modifier); });
-            ModifierPanels.Add(
-                modifier,
-                new DetailedPanel(
-                    panel,
-                    modifier.ModifierName,
-                    modifier.ModifierCategoryTitle,
-                    modifier.ParentMod.MiraPlugin.GetAbbreviatedModName()));
-            panel.gameObject.SetActive(false);
-        });
-        yield return CustomRoleManager.AllStoredRoleBehaviours.Where(roleBehaviour =>
-            roleBehaviour.Role is not RoleTypes.Crewmate and not RoleTypes.Impostor and
-            not RoleTypes.CrewmateGhost and
-            not RoleTypes.ImpostorGhost).CoLoopWithBudget(roleBehaviour =>
-        {
-            var panel = Object.Instantiate(
-                instance.MatchInfoRolePanelPrefab,
-                inner);
-            string abbreviation;
-            int amount;
-            int chance;
-            if (roleBehaviour is ICustomRole custom)
-            {
-                amount = custom.GetCount().GetValueOrDefault(0);
-                chance = custom.GetChance().GetValueOrDefault(0);
-                abbreviation = custom.ParentMod.MiraPlugin.GetAbbreviatedModName();
-            }
-            else
-            {
-                abbreviation = "AU";
-                amount =
-                    GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetNumPerGame(roleBehaviour.Role);
-                chance =
-                    GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetChancePerGame(roleBehaviour.Role);
-            }
-
-            panel.SetRolePanel(
-                roleBehaviour,
-                amount,
-                chance);
-            SetupPanelButton(panel, () => { DisplayAdvancedWiki(instance, roleBehaviour); });
-            RolePanels.Add(
-                roleBehaviour,
-                new DetailedPanel(
-                    panel,
-                    roleBehaviour.GetRoleName(),
-                    roleBehaviour.GetCategoryTitle(),
-                    abbreviation));
-            panel.gameObject.SetActive(false);
-        });
-
-        _panelCreation = null;
-        yield return CoRevealActiveTab();
-    }
-
-
-    public static void ToggleModifierVisibility()
-    {
-        var toShow = UpdateModifierPanels(out _);
-        foreach (var holder in toShow)
-        {
-            if (!holder.Panel.gameObject.activeSelf)
-            {
-                holder.Panel.gameObject.SetActive(true);
-            }
-        }
-    }
-
-    private static List<DetailedPanel> UpdateModifierPanels(out int shownCount)
-    {
-        var toShow = new List<DetailedPanel>();
-        var num = 0;
-        foreach (var (modifier, holder) in ModifierPanels)
-        {
-            var panel = holder.Panel;
-            var amount =
-                modifier.GetAmountPerGame();
-            var chance =
-                modifier.GetAssignmentChance();
-            SetPanelCount(panel, amount, chance, holder.ModId);
-            holder.Amount = amount;
-            holder.Chance = chance;
-            holder.Likelihood = amount * chance;
-            var isRoleDisabled = amount == 0 || chance == 0;
-            var isRoleNotVisible = !modifier.CanSpawnOnCurrentMode() || modifier.GetDescription() == string.Empty;
-            var show = ShouldShowPanel(modifier.ForceShowModifierOnWiki, isRoleDisabled, isRoleNotVisible);
-            if (!show)
-            {
-                if (panel.gameObject.activeSelf)
-                {
-                    panel.gameObject.SetActive(false);
-                }
-
-                continue;
-            }
-
-            toShow.Add(holder);
-            num++;
-        }
-
-        SortAllModifiers(GetSearchText());
-
-        /*var instance = MatchInfoGuide.Instance;
-        instance.rolesEnabledMessage.SetActive(num == 0);*/
-
-        _modifiersScroller.SetYBoundsMax(GetGridScrollBounds(num));
-        shownCount = num;
-        return toShow;
-    }
-
-    public static void ToggleRoleVisibility()
-    {
-        var toShow = UpdateRolePanels(out _);
-        foreach (var holder in toShow)
-        {
-            if (!holder.Panel.gameObject.activeSelf)
-            {
-                holder.Panel.gameObject.SetActive(true);
-            }
-        }
-    }
-
-    private static List<DetailedPanel> UpdateRolePanels(out int shownCount)
-    {
-        var toShow = new List<DetailedPanel>();
-        var num = 0;
-        foreach (var (roleData, holder) in RolePanels)
-        {
-            var panel = holder.Panel;
-            int amount;
-            int chance;
-            bool? forceShow = null;
-            if (roleData is ICustomRole custom)
-            {
-                amount = custom.GetCount().GetValueOrDefault(0);
-                chance = custom.GetChance().GetValueOrDefault(0);
-                forceShow = custom.ForceShowRoleOnWiki;
-            }
-            else
-            {
-                amount =
-                    GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetNumPerGame(roleData.Role);
-                chance =
-                    GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetChancePerGame(roleData.Role);
-            }
-
-            SetPanelCount(panel, amount, chance, holder.ModId);
-            holder.Amount = amount;
-            holder.Chance = chance;
-            holder.Likelihood = amount * chance;
-            var isRoleDisabled = amount == 0 || chance == 0;
-            var isRoleNotVisible = (roleData is ICustomRole custom2 &&
-                                    !custom2.CanSpawnOnCurrentMode()) ||
-                                   (Enum.IsDefined(roleData.Role) && roleData.IsRoleBlacklisted());
-            var show = ShouldShowPanel(forceShow, isRoleDisabled, isRoleNotVisible);
-            if (!show)
-            {
-                if (panel.gameObject.activeSelf)
-                {
-                    panel.gameObject.SetActive(false);
-                }
-
-                continue;
-            }
-
-            toShow.Add(holder);
-            num++;
-        }
-
-        SortAllRoles(GetSearchText());
-
-        var instance = MatchInfoGuide.Instance;
-        instance.rolesEnabledMessage.SetActive(num == 0);
-
-        instance.MatchInfoRoleScroller.SetYBoundsMax(GetGridScrollBounds(num));
-        shownCount = num;
-        return toShow;
-    }
-
-    public static void SortAllRoles(string searchText)
-    {
-        SortPanels(RolePanels, searchText);
-    }
-
-    public static void SortAllModifiers(string searchText)
-    {
-        SortPanels(ModifierPanels, searchText);
-    }
-
-    private static void SortPanels<T>(Dictionary<T, DetailedPanel> panels, string searchText)
-        where T : notnull
-    {
-        var sorted = panels.Values
-            .OrderByDescending(p => p.Title.Equals(searchText, StringComparison.OrdinalIgnoreCase))
-            .ThenByDescending(p =>
-                p.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-                p.Category.Contains(searchText, StringComparison.OrdinalIgnoreCase));
-
-        var ordered = _sortMethod is SortingMethod.Alphabetical
-            ? sorted.ThenBy(p => p.GetSortKey(_sortGrouping))
-            : sorted.ThenByDescending(p => p.GetSortKey(_sortGrouping));
-
-        var orderedList = ordered.ToList();
-        if (LastOrders.TryGetValue(panels, out var lastOrder) && lastOrder.SequenceEqual(orderedList))
-        {
-            return;
-        }
-
-        foreach (var panel in orderedList)
-        {
-            panel.Panel.transform.SetAsLastSibling();
-        }
-
-        LastOrders[panels] = orderedList;
-    }
-
     [HarmonyPrefix]
     [HarmonyPriority(Priority.First)]
     [HarmonyPatch(typeof(MatchInfoGuide), nameof(MatchInfoGuide.CreatePlayerEntries))]
@@ -1164,7 +1037,6 @@ public static class RoleGuidePatches
     {
         instance.settingsTabs[RolesTabIndex].SetActive(false);
         _modifiersScroller?.gameObject.SetActive(false);
-        UpdateSpinner();
         if (_currentAdvancedTabObject)
         {
             _currentAdvancedTabObject.SetActive(false);
@@ -1178,6 +1050,7 @@ public static class RoleGuidePatches
         }
 
         _advancedInfoTabScroller.gameObject.SetActive(true);
+        UpdateSpinner();
         return true;
     }
 
