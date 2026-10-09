@@ -228,6 +228,8 @@ public static class RoleGuidePatches
         }
 
         PlayerControl.LocalPlayer.NetTransform.Halt();
+        HidePanels(RoleEntries);
+        HidePanels(ModifierEntries);
         __instance.MatchInfoParent.SetActive(true);
         if (__instance.ControllerSelectable.Count > 0)
         {
@@ -242,7 +244,7 @@ public static class RoleGuidePatches
         __instance.SetActiveTab(regGame ? RolesTabIndex : 0);
         if (regGame)
         {
-            OpenTab(RolesTabIndex);
+            OpenTab(RolesTabIndex, __instance.transitionOpen.duration);
         }
 
         return false;
@@ -569,19 +571,23 @@ public static class RoleGuidePatches
         button.transform.GetChild(2).gameObject.SetActive(false);
     }
 
-    private static void OpenTab(int tabIndex)
+    private static void OpenTab(int tabIndex, float delay = 0f)
     {
         _advancedInfoTabScroller?.gameObject.SetActive(false);
         MatchInfoGuide.Instance.SetActiveTab(tabIndex);
-        foreach (var entry in tabIndex == ModifiersTabIndex ? ModifierEntries : RoleEntries)
+        HidePanels(tabIndex == ModifiersTabIndex ? ModifierEntries : RoleEntries);
+        StartPopulate(delay);
+    }
+
+    private static void HidePanels(List<DetailedPanel> entries)
+    {
+        foreach (var entry in entries)
         {
             if (entry.Panel && entry.Panel!.gameObject.activeSelf)
             {
                 entry.Panel.gameObject.SetActive(false);
             }
         }
-
-        StartPopulate();
     }
 
     public static void OpenModifiersTab() => OpenTab(ModifiersTabIndex);
@@ -642,7 +648,7 @@ public static class RoleGuidePatches
         return Mathf.Clamp(Mathf.Ceil(count / 2f) * 1.3f - 1.5f, 0f, 999f);
     }
 
-    private static void StartPopulate()
+    private static void StartPopulate(float delay = 0f)
     {
         if (_populate != null)
         {
@@ -651,11 +657,25 @@ public static class RoleGuidePatches
 
         _loading = true;
         UpdateSpinner();
-        _populate = Coroutines.Start(CoPopulate());
+        _populate = Coroutines.Start(CoPopulate(delay));
     }
 
-    private static IEnumerator CoPopulate()
+    private static IEnumerator CoPopulate(float delay)
     {
+        if (delay > 0f)
+        {
+            yield return new WaitForSeconds(delay);
+        }
+        else
+        {
+            yield return null;
+        }
+
+        if (!_guide)
+        {
+            yield break;
+        }
+
         var modifiers = IsModifiersTabActive;
         var entries = modifiers ? ModifierEntries : RoleEntries;
         var shown = UpdateEntries(entries, modifiers);
@@ -678,7 +698,7 @@ public static class RoleGuidePatches
     private static IEnumerator CoForEachBudgeted<T>(IEnumerable<T> collection, Action<T> action)
     {
         var fps = Application.targetFrameRate > 0 ? Application.targetFrameRate : 60;
-        var budget = 1000L / (fps * 2);
+        var budget = Math.Max(1L, 1000L / (fps * 4));
         var timer = new Stopwatch();
         timer.Start();
         foreach (var item in collection)
