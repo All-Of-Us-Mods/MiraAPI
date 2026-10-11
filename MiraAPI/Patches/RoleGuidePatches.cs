@@ -33,15 +33,19 @@ public static class RoleGuidePatches
     private static readonly List<DetailedPanel> RoleEntries = [];
     private static readonly List<DetailedPanel> ModifierEntries = [];
 
+    public static GameObject SearchComponentContainer;
     public static PassiveButton SearchIconButton;
     private static SpriteRenderer _searchIconIdle;
     private static SpriteRenderer _searchIconHover;
+    public static TextMeshPro OrderSortingTmp;
     public static PassiveButton SearchSortingOrderButton;
     private static SpriteRenderer _searchSortingOrderIdle;
     private static SpriteRenderer _searchSortingOrderHover;
+    public static TextMeshPro GroupSortingTmp;
     public static PassiveButton SearchSortingGroupButton;
     private static SpriteRenderer _searchSortingGroupIdle;
     private static SpriteRenderer _searchSortingGroupHover;
+    public static TextMeshPro FilterSortingTmp;
     public static PassiveButton SearchSortingFilterButton;
     private static SpriteRenderer _searchSortingFilterIdle;
     private static SpriteRenderer _searchSortingFilterHover;
@@ -589,6 +593,27 @@ public static class RoleGuidePatches
         modifiersButton.OnClick.AddListener((Action)(() => OpenModifiersTab()));
         instance.TabButtons.Add(modifiersButton);
 
+        OrderSortingTmp = Object.Instantiate(
+            _titleText,
+            sortingOrderButton.transform);
+        OrderSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.OrderLabel");
+        OrderSortingTmp.fontSize = OrderSortingTmp.fontSizeMax = 3f;
+        OrderSortingTmp.alignment = TextAlignmentOptions.Center;
+        OrderSortingTmp.horizontalAlignment = HorizontalAlignmentOptions.Center;
+        OrderSortingTmp.transform.localPosition = new Vector3(-0.65f, 0.4f, 0);
+
+        GroupSortingTmp = Object.Instantiate(
+            OrderSortingTmp,
+            sortingGroupButton.transform);
+        OrderSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.GroupingLabel");
+        GroupSortingTmp.transform.localPosition = new Vector3(-0.65f, 0.4f, 0);
+
+        FilterSortingTmp = Object.Instantiate(
+            OrderSortingTmp,
+            sortingFilterButton.transform);
+        FilterSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.FilterLabel");
+        FilterSortingTmp.transform.localPosition = new Vector3(-0.65f, 0.4f, 0);
+
         playerButton.transform.localPosition = new Vector3(-3.6f, 0.656f, -0.2f);
         settingButton.transform.localPosition = new Vector3(-3.6f, 0.056f, -0.2f);
         rolesButton.transform.localPosition = new Vector3(-3.6f, -0.544f, -0.2f);
@@ -822,7 +847,7 @@ public static class RoleGuidePatches
             return;
         }
 
-        var panel = Object.Instantiate(_guide!.MatchInfoRolePanelPrefab, parent);
+        var panel = Object.Instantiate(_guide.MatchInfoRolePanelPrefab, parent);
         if (entry.Modifier != null)
         {
             panel.SetModifierPanel(entry.Modifier, entry.Amount, entry.Chance);
