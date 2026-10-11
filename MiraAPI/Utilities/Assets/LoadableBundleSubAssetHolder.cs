@@ -38,10 +38,11 @@ public class LoadableBundleSubAssetHolder(string[] names, AssetBundle bundle)
             return;
 
         var newSprites = new List<Sprite>();
+        var type = Il2CppType.From(typeof(Sprite));
 
         foreach (var name in names)
         {
-            var loadedAssets = bundle.LoadAssetWithSubAssets(name, Il2CppType.From(typeof(Sprite)))
+            var loadedAssets = bundle.LoadAssetWithSubAssets(name, type)
                 ?? throw new InvalidOperationException($"INVALID ASSETS: {name}");
 
             foreach (var obj in loadedAssets)
