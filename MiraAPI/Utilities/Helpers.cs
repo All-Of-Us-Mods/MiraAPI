@@ -824,10 +824,10 @@ public static class Helpers
         }
 
         obj.transform.SetParent(parent.Inner.transform);
-        obj.transform.localPosition = new Vector3(0f, 0f, 0f);
+        obj.transform.localPosition = new Vector3(0f, 0.5f, 0f);
         var scrollHeight = variableTextSizing
-            ? (desc.textBounds.size.y - 2) + maxTextSize + 0.475f
-            : desc.textBounds.size.y - 2 + Mathf.Ceil(num / 2f) * 1.45f;
+            ? (desc.textBounds.size.y - 2.5f) + maxTextSize + 0.475f
+            : desc.textBounds.size.y - 2.5f + Mathf.Ceil(num / 2f) * 1.45f;
         parent.SetYBoundsMax(Mathf.Clamp(scrollHeight, 0f, 999f));
         return obj;
     }

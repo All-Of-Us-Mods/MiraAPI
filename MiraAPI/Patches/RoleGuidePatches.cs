@@ -354,9 +354,14 @@ public static class RoleGuidePatches
 
         _guide = instance;
         _loading = false;
+        SearchComponentContainer = new GameObject();
+        SearchComponentContainer.transform.SetParent(instance.MatchInfoParent.transform);
+        SearchComponentContainer.transform.localPosition = Vector3.zero;
+        instance.MatchInfoParent.transform.GetChild(1).transform.SetParent(SearchComponentContainer.transform);
+
         var sortingOrderButton = Object.Instantiate(
             HudManager.Instance.SettingsButton,
-            instance.TabButtons[2].transform.parent);
+            SearchComponentContainer.transform);
         sortingOrderButton.gameObject.SetActive(true);
         SearchSortingOrderButton = sortingOrderButton.GetComponent<PassiveButton>();
         SetupSearchButton(
@@ -371,7 +376,7 @@ public static class RoleGuidePatches
 
         var sortingGroupButton = Object.Instantiate(
             sortingOrderButton,
-            sortingOrderButton.transform.parent);
+            SearchComponentContainer.transform);
         sortingGroupButton.gameObject.SetActive(true);
         SearchSortingGroupButton = sortingGroupButton.GetComponent<PassiveButton>();
         SetupSearchButton(
@@ -386,7 +391,7 @@ public static class RoleGuidePatches
 
         var sortingFilterButton = Object.Instantiate(
             sortingOrderButton,
-            sortingOrderButton.transform.parent);
+            SearchComponentContainer.transform);
         sortingFilterButton.gameObject.SetActive(true);
         SearchSortingFilterButton = sortingFilterButton.GetComponent<PassiveButton>();
         SetupSearchButton(
@@ -420,10 +425,18 @@ public static class RoleGuidePatches
             instance.settingsTabs[RolesTabIndex],
             instance.settingsTabs[RolesTabIndex].transform.parent);
         wikiTab.name = "AdvancedWikiPanels";
-        wikiTab.transform.FindChild("MaskArea")?.transform.localPosition = new Vector3(-0.0184f, 0.15f, -0.1f);
+        var wikiMask = wikiTab.transform.FindChild("MaskArea");
+        wikiMask.transform.localPosition = new Vector3(-0.0184f, 0.425f, -0.1f);
+        wikiMask.transform.localScale = new Vector3(1, 1.3f, 1);
         wikiTab.transform.GetAllChildren()
             .First(x => x.name.Contains("BG_Gradient")).transform.localPosition = new Vector3(0, -0.62f, -5);
         _advancedInfoTabScroller = wikiTab.GetComponent<Scroller>();
+        var wikiScrollHitbox = wikiTab.transform.FindChild("Hitbox");
+        _advancedInfoTabScroller.ScrollbarYBounds.max = 1.2f;
+        wikiScrollHitbox.GetComponent<BoxCollider2D>().size = new Vector2(5.75f, 2.4f);
+        wikiScrollHitbox.transform.localPosition += new Vector3(0, 0.3f);
+        _advancedInfoTabScroller.ScrollbarY.trackGraphic.transform.localPosition = new Vector3(2.8364f, 0.3649f, -0.2f);
+        _advancedInfoTabScroller.ScrollbarY.trackGraphic.transform.localScale = new Vector3(0.0234f, 2.068f, 0.5598f);
 
         var spinnerParent = instance.settingsTabs[RolesTabIndex].transform.parent;
         var spinnerPos = spinnerParent.InverseTransformPoint(instance.MatchInfoRoleMaskArea.transform.position);
@@ -448,7 +461,7 @@ public static class RoleGuidePatches
 
         var searchBox = Object.Instantiate(
             instance.TabButtons[2].gameObject,
-            instance.TabButtons[2].transform.parent);
+            SearchComponentContainer.transform);
         var searchButton = searchBox.GetComponent<MatchInfoGuideTabButton>();
         var tmpText = searchButton.transform.GetChild(0).GetComponent<TextMeshPro>();
         tmpText.GetComponent<TextTranslatorTMP>().Destroy();
@@ -1211,6 +1224,7 @@ public static class RoleGuidePatches
         }
 
         _advancedInfoTabScroller?.gameObject.SetActive(false);
+        SearchComponentContainer?.SetActive(true);
         UpdateSpinner();
     }
 
@@ -1222,6 +1236,11 @@ public static class RoleGuidePatches
         {
             _currentAdvancedTabObject.SetActive(false);
             _currentAdvancedTabObject.Destroy();
+        }
+
+        if (SearchComponentContainer)
+        {
+            SearchComponentContainer.SetActive(false);
         }
 
         if (_advancedInfoTabScroller == null)
