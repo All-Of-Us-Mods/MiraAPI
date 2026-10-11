@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using HarmonyLib;
+using System.Collections.Generic;
 using Il2CppInterop.Runtime;
 using Reactor.Utilities.Extensions;
 using UnityEngine;
@@ -11,11 +9,10 @@ namespace MiraAPI.Utilities.Assets;
 /// <summary>
 /// A utility class for loading multiple assets from an <see cref="AssetBundle"/>.
 /// </summary>
-public class LoadableBundleSubAssetHolder
+/// <param name="names">The name of the assets to pull from.</param>
+/// <param name="bundle">The <see cref="AssetBundle"/> that contains the assets.</param>
+public class LoadableBundleSubAssetHolder(string[] names, AssetBundle bundle)
 {
-    private readonly string[] spriteNames;
-    private readonly AssetBundle bundle;
-
     /// <summary>
     /// Gets the sprites contained within the asset.
     /// </summary>
@@ -24,58 +21,42 @@ public class LoadableBundleSubAssetHolder
     /// <summary>
     /// Initializes a new instance of the <see cref="LoadableBundleSubAssetHolder"/> class.
     /// </summary>
-    /// <param name="names">The name of the assets to pull from.</param>
-    /// <param name="bundle">The <see cref="AssetBundle"/> that contains the assets.</param>
-    public LoadableBundleSubAssetHolder(string[] names, AssetBundle bundle)
-    {
-        this.bundle = bundle;
-        spriteNames = names;
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="LoadableBundleSubAssetHolder"/> class.
-    /// </summary>
     /// <param name="name">The name of the asset.</param>
     /// <param name="bundle">The <see cref="AssetBundle"/> that contains the assets.</param>
     public LoadableBundleSubAssetHolder(string name, AssetBundle bundle)
+        : this([name], bundle)
     {
-        this.bundle = bundle;
-        spriteNames = [name];
     }
 
     /// <summary>
     /// Attempts to load all of the sprite assets within the sprite sheet.
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown if the asset is not actually a sprite sheet.</exception>
-    [SuppressMessage("Style", "IDE0270:Use coalesce expression", Justification = "Null coalescing bypasses Unity lifetime checks.")]
     public void TryInit()
     {
-        if (SubSprites.Length == 0)
+        if (SubSprites.Length != 0)
+            return;
+
+        var newSprites = new List<Sprite>();
+
+        foreach (var name in names)
         {
-            var newSprites = Array.Empty<Sprite>();
+            var loadedAssets = bundle.LoadAssetWithSubAssets(name, Il2CppType.From(typeof(Sprite)))
+                ?? throw new InvalidOperationException($"INVALID ASSETS: {name}");
 
-            foreach (var name in spriteNames)
+            foreach (var obj in loadedAssets)
             {
-                var loadedAssets = bundle.LoadAssetWithSubAssets(name, Il2CppType.From(typeof(Sprite))).ToArray();
+                var img = obj.TryCast<Sprite>();
 
-                if (loadedAssets == null)
-                {
-                    throw new InvalidOperationException($"INVALID ASSETS: {name}");
-                }
+                if (img == null)
+                    continue;
 
-                foreach (var obj in loadedAssets)
-                {
-                    var img = obj.TryCast<Sprite>();
-                    if (img != null)
-                    {
-                        img.DontDestroy().DontUnload();
-                        newSprites = newSprites.AddToArray(img);
-                    }
-                }
+                img.DontDestroy().DontUnload();
+                newSprites.Add(img);
             }
-
-            SubSprites = newSprites;
         }
+
+        SubSprites = [.. newSprites];
     }
 
     /// <summary>
