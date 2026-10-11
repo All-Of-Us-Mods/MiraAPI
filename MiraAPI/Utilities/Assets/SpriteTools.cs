@@ -48,7 +48,13 @@ public static class SpriteTools
     public static Sprite LoadSpriteFromPath(string resourcePath, Assembly assembly, float pixelsPerUnit)
     {
         var tex = LoadTextureFromResourcePath(resourcePath, assembly);
-        var sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), pixelsPerUnit);
+        var sprite = Sprite.Create(
+            tex,
+            new Rect(0, 0, tex.width, tex.height),
+            new Vector2(0.5f, 0.5f),
+            pixelsPerUnit,
+            0,
+            SpriteMeshType.FullRect);
         sprite.name = resourcePath;
         return sprite;
     }

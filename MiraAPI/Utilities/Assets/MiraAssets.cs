@@ -19,7 +19,7 @@ public static class MiraAssets
             new Vector2(0.5f, 0.5f),
             100f,
             0U,
-            SpriteMeshType.Tight,
+            SpriteMeshType.FullRect,
             new Vector4(20, 20, 20, 20));
 
         RoundedBox = new LoadableAssetWrapper<Sprite>(boxSprite);

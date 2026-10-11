@@ -6,16 +6,19 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.OptionTypes;
+using MiraAPI.Modifiers;
 using MiraAPI.Roles;
 using MiraAPI.Translation;
 using MiraAPI.Utilities.Assets;
 using Rewired;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using MethodBase = System.Reflection.MethodBase;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
@@ -27,83 +30,67 @@ namespace MiraAPI.Utilities;
 /// </summary>
 public static class Helpers
 {
+    private static readonly Regex TrailingZeroRegex = new(@"\.0+(?!\d)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+
     public static ReadOnlyCollection<IModdedOption>? GetModdedOptionsForType(Type classType)
     {
-        var optionGroups =
-            AccessTools.Field(typeof(ModdedOptionsManager), "Groups").GetValue(null) as List<AbstractOptionGroup>;
+        var group = ModdedOptionsManager.Groups.FirstOrDefault(x => x.OptionableType == classType);
 
-        return optionGroups?.FirstOrDefault(x => x.OptionableType == classType)?.Children;
+        return group?.Children;
     }
 
     public static string GetOptionsText(Type classType)
     {
-        var options = GetModdedOptionsForType(classType);
+        var group = ModdedOptionsManager.Groups.FirstOrDefault(x => x.OptionableType == classType);
+        var options = group?.Children;
+        var summaryProvider = group as ISummarizedOptions;
+        var hiddenKeys = summaryProvider?.WikiHiddenOptionKeys;
+
         if (options == null)
         {
             return string.Empty;
         }
 
-        ISummarizedOptions? summaryProvider;
-        IReadOnlySet<StringNames>? hiddenKeys;
-        try
-        {
-            var optionGroups =
-                AccessTools.Field(typeof(ModdedOptionsManager), "Groups").GetValue(null) as List<AbstractOptionGroup>;
-            summaryProvider =
-                optionGroups?.FirstOrDefault(x => x.OptionableType == classType) as ISummarizedOptions;
-            hiddenKeys = summaryProvider?.WikiHiddenOptionKeys;
-        }
-        catch
-        {
-            summaryProvider = null;
-            hiddenKeys = null;
-        }
-
-        var builder = new StringBuilder();
-        builder.AppendLine(
-            MiraApiPlugin.Culture,
-            $"\n<size=50%> \n</size><b><color=#29D7B5>{MiraLocaleManager.Get("Options")}</color></b>");
-
+        var lines = new List<string>();
         var insertedSummary = false;
         foreach (var option in options)
         {
-            if (!insertedSummary && summaryProvider != null && hiddenKeys != null)
+            StringNames? key = option switch
             {
-                StringNames? key = option switch
-                {
-                    ModdedToggleOption t => t.StringName,
-                    ModdedEnumOption e => e.StringName,
-                    ModdedNumberOption n => n.StringName,
-                    _ => null,
-                };
-                if (key.HasValue && hiddenKeys.Contains(key.Value))
-                {
-                    foreach (var line in summaryProvider.GetWikiOptionSummaryLines())
-                    {
-                        if (!string.IsNullOrWhiteSpace(line))
-                        {
-                            builder.AppendLine(line);
-                        }
-                    }
+                ModdedToggleOption t => t.StringName,
+                ModdedEnumOption e => e.StringName,
+                ModdedNumberOption n => n.StringName,
+                _ => null,
+            };
 
-                    insertedSummary = true;
+            if (!insertedSummary && summaryProvider != null && hiddenKeys != null &&
+                key.HasValue && hiddenKeys.Contains(key.Value))
+            {
+                foreach (var line in summaryProvider.GetWikiOptionSummaryLines())
+                {
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        lines.Add(line);
+                    }
                 }
+
+                insertedSummary = true;
+            }
+
+            if (!option.Visible())
+            {
+                continue;
+            }
+
+            if (key.HasValue && hiddenKeys?.Contains(key.Value) == true)
+            {
+                continue;
             }
 
             switch (option)
             {
                 case ModdedToggleOption toggleOption:
-                    if (!toggleOption.Visible())
-                    {
-                        continue;
-                    }
-
-                    if (hiddenKeys != null && hiddenKeys.Contains(toggleOption.StringName))
-                    {
-                        continue;
-                    }
-
-                    builder.AppendLine(
+                    lines.Add(
                         TranslationController.Instance.GetString(toggleOption.StringName) + ": " +
                         toggleOption.Value);
                     break;
@@ -116,63 +103,47 @@ public static class Helpers
                     builder.AppendLine(enumOption.Title + ": " + enumOption.Values[enumOption.Value]);
                     break;*/
                 case ModdedEnumOption enumOption:
-                    if (!enumOption.Visible())
-                    {
-                        continue;
-                    }
-
-                    if (hiddenKeys != null && hiddenKeys.Contains(enumOption.StringName))
-                    {
-                        continue;
-                    }
-
-                    builder.AppendLine(
+                    lines.Add(
                         TranslationController.Instance.GetString(enumOption.StringName) + ": " +
                         MiraLocaleManager.Get(
                             enumOption.Values[enumOption.Value],
                             enumOption.Values[enumOption.Value]));
                     break;
                 case ModdedNumberOption numberOption:
-                    if (!numberOption.Visible())
-                    {
-                        continue;
-                    }
-
-                    if (hiddenKeys != null && hiddenKeys.Contains(numberOption.StringName))
-                    {
-                        continue;
-                    }
-
-                    var optionStr = numberOption.Data.GetValueString(numberOption.Value);
-                    if (optionStr.Contains(".000"))
-                    {
-                        optionStr = optionStr.Replace(".000", string.Empty);
-                    }
-                    else if (optionStr.Contains(".00"))
-                    {
-                        optionStr = optionStr.Replace(".00", string.Empty);
-                    }
-                    else if (optionStr.Contains(".0"))
-                    {
-                        optionStr = optionStr.Replace(".0", string.Empty);
-                    }
+                    var optionStr = TrailingZeroRegex.Replace(
+                        numberOption.Data.GetValueString(numberOption.Value),
+                        string.Empty);
 
                     var title = TranslationController.Instance.GetString(numberOption.StringName);
                     if (numberOption is { NegativeWordValue: not "#", Value: -1 })
                     {
-                        builder.AppendLine(title + $": {numberOption.NegativeWordValue}");
+                        lines.Add(title + $": {numberOption.NegativeWordValue}");
                     }
                     else if (numberOption is { ZeroWordValue: not "#", Value: 0 })
                     {
-                        builder.AppendLine(title + $": {numberOption.ZeroWordValue}");
+                        lines.Add(title + $": {numberOption.ZeroWordValue}");
                     }
                     else
                     {
-                        builder.AppendLine(title + ": " + optionStr);
+                        lines.Add(title + ": " + optionStr);
                     }
 
                     break;
             }
+        }
+
+        if (lines.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        var builder = new StringBuilder();
+        builder.AppendLine(
+            MiraApiPlugin.Culture,
+            $"\n<size=50%> \n</size><b><color=#29D7B5>{MiraLocaleManager.Get("Options")}</color></b>");
+        foreach (var line in lines)
+        {
+            builder.AppendLine(line);
         }
 
         return builder.ToString();
@@ -719,6 +690,40 @@ public static class Helpers
     }
 
     /// <summary>
+    /// Returns the TextMeshPro sprite tag for a role, matching how role names are shown in-game.
+    /// Uses the role's <see cref="CustomRoleConfiguration.IconTmp"/> if set, otherwise falls back to the faction icon.
+    /// </summary>
+    /// <param name="role">The <see cref="RoleBehaviour"/>.</param>
+    /// <returns>A <c>&lt;sprite&gt;</c> rich text tag.</returns>
+    public static string GetTmpIcon(this RoleBehaviour role)
+    {
+        return role is ICustomRole custom ? custom.GetTmpIcon() : $"<sprite name=\"AmongUs.Role.{role.Role}\">";
+    }
+
+    /// <summary>
+    /// Returns the TextMeshPro sprite tag for a custom role, matching how role names are shown in-game.
+    /// Uses the role's <see cref="CustomRoleConfiguration.IconTmp"/> if set, otherwise falls back to the faction icon.
+    /// </summary>
+    /// <param name="role">The <see cref="ICustomRole"/>.</param>
+    /// <returns>A <c>&lt;sprite&gt;</c> rich text tag.</returns>
+    public static string GetTmpIcon(this ICustomRole role)
+    {
+        return role.Configuration.IconTmp
+            ? $"<sprite name=\"{role.Configuration.IconTmp.name}\">"
+            : $"<sprite name=\"AmongUs.Role.{role.Team}\">";
+    }
+
+    /// <summary>
+    /// Returns the TextMeshPro sprite tag for a modifier, or an empty string if it has no <see cref="BaseModifier.IconTmp"/>.
+    /// </summary>
+    /// <param name="modifier">The <see cref="BaseModifier"/>.</param>
+    /// <returns>A <c>&lt;sprite&gt;</c> rich text tag, or <see cref="string.Empty"/>.</returns>
+    public static string GetTmpIcon(this BaseModifier modifier)
+    {
+        return modifier.IconTmp ? $"<sprite name=\"{modifier.IconTmp.name}\">" : string.Empty;
+    }
+
+    /// <summary>
     /// Returns whether the <see cref="RoleBehaviour"/> is blacklisted from appearing and spawning. (Only applicable to vanilla roles).
     /// </summary>
     /// <param name="role">The <see cref="RoleBehaviour"/> to check.</param>
@@ -743,6 +748,7 @@ public static class Helpers
     public static GameObject CreateAdvancedWikiTab(MatchInfoGuide guide, string objName, string title, string description, TextMeshPro titleTmp, out TextMeshPro descriptionTmp)
     {
         var obj = new GameObject(objName);
+        titleTmp.richText = true;
         titleTmp.text = title;
         descriptionTmp = Object.Instantiate(guide.MatchInfoRolePanelPrefab.roleCount, obj.transform);
         descriptionTmp.fontSizeMin = descriptionTmp.fontSizeMax = descriptionTmp.fontSize = 2f;
@@ -756,5 +762,98 @@ public static class Helpers
         descriptionTmp.transform.localPosition = new Vector3(0, 1.125f, 0);
         descriptionTmp.ForceMeshUpdate();
         return obj;
+    }
+
+    /// <summary>
+    /// Creates a full advanced wiki page with a title, a description, and an optional grid of ability panels.
+    /// </summary>
+    /// <param name="guide">The guide object.</param>
+    /// <param name="titleTmp">The <see cref="TextMeshPro"/> instance of the title.</param>
+    /// <param name="parent">The <see cref="Scroller"/> the page should be parented to.</param>
+    /// <param name="objName">The name of the page object.</param>
+    /// <param name="title">The title of the page.</param>
+    /// <param name="description">The description of the page.</param>
+    /// <param name="abilities">The abilities to display in a grid below the description.</param>
+    /// <param name="variableTextSizing">Whether to use variable text sizing for ability descriptions (allows different heights).</param>
+    /// <returns>The <see cref="GameObject"/> of the wiki page.</returns>
+    public static GameObject CreateAdvancedWikiPage(
+        MatchInfoGuide guide,
+        TextMeshPro titleTmp,
+        Scroller parent,
+        string objName,
+        string title,
+        string description,
+        IReadOnlyCollection<AdvancedWikiAbilityDescription> abilities,
+        bool variableTextSizing = false)
+    {
+        parent.ScrollToTop();
+        var obj = CreateAdvancedWikiTab(
+            guide,
+            objName,
+            title,
+            description,
+            titleTmp,
+            out var desc);
+        var num = 0;
+        var maxTextSize = 0f;
+        if (abilities.Count != 0)
+        {
+            var grid = Object.Instantiate(parent.Inner, obj.transform);
+            var layoutGroup = grid.GetComponent<GridLayoutGroup>();
+            layoutGroup.startAxis = GridLayoutGroup.Axis.Vertical;
+            layoutGroup.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            layoutGroup.spacing = new Vector2(0.75f, 0.4f);
+            grid.DestroyChildren();
+            foreach (var ability in abilities)
+            {
+                num++;
+                var panel = Object.Instantiate(guide.MatchInfoRolePanelPrefab, grid);
+                SetupAbilityPanel(panel, ability, variableTextSizing);
+                if (variableTextSizing)
+                {
+                    var descSize = panel.roleDescription.textBounds.size.y;
+                    if (maxTextSize < descSize)
+                    {
+                        maxTextSize = descSize;
+                    }
+                }
+            }
+
+            grid.localPosition = new Vector3(-3.9f, 1.1f - desc.textBounds.size.y, 0f);
+            grid.localScale = new Vector3(1.3f, 1.3f, 1);
+        }
+
+        obj.transform.SetParent(parent.Inner.transform);
+        obj.transform.localPosition = new Vector3(0f, 0f, 0f);
+        var scrollHeight = variableTextSizing
+            ? (desc.textBounds.size.y - 2) + maxTextSize + 0.475f
+            : desc.textBounds.size.y - 2 + Mathf.Ceil(num / 2f) * 1.45f;
+        parent.SetYBoundsMax(Mathf.Clamp(scrollHeight, 0f, 999f));
+        return obj;
+    }
+
+    private static void SetupAbilityPanel(MatchInfoRolePanel panel, AdvancedWikiAbilityDescription ability, bool variableTextSizing = false)
+    {
+        panel.roleCount.text = ability.AbilityType;
+        panel.roleCount.transform.localPosition += new Vector3(-0.04f, 0);
+        panel.roleName.text = ability.Name;
+        panel.roleName.transform.localPosition += new Vector3(-0.04f, 0);
+        panel.roleDescription.text = ability.Description;
+        panel.roleDescription.rectTransform.sizeDelta = new Vector2(2.601f, 0.8f);
+        panel.roleDescription.transform.localPosition += new Vector3(0, -0.1f);
+        if (variableTextSizing)
+        {
+            panel.roleDescription.alignment = TextAlignmentOptions.Top;
+            panel.roleDescription.fontSizeMin = 1.5f;
+            panel.roleDescription.ForceMeshUpdate();
+        }
+        panel.roleIcon.sprite = ability.Icon.LoadAsset();
+        panel.roleIcon.SetSizeLimit(0.13f);
+
+        panel.roleIcon.material.SetInt(PlayerMaterial.MaskLayer, 50);
+        panel.roleName.fontMaterial.SetFloat(panel.STENCIL_NAME, 50f);
+        panel.roleDescription.fontMaterial.SetFloat(panel.STENCIL_NAME, 50f);
+        panel.roleCount.fontMaterial.SetFloat(panel.STENCIL_NAME, 50f);
+        panel.roleIcon.transform.localScale = new Vector3(3.5f, 3.5f, 1f);
     }
 }

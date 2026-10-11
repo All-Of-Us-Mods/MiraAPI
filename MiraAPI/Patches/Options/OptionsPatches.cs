@@ -4,7 +4,6 @@ using MiraAPI.Roles;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using UnityEngine;
-using Object = Il2CppSystem.Object;
 
 namespace MiraAPI.Patches.Options;
 
