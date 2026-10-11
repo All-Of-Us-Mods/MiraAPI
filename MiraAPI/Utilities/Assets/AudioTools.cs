@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Resources;
+using System.Runtime.InteropServices;
 using System.Text;
 using UnityEngine;
 
@@ -96,34 +97,61 @@ public static class AudioTools
     }
 
     // This is somewhat magic to me, I just copied it from elsewhere.
+    // Could have been written better, so here - Az
     private static float[] ConvertPcmToFloat(byte[] pcmData, int bitsPerSample)
     {
         var sampleCount = pcmData.Length / (bitsPerSample / 8);
         var floatData = new float[sampleCount];
 
-        for (var i = 0; i < sampleCount; i++)
-        {
-            var byteIndex = i * (bitsPerSample / 8);
+        ReadOnlySpan<byte> source = pcmData;
+        Span<float> destination = floatData;
 
-            switch (bitsPerSample)
-            {
-                case 8:
-                    floatData[i] = (pcmData[byteIndex] - 128) / 128f; // 8-bit PCM is unsigned
-                    break;
-                case 16:
-                    floatData[i] = BitConverter.ToInt16(pcmData, byteIndex) / 32768f;
-                    break;
-                case 24:
-                    var sample24 = pcmData[byteIndex] | (pcmData[byteIndex + 1] << 8) | (pcmData[byteIndex + 2] << 16);
-                    if (sample24 > 0x7FFFFF) sample24 -= 0x1000000; // Convert from unsigned to signed
-                    floatData[i] = sample24 / 8388608f;
-                    break;
-                case 32:
-                    floatData[i] = BitConverter.ToInt32(pcmData, byteIndex) / 2147483648f;
-                    break;
-                default:
-                    throw new NotSupportedException($"Unsupported bit depth: {bitsPerSample}");
-            }
+        switch (bitsPerSample)
+        {
+            case 8:
+                for (var i = 0; i < sampleCount; i++)
+                {
+                    destination[i] = (source[i] - 128) / 128f; // 8-bit PCM is unsigned
+                }
+
+                break;
+
+            case 16:
+                var shortSource = MemoryMarshal.Cast<byte, short>(source);
+
+                for (var i = 0; i < sampleCount; i++)
+                {
+                    destination[i] = shortSource[i] / 32768f;
+                }
+
+                break;
+
+            case 24:
+                for (int i = 0, byteIndex = 0; i < sampleCount; i++, byteIndex += 3)
+                {
+                    var sample24 = source[byteIndex] | (source[byteIndex + 1] << 8) | (source[byteIndex + 2] << 16);
+
+                    // Convert from unsigned to signed
+                    if (sample24 > 0x7FFFFF)
+                        sample24 -= 0x1000000;
+
+                    destination[i] = sample24 / 8388608f;
+                }
+
+                break;
+
+            case 32:
+                var intSource = MemoryMarshal.Cast<byte, int>(source);
+
+                for (var i = 0; i < sampleCount; i++)
+                {
+                    destination[i] = intSource[i] / 2147483648f;
+                }
+
+                break;
+
+            default:
+                throw new NotSupportedException($"Unsupported bit depth: {bitsPerSample}");
         }
 
         return floatData;
