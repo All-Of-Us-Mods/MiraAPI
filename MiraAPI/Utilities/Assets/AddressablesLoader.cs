@@ -1,13 +1,5 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using Il2CppInterop.Runtime.Attributes;
-using MiraAPI.Patches.Menu;
-using Reactor.Utilities;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MiraAPI.Utilities.Assets;
 
@@ -15,47 +7,33 @@ namespace MiraAPI.Utilities.Assets;
 /// The component for loading Addressables, and cosmetics.
 /// </summary>
 [Obsolete("This system has been deprecated in favour of CorsacCosmetics. This will be removed in a future version.", true)]
+[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Part of obsolete code.")]
 public static class AddressablesLoader
 {
-    private static readonly List<(string Location, string ProviderSuffix)> CatalogLocations = [];
-    private static readonly List<string> LoadedLocations = [];
-
-    private static readonly List<string> RegisteredHatKeys = [];
-    private static readonly List<(string, string)> RegisteredVisorKeys = [];
-    private static readonly List<(string, string)> RegisteredNameplateKeys = [];
-    private static readonly List<string> RegisteredSkinKeys = [];
-
-    private static bool _isInitialized;
-    private static bool _addressableHatsExist;
-    private static bool _addressableVisorsExist;
-    private static bool _addressableNameplatesExist;
-    private static bool _addressableSkinsExist;
-    private static bool _catalogsExist;
-
     /// <summary>
     /// Gets a value indicating whether hats have been loaded by the addressables system.
     /// </summary>
-    public static bool AddressableHatsExist => _addressableHatsExist;
+    public static bool AddressableHatsExist => false;
 
     /// <summary>
     /// Gets a value indicating whether visors have been loaded by the addressables system.
     /// </summary>
-    public static bool AddressableVisorsExist => _addressableVisorsExist;
+    public static bool AddressableVisorsExist => false;
 
     /// <summary>
     /// Gets a value indicating whether nameplates have been loaded by the addressables system.
     /// </summary>
-    public static bool AddressableNameplatesExist => _addressableNameplatesExist;
+    public static bool AddressableNameplatesExist => false;
 
     /// <summary>
     /// Gets a value indicating whether skins have been loaded by the addressables system.
     /// </summary>
-    public static bool AddressableSkinsExist => _addressableSkinsExist;
+    public static bool AddressableSkinsExist => false;
 
     /// <summary>
     /// Gets a value indicating whether catalogs have been loaded by the addressables system.
     /// </summary>
-    public static bool CatalogsExist => _catalogsExist;
+    public static bool CatalogsExist => false;
 
     /// <summary>
     /// Registers a specific addressables package to load asynchronously at the start of the game, when possible.
@@ -64,7 +42,7 @@ public static class AddressablesLoader
     /// <param name="providerSuffix">The suffix of the provider for an addressables package.</param>
     public static void RegisterCatalog(string location, string providerSuffix = "")
     {
-        RegisterCosmetic((location, providerSuffix), CatalogLocations, "catalog", ref _catalogsExist);
+        Warning("The addressables system has been deprecated. None of the registered assets will be added.");
     }
 
     /// <summary>
@@ -73,7 +51,7 @@ public static class AddressablesLoader
     /// <param name="addressablesKey">The key/label/group for a List <see cref="HatData"/>.</param>
     public static void RegisterHats(string addressablesKey)
     {
-        RegisterCosmetic(addressablesKey, RegisteredHatKeys, "hat", ref _addressableHatsExist);
+        Warning("The addressables system has been deprecated. None of the registered assets will be added.");
     }
 
     /// <summary>
@@ -82,7 +60,7 @@ public static class AddressablesLoader
     /// <param name="addressablesKey">The key/label/group for a List <see cref="SkinData"/>.</param>
     public static void RegisterSkins(string addressablesKey)
     {
-        RegisterCosmetic(addressablesKey, RegisteredSkinKeys, "skin", ref _addressableSkinsExist);
+        Warning("The addressables system has been deprecated. None of the registered assets will be added.");
     }
 
     /// <summary>
@@ -92,7 +70,7 @@ public static class AddressablesLoader
     /// /// <param name="groupTitle">The title of the group for visors.</param>
     public static void RegisterNameplates(string addressablesKey, string groupTitle)
     {
-        RegisterCosmetic((addressablesKey, groupTitle), RegisteredNameplateKeys, "nameplate", ref _addressableNameplatesExist);
+        Warning("The addressables system has been deprecated. None of the registered assets will be added.");
     }
 
     /// <summary>
@@ -102,146 +80,6 @@ public static class AddressablesLoader
     /// <param name="groupTitle">The title of the group for visors.</param>
     public static void RegisterVisors(string addressablesKey, string groupTitle)
     {
-        RegisterCosmetic((addressablesKey, groupTitle), RegisteredVisorKeys, "visor", ref _addressableVisorsExist);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void RegisterCosmetic<T>(T value, List<T> values, string type, ref bool flag)
-    {
-        if (_isInitialized)
-        {
-            Error($"AddressablesLoader has already been initialized, cannot register more keys for {type}s.");
-            return;
-        }
-
-        flag = true;
-        values.Add(value);
-    }
-
-    internal static void LoadAll()
-    {
-        if (_isInitialized)
-        {
-            Error("AddressablesLoader has already been initialized.");
-            return;
-        }
-
-        _isInitialized = true;
-        foreach (var (location, providerSuffix) in CatalogLocations)
-        {
-            Coroutines.Start(CoLoadAddressables(location, providerSuffix));
-        }
-
-        Coroutines.Start(LoadCosmetics());
-    }
-
-    internal static IEnumerator CoLoadAddressables(string location, string suffix = "")
-    {
-        while (!AmongUsClient.Instance) yield return null;
-
-        // Load the local/remote content catalog
-        var catalogOperation = Addressables.LoadContentCatalog(location, suffix);
-        yield return catalogOperation;
-
-        // Check for errors
-        if (catalogOperation.Status != AsyncOperationStatus.Succeeded)
-        {
-            Error($"Failed to load catalog {location}.");
-        }
-
-        Info($"Loaded addressables {location}.");
-        LoadedLocations.Add(location);
-    }
-
-    [HideFromIl2Cpp]
-    internal static IEnumerator LoadCosmetics()
-    {
-        while (!AmongUsClient.Instance || CatalogLocations.Select(x => x.Location).Any(x => !LoadedLocations.Contains(x))) yield return null;
-
-        var hatBehaviours = DiscoverData<HatData>(RegisteredHatKeys);
-        hatBehaviours = [.. hatBehaviours.OrderBy(x => x.StoreName)];
-        var skinBehaviours = DiscoverData<SkinData>(RegisteredSkinKeys);
-        skinBehaviours = [.. skinBehaviours.OrderBy(x => x.StoreName)];
-        var namePlateBehaviours = DiscoverAndReportData<NamePlateData>(RegisteredNameplateKeys);
-        namePlateBehaviours = [.. namePlateBehaviours.OrderBy(x => x.Category)];
-        var visorBehaviours = DiscoverAndReportData<VisorData>(RegisteredVisorKeys);
-        visorBehaviours = [.. visorBehaviours.OrderBy(x => x.Category)];
-
-        var hatData = new List<HatData>();
-        hatData.AddRange(HatManager.Instance.allHats);
-        hatData.ForEach(x => x.StoreName = "Vanilla");
-        HatManager.Instance.allHats = PrepareArray(hatData, hatBehaviours);
-
-        var skinData = new List<SkinData>();
-        skinData.AddRange(HatManager.Instance.allSkins);
-        skinData.ForEach(x => x.StoreName = "Vanilla");
-        HatManager.Instance.allSkins = PrepareArray(skinData, skinBehaviours);
-
-        var visorData = new List<VisorData>();
-        visorData.AddRange(HatManager.Instance.allVisors);
-        VisorsTabPatches.AddRange(visorBehaviours);
-        HatManager.Instance.allVisors = PrepareArray(visorData, [.. visorBehaviours.Select(x => x.Data)]);
-
-        var namePlateData = new List<NamePlateData>();
-        namePlateData.AddRange(HatManager.Instance.allNamePlates);
-        NameplatesTabPatches.AddRange(namePlateBehaviours);
-        HatManager.Instance.allNamePlates = PrepareArray(namePlateData, [.. namePlateBehaviours.Select(x => x.Data)]);
-    }
-
-    private static T[] PrepareArray<T>(List<T> data, List<T> behaviours)
-        where T : CosmeticData
-    {
-        var count = data.Count;
-        for (var i = 0; i < behaviours.Count; i++)
-        {
-            behaviours[i].displayOrder = count + i;
-            data.Add(behaviours[i]);
-        }
-
-        return [.. data];
-    }
-
-    private static List<T> DiscoverData<T>(List<string> tags)
-    {
-        var behaviours = new List<T>();
-
-        foreach (var tag in tags)
-        {
-            try
-            {
-                var allLocations = Addressables.LoadResourceLocationsAsync(tag).WaitForCompletion();
-                var assets = Addressables.LoadAssetsAsync<T>(allLocations, null, false).WaitForCompletion();
-                var array = new CppCollections.List<T>(assets.Pointer);
-                behaviours.AddRange(array.ToArray());
-            }
-            catch
-            {
-                Error($"Failed to find tag {tag}");
-            }
-        }
-
-        return behaviours;
-    }
-
-    private static List<(string Category, T Data)> DiscoverAndReportData<T>(List<(string Tag, string Category)> tags)
-    {
-        var behaviours = new List<(string, T)>();
-
-        foreach (var tag in tags)
-        {
-            try
-            {
-                var allLocations = Addressables.LoadResourceLocationsAsync(tag.Tag).WaitForCompletion();
-                var assets = Addressables.LoadAssetsAsync<T>(allLocations, null, false).WaitForCompletion();
-                var array = new CppCollections.List<T>(assets.Pointer);
-                behaviours.AddRange(array.ToArray().Select(x => (tag.Category, x)));
-            }
-            catch
-            {
-                Error($"Failed to find tag {tag}");
-            }
-        }
-
-        return behaviours;
+        Warning("The addressables system has been deprecated. None of the registered assets will be added.");
     }
 }
