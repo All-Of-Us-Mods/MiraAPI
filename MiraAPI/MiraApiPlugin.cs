@@ -4,6 +4,7 @@ using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
+using MiraAPI.Patches;
 using MiraAPI.Patches.Roles;
 using MiraAPI.PluginLoading;
 using MiraAPI.Translation;
@@ -63,9 +64,30 @@ public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
     private static MiraPluginManager? PluginManager { get; set; }
     internal Harmony Harmony { get; } = new(Id);
 
+    public static ConfigEntry<SortingGroups> WikiSortingGroup { get; private set; }
+
+    public static ConfigEntry<SortingMethod> WikiSortingMethod { get; private set; }
+
+    public static ConfigEntry<SortingFilter> WikiSortingFilter { get; private set; }
+
     /// <inheritdoc />
     public override void Load()
     {
+        WikiSortingGroup = Config.Bind(
+            "Wiki",
+            "WikiSortingGroup",
+            SortingGroups.Ungrouped,
+            "Determines how clusters of roles / modifiers are grouped together, if at all.");
+        WikiSortingMethod = Config.Bind(
+            "Wiki",
+            "WikiSortingMethod",
+            SortingMethod.Alphabetical,
+            "Determines if the list of roles / modifiers are organized in ascending or descending order.");
+        WikiSortingFilter = Config.Bind(
+            "Wiki",
+            "WikiSortingFilter",
+            SortingFilter.AllRoles,
+            "Determines what roles / modifiers are displayed at once.");
         Harmony.PatchAll();
         RoleOptionsCollectionPatch.PatchRoleMethods(Harmony);
         UiResetEvents.Initialize();

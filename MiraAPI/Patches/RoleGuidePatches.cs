@@ -346,6 +346,10 @@ public static class RoleGuidePatches
             return;
         }
 
+        _sortFilter = MiraApiPlugin.WikiSortingFilter.Value;
+        _sortMethod = MiraApiPlugin.WikiSortingMethod.Value;
+        _sortGrouping = MiraApiPlugin.WikiSortingGroup.Value;
+
         if (_populate != null)
         {
             Coroutines.Stop(_populate);
@@ -368,8 +372,8 @@ public static class RoleGuidePatches
             SearchSortingOrderButton,
             "SearchSortingOrderButton",
             SwitchMethod,
-            MiraAssets.SortingAzIdleSprite,
-            MiraAssets.SortingAzHoverSprite,
+            GetSortMethodSprite(_sortMethod, false),
+            GetSortMethodSprite(_sortMethod, true),
             new Vector3(2.4f, 0.765f, -0.1f),
             out _searchSortingOrderIdle,
             out _searchSortingOrderHover);
@@ -383,8 +387,8 @@ public static class RoleGuidePatches
             SearchSortingGroupButton,
             "SearchSortingGroupButton",
             SwitchGrouping,
-            MiraAssets.GroupNoneIdleSprite,
-            MiraAssets.GroupNoneHoverSprite,
+            GetSortGroupSprite(_sortGrouping, false),
+            GetSortGroupSprite(_sortGrouping, true),
             new Vector3(1.7f, 0.765f, -0.1f),
             out _searchSortingGroupIdle,
             out _searchSortingGroupHover);
@@ -398,8 +402,8 @@ public static class RoleGuidePatches
             SearchSortingFilterButton,
             "SearchSortingFilterButton",
             SwitchFilter,
-            MiraAssets.VisibleOnIdleSprite,
-            MiraAssets.VisibleOnHoverSprite,
+            GetSortFilterSprite(_sortFilter, false),
+            GetSortFilterSprite(_sortFilter, true),
             new Vector3(1f, 0.765f, -0.1f),
             out _searchSortingFilterIdle,
             out _searchSortingFilterHover);
@@ -1042,23 +1046,38 @@ public static class RoleGuidePatches
             _sortFilter = SortingFilter.EnabledOnly;
         }
 
-        switch (_sortFilter)
-        {
-            case SortingFilter.AllRoles:
-                _searchSortingFilterIdle.sprite = MiraAssets.VisibleAllIdleSprite;
-                _searchSortingFilterHover.sprite = MiraAssets.VisibleAllHoverSprite;
-                break;
-            case SortingFilter.DisabledOnly:
-                _searchSortingFilterIdle.sprite = MiraAssets.VisibleOffIdleSprite;
-                _searchSortingFilterHover.sprite = MiraAssets.VisibleOffHoverSprite;
-                break;
-            default:
-                _searchSortingFilterIdle.sprite = MiraAssets.VisibleOnIdleSprite;
-                _searchSortingFilterHover.sprite = MiraAssets.VisibleOnHoverSprite;
-                break;
-        }
+        MiraApiPlugin.WikiSortingFilter.Value = _sortFilter;
+
+        _searchSortingFilterIdle.sprite = GetSortFilterSprite(_sortFilter, false);
+        _searchSortingFilterHover.sprite = GetSortFilterSprite(_sortFilter, true);
 
         RefreshActiveTab(false);
+    }
+
+    private static Sprite GetSortFilterSprite(SortingFilter value, bool hover)
+    {
+        if (hover)
+        {
+            switch (value)
+            {
+                case SortingFilter.AllRoles:
+                    return MiraAssets.VisibleAllHoverSprite;
+                case SortingFilter.DisabledOnly:
+                    return MiraAssets.VisibleOffHoverSprite;
+                default:
+                    return MiraAssets.VisibleOnHoverSprite;
+            }
+        }
+
+        switch (value)
+        {
+            case SortingFilter.AllRoles:
+                return MiraAssets.VisibleAllIdleSprite;
+            case SortingFilter.DisabledOnly:
+                return MiraAssets.VisibleOffIdleSprite;
+            default:
+                return MiraAssets.VisibleOnIdleSprite;
+        }
     }
 
     public static void SwitchMethod()
@@ -1073,14 +1092,26 @@ public static class RoleGuidePatches
             _sortMethod = SortingMethod.Alphabetical;
         }
 
-        _searchSortingOrderIdle.sprite = _sortMethod is SortingMethod.Alphabetical
-            ? MiraAssets.SortingAzIdleSprite
-            : MiraAssets.SortingZaIdleSprite;
-        _searchSortingOrderHover.sprite = _sortMethod is SortingMethod.Alphabetical
-            ? MiraAssets.SortingAzHoverSprite
-            : MiraAssets.SortingZaHoverSprite;
+        MiraApiPlugin.WikiSortingMethod.Value = _sortMethod;
+
+        _searchSortingOrderIdle.sprite = GetSortMethodSprite(_sortMethod, false);
+        _searchSortingOrderHover.sprite = GetSortMethodSprite(_sortMethod, true);
 
         RefreshActiveTab(false);
+    }
+
+    private static Sprite GetSortMethodSprite(SortingMethod value, bool hover)
+    {
+        if (hover)
+        {
+            return value is SortingMethod.Alphabetical
+                ? MiraAssets.SortingAzHoverSprite
+                : MiraAssets.SortingZaHoverSprite;
+        }
+
+        return _sortMethod is SortingMethod.Alphabetical
+            ? MiraAssets.SortingAzIdleSprite
+            : MiraAssets.SortingZaIdleSprite;
     }
 
     public static void SwitchGrouping()
@@ -1095,23 +1126,38 @@ public static class RoleGuidePatches
             _sortGrouping = SortingGroups.Ungrouped;
         }
 
-        switch (_sortGrouping)
-        {
-            case SortingGroups.Faction:
-                _searchSortingGroupIdle.sprite = MiraAssets.GroupFactionIdleSprite;
-                _searchSortingGroupHover.sprite = MiraAssets.GroupFactionHoverSprite;
-                break;
-            case SortingGroups.AmountChance:
-                _searchSortingGroupIdle.sprite = MiraAssets.GroupCountIdleSprite;
-                _searchSortingGroupHover.sprite = MiraAssets.GroupCountHoverSprite;
-                break;
-            default:
-                _searchSortingGroupIdle.sprite = MiraAssets.GroupNoneIdleSprite;
-                _searchSortingGroupHover.sprite = MiraAssets.GroupNoneHoverSprite;
-                break;
-        }
+        MiraApiPlugin.WikiSortingGroup.Value = _sortGrouping;
+
+        _searchSortingGroupIdle.sprite = GetSortGroupSprite(_sortGrouping, false);
+        _searchSortingGroupHover.sprite = GetSortGroupSprite(_sortGrouping, true);
 
         RefreshActiveTab(false);
+    }
+
+    private static Sprite GetSortGroupSprite(SortingGroups value, bool hover)
+    {
+        if (hover)
+        {
+            switch (value)
+            {
+                case SortingGroups.Faction:
+                    return MiraAssets.GroupFactionHoverSprite;
+                case SortingGroups.AmountChance:
+                    return MiraAssets.GroupCountHoverSprite;
+                default:
+                    return MiraAssets.GroupNoneHoverSprite;
+            }
+        }
+
+        switch (value)
+        {
+            case SortingGroups.Faction:
+                return MiraAssets.GroupFactionIdleSprite;
+            case SortingGroups.AmountChance:
+                return MiraAssets.GroupCountIdleSprite;
+            default:
+                return MiraAssets.GroupNoneIdleSprite;
+        }
     }
 
     private static void CopyTextLayout(TextMeshPro source, TextMeshPro target)
