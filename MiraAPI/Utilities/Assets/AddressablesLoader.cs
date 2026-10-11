@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -13,6 +14,7 @@ namespace MiraAPI.Utilities.Assets;
 /// <summary>
 /// The component for loading Addressables, and cosmetics.
 /// </summary>
+[Obsolete("This system has been deprecated in favour of CorsacCosmetics. This will be removed in a future version.", true)]
 public static class AddressablesLoader
 {
     private static readonly List<(string Location, string ProviderSuffix)> CatalogLocations = [];
