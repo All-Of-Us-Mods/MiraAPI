@@ -107,17 +107,20 @@ public abstract class BaseModifier : IOptionable
     /// </summary>
     /// <param name="guide">The guide object.</param>
     /// <param name="titleText">The title text object.</param>
+    /// <param name="titleIcon">The title's icon.</param>
     /// <param name="parent">The scroller parent.</param>
     /// <returns>The <see cref="GameObject"/> of the wiki.</returns>
-    public virtual GameObject GetAdvancedWiki(MatchInfoGuide guide, TextMeshPro titleText, Scroller parent)
+    public virtual GameObject GetAdvancedWiki(MatchInfoGuide guide, TextMeshPro titleText, SpriteRenderer titleIcon, Scroller parent)
     {
         var abilities = WikiAbilities;
         return Helpers.CreateAdvancedWikiPage(
             guide,
             titleText,
+            titleIcon,
             parent,
             ModifierNameLocale,
-            $"{this.GetTmpIcon()} {ModifierName} ({ModifierCategoryTitle})".TrimStart(),
+            $"{ModifierName} ({ModifierCategoryTitle})".TrimStart(),
+            ModifierIcon ?? MiraAssets.IconNeutral.LoadAsset(),
             ModifierWikiDescription,
             abilities);
     }

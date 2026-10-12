@@ -741,15 +741,19 @@ public static class Helpers
     /// <param name="guide">The guide panel to attach the tab to.</param>
     /// <param name="objName">The name of the tab.</param>
     /// <param name="title">The title of the tab.</param>
+    /// <param name="icon">The icon of the page.</param>
     /// <param name="description">The description of the tab.</param>
     /// <param name="titleTmp">The <see cref="TextMeshPro"/> instance of the title.</param>
+    /// <param name="titleIcon">The <see cref="SpriteRenderer"/> instance for the title.</param>
     /// <param name="descriptionTmp">The <see cref="TextMeshPro"/> instance of the description.</param>
     /// <returns>The <see cref="GameObject"/> of the tab.</returns>
-    public static GameObject CreateAdvancedWikiTab(MatchInfoGuide guide, string objName, string title, string description, TextMeshPro titleTmp, out TextMeshPro descriptionTmp)
+    public static GameObject CreateAdvancedWikiTab(MatchInfoGuide guide, string objName, string title, Sprite icon, string description, TextMeshPro titleTmp, SpriteRenderer titleIcon, out TextMeshPro descriptionTmp)
     {
         var obj = new GameObject(objName);
         titleTmp.richText = true;
         titleTmp.text = title;
+        titleIcon.sprite = icon;
+        titleIcon.SetSizeLimit(0.55f);
         descriptionTmp = Object.Instantiate(guide.MatchInfoRolePanelPrefab.roleCount, obj.transform);
         descriptionTmp.fontSizeMin = descriptionTmp.fontSizeMax = descriptionTmp.fontSize = 2f;
         var sourceTmp = HudManager.Instance.TaskPanel.taskText;
@@ -769,9 +773,11 @@ public static class Helpers
     /// </summary>
     /// <param name="guide">The guide object.</param>
     /// <param name="titleTmp">The <see cref="TextMeshPro"/> instance of the title.</param>
+    /// <param name="titleIcon">The <see cref="SpriteRenderer"/> instance for the title.</param>
     /// <param name="parent">The <see cref="Scroller"/> the page should be parented to.</param>
     /// <param name="objName">The name of the page object.</param>
     /// <param name="title">The title of the page.</param>
+    /// <param name="icon">The icon of the page.</param>
     /// <param name="description">The description of the page.</param>
     /// <param name="abilities">The abilities to display in a grid below the description.</param>
     /// <param name="variableTextSizing">Whether to use variable text sizing for ability descriptions (allows different heights).</param>
@@ -779,9 +785,11 @@ public static class Helpers
     public static GameObject CreateAdvancedWikiPage(
         MatchInfoGuide guide,
         TextMeshPro titleTmp,
+        SpriteRenderer titleIcon,
         Scroller parent,
         string objName,
         string title,
+        Sprite icon,
         string description,
         IReadOnlyCollection<AdvancedWikiAbilityDescription> abilities,
         bool variableTextSizing = false)
@@ -791,8 +799,10 @@ public static class Helpers
             guide,
             objName,
             title,
+            icon,
             description,
             titleTmp,
+            titleIcon,
             out var desc);
         var num = 0;
         var maxTextSize = 0f;

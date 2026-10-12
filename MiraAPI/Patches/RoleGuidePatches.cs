@@ -55,6 +55,7 @@ public static class RoleGuidePatches
     private static TextBoxTMP _searchBoxTmp;
     private static GameObject _currentAdvancedTabObject;
     private static TextMeshPro _titleText;
+    private static SpriteRenderer _titleIcon;
     private static bool _suppressSearchRefresh;
     private static IEnumerator? _searchDebounce;
     private static string _appliedSearch = string.Empty;
@@ -145,6 +146,7 @@ public static class RoleGuidePatches
         _appliedSearch = string.Empty;
         _suppressSearchRefresh = false;
         _titleText = null!;
+        _titleIcon = null!;
         _searchBoxTmp = null!;
         _rolesScroller = null!;
         _modifiersScroller = null!;
@@ -254,8 +256,17 @@ public static class RoleGuidePatches
             _titleText = __instance.transitionOpen.transform.FindChild("Text_Title")?.GetComponent<TextMeshPro>()!;
             if (_titleText)
             {
+                _titleText.transform.localPosition += new Vector3(0.5f, 0);
                 _titleText.transform.GetComponent<TextTranslatorTMP>().Destroy();
             }
+        }
+        if (!_titleIcon)
+        {
+            var titleIconObj = new GameObject("TitleIcon");
+            _titleIcon = titleIconObj.AddComponent<SpriteRenderer>();
+            _titleIcon.transform.SetParent(_titleText.transform.parent);
+            _titleIcon.transform.localPosition = new Vector3(-2.75f, 1.4f, 0);
+            titleIconObj.layer = _titleText.gameObject.layer;
         }
 
         if (_titleText)
@@ -1247,31 +1258,77 @@ public static class RoleGuidePatches
     [HarmonyPatch(typeof(MatchInfoGuide), nameof(MatchInfoGuide.SetActiveTab))]
     private static void SetActiveTab(int tabIndex)
     {
-        if (_titleText)
+        if (_titleText && _titleIcon)
         {
             switch (tabIndex)
             {
                 case 0:
                     _titleText.text = MiraLocaleManager.Get("MiraApi.Wiki.PlayersTab");
+                    _titleIcon.sprite = MiraAssets.IconPlayerList.LoadAsset();
                     break;
                 case 1:
                     _titleText.text = MiraLocaleManager.Get("MiraApi.Wiki.SettingsTab");
+                    _titleIcon.sprite = MiraAssets.IconSettings.LoadAsset();
                     break;
                 case RolesTabIndex:
                     _titleText.text = MiraLocaleManager.Get("Roles");
+                    _titleIcon.sprite = GetRandomRoleIcon();
                     break;
                 case ModifiersTabIndex:
                     _titleText.text = MiraLocaleManager.Get("Modifiers");
+                    _titleIcon.sprite = GetRandomModifierIcon();
                     break;
                 default:
                     _titleText.text = TranslationController.Instance.GetString(StringNames.MatchInfoGuideTitle);
+                    _titleIcon.sprite = MiraAssets.IconPlayerList.LoadAsset();
                     break;
             }
+
+            _titleIcon.SetSizeLimit(0.55f);
         }
 
         _advancedInfoTabScroller?.gameObject.SetActive(false);
         SearchComponentContainer?.SetActive(true);
         UpdateSpinner();
+    }
+
+    public static Sprite GetRandomModifierIcon()
+    {
+        var activeMods = PlayerControl.LocalPlayer.GetModifiers<GameModifier>()
+            .Where(x => !x.HideOnUi && x.ModifierIcon != null).ToList();
+        if (activeMods.Count > 0)
+        {
+            return activeMods.Random()!.ModifierIcon!.LoadAsset();
+        }
+
+        return GetRandomFactionIcon();
+    }
+
+    public static Sprite GetRandomRoleIcon()
+    {
+        var aliveRole = PlayerControl.LocalPlayer.Data?.Role;
+        if (aliveRole != null && aliveRole.RoleIconSolid != null)
+        {
+            return aliveRole.RoleIconSolid;
+        }
+
+        return GetRandomFactionIcon();
+    }
+
+    public static Sprite GetRandomFactionIcon()
+    {
+        var random = UnityEngine.Random.Range(1, 4);
+        if (random == 1)
+        {
+            return MiraAssets.IconCrewmate.LoadAsset();
+        }
+
+        if (random == 2)
+        {
+            return MiraAssets.IconImpostor.LoadAsset();
+        }
+
+        return MiraAssets.IconNeutral.LoadAsset();
     }
 
     private static bool TryPrepareAdvancedWiki(MatchInfoGuide instance)
@@ -1325,7 +1382,7 @@ public static class RoleGuidePatches
             return;
         }
 
-        _currentAdvancedTabObject = modifier.GetAdvancedWiki(instance, _titleText, _advancedInfoTabScroller);
+        _currentAdvancedTabObject = modifier.GetAdvancedWiki(instance, _titleText, _titleIcon, _advancedInfoTabScroller);
     }
 
     public static void DisplayAdvancedWiki(MatchInfoGuide instance, RoleBehaviour role)
@@ -1345,11 +1402,11 @@ public static class RoleGuidePatches
 
         if (role is ICustomRole custom)
         {
-            _currentAdvancedTabObject = custom.GetAdvancedWiki(instance, _titleText, _advancedInfoTabScroller);
+            _currentAdvancedTabObject = custom.GetAdvancedWiki(instance, _titleText, _titleIcon, _advancedInfoTabScroller);
         }
         else
         {
-            var titleTxt = $"{role.GetTmpIcon()} {role.GetRoleName()}" +
+            var titleTxt = $"{role.GetRoleName()}" +
                            $" ({TranslationController.Instance.GetString(role.TeamType is RoleTeamTypes.Crewmate ? StringNames.Crewmate : StringNames.Impostor)})";
             var description = TranslationController.Instance.GetString(role.BlurbNameLong);
             if (description.Contains("STRMISS"))
@@ -1364,9 +1421,11 @@ public static class RoleGuidePatches
             _currentAdvancedTabObject = Helpers.CreateAdvancedWikiPage(
                 instance,
                 _titleText,
+                _titleIcon,
                 _advancedInfoTabScroller,
                 role.Role.ToString(),
                 titleTxt,
+                role.RoleIconColor,
                 description,
                 []);
         }

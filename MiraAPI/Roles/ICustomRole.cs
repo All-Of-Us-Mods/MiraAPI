@@ -318,17 +318,20 @@ public interface ICustomRole : IOptionable
     /// </summary>
     /// <param name="guide">The guide object.</param>
     /// <param name="titleText">The title text object.</param>
+    /// <param name="titleIcon">The title's icon.</param>
     /// <param name="parent">The scroller parent.</param>
     /// <returns>The <see cref="GameObject"/> of the wiki.</returns>
-    GameObject GetAdvancedWiki(MatchInfoGuide guide, TextMeshPro titleText, Scroller parent)
+    GameObject GetAdvancedWiki(MatchInfoGuide guide, TextMeshPro titleText, SpriteRenderer titleIcon, Scroller parent)
     {
         var abilities = WikiAbilities;
         return Helpers.CreateAdvancedWikiPage(
             guide,
             titleText,
+            titleIcon,
             parent,
             RoleNameLocale,
-            $"{this.GetTmpIcon()} {RoleName} ({RoleFactionTitle})",
+            $"{RoleName} ({RoleFactionTitle})",
+            Configuration.Icon ?? MiraAssets.IconNeutral.LoadAsset(),
             RoleWikiDescription,
             abilities);
     }
