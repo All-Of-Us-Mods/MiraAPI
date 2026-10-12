@@ -1,12 +1,13 @@
-﻿using AmongUs.Data;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using AmongUs.Data;
 using HarmonyLib;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -35,12 +36,14 @@ public static class SkinsTabPatches
 
     [HarmonyPatch(nameof(SkinsTab.OnEnable))]
     [HarmonyPrefix]
+    [SuppressMessage("Style", "IDE0028:Collection initialization can be simplified", Justification = "Preview feature.")]
     public static bool OnEnablePrefix(SkinsTab __instance)
     {
         if (!AddressablesLoader.AddressableSkinsExist)
         {
             return true;
         }
+
         __instance.skinId = HatManager.Instance.GetSkinById(DataManager.Player.Customization.Skin).ProdId;
         var allSkins = HatManager.Instance.GetUnlockedSkins().ToImmutableList();
 
@@ -71,6 +74,7 @@ public static class SkinsTabPatches
         {
             return;
         }
+
         if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl) || Input.GetKeyDown(KeyCode.LeftArrow))
         {
             PreviousPage(__instance);
@@ -89,7 +93,7 @@ public static class SkinsTabPatches
 
         var groupNameText = __instance.GetComponentInChildren<TextMeshPro>(false);
 
-        int hatIndex = 0;
+        var hatIndex = 0;
 
         var (groupName, skins) = sortedSkins.ToArray()[page];
         var text = Object.Instantiate(groupNameText, __instance.scroller.Inner);
@@ -102,16 +106,18 @@ public static class SkinsTabPatches
         text.fontSize = 5f;
         text.fontSizeMax = 5f;
         text.fontSizeMin = 0f;
-        float xLerp = __instance.XRange.Lerp(0.5f);
-        float yLerp = __instance.YStart - hatIndex / __instance.NumPerRow * __instance.YOffset;
+        var xLerp = __instance.XRange.Lerp(0.5f);
+        var yLerp = __instance.YStart - __instance.YOffset;
         text.transform.localPosition = new Vector3(xLerp, yLerp, -1f);
 
         hatIndex += 5;
         foreach (var skin in skins.OrderBy(HatManager.Instance.allSkins.IndexOf))
         {
-            float hatXposition = __instance.XRange.Lerp(hatIndex % __instance.NumPerRow / (__instance.NumPerRow - 1f));
-            float hatYposition = __instance.YStart - hatIndex / __instance.NumPerRow * __instance.YOffset;
-            GenerateColorChip(__instance, new Vector2(hatXposition, hatYposition), skin);
+            var hatXPosition = __instance.XRange.Lerp(hatIndex % __instance.NumPerRow / (__instance.NumPerRow - 1f));
+
+            // ReSharper disable once PossibleLossOfFraction (Justification: Intended.)
+            var hatYPosition = __instance.YStart - hatIndex / __instance.NumPerRow * __instance.YOffset;
+            GenerateColorChip(__instance, new Vector2(hatXPosition, hatYPosition), skin);
             hatIndex += 1;
         }
 
@@ -135,6 +141,7 @@ public static class SkinsTabPatches
         {
             colorChip.Button.OnClick.AddListener((Action)(() => __instance.SelectSkin(skin)));
         }
+
         colorChip.Button.ClickMask = __instance.scroller.Hitbox;
         colorChip.ProductId = skin.ProductId;
         colorChip.SelectionHighlight.gameObject.SetActive(false);

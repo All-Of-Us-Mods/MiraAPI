@@ -1,9 +1,9 @@
-﻿using Il2CppInterop.Runtime.Attributes;
-using MiraAPI.Patches.Menu;
-using Reactor.Utilities;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Il2CppInterop.Runtime.Attributes;
+using MiraAPI.Patches.Menu;
+using Reactor.Utilities;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
@@ -14,8 +14,6 @@ namespace MiraAPI.Utilities.Assets;
 /// </summary>
 public static class AddressablesLoader
 {
-    private static bool _isInitialized;
-
     private static readonly List<(string Location, string ProviderSuffix)> CatalogLocations = [];
     private static readonly List<string> LoadedLocations = [];
 
@@ -23,6 +21,8 @@ public static class AddressablesLoader
     private static readonly List<(string, string)> RegisteredVisorKeys = [];
     private static readonly List<(string, string)> RegisteredNameplateKeys = [];
     private static readonly List<string> RegisteredSkinKeys = [];
+
+    private static bool _isInitialized;
 
     /// <summary>
     /// Gets a value indicating whether hats have been loaded by the addressables system.
@@ -146,6 +146,7 @@ public static class AddressablesLoader
     internal static IEnumerator CoLoadAddressables(string location, string suffix = "")
     {
         while (!AmongUsClient.Instance) yield return null;
+
         // Load the local/remote content catalog
         var catalogOperation = Addressables.LoadContentCatalog(location, suffix);
         yield return catalogOperation;
@@ -163,16 +164,16 @@ public static class AddressablesLoader
     [HideFromIl2Cpp]
     internal static IEnumerator LoadCosmetics()
     {
-        while (!AmongUsClient.Instance || CatalogLocations.Select(x=>x.Location).Any(x=>!LoadedLocations.Contains(x))) yield return null;
+        while (!AmongUsClient.Instance || CatalogLocations.Select(x => x.Location).Any(x => !LoadedLocations.Contains(x))) yield return null;
 
         var hatBehaviours = DiscoverData<HatData>(RegisteredHatKeys);
-        hatBehaviours = hatBehaviours.OrderBy(x => x.StoreName).ToList();
+        hatBehaviours = [.. hatBehaviours.OrderBy(x => x.StoreName)];
         var skinBehaviours = DiscoverData<SkinData>(RegisteredSkinKeys);
-        skinBehaviours = skinBehaviours.OrderBy(x => x.StoreName).ToList();
+        skinBehaviours = [.. skinBehaviours.OrderBy(x => x.StoreName)];
         var namePlateBehaviours = DiscoverAndReportData<NamePlateData>(RegisteredNameplateKeys);
-        namePlateBehaviours = namePlateBehaviours.OrderBy(x => x.Category).ToList();
+        namePlateBehaviours = [.. namePlateBehaviours.OrderBy(x => x.Category)];
         var visorBehaviours = DiscoverAndReportData<VisorData>(RegisteredVisorKeys);
-        visorBehaviours = visorBehaviours.OrderBy(x => x.Category).ToList();
+        visorBehaviours = [.. visorBehaviours.OrderBy(x => x.Category)];
 
         var hatData = new List<HatData>();
         hatData.AddRange(HatManager.Instance.allHats);
@@ -187,23 +188,25 @@ public static class AddressablesLoader
         var visorData = new List<VisorData>();
         visorData.AddRange(HatManager.Instance.allVisors);
         VisorsTabPatches.AddRange(visorBehaviours);
-        HatManager.Instance.allVisors = PrepareArray(visorData, visorBehaviours.Select(x=>x.Data).ToList());
+        HatManager.Instance.allVisors = PrepareArray(visorData, [.. visorBehaviours.Select(x => x.Data)]);
 
         var namePlateData = new List<NamePlateData>();
         namePlateData.AddRange(HatManager.Instance.allNamePlates);
         NameplatesTabPatches.AddRange(namePlateBehaviours);
-        HatManager.Instance.allNamePlates = PrepareArray(namePlateData, namePlateBehaviours.Select(x => x.Data).ToList());
+        HatManager.Instance.allNamePlates = PrepareArray(namePlateData, [.. namePlateBehaviours.Select(x => x.Data)]);
     }
 
-    private static T[] PrepareArray<T>(List<T> data, List<T> behaviours) where T : CosmeticData
+    private static T[] PrepareArray<T>(List<T> data, List<T> behaviours)
+        where T : CosmeticData
     {
         var count = data.Count;
-        for (int i = 0; i < behaviours.Count; i++)
+        for (var i = 0; i < behaviours.Count; i++)
         {
             behaviours[i].displayOrder = count + i;
             data.Add(behaviours[i]);
         }
-        return data.ToArray();
+
+        return [.. data];
     }
 
     private static List<T> DiscoverData<T>(List<string> tags)
@@ -216,7 +219,7 @@ public static class AddressablesLoader
             {
                 var allLocations = Addressables.LoadResourceLocationsAsync(tag).WaitForCompletion();
                 var assets = Addressables.LoadAssetsAsync<T>(allLocations, null, false).WaitForCompletion();
-                var array = new Il2CppSystem.Collections.Generic.List<T>(assets.Pointer);
+                var array = new CppCollections.List<T>(assets.Pointer);
                 behaviours.AddRange(array.ToArray());
             }
             catch
@@ -224,6 +227,7 @@ public static class AddressablesLoader
                 Error($"Failed to find tag {tag}");
             }
         }
+
         return behaviours;
     }
 
@@ -237,7 +241,7 @@ public static class AddressablesLoader
             {
                 var allLocations = Addressables.LoadResourceLocationsAsync(tag.Tag).WaitForCompletion();
                 var assets = Addressables.LoadAssetsAsync<T>(allLocations, null, false).WaitForCompletion();
-                var array = new Il2CppSystem.Collections.Generic.List<T>(assets.Pointer);
+                var array = new CppCollections.List<T>(assets.Pointer);
                 behaviours.AddRange(array.ToArray().Select(x => (tag.Category, x)));
             }
             catch
@@ -245,6 +249,7 @@ public static class AddressablesLoader
                 Error($"Failed to find tag {tag}");
             }
         }
+
         return behaviours;
     }
 }

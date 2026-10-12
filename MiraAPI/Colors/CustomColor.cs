@@ -32,18 +32,21 @@ public sealed class CustomColor(StringNames name, Color32 mainColor, Color32 sha
     /// </summary>
     public CustomColorBrightness ColorBrightness { get; set; } = CustomColorBrightness.Darker;
 
-    /// <inheritdoc />
-    public CustomColor(StringNames name, Color32 mainColor) : this(name, mainColor, mainColor.GetShadowColor(60))
+    /// <inheritdoc cref="CustomColor"/>
+    public CustomColor(StringNames name, Color32 mainColor)
+        : this(name, mainColor, mainColor.GetShadowColor(60))
     {
     }
 
-    /// <inheritdoc />
-    public CustomColor(string name, Color32 mainColor) : this(name, mainColor, mainColor.GetShadowColor(60))
+    /// <inheritdoc cref="CustomColor"/>
+    public CustomColor(string name, Color32 mainColor)
+        : this(name, mainColor, mainColor.GetShadowColor(60))
     {
     }
 
-    /// <inheritdoc />
-    public CustomColor(string name, Color32 mainColor, Color32 shadowColor) : this(MiraLocaleManager.GetOrCreateLocaleString(name), mainColor, shadowColor)
+    /// <inheritdoc cref="CustomColor"/>
+    public CustomColor(string name, Color32 mainColor, Color32 shadowColor)
+        : this(MiraLocaleManager.GetOrCreateLocaleString(name), mainColor, shadowColor)
     {
     }
 }

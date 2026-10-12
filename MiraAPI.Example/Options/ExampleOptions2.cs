@@ -16,6 +16,9 @@ public class ExampleOptions2 : AbstractOptionGroup
     public ModdedPlayerOption PlayerOption { get; } = new("options.exampleOptions2.ehWhatever");
     public ModdedToggleOption ToggleOpt1 { get; } = new("options.exampleOptions2.toggleOption1", false);
 
+    public ModdedOptionList<ModdedNumberOption> PlayerNums { get; } = new(5, i =>
+        new($"PlayerNum{i}", 2, 0, 5, 1, Utilities.MiraNumberSuffixes.None));
+
     public ModdedToggleOption ToggleOpt2 { get; } = new("options.exampleOptions2.toggleOption2", false)
     {
         Visible = () => OptionGroupSingleton<ExampleOptions2>.Instance.ToggleOpt1, // implicit cast from ModdedToggleOption to bool

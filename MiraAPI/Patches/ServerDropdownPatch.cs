@@ -15,7 +15,7 @@ public static class ServerDropdownPatch
                region.TranslateName == other.TranslateName &&
                region.PingServer == other.PingServer &&
                region.TargetServer == other.TargetServer &&
-               region.Servers.All(s=>other.Servers.Any(x=>x.Equals(s)));
+               region.Servers.All(s => other.Servers.Any(x => x.Equals(s)));
     }
 
     public static bool Prefix(ServerDropdown __instance)
@@ -44,6 +44,7 @@ public static class ServerDropdownPatch
                 {
                     x += 2;
                 }
+
                 var y = -0.55f * (num / 2f);
                 serverListButton.transform.localPosition = new Vector3(x, __instance.y_posButton + y, -1f);
                 serverListButton.transform.localScale = Vector3.one;

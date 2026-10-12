@@ -7,12 +7,17 @@ using Reactor.Utilities;
 
 namespace MiraAPI.Translation;
 
+/// <summary>
+/// Provides customized localization support, integrating MiraAPI translations into Reactor's localization system.
+/// </summary>
 public class MiraLocalizationProvider : LocalizationProvider
 {
+    /// <inheritdoc />
     public override int Priority => ReactorPriority.Normal;
     private static LocalizationProvider? _reactorProvider;
     private static bool _loadedStrings;
 
+    /// <inheritdoc />
     public override bool TryGetText(StringNames stringName, out string? result)
     {
         if (MiraLocaleManager.StringNamesLookup.TryGetValue(stringName, out var key))
@@ -20,10 +25,12 @@ public class MiraLocalizationProvider : LocalizationProvider
             result = MiraLocaleManager.Get(key);
             return true;
         }
+
         result = null;
         return false;
     }
 
+    /// <inheritdoc />
     public override bool TryGetTextFormatted(StringNames stringName, Il2CppReferenceArray<Il2CppSystem.Object> parts, out string? result)
     {
         if (!TryGetText(stringName, out result)) return false;
@@ -32,6 +39,7 @@ public class MiraLocalizationProvider : LocalizationProvider
         return true;
     }
 
+    /// <inheritdoc />
     public override void OnLanguageChanged(SupportedLangs newLanguage)
     {
         _reactorProvider ??= LocalizationManager.Providers.First(x => x is HardCodedLocalizationProvider);
@@ -40,6 +48,7 @@ public class MiraLocalizationProvider : LocalizationProvider
         {
             MiraApiPlugin.Culture = new(culture);
         }
+
         if (!_loadedStrings)
         {
             MiraLocaleManager.LoadExternalLocale();
@@ -55,6 +64,7 @@ public class MiraLocalizationProvider : LocalizationProvider
 
             tab.Key.text = $"<b>{LocalSettingsTab.GetShortName(tab.Value.Translate())}</b>";
         }
+
         /*Warning($"<?xml version='1.0' encoding='UTF-8'?>");
         Warning($"<resources>");
         foreach (var stringName in TranslationController.Instance.currentLanguage.AllStrings)

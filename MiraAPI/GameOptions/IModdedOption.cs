@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using BepInEx.Configuration;
 using MiraAPI.Networking;
 using MiraAPI.PluginLoading;
@@ -113,4 +114,31 @@ public interface IModdedOption
     /// </summary>
     /// <param name="presetConfig">The <see cref="ConfigFile"/> representing the preset configuration.</param>
     void LoadFromPreset(ConfigFile presetConfig);
+}
+
+/// <summary>
+/// Interface for list of modded options.
+/// </summary>
+public interface IModdedOptionList : IReadOnlyList<IModdedOption>
+{
+    /// <summary>
+    /// Gets the function to name the keys of the individual options in the configuration file.
+    /// <para/>
+    /// Return <see langword="null"/> to use the default of the property's name with its index appended.
+    /// </summary>
+    Func<int, string>? ConfigName { get; init; }
+}
+
+/// <summary>
+/// Interface for list of <typeparamref name="T"/> options.
+/// </summary>
+/// <typeparam name="T">The type of <see cref="IModdedOption"/>.</typeparam>
+public interface IModdedOptionList<out T> : IModdedOptionList
+    where T : IModdedOption
+{
+    /// <inheritdoc cref="IReadOnlyList{T}.this[int]"/>
+    new T this[int index] { get; }
+
+    /// <inheritdoc cref="IEnumerable{T}.GetEnumerator"/>
+    new IEnumerator<T> GetEnumerator();
 }

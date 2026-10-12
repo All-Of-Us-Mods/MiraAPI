@@ -7,7 +7,8 @@ namespace MiraAPI.Roles;
 /// A utility class to get the instance of a <typeparamref name="T"/> custom role.
 /// </summary>
 /// <typeparam name="T">The <see cref="ICustomRole"/> you are trying to access.</typeparam>
-public static class CustomRoleSingleton<T> where T : ICustomRole
+public static class CustomRoleSingleton<T>
+    where T : ICustomRole
 {
     private static T? _instance;
 

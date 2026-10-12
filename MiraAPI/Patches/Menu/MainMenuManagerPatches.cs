@@ -17,7 +17,7 @@ public static class MainMenuManagerPatches
     internal static bool NeedsDeepDestroy { get; private set; }
 
     /// <summary>
-    /// A postifix on <see cref="MainMenuManager.Awake"/> to load all the addressables registered.
+    /// A postfix on <see cref="MainMenuManager.Awake"/> to load all the addressables registered.
     /// </summary>
     [HarmonyPatch(nameof(MainMenuManager.Awake))]
     [HarmonyPostfix]

@@ -8,7 +8,8 @@ namespace MiraAPI.Utilities.Assets;
 /// </summary>
 /// <param name="uid">The guid of the asset.</param>
 /// <typeparam name="T">The type of the asset to be loaded.</typeparam>
-public class LoadableAddressableAsset<T>(string uid) : LoadableAsset<T> where T : UnityEngine.Object
+public class LoadableAddressableAsset<T>(string uid) : LoadableAsset<T>
+    where T : UnityEngine.Object
 {
     private readonly Action<LoadableAddressableAsset<T>>? _gcAction;
 
@@ -18,7 +19,8 @@ public class LoadableAddressableAsset<T>(string uid) : LoadableAsset<T> where T 
     /// </summary>
     /// <param name="uid">The guid of the asset.</param>
     /// <param name="garbageCollection">A lambda that allows GCHandle.Alloc calls without garbage collection interferences.</param>
-    public LoadableAddressableAsset(string uid, Action<LoadableAddressableAsset<T>> garbageCollection) : this(uid)
+    public LoadableAddressableAsset(string uid, Action<LoadableAddressableAsset<T>> garbageCollection)
+        : this(uid)
     {
         _gcAction = garbageCollection;
     }

@@ -20,7 +20,7 @@ public static class MiraGlobalKeybinds
     public static MiraKeybind SecondaryAbility { get; } = new("Secondary Ability", KeyboardKeyCode.Y);
 
     /// <summary>
-    /// Gets the keybind for Tetiary abilities.
+    /// Gets the keybind for Tertiary abilities.
     /// </summary>
     public static MiraKeybind TertiaryAbility { get; } = new("Tertiary Ability", KeyboardKeyCode.U);
 
@@ -35,7 +35,7 @@ public static class MiraGlobalKeybinds
     public static MiraKeybind ModifierSecondaryAbility { get; } = new("Modifier Secondary Ability", KeyboardKeyCode.O);
 
     /// <summary>
-    /// Gets the keybind for Tetiary modifier abilities.
+    /// Gets the keybind for Tertiary modifier abilities.
     /// </summary>
     public static MiraKeybind ModifierTertiaryAbility { get; } = new("Modifier Tertiary Ability", KeyboardKeyCode.P);
 }

@@ -12,7 +12,10 @@ namespace MiraAPI.Networking;
 /// </summary>
 /// <inheritdoc />
 [RegisterCustomRpc((uint)MiraRpc.CustomGameOver)]
+#pragma warning disable SA1515 // Single-line comment should be preceded by blank line (Justification: ReSharper suppression.)
+// ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated by Reactor.)
 public class CustomGameOverRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<MiraApiPlugin, GameOverData>(plugin, id)
+#pragma warning restore SA1515 // Single-line comment should be preceded by blank line
 {
     /// <inheritdoc />
     public override RpcLocalHandling LocalHandling => RpcLocalHandling.After;

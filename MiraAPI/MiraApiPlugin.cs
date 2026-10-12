@@ -1,10 +1,11 @@
-﻿global using static Reactor.Utilities.Logger<MiraAPI.MiraApiPlugin>;
-using System;
+﻿using System;
 using System.Globalization;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
+using MiraAPI.Patches;
+using MiraAPI.Patches.Roles;
 using MiraAPI.PluginLoading;
 using MiraAPI.Translation;
 using MiraAPI.VanillaEvents;
@@ -24,16 +25,13 @@ namespace MiraAPI;
 [BepInProcess("Among Us.exe")]
 [BepInDependency(ReactorPlugin.Id)]
 [ReactorModFlags(ModFlags.RequireOnAllClients)]
+#pragma warning disable SA1515 // Single-line comment should be preceded by blank line (Justification: ReSharper suppression.)
+// ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated by BepInEx.)
 public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
+#pragma warning restore SA1515 // Single-line comment should be preceded by blank line
 {
-    /// <inheritdoc />
-    public ConfigFile GetConfigFile()
-    {
-        return Config;
-    }
-
     /// <summary>
-    ///     Gets the specified Culture for string manipulations.
+    /// Gets the specified Culture for string manipulations.
     /// </summary>
     public static CultureInfo Culture { get; internal set; } = new("en-US");
 
@@ -66,10 +64,33 @@ public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
     private static MiraPluginManager? PluginManager { get; set; }
     internal Harmony Harmony { get; } = new(Id);
 
+    public static ConfigEntry<SortingGroups> WikiSortingGroup { get; private set; }
+
+    public static ConfigEntry<SortingMethod> WikiSortingMethod { get; private set; }
+
+    public static ConfigEntry<SortingFilter> WikiSortingFilter { get; private set; }
+
     /// <inheritdoc />
     public override void Load()
     {
+        WikiSortingGroup = Config.Bind(
+            "Wiki",
+            "WikiSortingGroup",
+            SortingGroups.Ungrouped,
+            "Determines how clusters of roles / modifiers are grouped together, if at all.");
+        WikiSortingMethod = Config.Bind(
+            "Wiki",
+            "WikiSortingMethod",
+            SortingMethod.Alphabetical,
+            "Determines if the list of roles / modifiers are organized in ascending or descending order.");
+        WikiSortingFilter = Config.Bind(
+            "Wiki",
+            "WikiSortingFilter",
+            SortingFilter.AllRoles,
+            "Determines what roles / modifiers are displayed at once.");
         Harmony.PatchAll();
+        RoleOptionsCollectionPatch.PatchRoleMethods(Harmony);
+        UiResetEvents.Initialize();
         JudgeEvents.Initialize();
 
         ReactorCredits.Register("Mira API", Version, IsDevBuild, ReactorCredits.AlwaysShow);
@@ -83,5 +104,11 @@ public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
         IL2CPPChainloader.Instance.Finished +=
             ModCompatibility
                 .Initialize; // Initialise AFTER the mods are loaded to ensure maximum parity (no need for the soft dependency either then)
+    }
+
+    /// <inheritdoc />
+    public ConfigFile GetConfigFile()
+    {
+        return Config;
     }
 }

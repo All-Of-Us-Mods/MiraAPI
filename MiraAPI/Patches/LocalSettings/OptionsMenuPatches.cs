@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using HarmonyLib;
 using MiraAPI.LocalSettings;
@@ -13,12 +14,16 @@ namespace MiraAPI.Patches.LocalSettings;
 [HarmonyPatch(typeof(OptionsMenuBehaviour))]
 public static class OptionsMenuPatches
 {
-    internal static OptionsMenuBehaviour? Instance { get; private set; }
-    internal static BoxCollider2D MaskCollider = null!;
-    private static SpriteRenderer? background;
-
+    private static readonly Dictionary<int, List<GameObject>> TabButtons = [];
     private static int currentPage = 1;
-    private static Dictionary<int, List<GameObject>> tabButtons = new();
+
+    internal static OptionsMenuBehaviour? Instance { get; private set; }
+
+    [SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
+    [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
+    internal static BoxCollider2D MaskCollider = null!;
+
+    private static SpriteRenderer? background;
 
     /// <summary>
     /// Creates the <see cref="LocalSettingsTab"/>s and their content.
@@ -28,6 +33,7 @@ public static class OptionsMenuPatches
     public static void StartPostfix(OptionsMenuBehaviour __instance)
     {
         Instance = __instance;
+
         // Fix for tabs not being clickable in the main menu
         if (!AmongUsClient.Instance.IsInGame)
         {
@@ -64,11 +70,11 @@ public static class OptionsMenuPatches
         MaskCollider.enabled = true;
 
         currentPage = 1;
-        tabButtons.Clear();
+        TabButtons.Clear();
         float yOffset = 0;
-        int i = 0;
-        int tabIdx = 0;
-        int page = 1;
+        var i = 0;
+        var tabIdx = 0;
+        var page = 1;
         LocalSettingsTab.TabGroups.Clear();
         foreach (var settings in LocalSettingsManager.AvailableTabs)
         {
@@ -79,16 +85,18 @@ public static class OptionsMenuPatches
                 button.GetComponent<TabGroup>().Content = tab;
                 button.SetActive(page == currentPage);
 
-                if (!tabButtons.TryGetValue(page, out var list))
+                if (!TabButtons.TryGetValue(page, out var list))
                 {
-                    tabButtons.Add(page, new());
-                    list = tabButtons[page];
+                    TabButtons.Add(page, []);
+                    list = TabButtons[page];
                 }
+
                 list.Add(button);
                 yOffset += 0.6f;
                 tabIdx++;
                 i++;
             }
+
             if (i > 7)
             {
                 i = 0;
@@ -97,22 +105,23 @@ public static class OptionsMenuPatches
             }
         }
 
-        void ChangePage(int increase)
+        static void ChangePage(int increase)
         {
             currentPage += increase;
-            if (currentPage > tabButtons.Count)
+            if (currentPage > TabButtons.Count)
             {
                 currentPage = 1;
             }
+
             if (currentPage < 1)
             {
-                currentPage = tabButtons.Count;
+                currentPage = TabButtons.Count;
             }
         }
 
         // Create page buttons
         // TODO: In-game menu has no close button. I tried making one from scratch but failed. Add one later plz
-        if (tabButtons.Count <= 1)
+        if (TabButtons.Count <= 1)
         {
             return;
         }
@@ -182,7 +191,7 @@ public static class OptionsMenuPatches
     /// </summary>
     [HarmonyPostfix]
     [HarmonyPatch(nameof(OptionsMenuBehaviour.Open))]
-    public static void OpenPostfix(OptionsMenuBehaviour __instance)
+    public static void OpenPostfix()
     {
         LocalSettingsManager.AvailableTabs.ForEach(CustomClose);
         currentPage = 1;
@@ -191,7 +200,7 @@ public static class OptionsMenuPatches
 
     private static void UpdatePages()
     {
-        foreach (var pages in tabButtons)
+        foreach (var pages in TabButtons)
         {
             pages.Value?
                 .Where(x => x != null)
@@ -217,6 +226,7 @@ public static class OptionsMenuPatches
 
         tab.Open();
     }
+
     private static void CustomClose(LocalSettingsTab tab)
     {
         if (tab.TabButton?.Button)

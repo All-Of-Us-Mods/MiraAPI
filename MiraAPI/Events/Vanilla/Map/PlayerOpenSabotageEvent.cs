@@ -3,19 +3,11 @@
 /// <summary>
 /// Sabotage from Vanilla Among Us.
 /// </summary>
-public class PlayerOpenSabotageEvent : MiraCancelableEvent
+/// <param name="mapBehaviour">The <see cref="global::MapBehaviour"/>.</param>
+public class PlayerOpenSabotageEvent(MapBehaviour mapBehaviour) : MiraCancelableEvent
 {
     /// <summary>
     /// Gets the <see cref="global::MapBehaviour"/>.
     /// </summary>
-    public MapBehaviour MapBehaviour { get; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="PlayerOpenSabotageEvent"/> class.
-    /// </summary>
-    /// <param name="mapBehaviour">The <see cref="global::MapBehaviour"/>.</param>
-    public PlayerOpenSabotageEvent(MapBehaviour mapBehaviour)
-    {
-        MapBehaviour = mapBehaviour;
-    }
+    public MapBehaviour MapBehaviour { get; } = mapBehaviour;
 }

@@ -26,8 +26,8 @@ public static class PlayerOptionPatches
         {
             filteredPlayers.Sort((a, b) => a.PlayerId.CompareTo(b.PlayerId));
 
+            moddedPlrOpt.Values = filteredPlayers;
             __instance.Values = filteredPlayers.ToIl2CppList();
-            moddedPlrOpt.Values = __instance.Values;
             __instance.playerIndex = filteredPlayers.FindIndex(p => p.PlayerId == __instance.Value);
             __instance.SetValueText();
         }

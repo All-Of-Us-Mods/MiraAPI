@@ -7,7 +7,8 @@ namespace MiraAPI.MeetingAbilities;
 /// A utility class to get the instance of a <see cref="TargetedMeetingButton"/>.
 /// </summary>
 /// <typeparam name="T">The type of the button you are trying to access.</typeparam>
-public static class TargetedMeetingButtonSingleton<T> where T : TargetedMeetingButton
+public static class TargetedMeetingButtonSingleton<T>
+    where T : TargetedMeetingButton
 {
     private static T? _instance;
 

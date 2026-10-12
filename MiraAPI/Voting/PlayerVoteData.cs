@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Il2CppInterop.Runtime.Attributes;
 using Reactor.Utilities.Attributes;
 using UnityEngine;
@@ -34,6 +35,7 @@ public class PlayerVoteData(nint cppPtr) : MonoBehaviour(cppPtr)
 
     private int _votesRemaining = 1;
 
+    [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity convention.")]
     private void Awake()
     {
         Owner = GetComponent<PlayerControl>();
@@ -78,7 +80,7 @@ public class PlayerVoteData(nint cppPtr) : MonoBehaviour(cppPtr)
     /// <param name="playerId">The target's playerId.</param>
     public void RemovePlayerVote(byte playerId)
     {
-        Votes.Remove(Votes.Find(x=>x.Suspect==playerId));
+        Votes.Remove(Votes.Find(x => x.Suspect == playerId));
     }
 
     /// <summary>

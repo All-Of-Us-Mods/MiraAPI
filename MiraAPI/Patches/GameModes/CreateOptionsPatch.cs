@@ -1,13 +1,14 @@
 ﻿using HarmonyLib;
+using GameModesEnum = AmongUs.GameOptions.GameModes;
 
 namespace MiraAPI.Patches.GameModes;
 
 [HarmonyPatch(typeof(CreateOptionsPicker), nameof(CreateOptionsPicker.SetGameMode))]
 internal static class CreateOptionsPatch
 {
-    public static bool Prefix(CreateOptionsPicker __instance, AmongUs.GameOptions.GameModes mode)
+    public static bool Prefix(CreateOptionsPicker __instance, GameModesEnum mode)
     {
-        if (mode <= AmongUs.GameOptions.GameModes.SeekFools)
+        if (mode <= GameModesEnum.SeekFools)
         {
             return true;
         }

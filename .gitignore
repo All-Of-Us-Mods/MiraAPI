@@ -1,6 +1,6 @@
 .git/
 .idea/
-.vs/
+.vs*/
 obj/
 bin/
 .qodo/

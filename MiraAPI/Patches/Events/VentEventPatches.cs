@@ -11,7 +11,7 @@ namespace MiraAPI.Patches.Events;
 [HarmonyPatch]
 public static class VentEventPatches
 {
-    // necessary because Vent.Use is inlined in il2cpp.
+    // necessary because Vent.Use is inlined in IL2Cpp.
     private static bool _showButtons;
 
     [HarmonyPostfix]
@@ -35,6 +35,7 @@ public static class VentEventPatches
         {
             _showButtons = !@event.IsCancelled;
         }
+
         return !@event.IsCancelled;
     }
 
@@ -52,6 +53,7 @@ public static class VentEventPatches
         {
             _showButtons = @event.IsCancelled;
         }
+
         return !@event.IsCancelled;
     }
 }

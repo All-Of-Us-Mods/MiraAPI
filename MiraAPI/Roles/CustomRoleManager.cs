@@ -10,7 +10,6 @@ using MiraAPI.PluginLoading;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
-using Reactor.Localization.Utilities;
 using Reactor.Networking.Rpc;
 using Reactor.Utilities.Extensions;
 using TMPro;
@@ -47,14 +46,20 @@ public static class CustomRoleManager
     public static IReadOnlyList<RoleBehaviour> CustomRoleBehaviours { get; private set; } = [];
 
     /// <summary>
+    /// Gets the <see cref="IReadOnlyList{T}"/> of all roles as <see cref="RoleBehaviour"/> objects.
+    /// </summary>
+    public static IReadOnlyList<RoleBehaviour> AllStoredRoleBehaviours { get; private set; } = [];
+
+    /// <summary>
     /// Gets the <see cref="IReadOnlyList{T}"/> of custom roles as <see cref="ICustomRole"/> objects.
     /// </summary>
     public static IReadOnlyList<ICustomRole> CustomMiraRoles { get; private set; } = [];
 
     internal static readonly Dictionary<ushort, RoleBehaviour> CustomRoles = [];
     internal static readonly Dictionary<Type, ushort> RoleIds = [];
+    internal static readonly Dictionary<Type, MiraPluginInfo> RoleParentMods = [];
 
-    private static Il2CppSystem.Collections.Generic.List<BaseGameSetting>? _emptySettings;
+    private static CppCollections.List<BaseGameSetting>? _emptySettings;
     private static Il2CppReferenceArray<OverlayKillAnimation>? _emptyKillAnimations;
 
     private static ushort _roleId = 100;
@@ -76,8 +81,9 @@ public static class CustomRoleManager
             RoleManager.GhostRoles.Add(role.Role);
         }
 
-        CustomRoleBehaviours = CustomRoles.Values.ToList();
-        CustomMiraRoles = CustomRoles.Values.OfType<ICustomRole>().ToList();
+        CustomRoleBehaviours = [.. CustomRoles.Values];
+        CustomMiraRoles = [.. CustomRoles.Values.OfType<ICustomRole>()];
+        AllStoredRoleBehaviours = [.. RoleManager.Instance.AllRoles];
     }
 
     internal static void RegisterRoleTypes(List<Type> roles, MiraPluginInfo pluginInfo)
@@ -100,6 +106,7 @@ public static class CustomRoleManager
                 }
 
                 pluginInfo.InternalRoles.Add((ushort)role.Role, role);
+                RoleParentMods[roleType] = pluginInfo;
             }
             catch (Exception ex)
             {
@@ -143,18 +150,13 @@ public static class CustomRoleManager
         roleBehaviour.CanVent = customRole.Configuration.CanUseVent || customRole.Configuration.GetsVentData;
         roleBehaviour.DefaultGhostRole = customRole.Configuration.GhostRole;
         roleBehaviour.MaxCount = customRole.Configuration.MaxRoleCount;
-        if (customRole.Configuration.OptionsScreenshot != null)
-        {
-            roleBehaviour.RoleScreenshot = customRole.Configuration.OptionsScreenshot.LoadAsset();
-        }
-        else
-        {
-            roleBehaviour.RoleScreenshot = Sprite.Create(
+        roleBehaviour.RoleScreenshot = customRole.Configuration.OptionsScreenshot != null
+            ? customRole.Configuration.OptionsScreenshot.LoadAsset()
+            : Sprite.Create(
                 null,
                 new Rect(0, 0, 370, 230),
                 Vector2.one / 2,
                 100);
-        }
 
         _emptySettings ??= new(0);
         _emptyKillAnimations ??= new(0);
@@ -211,7 +213,9 @@ public static class CustomRoleManager
     /// <returns>A <see cref="MiraPluginInfo"/> object representing the parent mod of the role.</returns>
     public static MiraPluginInfo FindParentMod(ICustomRole role)
     {
-        return MiraPluginManager.Instance.RegisteredPlugins.First(plugin => plugin.InternalRoles.ContainsValue(role as RoleBehaviour ?? throw new InvalidOperationException()));
+        return RoleParentMods.TryGetValue(role.GetType(), out var mod)
+            ? mod
+            : MiraPluginManager.Instance.RegisteredPlugins.First(plugin => plugin.InternalRoles.ContainsValue(role as RoleBehaviour ?? throw new InvalidOperationException()));
     }
 
     /// <summary>
@@ -283,7 +287,7 @@ public static class CustomRoleManager
     internal static void HandleSyncRoleOptions(NetData[] data)
     {
         // necessary to disable then re-enable this setting
-        // we dont know how other plugins handle their configs
+        // we don't know how other plugins handle their configs
         // this way, all the options are saved at once, instead of one by one
         var oldConfigSetting = new Dictionary<MiraPluginInfo, bool>();
         foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins)

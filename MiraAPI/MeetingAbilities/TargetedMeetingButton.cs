@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using MiraAPI.Utilities.Assets;
 using UnityEngine;
 using UnityEngine.UI;
@@ -150,6 +149,6 @@ public abstract class TargetedMeetingButton
     /// <returns>Whether the target is valid or not.</returns>
     public virtual bool IsTargetValid(PlayerVoteArea playerVoteArea)
     {
-        return playerVoteArea != null && playerVoteArea.PlayerId.Value != PlayerControl.LocalPlayer.Data.PlayerId;
+        return playerVoteArea != null && playerVoteArea.PlayerId.Value != PlayerControl.LocalPlayer.Data.PlayerId && playerVoteArea.PlayerId.Value != PlayerVoteArea.SkippedVote;
     }
 }

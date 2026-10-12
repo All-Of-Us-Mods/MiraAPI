@@ -10,46 +10,38 @@ namespace MiraAPI.Presets;
 /// <summary>
 /// Represents a preset of game options that can be applied to the game.
 /// </summary>
-public class OptionPreset
+/// <remarks>
+/// Initializes a new instance of the <see cref="OptionPreset"/> class with the specified name and configuration file.
+/// </remarks>
+/// <param name="name">The name of the preset.</param>
+/// <param name="plugin">The plugin associated with the preset.</param>
+/// <param name="presetConfig">The configuration file for the preset.</param>
+public class OptionPreset(string name, MiraPluginInfo plugin, ConfigFile presetConfig)
 {
     /// <summary>
     /// Gets the name of the preset.
     /// </summary>
-    public string Name { get; }
+    public string Name { get; } = name;
 
     /// <summary>
     /// Gets the plugin associated with the preset.
     /// </summary>
-    public MiraPluginInfo Plugin { get; }
+    public MiraPluginInfo Plugin { get; } = plugin;
 
     /// <summary>
     /// Gets the <see cref="ConfigFile"/> of the plugin associated with the preset.
     /// </summary>
-    public ConfigFile PluginConfig { get; }
+    public ConfigFile PluginConfig { get; } = plugin.PluginConfig;
 
     /// <summary>
     /// Gets the <see cref="ConfigFile"/> for the preset.
     /// </summary>
-    public ConfigFile PresetConfig { get; }
+    public ConfigFile PresetConfig { get; } = presetConfig;
 
     /// <summary>
     /// Gets or sets the button associated with the preset in the UI.
     /// </summary>
     public GameObject? PresetButton { get; set; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="OptionPreset"/> class with the specified name and configuration file.
-    /// </summary>
-    /// <param name="name">The name of the preset.</param>
-    /// <param name="plugin">The plugin associated with the preset.</param>
-    /// <param name="presetConfig">The configuration file for the preset.</param>
-    public OptionPreset(string name, MiraPluginInfo plugin, ConfigFile presetConfig)
-    {
-        Name = name;
-        Plugin = plugin;
-        PluginConfig = plugin.PluginConfig;
-        PresetConfig = presetConfig;
-    }
 
     /// <summary>
     /// Loads the preset by applying the values from the preset configuration to the plugin configuration.
@@ -78,7 +70,12 @@ public class OptionPreset
     /// <param name="baseOption">The option to reset.</param>
     public void ResetOption(OptionBehaviour baseOption)
     {
-        var selectedOpt = Plugin.InternalOptions.First(x => x.OptionBehaviour == baseOption);
+        var selectedOpt = Plugin.InternalOptions.FirstOrDefault(x => x.OptionBehaviour == baseOption);
+        if (selectedOpt == null)
+        {
+            return;
+        }
+
         selectedOpt.LoadFromPreset(PresetConfig);
         /*ModdedOptionsManager.SyncAllOptions();
 
@@ -92,7 +89,7 @@ public class OptionPreset
     /// <returns>The value of whether the option is in the preset.</returns>
     public bool IsOptionInPreset(OptionBehaviour baseOption)
     {
-        var selectedOpt = Plugin.InternalOptions.First(x => x.OptionBehaviour == baseOption);
-        return selectedOpt.ConfigDefinition != null && PresetConfig.ContainsKey(selectedOpt.ConfigDefinition);
+        var selectedOpt = Plugin.InternalOptions.FirstOrDefault(x => x.OptionBehaviour == baseOption);
+        return selectedOpt != null && selectedOpt.ConfigDefinition != null && PresetConfig.ContainsKey(selectedOpt.ConfigDefinition);
     }
 }
