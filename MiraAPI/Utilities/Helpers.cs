@@ -30,6 +30,7 @@ namespace MiraAPI.Utilities;
 /// </summary>
 public static class Helpers
 {
+    internal const float MatchInfoGuideBaseScale = 1.3f;
     private static readonly Regex TrailingZeroRegex = new(@"\.0+(?!\d)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
 
     public static ReadOnlyCollection<IModdedOption>? GetModdedOptionsForType(Type classType)
@@ -833,7 +834,8 @@ public static class Helpers
             grid.localScale = new Vector3(1.3f, 1.3f, 1);
         }
 
-        obj.transform.SetParent(parent.Inner.transform);
+        obj.transform.SetParent(parent.Inner.transform, false);
+        obj.transform.localScale = Vector3.one / MatchInfoGuideBaseScale;
         obj.transform.localPosition = new Vector3(0f, 0.5f, 0f);
         var scrollHeight = variableTextSizing
             ? (desc.textBounds.size.y - 2.5f) + maxTextSize + 0.475f
