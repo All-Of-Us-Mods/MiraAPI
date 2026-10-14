@@ -1,7 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using Il2CppInterop.Runtime.Attributes;
 using MiraAPI.GameOptions;
 using MiraAPI.PluginLoading;
+using MiraAPI.Roles;
+using MiraAPI.Translation;
+using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
+using TMPro;
 using UnityEngine;
 
 namespace MiraAPI.Modifiers;
@@ -45,14 +51,96 @@ public abstract class BaseModifier : IOptionable
         ?? throw new InvalidOperationException("Modifier is not registered.");
 
     /// <summary>
+    /// Gets the id part used to build the modifier's translation keys. It is recommended to simply call it what the modifier is, as other mods may utilize it.
+    /// </summary>
+    public virtual string IdPart => GetType().Name;
+
+    /// <summary>
+    /// Gets the id part used to build the modifier's translation keys. It is recommended to call it ModGuid.Modifier.Type.
+    /// </summary>
+    public virtual string IdPrefix => GetType().Namespace!;
+
+    /// <summary>
     /// Gets the modifier name.
     /// </summary>
-    public abstract string ModifierName { get; }
+    public virtual string ModifierName => MiraLocaleManager.Get(ModifierNameLocale);
+
+    /// <summary>
+    /// Gets the modifier's name id for localization.
+    /// </summary>
+    public virtual string ModifierNameLocale => MiraLocaleManager.BuildTranslationId(IdPrefix, IdPart);
+
+    /// <summary>
+    /// Gets the medium description of the modifier. Used in the modifier guide and options menu.
+    /// </summary>
+    public virtual string ModifierMedDescription => MiraLocaleManager.Get(ModifierMedDescriptionLocale, GetDescription());
+
+    /// <summary>
+    /// Gets the modifier's medium description id for localization.
+    /// </summary>
+    public virtual string ModifierMedDescriptionLocale => MiraLocaleManager.BuildTranslationId(IdPrefix, IdPart, "MedDescription");
+
+    /// <summary>
+    /// Gets the wiki description of the modifier. Used in the wiki and normally appends the options text as well.
+    /// </summary>
+    public virtual string ModifierWikiDescription => MiraLocaleManager.Get(ModifierWikiDescriptionLocale, GetDescription()) +
+                                                     Helpers.GetOptionsText(GetType());
+
+    /// <summary>
+    /// Gets the modifier's wiki description id for localization.
+    /// </summary>
+    public virtual string ModifierWikiDescriptionLocale => MiraLocaleManager.BuildTranslationId(IdPrefix, IdPart, "WikiDescription");
+
+    /// <summary>
+    /// Gets the category of the modifier. Used in the wiki.
+    /// </summary>
+    public virtual string ModifierCategoryTitle => MiraLocaleManager.Get("Modifier");
+
+    /// <summary>
+    /// Gets whether the modifier is forcibly shown or disabled in the wiki screen.
+    /// </summary>
+    /// <returns><see langword="true"/> if the modifier is always displayed, otherwise <see langword="false"/> if it is never displayable, or <see langword="null"/> if it is dictated by amount and chance.</returns>
+    public virtual bool? ForceShowModifierOnWiki => false;
+
+    /// <summary>
+    /// Gets the information to display in the wiki.
+    /// </summary>
+    /// <param name="guide">The guide object.</param>
+    /// <param name="titleText">The title text object.</param>
+    /// <param name="titleIcon">The title's icon.</param>
+    /// <param name="parent">The scroller parent.</param>
+    /// <returns>The <see cref="GameObject"/> of the wiki.</returns>
+    public virtual GameObject GetAdvancedWiki(MatchInfoGuide guide, TextMeshPro titleText, SpriteRenderer titleIcon, Scroller parent)
+    {
+        var abilities = WikiAbilities;
+        return Helpers.CreateAdvancedWikiPage(
+            guide,
+            titleText,
+            titleIcon,
+            parent,
+            ModifierNameLocale,
+            $"{ModifierName} ({ModifierCategoryTitle})".TrimStart(),
+            ModifierIcon ?? MiraAssets.IconNeutral.LoadAsset(),
+            ModifierWikiDescription,
+            abilities);
+    }
+
+    /// <summary>
+    /// Gets the list of abilities or other similar information to display below the text of a modifier's wiki page.
+    /// </summary>
+    [HideFromIl2Cpp]
+    public virtual List<AdvancedWikiAbilityDescription> WikiAbilities => [];
 
     /// <summary>
     /// Gets the modifier icon. Useless if <see cref="HideOnUi"/> is <see langword="true"/>.
     /// </summary>
     public virtual LoadableAsset<Sprite>? ModifierIcon => null;
+
+    /// <summary>
+    /// Gets the <see cref="TMP_SpriteAsset"/> for the Modifier Icon.
+    /// </summary>
+    [HideFromIl2Cpp]
+    public virtual TMP_SpriteAsset IconTmp => null!;
 
     /// <summary>
     /// Gets a value indicating whether the modifier is hidden on the UI. Will be hidden either way if no description is provided.
@@ -68,6 +156,11 @@ public abstract class BaseModifier : IOptionable
     /// Gets a value indicating the <see cref="Color"/> that should be used for the modifier within freeplay.
     /// </summary>
     public virtual Color FreeplayFileColor => Color.gray;
+
+    /// <summary>
+    /// Gets the <see cref="Color"/> of the modifier, used in the wiki and other UI outside freeplay.
+    /// </summary>
+    public virtual Color GeneralColor => FreeplayFileColor;
 
     /// <summary>
     /// Gets a value indicating whether the modifier is unique. If <see langword="true"/>, the player can only have one instance of this modifier.

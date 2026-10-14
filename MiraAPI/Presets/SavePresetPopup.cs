@@ -9,7 +9,10 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
+// TODO: for the love of fucking god please add a namespace on the asset bundle AND here - Atony.
+/*
 namespace MiraAPI.Presets;
+*/
 
 [RegisterInIl2Cpp]
 [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity convention.")]
