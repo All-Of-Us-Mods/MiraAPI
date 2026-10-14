@@ -385,9 +385,7 @@ public static class RoleGuidePatches
         _sortMethod = MiraApiPlugin.WikiSortingMethod.Value;
         _sortGrouping = MiraApiPlugin.WikiSortingGroup.Value;
 
-        var noResultsText = instance.rolesEnabledMessage.GetComponentInChildren<TextMeshPro>();
-        if (noResultsText)
-            SetNoResultsText(instance.rolesEnabledMessage);
+        SetNoResultsText(instance.rolesEnabledMessage);
 
         if (_populate != null)
         {
@@ -457,13 +455,10 @@ public static class RoleGuidePatches
             instance.settingsTabs[RolesTabIndex],
             instance.settingsTabs[RolesTabIndex].transform.parent);
         modifiersTab.name = "ModifiersPanel";
-        var clonedMessage = FindClonedTransform(
-            instance.rolesEnabledMessage.transform,
-            instance.settingsTabs[RolesTabIndex].transform,
-            modifiersTab.transform);
-        _modifierNoResultsMessage = clonedMessage
-            ? clonedMessage.gameObject
-            : Object.Instantiate(instance.rolesEnabledMessage, modifiersTab.transform, true);
+        _modifierNoResultsMessage = Object.Instantiate(
+            instance.rolesEnabledMessage,
+            instance.rolesEnabledMessage.transform.parent,
+            true);
         _modifierNoResultsMessage.name = "NoResultsFound";
         _modifierNoResultsMessage.SetActive(false);
         SetNoResultsText(_modifierNoResultsMessage);
@@ -773,39 +768,9 @@ public static class RoleGuidePatches
 
     public static void OpenRolesTab() => OpenTab(RolesTabIndex);
 
-    private static Transform? FindClonedTransform(Transform source, Transform sourceRoot, Transform cloneRoot)
-    {
-        var childIndices = new List<int>();
-        var current = source;
-        while (current != sourceRoot && current.parent)
-        {
-            childIndices.Add(current.GetSiblingIndex());
-            current = current.parent;
-        }
-
-        if (current != sourceRoot)
-        {
-            return null;
-        }
-
-        var result = cloneRoot;
-        for (var i = childIndices.Count - 1; i >= 0; i--)
-        {
-            var index = childIndices[i];
-            if (index >= result.childCount)
-            {
-                return null;
-            }
-
-            result = result.GetChild(index);
-        }
-
-        return result;
-    }
-
     private static void SetNoResultsText(GameObject message)
     {
-        var text = message.GetComponentInChildren<TextMeshPro>();
+        var text = message.GetComponentInChildren<TextMeshPro>(true);
         if (!text)
         {
             return;
@@ -815,12 +780,11 @@ public static class RoleGuidePatches
         text.text = MiraLocaleManager.Get("MiraApi.Wiki.NoResultsFound", "No Results Found");
     }
 
-    private static void SetNoResultsVisible(bool modifiers, bool visible)
+    private static void SetNoResultsVisible(GameObject message, bool visible)
     {
-        MatchInfoGuide.Instance.rolesEnabledMessage.SetActive(!modifiers && visible);
-        if (_modifierNoResultsMessage)
+        if (message)
         {
-            _modifierNoResultsMessage.SetActive(modifiers && visible);
+            message.SetActive(visible);
         }
     }
 
@@ -1054,12 +1018,12 @@ public static class RoleGuidePatches
         if (modifiers)
         {
             _modifiersScroller.SetYBoundsMax(GetGridScrollBounds(shown.Count));
-            SetNoResultsVisible(true, shown.Count == 0);
+            SetNoResultsVisible(_modifierNoResultsMessage, shown.Count == 0);
         }
         else
         {
             instance.MatchInfoRoleScroller.SetYBoundsMax(GetGridScrollBounds(shown.Count));
-            SetNoResultsVisible(false, shown.Count == 0);
+            SetNoResultsVisible(instance.rolesEnabledMessage, shown.Count == 0);
         }
 
         return shown;
@@ -1161,7 +1125,10 @@ public static class RoleGuidePatches
             ? _modifiersScroller
             : guide.MatchInfoRoleScroller;
         scroller.SetYBoundsMax(GetGridScrollBounds(shown.Count));
-        SetNoResultsVisible(guide.activeTabIndex == ModifiersTabIndex, shown.Count == 0);
+        var noResultsMessage = guide.activeTabIndex == ModifiersTabIndex
+            ? _modifierNoResultsMessage
+            : guide.rolesEnabledMessage;
+        SetNoResultsVisible(noResultsMessage, shown.Count == 0);
         scroller.ScrollToTop();
         return true;
     }
