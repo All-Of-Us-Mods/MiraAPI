@@ -89,8 +89,7 @@ public static class KeybindUtils
 
     internal static bool IsControllerActionActive(int actionId)
     {
-        var buttons = CustomButtonManager.Buttons.Where(x => x.Keybind?.RewiredInputAction?.id == actionId).ToArray();
-        return buttons.Length == 0 || buttons.Any(x => x.Button != null && x.Button.isActiveAndEnabled && x.Enabled(PlayerControl.LocalPlayer?.Data?.Role));
+        return CustomButtonManager.Buttons.Any(x => x.Keybind?.RewiredInputAction?.id == actionId && x.Button != null && x.Button.isActiveAndEnabled && x.Enabled(PlayerControl.LocalPlayer?.Data?.Role));
     }
 
     /// <summary>

@@ -5,6 +5,7 @@ namespace MiraAPI.Keybinds;
 /// <summary>
 /// Class containing all default <see cref="MiraKeybind"/>s.
 /// Recommended for cross-mod compatibility.
+/// Controller bindings are unassigned by default.
 /// </summary>
 [RegisterCustomKeybinds]
 public static class MiraGlobalKeybinds
@@ -12,12 +13,12 @@ public static class MiraGlobalKeybinds
     /// <summary>
     /// Gets the keybind for primary abilities.
     /// </summary>
-    public static MiraKeybind PrimaryAbility { get; } = new("Primary Ability", KeyboardKeyCode.T, ControllerButton.RightTrigger);
+    public static MiraKeybind PrimaryAbility { get; } = new("Primary Ability", KeyboardKeyCode.T);
 
     /// <summary>
     /// Gets the keybind for secondary abilities.
     /// </summary>
-    public static MiraKeybind SecondaryAbility { get; } = new("Secondary Ability", KeyboardKeyCode.Y, ControllerButton.RightBumper);
+    public static MiraKeybind SecondaryAbility { get; } = new("Secondary Ability", KeyboardKeyCode.Y);
 
     /// <summary>
     /// Gets the keybind for Tertiary abilities.
@@ -27,7 +28,7 @@ public static class MiraGlobalKeybinds
     /// <summary>
     /// Gets the keybind for primary modifier abilities.
     /// </summary>
-    public static MiraKeybind ModifierPrimaryAbility { get; } = new("Modifier Primary Ability", KeyboardKeyCode.I, ControllerButton.LeftTrigger);
+    public static MiraKeybind ModifierPrimaryAbility { get; } = new("Modifier Primary Ability", KeyboardKeyCode.I);
 
     /// <summary>
     /// Gets the keybind for secondary modifier abilities.
