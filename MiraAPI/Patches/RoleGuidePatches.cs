@@ -27,6 +27,7 @@ namespace MiraAPI.Patches;
 [HarmonyPatch]
 public static class RoleGuidePatches
 {
+    private const int GeneralTabIndex = 1;
     private const int RolesTabIndex = 2;
     private const int ModifiersTabIndex = 3;
     private const float MinGuideScaleFactor = 0.5f;
@@ -174,6 +175,7 @@ public static class RoleGuidePatches
         _advancedInfoTabScroller = null!;
         _currentAdvancedTabObject = null!;
         _loadingSpinner = null;
+        ResetGeneralState();
         SearchIconButton = null!;
         SearchSortingOrderButton = null!;
         SearchSortingGroupButton = null!;
@@ -468,6 +470,7 @@ public static class RoleGuidePatches
             .First(x => x.name.Contains("BG_Gradient")).transform.localPosition = new Vector3(0, -0.62f, -5);
         _modifiersScroller = modifiersTab.GetComponent<Scroller>();
         instance.settingsTabs.Add(modifiersTab);
+        InitializeGeneralPanel(instance);
 
         var wikiTab = Object.Instantiate(
             instance.settingsTabs[RolesTabIndex],
@@ -1051,6 +1054,12 @@ public static class RoleGuidePatches
 
     private static void RefreshActiveTab(bool scrollToTop)
     {
+        if (IsGeneralTabActive)
+        {
+            RefreshGeneralTab(scrollToTop);
+            return;
+        }
+
         StartPopulate();
         if (scrollToTop)
         {
@@ -1079,6 +1088,12 @@ public static class RoleGuidePatches
         }
 
         _appliedSearch = text;
+        if (IsGeneralTabActive)
+        {
+            RefreshGeneralTab(true);
+            yield break;
+        }
+
         if (TryRefreshSearch(text))
         {
             yield break;
@@ -1186,6 +1201,12 @@ public static class RoleGuidePatches
 
     public static void SwitchFilter()
     {
+        if (IsGeneralTabActive)
+        {
+            ChangeGeneralPage(-1);
+            return;
+        }
+
         var stepUp = (SortingFilter)((int)_sortFilter + 1);
         if (Enum.IsDefined(stepUp))
         {
@@ -1232,6 +1253,11 @@ public static class RoleGuidePatches
 
     public static void SwitchMethod()
     {
+        if (IsGeneralTabActive)
+        {
+            return;
+        }
+
         var stepUp = (SortingMethod)((int)_sortMethod + 1);
         if (Enum.IsDefined(stepUp))
         {
@@ -1266,6 +1292,12 @@ public static class RoleGuidePatches
 
     public static void SwitchGrouping()
     {
+        if (IsGeneralTabActive)
+        {
+            ChangeGeneralPage(1);
+            return;
+        }
+
         var stepUp = (SortingGroups)((int)_sortGrouping + 1);
         if (Enum.IsDefined(stepUp))
         {
@@ -1405,8 +1437,8 @@ public static class RoleGuidePatches
                     _titleText.text = MiraLocaleManager.Get("MiraApi.Wiki.PlayersTab");
                     _titleIcon.sprite = MiraAssets.IconPlayerList.LoadAsset();
                     break;
-                case 1:
-                    _titleText.text = MiraLocaleManager.Get("MiraApi.Wiki.SettingsTab");
+                case GeneralTabIndex:
+                    _titleText.text = GetGeneralTitle();
                     _titleIcon.sprite = MiraAssets.IconSettings.LoadAsset();
                     break;
                 case RolesTabIndex:
@@ -1428,6 +1460,15 @@ public static class RoleGuidePatches
 
         _advancedInfoTabScroller?.gameObject.SetActive(false);
         SearchComponentContainer?.SetActive(true);
+        if (tabIndex == GeneralTabIndex)
+        {
+            EnterGeneralTab();
+        }
+        else
+        {
+            LeaveGeneralTab();
+        }
+
         UpdateSpinner();
     }
 
@@ -1474,6 +1515,7 @@ public static class RoleGuidePatches
     {
         instance.settingsTabs[RolesTabIndex].SetActive(false);
         _modifiersScroller?.gameObject.SetActive(false);
+        LeaveGeneralTab();
         if (_currentAdvancedTabObject)
         {
             _currentAdvancedTabObject.SetActive(false);
@@ -1679,6 +1721,416 @@ public static class RoleGuidePatches
     public static string GetCategoryTitle(this ICustomRole customRole)
     {
         return customRole.RoleFactionTitle;
+    }
+
+    // ---- General (non-role) option pages: paginated General tab + cross-page search ----
+    private static Scroller? _generalScroller;
+    private static GameObject? _generalNoResults;
+    private static readonly List<GeneralRow> GeneralRows = [];
+    private static GameObject? _generalRowTemplate;
+    private static Vector3 _generalRowOrigin;
+    private static Vector3 _generalRowColumnStep;
+    private static float _generalRowHeight = -0.65f; // negative: rows go down
+    private static int _generalColumns = 2;
+    private static float _generalVisibleHeight;
+    private static bool _generalScrollerFailed;
+
+    /// <summary>One vanilla-looking settings row (label box + value box) that is reused between pages.</summary>
+    private sealed class GeneralRow(GameObject root, TextMeshPro label, TextMeshPro value)
+    {
+        public GameObject Root { get; } = root;
+        public TextMeshPro Label { get; } = label;
+        public TextMeshPro Value { get; } = value;
+    }
+    private static List<GuideOptionPage> _generalPages = [];
+    private static int _generalPage; // 0 = vanilla settings, 1..N = _generalPages[page - 1]
+    private static bool _generalSearching;
+
+    // Saved state of the sort buttons so they can be restored when leaving the General tab.
+    private static bool _sortButtonsRepurposed;
+    private static string _savedFilterLabel = string.Empty;
+    private static string _savedGroupLabel = string.Empty;
+    private static Vector3 _savedFilterIconScale = Vector3.one;
+    private static Vector3 _savedGroupIconScale = Vector3.one;
+
+    private static bool IsGeneralTabActive =>
+        _uiInitialized && MatchInfoGuide.Instance && MatchInfoGuide.Instance.activeTabIndex == GeneralTabIndex;
+
+    private static void ResetGeneralState()
+    {
+        _generalScroller = null;
+        _generalNoResults = null;
+        GeneralRows.Clear();
+        _generalRowTemplate = null;
+        _generalScrollerFailed = false;
+        _generalPages = [];
+        _generalPage = 0;
+        _generalSearching = false;
+        _sortButtonsRepurposed = false;
+    }
+
+    private static void InitializeGeneralPanel(MatchInfoGuide instance)
+    {
+        _generalNoResults = Object.Instantiate(
+            instance.rolesEnabledMessage,
+            instance.rolesEnabledMessage.transform.parent,
+            true);
+        _generalNoResults.name = "GeneralNoResultsFound";
+        _generalNoResults.SetActive(false);
+        SetNoResultsText(_generalNoResults);
+    }
+
+    /// <summary>
+    /// Clones the vanilla settings tab the first time it is needed, so extra pages are drawn with the exact same
+    /// rows, fonts, masking and scroll area as the vanilla list. Done lazily because the vanilla rows are only
+    /// created when the guide first opens. The clone is NOT added to <c>settingsTabs</c>; its visibility is managed
+    /// here so the guide's tab count and tab buttons stay untouched.
+    /// </summary>
+    private static bool EnsureGeneralScroller(MatchInfoGuide guide)
+    {
+        if (_generalScroller != null && _generalRowTemplate)
+        {
+            return true;
+        }
+
+        if (_generalScrollerFailed)
+        {
+            return false;
+        }
+
+        var vanillaTab = guide.settingsTabs[GeneralTabIndex];
+        var vanillaScroller = vanillaTab.GetComponent<Scroller>() ?? vanillaTab.GetComponentInChildren<Scroller>(true);
+        if (!vanillaScroller || vanillaScroller.Inner.childCount < 2)
+        {
+            return false; // vanilla rows not built yet; try again next refresh
+        }
+
+        // Read the vanilla grid: first row, second entry (same row => 2 columns), third entry (next row).
+        var vInner = vanillaScroller.Inner;
+        var p0 = vInner.GetChild(0).localPosition;
+        var p1 = vInner.GetChild(1).localPosition;
+        var sameRow = Mathf.Abs(p1.y - p0.y) < 0.01f;
+        var vanillaCount = vInner.childCount;
+        _generalColumns = sameRow ? 2 : 1;
+        _generalRowOrigin = p0;
+        _generalRowColumnStep = sameRow ? new Vector3(p1.x - p0.x, 0f, 0f) : Vector3.zero;
+        if (sameRow)
+        {
+            _generalRowHeight = vanillaCount >= 3 ? vInner.GetChild(2).localPosition.y - p0.y : -0.65f;
+        }
+        else
+        {
+            _generalRowHeight = p1.y - p0.y;
+        }
+
+        if (Mathf.Abs(_generalRowHeight) < 0.05f)
+        {
+            _generalRowHeight = -0.65f;
+        }
+
+        // Self-calibrate the visible height from how the vanilla list was bounded.
+        var vanillaRows = Mathf.CeilToInt(vanillaCount / (float)_generalColumns);
+        var visible = (vanillaRows * Mathf.Abs(_generalRowHeight)) - vanillaScroller.ContentYBounds.max;
+        _generalVisibleHeight = visible > 0.1f && visible < vanillaRows * Mathf.Abs(_generalRowHeight)
+            ? visible
+            : 3.3f * Mathf.Abs(_generalRowHeight);
+
+        var clone = Object.Instantiate(vanillaTab, vanillaTab.transform.parent);
+        clone.name = "GeneralOptionsPanel";
+        var cloneScroller = clone.GetComponent<Scroller>() ?? clone.GetComponentInChildren<Scroller>(true);
+        var cInner = cloneScroller.Inner;
+
+        // Keep the first row as an inactive prototype, delete the rest.
+        var template = cInner.GetChild(0).gameObject;
+        for (var i = cInner.childCount - 1; i >= 1; i--)
+        {
+            var child = cInner.GetChild(i).gameObject;
+            child.SetActive(false);
+            child.Destroy();
+        }
+
+        template.SetActive(false);
+        _generalRowTemplate = template;
+        _generalScroller = cloneScroller;
+        clone.SetActive(false);
+        return true;
+    }
+
+    private static GeneralRow? CreateGeneralRow()
+    {
+        if (_generalScroller == null || !_generalRowTemplate)
+        {
+            return null;
+        }
+
+        var go = Object.Instantiate(_generalRowTemplate!, _generalScroller.Inner);
+        go.name = "GeneralOptionRow";
+
+        // The game would re-translate these and overwrite our text.
+        foreach (var translator in go.GetComponentsInChildren<TextTranslatorTMP>(true))
+        {
+            translator.Destroy();
+        }
+
+        // Label is the left-most text, value is the right-most (same as the vanilla entries).
+        var texts = go.GetComponentsInChildren<TextMeshPro>(true).OrderBy(t => t.transform.position.x).ToArray();
+        if (texts.Length < 2)
+        {
+            Warning("Vanilla settings row has fewer than two text fields; cannot clone it for the general pages.");
+            go.Destroy();
+            _generalScrollerFailed = true;
+            return null;
+        }
+
+        return new GeneralRow(go, texts[0], texts[^1]);
+    }
+
+    private static void EnterGeneralTab()
+    {
+        if (!_uiInitialized)
+        {
+            return;
+        }
+
+        RefreshGeneralTab(true);
+    }
+
+    private static void LeaveGeneralTab()
+    {
+        if (_generalScroller != null)
+        {
+            _generalScroller.gameObject.SetActive(false);
+        }
+
+        if (_generalNoResults)
+        {
+            _generalNoResults!.SetActive(false);
+        }
+
+        RestoreSortButtons();
+    }
+
+    private static void ChangeGeneralPage(int delta)
+    {
+        var total = _generalPages.Count + 1;
+        if (total <= 1)
+        {
+            return;
+        }
+
+        _generalPage = (_generalPage + delta + total) % total;
+        RefreshGeneralTab(true);
+    }
+
+    /// <summary>
+    /// Rebuilds pages from live option data and redraws the General tab.
+    /// Pages are rebuilt every time because values, group visibility and the gamemode can change.
+    /// </summary>
+    private static void RefreshGeneralTab(bool scrollToTop)
+    {
+        var guide = MatchInfoGuide.Instance;
+        if (!_uiInitialized || !guide)
+        {
+            return;
+        }
+
+        _generalPages = GuideOptionPages.BuildPages(guide.GetBoolString);
+        if (_generalPage > _generalPages.Count)
+        {
+            _generalPage = 0;
+        }
+
+        var vanillaTab = guide.settingsTabs[GeneralTabIndex];
+
+        // No MiraAPI general options in this match: leave the vanilla tab exactly as it always was.
+        if (_generalPages.Count == 0)
+        {
+            _generalSearching = false;
+            _generalScroller?.gameObject.SetActive(false);
+            _generalNoResults?.SetActive(false);
+            vanillaTab.SetActive(true);
+            RestoreSortButtons();
+            UpdateGeneralTitle();
+            return;
+        }
+
+        var searchText = GetSearchText().Trim();
+        _generalSearching = searchText.Length > 0;
+
+        if (_generalSearching)
+        {
+            ShowGeneralEntries(GuideOptionPages.Search(_generalPages, searchText), true, scrollToTop);
+            vanillaTab.SetActive(false);
+            RepurposeSortButtons(false);
+        }
+        else if (_generalPage == 0)
+        {
+            _generalScroller?.gameObject.SetActive(false);
+            _generalNoResults?.SetActive(false);
+            vanillaTab.SetActive(true);
+            RepurposeSortButtons(true);
+        }
+        else
+        {
+            ShowGeneralEntries(_generalPages[_generalPage - 1].Entries, false, scrollToTop);
+            vanillaTab.SetActive(false);
+            RepurposeSortButtons(true);
+        }
+
+        UpdateGeneralTitle();
+    }
+
+    private static void ShowGeneralEntries(IReadOnlyList<GuideOptionEntry> entries, bool showGroup, bool scrollToTop)
+    {
+        var guide = MatchInfoGuide.Instance;
+        if (!guide || !EnsureGeneralScroller(guide))
+        {
+            // Could not clone the vanilla rows: fall back to the plain vanilla tab rather than a blank page.
+            guide?.settingsTabs[GeneralTabIndex].SetActive(true);
+            return;
+        }
+
+        while (GeneralRows.Count < entries.Count)
+        {
+            var row = CreateGeneralRow();
+            if (row == null)
+            {
+                break;
+            }
+
+            GeneralRows.Add(row);
+        }
+
+        for (var i = 0; i < GeneralRows.Count; i++)
+        {
+            var row = GeneralRows[i];
+            if (i >= entries.Count)
+            {
+                row.Root.SetActive(false);
+                continue;
+            }
+
+            var entry = entries[i];
+            row.Label.text = showGroup ? $"<size=60%>{entry.GroupName}</size>\n{entry.Title}" : entry.Title;
+            row.Value.text = entry.Value;
+            row.Root.transform.localPosition = _generalRowOrigin +
+                                               (_generalRowColumnStep * (i % _generalColumns)) +
+                                               new Vector3(0f, _generalRowHeight * (i / _generalColumns), 0f);
+            row.Root.SetActive(true);
+        }
+
+        var rows = Mathf.CeilToInt(Mathf.Min(entries.Count, GeneralRows.Count) / (float)_generalColumns);
+        _generalScroller!.gameObject.SetActive(true);
+        _generalScroller.SetYBoundsMax(Mathf.Clamp((rows * Mathf.Abs(_generalRowHeight)) - _generalVisibleHeight, 0f, 999f));
+        _generalNoResults?.SetActive(entries.Count == 0);
+        if (scrollToTop)
+        {
+            _generalScroller.ScrollToTop();
+        }
+    }
+
+    private static string GetGeneralTitle()
+    {
+        var baseTitle = MiraLocaleManager.Get("MiraApi.Wiki.SettingsTab");
+        if (!_uiInitialized || _generalPages.Count == 0)
+        {
+            return baseTitle;
+        }
+
+        if (_generalSearching)
+        {
+            return $"{baseTitle}: {MiraLocaleManager.Get("MiraApi.Wiki.SearchResults", "Search Results")}";
+        }
+
+        var counter = $"({_generalPage + 1}/{_generalPages.Count + 1})";
+        return _generalPage == 0
+            ? $"{baseTitle} {counter}"
+            : $"{baseTitle}: {_generalPages[_generalPage - 1].Title} {counter}";
+    }
+
+    private static void UpdateGeneralTitle()
+    {
+        if (_titleText && IsGeneralTabActive)
+        {
+            _titleText.text = GetGeneralTitle();
+        }
+    }
+
+    /// <summary>
+    /// Turns the Filter button into "previous page" and the Grouping button into "next page",
+    /// and hides the Order button (it only sorts roles/modifiers).
+    /// </summary>
+    /// <param name="paginationVisible">False while searching, since search results are a single page.</param>
+    private static void RepurposeSortButtons(bool paginationVisible)
+    {
+        if (!SearchSortingFilterButton || !SearchSortingGroupButton || !SearchSortingOrderButton)
+        {
+            return;
+        }
+
+        if (!_sortButtonsRepurposed)
+        {
+            _savedFilterLabel = FilterSortingTmp.text;
+            _savedGroupLabel = GroupSortingTmp.text;
+            _savedFilterIconScale = _searchSortingFilterIdle.transform.localScale;
+            _savedGroupIconScale = _searchSortingGroupIdle.transform.localScale;
+
+            SetPaginationSprites(_searchSortingFilterIdle, _searchSortingFilterHover, true);
+            SetPaginationSprites(_searchSortingGroupIdle, _searchSortingGroupHover, false);
+            FilterSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.PrevPage", "Prev");
+            GroupSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.NextPage", "Next");
+            _sortButtonsRepurposed = true;
+        }
+
+        SearchSortingOrderButton.gameObject.SetActive(false);
+        SearchSortingFilterButton.gameObject.SetActive(paginationVisible);
+        SearchSortingGroupButton.gameObject.SetActive(paginationVisible);
+    }
+
+    private static void SetPaginationSprites(SpriteRenderer idle, SpriteRenderer hover, bool flip)
+    {
+        var idleSprite = MiraAssets.NextButton.LoadAsset();
+        var hoverSprite = MiraAssets.NextButtonActive.LoadAsset();
+
+        // Match the on-screen size of the sort icon being replaced, since the arrow art differs in size.
+        var currentHeight = idle.sprite ? idle.sprite.bounds.size.y * idle.transform.localScale.y : 0f;
+        var newHeight = idleSprite.bounds.size.y;
+        var scale = currentHeight > 0f && newHeight > 0f ? currentHeight / newHeight : 1f;
+
+        idle.sprite = idleSprite;
+        hover.sprite = hoverSprite;
+        idle.flipX = hover.flipX = flip;
+        idle.transform.localScale = hover.transform.localScale = new Vector3(scale, scale, 1f);
+    }
+
+    private static void RestoreSortButtons()
+    {
+        if (!_sortButtonsRepurposed)
+        {
+            return;
+        }
+
+        _sortButtonsRepurposed = false;
+        if (!SearchSortingFilterButton || !SearchSortingGroupButton || !SearchSortingOrderButton)
+        {
+            return;
+        }
+
+        _searchSortingFilterIdle.sprite = GetSortFilterSprite(_sortFilter, false);
+        _searchSortingFilterHover.sprite = GetSortFilterSprite(_sortFilter, true);
+        _searchSortingGroupIdle.sprite = GetSortGroupSprite(_sortGrouping, false);
+        _searchSortingGroupHover.sprite = GetSortGroupSprite(_sortGrouping, true);
+        _searchSortingFilterIdle.flipX = _searchSortingFilterHover.flipX = false;
+        _searchSortingGroupIdle.flipX = _searchSortingGroupHover.flipX = false;
+        _searchSortingFilterIdle.transform.localScale =
+            _searchSortingFilterHover.transform.localScale = _savedFilterIconScale;
+        _searchSortingGroupIdle.transform.localScale =
+            _searchSortingGroupHover.transform.localScale = _savedGroupIconScale;
+        FilterSortingTmp.text = _savedFilterLabel;
+        GroupSortingTmp.text = _savedGroupLabel;
+        SearchSortingOrderButton.gameObject.SetActive(true);
+        SearchSortingFilterButton.gameObject.SetActive(true);
+        SearchSortingGroupButton.gameObject.SetActive(true);
     }
 }
 
