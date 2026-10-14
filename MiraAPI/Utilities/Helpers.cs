@@ -911,9 +911,8 @@ public static class Helpers
         Scroller parent,
         IReadOnlyList<KeyValuePair<string, string>> settings)
     {
-        const float rowPitch = 0.57f;
         const float contentTop = 0.95f;
-        const float visibleHeight = 1.8f;
+        const float horizontalOffset = -0.2f;
         const int columns = 2;
 
         var inner = parent.Inner;
@@ -965,13 +964,16 @@ public static class Helpers
             });
         var rowScale = (columnWidth / prefabBounds.size.x) * 1.1f;
         var rowHeight = prefabBounds.size.y * rowScale;
+        var rowPitch = 0.45f * rowScale;
+        var contentBottom = float.PositiveInfinity;
 
         for (var i = 0; i < settings.Count; i++)
         {
             var column = i % columns;
             var rowIndex = i / columns;
             var originX = -((columns * columnWidth) + ((columns - 1) * columnGap)) / 2f +
-                          (column * (columnWidth + columnGap));
+                          (column * (columnWidth + columnGap)) +
+                          horizontalOffset;
             var centerY = contentTop - (rowHeight / 2f) - (rowIndex * rowPitch);
             var row = Object.Instantiate(rowPrefab, page.transform);
             row.enabled = false;
@@ -994,7 +996,6 @@ public static class Helpers
                 centerY - (prefabBounds.center.y * rowScale),
                 0f);
             row.TitleText.text = settings[i].Key;
-            row.TitleText.fontStyle = FontStyles.Bold;
             row.ValueText.text = settings[i].Value;
 
             foreach (var text in row.GetComponentsInChildren<TextMeshPro>(true))
@@ -1005,21 +1006,48 @@ public static class Helpers
                     Object.Destroy(translator);
                 }
 
-                text.fontMaterial.SetFloat(guide.MatchInfoRolePanelPrefab.STENCIL_NAME, 50f);
+                text.fontMaterial.SetFloat(ShaderID.StencilComp, 3f);
+                text.fontMaterial.SetFloat(ShaderID.Stencil, 50f);
             }
 
             foreach (var renderer in row.GetComponentsInChildren<SpriteRenderer>(true))
             {
                 renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                 renderer.material.SetInt(PlayerMaterial.MaskLayer, 50);
+                if (renderer.enabled &&
+                    renderer.sprite &&
+                    renderer.transform != row.PlusBtn.transform &&
+                    !renderer.transform.IsChildOf(row.PlusBtn.transform) &&
+                    renderer.transform != row.MinusBtn.transform &&
+                    !renderer.transform.IsChildOf(row.MinusBtn.transform))
+                {
+                    contentBottom = Mathf.Min(
+                        contentBottom,
+                        inner.InverseTransformPoint(renderer.bounds.min).y);
+                }
+            }
+
+            foreach (var text in row.GetComponentsInChildren<TextMeshPro>(true))
+            {
+                if (text.enabled)
+                {
+                    contentBottom = Mathf.Min(
+                        contentBottom,
+                        inner.InverseTransformPoint(text.bounds.min).y);
+                }
             }
 
             row.gameObject.SetActive(true);
         }
 
-        var rows = Mathf.CeilToInt(settings.Count / (float)columns);
-        var contentHeight = rows == 0 ? 0f : rowHeight + ((rows - 1) * rowPitch);
-        parent.SetYBoundsMax(Mathf.Clamp(contentHeight - visibleHeight, 0f, 999f));
+        var maskArea = parent.transform.FindChild("MaskArea")?.GetComponent<SpriteRenderer>();
+        var maskBottom = maskArea
+            ? inner.InverseTransformPoint(maskArea!.bounds.min).y
+            : -0.75f;
+        var scrollRange = float.IsPositiveInfinity(contentBottom)
+            ? 0f
+            : Mathf.Max(0f, maskBottom - contentBottom + 0.1f);
+        parent.SetYBoundsMax(Mathf.Clamp(scrollRange, 0f, 999f));
         page.SetActive(true);
         return page;
     }
