@@ -38,6 +38,7 @@ internal static class GameOptionsMenuPatch
     [HarmonyPatch(nameof(GameOptionsMenu.Initialize))]
     public static bool InitPatch(GameOptionsMenu __instance)
     {
+        Helpers.CacheAdvancedSettingsRowPrefab(__instance.numberOptionOrigin);
         __instance.Children ??= new();
         __instance.Children.Clear();
 

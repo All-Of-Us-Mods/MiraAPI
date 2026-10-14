@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using HarmonyLib;
+using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.OptionTypes;
@@ -32,6 +33,7 @@ public static class Helpers
 {
     internal const float MatchInfoGuideBaseScale = 1.3f;
     private static readonly Regex TrailingZeroRegex = new(@"\.0+(?!\d)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+    private static NumberOption? _advancedSettingsRowPrefab;
 
     public static ReadOnlyCollection<IModdedOption>? GetModdedOptionsForType(Type classType)
     {
@@ -845,8 +847,60 @@ public static class Helpers
     }
 
     /// <summary>
-    /// Creates a page of vanilla-looking settings rows (label box on the left, value box on the right, two columns)
-    /// inside a roles-style scroller. Use this for lists of "Name: Value" settings that are not roles or modifiers.
+    /// Caches a persistent clone of the vanilla settings row for use in the Match Info Guide.
+    /// </summary>
+    /// <param name="rowPrefab">The vanilla settings row prefab.</param>
+    internal static void CacheAdvancedSettingsRowPrefab(NumberOption? rowPrefab)
+    {
+        if (!rowPrefab)
+        {
+            foreach (var candidate in Resources.FindObjectsOfTypeAll(Il2CppType.Of<GameSettingMenu>()))
+            {
+                var menu = candidate.TryCast<GameSettingMenu>();
+                var settingsTab = menu ? menu!.GameSettingsTab : null;
+                if (settingsTab && settingsTab!.numberOptionOrigin)
+                {
+                    rowPrefab = settingsTab.numberOptionOrigin;
+                    break;
+                }
+            }
+        }
+
+        if (!rowPrefab)
+        {
+            foreach (var candidate in Resources.FindObjectsOfTypeAll(Il2CppType.Of<NumberOption>()))
+            {
+                var option = candidate.TryCast<NumberOption>();
+                if (!option)
+                {
+                    continue;
+                }
+
+                if (option!.TitleText && option.ValueText && option.PlusBtn && option.MinusBtn)
+                {
+                    rowPrefab = option;
+                    break;
+                }
+            }
+        }
+
+        if (_advancedSettingsRowPrefab || !rowPrefab)
+        {
+            return;
+        }
+
+        var cachedPrefab = Object.Instantiate(rowPrefab!.gameObject);
+        cachedPrefab.name = "MiraAPIAdvancedSettingsRowPrefab";
+        cachedPrefab.transform.SetParent(null, false);
+        cachedPrefab.transform.localPosition = Vector3.zero;
+        cachedPrefab.transform.localRotation = Quaternion.identity;
+        cachedPrefab.SetActive(false);
+        Object.DontDestroyOnLoad(cachedPrefab);
+        _advancedSettingsRowPrefab = cachedPrefab.GetComponent<NumberOption>();
+    }
+
+    /// <summary>
+    /// Creates a page of vanilla settings rows inside a roles-style scroller.
     /// </summary>
     /// <param name="guide">The guide object.</param>
     /// <param name="parent">The <see cref="Scroller"/> the page is parented to.</param>
@@ -857,10 +911,9 @@ public static class Helpers
         Scroller parent,
         IReadOnlyList<KeyValuePair<string, string>> settings)
     {
-        const float rowHeight = 0.4f;
-        const float rowPitch = 0.52f;
+        const float rowPitch = 0.57f;
         const float contentTop = 0.95f;
-        const float visibleHeight = 1.5f;
+        const float visibleHeight = 1.8f;
         const int columns = 2;
 
         var inner = parent.Inner;
@@ -872,88 +925,102 @@ public static class Helpers
 
         var columnWidth = layout ? Mathf.Clamp(layout.cellSize.x, 2f, 3.2f) : 2.7f;
         var columnGap = layout ? Mathf.Clamp(layout.spacing.x, 0.1f, 0.6f) : 0.3f;
-        var labelWidth = columnWidth * 0.62f;
-        var valueWidth = columnWidth * 0.30f;
-        var boxGap = columnWidth - labelWidth - valueWidth;
-        var left = -((columns * columnWidth) + ((columns - 1) * columnGap)) / 2f;
-
-        var prefab = guide.MatchInfoRolePanelPrefab;
-        var vanillaFont = HudManager.Instance.TaskPanel.taskText;
-
-        var boxMaterial = new Material(prefab.roleIcon.sharedMaterial);
-        boxMaterial.SetInt(PlayerMaterial.MaskLayer, 50);
-        var boxSprite = MiraAssets.BlankSprite.LoadAsset();
         var layer = inner.gameObject.layer;
-
         var page = new GameObject("AdvancedSettingsPage") { layer = layer };
         page.transform.SetParent(inner, false);
         page.transform.localPosition = Vector3.zero;
+        page.SetActive(false);
 
-        void MakeBox(Vector3 pos, Vector2 size, Color color)
+        var gameSettingsMenu = GameSettingMenu.Instance;
+        CacheAdvancedSettingsRowPrefab(gameSettingsMenu ? gameSettingsMenu.GameSettingsTab.numberOptionOrigin : null);
+        var rowPrefab = _advancedSettingsRowPrefab;
+        if (!rowPrefab)
         {
-            var box = new GameObject("Box") { layer = layer };
-            box.transform.SetParent(page.transform, false);
-            box.transform.localPosition = pos;
-            var sr = box.AddComponent<SpriteRenderer>();
-            sr.sprite = boxSprite;
-            sr.drawMode = SpriteDrawMode.Sliced;
-            sr.size = size;
-            sr.color = color;
-            sr.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-            sr.sharedMaterial = boxMaterial;
+            Error("Could not render MiraAPI settings rows because the vanilla NumberOption prefab was not cached.");
+            return page;
         }
 
-        void MakeText(string text, Vector3 pos, Vector2 size)
+        var spriteBounds = rowPrefab!.GetComponentsInChildren<SpriteRenderer>(true)
+            .Where(renderer =>
+                renderer.enabled &&
+                renderer.sprite &&
+                renderer.transform != rowPrefab.PlusBtn.transform &&
+                !renderer.transform.IsChildOf(rowPrefab.PlusBtn.transform) &&
+                renderer.transform != rowPrefab.MinusBtn.transform &&
+                !renderer.transform.IsChildOf(rowPrefab.MinusBtn.transform))
+            .Select(renderer => renderer.bounds)
+            .ToArray();
+        if (spriteBounds.Length == 0)
         {
-            var tmp = Object.Instantiate(prefab.roleName, page.transform);
-            tmp.richText = true;
-            tmp.font = vanillaFont.font;
-            tmp.fontMaterial = vanillaFont.fontMaterial;
-            tmp.text = text;
-            tmp.enableAutoSizing = true;
-            tmp.fontSizeMin = 0.9f;
-            tmp.fontSizeMax = 2.2f;
-            tmp.fontStyle = FontStyles.Normal;
-            tmp.enableWordWrapping = true;
-            tmp.alignment = TextAlignmentOptions.Center;
-            tmp.color = Color.white;
-            tmp.rectTransform.sizeDelta = size;
-            tmp.transform.localPosition = pos;
-            tmp.EnableStencilMasking();
+            Error("Could not render MiraAPI settings rows because the vanilla NumberOption prefab has no sprites.");
+            return page;
         }
+
+        var prefabBounds = spriteBounds.Skip(1).Aggregate(
+            spriteBounds[0],
+            (bounds, next) =>
+            {
+                bounds.Encapsulate(next);
+                return bounds;
+            });
+        var rowScale = (columnWidth / prefabBounds.size.x) * 1.1f;
+        var rowHeight = prefabBounds.size.y * rowScale;
 
         for (var i = 0; i < settings.Count; i++)
         {
-            var col = i % columns;
-            var row = i / columns;
-            var originX = left + (col * (columnWidth + columnGap));
-            var centerY = contentTop - (rowHeight / 2f) - (row * rowPitch);
+            var column = i % columns;
+            var rowIndex = i / columns;
+            var originX = -((columns * columnWidth) + ((columns - 1) * columnGap)) / 2f +
+                          (column * (columnWidth + columnGap));
+            var centerY = contentTop - (rowHeight / 2f) - (rowIndex * rowPitch);
+            var row = Object.Instantiate(rowPrefab, page.transform);
+            row.enabled = false;
+            row.PlusBtn.gameObject.SetActive(false);
+            row.MinusBtn.gameObject.SetActive(false);
 
-            var labelX = originX + (labelWidth / 2f);
-            var valueX = originX + labelWidth + boxGap + (valueWidth / 2f);
+            foreach (var button in row.GetComponentsInChildren<PassiveButton>(true))
+            {
+                button.enabled = false;
+            }
 
-            MakeBox(
-                new Vector3(labelX, centerY, 0f),
-                new Vector2(labelWidth, rowHeight),
-                new Color(0.16f, 0.16f, 0.16f, 1f));
-            MakeBox(new Vector3(valueX, centerY, -0.01f), new Vector2(valueWidth, rowHeight), Color.white);
-            MakeBox(
-                new Vector3(valueX, centerY, -0.02f),
-                new Vector2(valueWidth - 0.04f, rowHeight - 0.04f),
-                Color.black);
+            foreach (var collider in row.GetComponentsInChildren<Collider2D>(true))
+            {
+                collider.enabled = false;
+            }
 
-            MakeText(
-                $"<b>{settings[i].Key}</b>",
-                new Vector3(labelX, centerY, -0.1f),
-                new Vector2(labelWidth - 0.12f, rowHeight - 0.04f));
-            MakeText(
-                settings[i].Value,
-                new Vector3(valueX, centerY, -0.1f),
-                new Vector2(valueWidth - 0.1f, rowHeight - 0.04f));
+            row.transform.localScale = rowPrefab.transform.localScale * rowScale;
+            row.transform.localPosition = new Vector3(
+                originX + (columnWidth / 2f) - (prefabBounds.center.x * rowScale),
+                centerY - (prefabBounds.center.y * rowScale),
+                0f);
+            row.TitleText.text = settings[i].Key;
+            row.TitleText.fontStyle = FontStyles.Bold;
+            row.ValueText.text = settings[i].Value;
+
+            foreach (var text in row.GetComponentsInChildren<TextMeshPro>(true))
+            {
+                if (text.TryGetComponent<TextTranslatorTMP>(out var translator))
+                {
+                    translator.enabled = false;
+                    Object.Destroy(translator);
+                }
+
+                text.fontMaterial.SetFloat(guide.MatchInfoRolePanelPrefab.STENCIL_NAME, 50f);
+            }
+
+            foreach (var renderer in row.GetComponentsInChildren<SpriteRenderer>(true))
+            {
+                renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                renderer.material.SetInt(PlayerMaterial.MaskLayer, 50);
+            }
+
+            row.gameObject.SetActive(true);
         }
 
         var rows = Mathf.CeilToInt(settings.Count / (float)columns);
-        parent.SetYBoundsMax(Mathf.Clamp((rows * rowPitch) - visibleHeight, 0f, 999f));
+        var contentHeight = rows == 0 ? 0f : rowHeight + ((rows - 1) * rowPitch);
+        parent.SetYBoundsMax(Mathf.Clamp(contentHeight - visibleHeight, 0f, 999f));
+        page.SetActive(true);
         return page;
     }
 
