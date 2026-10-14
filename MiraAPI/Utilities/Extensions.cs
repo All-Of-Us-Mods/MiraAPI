@@ -226,7 +226,7 @@ public static class Extensions
     public static IEnumerator CoLoopWithBudget<T>(this IEnumerable<T> collection, Action<T> action)
     {
         var fps = Application.targetFrameRate > 0 ? Application.targetFrameRate : 60;
-        long budget = 1 / (fps * 2); // default is half of current frame time.
+        var budget = 1000L / (fps * 2); // default is half of current frame time.
         yield return collection.CoLoopWithBudget(budget, action);
     }
 
@@ -355,8 +355,8 @@ public static class Extensions
     public static void ClearGarbageCollector()
     {
         Resources.UnloadUnusedAssets();
-        Il2CppSystem.GC.Collect();
-        GC.Collect();
+        /*Il2CppSystem.GC.Collect();
+        GC.Collect();*/
     }
 
     /// <summary>

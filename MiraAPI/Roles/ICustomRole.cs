@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using BepInEx.Configuration;
+using Il2CppInterop.Runtime.Attributes;
 using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
 using MiraAPI.Modifiers;
 using MiraAPI.PluginLoading;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;
+using MiraAPI.Utilities.Assets;
 using TMPro;
 using UnityEngine;
 
@@ -68,9 +71,10 @@ public interface ICustomRole : IOptionable
     string RoleLongDescriptionLocale => MiraLocaleManager.BuildTranslationId(IdPrefix, IdPart, "TabDescription");
 
     /// <summary>
-    /// Gets the wiki description of the role. Used in the wiki, but not currently required.
+    /// Gets the wiki description of the role. Used in the wiki and normally appends the options text as well.
     /// </summary>
-    string RoleWikiDescription => MiraLocaleManager.Get(RoleWikiDescriptionLocale, RoleLongDescription);
+    string RoleWikiDescription => MiraLocaleManager.Get(RoleWikiDescriptionLocale, RoleLongDescription) +
+                                  Helpers.GetOptionsText(GetType());
 
     /// <summary>
     /// Gets the role's wiki description id for localization.
@@ -314,26 +318,34 @@ public interface ICustomRole : IOptionable
     /// </summary>
     /// <param name="guide">The guide object.</param>
     /// <param name="titleText">The title text object.</param>
+    /// <param name="titleIcon">The title's icon.</param>
     /// <param name="parent">The scroller parent.</param>
     /// <returns>The <see cref="GameObject"/> of the wiki.</returns>
-    GameObject GetAdvancedWiki(MatchInfoGuide guide, TextMeshPro titleText, Scroller parent)
+    GameObject GetAdvancedWiki(MatchInfoGuide guide, TextMeshPro titleText, SpriteRenderer titleIcon, Scroller parent)
     {
-        parent.ScrollToTop();
-        var obj = Helpers.CreateAdvancedWikiTab(
+        var abilities = WikiAbilities;
+        return Helpers.CreateAdvancedWikiPage(
             guide,
-            RoleNameLocale,
-            RoleName + $" ({RoleFactionTitle})",
-            RoleWikiDescription,
             titleText,
-            out var desc);
-        obj.transform.SetParent(parent.Inner.transform);
-        obj.transform.localPosition = new Vector3(0f, 0f, 0f);
-        parent.SetYBoundsMax(Mathf.Clamp(desc.textBounds.size.y - 2, 0f, 999f));
-        return obj;
+            titleIcon,
+            parent,
+            RoleNameLocale,
+            $"{RoleName} ({RoleFactionTitle})",
+            Configuration.Icon ?? MiraAssets.IconNeutral.LoadAsset(),
+            RoleWikiDescription,
+            abilities);
     }
 
     /// <summary>
     /// Gets the function that determines whether the role should be toggled on or off in the game settings.
     /// </summary>
     Func<bool> VisibleInSettings => () => true;
+
+    /// <summary>
+    /// Gets the list of abilities or other similar information to display below the text of a role's wiki page.
+    /// </summary>
+    [HideFromIl2Cpp]
+    public List<AdvancedWikiAbilityDescription> WikiAbilities => [];
 }
+
+public record struct AdvancedWikiAbilityDescription(string Name, string AbilityType, string Description, LoadableAsset<Sprite> Icon);
