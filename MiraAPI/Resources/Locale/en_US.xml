@@ -8,6 +8,7 @@
     <string name="MiraApi.ShowKeybindsOnButtons">Show Keybinds on Buttons</string>
     <string name="MiraApi.ButtonScaleFactor">Button Scale Factor</string>
     <string name="MiraApi.TopRightButtonScaleFactor">Top-Right UI Scale Factor</string>
+    <string name="MiraApi.MatchInfoGuideScaleFactor">Match Info Guide Scale Factor</string>
     <string name="MiraApi.MaxFps">Max FPS</string>
     <string name="MiraApi.WikiOnBottomRow">Display Wiki on Bottom Row</string>
     <string name="MiraApi.EnableSabotageFlashes">Enable Sabotage Flashes</string>
