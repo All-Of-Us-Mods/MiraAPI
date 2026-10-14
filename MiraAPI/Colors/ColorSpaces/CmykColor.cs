@@ -42,9 +42,11 @@ public record struct CmykColor(float c, float m, float y, float k, float a = 1f)
     /// <returns>A Unity <see cref="Color"/> representing the same visual color.</returns>
     public static Color ToColor(CmykColor cmyk)
     {
-        var r = (1f - cmyk.c) * (1f - cmyk.k);
-        var g = (1f - cmyk.m) * (1f - cmyk.k);
-        var b = (1f - cmyk.y) * (1f - cmyk.k);
+        var key = 1f - cmyk.k;
+
+        var r = (1f - cmyk.c) * key;
+        var g = (1f - cmyk.m) * key;
+        var b = (1f - cmyk.y) * key;
 
         return new Color(MathUtilities.Clamp01(r), MathUtilities.Clamp01(g), MathUtilities.Clamp01(b), cmyk.a);
     }

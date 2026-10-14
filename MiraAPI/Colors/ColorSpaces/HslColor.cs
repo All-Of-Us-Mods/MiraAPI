@@ -75,7 +75,7 @@ public record struct HslColor(float h, float s, float l, float a = 1f)
         var l = (max + min) / 2f;
         var delta = max - min;
 
-        var s = delta == 0f ? 0f : delta / (1f - MathF.Abs(2f * l - 1f));
+        var s = delta == 0f ? 0f : delta / (1f - MathF.Abs((2f * l) - 1f));
 
         var h = 0f;
 

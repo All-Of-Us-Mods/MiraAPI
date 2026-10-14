@@ -70,23 +70,26 @@ internal static class RainbowLobbyInfoPanePatch
     [SuppressMessage("Style", "IDE0045:Convert to conditional expression", Justification = "Operator becomes too large.")]
     public static void Postfix(HostInfoPanel __instance)
     {
-        if (!__instance.gameObject.activeInHierarchy || !PaletteManager.IsVariable(__instance.player.cosmetics.ColorId))
-        {
+        if (!__instance.gameObject.activeInHierarchy)
             return;
-        }
+
+        var colorId = __instance.player.cosmetics.ColorId;
+
+        if (!PaletteManager.IsVariable(colorId))
+            return;
 
         var host = GameData.Instance.GetHost();
 
         if (!host)
             return;
 
-        var text = PaletteManager.GetMainColor(__instance.player.cosmetics.ColorId).ToHtmlStringRGBA();
-        __instance.hostLabel.text = TranslationController.Instance.GetString(StringNames.HostNounLabel);
+        var text = PaletteManager.GetMainColor(colorId).ToHtmlStringRGBA();
+        var label = __instance.hostLabel;
+        label.text = TranslationController.Instance.GetString(StringNames.HostNounLabel);
 
         if (__instance.ShouldBoldenHostLabel(DataManager.Settings.Language.CurrentLanguage))
         {
-            __instance.hostLabel.text = __instance.hostLabel.text.Insert(0, "<b>");
-            __instance.hostLabel.text = __instance.hostLabel.text.Insert(__instance.hostLabel.text.Length, "</b>");
+            label.text = "<b>" + label.text + "</b>";
         }
 
         if (AmongUsClient.Instance.AmHost)

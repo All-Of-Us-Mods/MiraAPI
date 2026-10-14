@@ -14,7 +14,7 @@ namespace MiraAPI.Colors;
 /// <param name="shadowEvaluator">The function to evaluate the dynamic shadow color.</param>
 /// <param name="mainColor">The static main color used when dynamic colors are disabled.</param>
 /// <param name="shadowColor">The static shadow color used when dynamic colors are disabled.</param>
-/// <param name="defaultTime">The default time that is used to automatically fill in the static colors when the latter are not provided.</param>
+/// <param name="defaultTime">The default time that is used to automatically fill in the static colors when the latter is not provided.</param>
 public sealed class VariableColor(StringNames name, Func<float, Color> mainEvaluator, Func<float, Color>? shadowEvaluator, Color32? mainColor = null, Color32? shadowColor = null, float defaultTime = 0f)
     : CustomColor(name, mainColor ?? mainEvaluator(defaultTime), shadowColor ?? shadowEvaluator?.Invoke(defaultTime) ?? (mainColor ?? mainEvaluator(defaultTime)).GetShadowColor(60))
 {
