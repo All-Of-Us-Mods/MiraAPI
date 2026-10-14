@@ -14,8 +14,9 @@ namespace MiraAPI.Colors;
 /// <param name="shadowEvaluator">The function to evaluate the dynamic shadow color.</param>
 /// <param name="mainColor">The static main color used when dynamic colors are disabled.</param>
 /// <param name="shadowColor">The static shadow color used when dynamic colors are disabled.</param>
-public sealed class VariableColor(StringNames name, Func<float, Color> mainEvaluator, Func<float, Color>? shadowEvaluator, Color32? mainColor = null, Color32? shadowColor = null)
-    : CustomColor(name, mainColor ?? mainEvaluator(0f), shadowColor ?? shadowEvaluator?.Invoke(0f) ?? (mainColor ?? mainEvaluator(0f)).GetShadowColor(60))
+/// <param name="defaultTime">The default time that is used to automatically fill in the static colors when the latter are not provided.</param>
+public sealed class VariableColor(StringNames name, Func<float, Color> mainEvaluator, Func<float, Color>? shadowEvaluator, Color32? mainColor = null, Color32? shadowColor = null, float defaultTime = 0f)
+    : CustomColor(name, mainColor ?? mainEvaluator(defaultTime), shadowColor ?? shadowEvaluator?.Invoke(defaultTime) ?? (mainColor ?? mainEvaluator(defaultTime)).GetShadowColor(60))
 {
     /// <summary>
     /// Gets or sets a delegate that takes in a time value and returns the dynamic main color.
@@ -28,20 +29,20 @@ public sealed class VariableColor(StringNames name, Func<float, Color> mainEvalu
     public Func<float, Color> ShadowEvaluator { get; set; } = shadowEvaluator ?? (t => mainEvaluator(t).GetShadowColor(0.24f));
 
     /// <inheritdoc cref="VariableColor"/>
-    public VariableColor(StringNames name, Func<float, Color> mainEvaluator, Color32? mainColor = null)
-        : this(name, mainEvaluator, null, mainColor, null)
+    public VariableColor(StringNames name, Func<float, Color> mainEvaluator, Color32? mainColor = null, float defaultTime = 0f)
+        : this(name, mainEvaluator, null, mainColor, null, defaultTime)
     {
     }
 
     /// <inheritdoc cref="VariableColor"/>
-    public VariableColor(string name, Func<float, Color> mainEvaluator, Color32? mainColor = null)
-        : this(name, mainEvaluator, null, mainColor, null)
+    public VariableColor(string name, Func<float, Color> mainEvaluator, Color32? mainColor = null, float defaultTime = 0f)
+        : this(name, mainEvaluator, null, mainColor, null, defaultTime)
     {
     }
 
     /// <inheritdoc cref="VariableColor"/>
-    public VariableColor(string name, Func<float, Color> mainEvaluator, Func<float, Color>? shadowEvaluator, Color32? mainColor = null, Color32? shadowColor = null)
-        : this(MiraLocaleManager.GetOrCreateLocaleString(name), mainEvaluator, shadowEvaluator, mainColor, shadowColor)
+    public VariableColor(string name, Func<float, Color> mainEvaluator, Func<float, Color>? shadowEvaluator, Color32? mainColor = null, Color32? shadowColor = null, float defaultTime = 0f)
+        : this(MiraLocaleManager.GetOrCreateLocaleString(name), mainEvaluator, shadowEvaluator, mainColor, shadowColor, defaultTime)
     {
     }
 

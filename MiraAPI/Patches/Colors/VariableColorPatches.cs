@@ -7,7 +7,7 @@ using MiraAPI.Utilities;
 using Reactor.Utilities.Extensions;
 using UnityEngine;
 
-namespace MiraAPI.Patches.Hud;
+namespace MiraAPI.Patches.Colors;
 
 [HarmonyPatch(typeof(PlayerMaterial))]
 internal static class SetPlayerMaterialPatch
@@ -16,7 +16,7 @@ internal static class SetPlayerMaterialPatch
     public static bool Prefix(int colorId, Renderer rend)
     {
         rend.gameObject.GetOrAddComponent<VariableColorBehaviour>().SetColor(
-            PaletteManager.ColorIdToColorMap.TryGetValue(colorId, out var color) && color is VariableColor variable
+            PaletteManager.TryGetCustomColor(colorId, out var color) && color is VariableColor variable
                 ? variable
                 : null);
         return !PaletteManager.IsVariable(colorId);
@@ -48,11 +48,19 @@ internal static class ChatNotifRainbowPatch
 
     public static void Postfix(ChatNotification __instance)
     {
-        if (!__instance.gameObject.active || !PaletteManager.IsVariable(__instance.player.cosmetics.ColorId))
+        if (!__instance.gameObject.active)
             return;
 
-        var str = PaletteManager.GetMainColor(__instance.player.cosmetics.ColorId).ToHtmlStringRGBA();
-        __instance.playerNameText.text = "<color=#" + str + ">" + RichTags.Replace(__instance.playerNameText.text, string.Empty);
+        var colorId = __instance.player.cosmetics.ColorId;
+
+        if (!PaletteManager.IsVariable(colorId))
+            return;
+
+        var color = PaletteManager.GetMainColor(colorId);
+        var str = color.ToHtmlStringRGBA();
+        var nameText = __instance.playerNameText;
+        nameText.text = "<color=#" + str + ">" + RichTags.Replace(nameText.text, string.Empty);
+        nameText.outlineColor = color.GetShadowColor(0.5f);
     }
 }
 
@@ -68,6 +76,10 @@ internal static class RainbowLobbyInfoPanePatch
         }
 
         var host = GameData.Instance.GetHost();
+
+        if (!host)
+            return;
+
         var text = PaletteManager.GetMainColor(__instance.player.cosmetics.ColorId).ToHtmlStringRGBA();
         __instance.hostLabel.text = TranslationController.Instance.GetString(StringNames.HostNounLabel);
 

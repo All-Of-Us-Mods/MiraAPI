@@ -17,7 +17,7 @@ public static class ExampleColors
 
     public static CustomColor Gold { get; } = new("color.gold", new Color(1.0f, 0.84f, 0.0f));
 
-    public static VariableColor Rainbow { get; } = new("color.rainbow", t => new HsbColor(MathUtilities.PingPong(t, 1f), 1f, 1f))
+    public static VariableColor Rainbow { get; } = new("color.rainbow", t => new HsbColor(MathUtilities.PingPong(t, 1f, 0.3f), 1f, 1f))
     {
         ColorBrightness = CustomColorBrightness.Lighter,
     };

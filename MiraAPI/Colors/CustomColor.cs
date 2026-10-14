@@ -81,6 +81,11 @@ public class CustomColor(StringNames name, Color32 mainColor, Color32 shadowColo
 public enum CustomColorBrightness
 {
     /// <summary>
+    /// An invalid color.
+    /// </summary>
+    Invalid = -1,
+
+    /// <summary>
     /// A lighter color.
     /// </summary>
     Lighter,
