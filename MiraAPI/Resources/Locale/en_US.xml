@@ -60,4 +60,5 @@ Outlive the timer or eliminate the crew.</string>
     <string name="MiraApi.Wiki.FilterLabel">Filter</string>
     <string name="MiraApi.Wiki.GroupingLabel">Grouping</string>
     <string name="MiraApi.Wiki.OrderLabel">Order</string>
+    <string name="MiraApi.Wiki.NoResultsFound">No Results Found</string>
 </resources>
