@@ -7,6 +7,7 @@ using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
 using Innersloth.Assets;
+using MiraAPI.LocalSettings;
 using MiraAPI.Modifiers;
 using MiraAPI.Modifiers.Types;
 using MiraAPI.Roles;
@@ -28,7 +29,9 @@ public static class RoleGuidePatches
 {
     private const int RolesTabIndex = 2;
     private const int ModifiersTabIndex = 3;
-    private const float SearchDebounceSeconds = 0.3f;
+    private const float MinGuideScaleFactor = 0.5f;
+    private const float MaxGuideScaleFactor = 1f;
+    private const float SearchDebounceSeconds = 0.05f;
 
     private static readonly List<DetailedPanel> RoleEntries = [];
     private static readonly List<DetailedPanel> ModifierEntries = [];
@@ -113,10 +116,26 @@ public static class RoleGuidePatches
     [HarmonyPatch(typeof(MatchInfoGuide), nameof(MatchInfoGuide.Awake))]
     public static void Awake(MatchInfoGuide __instance)
     {
-        __instance.transitionOpen.targetSize = 1.3f;
+        __instance.transitionOpen.targetSize = Helpers.MatchInfoGuideBaseScale;
         if (_guide != __instance)
         {
             ResetState();
+        }
+    }
+
+    public static void ApplyGuideScale(MatchInfoGuide instance, float scaleFactor)
+    {
+        if (!instance || !instance.transitionOpen)
+        {
+            return;
+        }
+
+        var targetSize = Helpers.MatchInfoGuideBaseScale *
+                         Mathf.Clamp(scaleFactor, MinGuideScaleFactor, MaxGuideScaleFactor);
+        instance.transitionOpen.targetSize = targetSize;
+        if (instance.MatchInfoParent.activeSelf)
+        {
+            instance.transitionOpen.transform.localScale = Vector3.one * targetSize;
         }
     }
 
@@ -171,6 +190,7 @@ public static class RoleGuidePatches
     [HarmonyPatch(typeof(MatchInfoGuide), nameof(MatchInfoGuide.Awake))]
     private static void AwakePostfix(MatchInfoGuide __instance)
     {
+        ApplyGuideScale(__instance, LocalSettingsTabSingleton<MiraApiSettings>.Instance.MatchInfoGuideScaleFactor.Value);
         Coroutines.Start(CoPreload(__instance));
     }
 
@@ -231,6 +251,8 @@ public static class RoleGuidePatches
         {
             return false;
         }
+
+        ApplyGuideScale(__instance, LocalSettingsTabSingleton<MiraApiSettings>.Instance.MatchInfoGuideScaleFactor.Value);
 
         if (Minigame.Instance != null)
         {
@@ -746,6 +768,8 @@ public static class RoleGuidePatches
         public int Amount { get; set; }
         public int Chance { get; set; }
         public float Likelihood { get; set; }
+        public bool CanShow { get; set; }
+        public bool CountsReady { get; set; }
         public bool Visible { get; set; }
 
         public string GetSortKey(SortingGroups grouping)
@@ -935,14 +959,18 @@ public static class RoleGuidePatches
         entry.Amount = amount;
         entry.Chance = chance;
         entry.Likelihood = amount * chance;
-        entry.Visible = ShouldShowPanel(forceShow, amount == 0 || chance == 0, isHidden);
+        entry.CanShow = ShouldShowPanel(forceShow, amount == 0 || chance == 0, isHidden);
+        entry.CountsReady = true;
+        entry.Visible = entry.CanShow;
     }
 
     private static List<DetailedPanel> UpdateEntries(List<DetailedPanel> entries, bool modifiers)
     {
+        var searchText = GetSearchText();
         foreach (var entry in entries)
         {
             ComputeCounts(entry);
+            entry.Visible = entry.CanShow && (modifiers || MatchesSearch(entry, searchText));
             if (entry.Panel)
             {
                 SetPanelCount(entry.Panel!, entry.Amount, entry.Chance, entry.ModId);
@@ -953,16 +981,7 @@ public static class RoleGuidePatches
             }
         }
 
-        var searchText = GetSearchText();
-        var sorted = entries.Where(p => p.Visible)
-            .OrderByDescending(p => p.Title.Equals(searchText, StringComparison.OrdinalIgnoreCase))
-            .ThenByDescending(p =>
-                p.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-                p.Category.Contains(searchText, StringComparison.OrdinalIgnoreCase));
-        var shown = (_sortMethod is SortingMethod.Alphabetical
-                ? sorted.ThenBy(p => p.GetSortKey(_sortGrouping))
-                : sorted.ThenByDescending(p => p.GetSortKey(_sortGrouping)))
-            .ToList();
+        var shown = SortEntries(entries, searchText);
 
         var instance = MatchInfoGuide.Instance;
         if (modifiers)
@@ -977,6 +996,26 @@ public static class RoleGuidePatches
         }
 
         return shown;
+    }
+
+    private static List<DetailedPanel> SortEntries(List<DetailedPanel> entries, string searchText)
+    {
+        var sorted = entries.Where(p => p.Visible)
+            .OrderByDescending(p => p.Title.Equals(searchText, StringComparison.OrdinalIgnoreCase))
+            .ThenByDescending(p =>
+                p.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                p.Category.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+        return (_sortMethod is SortingMethod.Alphabetical
+                ? sorted.ThenBy(p => p.GetSortKey(_sortGrouping))
+                : sorted.ThenByDescending(p => p.GetSortKey(_sortGrouping)))
+            .ToList();
+    }
+
+    private static bool MatchesSearch(DetailedPanel entry, string searchText)
+    {
+        return searchText.Length == 0 ||
+               entry.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+               entry.Category.Contains(searchText, StringComparison.OrdinalIgnoreCase);
     }
 
     private static void RefreshActiveTab(bool scrollToTop)
@@ -1009,7 +1048,43 @@ public static class RoleGuidePatches
         }
 
         _appliedSearch = text;
+        if (TryRefreshRoleSearch(text))
+        {
+            yield break;
+        }
+
         RefreshActiveTab(true);
+    }
+
+    private static bool TryRefreshRoleSearch(string searchText)
+    {
+        var guide = MatchInfoGuide.Instance;
+        if (!_guide || guide != _guide || guide.activeTabIndex != RolesTabIndex ||
+            _populate != null || RoleEntries.Count == 0 ||
+            RoleEntries.Any(entry => !entry.CountsReady || !entry.Panel))
+        {
+            return false;
+        }
+
+        foreach (var entry in RoleEntries)
+        {
+            entry.Visible = entry.CanShow && MatchesSearch(entry, searchText);
+            if (entry.Panel!.gameObject.activeSelf != entry.Visible)
+            {
+                entry.Panel.gameObject.SetActive(entry.Visible);
+            }
+        }
+
+        var shown = SortEntries(RoleEntries, searchText);
+        foreach (var entry in shown)
+        {
+            entry.Panel!.transform.SetAsLastSibling();
+        }
+
+        guide.MatchInfoRoleScroller.SetYBoundsMax(GetGridScrollBounds(shown.Count));
+        guide.rolesEnabledMessage.SetActive(shown.Count == 0);
+        _rolesScroller.ScrollToTop();
+        return true;
     }
 
     private static void ResetSearchBox()
