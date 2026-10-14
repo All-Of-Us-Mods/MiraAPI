@@ -36,7 +36,7 @@ internal static class AmongUsClientSyncPatch
         GameModeOption.RpcSyncGamemode(PlayerControl.LocalPlayer, GameModeOption.Value);
     }
 
-    [HarmonyPostfix]
+    [HarmonyPrefix]
     [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnPlayerLeft))]
     public static void PlayerLeftPatch(ClientData data, DisconnectReasons reason)
     {
