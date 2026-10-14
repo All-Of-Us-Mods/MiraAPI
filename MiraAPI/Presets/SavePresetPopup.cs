@@ -16,6 +16,7 @@ namespace MiraAPI.Presets;
 
 [RegisterInIl2Cpp]
 [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity convention.")]
+[SuppressMessage("Design", "CA1050:Declare types in namespaces", Justification = "Unity script.")]
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (Justification: Unity fields; ignore.)
 public class SavePresetPopup(nint cppPtr) : Minigame(cppPtr)
 {

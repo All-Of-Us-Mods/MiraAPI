@@ -64,11 +64,9 @@ public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
     private static MiraPluginManager? PluginManager { get; set; }
     internal Harmony Harmony { get; } = new(Id);
 
-    public static ConfigEntry<SortingGroups> WikiSortingGroup { get; private set; }
-
-    public static ConfigEntry<SortingMethod> WikiSortingMethod { get; private set; }
-
-    public static ConfigEntry<SortingFilter> WikiSortingFilter { get; private set; }
+    internal static ConfigEntry<SortingGroups> WikiSortingGroup { get; private set; }
+    internal static ConfigEntry<SortingMethod> WikiSortingMethod { get; private set; }
+    internal static ConfigEntry<SortingFilter> WikiSortingFilter { get; private set; }
 
     /// <inheritdoc />
     public override void Load()

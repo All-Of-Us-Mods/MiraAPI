@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Linq;
 using HarmonyLib;
 using MiraAPI.GameOptions;
@@ -24,7 +23,6 @@ public static class SettingPatches
     /// <returns><see langword="false"/> to skip original method.</returns>
     [HarmonyPrefix]
     [HarmonyPatch(typeof(FloatGameSetting), nameof(FloatGameSetting.GetValueString))]
-    [SuppressMessage("Style", "IDE0045:Convert to conditional expression", Justification = "Warning cascades into forcing the entire tree to be ternary operators.")]
     public static bool ValueStringPatch(
         FloatGameSetting __instance,
         ref string __result,
