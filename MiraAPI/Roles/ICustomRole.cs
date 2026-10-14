@@ -345,7 +345,14 @@ public interface ICustomRole : IOptionable
     /// Gets the list of abilities or other similar information to display below the text of a role's wiki page.
     /// </summary>
     [HideFromIl2Cpp]
-    public List<AdvancedWikiAbilityDescription> WikiAbilities => [];
+    List<AdvancedWikiAbilityDescription> WikiAbilities => [];
 }
 
+/// <summary>
+/// A data holder of an ability's wiki entry.
+/// </summary>
+/// <param name="Name">The name of the ability.</param>
+/// <param name="AbilityType">The type of the ability.</param>
+/// <param name="Description">The description of the ability.</param>
+/// <param name="Icon">The icon sprite of the ability.</param>
 public record struct AdvancedWikiAbilityDescription(string Name, string AbilityType, string Description, LoadableAsset<Sprite> Icon);

@@ -101,7 +101,6 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
             : text.Trim().ToLowerInvariant();
     }
 
-    [SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "Creates a rather large ternary operation.")]
     private List<MenuEntry> GetFilteredEntries()
     {
         var query = NormalizeForSearch(searchText);
