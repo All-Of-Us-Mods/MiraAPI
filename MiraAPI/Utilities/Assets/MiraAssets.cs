@@ -19,7 +19,7 @@ public static class MiraAssets
             new Vector2(0.5f, 0.5f),
             100f,
             0U,
-            SpriteMeshType.Tight,
+            SpriteMeshType.FullRect,
             new Vector4(20, 20, 20, 20));
 
         RoundedBox = new LoadableAssetWrapper<Sprite>(boxSprite);
@@ -304,6 +304,36 @@ public static class MiraAssets
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
     public static LoadableResourceAsset VisibleOnIdleSprite { get; } = new("MiraAPI.Resources.Wiki.VisibleOnIdle.png");
+
+    /// <summary>
+    /// Gets the sprite used for crewmates.
+    /// </summary>
+    public static LoadableResourceAsset IconCrewmate { get; } = new("MiraAPI.Resources.Wiki.IconCrewmate.png");
+
+    /// <summary>
+    /// Gets the sprite used for impostors.
+    /// </summary>
+    public static LoadableResourceAsset IconImpostor { get; } = new("MiraAPI.Resources.Wiki.IconImpostor.png");
+
+    /// <summary>
+    /// Gets the sprite used for neutrals.
+    /// </summary>
+    public static LoadableResourceAsset IconNeutral { get; } = new("MiraAPI.Resources.Wiki.IconNeutral.png");
+
+    /// <summary>
+    /// Gets the sprite used for the player list.
+    /// </summary>
+    public static LoadableResourceAsset IconPlayerList { get; } = new("MiraAPI.Resources.Wiki.IconPlayerList.png");
+
+    /// <summary>
+    /// Gets the sprite used for settings.
+    /// </summary>
+    public static LoadableResourceAsset IconSettings { get; } = new("MiraAPI.Resources.Wiki.IconSettings.png");
+
+    /// <summary>
+    /// Gets the sprite used for terminology.
+    /// </summary>
+    public static LoadableResourceAsset IconTerminology { get; } = new("MiraAPI.Resources.Wiki.IconTerminology.png");
 
     internal static LoadableResourceAsset BlankSprite { get; } = new("MiraAPI.Resources.BlankSprite.png");
 }

@@ -46,12 +46,18 @@ public static class CustomRoleManager
     public static IReadOnlyList<RoleBehaviour> CustomRoleBehaviours { get; private set; } = [];
 
     /// <summary>
+    /// Gets the <see cref="IReadOnlyList{T}"/> of all roles as <see cref="RoleBehaviour"/> objects.
+    /// </summary>
+    public static IReadOnlyList<RoleBehaviour> AllStoredRoleBehaviours { get; private set; } = [];
+
+    /// <summary>
     /// Gets the <see cref="IReadOnlyList{T}"/> of custom roles as <see cref="ICustomRole"/> objects.
     /// </summary>
     public static IReadOnlyList<ICustomRole> CustomMiraRoles { get; private set; } = [];
 
     internal static readonly Dictionary<ushort, RoleBehaviour> CustomRoles = [];
     internal static readonly Dictionary<Type, ushort> RoleIds = [];
+    internal static readonly Dictionary<Type, MiraPluginInfo> RoleParentMods = [];
 
     private static CppCollections.List<BaseGameSetting>? _emptySettings;
     private static Il2CppReferenceArray<OverlayKillAnimation>? _emptyKillAnimations;
@@ -77,6 +83,7 @@ public static class CustomRoleManager
 
         CustomRoleBehaviours = [.. CustomRoles.Values];
         CustomMiraRoles = [.. CustomRoles.Values.OfType<ICustomRole>()];
+        AllStoredRoleBehaviours = [.. RoleManager.Instance.AllRoles];
     }
 
     internal static void RegisterRoleTypes(List<Type> roles, MiraPluginInfo pluginInfo)
@@ -99,6 +106,7 @@ public static class CustomRoleManager
                 }
 
                 pluginInfo.InternalRoles.Add((ushort)role.Role, role);
+                RoleParentMods[roleType] = pluginInfo;
             }
             catch (Exception ex)
             {
@@ -205,7 +213,9 @@ public static class CustomRoleManager
     /// <returns>A <see cref="MiraPluginInfo"/> object representing the parent mod of the role.</returns>
     public static MiraPluginInfo FindParentMod(ICustomRole role)
     {
-        return MiraPluginManager.Instance.RegisteredPlugins.First(plugin => plugin.InternalRoles.ContainsValue(role as RoleBehaviour ?? throw new InvalidOperationException()));
+        return RoleParentMods.TryGetValue(role.GetType(), out var mod)
+            ? mod
+            : MiraPluginManager.Instance.RegisteredPlugins.First(plugin => plugin.InternalRoles.ContainsValue(role as RoleBehaviour ?? throw new InvalidOperationException()));
     }
 
     /// <summary>
