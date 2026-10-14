@@ -54,6 +54,7 @@ public static class RoleGuidePatches
     private static SpriteRenderer _searchSortingFilterHover;
     private static Scroller _rolesScroller;
     private static Scroller _modifiersScroller;
+    private static GameObject _modifierNoResultsMessage;
     private static Scroller _advancedInfoTabScroller;
     private static TextBoxTMP _searchBoxTmp;
     private static GameObject _currentAdvancedTabObject;
@@ -169,6 +170,7 @@ public static class RoleGuidePatches
         _searchBoxTmp = null!;
         _rolesScroller = null!;
         _modifiersScroller = null!;
+        _modifierNoResultsMessage = null!;
         _advancedInfoTabScroller = null!;
         _currentAdvancedTabObject = null!;
         _loadingSpinner = null;
@@ -383,6 +385,10 @@ public static class RoleGuidePatches
         _sortMethod = MiraApiPlugin.WikiSortingMethod.Value;
         _sortGrouping = MiraApiPlugin.WikiSortingGroup.Value;
 
+        var noResultsText = instance.rolesEnabledMessage.GetComponentInChildren<TextMeshPro>();
+        if (noResultsText)
+            SetNoResultsText(instance.rolesEnabledMessage);
+
         if (_populate != null)
         {
             Coroutines.Stop(_populate);
@@ -451,6 +457,16 @@ public static class RoleGuidePatches
             instance.settingsTabs[RolesTabIndex],
             instance.settingsTabs[RolesTabIndex].transform.parent);
         modifiersTab.name = "ModifiersPanel";
+        var clonedMessage = FindClonedTransform(
+            instance.rolesEnabledMessage.transform,
+            instance.settingsTabs[RolesTabIndex].transform,
+            modifiersTab.transform);
+        _modifierNoResultsMessage = clonedMessage
+            ? clonedMessage.gameObject
+            : Object.Instantiate(instance.rolesEnabledMessage, modifiersTab.transform, true);
+        _modifierNoResultsMessage.name = "NoResultsFound";
+        _modifierNoResultsMessage.SetActive(false);
+        SetNoResultsText(_modifierNoResultsMessage);
         modifiersTab.transform.FindChild("MaskArea")?.transform.localPosition =
             new Vector3(-0.0184f, 0.15f, -0.1f);
         modifiersTab.transform.GetAllChildren()
@@ -757,6 +773,57 @@ public static class RoleGuidePatches
 
     public static void OpenRolesTab() => OpenTab(RolesTabIndex);
 
+    private static Transform? FindClonedTransform(Transform source, Transform sourceRoot, Transform cloneRoot)
+    {
+        var childIndices = new List<int>();
+        var current = source;
+        while (current != sourceRoot && current.parent)
+        {
+            childIndices.Add(current.GetSiblingIndex());
+            current = current.parent;
+        }
+
+        if (current != sourceRoot)
+        {
+            return null;
+        }
+
+        var result = cloneRoot;
+        for (var i = childIndices.Count - 1; i >= 0; i--)
+        {
+            var index = childIndices[i];
+            if (index >= result.childCount)
+            {
+                return null;
+            }
+
+            result = result.GetChild(index);
+        }
+
+        return result;
+    }
+
+    private static void SetNoResultsText(GameObject message)
+    {
+        var text = message.GetComponentInChildren<TextMeshPro>();
+        if (!text)
+        {
+            return;
+        }
+
+        text.GetComponent<TextTranslatorTMP>()?.Destroy();
+        text.text = MiraLocaleManager.Get("MiraApi.Wiki.NoResultsFound", "No Results Found");
+    }
+
+    private static void SetNoResultsVisible(bool modifiers, bool visible)
+    {
+        MatchInfoGuide.Instance.rolesEnabledMessage.SetActive(!modifiers && visible);
+        if (_modifierNoResultsMessage)
+        {
+            _modifierNoResultsMessage.SetActive(modifiers && visible);
+        }
+    }
+
     public sealed class DetailedPanel(string title, string category, string modId, RoleBehaviour? role, GameModifier? modifier)
     {
         public MatchInfoRolePanel? Panel { get; set; }
@@ -970,7 +1037,7 @@ public static class RoleGuidePatches
         foreach (var entry in entries)
         {
             ComputeCounts(entry);
-            entry.Visible = entry.CanShow && (modifiers || MatchesSearch(entry, searchText));
+            entry.Visible = entry.CanShow && MatchesSearch(entry, searchText);
             if (entry.Panel)
             {
                 SetPanelCount(entry.Panel!, entry.Amount, entry.Chance, entry.ModId);
@@ -987,12 +1054,12 @@ public static class RoleGuidePatches
         if (modifiers)
         {
             _modifiersScroller.SetYBoundsMax(GetGridScrollBounds(shown.Count));
-            /*instance.rolesEnabledMessage.SetActive(shown.Count == 0);*/
+            SetNoResultsVisible(true, shown.Count == 0);
         }
         else
         {
             instance.MatchInfoRoleScroller.SetYBoundsMax(GetGridScrollBounds(shown.Count));
-            instance.rolesEnabledMessage.SetActive(shown.Count == 0);
+            SetNoResultsVisible(false, shown.Count == 0);
         }
 
         return shown;
@@ -1048,7 +1115,7 @@ public static class RoleGuidePatches
         }
 
         _appliedSearch = text;
-        if (TryRefreshRoleSearch(text))
+        if (TryRefreshSearch(text))
         {
             yield break;
         }
@@ -1056,7 +1123,7 @@ public static class RoleGuidePatches
         RefreshActiveTab(true);
     }
 
-    private static bool TryRefreshRoleSearch(string searchText)
+    private static bool TryRefreshSearch(string searchText)
     {
         var guide = MatchInfoGuide.Instance;
         if (!_guide || guide != _guide)
@@ -1064,12 +1131,18 @@ public static class RoleGuidePatches
             return false;
         }
 
-        if (guide.activeTabIndex != RolesTabIndex || _populate != null || !AreRolePanelsReady())
+        var entries = guide.activeTabIndex switch
+        {
+            RolesTabIndex => RoleEntries,
+            ModifiersTabIndex => ModifierEntries,
+            _ => null,
+        };
+        if (entries == null || _populate != null || !ArePanelsReady(entries))
         {
             return false;
         }
 
-        foreach (var entry in RoleEntries)
+        foreach (var entry in entries)
         {
             entry.Visible = entry.CanShow && MatchesSearch(entry, searchText);
             if (entry.Panel!.gameObject.activeSelf != entry.Visible)
@@ -1078,26 +1151,29 @@ public static class RoleGuidePatches
             }
         }
 
-        var shown = SortEntries(RoleEntries, searchText);
+        var shown = SortEntries(entries, searchText);
         foreach (var entry in shown)
         {
             entry.Panel!.transform.SetAsLastSibling();
         }
 
-        guide.MatchInfoRoleScroller.SetYBoundsMax(GetGridScrollBounds(shown.Count));
-        guide.rolesEnabledMessage.SetActive(shown.Count == 0);
-        _rolesScroller.ScrollToTop();
+        var scroller = guide.activeTabIndex == ModifiersTabIndex
+            ? _modifiersScroller
+            : guide.MatchInfoRoleScroller;
+        scroller.SetYBoundsMax(GetGridScrollBounds(shown.Count));
+        SetNoResultsVisible(guide.activeTabIndex == ModifiersTabIndex, shown.Count == 0);
+        scroller.ScrollToTop();
         return true;
     }
 
-    private static bool AreRolePanelsReady()
+    private static bool ArePanelsReady(List<DetailedPanel> entries)
     {
-        if (RoleEntries.Count == 0)
+        if (entries.Count == 0)
         {
             return false;
         }
 
-        foreach (var entry in RoleEntries)
+        foreach (var entry in entries)
         {
             if (!entry.CountsReady || !entry.Panel)
             {
