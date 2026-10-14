@@ -844,6 +844,119 @@ public static class Helpers
         return obj;
     }
 
+    /// <summary>
+    /// Creates a page of vanilla-looking settings rows (label box on the left, value box on the right, two columns)
+    /// inside a roles-style scroller. Use this for lists of "Name: Value" settings that are not roles or modifiers.
+    /// </summary>
+    /// <param name="guide">The guide object.</param>
+    /// <param name="parent">The <see cref="Scroller"/> the page is parented to.</param>
+    /// <param name="settings">The rows to show: key is the label, value is the displayed value.</param>
+    /// <returns>The <see cref="GameObject"/> that holds all the rows. Destroy it to remove the page.</returns>
+    public static GameObject CreateAdvancedSettingsPage(
+        MatchInfoGuide guide,
+        Scroller parent,
+        IReadOnlyList<KeyValuePair<string, string>> settings)
+    {
+        const float rowHeight = 0.4f;
+        const float rowPitch = 0.52f;
+        const float contentTop = 0.95f;
+        const float visibleHeight = 1.5f;
+        const int columns = 2;
+
+        var inner = parent.Inner;
+        var layout = inner.GetComponent<GridLayoutGroup>();
+        if (layout)
+        {
+            layout.enabled = false;
+        }
+
+        var columnWidth = layout ? Mathf.Clamp(layout.cellSize.x, 2f, 3.2f) : 2.7f;
+        var columnGap = layout ? Mathf.Clamp(layout.spacing.x, 0.1f, 0.6f) : 0.3f;
+        var labelWidth = columnWidth * 0.62f;
+        var valueWidth = columnWidth * 0.30f;
+        var boxGap = columnWidth - labelWidth - valueWidth;
+        var left = -((columns * columnWidth) + ((columns - 1) * columnGap)) / 2f;
+
+        var prefab = guide.MatchInfoRolePanelPrefab;
+        var vanillaFont = HudManager.Instance.TaskPanel.taskText;
+
+        var boxMaterial = new Material(prefab.roleIcon.sharedMaterial);
+        boxMaterial.SetInt(PlayerMaterial.MaskLayer, 50);
+        var boxSprite = MiraAssets.BlankSprite.LoadAsset();
+        var layer = inner.gameObject.layer;
+
+        var page = new GameObject("AdvancedSettingsPage") { layer = layer };
+        page.transform.SetParent(inner, false);
+        page.transform.localPosition = Vector3.zero;
+
+        void MakeBox(Vector3 pos, Vector2 size, Color color)
+        {
+            var box = new GameObject("Box") { layer = layer };
+            box.transform.SetParent(page.transform, false);
+            box.transform.localPosition = pos;
+            var sr = box.AddComponent<SpriteRenderer>();
+            sr.sprite = boxSprite;
+            sr.drawMode = SpriteDrawMode.Sliced;
+            sr.size = size;
+            sr.color = color;
+            sr.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            sr.sharedMaterial = boxMaterial;
+        }
+
+        void MakeText(string text, Vector3 pos, Vector2 size)
+        {
+            var tmp = Object.Instantiate(prefab.roleName, page.transform);
+            tmp.richText = true;
+            tmp.font = vanillaFont.font;
+            tmp.fontMaterial = vanillaFont.fontMaterial;
+            tmp.text = text;
+            tmp.enableAutoSizing = true;
+            tmp.fontSizeMin = 0.9f;
+            tmp.fontSizeMax = 2.2f;
+            tmp.fontStyle = FontStyles.Normal;
+            tmp.enableWordWrapping = true;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.color = Color.white;
+            tmp.rectTransform.sizeDelta = size;
+            tmp.transform.localPosition = pos;
+            tmp.EnableStencilMasking();
+        }
+
+        for (var i = 0; i < settings.Count; i++)
+        {
+            var col = i % columns;
+            var row = i / columns;
+            var originX = left + (col * (columnWidth + columnGap));
+            var centerY = contentTop - (rowHeight / 2f) - (row * rowPitch);
+
+            var labelX = originX + (labelWidth / 2f);
+            var valueX = originX + labelWidth + boxGap + (valueWidth / 2f);
+
+            MakeBox(
+                new Vector3(labelX, centerY, 0f),
+                new Vector2(labelWidth, rowHeight),
+                new Color(0.16f, 0.16f, 0.16f, 1f));
+            MakeBox(new Vector3(valueX, centerY, -0.01f), new Vector2(valueWidth, rowHeight), Color.white);
+            MakeBox(
+                new Vector3(valueX, centerY, -0.02f),
+                new Vector2(valueWidth - 0.04f, rowHeight - 0.04f),
+                Color.black);
+
+            MakeText(
+                $"<b>{settings[i].Key}</b>",
+                new Vector3(labelX, centerY, -0.1f),
+                new Vector2(labelWidth - 0.12f, rowHeight - 0.04f));
+            MakeText(
+                settings[i].Value,
+                new Vector3(valueX, centerY, -0.1f),
+                new Vector2(valueWidth - 0.1f, rowHeight - 0.04f));
+        }
+
+        var rows = Mathf.CeilToInt(settings.Count / (float)columns);
+        parent.SetYBoundsMax(Mathf.Clamp((rows * rowPitch) - visibleHeight, 0f, 999f));
+        return page;
+    }
+
     private static void SetupAbilityPanel(MatchInfoRolePanel panel, AdvancedWikiAbilityDescription ability, bool variableTextSizing = false)
     {
         panel.roleCount.text = ability.AbilityType;

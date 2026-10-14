@@ -1726,22 +1726,7 @@ public static class RoleGuidePatches
     // ---- General (non-role) option pages: paginated General tab + cross-page search ----
     private static Scroller? _generalScroller;
     private static GameObject? _generalNoResults;
-    private static readonly List<GeneralRow> GeneralRows = [];
-    private static GameObject? _generalRowTemplate;
-    private static Vector3 _generalRowOrigin;
-    private static Vector3 _generalRowColumnStep;
-    private static float _generalRowHeight = -0.65f; // negative: rows go down
-    private static int _generalColumns = 2;
-    private static float _generalVisibleHeight;
-    private static bool _generalScrollerFailed;
-
-    /// <summary>One vanilla-looking settings row (label box + value box) that is reused between pages.</summary>
-    private sealed class GeneralRow(GameObject root, TextMeshPro label, TextMeshPro value)
-    {
-        public GameObject Root { get; } = root;
-        public TextMeshPro Label { get; } = label;
-        public TextMeshPro Value { get; } = value;
-    }
+    private static GameObject? _generalPageObject;
     private static List<GuideOptionPage> _generalPages = [];
     private static int _generalPage; // 0 = vanilla settings, 1..N = _generalPages[page - 1]
     private static bool _generalSearching;
@@ -1760,17 +1745,27 @@ public static class RoleGuidePatches
     {
         _generalScroller = null;
         _generalNoResults = null;
-        GeneralRows.Clear();
-        _generalRowTemplate = null;
-        _generalScrollerFailed = false;
+        _generalPageObject = null;
         _generalPages = [];
         _generalPage = 0;
         _generalSearching = false;
         _sortButtonsRepurposed = false;
     }
 
+    /// <summary>
+    /// Clones the roles tab to make the Settings tab. Used to display Options initialized by MiraAPI mods not related to roles or modifiers.
+    /// </summary>
     private static void InitializeGeneralPanel(MatchInfoGuide instance)
     {
+        var rolesTab = instance.settingsTabs[RolesTabIndex];
+        var generalTab = Object.Instantiate(rolesTab, rolesTab.transform.parent);
+        generalTab.name = "GeneralOptionsPanel";
+        generalTab.transform.FindChild("MaskArea")?.transform.localPosition = new Vector3(-0.0184f, 0.15f, -0.1f);
+        generalTab.transform.GetAllChildren()
+            .First(x => x.name.Contains("BG_Gradient")).transform.localPosition = new Vector3(0, -0.62f, -5);
+        _generalScroller = generalTab.GetComponent<Scroller>();
+        generalTab.SetActive(false);
+
         _generalNoResults = Object.Instantiate(
             instance.rolesEnabledMessage,
             instance.rolesEnabledMessage.transform.parent,
@@ -1778,111 +1773,6 @@ public static class RoleGuidePatches
         _generalNoResults.name = "GeneralNoResultsFound";
         _generalNoResults.SetActive(false);
         SetNoResultsText(_generalNoResults);
-    }
-
-    /// <summary>
-    /// Clones the vanilla settings tab the first time it is needed, so extra pages are drawn with the exact same
-    /// rows, fonts, masking and scroll area as the vanilla list. Done lazily because the vanilla rows are only
-    /// created when the guide first opens. The clone is NOT added to <c>settingsTabs</c>; its visibility is managed
-    /// here so the guide's tab count and tab buttons stay untouched.
-    /// </summary>
-    private static bool EnsureGeneralScroller(MatchInfoGuide guide)
-    {
-        if (_generalScroller != null && _generalRowTemplate)
-        {
-            return true;
-        }
-
-        if (_generalScrollerFailed)
-        {
-            return false;
-        }
-
-        var vanillaTab = guide.settingsTabs[GeneralTabIndex];
-        var vanillaScroller = vanillaTab.GetComponent<Scroller>() ?? vanillaTab.GetComponentInChildren<Scroller>(true);
-        if (!vanillaScroller || vanillaScroller.Inner.childCount < 2)
-        {
-            return false; // vanilla rows not built yet; try again next refresh
-        }
-
-        // Read the vanilla grid: first row, second entry (same row => 2 columns), third entry (next row).
-        var vInner = vanillaScroller.Inner;
-        var p0 = vInner.GetChild(0).localPosition;
-        var p1 = vInner.GetChild(1).localPosition;
-        var sameRow = Mathf.Abs(p1.y - p0.y) < 0.01f;
-        var vanillaCount = vInner.childCount;
-        _generalColumns = sameRow ? 2 : 1;
-        _generalRowOrigin = p0;
-        _generalRowColumnStep = sameRow ? new Vector3(p1.x - p0.x, 0f, 0f) : Vector3.zero;
-        if (sameRow)
-        {
-            _generalRowHeight = vanillaCount >= 3 ? vInner.GetChild(2).localPosition.y - p0.y : -0.65f;
-        }
-        else
-        {
-            _generalRowHeight = p1.y - p0.y;
-        }
-
-        if (Mathf.Abs(_generalRowHeight) < 0.05f)
-        {
-            _generalRowHeight = -0.65f;
-        }
-
-        // Self-calibrate the visible height from how the vanilla list was bounded.
-        var vanillaRows = Mathf.CeilToInt(vanillaCount / (float)_generalColumns);
-        var visible = (vanillaRows * Mathf.Abs(_generalRowHeight)) - vanillaScroller.ContentYBounds.max;
-        _generalVisibleHeight = visible > 0.1f && visible < vanillaRows * Mathf.Abs(_generalRowHeight)
-            ? visible
-            : 3.3f * Mathf.Abs(_generalRowHeight);
-
-        var clone = Object.Instantiate(vanillaTab, vanillaTab.transform.parent);
-        clone.name = "GeneralOptionsPanel";
-        var cloneScroller = clone.GetComponent<Scroller>() ?? clone.GetComponentInChildren<Scroller>(true);
-        var cInner = cloneScroller.Inner;
-
-        // Keep the first row as an inactive prototype, delete the rest.
-        var template = cInner.GetChild(0).gameObject;
-        for (var i = cInner.childCount - 1; i >= 1; i--)
-        {
-            var child = cInner.GetChild(i).gameObject;
-            child.SetActive(false);
-            child.Destroy();
-        }
-
-        template.SetActive(false);
-        _generalRowTemplate = template;
-        _generalScroller = cloneScroller;
-        clone.SetActive(false);
-        return true;
-    }
-
-    private static GeneralRow? CreateGeneralRow()
-    {
-        if (_generalScroller == null || !_generalRowTemplate)
-        {
-            return null;
-        }
-
-        var go = Object.Instantiate(_generalRowTemplate!, _generalScroller.Inner);
-        go.name = "GeneralOptionRow";
-
-        // The game would re-translate these and overwrite our text.
-        foreach (var translator in go.GetComponentsInChildren<TextTranslatorTMP>(true))
-        {
-            translator.Destroy();
-        }
-
-        // Label is the left-most text, value is the right-most (same as the vanilla entries).
-        var texts = go.GetComponentsInChildren<TextMeshPro>(true).OrderBy(t => t.transform.position.x).ToArray();
-        if (texts.Length < 2)
-        {
-            Warning("Vanilla settings row has fewer than two text fields; cannot clone it for the general pages.");
-            go.Destroy();
-            _generalScrollerFailed = true;
-            return null;
-        }
-
-        return new GeneralRow(go, texts[0], texts[^1]);
     }
 
     private static void EnterGeneralTab()
@@ -1983,45 +1873,29 @@ public static class RoleGuidePatches
     private static void ShowGeneralEntries(IReadOnlyList<GuideOptionEntry> entries, bool showGroup, bool scrollToTop)
     {
         var guide = MatchInfoGuide.Instance;
-        if (!guide || !EnsureGeneralScroller(guide))
+        if (_generalScroller == null || !guide || !guide.MatchInfoRolePanelPrefab)
         {
-            // Could not clone the vanilla rows: fall back to the plain vanilla tab rather than a blank page.
+            // Never leave the tab blank: fall back to the plain vanilla list.
             guide?.settingsTabs[GeneralTabIndex].SetActive(true);
             return;
         }
 
-        while (GeneralRows.Count < entries.Count)
+        if (_generalPageObject)
         {
-            var row = CreateGeneralRow();
-            if (row == null)
-            {
-                break;
-            }
-
-            GeneralRows.Add(row);
+            _generalPageObject!.SetActive(false);
+            _generalPageObject.Destroy();
+            _generalPageObject = null;
         }
 
-        for (var i = 0; i < GeneralRows.Count; i++)
+        var rows = new List<KeyValuePair<string, string>>(entries.Count);
+        foreach (var entry in entries)
         {
-            var row = GeneralRows[i];
-            if (i >= entries.Count)
-            {
-                row.Root.SetActive(false);
-                continue;
-            }
-
-            var entry = entries[i];
-            row.Label.text = showGroup ? $"<size=60%>{entry.GroupName}</size>\n{entry.Title}" : entry.Title;
-            row.Value.text = entry.Value;
-            row.Root.transform.localPosition = _generalRowOrigin +
-                                               (_generalRowColumnStep * (i % _generalColumns)) +
-                                               new Vector3(0f, _generalRowHeight * (i / _generalColumns), 0f);
-            row.Root.SetActive(true);
+            var label = showGroup ? $"<size=60%>{entry.GroupName}</size>\n{entry.Title}" : entry.Title;
+            rows.Add(new KeyValuePair<string, string>(label, entry.Value));
         }
 
-        var rows = Mathf.CeilToInt(Mathf.Min(entries.Count, GeneralRows.Count) / (float)_generalColumns);
-        _generalScroller!.gameObject.SetActive(true);
-        _generalScroller.SetYBoundsMax(Mathf.Clamp((rows * Mathf.Abs(_generalRowHeight)) - _generalVisibleHeight, 0f, 999f));
+        _generalScroller.gameObject.SetActive(true);
+        _generalPageObject = Helpers.CreateAdvancedSettingsPage(guide, _generalScroller, rows);
         _generalNoResults?.SetActive(entries.Count == 0);
         if (scrollToTop)
         {
