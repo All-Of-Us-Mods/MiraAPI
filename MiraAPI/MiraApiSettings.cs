@@ -205,7 +205,7 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
     /// <summary>
     /// Gets the scale of the match info guide.
     /// </summary>
-    [LocalSliderSetting(min: 0.5f, max: 1.5f, suffixType: MiraNumberSuffixes.Multiplier, formatString: "0.00", displayValue: true)]
+    [LocalSliderSetting(min: 0.5f, max: 1f, suffixType: MiraNumberSuffixes.Multiplier, formatString: "0.00", displayValue: true)]
     public ConfigEntry<float> MatchInfoGuideScaleFactor { get; private set; } = config.Bind("MiraApi.VisualsUi", "MiraApi.MatchInfoGuideScaleFactor", 1f);
 
     /// <summary>
