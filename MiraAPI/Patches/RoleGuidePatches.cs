@@ -27,7 +27,7 @@ namespace MiraAPI.Patches;
 [HarmonyPatch]
 public static class RoleGuidePatches
 {
-    private const int GeneralTabIndex = 1;
+    private const int SettingsTabIndex = 1;
     private const int RolesTabIndex = 2;
     private const int ModifiersTabIndex = 3;
     private const float MinGuideScaleFactor = 0.5f;
@@ -56,9 +56,9 @@ public static class RoleGuidePatches
     private static Scroller _rolesScroller;
     private static Scroller _modifiersScroller;
     private static GameObject _modifierNoResultsMessage;
-    private static Scroller _advancedInfoTabScroller;
+    private static Scroller _wikiScroller;
     private static TextBoxTMP _searchBoxTmp;
-    private static GameObject _currentAdvancedTabObject;
+    private static GameObject _currentWikiPage;
     private static TextMeshPro _titleText;
     private static SpriteRenderer _titleIcon;
     private static bool _suppressSearchRefresh;
@@ -172,10 +172,10 @@ public static class RoleGuidePatches
         _rolesScroller = null!;
         _modifiersScroller = null!;
         _modifierNoResultsMessage = null!;
-        _advancedInfoTabScroller = null!;
-        _currentAdvancedTabObject = null!;
+        _wikiScroller = null!;
+        _currentWikiPage = null!;
         _loadingSpinner = null;
-        ResetGeneralState();
+        ResetSettingsState();
         SearchIconButton = null!;
         SearchSortingOrderButton = null!;
         SearchSortingGroupButton = null!;
@@ -470,24 +470,24 @@ public static class RoleGuidePatches
             .First(x => x.name.Contains("BG_Gradient")).transform.localPosition = new Vector3(0, -0.62f, -5);
         _modifiersScroller = modifiersTab.GetComponent<Scroller>();
         instance.settingsTabs.Add(modifiersTab);
-        InitializeGeneralPanel(instance);
+        InitializeSettingsPanel(instance);
 
         var wikiTab = Object.Instantiate(
             instance.settingsTabs[RolesTabIndex],
             instance.settingsTabs[RolesTabIndex].transform.parent);
-        wikiTab.name = "AdvancedWikiPanels";
+        wikiTab.name = "WikiPanels";
         var wikiMask = wikiTab.transform.FindChild("MaskArea");
         wikiMask.transform.localPosition = new Vector3(-0.0184f, 0.425f, -0.1f);
         wikiMask.transform.localScale = new Vector3(1, 1.3f, 1);
         wikiTab.transform.GetAllChildren()
             .First(x => x.name.Contains("BG_Gradient")).transform.localPosition = new Vector3(0, -0.62f, -5);
-        _advancedInfoTabScroller = wikiTab.GetComponent<Scroller>();
+        _wikiScroller = wikiTab.GetComponent<Scroller>();
         var wikiScrollHitbox = wikiTab.transform.FindChild("Hitbox");
-        _advancedInfoTabScroller.ScrollbarYBounds.max = 1.2f;
+        _wikiScroller.ScrollbarYBounds.max = 1.2f;
         wikiScrollHitbox.GetComponent<BoxCollider2D>().size = new Vector2(5.75f, 2.4f);
         wikiScrollHitbox.transform.localPosition += new Vector3(0, 0.3f);
-        _advancedInfoTabScroller.ScrollbarY.trackGraphic.transform.localPosition = new Vector3(2.8364f, 0.3649f, -0.2f);
-        _advancedInfoTabScroller.ScrollbarY.trackGraphic.transform.localScale = new Vector3(0.0234f, 2.068f, 0.5598f);
+        _wikiScroller.ScrollbarY.trackGraphic.transform.localPosition = new Vector3(2.8364f, 0.3649f, -0.2f);
+        _wikiScroller.ScrollbarY.trackGraphic.transform.localScale = new Vector3(0.0234f, 2.068f, 0.5598f);
 
         var spinnerParent = instance.settingsTabs[RolesTabIndex].transform.parent;
         var spinnerPos = spinnerParent.InverseTransformPoint(instance.MatchInfoRoleMaskArea.transform.position);
@@ -750,7 +750,7 @@ public static class RoleGuidePatches
 
     private static void OpenTab(int tabIndex, float delay = 0f)
     {
-        _advancedInfoTabScroller?.gameObject.SetActive(false);
+        _wikiScroller?.gameObject.SetActive(false);
         MatchInfoGuide.Instance.SetActiveTab(tabIndex);
         HidePanels(tabIndex == ModifiersTabIndex ? ModifierEntries : RoleEntries);
         StartPopulate(delay);
@@ -838,7 +838,7 @@ public static class RoleGuidePatches
         {
             _loadingSpinner.gameObject.SetActive(
                 _loading && MatchInfoGuide.Instance.activeTabIndex is RolesTabIndex or ModifiersTabIndex &&
-                !(_advancedInfoTabScroller && _advancedInfoTabScroller.gameObject.activeSelf));
+                !(_wikiScroller && _wikiScroller.gameObject.activeSelf));
         }
     }
 
@@ -1054,9 +1054,9 @@ public static class RoleGuidePatches
 
     private static void RefreshActiveTab(bool scrollToTop)
     {
-        if (IsGeneralTabActive)
+        if (IsSettingsTabActive)
         {
-            RefreshGeneralTab(scrollToTop);
+            RefreshSettingsTab(scrollToTop);
             return;
         }
 
@@ -1088,9 +1088,9 @@ public static class RoleGuidePatches
         }
 
         _appliedSearch = text;
-        if (IsGeneralTabActive)
+        if (IsSettingsTabActive)
         {
-            RefreshGeneralTab(true);
+            RefreshSettingsTab(true);
             yield break;
         }
 
@@ -1201,9 +1201,9 @@ public static class RoleGuidePatches
 
     public static void SwitchFilter()
     {
-        if (IsGeneralTabActive)
+        if (IsSettingsTabActive)
         {
-            ChangeGeneralPage(-1);
+            ChangeSettingsPage(-1);
             return;
         }
 
@@ -1253,7 +1253,7 @@ public static class RoleGuidePatches
 
     public static void SwitchMethod()
     {
-        if (IsGeneralTabActive)
+        if (IsSettingsTabActive)
         {
             return;
         }
@@ -1292,9 +1292,9 @@ public static class RoleGuidePatches
 
     public static void SwitchGrouping()
     {
-        if (IsGeneralTabActive)
+        if (IsSettingsTabActive)
         {
-            ChangeGeneralPage(1);
+            ChangeSettingsPage(1);
             return;
         }
 
@@ -1437,8 +1437,8 @@ public static class RoleGuidePatches
                     _titleText.text = MiraLocaleManager.Get("MiraApi.Wiki.PlayersTab");
                     _titleIcon.sprite = MiraAssets.IconPlayerList.LoadAsset();
                     break;
-                case GeneralTabIndex:
-                    _titleText.text = GetGeneralTitle();
+                case SettingsTabIndex:
+                    _titleText.text = GetSettingsTitle();
                     _titleIcon.sprite = MiraAssets.IconSettings.LoadAsset();
                     break;
                 case RolesTabIndex:
@@ -1458,15 +1458,15 @@ public static class RoleGuidePatches
             _titleIcon.SetSizeLimit(0.55f);
         }
 
-        _advancedInfoTabScroller?.gameObject.SetActive(false);
+        _wikiScroller?.gameObject.SetActive(false);
         SearchComponentContainer?.SetActive(true);
-        if (tabIndex == GeneralTabIndex)
+        if (tabIndex == SettingsTabIndex)
         {
-            EnterGeneralTab();
+            EnterSettingsTab();
         }
         else
         {
-            LeaveGeneralTab();
+            LeaveSettingsTab();
         }
 
         UpdateSpinner();
@@ -1511,15 +1511,15 @@ public static class RoleGuidePatches
         return MiraAssets.IconNeutral.LoadAsset();
     }
 
-    private static bool TryPrepareAdvancedWiki(MatchInfoGuide instance)
+    private static bool TryPrepareWikiPage(MatchInfoGuide instance)
     {
         instance.settingsTabs[RolesTabIndex].SetActive(false);
         _modifiersScroller?.gameObject.SetActive(false);
-        LeaveGeneralTab();
-        if (_currentAdvancedTabObject)
+        LeaveSettingsTab();
+        if (_currentWikiPage)
         {
-            _currentAdvancedTabObject.SetActive(false);
-            _currentAdvancedTabObject.Destroy();
+            _currentWikiPage.SetActive(false);
+            _currentWikiPage.Destroy();
         }
 
         if (SearchComponentContainer)
@@ -1527,18 +1527,18 @@ public static class RoleGuidePatches
             SearchComponentContainer.SetActive(false);
         }
 
-        if (_advancedInfoTabScroller == null)
+        if (_wikiScroller == null)
         {
             Warning("Wiki tab is null.");
             return false;
         }
 
-        _advancedInfoTabScroller.gameObject.SetActive(true);
+        _wikiScroller.gameObject.SetActive(true);
         UpdateSpinner();
         return true;
     }
 
-    private static IEnumerator CoDisplayAdvancedWikiLater(float delay, Action display)
+    private static IEnumerator CoDisplayWikiPageLater(float delay, Action display)
     {
         yield return new WaitForSeconds(delay);
         if (_guide && MatchInfoGuide.Instance && MatchInfoGuide.Instance.MatchInfoParent.activeSelf)
@@ -1552,18 +1552,18 @@ public static class RoleGuidePatches
         var remaining = _openedAt + instance.transitionOpen.duration - Time.time;
         if (remaining > 0f)
         {
-            Coroutines.Start(CoDisplayAdvancedWikiLater(remaining, () => DisplayAdvancedWiki(instance, modifier)));
+            Coroutines.Start(CoDisplayWikiPageLater(remaining, () => DisplayAdvancedWiki(instance, modifier)));
             return;
         }
 
         var name = modifier.ModifierName;
-        Info($"Opening advanced tab for {name}.");
-        if (!TryPrepareAdvancedWiki(instance))
+        Info($"Opening wiki page for {name}.");
+        if (!TryPrepareWikiPage(instance))
         {
             return;
         }
 
-        _currentAdvancedTabObject = modifier.GetAdvancedWiki(instance, _titleText, _titleIcon, _advancedInfoTabScroller);
+        _currentWikiPage = modifier.GetAdvancedWiki(instance, _titleText, _titleIcon, _wikiScroller);
     }
 
     public static void DisplayAdvancedWiki(MatchInfoGuide instance, RoleBehaviour role)
@@ -1571,19 +1571,19 @@ public static class RoleGuidePatches
         var remaining = _openedAt + instance.transitionOpen.duration - Time.time;
         if (remaining > 0f)
         {
-            Coroutines.Start(CoDisplayAdvancedWikiLater(remaining, () => DisplayAdvancedWiki(instance, role)));
+            Coroutines.Start(CoDisplayWikiPageLater(remaining, () => DisplayAdvancedWiki(instance, role)));
             return;
         }
 
-        Info($"Opening advanced tab for {role.GetRoleName()}.");
-        if (!TryPrepareAdvancedWiki(instance))
+        Info($"Opening wiki page for {role.GetRoleName()}.");
+        if (!TryPrepareWikiPage(instance))
         {
             return;
         }
 
         if (role is ICustomRole custom)
         {
-            _currentAdvancedTabObject = custom.GetAdvancedWiki(instance, _titleText, _titleIcon, _advancedInfoTabScroller);
+            _currentWikiPage = custom.GetAdvancedWiki(instance, _titleText, _titleIcon, _wikiScroller);
         }
         else
         {
@@ -1599,11 +1599,11 @@ public static class RoleGuidePatches
                 }
             }
 
-            _currentAdvancedTabObject = Helpers.CreateAdvancedWikiPage(
+            _currentWikiPage = Helpers.CreateAdvancedWikiPage(
                 instance,
                 _titleText,
                 _titleIcon,
-                _advancedInfoTabScroller,
+                _wikiScroller,
                 role.Role.ToString(),
                 titleTxt,
                 role.RoleIconColor,
@@ -1723,100 +1723,96 @@ public static class RoleGuidePatches
         return customRole.RoleFactionTitle;
     }
 
-    // ---- General (non-role) option pages: paginated General tab + cross-page search ----
-    private static Scroller? _generalScroller;
-    private static GameObject? _generalNoResults;
-    private static GameObject? _generalPageObject;
-    private static List<GuideOptionPage> _generalPages = [];
-    private static int _generalPage; // 0 = vanilla settings, 1..N = _generalPages[page - 1]
-    private static bool _generalSearching;
+    // Settings page state.
+    private static Scroller? _settingsScroller;
+    private static GameObject? _settingsNoResults;
+    private static GameObject? _settingsPageObject;
+    private static List<GuideOptionPage> _settingsPages = [];
+    private static int _settingsPage; // 0 = vanilla settings, 1..N = _settingsPages[page - 1]
+    private static bool _settingsSearching;
 
-    // Saved state of the sort buttons so they can be restored when leaving the General tab.
+    // Save the sort-button appearance while they are used for page navigation.
     private static bool _sortButtonsRepurposed;
     private static string _savedFilterLabel = string.Empty;
     private static string _savedGroupLabel = string.Empty;
     private static Vector3 _savedFilterIconScale = Vector3.one;
     private static Vector3 _savedGroupIconScale = Vector3.one;
 
-    private static bool IsGeneralTabActive =>
-        _uiInitialized && MatchInfoGuide.Instance && MatchInfoGuide.Instance.activeTabIndex == GeneralTabIndex;
+    private static bool IsSettingsTabActive =>
+        _uiInitialized && MatchInfoGuide.Instance && MatchInfoGuide.Instance.activeTabIndex == SettingsTabIndex;
 
-    private static void ResetGeneralState()
+    private static void ResetSettingsState()
     {
-        _generalScroller = null;
-        _generalNoResults = null;
-        _generalPageObject = null;
-        _generalPages = [];
-        _generalPage = 0;
-        _generalSearching = false;
+        _settingsScroller = null;
+        _settingsNoResults = null;
+        _settingsPageObject = null;
+        _settingsPages = [];
+        _settingsPage = 0;
+        _settingsSearching = false;
         _sortButtonsRepurposed = false;
     }
 
-    /// <summary>
-    /// Clones the roles tab to make the Settings tab. Used to display Options initialized by MiraAPI mods not related to roles or modifiers.
-    /// </summary>
-    private static void InitializeGeneralPanel(MatchInfoGuide instance)
+    private static void InitializeSettingsPanel(MatchInfoGuide instance)
     {
         var rolesTab = instance.settingsTabs[RolesTabIndex];
-        var generalTab = Object.Instantiate(rolesTab, rolesTab.transform.parent);
-        generalTab.name = "GeneralOptionsPanel";
-        generalTab.transform.FindChild("MaskArea")?.transform.localPosition = new Vector3(-0.0184f, 0.15f, -0.1f);
-        generalTab.transform.GetAllChildren()
+        var settingsTab = Object.Instantiate(rolesTab, rolesTab.transform.parent);
+        settingsTab.name = "SettingsOptionsPanel";
+        settingsTab.transform.FindChild("MaskArea")?.transform.localPosition = new Vector3(-0.0184f, 0.15f, -0.1f);
+        settingsTab.transform.GetAllChildren()
             .First(x => x.name.Contains("BG_Gradient")).transform.localPosition = new Vector3(0, -0.62f, -5);
-        _generalScroller = generalTab.GetComponent<Scroller>();
-        generalTab.SetActive(false);
+        _settingsScroller = settingsTab.GetComponent<Scroller>();
+        settingsTab.SetActive(false);
 
-        _generalNoResults = Object.Instantiate(
+        _settingsNoResults = Object.Instantiate(
             instance.rolesEnabledMessage,
             instance.rolesEnabledMessage.transform.parent,
             true);
-        _generalNoResults.name = "GeneralNoResultsFound";
-        _generalNoResults.SetActive(false);
-        SetNoResultsText(_generalNoResults);
+        _settingsNoResults.name = "SettingsNoResultsFound";
+        _settingsNoResults.SetActive(false);
+        SetNoResultsText(_settingsNoResults);
     }
 
-    private static void EnterGeneralTab()
+    private static void EnterSettingsTab()
     {
         if (!_uiInitialized)
         {
             return;
         }
 
-        RefreshGeneralTab(true);
+        RefreshSettingsTab(true);
     }
 
-    private static void LeaveGeneralTab()
+    private static void LeaveSettingsTab()
     {
-        if (_generalScroller != null)
+        if (_settingsScroller != null)
         {
-            _generalScroller.gameObject.SetActive(false);
+            _settingsScroller.gameObject.SetActive(false);
         }
 
-        if (_generalNoResults)
+        if (_settingsNoResults)
         {
-            _generalNoResults!.SetActive(false);
+            _settingsNoResults!.SetActive(false);
         }
 
         RestoreSortButtons();
     }
 
-    private static void ChangeGeneralPage(int delta)
+    private static void ChangeSettingsPage(int delta)
     {
-        var total = _generalPages.Count + 1;
+        var total = _settingsPages.Count + 1;
         if (total <= 1)
         {
             return;
         }
 
-        _generalPage = (_generalPage + delta + total) % total;
-        RefreshGeneralTab(true);
+        _settingsPage = (_settingsPage + delta + total) % total;
+        RefreshSettingsTab(true);
     }
 
     /// <summary>
-    /// Rebuilds pages from live option data and redraws the General tab.
-    /// Pages are rebuilt every time because values, group visibility and the gamemode can change.
+    /// Updates the Settings tab with the current option values.
     /// </summary>
-    private static void RefreshGeneralTab(bool scrollToTop)
+    private static void RefreshSettingsTab(bool scrollToTop)
     {
         var guide = MatchInfoGuide.Instance;
         if (!_uiInitialized || !guide)
@@ -1824,67 +1820,67 @@ public static class RoleGuidePatches
             return;
         }
 
-        _generalPages = GuideOptionPages.BuildPages(guide.GetBoolString);
-        if (_generalPage > _generalPages.Count)
+        _settingsPages = GuideOptionPages.BuildPages(guide.GetBoolString);
+        if (_settingsPage > _settingsPages.Count)
         {
-            _generalPage = 0;
+            _settingsPage = 0;
         }
 
-        var vanillaTab = guide.settingsTabs[GeneralTabIndex];
+        var vanillaTab = guide.settingsTabs[SettingsTabIndex];
 
-        // No MiraAPI general options in this match: leave the vanilla tab exactly as it always was.
-        if (_generalPages.Count == 0)
+        // Keep the vanilla tab when there are no MiraAPI settings pages.
+        if (_settingsPages.Count == 0)
         {
-            _generalSearching = false;
-            _generalScroller?.gameObject.SetActive(false);
-            _generalNoResults?.SetActive(false);
+            _settingsSearching = false;
+            _settingsScroller?.gameObject.SetActive(false);
+            _settingsNoResults?.SetActive(false);
             vanillaTab.SetActive(true);
             RestoreSortButtons();
-            UpdateGeneralTitle();
+            UpdateSettingsTitle();
             return;
         }
 
         var searchText = GetSearchText().Trim();
-        _generalSearching = searchText.Length > 0;
+        _settingsSearching = searchText.Length > 0;
 
-        if (_generalSearching)
+        if (_settingsSearching)
         {
-            ShowGeneralEntries(GuideOptionPages.Search(_generalPages, searchText), true, scrollToTop);
+            ShowSettingsEntries(GuideOptionPages.Search(_settingsPages, searchText), true, scrollToTop);
             vanillaTab.SetActive(false);
             RepurposeSortButtons(false);
         }
-        else if (_generalPage == 0)
+        else if (_settingsPage == 0)
         {
-            _generalScroller?.gameObject.SetActive(false);
-            _generalNoResults?.SetActive(false);
+            _settingsScroller?.gameObject.SetActive(false);
+            _settingsNoResults?.SetActive(false);
             vanillaTab.SetActive(true);
             RepurposeSortButtons(true);
         }
         else
         {
-            ShowGeneralEntries(_generalPages[_generalPage - 1].Entries, false, scrollToTop);
+            ShowSettingsEntries(_settingsPages[_settingsPage - 1].Entries, false, scrollToTop);
             vanillaTab.SetActive(false);
             RepurposeSortButtons(true);
         }
 
-        UpdateGeneralTitle();
+        UpdateSettingsTitle();
     }
 
-    private static void ShowGeneralEntries(IReadOnlyList<GuideOptionEntry> entries, bool showGroup, bool scrollToTop)
+    private static void ShowSettingsEntries(IReadOnlyList<GuideOptionEntry> entries, bool showGroup, bool scrollToTop)
     {
         var guide = MatchInfoGuide.Instance;
-        if (_generalScroller == null || !guide || !guide.MatchInfoRolePanelPrefab)
+        if (_settingsScroller == null || !guide || !guide.MatchInfoRolePanelPrefab)
         {
-            // Never leave the tab blank: fall back to the plain vanilla list.
-            guide?.settingsTabs[GeneralTabIndex].SetActive(true);
+            // Use the vanilla settings tab if the custom panel is unavailable.
+            guide?.settingsTabs[SettingsTabIndex].SetActive(true);
             return;
         }
 
-        if (_generalPageObject)
+        if (_settingsPageObject)
         {
-            _generalPageObject!.SetActive(false);
-            _generalPageObject.Destroy();
-            _generalPageObject = null;
+            _settingsPageObject!.SetActive(false);
+            _settingsPageObject.Destroy();
+            _settingsPageObject = null;
         }
 
         var rows = new List<KeyValuePair<string, string>>(entries.Count);
@@ -1894,39 +1890,39 @@ public static class RoleGuidePatches
             rows.Add(new KeyValuePair<string, string>(label, entry.Value));
         }
 
-        _generalScroller.gameObject.SetActive(true);
-        _generalPageObject = Helpers.CreateAdvancedSettingsPage(guide, _generalScroller, rows);
-        _generalNoResults?.SetActive(entries.Count == 0);
+        _settingsScroller.gameObject.SetActive(true);
+        _settingsPageObject = Helpers.CreateAdvancedSettingsPage(guide, _settingsScroller, rows);
+        _settingsNoResults?.SetActive(entries.Count == 0);
         if (scrollToTop)
         {
-            _generalScroller.ScrollToTop();
+            _settingsScroller.ScrollToTop();
         }
     }
 
-    private static string GetGeneralTitle()
+    private static string GetSettingsTitle()
     {
         var baseTitle = MiraLocaleManager.Get("MiraApi.Wiki.SettingsTab");
-        if (!_uiInitialized || _generalPages.Count == 0)
+        if (!_uiInitialized || _settingsPages.Count == 0)
         {
             return baseTitle;
         }
 
-        if (_generalSearching)
+        if (_settingsSearching)
         {
             return $"{baseTitle}: {MiraLocaleManager.Get("MiraApi.Wiki.SearchResults", "Search Results")}";
         }
 
-        var counter = $"({_generalPage + 1}/{_generalPages.Count + 1})";
-        return _generalPage == 0
+        var counter = $"({_settingsPage + 1}/{_settingsPages.Count + 1})";
+        return _settingsPage == 0
             ? $"{baseTitle} {counter}"
-            : $"{baseTitle}: {_generalPages[_generalPage - 1].Title} {counter}";
+            : $"{baseTitle}: {_settingsPages[_settingsPage - 1].Title} {counter}";
     }
 
-    private static void UpdateGeneralTitle()
+    private static void UpdateSettingsTitle()
     {
-        if (_titleText && IsGeneralTabActive)
+        if (_titleText && IsSettingsTabActive)
         {
-            _titleText.text = GetGeneralTitle();
+            _titleText.text = GetSettingsTitle();
         }
     }
 

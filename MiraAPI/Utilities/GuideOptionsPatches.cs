@@ -39,7 +39,7 @@ internal static class GuideOptionPages
             var modAbbreviation = plugin.MiraPlugin.GetAbbreviatedModName();
 
             var groups = plugin.InternalOptionGroups
-                .Where(g => IsGeneralGroup(g, mode) && SafeGroupVisible(g))
+                .Where(g => IsSettingsGroup(g, mode) && SafeGroupVisible(g))
                 .OrderBy(g => g.GroupPriority)
                 .ThenBy(g => g.GroupName, StringComparer.OrdinalIgnoreCase);
 
@@ -108,7 +108,7 @@ internal static class GuideOptionPages
 
         return entry.Value.Contains(query, cmp) ? 3 : int.MaxValue;
     }
-    private static bool IsGeneralGroup(AbstractOptionGroup group, AbstractGameMode? mode)
+    private static bool IsSettingsGroup(AbstractOptionGroup group, AbstractGameMode? mode)
     {
         if (group.ParentMenu is not (MenuCategory.Game or MenuCategory.CustomOne or MenuCategory.CustomTwo))
         {
