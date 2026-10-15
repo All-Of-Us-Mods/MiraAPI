@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -162,7 +161,6 @@ public static class MiraLocaleManager
     /// <param name="key">The string id to find.</param>
     /// <param name="fallback">Fallback string to use if no translation is found.</param>
     /// <returns>A <see cref="string"/> based on the key provided.</returns>
-    [SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "Warning cascades into forcing the entire tree to be ternary operators.")]
     public static string Get(MiraLanguage language, string key, string fallback = "")
     {
         if (Locale.TryGetValue(language, out var translations) &&

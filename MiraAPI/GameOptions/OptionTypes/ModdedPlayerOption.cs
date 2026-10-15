@@ -43,7 +43,7 @@ public class ModdedPlayerOption : ModdedOption<int>
         data.Title = StringName;
         data.Type = global::OptionTypes.Player;
 
-        Values = new();
+        Values = [];
         AllowNone = allowNone;
         Value = DefaultValue;
     }
