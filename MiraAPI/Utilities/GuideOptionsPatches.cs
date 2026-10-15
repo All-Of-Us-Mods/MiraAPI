@@ -18,9 +18,14 @@ internal sealed record GuideOptionEntry(
     string Value,
     AbstractOptionGroup Group,
     string GroupName,
-    string ModAbbreviation);
+    string ModAbbreviation,
+    IReadOnlyList<string> ModSearchTerms);
 
-internal sealed class GuideOptionPage(AbstractOptionGroup group, string modAbbreviation, IReadOnlyList<GuideOptionEntry> entries)
+internal sealed class GuideOptionPage(
+    AbstractOptionGroup group,
+    string modAbbreviation,
+    IReadOnlyList<string> modSearchTerms,
+    IReadOnlyList<GuideOptionEntry> entries)
 {
     public AbstractOptionGroup Group { get; } = group;
 
@@ -29,6 +34,8 @@ internal sealed class GuideOptionPage(AbstractOptionGroup group, string modAbbre
     public LoadableAsset<Sprite> Sprite { get; } = group.Sprite;
 
     public string ModAbbreviation { get; } = modAbbreviation;
+
+    public IReadOnlyList<string> ModSearchTerms { get; } = modSearchTerms;
 
     public IReadOnlyList<GuideOptionEntry> Entries { get; } = entries;
 }
@@ -44,7 +51,10 @@ internal static class GuideOptionPages
         var groups = MiraPluginManager.Instance.PluginsWithOptionsOrGameModes
             .SelectMany(plugin => plugin.InternalOptionGroups
                 .Where(group => group.ShowInMatchInfoGuide && IsSettingsGroup(group, mode) && SafeGroupVisible(group))
-                .Select(group => (Group: group, ModAbbreviation: plugin.MiraPlugin.GetAbbreviatedModName())))
+                .Select(group => (
+                    Plugin: plugin,
+                    Group: group,
+                    ModAbbreviation: plugin.MiraPlugin.GetAbbreviatedModName())))
             .OrderBy(item => GetMenuOrder(item.Group.ParentMenu))
             .ThenBy(item => item.Group.GroupPriority)
             .ThenBy(item => item.Group.GroupName, StringComparer.OrdinalIgnoreCase)
@@ -53,6 +63,7 @@ internal static class GuideOptionPages
         foreach (var item in groups)
         {
             var groupName = item.Group.GroupName.Translate();
+            var modSearchTerms = GetModSearchTerms(item.Plugin, item.Group);
             var entries = new List<GuideOptionEntry>();
 
             foreach (var option in item.Group.Options)
@@ -62,7 +73,13 @@ internal static class GuideOptionPages
                     continue;
                 }
 
-                var entry = TryCreateEntry(option, item.Group, groupName, item.ModAbbreviation, formatBool);
+                var entry = TryCreateEntry(
+                    option,
+                    item.Group,
+                    groupName,
+                    item.ModAbbreviation,
+                    modSearchTerms,
+                    formatBool);
                 if (entry != null)
                 {
                     entries.Add(entry);
@@ -71,7 +88,7 @@ internal static class GuideOptionPages
 
             if (entries.Count > 0)
             {
-                pages.Add(new GuideOptionPage(item.Group, item.ModAbbreviation, entries));
+                pages.Add(new GuideOptionPage(item.Group, item.ModAbbreviation, modSearchTerms, entries));
             }
         }
 
@@ -98,13 +115,61 @@ internal static class GuideOptionPages
         }
 
         const StringComparison cmp = StringComparison.OrdinalIgnoreCase;
-        return pages
+        var pageList = pages.ToList();
+        var normalizedQuery = NormalizeSearchText(query);
+        var matchingModPages = normalizedQuery.Length < 3
+            ? Array.Empty<GuideOptionPage>()
+            : pageList
+                .Where(page => page.ModSearchTerms.Any(term =>
+                    NormalizeSearchText(term).Contains(normalizedQuery, StringComparison.Ordinal)))
+                .ToArray();
+
+        if (matchingModPages.Length > 0)
+        {
+            return matchingModPages.SelectMany(page => page.Entries).ToList();
+        }
+
+        return pageList
             .SelectMany(page => page.Entries
                 .Select(entry => (Entry: entry, Rank: Rank(entry, query, cmp)))
                 .Where(result => result.Rank < int.MaxValue)
                 .OrderBy(result => result.Rank)
                 .Select(result => result.Entry))
             .ToList();
+    }
+
+    private static IReadOnlyList<string> GetModSearchTerms(MiraPluginInfo plugin, AbstractOptionGroup group)
+    {
+        var terms = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            plugin.PluginId,
+            plugin.PluginInfo.Metadata.Name,
+            plugin.MiraPlugin.OptionsTitleText,
+            plugin.MiraPlugin.ParentLocaleId,
+            plugin.MiraPlugin.GetAbbreviatedModName(),
+        };
+
+        AddNamespace(terms, plugin.MiraPlugin.GetType());
+        AddNamespace(terms, group.GetType());
+        foreach (var option in group.Options)
+        {
+            AddNamespace(terms, option.GetType());
+        }
+
+        return terms.Where(term => !string.IsNullOrWhiteSpace(term)).ToArray();
+    }
+
+    private static void AddNamespace(ISet<string> terms, Type type)
+    {
+        if (!string.IsNullOrWhiteSpace(type.Namespace))
+        {
+            terms.Add(type.Namespace);
+        }
+    }
+
+    private static string NormalizeSearchText(string value)
+    {
+        return new string(value.Where(char.IsLetterOrDigit).Select(char.ToLowerInvariant).ToArray());
     }
 
     private static int Rank(GuideOptionEntry entry, string query, StringComparison cmp)
@@ -173,13 +238,14 @@ internal static class GuideOptionPages
         AbstractOptionGroup group,
         string groupName,
         string modAbbreviation,
+        IReadOnlyList<string> modSearchTerms,
         Func<bool, string> formatBool)
     {
         try
         {
             var title = TranslationController.Instance.GetString(option.StringName);
             var value = FormatValue(option, formatBool);
-            return new GuideOptionEntry(title, value, group, groupName, modAbbreviation);
+            return new GuideOptionEntry(title, value, group, groupName, modAbbreviation, modSearchTerms);
         }
         catch (Exception e)
         {
