@@ -68,6 +68,7 @@ public static class RoleGuidePatches
     private static float _openedAt;
     private static bool _uiInitialized;
     private static MatchInfoGuide? _guide;
+    private static int _activeGuideTabIndex = -1;
     private static IEnumerator? _populate;
     private static bool _loading;
     private static LoadingRing? _loadingSpinner;
@@ -75,7 +76,7 @@ public static class RoleGuidePatches
     private static SortingMethod _sortMethod = SortingMethod.Alphabetical;
     private static SortingGroups _sortGrouping = SortingGroups.Ungrouped;
 
-    private static bool IsModifiersTabActive => MatchInfoGuide.Instance.activeTabIndex == ModifiersTabIndex;
+    private static bool IsModifiersTabActive => _activeGuideTabIndex == ModifiersTabIndex;
 
     [HarmonyPostfix]
     [HarmonyPriority(Priority.First)]
@@ -163,6 +164,7 @@ public static class RoleGuidePatches
         RoleEntries.Clear();
         ModifierEntries.Clear();
         _guide = null;
+        _activeGuideTabIndex = -1;
         _uiInitialized = false;
         _loading = false;
         _appliedSearch = string.Empty;
@@ -670,7 +672,7 @@ public static class RoleGuidePatches
         GroupSortingTmp = Object.Instantiate(
             OrderSortingTmp,
             sortingGroupButton.transform);
-        OrderSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.GroupingLabel");
+        GroupSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.GroupingLabel");
         GroupSortingTmp.transform.localPosition = new Vector3(-0.65f, 0.4f, 0);
 
         FilterSortingTmp = Object.Instantiate(
@@ -752,6 +754,7 @@ public static class RoleGuidePatches
     private static void OpenTab(int tabIndex, float delay = 0f)
     {
         _wikiScroller?.gameObject.SetActive(false);
+        _activeGuideTabIndex = tabIndex;
         MatchInfoGuide.Instance.SetActiveTab(tabIndex);
         HidePanels(tabIndex == ModifiersTabIndex ? ModifierEntries : RoleEntries);
         StartPopulate(delay);
@@ -838,7 +841,7 @@ public static class RoleGuidePatches
         if (_loadingSpinner != null)
         {
             _loadingSpinner.gameObject.SetActive(
-                _loading && MatchInfoGuide.Instance.activeTabIndex is RolesTabIndex or ModifiersTabIndex &&
+                _loading && _activeGuideTabIndex is RolesTabIndex or ModifiersTabIndex &&
                 !(_wikiScroller && _wikiScroller.gameObject.activeSelf));
         }
     }
@@ -920,6 +923,7 @@ public static class RoleGuidePatches
     {
         if (entry.Panel)
         {
+            SetupPanelButton(entry.Panel!, () => OpenAdvancedWiki(entry));
             return;
         }
 
@@ -938,16 +942,27 @@ public static class RoleGuidePatches
         if (entry.Modifier != null)
         {
             panel.SetModifierPanel(entry.Modifier, entry.Amount, entry.Chance);
-            SetupPanelButton(panel, () => DisplayAdvancedWiki(MatchInfoGuide.Instance, entry.Modifier));
         }
         else
         {
             panel.SetRolePanel(entry.Role!, entry.Amount, entry.Chance);
-            SetupPanelButton(panel, () => DisplayAdvancedWiki(MatchInfoGuide.Instance, entry.Role!));
         }
 
+        SetupPanelButton(panel, () => OpenAdvancedWiki(entry));
         panel.gameObject.SetActive(false);
         entry.Panel = panel;
+    }
+
+    private static void OpenAdvancedWiki(DetailedPanel entry)
+    {
+        if (entry.Modifier != null)
+        {
+            DisplayAdvancedWiki(MatchInfoGuide.Instance, entry.Modifier);
+        }
+        else if (entry.Role != null)
+        {
+            DisplayAdvancedWiki(MatchInfoGuide.Instance, entry.Role);
+        }
     }
 
     private static void PreloadPanel(DetailedPanel entry)
@@ -1111,7 +1126,7 @@ public static class RoleGuidePatches
             return false;
         }
 
-        var entries = guide.activeTabIndex switch
+        var entries = _activeGuideTabIndex switch
         {
             RolesTabIndex => RoleEntries,
             ModifiersTabIndex => ModifierEntries,
@@ -1137,11 +1152,11 @@ public static class RoleGuidePatches
             entry.Panel!.transform.SetAsLastSibling();
         }
 
-        var scroller = guide.activeTabIndex == ModifiersTabIndex
+        var scroller = _activeGuideTabIndex == ModifiersTabIndex
             ? _modifiersScroller
             : guide.MatchInfoRoleScroller;
         scroller.SetYBoundsMax(GetGridScrollBounds(shown.Count));
-        var noResultsMessage = guide.activeTabIndex == ModifiersTabIndex
+        var noResultsMessage = _activeGuideTabIndex == ModifiersTabIndex
             ? _modifierNoResultsMessage
             : guide.rolesEnabledMessage;
         SetNoResultsVisible(noResultsMessage, shown.Count == 0);
@@ -1371,10 +1386,22 @@ public static class RoleGuidePatches
 
     private static void SetupPanelButton(MatchInfoRolePanel panel, Action onClick)
     {
-        var collider = panel.roleIcon.gameObject.AddComponent<BoxCollider2D>();
+        var collider = panel.roleIcon.gameObject.GetComponent<BoxCollider2D>();
+        if (!collider)
+        {
+            collider = panel.roleIcon.gameObject.AddComponent<BoxCollider2D>();
+        }
+
         collider.size = new Vector2(0.13f, 0.13f);
         collider.offset = new Vector2(0, 0);
-        var passiveButton = panel.roleIcon.gameObject.AddComponent<PassiveButton>();
+        collider.enabled = true;
+        var passiveButton = panel.roleIcon.gameObject.GetComponent<PassiveButton>();
+        if (!passiveButton)
+        {
+            passiveButton = panel.roleIcon.gameObject.AddComponent<PassiveButton>();
+        }
+
+        passiveButton.enabled = true;
         passiveButton.ClickSound = HudManager.Instance.MapButton.ClickSound;
         passiveButton.OnMouseOver = new UnityEvent();
         passiveButton.OnMouseOver.AddListener(
@@ -1430,6 +1457,8 @@ public static class RoleGuidePatches
     [HarmonyPatch(typeof(MatchInfoGuide), nameof(MatchInfoGuide.SetActiveTab))]
     private static void SetActiveTab(int tabIndex)
     {
+        _activeGuideTabIndex = tabIndex;
+
         if (_titleText && _titleIcon)
         {
             switch (tabIndex)
@@ -1740,7 +1769,7 @@ public static class RoleGuidePatches
     private static Vector3 _savedGroupIconScale = Vector3.one;
 
     private static bool IsSettingsTabActive =>
-        _uiInitialized && MatchInfoGuide.Instance && MatchInfoGuide.Instance.activeTabIndex == SettingsTabIndex;
+        _uiInitialized && MatchInfoGuide.Instance && _activeGuideTabIndex == SettingsTabIndex;
 
     private static void ResetSettingsState()
     {
@@ -1947,17 +1976,15 @@ public static class RoleGuidePatches
             return baseTitle;
         }
 
-        if (_settingsPage == 0 || _settingsPages.Count == 0)
-        {
-            var vanillaTitle = $"{MiraLocaleManager.Get("MiraApi.Wiki.VanillaSettings", "Vanilla")} Settings";
-            return _settingsPages.Count == 0
-                ? vanillaTitle
-                : $"{vanillaTitle} ({_settingsPage + 1}/{_settingsPages.Count + 1})";
-        }
-
         if (_settingsSearching)
         {
             return $"{baseTitle}: {MiraLocaleManager.Get("MiraApi.Wiki.SearchResults", "Search Results")}";
+        }
+
+        if (_settingsPage == 0 || _settingsPages.Count == 0)
+        {
+            var vanillaTitle = $"{MiraLocaleManager.Get("MiraApi.Wiki.VanillaSettings", "Vanilla")} Settings";
+            return $"{vanillaTitle} ({_settingsPage + 1}/{_settingsPages.Count + 1})";
         }
 
         var counter = $"({_settingsPage + 1}/{_settingsPages.Count + 1})";
