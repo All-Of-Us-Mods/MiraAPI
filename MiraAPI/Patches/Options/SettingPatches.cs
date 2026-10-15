@@ -51,6 +51,7 @@ public static class SettingPatches
                     MiraNumberSuffixes.None => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo),
                     MiraNumberSuffixes.Multiplier => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "x",
                     MiraNumberSuffixes.Percent => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "%",
+                    MiraNumberSuffixes.Distance => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + MiraApiPlugin.DistanceSuffix.Value,
                     _ => TranslationController.Instance.GetString(
                         StringNames.GameSecondsAbbrev,
                         (Il2CppSystem.Object[])[value.ToString(__instance.FormatString, CultureInfo.InvariantCulture)]),
@@ -68,6 +69,7 @@ public static class SettingPatches
                 MiraNumberSuffixes.None => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo),
                 MiraNumberSuffixes.Multiplier => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "x",
                 MiraNumberSuffixes.Percent => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "%",
+                MiraNumberSuffixes.Distance => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + MiraApiPlugin.DistanceSuffix.Value,
                 _ => TranslationController.Instance.GetString(
                     StringNames.GameSecondsAbbrev,
                     (Il2CppSystem.Object[])[value.ToString(__instance.FormatString, CultureInfo.InvariantCulture)]),

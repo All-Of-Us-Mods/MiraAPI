@@ -41,10 +41,11 @@ public class ModdedEnumOptionAttribute(string title, Type enumType, string[]? va
 /// Attribute for creating an enum option.
 /// </summary>
 /// <typeparam name="T">The enum type.</typeparam>
+/// <param name="title">The title of the option.</param>
 [AttributeUsage(AttributeTargets.Property)]
 public class ModdedEnumOptionAttribute<T>(string title, string[]? values = null)
     : ModdedOptionAttribute(title)
-    where T : Enum
+    where T : struct, Enum
 {
     internal override IModdedOption CreateOption(object? value, PropertyInfo property)
     {

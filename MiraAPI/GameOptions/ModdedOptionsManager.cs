@@ -26,6 +26,7 @@ public static class ModdedOptionsManager
 {
     private static readonly Dictionary<PropertyInfo, PropertyOptionAttribute> OptionAttributes = [];
     private static readonly Dictionary<Type, AbstractOptionGroup> TypeToGroup = [];
+    private static readonly HashSet<Type> PatchedListTypes = [];
 
     internal static readonly Dictionary<OptionBehaviour, ModdedPlayerOption> CreatedPlayerOptions = [];
     internal static readonly Dictionary<OptionBehaviour, ModdedStringOption> CreatedStringOptions = [];
@@ -181,6 +182,27 @@ public static class ModdedOptionsManager
             option.Visible = visibilityFunc;
         }
 
+        var getterAtr = property.GetCustomAttribute<ModdedOptionGetterAttribute>();
+        var getterFunc = getterAtr?.GetGetter(group, property, option);
+        if (getterFunc != null)
+        {
+            option.Getter = getterFunc;
+        }
+
+        var setterAtr = property.GetCustomAttribute<ModdedOptionSetterAttribute>();
+        var setterFunc = setterAtr?.GetSetter(group, property, option);
+        if (setterFunc != null)
+        {
+            option.Setter = setterFunc;
+        }
+
+        var changedAtr = property.GetCustomAttribute<ModdedOptionChangedAttribute>();
+        var changedFunc = changedAtr?.GetChanged(group, property, option);
+        if (changedFunc != null)
+        {
+            option.ChangedEvent = changedFunc;
+        }
+
         RegisterOption(option, group, property.Name, pluginInfo);
     }
 
@@ -255,28 +277,61 @@ public static class ModdedOptionsManager
         var getterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyGetterPatch));
         PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: new HarmonyMethod(getterPatch));
 
-        var listIndex = propertyList.GetType().GetProperty("Item")!;
+        var listType = propertyList.GetType();
 
-        var listSetterOriginal = listIndex.GetSetMethod();
-        var listSetterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyListSetterPatch));
-        PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(listSetterOriginal, postfix: new HarmonyMethod(listSetterPatch));
+        if (PatchedListTypes.Add(listType))
+        {
+            var listIndex = listType.GetProperty("Item")!;
 
-        var listGetterOriginal = listIndex.GetSetMethod();
-        var listGetterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyListGetterPatch));
-        PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(listGetterOriginal, prefix: new HarmonyMethod(listGetterPatch));
+            var listSetterOriginal = listIndex.GetSetMethod();
+            var listSetterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyListSetterPatch));
+            PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(listSetterOriginal, postfix: new HarmonyMethod(listSetterPatch));
+
+            var listGetterOriginal = listIndex.GetGetMethod();
+            var listGetterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyListGetterPatch));
+            PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(listGetterOriginal, prefix: new HarmonyMethod(listGetterPatch));
+        }
 
         OptionAttributes.Add(property, attribute);
         attribute.HolderOptionList = optionList;
         attribute.Value = propertyVal;
 
+        var valueType = property.PropertyType.GetGenericArguments()[0];
+
         var visibilityAttr = property.GetCustomAttribute<ModdedOptionVisibilityAttribute>();
-        var visibilityFunc = visibilityAttr?.GetListVisibility(group, property);
-        for (int i = 0; i < optionList.Count; i++)
+        var visibilityFactory = visibilityAttr?.GetListVisibility(group, property);
+
+        var getterAttr = property.GetCustomAttribute<ModdedOptionGetterAttribute>();
+        var getterFactory = getterAttr?.GetListGetter(group, property, valueType);
+
+        var setterAttr = property.GetCustomAttribute<ModdedOptionSetterAttribute>();
+        var setterFactory = setterAttr?.GetListSetter(group, property, valueType);
+
+        var changedAttr = property.GetCustomAttribute<ModdedOptionChangedAttribute>();
+        var changedFactory = changedAttr?.GetListChanged(group, property, valueType);
+
+        for (var i = 0; i < optionList.Count; i++)
         {
             var option = optionList[i];
-            if (visibilityFunc != null)
+
+            if (visibilityFactory != null)
             {
-                option.Visible = () => visibilityFunc(i);
+                option.Visible = (Func<bool>)visibilityFactory(i);
+            }
+
+            if (getterFactory != null)
+            {
+                option.Getter = getterFactory(i);
+            }
+
+            if (setterFactory != null)
+            {
+                option.Setter = setterFactory(i);
+            }
+
+            if (changedFactory != null)
+            {
+                option.ChangedEvent = changedFactory(i);
             }
 
             RegisterOption(option, group, property.Name + (i + 1), pluginInfo);
@@ -350,7 +405,7 @@ public static class ModdedOptionsManager
     /// <param name="__originalMethod">The original setter method.</param>
     /// <param name="value">The new object value.</param>
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony naming convention.")]
-    [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Harmony naming convention.")]
+    [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Read above.")]
     public static void PropertySetterPatch(MethodBase __originalMethod, object value)
     {
         var attribute = OptionAttributes.First(pair => pair.Key.GetSetMethod() == __originalMethod).Value;
@@ -364,7 +419,7 @@ public static class ModdedOptionsManager
     /// <param name="__result">The result of the property getter.</param>
     /// <returns><see langword="false"/> so the original getter gets skipped.</returns>
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony naming convention")]
-    [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Harmony naming convention.")]
+    [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Read above.")]
     public static bool PropertyGetterPatch(MethodBase __originalMethod, ref object __result)
     {
         var attribute = OptionAttributes.First(pair => pair.Key.GetGetMethod() == __originalMethod).Value;
@@ -382,9 +437,10 @@ public static class ModdedOptionsManager
     [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Read above.")]
     public static void PropertyListSetterPatch(object __instance, int index, object value)
     {
-        var attribute = (ModdedOptionListAttribute)OptionAttributes.First(
-            pair => pair.Value is ModdedOptionListAttribute list && ReferenceEquals(list.Value, __instance)).Value;
-        attribute.SetValue(index, value);
+        var match = OptionAttributes.Values
+            .OfType<ModdedOptionListAttribute>()
+            .FirstOrDefault(list => ReferenceEquals(list.Value, __instance));
+        match?.SetValue(index, value);
     }
 
     /// <summary>
@@ -398,9 +454,14 @@ public static class ModdedOptionsManager
     [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Read above.")]
     public static bool PropertyListGetterPatch(object __instance, int index, ref object __result)
     {
-        var attribute = (ModdedOptionListAttribute)OptionAttributes.First(
-            pair => pair.Value is ModdedOptionListAttribute list && ReferenceEquals(list.Value, __instance)).Value;
-        __result = attribute.GetValue(index);
+        var match = OptionAttributes.Values
+            .OfType<ModdedOptionListAttribute>()
+            .FirstOrDefault(list => ReferenceEquals(list.Value, __instance));
+
+        if (match is null)
+            return true;
+
+        __result = match.GetValue(index);
         return false;
     }
 }

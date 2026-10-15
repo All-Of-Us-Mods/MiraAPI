@@ -58,6 +58,21 @@ public interface IModdedOption
     Func<bool> Visible { get; set; }
 
     /// <summary>
+    /// Gets or sets a getter event for the option, allowing for dynamic values based on external circumstances.
+    /// </summary>
+    Delegate? Getter { get; set; }
+
+    /// <summary>
+    /// Gets or sets a setter event for the option, allowing for dynamic value changes based on external circumstances.
+    /// </summary>
+    Delegate? Setter { get; set; }
+
+    /// <summary>
+    /// Gets or sets the event that is invoked when the value of the option changes.
+    /// </summary>
+    Delegate? ChangedEvent { get; set; }
+
+    /// <summary>
     /// Gets or sets a value indicating whether the option should be included with presets.
     /// </summary>
     bool IncludeInPreset { get; set; }
@@ -114,6 +129,12 @@ public interface IModdedOption
     /// </summary>
     /// <param name="presetConfig">The <see cref="ConfigFile"/> representing the preset configuration.</param>
     void LoadFromPreset(ConfigFile presetConfig);
+
+    /// <summary>
+    /// Gets the type of the value that the option represents.
+    /// </summary>
+    /// <returns>The type of the option value.</returns>
+    Type GetValueType();
 }
 
 /// <summary>

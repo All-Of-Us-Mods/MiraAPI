@@ -113,7 +113,7 @@ public class ModdedEnumOption : ModdedOption<int>
 /// </summary>
 /// <typeparam name="T">The <see cref="Enum"/> type.</typeparam>
 public class ModdedEnumOption<T> : ModdedOption<T>
-    where T : Enum
+    where T : struct, Enum
 {
     /// <summary>
     /// Gets the string values of the <see langword="enum"/>.
@@ -130,7 +130,7 @@ public class ModdedEnumOption<T> : ModdedOption<T>
     public ModdedEnumOption(string title, T defaultValue, string[]? values = null, bool includeInPreset = true)
         : base(title, defaultValue, includeInPreset)
     {
-        Values = values ?? Enum.GetNames(typeof(T));
+        Values = values ?? Enum.GetNames<T>();
 
         var data = ScriptableObject.CreateInstance<StringGameSetting>();
         data.Title = StringName;
@@ -150,6 +150,10 @@ public class ModdedEnumOption<T> : ModdedOption<T>
 
         stringOption.SetUpFromData(Data, 20);
         stringOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
+
+        // Changing the button text to make them more distinct from number options
+        stringOption.MinusBtn.ChangeButtonText("<");
+        stringOption.PlusBtn.ChangeButtonText(">");
 
         // SetUpFromData method doesn't work correctly so we must set the values manually
         stringOption.Title = StringName;
@@ -176,13 +180,13 @@ public class ModdedEnumOption<T> : ModdedOption<T>
     /// <inheritdoc />
     public override void HandleNetData(byte[] data)
     {
-        SetValue((T)Enum.Parse(typeof(T), Encoding.Unicode.GetString(data)));
+        SetValue(Enum.Parse<T>(Encoding.Unicode.GetString(data)));
     }
 
     /// <inheritdoc />
     public override T GetValueFromOptionBehaviour(OptionBehaviour optionBehaviour)
     {
-        return (T)Enum.Parse(typeof(T), optionBehaviour.GetInt().ToString(NumberFormatInfo.InvariantInfo));
+        return Enum.Parse<T>(optionBehaviour.GetInt().ToString(NumberFormatInfo.InvariantInfo));
     }
 
     /// <inheritdoc />
