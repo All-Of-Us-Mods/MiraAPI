@@ -985,7 +985,7 @@ public static class Helpers
                 bounds.Encapsulate(next);
                 return bounds;
             });
-        var rowScale = (columnWidth / prefabBounds.size.x) * 1.1f;
+        var rowScale = (columnWidth / prefabBounds.size.x) * 1.22f;
         var rowHeight = prefabBounds.size.y * rowScale;
         var rowPitch = 0.45f * rowScale;
         var contentBottom = float.PositiveInfinity;
@@ -1035,7 +1035,7 @@ public static class Helpers
                     var header = Object.Instantiate(headerSource!, page.transform, false);
                     header.transform.localScale = Vector3.one * headerScale;
                     header.transform.localPosition = new Vector3(
-                        horizontalOffset - 0.4f,
+                        horizontalOffset - 0.5f,
                         contentTop - (rowIndex * rowPitch) - groupSpacing,
                         -1f);
                     header.SetHeader(MiraLocaleManager.GetOrCreateLocaleString(group.GroupName), 20);
@@ -1143,6 +1143,10 @@ public static class Helpers
 
                 text.fontMaterial.SetFloat(ShaderID.StencilComp, 3f);
                 text.fontMaterial.SetFloat(ShaderID.Stencil, 50f);
+                if (text.enabled)
+                {
+                    text.ForceMeshUpdate();
+                }
             }
 
             foreach (var renderer in row.GetComponentsInChildren<SpriteRenderer>(true))
@@ -1185,9 +1189,12 @@ public static class Helpers
         var maskBottom = maskArea
             ? inner.InverseTransformPoint(maskArea!.bounds.min).y
             : -0.75f;
-        var scrollRange = float.IsPositiveInfinity(contentBottom)
+        var contentOverflow = float.IsPositiveInfinity(contentBottom)
             ? 0f
-            : Mathf.Max(0f, maskBottom - contentBottom + 0.1f);
+            : maskBottom - contentBottom;
+        var scrollRange = contentOverflow > 0.05f
+            ? contentOverflow + 0.05f
+            : 0f;
         parent.SetYBoundsMax(Mathf.Clamp(scrollRange, 0f, 999f));
         page.SetActive(true);
         return page;
