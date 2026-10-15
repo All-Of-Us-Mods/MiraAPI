@@ -38,7 +38,7 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
         var flags = BindingFlags.Static | BindingFlags.Public;
 
         type = holderType ?? groupType;
-        MemberName ??= $"{property.Name}{defaultSuffix}";
+        MemberName ??= property.Name + defaultSuffix;
 
         if (type.IsAssignableTo(typeof(AbstractOptionGroup)))
         {
@@ -59,12 +59,23 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
 
         var member = type.GetMember(MemberName, flags).FirstOrDefault();
 
-        if (instanceGetter != null)
+        if (instanceGetter == null)
+            return member;
+
+        bool isStatic;
+
+        if (member is FieldInfo field)
+        {
+            isStatic = field.IsStatic;
+        }
+        else
         {
             var method = (member as PropertyInfo)?.GetGetMethod(true) ?? member as MethodInfo;
-            if (method is { IsStatic: true })
-                instanceGetter = null;
+            isStatic = method is { IsStatic: true };
         }
+
+        if (isStatic)
+            instanceGetter = null;
 
         return member;
     }
@@ -186,8 +197,8 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
                 baseParamTypes,
                 delegateType,
                 suffix,
-                forwardParameters: baseParamTypes.Length > 0,
-                postProcessCall: postProcessCall);
+                baseParamTypes.Length > 0,
+                postProcessCall);
 
             return _ => sharedDelegate;
         }
@@ -202,11 +213,16 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
 
             for (byte i = 0; i < baseParamTypes.Length; i++)
             {
-                if (i == 0) il.Emit(OpCodes.Ldarg_0);
-                else if (i == 1) il.Emit(OpCodes.Ldarg_1);
-                else if (i == 2) il.Emit(OpCodes.Ldarg_2);
-                else if (i == 3) il.Emit(OpCodes.Ldarg_3);
-                else il.Emit(OpCodes.Ldarg_S, i);
+                if (i == 0)
+                    il.Emit(OpCodes.Ldarg_0);
+                else if (i == 1)
+                    il.Emit(OpCodes.Ldarg_1);
+                else if (i == 2)
+                    il.Emit(OpCodes.Ldarg_2);
+                else if (i == 3)
+                    il.Emit(OpCodes.Ldarg_3);
+                else
+                    il.Emit(OpCodes.Ldarg_S, i);
             }
 
             if (hasIndexParameter)

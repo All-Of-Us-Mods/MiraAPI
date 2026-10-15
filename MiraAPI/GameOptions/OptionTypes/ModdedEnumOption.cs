@@ -52,6 +52,10 @@ public class ModdedEnumOption : ModdedOption<int>
         stringOption.SetUpFromData(Data, 20);
         stringOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
 
+        // Changing the button text to make them more distinct from number options
+        stringOption.MinusBtn.ChangeButtonText("<");
+        stringOption.PlusBtn.ChangeButtonText(">");
+
         // SetUpFromData method doesn't work correctly so we must set the values manually
         stringOption.Title = StringName;
         stringOption.Values = (Data as StringGameSetting)?.Values ?? new Il2CppStructArray<StringNames>(0);

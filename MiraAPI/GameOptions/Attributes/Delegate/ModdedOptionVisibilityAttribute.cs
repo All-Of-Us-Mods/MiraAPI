@@ -71,6 +71,32 @@ public sealed class ModdedOptionVisibilityAttribute(string? memberName = null, T
 
             targetMethod = vMethod;
         }
+        else if (member is FieldInfo field)
+        {
+            if (field.FieldType != typeof(bool))
+            {
+                Error($"Field {MemberName} is not a bool.");
+                return null;
+            }
+
+            var dynamicMethod = new DynamicMethod($"GetVisibility_{type.Name}_{field.Name}", typeof(bool), Type.EmptyTypes, type, true);
+
+            var il = dynamicMethod.GetILGenerator();
+
+            if (instanceGetter != null)
+            {
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Call, instanceGetter);
+                il.Emit(OpCodes.Ldfld, field);
+            }
+            else
+            {
+                il.Emit(OpCodes.Ldsfld, field);
+            }
+
+            il.Emit(OpCodes.Ret);
+            return dynamicMethod.CreateDelegate<Func<bool>>();
+        }
         else
         {
             Error($"Member {MemberName} of {type.FullName} is not valid for Visible function.");
@@ -118,6 +144,7 @@ public sealed class ModdedOptionVisibilityAttribute(string? memberName = null, T
             }
 
             var indexParams = vProperty.GetIndexParameters();
+
             if (indexParams.Length > 1)
             {
                 Error($"Indexer {MemberName} has too many parameters.");
@@ -177,6 +204,43 @@ public sealed class ModdedOptionVisibilityAttribute(string? memberName = null, T
             }
 
             targetMethod = vMethod;
+        }
+        else if (member is FieldInfo field)
+        {
+            if (field.FieldType.IsAssignableTo(typeof(IList<bool>)))
+            {
+                postProcess = il =>
+                {
+                    il.Emit(OpCodes.Ldarg_0);
+                    il.Emit(OpCodes.Callvirt, ListBoolIndexerGetter);
+                };
+            }
+            else if (field.FieldType != typeof(bool))
+            {
+                Error($"Field {MemberName} is not a bool or a list of bools.");
+                return null;
+            }
+
+            var dynamicMethod = new DynamicMethod($"GetListVisibility_{type.Name}_{field.Name}", typeof(bool), [typeof(int)], type, true);
+            var il = dynamicMethod.GetILGenerator();
+
+            if (instanceGetter != null)
+            {
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Call, instanceGetter);
+                il.Emit(OpCodes.Ldfld, field);
+            }
+            else
+            {
+                il.Emit(OpCodes.Ldsfld, field);
+            }
+
+            postProcess?.Invoke(il);
+
+            il.Emit(OpCodes.Ret);
+
+            var func = dynamicMethod.CreateDelegate<Func<int, bool>>();
+            return index => () => func(index);
         }
         else
         {
