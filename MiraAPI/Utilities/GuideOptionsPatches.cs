@@ -11,7 +11,12 @@ using Reactor.Utilities;
 
 namespace MiraAPI.Utilities;
 
-internal sealed record GuideOptionEntry(string Title, string Value, string GroupName, string ModAbbreviation);
+internal sealed record GuideOptionEntry(
+    string Title,
+    string Value,
+    AbstractOptionGroup Group,
+    string GroupName,
+    string ModAbbreviation);
 
 internal sealed class GuideOptionPage(AbstractOptionGroup group, string modAbbreviation, IReadOnlyList<GuideOptionEntry> entries)
 {
@@ -53,7 +58,7 @@ internal static class GuideOptionPages
                     continue;
                 }
 
-                var entry = TryCreateEntry(option, groupName, item.ModAbbreviation, formatBool);
+                var entry = TryCreateEntry(option, item.Group, groupName, item.ModAbbreviation, formatBool);
                 if (entry != null)
                 {
                     entries.Add(entry);
@@ -90,11 +95,11 @@ internal static class GuideOptionPages
 
         const StringComparison cmp = StringComparison.OrdinalIgnoreCase;
         return pages
-            .SelectMany(p => p.Entries)
-            .Select(e => (Entry: e, Rank: Rank(e, query, cmp)))
-            .Where(x => x.Rank < int.MaxValue)
-            .OrderBy(x => x.Rank)
-            .Select(x => x.Entry)
+            .SelectMany(page => page.Entries
+                .Select(entry => (Entry: entry, Rank: Rank(entry, query, cmp)))
+                .Where(result => result.Rank < int.MaxValue)
+                .OrderBy(result => result.Rank)
+                .Select(result => result.Entry))
             .ToList();
     }
 
@@ -161,6 +166,7 @@ internal static class GuideOptionPages
 
     private static GuideOptionEntry? TryCreateEntry(
         IModdedOption option,
+        AbstractOptionGroup group,
         string groupName,
         string modAbbreviation,
         Func<bool, string> formatBool)
@@ -169,7 +175,7 @@ internal static class GuideOptionPages
         {
             var title = TranslationController.Instance.GetString(option.StringName);
             var value = FormatValue(option, formatBool);
-            return new GuideOptionEntry(title, value, groupName, modAbbreviation);
+            return new GuideOptionEntry(title, value, group, groupName, modAbbreviation);
         }
         catch (Exception e)
         {

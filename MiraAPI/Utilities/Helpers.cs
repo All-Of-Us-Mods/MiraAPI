@@ -26,6 +26,8 @@ using Random = UnityEngine.Random;
 
 namespace MiraAPI.Utilities;
 
+internal readonly record struct AdvancedSettingsRow(string Title, string Value, AbstractOptionGroup? Group);
+
 /// <summary>
 /// A class that contains helper methods.
 /// </summary>
@@ -921,6 +923,17 @@ public static class Helpers
         Scroller parent,
         IReadOnlyList<KeyValuePair<string, string>> settings)
     {
+        return CreateAdvancedSettingsPage(
+            guide,
+            parent,
+            settings.Select(setting => new AdvancedSettingsRow(setting.Key, setting.Value, null)).ToList());
+    }
+
+    internal static GameObject CreateAdvancedSettingsPage(
+        MatchInfoGuide guide,
+        Scroller parent,
+        List<AdvancedSettingsRow> settings)
+    {
         const float contentTop = 0.95f;
         const float horizontalOffset = -0.2f;
         const int columns = 2;
@@ -976,15 +989,127 @@ public static class Helpers
         var rowHeight = prefabBounds.size.y * rowScale;
         var rowPitch = 0.45f * rowScale;
         var contentBottom = float.PositiveInfinity;
+        var previousGroup = (AbstractOptionGroup?)null;
+        var rowIndex = 0;
+        var column = 0;
+        var groupSpacing = 0f;
 
         for (var i = 0; i < settings.Count; i++)
         {
-            var column = i % columns;
-            var rowIndex = i / columns;
+            if (settings[i].Group != previousGroup && settings[i].Group is { } group)
+            {
+                if (previousGroup != null)
+                {
+                    groupSpacing += 0.2f;
+                }
+
+                if (column != 0)
+                {
+                    rowIndex++;
+                    column = 0;
+                }
+
+                var headerSource = group.Header;
+                if (!headerSource && gameSettingsMenu && gameSettingsMenu.GameSettingsTab)
+                {
+                    headerSource = gameSettingsMenu.GameSettingsTab.categoryHeaderOrigin;
+                }
+
+                if (!headerSource)
+                {
+                    foreach (var candidate in Resources.FindObjectsOfTypeAll(Il2CppType.Of<CategoryHeaderMasked>()))
+                    {
+                        var candidateHeader = candidate.TryCast<CategoryHeaderMasked>();
+                        if (candidateHeader && candidateHeader!.Background && candidateHeader.Title)
+                        {
+                            headerSource = candidateHeader;
+                            break;
+                        }
+                    }
+                }
+
+                if (headerSource)
+                {
+                    const float headerScale = 0.5f;
+                    var headerWidth = (columns * columnWidth + (columns - 1) * columnGap) / headerScale;
+                    var header = Object.Instantiate(headerSource!, page.transform, false);
+                    header.transform.localScale = Vector3.one * headerScale;
+                    header.transform.localPosition = new Vector3(
+                        horizontalOffset - 0.4f,
+                        contentTop - (rowIndex * rowPitch) - groupSpacing,
+                        -1f);
+                    header.SetHeader(MiraLocaleManager.GetOrCreateLocaleString(group.GroupName), 20);
+                    if (header.Title)
+                    {
+                        var titleTranslator = header.Title.GetComponent<TextTranslatorTMP>();
+                        if (titleTranslator)
+                        {
+                            Object.Destroy(titleTranslator);
+                        }
+
+                        header.Title.text = group.GroupName.Translate();
+                        header.Title.color = Color.white;
+                        header.Title.horizontalAlignment = HorizontalAlignmentOptions.Left;
+                        var titleTransform = header.Title.rectTransform;
+                        var titlePosition = titleTransform.localPosition;
+                        titlePosition.x = 0.5f;
+                        titleTransform.localPosition = titlePosition;
+                        titleTransform.SetSizeWithCurrentAnchors(
+                            RectTransform.Axis.Horizontal,
+                            headerWidth - 0.3f);
+                    }
+
+                    if (header.Background)
+                    {
+                        header.Background.sprite = MiraAssets.CategoryHeader.LoadAsset();
+                        header.Background.drawMode = SpriteDrawMode.Sliced;
+                        header.Background.color = MiraApiPlugin.DefaultHeaderColor;
+                        header.Background.transform.localPosition = new Vector3(0.5f, -0.1833f, 0f);
+                        header.Background.size = new Vector2(headerWidth, header.Background.size.y);
+                    }
+
+                    if (header.Divider)
+                    {
+                        header.Divider.color = MiraApiPlugin.DefaultHeaderColor;
+                    }
+
+                    header.gameObject.SetActive(true);
+                    foreach (var renderer in header.GetComponentsInChildren<SpriteRenderer>(true))
+                    {
+                        renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                        renderer.material.SetInt(PlayerMaterial.MaskLayer, 50);
+                        if (renderer.enabled && renderer.sprite)
+                        {
+                            contentBottom = Mathf.Min(
+                                contentBottom,
+                                inner.InverseTransformPoint(renderer.bounds.min).y);
+                        }
+                    }
+
+                    foreach (var text in header.GetComponentsInChildren<TextMeshPro>(true))
+                    {
+                        text.fontMaterial.SetFloat(ShaderID.StencilComp, 3f);
+                        text.fontMaterial.SetFloat(ShaderID.Stencil, 50f);
+                        if (text.enabled)
+                        {
+                            text.ForceMeshUpdate();
+                            contentBottom = Mathf.Min(
+                                contentBottom,
+                                inner.InverseTransformPoint(text.bounds.min).y);
+                        }
+                    }
+
+                    rowIndex++;
+                }
+
+                previousGroup = group;
+            }
+
             var originX = -((columns * columnWidth) + ((columns - 1) * columnGap)) / 2f +
                           (column * (columnWidth + columnGap)) +
                           horizontalOffset;
             var centerY = contentTop - (rowHeight / 2f) - (rowIndex * rowPitch);
+            centerY -= groupSpacing;
             var row = Object.Instantiate(rowPrefab, page.transform);
             row.enabled = false;
             row.PlusBtn.gameObject.SetActive(false);
@@ -1005,7 +1130,7 @@ public static class Helpers
                 originX + (columnWidth / 2f) - (prefabBounds.center.x * rowScale),
                 centerY - (prefabBounds.center.y * rowScale),
                 0f);
-            row.TitleText.text = settings[i].Key;
+            row.TitleText.text = settings[i].Title;
             row.ValueText.text = settings[i].Value;
 
             foreach (var text in row.GetComponentsInChildren<TextMeshPro>(true))
@@ -1048,6 +1173,12 @@ public static class Helpers
             }
 
             row.gameObject.SetActive(true);
+            column++;
+            if (column == columns)
+            {
+                column = 0;
+                rowIndex++;
+            }
         }
 
         var maskArea = parent.transform.FindChild("MaskArea")?.GetComponent<SpriteRenderer>();
