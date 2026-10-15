@@ -871,9 +871,9 @@ public static class RoleGuidePatches
         text.text = MiraLocaleManager.Get("MiraApi.Wiki.NoResultsFound", "No Results Found");
     }
 
-    private static void SetNoResultsVisible(GameObject message, bool visible)
+    private static void SetNoResultsVisible(GameObject? message, bool visible)
     {
-        if (message)
+        if (message != null && message)
         {
             message.SetActive(visible);
         }
@@ -1532,6 +1532,7 @@ public static class RoleGuidePatches
     private static void SetActiveTab(int tabIndex)
     {
         _activeGuideTabIndex = tabIndex;
+        HideNoResultsMessages();
 
         if (_titleText && _titleIcon)
         {
@@ -1574,6 +1575,18 @@ public static class RoleGuidePatches
         }
 
         UpdateSpinner();
+    }
+
+    private static void HideNoResultsMessages()
+    {
+        var guide = _guide;
+        if (guide != null && guide)
+        {
+            SetNoResultsVisible(guide.rolesEnabledMessage, false);
+        }
+
+        SetNoResultsVisible(_modifierNoResultsMessage, false);
+        SetNoResultsVisible(_settingsNoResults, false);
     }
 
     public static Sprite GetRandomModifierIcon()
@@ -2025,7 +2038,7 @@ public static class RoleGuidePatches
             .Select(entry => new AdvancedSettingsRow(entry.Title, entry.Value, showGroup ? entry.Group : null))
             .ToList();
         ShowSettingsRows(rows, scrollToTop);
-        _settingsNoResults?.SetActive(entries.Count == 0);
+        _settingsNoResults?.SetActive(_settingsSearching && entries.Count == 0);
     }
 
     private static void ShowSettingsRows(IReadOnlyList<KeyValuePair<string, string>> rows, bool scrollToTop)
@@ -2055,7 +2068,7 @@ public static class RoleGuidePatches
 
         _settingsScroller.gameObject.SetActive(true);
         _settingsPageObject = Helpers.CreateAdvancedSettingsPage(guide, _settingsScroller, rows);
-        _settingsNoResults?.SetActive(rows.Count == 0);
+        _settingsNoResults?.SetActive(false);
         if (scrollToTop)
         {
             _settingsScroller.ScrollToTop();
@@ -2082,7 +2095,12 @@ public static class RoleGuidePatches
         }
 
         var counter = $"({_settingsPage + 1}/{_settingsPages.Count + 1})";
-        return $"{_settingsPages[_settingsPage - 1].Title} Settings {counter}";
+        var pageTitle = _settingsPages[_settingsPage - 1].Title;
+        var titleAlreadyDescribesSettings = pageTitle.EndsWith("settings", StringComparison.OrdinalIgnoreCase) ||
+                                            pageTitle.EndsWith("options", StringComparison.OrdinalIgnoreCase);
+        return titleAlreadyDescribesSettings
+            ? $"{pageTitle} {counter}"
+            : $"{pageTitle} Settings {counter}";
     }
 
     private static void UpdateSettingsTitle()
@@ -2117,11 +2135,11 @@ public static class RoleGuidePatches
             SetPaginationSprites(_searchSortingFilterIdle, _searchSortingFilterHover, true);
             SetPaginationSprites(_searchSortingGroupIdle, _searchSortingGroupHover, false);
             FilterSortingTmp.transform.localPosition = new Vector3(
-                -0.15f,
+                -1.05f,
                 _savedFilterLabelPosition.y,
                 _savedFilterLabelPosition.z);
             GroupSortingTmp.transform.localPosition = new Vector3(
-                0.15f,
+                0.95f,
                 _savedGroupLabelPosition.y,
                 _savedGroupLabelPosition.z);
             FilterSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.PrevPage", "Prev");
