@@ -25,9 +25,9 @@ namespace MiraAPI.Patches.Options;
 [HarmonyPatch(typeof(GameOptionsMenu))]
 internal static class GameOptionsMenuPatch
 {
-    private static readonly List<CategoryHeaderMasked> VanillaHeaders = new();
-    private static readonly List<OptionBehaviour> VanillaOptions = new();
-    private static readonly List<OptionBehaviour> MainOptions = new();
+    private static readonly List<CategoryHeaderMasked> VanillaHeaders = [];
+    private static readonly List<OptionBehaviour> VanillaOptions = [];
+    private static readonly List<OptionBehaviour> MainOptions = [];
     private static readonly Dictionary<AbstractGameMode, List<AbstractOptionGroup>> GameModeGroups = [];
     private static readonly Dictionary<AbstractGameMode, List<OptionBehaviour>> GameModeOptions = [];
     private static readonly Dictionary<AbstractGameMode, List<CategoryHeaderMasked>> GameModeHeaders = [];

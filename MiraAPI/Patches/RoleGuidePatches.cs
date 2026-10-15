@@ -38,11 +38,10 @@ public static class RoleGuidePatches
     private static readonly List<DetailedPanel> RoleEntries = [];
     private static readonly List<DetailedPanel> ModifierEntries = [];
 
-    public static GameObject SearchComponentContainer;
+    private static GameObject searchComponentContainer;
     public static PassiveButton SearchIconButton;
     private static SpriteRenderer _searchIconIdle;
     private static SpriteRenderer _searchIconHover;
-    public static TextMeshPro OrderSortingTmp;
     public static PassiveButton SearchSortingOrderButton;
     private static SpriteRenderer _searchSortingOrderIdle;
     private static SpriteRenderer _searchSortingOrderHover;
@@ -289,6 +288,7 @@ public static class RoleGuidePatches
                 _titleText.transform.GetComponent<TextTranslatorTMP>().Destroy();
             }
         }
+
         if (!_titleIcon)
         {
             var titleIconObj = new GameObject("TitleIcon");
@@ -400,14 +400,14 @@ public static class RoleGuidePatches
 
         _guide = instance;
         _loading = false;
-        SearchComponentContainer = new GameObject();
-        SearchComponentContainer.transform.SetParent(instance.MatchInfoParent.transform);
-        SearchComponentContainer.transform.localPosition = Vector3.zero;
-        instance.MatchInfoParent.transform.GetChild(1).transform.SetParent(SearchComponentContainer.transform);
+        searchComponentContainer = new GameObject();
+        searchComponentContainer.transform.SetParent(instance.MatchInfoParent.transform);
+        searchComponentContainer.transform.localPosition = Vector3.zero;
+        instance.MatchInfoParent.transform.GetChild(1).transform.SetParent(searchComponentContainer.transform);
 
         var sortingOrderButton = Object.Instantiate(
             HudManager.Instance.SettingsButton,
-            SearchComponentContainer.transform);
+            searchComponentContainer.transform);
         sortingOrderButton.gameObject.SetActive(true);
         SearchSortingOrderButton = sortingOrderButton.GetComponent<PassiveButton>();
         SetupSearchButton(
@@ -422,7 +422,7 @@ public static class RoleGuidePatches
 
         var sortingGroupButton = Object.Instantiate(
             sortingOrderButton,
-            SearchComponentContainer.transform);
+            searchComponentContainer.transform);
         sortingGroupButton.gameObject.SetActive(true);
         SearchSortingGroupButton = sortingGroupButton.GetComponent<PassiveButton>();
         SetupSearchButton(
@@ -437,7 +437,7 @@ public static class RoleGuidePatches
 
         var sortingFilterButton = Object.Instantiate(
             sortingOrderButton,
-            SearchComponentContainer.transform);
+            searchComponentContainer.transform);
         sortingFilterButton.gameObject.SetActive(true);
         SearchSortingFilterButton = sortingFilterButton.GetComponent<PassiveButton>();
         SetupSearchButton(
@@ -515,7 +515,7 @@ public static class RoleGuidePatches
 
         var searchBox = Object.Instantiate(
             instance.TabButtons[2].gameObject,
-            SearchComponentContainer.transform);
+            searchComponentContainer.transform);
         var searchButton = searchBox.GetComponent<MatchInfoGuideTabButton>();
         var tmpText = searchButton.transform.GetChild(0).GetComponent<TextMeshPro>();
         tmpText.GetComponent<TextTranslatorTMP>().Destroy();
@@ -660,23 +660,23 @@ public static class RoleGuidePatches
         modifiersButton.OnClick.AddListener((Action)(() => OpenModifiersTab()));
         instance.TabButtons.Add(modifiersButton);
 
-        OrderSortingTmp = Object.Instantiate(
+        var orderSortingTmp = Object.Instantiate(
             _titleText,
             sortingOrderButton.transform);
-        OrderSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.OrderLabel");
-        OrderSortingTmp.fontSize = OrderSortingTmp.fontSizeMax = 3f;
-        OrderSortingTmp.alignment = TextAlignmentOptions.Center;
-        OrderSortingTmp.horizontalAlignment = HorizontalAlignmentOptions.Center;
-        OrderSortingTmp.transform.localPosition = new Vector3(-0.65f, 0.4f, 0);
+        orderSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.OrderLabel");
+        orderSortingTmp.fontSize = orderSortingTmp.fontSizeMax = 3f;
+        orderSortingTmp.alignment = TextAlignmentOptions.Center;
+        orderSortingTmp.horizontalAlignment = HorizontalAlignmentOptions.Center;
+        orderSortingTmp.transform.localPosition = new Vector3(-0.65f, 0.4f, 0);
 
         GroupSortingTmp = Object.Instantiate(
-            OrderSortingTmp,
+            orderSortingTmp,
             sortingGroupButton.transform);
         GroupSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.GroupingLabel");
         GroupSortingTmp.transform.localPosition = new Vector3(-0.65f, 0.4f, 0);
 
         FilterSortingTmp = Object.Instantiate(
-            OrderSortingTmp,
+            orderSortingTmp,
             sortingFilterButton.transform);
         FilterSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.FilterLabel");
         FilterSortingTmp.transform.localPosition = new Vector3(-0.65f, 0.4f, 0);
@@ -771,9 +771,15 @@ public static class RoleGuidePatches
         }
     }
 
-    public static void OpenModifiersTab() => OpenTab(ModifiersTabIndex);
+    public static void OpenModifiersTab()
+    {
+        OpenTab(ModifiersTabIndex);
+    }
 
-    public static void OpenRolesTab() => OpenTab(RolesTabIndex);
+    public static void OpenRolesTab()
+    {
+        OpenTab(RolesTabIndex);
+    }
 
     private static void SetNoResultsText(GameObject message)
     {
@@ -795,7 +801,7 @@ public static class RoleGuidePatches
         }
     }
 
-    public sealed class DetailedPanel(string title, string category, string modId, RoleBehaviour? role, GameModifier? modifier)
+    private sealed class DetailedPanel(string title, string category, string modId, RoleBehaviour? role, GameModifier? modifier)
     {
         public MatchInfoRolePanel? Panel { get; set; }
         public string Title { get; } = title;
@@ -865,14 +871,7 @@ public static class RoleGuidePatches
 
     private static IEnumerator CoPopulate(float delay)
     {
-        if (delay > 0f)
-        {
-            yield return new WaitForSeconds(delay);
-        }
-        else
-        {
-            yield return null;
-        }
+        yield return delay > 0f ? new WaitForSeconds(delay) : null;
 
         if (!_guide)
         {
@@ -1224,14 +1223,8 @@ public static class RoleGuidePatches
         }
 
         var stepUp = (SortingFilter)((int)_sortFilter + 1);
-        if (Enum.IsDefined(stepUp))
-        {
-            _sortFilter = stepUp;
-        }
-        else
-        {
-            _sortFilter = SortingFilter.EnabledOnly;
-        }
+
+        _sortFilter = Enum.IsDefined(stepUp) ? stepUp : SortingFilter.EnabledOnly;
 
         MiraApiPlugin.WikiSortingFilter.Value = _sortFilter;
 
@@ -1275,14 +1268,8 @@ public static class RoleGuidePatches
         }
 
         var stepUp = (SortingMethod)((int)_sortMethod + 1);
-        if (Enum.IsDefined(stepUp))
-        {
-            _sortMethod = stepUp;
-        }
-        else
-        {
-            _sortMethod = SortingMethod.Alphabetical;
-        }
+
+        _sortMethod = Enum.IsDefined(stepUp) ? stepUp : SortingMethod.Alphabetical;
 
         MiraApiPlugin.WikiSortingMethod.Value = _sortMethod;
 
@@ -1489,7 +1476,7 @@ public static class RoleGuidePatches
         }
 
         _wikiScroller?.gameObject.SetActive(false);
-        SearchComponentContainer?.SetActive(true);
+        searchComponentContainer?.SetActive(true);
         if (tabIndex == SettingsTabIndex)
         {
             EnterSettingsTab();
@@ -1552,9 +1539,9 @@ public static class RoleGuidePatches
             _currentWikiPage.Destroy();
         }
 
-        if (SearchComponentContainer)
+        if (searchComponentContainer)
         {
-            SearchComponentContainer.SetActive(false);
+            searchComponentContainer.SetActive(false);
         }
 
         if (_wikiScroller == null)
@@ -2077,20 +2064,20 @@ public static class RoleGuidePatches
     }
 }
 
-public enum SortingGroups
+internal enum SortingGroups
 {
     Ungrouped,
     Faction,
     AmountChance,
 }
 
-public enum SortingMethod
+internal enum SortingMethod
 {
     Alphabetical,
     AlphabeticalDescending,
 }
 
-public enum SortingFilter
+internal enum SortingFilter
 {
     EnabledOnly,
     DisabledOnly,

@@ -35,6 +35,11 @@ public static class Helpers
     private static readonly Regex TrailingZeroRegex = new(@"\.0+(?!\d)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
     private static NumberOption? _advancedSettingsRowPrefab;
 
+    /// <summary>
+    /// Gets all of the options stored within the provided type.
+    /// </summary>
+    /// <param name="classType">The type to get the options of.</param>
+    /// <returns>A readonly list of options from the provided type.</returns>
     public static ReadOnlyCollection<IModdedOption>? GetModdedOptionsForType(Type classType)
     {
         var group = ModdedOptionsManager.Groups.FirstOrDefault(x => x.OptionableType == classType);
@@ -42,6 +47,11 @@ public static class Helpers
         return group?.Children;
     }
 
+    /// <summary>
+    /// Gets the option text of the provided type.
+    /// </summary>
+    /// <param name="classType">The type to get the text for.</param>
+    /// <returns>The options text of the provided type.</returns>
     public static string GetOptionsText(Type classType)
     {
         var group = ModdedOptionsManager.Groups.FirstOrDefault(x => x.OptionableType == classType);
@@ -840,7 +850,7 @@ public static class Helpers
         obj.transform.localScale = Vector3.one / MatchInfoGuideBaseScale;
         obj.transform.localPosition = new Vector3(0f, 0.5f, 0f);
         var scrollHeight = variableTextSizing
-            ? (desc.textBounds.size.y - 2.5f) + maxTextSize + 0.475f
+            ? desc.textBounds.size.y - 2.5f + maxTextSize + 0.475f
             : desc.textBounds.size.y - 2.5f + Mathf.Ceil(num / 2f) * 1.45f;
         parent.SetYBoundsMax(Mathf.Clamp(scrollHeight, 0f, 999f));
         return obj;
@@ -1067,6 +1077,7 @@ public static class Helpers
             panel.roleDescription.fontSizeMin = 1.5f;
             panel.roleDescription.ForceMeshUpdate();
         }
+
         panel.roleIcon.sprite = ability.Icon.LoadAsset();
         panel.roleIcon.SetSizeLimit(0.13f);
 

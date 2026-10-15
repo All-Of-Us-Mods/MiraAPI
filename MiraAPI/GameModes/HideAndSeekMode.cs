@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using AmongUs.Data;
@@ -462,7 +461,6 @@ public class HideAndSeekMode : AbstractGameMode
     }
 
     /// <inheritdoc/>
-    [SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "Warning cascades into forcing the entire tree to be ternary operators.")]
     public override PlayerBodyTypes GetBodyType(PlayerControl player)
     {
         if (player == null || player.Data == null || player.Data.Role == null)
