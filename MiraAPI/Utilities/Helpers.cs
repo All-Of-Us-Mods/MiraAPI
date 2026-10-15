@@ -941,6 +941,7 @@ public static class Helpers
         const float contentTop = 0.95f;
         const float horizontalOffset = -0.2f;
         const float headerContentGap = 0.2f;
+        const int contentSortingOrder = 151;
 
         columns = Mathf.Clamp(columns, 1, 6);
         var inner = parent.Inner;
@@ -1008,7 +1009,7 @@ public static class Helpers
         groupsAsColumns = groupedSettings.Count > 1;
         if (groupsAsColumns)
         {
-            rowScale = columnWidth / prefabBounds.size.x;
+            rowScale = (columnWidth / prefabBounds.size.x) * (columns > 2 ? 1.15f : 1f);
             rowHeight = prefabBounds.size.y * rowScale;
             rowPitch = 0.45f * rowScale;
         }
@@ -1157,6 +1158,7 @@ public static class Helpers
                     {
                         renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                         renderer.material.SetInt(PlayerMaterial.MaskLayer, 50);
+                        renderer.sortingOrder = contentSortingOrder;
                         if (renderer.enabled && renderer.sprite)
                         {
                             contentBottom = Mathf.Min(
@@ -1169,6 +1171,7 @@ public static class Helpers
                     {
                         text.fontMaterial.SetFloat(ShaderID.StencilComp, 3f);
                         text.fontMaterial.SetFloat(ShaderID.Stencil, 50f);
+                        text.renderer.sortingOrder = contentSortingOrder;
                         if (text.enabled)
                         {
                             text.ForceMeshUpdate();
@@ -1227,6 +1230,7 @@ public static class Helpers
 
                 text.fontMaterial.SetFloat(ShaderID.StencilComp, 3f);
                 text.fontMaterial.SetFloat(ShaderID.Stencil, 50f);
+                text.renderer.sortingOrder = contentSortingOrder;
                 if (text.enabled)
                 {
                     text.ForceMeshUpdate();
@@ -1237,6 +1241,7 @@ public static class Helpers
             {
                 renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                 renderer.material.SetInt(PlayerMaterial.MaskLayer, 50);
+                renderer.sortingOrder = contentSortingOrder;
                 if (renderer.enabled &&
                     renderer.sprite &&
                     renderer.transform != row.PlusBtn.transform &&
