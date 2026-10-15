@@ -86,7 +86,14 @@ public class ModdedPlayerOption : ModdedOption<int>
     /// <returns>A list of filtered players.</returns>
     public List<NetworkedPlayerInfo> GetFilteredPlayers()
     {
-        return [.. GameData.Instance.AllPlayers.ToArray().Where(x => PlayerFilter?.Invoke(x) ?? true)];
+        var players = GameData.Instance.AllPlayers.ToArray();
+
+        IEnumerable<NetworkedPlayerInfo> filtered = players;
+
+        if (PlayerFilter != null)
+            filtered = players.Where(PlayerFilter);
+
+        return [.. filtered.OrderBy(x => x.PlayerId)];
     }
 
     /// <summary>

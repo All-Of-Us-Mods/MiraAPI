@@ -1,7 +1,6 @@
 using System;
 using System.Reflection;
 using MiraAPI.GameOptions.OptionTypes;
-using MiraAPI.Translation;
 
 namespace MiraAPI.GameOptions.Attributes;
 
@@ -18,7 +17,7 @@ public class ModdedStringOptionAttribute(
 {
     internal override IModdedOption? CreateOption(object? value, PropertyInfo property)
     {
-        var option = new ModdedStringOption(Title.Translate(), (string)(value ?? string.Empty), values);
+        var option = new ModdedStringOption(Title, (string)(value ?? string.Empty), values);
         return option;
     }
 
