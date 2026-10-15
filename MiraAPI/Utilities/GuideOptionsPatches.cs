@@ -23,29 +23,46 @@ internal sealed record GuideOptionEntry(
 
 internal sealed class GuideOptionPage(
     AbstractOptionGroup group,
+    string title,
+    int order,
+    int menuOrder,
+    uint groupPriority,
+    int columns,
     string modAbbreviation,
     IReadOnlyList<string> modSearchTerms,
-    IReadOnlyList<GuideOptionEntry> entries)
+    List<GuideOptionEntry> entries)
 {
     public AbstractOptionGroup Group { get; } = group;
 
-    public string Title { get; } = group.RoleGuideTitle;
+    public List<AbstractOptionGroup> Groups { get; } = [group];
+
+    public string Title { get; } = title;
 
     public LoadableAsset<Sprite> Sprite { get; } = group.Sprite;
 
+    public int Order { get; set; } = order;
+
+    public int MenuOrder { get; set; } = menuOrder;
+
+    public uint GroupPriority { get; set; } = groupPriority;
+
+    public int Columns { get; } = columns;
+
     public string ModAbbreviation { get; } = modAbbreviation;
 
-    public IReadOnlyList<string> ModSearchTerms { get; } = modSearchTerms;
+    public HashSet<string> ModSearchTerms { get; } = new(modSearchTerms, StringComparer.OrdinalIgnoreCase);
 
-    public IReadOnlyList<GuideOptionEntry> Entries { get; } = entries;
+    public List<GuideOptionEntry> Entries { get; } = entries;
 }
 
 internal static class GuideOptionPages
 {
     private static readonly Regex TrailingZeroRegex = new(@"\.0+(?!\d)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+
     public static List<GuideOptionPage> BuildPages(Func<bool, string> formatBool)
     {
         var pages = new List<GuideOptionPage>();
+        var combinedPages = new Dictionary<string, GuideOptionPage>(StringComparer.OrdinalIgnoreCase);
         var mode = CustomGameModeManager.ActiveMode;
 
         var groups = MiraPluginManager.Instance.PluginsWithOptionsOrGameModes
@@ -88,11 +105,49 @@ internal static class GuideOptionPages
 
             if (entries.Count > 0)
             {
-                pages.Add(new GuideOptionPage(item.Group, item.ModAbbreviation, modSearchTerms, entries));
+                var pageKey = item.Group.MatchInfoGuidePageKey?.Trim();
+                var combinedKey = string.IsNullOrEmpty(pageKey) ? null : $"{item.Plugin.PluginId}\0{pageKey}";
+                if (combinedKey != null && combinedPages.TryGetValue(combinedKey, out var combinedPage))
+                {
+                    combinedPage.Groups.Add(item.Group);
+                    combinedPage.Entries.AddRange(entries);
+                    combinedPage.ModSearchTerms.UnionWith(modSearchTerms);
+                    combinedPage.Order = Math.Min(combinedPage.Order, item.Group.MatchInfoGuidePageOrder);
+                    combinedPage.MenuOrder = Math.Min(
+                        combinedPage.MenuOrder,
+                        GetMenuOrder(item.Group.ParentMenu));
+                    combinedPage.GroupPriority = Math.Min(
+                        combinedPage.GroupPriority,
+                        item.Group.GroupPriority);
+                }
+                else
+                {
+                    var page = new GuideOptionPage(
+                        item.Group,
+                        item.Group.MatchInfoGuidePageTitle,
+                        item.Group.MatchInfoGuidePageOrder,
+                        GetMenuOrder(item.Group.ParentMenu),
+                        item.Group.GroupPriority,
+                        Mathf.Clamp(item.Group.MatchInfoGuidePageColumns, 1, 6),
+                        item.ModAbbreviation,
+                        modSearchTerms,
+                        entries);
+                    pages.Add(page);
+                    if (combinedKey != null)
+                    {
+                        combinedPages.Add(combinedKey, page);
+                    }
+                }
             }
         }
 
-        return pages;
+        return pages
+            .OrderBy(page => page.MenuOrder)
+            .ThenBy(page => page.GroupPriority)
+            .ThenBy(page => page.Order)
+            .ThenBy(page => page.Group.GroupName, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(page => page.ModAbbreviation, StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 
     private static int GetMenuOrder(MenuCategory menu)
@@ -138,7 +193,7 @@ internal static class GuideOptionPages
             .ToList();
     }
 
-    private static IReadOnlyList<string> GetModSearchTerms(MiraPluginInfo plugin, AbstractOptionGroup group)
+    private static string[] GetModSearchTerms(MiraPluginInfo plugin, AbstractOptionGroup group)
     {
         var terms = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -159,7 +214,7 @@ internal static class GuideOptionPages
         return terms.Where(term => !string.IsNullOrWhiteSpace(term)).ToArray();
     }
 
-    private static void AddNamespace(ISet<string> terms, Type type)
+    private static void AddNamespace(HashSet<string> terms, Type type)
     {
         if (!string.IsNullOrWhiteSpace(type.Namespace))
         {
@@ -191,6 +246,7 @@ internal static class GuideOptionPages
 
         return entry.Value.Contains(query, cmp) ? 3 : int.MaxValue;
     }
+
     private static bool IsSettingsGroup(AbstractOptionGroup group, AbstractGameMode? mode)
     {
         if (group.ParentMenu is not (MenuCategory.Game or MenuCategory.CustomOne or MenuCategory.CustomTwo))
