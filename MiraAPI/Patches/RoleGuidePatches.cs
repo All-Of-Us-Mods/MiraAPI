@@ -10,6 +10,7 @@ using Innersloth.Assets;
 using MiraAPI.LocalSettings;
 using MiraAPI.Modifiers;
 using MiraAPI.Modifiers.Types;
+using MiraAPI.Patches.Options;
 using MiraAPI.Roles;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;
@@ -1820,24 +1821,17 @@ public static class RoleGuidePatches
             return;
         }
 
+        var vanillaTab = guide.settingsTabs[SettingsTabIndex];
+        vanillaTab.SetActive(false);
+        var vanillaEntries = GameOptionsMenuPatch.GetActiveGameSettingsRows(guide.GetBoolString);
+        if (vanillaEntries.Count == 0)
+        {
+            vanillaEntries = BuildVanillaSettingsEntries(guide);
+        }
         _settingsPages = GuideOptionPages.BuildPages(guide.GetBoolString);
         if (_settingsPage > _settingsPages.Count)
         {
             _settingsPage = 0;
-        }
-
-        var vanillaTab = guide.settingsTabs[SettingsTabIndex];
-
-        // Keep the vanilla tab when there are no MiraAPI settings pages.
-        if (_settingsPages.Count == 0)
-        {
-            _settingsSearching = false;
-            _settingsScroller?.gameObject.SetActive(false);
-            _settingsNoResults?.SetActive(false);
-            vanillaTab.SetActive(true);
-            RestoreSortButtons();
-            UpdateSettingsTitle();
-            return;
         }
 
         var searchText = GetSearchText().Trim();
@@ -1851,9 +1845,7 @@ public static class RoleGuidePatches
         }
         else if (_settingsPage == 0)
         {
-            _settingsScroller?.gameObject.SetActive(false);
-            _settingsNoResults?.SetActive(false);
-            vanillaTab.SetActive(true);
+            ShowSettingsRows(vanillaEntries, scrollToTop);
             RepurposeSortButtons(true);
         }
         else
@@ -1866,7 +1858,62 @@ public static class RoleGuidePatches
         UpdateSettingsTitle();
     }
 
+    internal static void RefreshSettingsForGameMode()
+    {
+        if (IsSettingsTabActive)
+        {
+            RefreshSettingsTab(false);
+        }
+    }
+
+    private static List<KeyValuePair<string, string>> BuildVanillaSettingsEntries(MatchInfoGuide guide)
+    {
+        foreach (var setting in guide.NormalModeSettings.ToArray())
+        {
+            if (setting)
+            {
+                setting.Destroy();
+            }
+        }
+
+        guide.NormalModeSettings.Clear();
+        guide.CreateNormalModeSettings();
+
+        var entries = new List<KeyValuePair<string, string>>(guide.NormalModeSettings.Count);
+        foreach (var setting in guide.NormalModeSettings)
+        {
+            if (!setting)
+            {
+                continue;
+            }
+
+            var texts = setting.GetComponentsInChildren<TextMeshPro>(true);
+            if (texts.Length < 2)
+            {
+                Warning($"Could not read vanilla settings row '{setting.name}'.");
+                continue;
+            }
+
+            entries.Add(new KeyValuePair<string, string>(texts[0].text, texts[1].text));
+        }
+
+        return entries;
+    }
+
     private static void ShowSettingsEntries(IReadOnlyList<GuideOptionEntry> entries, bool showGroup, bool scrollToTop)
+    {
+        var rows = new List<KeyValuePair<string, string>>(entries.Count);
+        foreach (var entry in entries)
+        {
+            var label = showGroup ? $"<size=60%>{entry.GroupName}</size>\n{entry.Title}" : entry.Title;
+            rows.Add(new KeyValuePair<string, string>(label, entry.Value));
+        }
+
+        ShowSettingsRows(rows, scrollToTop);
+        _settingsNoResults?.SetActive(entries.Count == 0);
+    }
+
+    private static void ShowSettingsRows(IReadOnlyList<KeyValuePair<string, string>> rows, bool scrollToTop)
     {
         var guide = MatchInfoGuide.Instance;
         if (_settingsScroller == null || !guide || !guide.MatchInfoRolePanelPrefab)
@@ -1883,16 +1930,9 @@ public static class RoleGuidePatches
             _settingsPageObject = null;
         }
 
-        var rows = new List<KeyValuePair<string, string>>(entries.Count);
-        foreach (var entry in entries)
-        {
-            var label = showGroup ? $"<size=60%>{entry.GroupName}</size>\n{entry.Title}" : entry.Title;
-            rows.Add(new KeyValuePair<string, string>(label, entry.Value));
-        }
-
         _settingsScroller.gameObject.SetActive(true);
         _settingsPageObject = Helpers.CreateAdvancedSettingsPage(guide, _settingsScroller, rows);
-        _settingsNoResults?.SetActive(entries.Count == 0);
+        _settingsNoResults?.SetActive(rows.Count == 0);
         if (scrollToTop)
         {
             _settingsScroller.ScrollToTop();
@@ -1902,9 +1942,17 @@ public static class RoleGuidePatches
     private static string GetSettingsTitle()
     {
         var baseTitle = MiraLocaleManager.Get("MiraApi.Wiki.SettingsTab");
-        if (!_uiInitialized || _settingsPages.Count == 0)
+        if (!_uiInitialized)
         {
             return baseTitle;
+        }
+
+        if (_settingsPage == 0 || _settingsPages.Count == 0)
+        {
+            var vanillaTitle = $"{MiraLocaleManager.Get("MiraApi.Wiki.VanillaSettings", "Vanilla")} Settings";
+            return _settingsPages.Count == 0
+                ? vanillaTitle
+                : $"{vanillaTitle} ({_settingsPage + 1}/{_settingsPages.Count + 1})";
         }
 
         if (_settingsSearching)
@@ -1913,9 +1961,7 @@ public static class RoleGuidePatches
         }
 
         var counter = $"({_settingsPage + 1}/{_settingsPages.Count + 1})";
-        return _settingsPage == 0
-            ? $"{baseTitle} {counter}"
-            : $"{baseTitle}: {_settingsPages[_settingsPage - 1].Title} {counter}";
+        return $"{_settingsPages[_settingsPage - 1].Title} Settings {counter}";
     }
 
     private static void UpdateSettingsTitle()
