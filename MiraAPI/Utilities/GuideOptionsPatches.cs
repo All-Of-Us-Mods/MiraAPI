@@ -32,45 +32,54 @@ internal static class GuideOptionPages
         var pages = new List<GuideOptionPage>();
         var mode = CustomGameModeManager.ActiveMode;
 
-        // Same plugin set the in-game options menu lists (skips mods that hide themselves from it).
-        foreach (var plugin in MiraPluginManager.Instance.PluginsWithOptionsOrGameModes
-                     .OrderBy(p => p.MiraPlugin.GetAbbreviatedModName(), StringComparer.OrdinalIgnoreCase))
+        var groups = MiraPluginManager.Instance.PluginsWithOptionsOrGameModes
+            .SelectMany(plugin => plugin.InternalOptionGroups
+                .Where(group => group.ShowInMatchInfoGuide && IsSettingsGroup(group, mode) && SafeGroupVisible(group))
+                .Select(group => (Group: group, ModAbbreviation: plugin.MiraPlugin.GetAbbreviatedModName())))
+            .OrderBy(item => GetMenuOrder(item.Group.ParentMenu))
+            .ThenBy(item => item.Group.GroupPriority)
+            .ThenBy(item => item.Group.GroupName, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(item => item.ModAbbreviation, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var item in groups)
         {
-            var modAbbreviation = plugin.MiraPlugin.GetAbbreviatedModName();
+            var groupName = item.Group.GroupName.Translate();
+            var entries = new List<GuideOptionEntry>();
 
-            var groups = plugin.InternalOptionGroups
-                .Where(g => IsSettingsGroup(g, mode) && SafeGroupVisible(g))
-                .OrderBy(g => g.GroupPriority)
-                .ThenBy(g => g.GroupName, StringComparer.OrdinalIgnoreCase);
-
-            foreach (var group in groups)
+            foreach (var option in item.Group.Options)
             {
-                var groupName = group.GroupName.Translate();
-                var entries = new List<GuideOptionEntry>();
-
-                foreach (var option in group.Options)
+                if (!SafeOptionVisible(option))
                 {
-                    if (!SafeOptionVisible(option))
-                    {
-                        continue;
-                    }
-
-                    var entry = TryCreateEntry(option, groupName, modAbbreviation, formatBool);
-                    if (entry != null)
-                    {
-                        entries.Add(entry);
-                    }
+                    continue;
                 }
 
-                if (entries.Count > 0)
+                var entry = TryCreateEntry(option, groupName, item.ModAbbreviation, formatBool);
+                if (entry != null)
                 {
-                    pages.Add(new GuideOptionPage(group, modAbbreviation, entries));
+                    entries.Add(entry);
                 }
+            }
+
+            if (entries.Count > 0)
+            {
+                pages.Add(new GuideOptionPage(item.Group, item.ModAbbreviation, entries));
             }
         }
 
         return pages;
     }
+
+    private static int GetMenuOrder(MenuCategory menu)
+    {
+        return menu switch
+        {
+            MenuCategory.Game => 0,
+            MenuCategory.CustomOne => 1,
+            MenuCategory.CustomTwo => 2,
+            _ => int.MaxValue,
+        };
+    }
+
     public static List<GuideOptionEntry> Search(IEnumerable<GuideOptionPage> pages, string query)
     {
         query = query.Trim();
