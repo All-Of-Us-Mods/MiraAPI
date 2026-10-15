@@ -926,18 +926,23 @@ public static class Helpers
         return CreateAdvancedSettingsPage(
             guide,
             parent,
-            settings.Select(setting => new AdvancedSettingsRow(setting.Key, setting.Value, null)).ToList());
+            settings.Select(setting => new AdvancedSettingsRow(setting.Key, setting.Value, null)).ToList(),
+            2,
+            false);
     }
 
     internal static GameObject CreateAdvancedSettingsPage(
         MatchInfoGuide guide,
         Scroller parent,
-        List<AdvancedSettingsRow> settings)
+        List<AdvancedSettingsRow> settings,
+        int columns = 2,
+        bool groupsAsColumns = false)
     {
         const float contentTop = 0.95f;
         const float horizontalOffset = -0.2f;
-        const int columns = 2;
+        const float headerContentGap = 0.2f;
 
+        columns = Mathf.Clamp(columns, 1, 6);
         var inner = parent.Inner;
         var layout = inner.GetComponent<GridLayoutGroup>();
         if (layout)
@@ -945,8 +950,14 @@ public static class Helpers
             layout.enabled = false;
         }
 
-        var columnWidth = layout ? Mathf.Clamp(layout.cellSize.x, 2f, 3.2f) : 2.7f;
         var columnGap = layout ? Mathf.Clamp(layout.spacing.x, 0.1f, 0.6f) : 0.3f;
+        const int baseColumnCount = 2;
+        var baseColumnWidth = layout ? Mathf.Clamp(layout.cellSize.x, 2f, 3.2f) : 2.7f;
+        var availableWidth = baseColumnWidth * baseColumnCount + columnGap * (baseColumnCount - 1);
+        var columnWidth = Mathf.Clamp(
+            (availableWidth - (columns - 1) * columnGap) / columns,
+            1f,
+            3.2f);
         var layer = inner.gameObject.layer;
         var page = new GameObject("AdvancedSettingsPage") { layer = layer };
         page.transform.SetParent(inner, false);
@@ -988,6 +999,50 @@ public static class Helpers
         var rowScale = (columnWidth / prefabBounds.size.x) * 1.22f;
         var rowHeight = prefabBounds.size.y * rowScale;
         var rowPitch = 0.45f * rowScale;
+        var groupedSettings = groupsAsColumns
+            ? settings
+                .Where(setting => setting.Group != null)
+                .GroupBy(setting => setting.Group!)
+                .ToList()
+            : [];
+        groupsAsColumns = groupedSettings.Count > 1;
+        if (groupsAsColumns)
+        {
+            rowScale = columnWidth / prefabBounds.size.x;
+            rowHeight = prefabBounds.size.y * rowScale;
+            rowPitch = 0.45f * rowScale;
+        }
+
+        var groupColumns = new Dictionary<AbstractOptionGroup, int>();
+        var groupTopOffsets = new Dictionary<AbstractOptionGroup, float>();
+        var groupRows = new Dictionary<AbstractOptionGroup, int>();
+        if (groupsAsColumns)
+        {
+            var bandCount = Mathf.CeilToInt(groupedSettings.Count / (float)columns);
+            var bandHeights = new float[bandCount];
+            for (var i = 0; i < groupedSettings.Count; i++)
+            {
+                var group = groupedSettings[i].Key;
+                var band = i / columns;
+                groupColumns[group] = i % columns;
+                bandHeights[band] = Mathf.Max(
+                    bandHeights[band],
+                    rowPitch * (groupedSettings[i].Count() + 1) + headerContentGap + 0.25f);
+            }
+
+            var bandOffset = 0f;
+            for (var band = 0; band < bandCount; band++)
+            {
+                for (var i = band * columns; i < Mathf.Min((band + 1) * columns, groupedSettings.Count); i++)
+                {
+                    groupTopOffsets[groupedSettings[i].Key] = bandOffset;
+                    groupRows[groupedSettings[i].Key] = 0;
+                }
+
+                bandOffset += bandHeights[band];
+            }
+        }
+
         var contentBottom = float.PositiveInfinity;
         var previousGroup = (AbstractOptionGroup?)null;
         var rowIndex = 0;
@@ -998,15 +1053,22 @@ public static class Helpers
         {
             if (settings[i].Group != previousGroup && settings[i].Group is { } group)
             {
-                if (previousGroup != null)
+                if (groupsAsColumns)
                 {
-                    groupSpacing += 0.2f;
+                    column = groupColumns[group];
                 }
-
-                if (column != 0)
+                else
                 {
-                    rowIndex++;
-                    column = 0;
+                    if (previousGroup != null)
+                    {
+                        groupSpacing += 0.2f;
+                    }
+
+                    if (column != 0)
+                    {
+                        rowIndex++;
+                        column = 0;
+                    }
                 }
 
                 var headerSource = group.Header;
@@ -1030,14 +1092,31 @@ public static class Helpers
 
                 if (headerSource)
                 {
-                    const float headerScale = 0.5f;
-                    var headerWidth = (columns * columnWidth + (columns - 1) * columnGap) / headerScale;
+                    const float headerScale = 0.46f;
+                    var headerWidth = groupsAsColumns
+                        ? columnWidth / headerScale
+                        : (columns * columnWidth + (columns - 1) * columnGap) / headerScale;
                     var header = Object.Instantiate(headerSource!, page.transform, false);
                     header.transform.localScale = Vector3.one * headerScale;
-                    header.transform.localPosition = new Vector3(
-                        horizontalOffset - 0.5f,
-                        contentTop - (rowIndex * rowPitch) - groupSpacing,
-                        -1f);
+                    if (groupsAsColumns)
+                    {
+                        var totalWidth = columns * columnWidth + (columns - 1) * columnGap;
+                        var groupColumn = groupColumns[group];
+                        var groupLeft = -totalWidth / 2f + horizontalOffset +
+                                        groupColumn * (columnWidth + columnGap);
+                        header.transform.localPosition = new Vector3(
+                            groupLeft + (columnWidth / 2f) - 0.25f,
+                            contentTop - groupTopOffsets[group],
+                            -1f);
+                    }
+                    else
+                    {
+                        header.transform.localPosition = new Vector3(
+                            horizontalOffset - 0.5f,
+                            contentTop - (rowIndex * rowPitch) - groupSpacing,
+                            -1f);
+                    }
+
                     header.SetHeader(MiraLocaleManager.GetOrCreateLocaleString(group.GroupName), 20);
                     if (header.Title)
                     {
@@ -1063,14 +1142,14 @@ public static class Helpers
                     {
                         header.Background.sprite = MiraAssets.CategoryHeader.LoadAsset();
                         header.Background.drawMode = SpriteDrawMode.Sliced;
-                        header.Background.color = MiraApiPlugin.DefaultHeaderColor;
+                        header.Background.color = group.GroupColor;
                         header.Background.transform.localPosition = new Vector3(0.5f, -0.1833f, 0f);
                         header.Background.size = new Vector2(headerWidth, header.Background.size.y);
                     }
 
                     if (header.Divider)
                     {
-                        header.Divider.color = MiraApiPlugin.DefaultHeaderColor;
+                        header.Divider.color = group.GroupColor;
                     }
 
                     header.gameObject.SetActive(true);
@@ -1099,7 +1178,10 @@ public static class Helpers
                         }
                     }
 
-                    rowIndex++;
+                    if (!groupsAsColumns)
+                    {
+                        rowIndex++;
+                    }
                 }
 
                 previousGroup = group;
@@ -1108,8 +1190,10 @@ public static class Helpers
             var originX = -((columns * columnWidth) + ((columns - 1) * columnGap)) / 2f +
                           (column * (columnWidth + columnGap)) +
                           horizontalOffset;
-            var centerY = contentTop - (rowHeight / 2f) - (rowIndex * rowPitch);
-            centerY -= groupSpacing;
+            var centerY = groupsAsColumns && settings[i].Group is { } rowGroup
+                ? contentTop - groupTopOffsets[rowGroup] -
+                  (rowPitch * (groupRows[rowGroup] + 1)) - headerContentGap - (rowHeight / 2f)
+                : contentTop - (rowHeight / 2f) - (rowIndex * rowPitch) - groupSpacing;
             var row = Object.Instantiate(rowPrefab, page.transform);
             row.enabled = false;
             row.PlusBtn.gameObject.SetActive(false);
@@ -1177,11 +1261,18 @@ public static class Helpers
             }
 
             row.gameObject.SetActive(true);
-            column++;
-            if (column == columns)
+            if (groupsAsColumns && settings[i].Group is { } renderedGroup)
             {
-                column = 0;
-                rowIndex++;
+                groupRows[renderedGroup]++;
+            }
+            else
+            {
+                column++;
+                if (column == columns)
+                {
+                    column = 0;
+                    rowIndex++;
+                }
             }
         }
 

@@ -1957,6 +1957,7 @@ public static class RoleGuidePatches
         {
             vanillaEntries = BuildVanillaSettingsEntries(guide);
         }
+
         _settingsPages = GuideOptionPages.BuildPages(guide.GetBoolString);
         if (_settingsPage > _settingsPages.Count)
         {
@@ -1979,7 +1980,13 @@ public static class RoleGuidePatches
         }
         else
         {
-            ShowSettingsEntries(_settingsPages[_settingsPage - 1].Entries, false, scrollToTop);
+            var page = _settingsPages[_settingsPage - 1];
+            ShowSettingsEntries(
+                page.Entries,
+                page.Groups.Count > 1,
+                scrollToTop,
+                page.Columns,
+                page.Groups.Count > 1);
             vanillaTab.SetActive(false);
             RepurposeSortButtons(true);
         }
@@ -2029,7 +2036,12 @@ public static class RoleGuidePatches
         return entries;
     }
 
-    private static void ShowSettingsEntries(IReadOnlyList<GuideOptionEntry> entries, bool showGroup, bool scrollToTop)
+    private static void ShowSettingsEntries(
+        List<GuideOptionEntry> entries,
+        bool showGroup,
+        bool scrollToTop,
+        int columns = 2,
+        bool groupsAsColumns = false)
     {
         var orderedEntries = showGroup
             ? entries.GroupBy(entry => entry.Group).SelectMany(group => group)
@@ -2037,7 +2049,7 @@ public static class RoleGuidePatches
         var rows = orderedEntries
             .Select(entry => new AdvancedSettingsRow(entry.Title, entry.Value, showGroup ? entry.Group : null))
             .ToList();
-        ShowSettingsRows(rows, scrollToTop);
+        ShowSettingsRows(rows, scrollToTop, columns, groupsAsColumns);
         _settingsNoResults?.SetActive(_settingsSearching && entries.Count == 0);
     }
 
@@ -2049,7 +2061,11 @@ public static class RoleGuidePatches
         ShowSettingsRows(advancedRows, scrollToTop);
     }
 
-    private static void ShowSettingsRows(List<AdvancedSettingsRow> rows, bool scrollToTop)
+    private static void ShowSettingsRows(
+        List<AdvancedSettingsRow> rows,
+        bool scrollToTop,
+        int columns = 2,
+        bool groupsAsColumns = false)
     {
         var guide = MatchInfoGuide.Instance;
         if (_settingsScroller == null || !guide || !guide.MatchInfoRolePanelPrefab)
@@ -2067,7 +2083,12 @@ public static class RoleGuidePatches
         }
 
         _settingsScroller.gameObject.SetActive(true);
-        _settingsPageObject = Helpers.CreateAdvancedSettingsPage(guide, _settingsScroller, rows);
+        _settingsPageObject = Helpers.CreateAdvancedSettingsPage(
+            guide,
+            _settingsScroller,
+            rows,
+            columns,
+            groupsAsColumns);
         _settingsNoResults?.SetActive(false);
         if (scrollToTop)
         {
