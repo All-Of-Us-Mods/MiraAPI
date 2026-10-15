@@ -68,6 +68,32 @@ public abstract class AbstractOptionGroup
     public virtual string RoleGuideTitle => GroupName;
 
     /// <summary>
+    /// Gets the key used to combine this group with other option groups on one Match Info Guide page.
+    /// Groups are combined only with groups from the same plugin that use the same non-empty key.
+    /// </summary>
+    public virtual string? MatchInfoGuidePageKey => null;
+
+    /// <summary>
+    /// Gets the title of the Match Info Guide page. For groups sharing a page key, the first
+    /// group in menu order supplies the page title.
+    /// </summary>
+    public virtual string MatchInfoGuidePageTitle => RoleGuideTitle;
+
+    /// <summary>
+    /// Gets the ordering priority of this Match Info Guide page. Lower values appear first
+    /// among pages with the same menu category and group priority. Groups sharing a page key
+    /// use the lowest page-order value among those groups.
+    /// </summary>
+    public virtual int MatchInfoGuidePageOrder => int.MaxValue;
+
+    /// <summary>
+    /// Gets the number of columns used to lay out options on this Match Info Guide page.
+    /// For a combined page, groups are placed into these columns. Values are limited to 1-6;
+    /// for groups sharing a page key, the first group in menu order supplies this value.
+    /// </summary>
+    public virtual int MatchInfoGuidePageColumns => 2;
+
+    /// <summary>
     /// Gets the group <see cref="Color"/>. This is used to color the group in the options menu.
     /// </summary>
     public virtual Color GroupColor => MiraApiPlugin.DefaultHeaderColor;
