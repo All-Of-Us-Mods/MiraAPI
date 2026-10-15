@@ -42,6 +42,7 @@ public class ModdedEnumOptionAttribute(string title, Type enumType, string[]? va
 /// </summary>
 /// <typeparam name="T">The enum type.</typeparam>
 /// <param name="title">The title of the option.</param>
+/// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
 [AttributeUsage(AttributeTargets.Property)]
 public class ModdedEnumOptionAttribute<T>(string title, string[]? values = null)
     : ModdedOptionAttribute(title)
