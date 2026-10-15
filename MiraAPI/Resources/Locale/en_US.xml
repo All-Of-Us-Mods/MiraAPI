@@ -12,6 +12,7 @@
     <string name="MiraApi.WikiOnBottomRow">Display Wiki on Bottom Row</string>
     <string name="MiraApi.EnableSabotageFlashes">Enable Sabotage Flashes</string>
     <string name="MiraApi.EnableSabotageBlare">Enable Sabotage Blare</string>
+    <string name="MiraApi.EnableVariableColors">Enable Variable Color Changes</string>
     <string name="MiraApi.ReturnToRoleSettings">RETURN TO ROLE SETTINGS</string>
     <string name="MiraApi.CustomCategory1">Custom Category 1</string>
     <string name="MiraApi.CustomCategory2">Custom Category 2</string>
