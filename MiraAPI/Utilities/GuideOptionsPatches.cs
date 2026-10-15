@@ -7,7 +7,9 @@ using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.OptionTypes;
 using MiraAPI.PluginLoading;
 using MiraAPI.Translation;
+using MiraAPI.Utilities.Assets;
 using Reactor.Utilities;
+using UnityEngine;
 
 namespace MiraAPI.Utilities;
 
@@ -22,7 +24,9 @@ internal sealed class GuideOptionPage(AbstractOptionGroup group, string modAbbre
 {
     public AbstractOptionGroup Group { get; } = group;
 
-    public string Title { get; } = group.GroupName.Translate();
+    public string Title { get; } = group.RoleGuideTitle;
+
+    public LoadableAsset<Sprite> Sprite { get; } = group.Sprite;
 
     public string ModAbbreviation { get; } = modAbbreviation;
 

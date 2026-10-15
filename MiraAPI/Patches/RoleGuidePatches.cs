@@ -1544,7 +1544,7 @@ public static class RoleGuidePatches
                     break;
                 case SettingsTabIndex:
                     _titleText.text = GetSettingsTitle();
-                    _titleIcon.sprite = MiraAssets.IconSettings.LoadAsset();
+                    _titleIcon.sprite = GetSettingsIcon();
                     break;
                 case RolesTabIndex:
                     _titleText.text = MiraLocaleManager.Get("Roles");
@@ -2103,11 +2103,27 @@ public static class RoleGuidePatches
             : $"{pageTitle} Settings {counter}";
     }
 
+    private static Sprite GetSettingsIcon()
+    {
+        if (!_uiInitialized || _settingsSearching || _settingsPage == 0 || _settingsPages.Count == 0)
+        {
+            return MiraAssets.IconSettings;
+        }
+
+        return _settingsPages[_settingsPage - 1].Sprite;
+    }
+
     private static void UpdateSettingsTitle()
     {
         if (_titleText && IsSettingsTabActive)
         {
             _titleText.text = GetSettingsTitle();
+            if (_titleIcon)
+            {
+                _titleIcon.sprite = GetSettingsIcon();
+
+                _titleIcon.SetSizeLimit(0.55f);
+            }
         }
     }
 

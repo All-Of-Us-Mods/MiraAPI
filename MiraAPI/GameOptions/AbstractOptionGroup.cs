@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Il2CppInterop.Runtime.Attributes;
 using MiraAPI.Modifiers;
 using MiraAPI.Roles;
+using MiraAPI.Utilities.Assets;
 using UnityEngine;
 
 namespace MiraAPI.GameOptions;
@@ -25,6 +27,12 @@ public abstract class AbstractOptionGroup
     /// Gets the name of the group. Visible in options menu.
     /// </summary>
     public abstract string GroupName { get; }
+
+    /// <summary>
+    /// Gets the sprite of the group that is displayed in the match info guide.
+    /// </summary>
+    [HideFromIl2Cpp]
+    public virtual LoadableAsset<Sprite> Sprite => MiraAssets.IconSettings;
 
     /// <summary>
     /// Gets the Optionable type of the group.
@@ -52,7 +60,12 @@ public abstract class AbstractOptionGroup
     /// <summary>
     /// Gets a value indicating whether this group's options are shown in the Match Info Guide.
     /// </summary>
-    public virtual bool ShowInMatchInfoGuide => true;
+    public virtual bool ShowInMatchInfoGuide => ParentMenu is MenuCategory.Game;
+
+    /// <summary>
+    /// Gets the name title of the group when it is in the match info guide.
+    /// </summary>
+    public virtual string RoleGuideTitle => GroupName;
 
     /// <summary>
     /// Gets the group <see cref="Color"/>. This is used to color the group in the options menu.
