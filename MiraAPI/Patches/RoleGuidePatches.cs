@@ -2135,12 +2135,12 @@ public static class RoleGuidePatches
             SetPaginationSprites(_searchSortingFilterIdle, _searchSortingFilterHover, true);
             SetPaginationSprites(_searchSortingGroupIdle, _searchSortingGroupHover, false);
             FilterSortingTmp.transform.localPosition = new Vector3(
-                -1.05f,
-                _savedFilterLabelPosition.y,
+                -1.25f,
+                0f,
                 _savedFilterLabelPosition.z);
             GroupSortingTmp.transform.localPosition = new Vector3(
-                0.95f,
-                _savedGroupLabelPosition.y,
+                0f,
+                0f,
                 _savedGroupLabelPosition.z);
             FilterSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.PrevPage", "Prev");
             GroupSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.NextPage", "Next");
