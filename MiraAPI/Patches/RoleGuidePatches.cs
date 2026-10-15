@@ -7,6 +7,7 @@ using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
 using Innersloth.Assets;
+using MiraAPI.GameModes;
 using MiraAPI.LocalSettings;
 using MiraAPI.Modifiers;
 using MiraAPI.Modifiers.Types;
@@ -37,6 +38,7 @@ public static class RoleGuidePatches
 
     private static readonly List<DetailedPanel> RoleEntries = [];
     private static readonly List<DetailedPanel> ModifierEntries = [];
+    private static readonly List<string> UntrackedRolePanelDiagnostics = [];
 
     private static GameObject searchComponentContainer;
     public static PassiveButton SearchIconButton;
@@ -70,12 +72,18 @@ public static class RoleGuidePatches
     private static int _activeGuideTabIndex = -1;
     private static IEnumerator? _populate;
     private static bool _loading;
+    private static Type? _roleEntriesMode;
+    private static bool _roleEntriesInitialized;
+    private static bool _rolePanelsCleaned;
     private static LoadingRing? _loadingSpinner;
     private static SortingFilter _sortFilter = SortingFilter.EnabledOnly;
     private static SortingMethod _sortMethod = SortingMethod.Alphabetical;
     private static SortingGroups _sortGrouping = SortingGroups.Ungrouped;
 
-    private static bool IsModifiersTabActive => _activeGuideTabIndex == ModifiersTabIndex;
+    private static int ActiveGuideTabIndex =>
+        _guide && MatchInfoGuide.Instance == _guide ? MatchInfoGuide.Instance.activeTabIndex : _activeGuideTabIndex;
+
+    private static bool IsModifiersTabActive => ActiveGuideTabIndex == ModifiersTabIndex;
 
     [HarmonyPostfix]
     [HarmonyPriority(Priority.First)]
@@ -162,6 +170,10 @@ public static class RoleGuidePatches
 
         RoleEntries.Clear();
         ModifierEntries.Clear();
+        UntrackedRolePanelDiagnostics.Clear();
+        _roleEntriesMode = null;
+        _roleEntriesInitialized = false;
+        _rolePanelsCleaned = false;
         _guide = null;
         _activeGuideTabIndex = -1;
         _uiInitialized = false;
@@ -223,11 +235,7 @@ public static class RoleGuidePatches
         }
 
         _guide = instance;
-        if (RoleEntries.Count == 0)
-        {
-            BuildEntries();
-        }
-
+        BuildEntries();
         if (_populate != null)
         {
             yield break;
@@ -690,19 +698,42 @@ public static class RoleGuidePatches
 
     private static void BuildEntries()
     {
-        foreach (var modifier in ModifierManager.Modifiers.OfType<GameModifier>())
+        if (ModifierEntries.Count == 0)
         {
-            ModifierEntries.Add(new DetailedPanel(
-                modifier.ModifierName,
-                modifier.ModifierCategoryTitle,
-                modifier.ParentMod.MiraPlugin.GetAbbreviatedModName(),
-                null,
-                modifier));
+            foreach (var modifier in ModifierManager.Modifiers.OfType<GameModifier>())
+            {
+                ModifierEntries.Add(new DetailedPanel(
+                    modifier.ModifierName,
+                    modifier.ModifierCategoryTitle,
+                    modifier.ParentMod.MiraPlugin.GetAbbreviatedModName(),
+                    null,
+                    modifier));
+            }
         }
 
+        var activeMode = CustomGameModeManager.ActiveMode;
+        var activeModeType = activeMode?.GetType();
+        if (_roleEntriesInitialized && _roleEntriesMode == activeModeType)
+        {
+            return;
+        }
+
+        foreach (var entry in RoleEntries)
+        {
+            if (entry.Panel)
+            {
+                entry.Panel!.gameObject.Destroy();
+            }
+        }
+
+        RoleEntries.Clear();
+        _rolePanelsCleaned = false;
         foreach (var roleBehaviour in CustomRoleManager.AllStoredRoleBehaviours.Where(x =>
                      x.Role is not RoleTypes.Crewmate and not RoleTypes.Impostor and
-                     not RoleTypes.CrewmateGhost and not RoleTypes.ImpostorGhost))
+                     not RoleTypes.CrewmateGhost and not RoleTypes.ImpostorGhost &&
+                     CustomRoleUtils.CanSpawnOnCurrentMode(x))
+                     .GroupBy(x => x.Role)
+                     .Select(group => group.First()))
         {
             var modId = roleBehaviour is ICustomRole custom
                 ? custom.ParentMod.MiraPlugin.GetAbbreviatedModName()
@@ -714,6 +745,9 @@ public static class RoleGuidePatches
                 roleBehaviour,
                 null));
         }
+
+        _roleEntriesMode = activeModeType;
+        _roleEntriesInitialized = true;
     }
 
     private static void SetupTabButton(MatchInfoGuideTabButton button, Sprite inactive, Sprite selected, Sprite hover)
@@ -756,8 +790,52 @@ public static class RoleGuidePatches
         _wikiScroller?.gameObject.SetActive(false);
         _activeGuideTabIndex = tabIndex;
         MatchInfoGuide.Instance.SetActiveTab(tabIndex);
+        if (tabIndex == RolesTabIndex)
+        {
+            BuildEntries();
+            if (!_rolePanelsCleaned)
+            {
+                _rolePanelsCleaned = RemoveUntrackedRolePanels();
+            }
+        }
+
         HidePanels(tabIndex == ModifiersTabIndex ? ModifierEntries : RoleEntries);
         StartPopulate(delay);
+    }
+
+    private static bool RemoveUntrackedRolePanels()
+    {
+        if (_rolesScroller?.Inner == null)
+        {
+            return false;
+        }
+
+        var trackedPanels = RoleEntries
+            .Where(entry => entry.Panel)
+            .Select(entry => entry.Panel!)
+            .ToHashSet();
+        foreach (var panel in _rolesScroller.Inner.GetComponentsInChildren<MatchInfoRolePanel>(true))
+        {
+            if (!trackedPanels.Contains(panel))
+            {
+                var panelName = panel.roleName ? panel.roleName.text : panel.name;
+                UntrackedRolePanelDiagnostics.Add(panelName);
+                panel.gameObject.Destroy();
+            }
+        }
+
+        if (UntrackedRolePanelDiagnostics.Count > 0)
+        {
+            var panelNames = string.Join(", ", UntrackedRolePanelDiagnostics.Take(10));
+            var additionalCount = UntrackedRolePanelDiagnostics.Count - 10;
+            Logger<MiraApiPlugin>.Warning(
+                $"Removed or blocked {UntrackedRolePanelDiagnostics.Count} untracked Match Info role panel(s) in " +
+                $"{CustomGameModeManager.ActiveMode?.GetType().Name ?? "vanilla"} mode: {panelNames}" +
+                (additionalCount > 0 ? $", and {additionalCount} more" : string.Empty));
+            UntrackedRolePanelDiagnostics.Clear();
+        }
+
+        return true;
     }
 
     private static void HidePanels(List<DetailedPanel> entries)
@@ -847,7 +925,7 @@ public static class RoleGuidePatches
         if (_loadingSpinner != null)
         {
             _loadingSpinner.gameObject.SetActive(
-                _loading && _activeGuideTabIndex is RolesTabIndex or ModifiersTabIndex &&
+                _loading && ActiveGuideTabIndex is RolesTabIndex or ModifiersTabIndex &&
                 !(_wikiScroller && _wikiScroller.gameObject.activeSelf));
         }
     }
@@ -892,8 +970,16 @@ public static class RoleGuidePatches
         });
         _loading = false;
         UpdateSpinner();
-        yield return CoForEachBudgeted(entries, EnsurePanel);
-        yield return CoForEachBudgeted(modifiers ? RoleEntries : ModifierEntries, PreloadPanel);
+        if (!modifiers)
+        {
+            RemoveUntrackedRolePanels();
+            yield return null;
+            if (_guide)
+            {
+                RemoveUntrackedRolePanels();
+            }
+        }
+
         _populate = null;
     }
 
@@ -1125,7 +1211,8 @@ public static class RoleGuidePatches
             return false;
         }
 
-        var entries = _activeGuideTabIndex switch
+        var activeTabIndex = ActiveGuideTabIndex;
+        var entries = activeTabIndex switch
         {
             RolesTabIndex => RoleEntries,
             ModifiersTabIndex => ModifierEntries,
@@ -1151,11 +1238,11 @@ public static class RoleGuidePatches
             entry.Panel!.transform.SetAsLastSibling();
         }
 
-        var scroller = _activeGuideTabIndex == ModifiersTabIndex
+        var scroller = activeTabIndex == ModifiersTabIndex
             ? _modifiersScroller
             : guide.MatchInfoRoleScroller;
         scroller.SetYBoundsMax(GetGridScrollBounds(shown.Count));
-        var noResultsMessage = _activeGuideTabIndex == ModifiersTabIndex
+        var noResultsMessage = activeTabIndex == ModifiersTabIndex
             ? _modifierNoResultsMessage
             : guide.rolesEnabledMessage;
         SetNoResultsVisible(noResultsMessage, shown.Count == 0);
@@ -1634,6 +1721,17 @@ public static class RoleGuidePatches
     [HarmonyPatch(typeof(MatchInfoRolePanel), nameof(MatchInfoRolePanel.SetPanel))]
     public static bool SetPanel(MatchInfoRolePanel __instance, RoleBehaviour role, int numPerGame, int chancePerGame)
     {
+        var rolesInner = _rolesScroller ? _rolesScroller.Inner : null;
+        if (rolesInner &&
+            __instance.transform.IsChildOf(rolesInner) &&
+            !RoleEntries.Any(entry => entry.Panel == __instance))
+        {
+            UntrackedRolePanelDiagnostics.Add(
+                role is ICustomRole untrackedRole ? untrackedRole.RoleName : role.NiceName);
+            __instance.gameObject.Destroy();
+            return false;
+        }
+
         __instance.roleCount.text = string.Format(
             CultureInfo.InvariantCulture,
             "{0} at {1}%",
@@ -1754,9 +1852,11 @@ public static class RoleGuidePatches
     private static string _savedGroupLabel = string.Empty;
     private static Vector3 _savedFilterIconScale = Vector3.one;
     private static Vector3 _savedGroupIconScale = Vector3.one;
+    private static Vector3 _savedFilterLabelPosition = Vector3.zero;
+    private static Vector3 _savedGroupLabelPosition = Vector3.zero;
 
     private static bool IsSettingsTabActive =>
-        _uiInitialized && MatchInfoGuide.Instance && _activeGuideTabIndex == SettingsTabIndex;
+        _uiInitialized && MatchInfoGuide.Instance && ActiveGuideTabIndex == SettingsTabIndex;
 
     private static void ResetSettingsState()
     {
@@ -1918,18 +2018,25 @@ public static class RoleGuidePatches
 
     private static void ShowSettingsEntries(IReadOnlyList<GuideOptionEntry> entries, bool showGroup, bool scrollToTop)
     {
-        var rows = new List<KeyValuePair<string, string>>(entries.Count);
-        foreach (var entry in entries)
-        {
-            var label = showGroup ? $"<size=60%>{entry.GroupName}</size>\n{entry.Title}" : entry.Title;
-            rows.Add(new KeyValuePair<string, string>(label, entry.Value));
-        }
-
+        var orderedEntries = showGroup
+            ? entries.GroupBy(entry => entry.Group).SelectMany(group => group)
+            : entries;
+        var rows = orderedEntries
+            .Select(entry => new AdvancedSettingsRow(entry.Title, entry.Value, showGroup ? entry.Group : null))
+            .ToList();
         ShowSettingsRows(rows, scrollToTop);
         _settingsNoResults?.SetActive(entries.Count == 0);
     }
 
     private static void ShowSettingsRows(IReadOnlyList<KeyValuePair<string, string>> rows, bool scrollToTop)
+    {
+        var advancedRows = rows
+            .Select(row => new AdvancedSettingsRow(row.Key, row.Value, null))
+            .ToList();
+        ShowSettingsRows(advancedRows, scrollToTop);
+    }
+
+    private static void ShowSettingsRows(List<AdvancedSettingsRow> rows, bool scrollToTop)
     {
         var guide = MatchInfoGuide.Instance;
         if (_settingsScroller == null || !guide || !guide.MatchInfoRolePanelPrefab)
@@ -2004,9 +2111,19 @@ public static class RoleGuidePatches
             _savedGroupLabel = GroupSortingTmp.text;
             _savedFilterIconScale = _searchSortingFilterIdle.transform.localScale;
             _savedGroupIconScale = _searchSortingGroupIdle.transform.localScale;
+            _savedFilterLabelPosition = FilterSortingTmp.transform.localPosition;
+            _savedGroupLabelPosition = GroupSortingTmp.transform.localPosition;
 
             SetPaginationSprites(_searchSortingFilterIdle, _searchSortingFilterHover, true);
             SetPaginationSprites(_searchSortingGroupIdle, _searchSortingGroupHover, false);
+            FilterSortingTmp.transform.localPosition = new Vector3(
+                -0.15f,
+                _savedFilterLabelPosition.y,
+                _savedFilterLabelPosition.z);
+            GroupSortingTmp.transform.localPosition = new Vector3(
+                0.15f,
+                _savedGroupLabelPosition.y,
+                _savedGroupLabelPosition.z);
             FilterSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.PrevPage", "Prev");
             GroupSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.NextPage", "Next");
             _sortButtonsRepurposed = true;
@@ -2058,6 +2175,8 @@ public static class RoleGuidePatches
             _searchSortingGroupHover.transform.localScale = _savedGroupIconScale;
         FilterSortingTmp.text = _savedFilterLabel;
         GroupSortingTmp.text = _savedGroupLabel;
+        FilterSortingTmp.transform.localPosition = _savedFilterLabelPosition;
+        GroupSortingTmp.transform.localPosition = _savedGroupLabelPosition;
         SearchSortingOrderButton.gameObject.SetActive(true);
         SearchSortingFilterButton.gameObject.SetActive(true);
         SearchSortingGroupButton.gameObject.SetActive(true);
