@@ -4,6 +4,7 @@ using System.Linq;
 using HarmonyLib;
 using MiraAPI.GameOptions;
 using MiraAPI.Networking;
+using MiraAPI.Patches;
 using MiraAPI.Patches.GameModes;
 using MiraAPI.Patches.Options;
 using MiraAPI.Translation;
@@ -128,6 +129,9 @@ public static class GameModeOption
                     MenuState.Instance.QueuedRoleMenuRefresh[roleMenu.Key] = true;
                 }
             }
+
+            GameOptionsMenuPatch.RefreshForGameMode();
+            RoleGuidePatches.RefreshSettingsForGameMode();
         }
 
         // TODO: could make Values a dict of AbstractGameMode too
@@ -142,12 +146,6 @@ public static class GameModeOption
 
         Info($"Game mode changed to {option.GetInt()}");
         RpcSyncGamemode(PlayerControl.LocalPlayer, option.GetInt());
-
-        if (GameSettingMenu.Instance && CustomGameModeManager.ActiveMode != null)
-        {
-            GameOptionsMenuPatch.ToggleGamemodeOptions(CustomGameModeManager.ActiveMode, __instance);
-            GameSettingMenu.Instance.RoleSettingsButton.gameObject.SetActive(CustomGameModeManager.ActiveMode.ShowNormalRoleSettings);
-        }
 
         return false;
     }
