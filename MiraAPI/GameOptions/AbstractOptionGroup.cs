@@ -50,6 +50,11 @@ public abstract class AbstractOptionGroup
     public virtual Func<bool> GroupVisible => () => true;
 
     /// <summary>
+    /// Gets a value indicating whether this group's options are shown in the Match Info Guide.
+    /// </summary>
+    public virtual bool ShowInMatchInfoGuide => true;
+
+    /// <summary>
     /// Gets the group <see cref="Color"/>. This is used to color the group in the options menu.
     /// </summary>
     public virtual Color GroupColor => MiraApiPlugin.DefaultHeaderColor;
