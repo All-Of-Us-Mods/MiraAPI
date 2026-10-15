@@ -470,7 +470,7 @@ public static class RoleGuidePatches
         modifiersTab.name = "ModifiersPanel";
         _modifierNoResultsMessage = Object.Instantiate(
             instance.rolesEnabledMessage,
-            instance.rolesEnabledMessage.transform.parent,
+            modifiersTab.transform,
             true);
         _modifierNoResultsMessage.name = "NoResultsFound";
         _modifierNoResultsMessage.SetActive(false);
@@ -1895,7 +1895,7 @@ public static class RoleGuidePatches
 
         _settingsNoResults = Object.Instantiate(
             instance.rolesEnabledMessage,
-            instance.rolesEnabledMessage.transform.parent,
+            settingsTab.transform,
             true);
         _settingsNoResults.name = "SettingsNoResultsFound";
         _settingsNoResults.SetActive(false);
