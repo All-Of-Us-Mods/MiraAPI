@@ -36,15 +36,15 @@ public class ModdedStringOption : ModdedOption<string>
         : base(title, defaultValue, includeInPreset)
     {
         Values = values;
-        Data = ScriptableObject.CreateInstance<StringGameSetting>();
-        var data = (StringGameSetting)Data;
+        StringNameValues = [.. values.Select(MiraLocaleManager.GetOrCreateLocaleString)];
 
+        var data = ScriptableObject.CreateInstance<StringGameSetting>();
         data.Title = StringName;
         data.Type = global::OptionTypes.String;
-        StringNameValues = [.. values.Select(MiraLocaleManager.GetOrCreateLocaleString)];
         data.Values = StringNameValues;
-
         data.Index = GetIndex(Value);
+
+        Data = data;
     }
 
     /// <summary>

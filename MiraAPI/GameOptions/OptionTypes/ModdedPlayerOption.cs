@@ -37,15 +37,16 @@ public class ModdedPlayerOption : ModdedOption<int>
     public ModdedPlayerOption(string title, bool allowNone = true)
         : base(title, allowNone ? -1 : 0, false)
     {
-        Data = ScriptableObject.CreateInstance<PlayerSelectionGameSetting>();
-        var data = (PlayerSelectionGameSetting)Data;
+        Values = [];
+        AllowNone = allowNone;
 
+        Value = DefaultValue;
+
+        var data = ScriptableObject.CreateInstance<PlayerSelectionGameSetting>();
         data.Title = StringName;
         data.Type = global::OptionTypes.Player;
 
-        Values = [];
-        AllowNone = allowNone;
-        Value = DefaultValue;
+        Data = data;
     }
 
     /// <inheritdoc />

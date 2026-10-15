@@ -44,6 +44,13 @@ public class ModdedOptionList<T> : IModdedOptionList<T>
         Options = [.. options];
     }
 
+    /// <summary>
+    /// Indexes the option of type <typeparamref name="T"/>.
+    /// </summary>
+    /// <param name="idx">The option's index.</param>
+    /// <returns>option of type <typeparamref name="T"/>.</returns>
+    public T this[int idx] => Options[idx];
+
     /// <inheritdoc cref="IEnumerable{T}.GetEnumerator"/>
     public IEnumerator<T> GetEnumerator()
     {
@@ -61,13 +68,6 @@ public class ModdedOptionList<T> : IModdedOptionList<T>
     {
         return ((IEnumerable<IModdedOption>)Options).GetEnumerator();
     }
-
-    /// <summary>
-    /// Indexes the option of type <typeparamref name="T"/>.
-    /// </summary>
-    /// <param name="idx">The option's index.</param>
-    /// <returns>option of type <typeparamref name="T"/>.</returns>
-    public T this[int idx] => Options[idx];
 
     /// <inheritdoc cref="IReadOnlyList{T}.this"/>
     IModdedOption IReadOnlyList<IModdedOption>.this[int index] => this[index];

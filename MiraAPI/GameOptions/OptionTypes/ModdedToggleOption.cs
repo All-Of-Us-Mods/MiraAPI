@@ -20,11 +20,11 @@ public class ModdedToggleOption : ModdedOption<bool>
     public ModdedToggleOption(string title, bool defaultValue, bool includeInPreset = true)
         : base(title, defaultValue, includeInPreset)
     {
-        Data = ScriptableObject.CreateInstance<CheckboxGameSetting>();
-
-        var data = (CheckboxGameSetting)Data;
+        var data = ScriptableObject.CreateInstance<CheckboxGameSetting>();
         data.Title = StringName;
         data.Type = global::OptionTypes.Checkbox;
+
+        Data = data;
     }
 
     /// <inheritdoc />
