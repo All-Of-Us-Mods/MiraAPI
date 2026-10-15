@@ -80,7 +80,6 @@ public sealed class ModdedOptionVisibilityAttribute(string? memberName = null, T
             }
 
             var dynamicMethod = new DynamicMethod($"GetVisibility_{type.Name}_{field.Name}", typeof(bool), Type.EmptyTypes, type, true);
-
             var il = dynamicMethod.GetILGenerator();
 
             if (instanceGetter != null)

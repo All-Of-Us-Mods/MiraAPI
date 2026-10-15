@@ -164,11 +164,11 @@ public static class ModdedOptionsManager
             return;
         }
 
-        var setterOriginal = property.GetSetMethod();
+        var setterOriginal = property.GetSetMethod(true);
         var setterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertySetterPatch));
         PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: new HarmonyMethod(setterPatch));
 
-        var getterOriginal = property.GetGetMethod();
+        var getterOriginal = property.GetGetMethod(true);
         var getterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyGetterPatch));
         PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: new HarmonyMethod(getterPatch));
 
@@ -269,11 +269,11 @@ public static class ModdedOptionsManager
             return;
         }
 
-        var setterOriginal = property.GetSetMethod();
+        var setterOriginal = property.GetSetMethod(true);
         var setterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertySetterPatch));
         PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: new HarmonyMethod(setterPatch));
 
-        var getterOriginal = property.GetGetMethod();
+        var getterOriginal = property.GetGetMethod(true);
         var getterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyGetterPatch));
         PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: new HarmonyMethod(getterPatch));
 
@@ -283,11 +283,11 @@ public static class ModdedOptionsManager
         {
             var listIndex = listType.GetProperty("Item")!;
 
-            var listSetterOriginal = listIndex.GetSetMethod();
+            var listSetterOriginal = listIndex.GetSetMethod(true);
             var listSetterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyListSetterPatch));
             PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(listSetterOriginal, postfix: new HarmonyMethod(listSetterPatch));
 
-            var listGetterOriginal = listIndex.GetGetMethod();
+            var listGetterOriginal = listIndex.GetGetMethod(true);
             var listGetterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyListGetterPatch));
             PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(listGetterOriginal, prefix: new HarmonyMethod(listGetterPatch));
         }
