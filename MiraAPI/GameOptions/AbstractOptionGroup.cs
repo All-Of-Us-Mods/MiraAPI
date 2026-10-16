@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Il2CppInterop.Runtime.Attributes;
 using MiraAPI.Modifiers;
 using MiraAPI.Roles;
+using MiraAPI.Utilities.Assets;
 using UnityEngine;
 
 namespace MiraAPI.GameOptions;
@@ -25,6 +27,12 @@ public abstract class AbstractOptionGroup
     /// Gets the name of the group. Visible in options menu.
     /// </summary>
     public abstract string GroupName { get; }
+
+    /// <summary>
+    /// Gets the sprite of the group that is displayed in the match info guide.
+    /// </summary>
+    [HideFromIl2Cpp]
+    public virtual LoadableAsset<Sprite> Sprite => MiraAssets.IconSettings;
 
     /// <summary>
     /// Gets the Optionable type of the group.
@@ -48,6 +56,42 @@ public abstract class AbstractOptionGroup
     /// Gets the function that determines whether the group should be visible or not.
     /// </summary>
     public virtual Func<bool> GroupVisible => () => true;
+
+    /// <summary>
+    /// Gets a value indicating whether this group's options are shown in the Match Info Guide.
+    /// </summary>
+    public virtual bool ShowInMatchInfoGuide => ParentMenu is MenuCategory.Game;
+
+    /// <summary>
+    /// Gets the name title of the group when it is in the match info guide.
+    /// </summary>
+    public virtual string RoleGuideTitle => GroupName;
+
+    /// <summary>
+    /// Gets the key used to combine this group with other option groups on one Match Info Guide page.
+    /// Groups are combined only with groups from the same plugin that use the same non-empty key.
+    /// </summary>
+    public virtual string? MatchInfoGuidePageKey => null;
+
+    /// <summary>
+    /// Gets the title of the Match Info Guide page. For groups sharing a page key, the first
+    /// group in menu order supplies the page title.
+    /// </summary>
+    public virtual string MatchInfoGuidePageTitle => RoleGuideTitle;
+
+    /// <summary>
+    /// Gets the ordering priority of this Match Info Guide page. Lower values appear first
+    /// among pages with the same menu category and group priority. Groups sharing a page key
+    /// use the lowest page-order value among those groups.
+    /// </summary>
+    public virtual int MatchInfoGuidePageOrder => int.MaxValue;
+
+    /// <summary>
+    /// Gets the number of columns used to lay out options on this Match Info Guide page.
+    /// For a combined page, groups are placed into these columns. Values are limited to 1-6;
+    /// for groups sharing a page key, the first group in menu order supplies this value.
+    /// </summary>
+    public virtual int MatchInfoGuidePageColumns => 2;
 
     /// <summary>
     /// Gets the group <see cref="Color"/>. This is used to color the group in the options menu.
