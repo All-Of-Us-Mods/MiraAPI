@@ -31,9 +31,16 @@ public class ModdedNumberOptionListAttribute(
     {
         return new ModdedOptionList<ModdedNumberOption>(value.Count, idx =>
         {
+            var final = value[idx] switch
+            {
+                null => min + increment,
+                int integer => integer,
+                _ => (float)value[idx]!,
+            };
+
             return new(
                 GetFormattedTitle(idx),
-                (float)(value[idx] ?? min + increment),
+                final,
                 min,
                 max,
                 increment,
@@ -46,15 +53,28 @@ public class ModdedNumberOptionListAttribute(
     /// <inheritdoc />
     public override void SetValue(int idx, object value)
     {
-        var opt = HolderOptionList?[idx] as ModdedNumberOption;
-        opt?.SetValue((float)value);
+        if (HolderOptionList?[idx] is not ModdedNumberOption opt)
+            return;
+
+        var final = value switch
+        {
+            int integer => integer,
+            _ => (float)value,
+        };
+        opt.SetValue(final);
     }
 
     /// <inheritdoc />
     public override object GetValue(int idx)
     {
-        return HolderOptionList?[idx] is ModdedNumberOption opt
-            ? (object)opt.Value
-            : throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" is not a ModdedNumberOption");
+        if (HolderOptionList?[idx] is not ModdedNumberOption opt)
+            throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" is not a ModdedNumberOption");
+
+        var value = opt.Value;
+
+        if (ValueType == typeof(int))
+            return (int)Math.Round(value);
+
+        return value;
     }
 }

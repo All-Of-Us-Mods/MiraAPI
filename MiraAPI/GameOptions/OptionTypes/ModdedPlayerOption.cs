@@ -30,6 +30,11 @@ public class ModdedPlayerOption : ModdedOption<int>
     public bool AllowNone { get; set; }
 
     /// <summary>
+    /// Gets the player selected by this option. May be <c>null</c> if allowed to have <c>None</c> as an option.
+    /// </summary>
+    public NetworkedPlayerInfo? SelectedPlayer => Value == -1 ? null : Values[Value];
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="ModdedPlayerOption"/> class.
     /// </summary>
     /// <param name="title">The title of the option.</param>
@@ -64,7 +69,7 @@ public class ModdedPlayerOption : ModdedOption<int>
         Values = GetFilteredPlayers();
 
         playerOption.SetUpFromData(Data, 20);
-        playerOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
+        playerOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
 
         playerOption.Title = StringName;
         playerOption.TitleText.text = Title.Translate();

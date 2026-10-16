@@ -36,7 +36,7 @@ public class ModdedStringOptionListAttribute(
     public override object GetValue(int idx)
     {
         return HolderOptionList?[idx] is ModdedStringOption opt
-            ? (object)opt.Value
+            ? opt.Value
             : throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" is not a ModdedStringOption");
     }
 }

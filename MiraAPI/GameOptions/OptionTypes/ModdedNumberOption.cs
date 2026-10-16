@@ -78,8 +78,36 @@ public class ModdedNumberOption : ModdedOption<float>
         string? formatString = null,
         bool halfIncrements = false,
         bool includeInPreset = true)
-        : this(title, defaultValue, min, max, increment, suffixType, zeroBehavior, negativeBehavior, halfIncrements, formatString, includeInPreset)
+        : base(title, defaultValue, includeInPreset)
     {
+        Min = min;
+        Max = max;
+        Increment = increment;
+        SuffixType = suffixType;
+        ZeroWordValue = zeroBehavior;
+        ShiftIncrement = halfIncrements;
+        NegativeWordValue = negativeBehavior;
+
+        Value = Mathf.Clamp(defaultValue, min, max);
+
+        var data = ScriptableObject.CreateInstance<FloatGameSetting>();
+        data.Type = global::OptionTypes.Float;
+        data.Title = StringName;
+        data.Value = Value;
+        data.Increment = Increment;
+        data.ValidRange = new FloatRange(Min, Max);
+        data.FormatString = formatString ??
+                            (defaultValue.IsInteger() &&
+                             Increment.IsInteger() &&
+                             Value.IsInteger() &&
+                             Min.IsInteger() &&
+                             Max.IsInteger() ? "0" : "0.0");
+
+        data.ZeroIsInfinity = ZeroInfinity;
+        data.SuffixType = (NumberSuffixes)SuffixType;
+        data.OptionName = FloatOptionNames.Invalid;
+
+        Data = data;
     }
 
     /// <summary>
@@ -104,52 +132,8 @@ public class ModdedNumberOption : ModdedOption<float>
         string? formatString = null,
         bool zeroInfinity = false,
         bool includeInPreset = true)
-        : this(title, defaultValue, min, max, increment, suffixType, zeroInfinity ? "∞" : "#", "#", increment == 1f, formatString, includeInPreset)
+        : this(title, defaultValue, min, max, increment, zeroInfinity ? "∞" : "#", "#", suffixType, formatString, increment == 1f, includeInPreset)
     {
-    }
-
-    private ModdedNumberOption(
-        string title,
-        float defaultValue,
-        float min,
-        float max,
-        float increment,
-        MiraNumberSuffixes suffixType,
-        string zeroBehavior,
-        string negativeBehavior,
-        bool shiftIncrement,
-        string? formatString,
-        bool includeInPreset)
-        : base(title, defaultValue, includeInPreset)
-    {
-        Min = min;
-        Max = max;
-        Increment = increment;
-        SuffixType = suffixType;
-        ZeroWordValue = zeroBehavior;
-        ShiftIncrement = shiftIncrement;
-        NegativeWordValue = negativeBehavior;
-
-        Value = Mathf.Clamp(defaultValue, min, max);
-
-        var data = ScriptableObject.CreateInstance<FloatGameSetting>();
-        data.Type = global::OptionTypes.Float;
-        data.Title = StringName;
-        data.Value = Value;
-        data.Increment = Increment;
-        data.ValidRange = new FloatRange(Min, Max);
-        data.FormatString = formatString ??
-                            (defaultValue.IsInteger() &&
-                             Increment.IsInteger() &&
-                             Value.IsInteger() &&
-                             Min.IsInteger() &&
-                             Max.IsInteger() ? "0" : "0.0");
-
-        data.ZeroIsInfinity = ZeroInfinity;
-        data.SuffixType = (NumberSuffixes)SuffixType;
-        data.OptionName = FloatOptionNames.Invalid;
-
-        Data = data;
     }
 
     /// <inheritdoc />

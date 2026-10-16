@@ -25,7 +25,7 @@ public class ModdedStringOptionAttribute(
     public override object GetValue()
     {
         return HolderOption is ModdedStringOption opt
-            ? (object)opt.Value
+            ? opt.Value
             : throw new InvalidOperationException($"Holder option for {Title} is not a ModdedStringOption.");
     }
 

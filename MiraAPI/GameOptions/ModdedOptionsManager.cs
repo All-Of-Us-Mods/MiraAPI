@@ -62,14 +62,14 @@ public static class ModdedOptionsManager
 
     internal static bool RegisterGroup(Type type)
     {
-        if (Activator.CreateInstance(type) is not AbstractOptionGroup group)
+        if (TypeToGroup.ContainsKey(type))
         {
+            Error($"Group {type.Name} already exists.");
             return false;
         }
 
-        if (TypeToGroup.ContainsKey(type))
+        if (Activator.CreateInstance(type) is not AbstractOptionGroup group)
         {
-            Logger<MiraApiPlugin>.Error($"Group {type.Name} already exists.");
             return false;
         }
 
@@ -79,14 +79,14 @@ public static class ModdedOptionsManager
 
     internal static bool RegisterGroup(Type type, MiraPluginInfo pluginInfo)
     {
-        if (Activator.CreateInstance(type) is not AbstractOptionGroup group)
-        {
-            return false;
-        }
-
         if (TypeToGroup.ContainsKey(type))
         {
             Error($"Group {type.Name} already exists.");
+            return false;
+        }
+
+        if (Activator.CreateInstance(type) is not AbstractOptionGroup group)
+        {
             return false;
         }
 
@@ -117,7 +117,7 @@ public static class ModdedOptionsManager
         Groups.Add(group);
         TypeToGroup.Add(type, group);
         typeof(OptionGroupSingleton<>).MakeGenericType(type)
-            .GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic)! // Message suppression points to here
+            .GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic)!
             .SetValue(null, group);
     }
 
@@ -164,16 +164,21 @@ public static class ModdedOptionsManager
             return;
         }
 
-        var setterOriginal = property.GetSetMethod(true);
-        var setterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertySetterPatch));
-        PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: new HarmonyMethod(setterPatch));
-
         var getterOriginal = property.GetGetMethod(true);
         var getterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyGetterPatch));
         PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: new HarmonyMethod(getterPatch));
 
+        var setterOriginal = property.GetSetMethod(true);
+
+        if (setterOriginal != null)
+        {
+            var setterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertySetterPatch));
+            PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: new HarmonyMethod(setterPatch));
+        }
+
         OptionAttributes.Add(property, attribute);
         attribute.HolderOption = option;
+        attribute.ValueType = property.PropertyType;
 
         var visibilityAttr = property.GetCustomAttribute<ModdedOptionVisibilityAttribute>();
         var visibilityFunc = visibilityAttr?.GetVisibility(group, property);
@@ -220,9 +225,9 @@ public static class ModdedOptionsManager
             return;
         }
 
-        Func<int, string> configName = optionList.ConfigName ?? (i => property.Name + (i + 1));
+        var configName = optionList.ConfigName ?? (i => property.Name + (i + 1));
 
-        for (int i = 0; i < optionList.Count; i++)
+        for (var i = 0; i < optionList.Count; i++)
         {
             RegisterOption(optionList[i], group, configName(i), pluginInfo);
         }
@@ -269,13 +274,17 @@ public static class ModdedOptionsManager
             return;
         }
 
-        var setterOriginal = property.GetSetMethod(true);
-        var setterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertySetterPatch));
-        PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: new HarmonyMethod(setterPatch));
-
         var getterOriginal = property.GetGetMethod(true);
         var getterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyGetterPatch));
         PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: new HarmonyMethod(getterPatch));
+
+        var setterOriginal = property.GetSetMethod(true);
+
+        if (setterOriginal != null)
+        {
+            var setterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertySetterPatch));
+            PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: new HarmonyMethod(setterPatch));
+        }
 
         var listType = propertyList.GetType();
 
@@ -283,18 +292,23 @@ public static class ModdedOptionsManager
         {
             var listIndex = listType.GetProperty("Item")!;
 
-            var listSetterOriginal = listIndex.GetSetMethod(true);
-            var listSetterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyListSetterPatch));
-            PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(listSetterOriginal, postfix: new HarmonyMethod(listSetterPatch));
-
             var listGetterOriginal = listIndex.GetGetMethod(true);
             var listGetterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyListGetterPatch));
             PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(listGetterOriginal, prefix: new HarmonyMethod(listGetterPatch));
+
+            var listSetterOriginal = listIndex.GetSetMethod(true);
+
+            if (listSetterOriginal != null)
+            {
+                var listSetterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyListSetterPatch));
+                PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(listSetterOriginal, postfix: new HarmonyMethod(listSetterPatch));
+            }
         }
 
         OptionAttributes.Add(property, attribute);
         attribute.HolderOptionList = optionList;
-        attribute.Value = propertyVal;
+        attribute.Value = (IList)propertyVal;
+        attribute.ValueType = listType.GetGenericArguments()[0];
 
         var valueType = property.PropertyType.GetGenericArguments()[0];
 

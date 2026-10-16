@@ -124,7 +124,7 @@ public class ModdedStringOption : ModdedOption<string>
             $"{ParentMod!.OptionsTitleText}.StringOption.{TranslationController.Instance.GetString(StringName)}";
 
         stringOption.SetUpFromData(Data, 20);
-        stringOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
+        stringOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
 
         // Changing the button text to make them more distinct from number options
         stringOption.MinusBtn.ChangeButtonText("<");

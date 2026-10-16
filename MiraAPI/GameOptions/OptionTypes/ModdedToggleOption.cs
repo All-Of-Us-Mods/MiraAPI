@@ -12,6 +12,11 @@ namespace MiraAPI.GameOptions.OptionTypes;
 public class ModdedToggleOption : ModdedOption<bool>
 {
     /// <summary>
+    /// Gets or sets the delegate that dictates how a toggle option's value is displayed.
+    /// </summary>
+    public Func<bool, string> DisplayValue { get; set; } = value => value ? "On" : "Off";
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="ModdedToggleOption"/> class.
     /// </summary>
     /// <param name="title">The option title.</param>
@@ -39,7 +44,7 @@ public class ModdedToggleOption : ModdedOption<bool>
         toggleOption.Title = StringName;
         toggleOption.TitleText.text = Title.Translate();
         toggleOption.CheckMark.enabled = Value;
-        toggleOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
+        toggleOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
 
         OptionBehaviour = toggleOption;
 
@@ -76,7 +81,7 @@ public class ModdedToggleOption : ModdedOption<bool>
         ModdedOptionsManager.AddSettingsChangeMessage(
             HudManager.Instance.Notifier,
             StringName,
-            newValue ? "On" : "Off",
+            DisplayValue(newValue).Translate(),
             Configuration.PopUpTextColor,
             Configuration.PopUpIconTmp,
             false);

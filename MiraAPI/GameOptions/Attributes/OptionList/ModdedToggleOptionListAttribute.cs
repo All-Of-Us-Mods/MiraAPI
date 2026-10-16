@@ -30,7 +30,7 @@ public class ModdedToggleOptionListAttribute(string title) : ModdedOptionListAtt
     public override object GetValue(int idx)
     {
         return HolderOptionList?[idx] is ModdedToggleOption opt
-            ? (object)opt.Value
+            ? opt.Value
             : throw new InvalidOperationException($"Holder option for {GetFormattedTitle(idx)} is not a ModdedToggleOption.");
     }
 }

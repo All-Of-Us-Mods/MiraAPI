@@ -34,7 +34,7 @@ public class ModdedEnumOptionListAttribute(string title, Type enumType, string[]
     {
         return HolderOptionList?[idx] is ModdedEnumOption opt
             ? Enum.ToObject(enumType, opt.Value)
-            : throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" with EnumType ${enumType.FullName} is not a ModdedEnumOption");
+            : throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" with EnumType {enumType.FullName} is not a ModdedEnumOption");
     }
 }
 
@@ -68,6 +68,6 @@ public class ModdedEnumOptionListAttribute<T>(string title, string[]? values = n
     {
         return HolderOptionList?[idx] is ModdedEnumOption<T> opt
             ? opt.Value
-            : throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" with EnumType ${typeof(T).FullName} is not a ModdedEnumOption");
+            : throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" with EnumType {typeof(T).FullName} is not a ModdedEnumOption<{typeof(T).FullName}>");
     }
 }

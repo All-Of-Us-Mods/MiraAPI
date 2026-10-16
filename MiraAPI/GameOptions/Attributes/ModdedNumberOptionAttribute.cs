@@ -28,9 +28,16 @@ public class ModdedNumberOptionAttribute(
 {
     internal override IModdedOption CreateOption(object? value, PropertyInfo property)
     {
+        var final = value switch
+        {
+            null => min + increment,
+            int integer => integer,
+            _ => (float)value,
+        };
+
         return new ModdedNumberOption(
             Title,
-            (float)(value ?? min + increment),
+            final,
             min,
             max,
             increment,
@@ -42,15 +49,28 @@ public class ModdedNumberOptionAttribute(
     /// <inheritdoc />
     public override void SetValue(object value)
     {
-        var opt = HolderOption as ModdedNumberOption;
-        opt?.SetValue((float)value);
+        if (HolderOption is not ModdedNumberOption opt)
+            return;
+
+        var final = value switch
+        {
+            int integer => integer,
+            _ => (float)value,
+        };
+        opt.SetValue(final);
     }
 
     /// <inheritdoc />
     public override object GetValue()
     {
-        return HolderOption is ModdedNumberOption opt
-            ? (object)opt.Value
-            : throw new InvalidOperationException($"HolderOption for option \"{Title}\" is not a ModdedNumberOption");
+        if (HolderOption is not ModdedNumberOption opt)
+            throw new InvalidOperationException($"HolderOption for option \"{Title}\" is not a ModdedNumberOption");
+
+        var value = opt.Value;
+
+        if (ValueType == typeof(int))
+            return (int)Math.Round(value);
+
+        return value;
     }
 }

@@ -27,19 +27,22 @@ public class ExampleOptions : AbstractOptionGroup
     [ModdedOptionVisibility(nameof(NumberOptVisibility))] // Can also target static methods
     public float NumberOpt { get; set; } = 4f;
 
+    [ModdedNumberOption("options.exampleOptions1.numberOpt", min: 0, max: 10, suffixType: MiraNumberSuffixes.Distance)]
+    public int NumberOpt2 { get; set; } = 4; // Can also be int!
+
     [ModdedEnumOption("options.exampleOptions1.bestApi", typeof(Api), ["Mira API", "Mitochondria", "Reactor"])]
+    public Api BestApi { get; set; } = Api.MiraAPI;
+
+    [ModdedEnumOption<Api>("options.exampleOptions1.worstApi", ["Mira API", "Mitochondria", "Reactor"])]
 
     // These three can target both instance and static methods
     [ModdedOptionGetter(nameof(GetApi))] // Can also automatically resolve to {Option Name}Getter
     [ModdedOptionSetter(nameof(SetApi))] // Can also automatically resolve to {Option Name}Setter
     [ModdedOptionChanged(nameof(ApiChanged))] // Can also automatically resolve to {Option Name}Changed
-    public Api BestApi { get; set; } = Api.MiraAPI;
-
-    [ModdedEnumOption<Api>("options.exampleOptions1.worstApi", ["Mira API", "Mitochondria", "Reactor"])]
     public Api WorstApi { get; set; } = Api.MiraAPI;
 
     [ModdedEnumOptionList<ValueState>("Value State {0}", ["None", "Primary", "Secondary"])]
-    public List<ValueState> ValueStates { get; } =
+    public List<ValueState> ValueStates { get; set; } =
         [ValueState.Primary, ValueState.Secondary, ValueState.None, ValueState.None, ValueState.None];
 
     public bool ToggleOpt1Visibility()

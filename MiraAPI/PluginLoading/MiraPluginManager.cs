@@ -313,9 +313,9 @@ public sealed class MiraPluginManager
 
             foreach (var property in type.GetProperties())
             {
-                if (property.GetMethod?.IsStatic == true)
+                if (property.GetMethod?.IsStatic == true && property.GetCustomAttribute<MiraIgnoreAttribute>() == null)
                 {
-                    Error($"Option property {property.Name} in {type.Name} must not be static.");
+                    Error($"Non-ignored option property {property.Name} in {type.Name} must not be static.");
                     continue;
                 }
 
@@ -325,16 +325,17 @@ public sealed class MiraPluginManager
                     continue;
                 }
 
+                if (property.PropertyType.IsAssignableTo(typeof(IModdedOptionList)))
+                {
+                    ModdedOptionsManager.RegisterPropertyOptionList(type, property, pluginInfo);
+                    continue;
+                }
+
                 var attribute = property.GetCustomAttribute<ModdedOptionAttribute>();
                 if (attribute != null)
                 {
                     ModdedOptionsManager.RegisterAttributeOption(type, attribute, property, pluginInfo);
                     continue;
-                }
-
-                if (property.PropertyType.IsAssignableTo(typeof(IModdedOptionList)))
-                {
-                    ModdedOptionsManager.RegisterPropertyOptionList(type, property, pluginInfo);
                 }
 
                 var listAttr = property.GetCustomAttribute<ModdedOptionListAttribute>();
