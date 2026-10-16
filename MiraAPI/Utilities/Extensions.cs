@@ -567,7 +567,28 @@ public static class Extensions
     /// <returns>The darkened <see cref="Color32"/>.</returns>
     public static Color32 GetShadowColor(this Color32 color, byte darknessAmount)
     {
-        return new Color32((byte)Mathf.Clamp(color.r - darknessAmount, 0, 255), (byte)Mathf.Clamp(color.g - darknessAmount, 0, 255), (byte)Mathf.Clamp(color.b - darknessAmount, 0, 255), byte.MaxValue);
+        return
+            new Color32(
+                (byte)Mathf.Clamp(color.r - darknessAmount, 0, 255),
+                (byte)Mathf.Clamp(color.g - darknessAmount, 0, 255),
+                (byte)Mathf.Clamp(color.b - darknessAmount, 0, 255),
+                color.a);
+    }
+
+    /// <summary>
+    /// Gets a darkened version of a <see cref="Color"/>.
+    /// </summary>
+    /// <param name="color">The original <see cref="Color"/>.</param>
+    /// <param name="darknessAmount">A darkness amount between 0 and 1.</param>
+    /// <returns>The darkened <see cref="Color"/>.</returns>
+    public static Color GetShadowColor(this Color color, float darknessAmount)
+    {
+        return
+            new Color(
+                MathUtilities.Clamp01(color.r - darknessAmount),
+                MathUtilities.Clamp01(color.g - darknessAmount),
+                MathUtilities.Clamp01(color.b - darknessAmount),
+                color.a);
     }
 
     /// <summary>
@@ -771,5 +792,18 @@ public static class Extensions
 
         userData.keyboardMaps[0].actionElementMaps.Add(map);
         return action;
+    }
+
+    /// <summary>
+    /// Gets a component that is attached to the provided <see cref="GameObject"/>, attaching and returning the component if it wasn't found.
+    /// </summary>
+    /// <typeparam name="T">The component type.</typeparam>
+    /// <param name="go">The <see cref="GameObject"/> to get the component from.</param>
+    /// <returns>The component.</returns>
+    public static T GetOrAddComponent<T>(this GameObject go)
+        where T : Component
+    {
+        var comp = go.GetComponent<T>();
+        return comp ? comp : go.AddComponent<T>();
     }
 }

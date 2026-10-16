@@ -16,11 +16,11 @@
 Your votes have double the power.</string>
     <string name="ApiExample.Role.Crewmate.Mayor.TabDescription">You get one extra vote in the meeting!</string>
     <string name="ApiExample.Role.Crewmate.Mayor.WikiDescription">The Mayor is a Crewmate role that gets two votes in the meeting, instead of the singular vote other Crewmates get.</string>
-    <string name="ApiExample.Role.Crewmate.Chamelon">Chamelon</string>
-    <string name="ApiExample.Role.Crewmate.Chamelon.IntroBlurb">Become one with the environment.</string>
-    <string name="ApiExample.Role.Crewmate.Chamelon.MedDescription">Fade out of everyone's vision by not moving.</string>
-    <string name="ApiExample.Role.Crewmate.Chamelon.TabDescription">Stay invisible while not moving.</string>
-    <string name="ApiExample.Role.Crewmate.Chamelon.WikiDescription">The Chamelon is a Crewmate role that slowly becomes invisible while standing still.</string>
+    <string name="ApiExample.Role.Crewmate.Chameleon">Chameleon</string>
+    <string name="ApiExample.Role.Crewmate.Chameleon.IntroBlurb">Become one with the environment.</string>
+    <string name="ApiExample.Role.Crewmate.Chameleon.MedDescription">Fade out of everyone's vision by not moving.</string>
+    <string name="ApiExample.Role.Crewmate.Chameleon.TabDescription">Stay invisible while not moving.</string>
+    <string name="ApiExample.Role.Crewmate.Chameleon.WikiDescription">The Chameleon is a Crewmate role that slowly becomes invisible while standing still.</string>
     <string name="ApiExample.Role.Outcast.OutcastKiller">Outcast Killer</string>
     <string name="ApiExample.Role.Outcast.OutcastKiller.IntroBlurb">Kill everyone else.</string>
     <string name="ApiExample.Role.Outcast.OutcastKiller.MedDescription">Be the last outcast standing.
@@ -73,11 +73,12 @@ Eliminate every other faction.</string>
     <string name="settings.miraExample.exampleBool2">Example Bool 2</string>
     <string name="settings.miraExample.slider">Slider</string>
     <string name="settings.miraExample.exampleNumber">Example Number</string>
-    <string name="settings.miraExample.exampleMultiplier">Example Multplier</string>
+    <string name="settings.miraExample.exampleMultiplier">Example Multiplier</string>
     <string name="settings.miraExample.exampleEnum">Example Enum</string>
     <string name="settings.miraExample.button.exampleButton">Example Button</string>
     <string name="gameover.outcastKiller.win">Outcast Killer Wins!</string>
     <string name="color.cerulean">Cerulean</string>
     <string name="color.rose">Rose</string>
     <string name="color.gold">Gold</string>
+    <string name="color.rainbow">Rainbow</string>
 </resources>

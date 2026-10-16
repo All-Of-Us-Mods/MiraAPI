@@ -39,10 +39,10 @@ public static class RoleBehaviourStubs
     }
 
     /// <summary>
-    /// Stub method for <see cref="RoleBehaviour.AppendTaskHint(StringBuilder)"/>.
+    /// Stub method for <see cref="RoleBehaviour.AppendTaskHint(Il2CppSystem.Text.StringBuilder)"/>.
     /// </summary>
     /// <param name="instance">The <see cref="RoleBehaviour"/> object.</param>
-    /// <param name="taskStringBuilder">The <see cref="StringBuilder"/> to append the task hint to.</param>
+    /// <param name="taskStringBuilder">The <see cref="Il2CppSystem.Text.StringBuilder"/> to append the task hint to.</param>
     [HarmonyReversePatch]
     [HarmonyPatch(typeof(RoleBehaviour), nameof(RoleBehaviour.AppendTaskHint), typeof(Il2CppSystem.Text.StringBuilder))]
     [MethodImpl(MethodImplOptions.NoInlining)]
