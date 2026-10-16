@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using BepInEx.Configuration;
 using HarmonyLib;
 using MiraAPI.GameModes;
@@ -24,7 +25,10 @@ namespace MiraAPI.GameOptions;
 /// </summary>
 public static class ModdedOptionsManager
 {
+    private static readonly ConditionalWeakTable<object, ModdedOptionListAttribute> ListInstanceCache = [];
     private static readonly Dictionary<PropertyInfo, PropertyOptionAttribute> OptionAttributes = [];
+    private static readonly Dictionary<MethodBase, PropertyOptionAttribute> GetterLookups = [];
+    private static readonly Dictionary<MethodBase, PropertyOptionAttribute> SetterLookups = [];
     private static readonly Dictionary<Type, AbstractOptionGroup> TypeToGroup = [];
     private static readonly HashSet<Type> PatchedListTypes = [];
 
@@ -168,12 +172,16 @@ public static class ModdedOptionsManager
         var getterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyGetterPatch));
         PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: new HarmonyMethod(getterPatch));
 
+        GetterLookups[getterOriginal!] = attribute;
+
         var setterOriginal = property.GetSetMethod(true);
 
         if (setterOriginal != null)
         {
             var setterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertySetterPatch));
             PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: new HarmonyMethod(setterPatch));
+
+            SetterLookups[setterOriginal] = attribute;
         }
 
         OptionAttributes.Add(property, attribute);
@@ -278,12 +286,16 @@ public static class ModdedOptionsManager
         var getterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyGetterPatch));
         PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: new HarmonyMethod(getterPatch));
 
+        GetterLookups[getterOriginal!] = attribute;
+
         var setterOriginal = property.GetSetMethod(true);
 
         if (setterOriginal != null)
         {
             var setterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertySetterPatch));
             PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: new HarmonyMethod(setterPatch));
+
+            SetterLookups[setterOriginal] = attribute;
         }
 
         var listType = propertyList.GetType();
@@ -307,8 +319,10 @@ public static class ModdedOptionsManager
 
         OptionAttributes.Add(property, attribute);
         attribute.HolderOptionList = optionList;
-        attribute.Value = (IList)propertyVal;
+        attribute.Value = propertyList;
         attribute.ValueType = listType.GetGenericArguments()[0];
+
+        ListInstanceCache.Add(propertyVal, attribute);
 
         var valueType = property.PropertyType.GetGenericArguments()[0];
 
@@ -422,8 +436,13 @@ public static class ModdedOptionsManager
     [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Read above.")]
     public static void PropertySetterPatch(MethodBase __originalMethod, object value)
     {
-        var attribute = OptionAttributes.First(pair => pair.Key.GetSetMethod() == __originalMethod).Value;
+        if (!SetterLookups.TryGetValue(__originalMethod, out var attribute))
+            return;
+
         attribute.SetValue(value);
+
+        if (attribute is ModdedOptionListAttribute listAttribute && value != null)
+            ListInstanceCache.AddOrUpdate(value, listAttribute);
     }
 
     /// <summary>
@@ -436,7 +455,9 @@ public static class ModdedOptionsManager
     [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Read above.")]
     public static bool PropertyGetterPatch(MethodBase __originalMethod, ref object __result)
     {
-        var attribute = OptionAttributes.First(pair => pair.Key.GetGetMethod() == __originalMethod).Value;
+        if (!GetterLookups.TryGetValue(__originalMethod, out var attribute))
+            return true;
+
         __result = attribute.GetValue();
         return false;
     }
@@ -451,10 +472,8 @@ public static class ModdedOptionsManager
     [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Read above.")]
     public static void PropertyListSetterPatch(object __instance, int index, object value)
     {
-        var match = OptionAttributes.Values
-            .OfType<ModdedOptionListAttribute>()
-            .FirstOrDefault(list => ReferenceEquals(list.Value, __instance));
-        match?.SetValue(index, value);
+        if (ListInstanceCache.TryGetValue(__instance, out var match))
+            match.SetValue(index, value);
     }
 
     /// <summary>
@@ -468,11 +487,7 @@ public static class ModdedOptionsManager
     [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Read above.")]
     public static bool PropertyListGetterPatch(object __instance, int index, ref object __result)
     {
-        var match = OptionAttributes.Values
-            .OfType<ModdedOptionListAttribute>()
-            .FirstOrDefault(list => ReferenceEquals(list.Value, __instance));
-
-        if (match is null)
+        if (!ListInstanceCache.TryGetValue(__instance, out var match))
             return true;
 
         __result = match.GetValue(index);

@@ -313,7 +313,10 @@ public sealed class MiraPluginManager
 
             foreach (var property in type.GetProperties())
             {
-                if (property.GetMethod?.IsStatic == true && property.GetCustomAttribute<MiraIgnoreAttribute>() == null)
+                if (property.GetCustomAttribute<MiraIgnoreAttribute>() != null)
+                    continue;
+
+                if (property.GetMethod?.IsStatic == true)
                 {
                     Error($"Non-ignored option property {property.Name} in {type.Name} must not be static.");
                     continue;

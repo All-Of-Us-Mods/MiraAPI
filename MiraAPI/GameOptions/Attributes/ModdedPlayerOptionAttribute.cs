@@ -41,7 +41,7 @@ public class ModdedPlayerOptionAttribute(
 
         var final = value switch
         {
-            NetworkedPlayerInfo info => opt.Values.IndexOf(info),
+            NetworkedPlayerInfo info => info ? opt.Values.IndexOf(info) : (allowNone ? -1 : 0),
             _ => (int)value,
         };
         opt?.SetValue(final);

@@ -45,6 +45,9 @@ public class ExampleOptions : AbstractOptionGroup
     public List<ValueState> ValueStates { get; set; } =
         [ValueState.Primary, ValueState.Secondary, ValueState.None, ValueState.None, ValueState.None];
 
+    [ModdedPlayerOption("options.exampleOptions1.players")]
+    public NetworkedPlayerInfo PlayerSelected { get; set; }
+
     public bool ToggleOpt1Visibility()
     {
         return true;

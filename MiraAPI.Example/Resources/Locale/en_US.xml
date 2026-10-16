@@ -48,6 +48,7 @@ Eliminate every other faction.</string>
     <string name="options.exampleOptions1.numberOpt">Number Opt</string>
     <string name="options.exampleOptions1.bestApi">Best API</string>
     <string name="options.exampleOptions1.worstApi">Worst API</string>
+    <string name="options.exampleOptions1.players">Choose A Player</string>
     <string name="options.exampleOptions2">Example Options 2</string>
     <string name="options.exampleOptions2.youMustChoseAPlayer">YOU MUST CHOSE A PLAYER</string>
     <string name="options.exampleOptions2.ehWhatever">Eh whatever</string>
