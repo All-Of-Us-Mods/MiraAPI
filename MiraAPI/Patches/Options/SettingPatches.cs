@@ -46,15 +46,14 @@ public static class SettingPatches
             }
             else
             {
+                var part = value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo);
                 result = suffix switch
                 {
-                    MiraNumberSuffixes.None => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo),
-                    MiraNumberSuffixes.Multiplier => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "x",
-                    MiraNumberSuffixes.Percent => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "%",
-                    MiraNumberSuffixes.Distance => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + MiraApiPlugin.DistanceSuffix.Value,
-                    _ => TranslationController.Instance.GetString(
-                        StringNames.GameSecondsAbbrev,
-                        (Il2CppSystem.Object[])[value.ToString(__instance.FormatString, CultureInfo.InvariantCulture)]),
+                    MiraNumberSuffixes.None => part,
+                    MiraNumberSuffixes.Multiplier => part + "x",
+                    MiraNumberSuffixes.Percent => part + "%",
+                    MiraNumberSuffixes.Distance => string.Concat(part, " ", MiraApiPlugin.DistanceSuffix.Value),
+                    _ => TranslationController.Instance.GetString(StringNames.GameSecondsAbbrev, part),
                 };
             }
         }
@@ -64,15 +63,14 @@ public static class SettingPatches
         }
         else
         {
+            var part = value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo);
             result = suffix switch
             {
-                MiraNumberSuffixes.None => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo),
-                MiraNumberSuffixes.Multiplier => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "x",
-                MiraNumberSuffixes.Percent => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "%",
-                MiraNumberSuffixes.Distance => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + MiraApiPlugin.DistanceSuffix.Value,
-                _ => TranslationController.Instance.GetString(
-                    StringNames.GameSecondsAbbrev,
-                    (Il2CppSystem.Object[])[value.ToString(__instance.FormatString, CultureInfo.InvariantCulture)]),
+                MiraNumberSuffixes.None => part,
+                MiraNumberSuffixes.Multiplier => part + "x",
+                MiraNumberSuffixes.Percent => part + "%",
+                MiraNumberSuffixes.Distance => string.Concat(part, " ", MiraApiPlugin.DistanceSuffix.Value),
+                _ => TranslationController.Instance.GetString(StringNames.GameSecondsAbbrev, part),
             };
         }
 
