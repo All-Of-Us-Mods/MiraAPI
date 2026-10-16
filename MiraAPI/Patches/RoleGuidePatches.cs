@@ -661,9 +661,9 @@ public static class RoleGuidePatches
             instance.TabButtons[2].transform.parent);
         SetupTabButton(
             modifiersButton,
-            MiraAssets.WikiRolesButtonIdleSprite,
-            MiraAssets.WikiRolesButtonOpenSprite,
-            MiraAssets.WikiRolesButtonHoverSprite);
+            MiraAssets.WikiModifiersButtonIdleSprite,
+            MiraAssets.WikiModifiersButtonOpenSprite,
+            MiraAssets.WikiModifiersButtonHoverSprite);
         modifiersButton.OnClick = new Button.ButtonClickedEvent();
         modifiersButton.OnClick.AddListener((Action)(() => OpenModifiersTab()));
         instance.TabButtons.Add(modifiersButton);
@@ -2189,10 +2189,10 @@ public static class RoleGuidePatches
         SearchSortingGroupButton.gameObject.SetActive(paginationVisible);
     }
 
-    private static void SetPaginationSprites(SpriteRenderer idle, SpriteRenderer hover, bool flip)
+    private static void SetPaginationSprites(SpriteRenderer idle, SpriteRenderer hover, bool isLeft)
     {
-        var idleSprite = MiraAssets.NextButton.LoadAsset();
-        var hoverSprite = MiraAssets.NextButtonActive.LoadAsset();
+        var idleSprite = isLeft ? MiraAssets.PageLeftIdle.LoadAsset() : MiraAssets.PageRightIdle.LoadAsset();
+        var hoverSprite = isLeft ? MiraAssets.PageLeftHover.LoadAsset() : MiraAssets.PageRightHover.LoadAsset();
 
         // Match the on-screen size of the sort icon being replaced, since the arrow art differs in size.
         var currentHeight = idle.sprite ? idle.sprite.bounds.size.y * idle.transform.localScale.y : 0f;
@@ -2201,7 +2201,6 @@ public static class RoleGuidePatches
 
         idle.sprite = idleSprite;
         hover.sprite = hoverSprite;
-        idle.flipX = hover.flipX = flip;
         idle.transform.localScale = hover.transform.localScale = new Vector3(scale, scale, 1f);
     }
 
