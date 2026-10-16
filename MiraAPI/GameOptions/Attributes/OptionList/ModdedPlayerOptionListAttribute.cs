@@ -41,14 +41,12 @@ public class ModdedPlayerOptionListAttribute(
     /// <inheritdoc />
     public override object GetValue(int idx)
     {
-        if (HolderOptionList?[idx] is not ModdedNumberOption opt)
-            throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" is not a ModdedNumberOption");
-
-        var value = opt.Value;
+        if (HolderOptionList?[idx] is not ModdedPlayerOption opt)
+            throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" is not a ModdedPlayerOption");
 
         if (ValueType == typeof(int))
-            return (int)Math.Round(value);
+            return opt.Value;
 
-        return value;
+        return opt.SelectedPlayer!;
     }
 }
