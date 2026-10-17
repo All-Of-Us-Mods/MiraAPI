@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
@@ -15,10 +16,115 @@ namespace MiraAPI.GameOptions.Attributes;
 [AttributeUsage(AttributeTargets.Property)]
 public abstract class ModdedOptionMemberAttribute(string? memberName, Type? holderType, string defaultSuffix) : Attribute
 {
+    private static readonly Dictionary<MethodInfo, Delegate> DelegateCache = [];
+
+    /// <summary>
+    /// A helper class to bind a specific list index to a dynamically compiled delegate.
+    /// </summary>
+    /// <param name="index">The index to bind.</param>
+    public sealed class DelegateIndexClosure(int index)
+    {
+        /// <summary>
+        /// The bound index.
+        /// </summary>
+        [SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "No need to be private.")]
+        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
+        public readonly int Index = index;
+    }
+
+    /// <summary>
+    /// Exposes the index field so child attributes can emit instructions to read it.
+    /// </summary>
+    protected static readonly FieldInfo IndexClosureField = typeof(DelegateIndexClosure).GetField(nameof(DelegateIndexClosure.Index))!;
+
     /// <summary>
     /// Gets the resolved name of the target member.
     /// </summary>
     protected string? MemberName { get; private set; } = memberName;
+
+    /// <summary>
+    /// Validates that a method matches the expected return type and parameter types.
+    /// </summary>
+    /// <param name="method">The method to validate.</param>
+    /// <param name="expectedReturnType">The expected return type of the method.</param>
+    /// <param name="expectedParamTypes">The expected types of the parameters of the method.</param>
+    /// <returns><c>true</c> if the method is valid; <c>false</c> otherwise.</returns>
+    protected bool ValidateSignature(MethodInfo method, Type expectedReturnType, params Type[] expectedParamTypes)
+    {
+        if (method.ReturnType != expectedReturnType)
+        {
+            Error($"{MemberName}'s return type must be {expectedReturnType.Name}.");
+            return false;
+        }
+
+        var parameters = method.GetParameters();
+
+        if (parameters.Length != expectedParamTypes.Length)
+        {
+            Error($"{MemberName} must have exactly {expectedParamTypes.Length} parameter(s).");
+            return false;
+        }
+
+        for (var i = 0; i < expectedParamTypes.Length; i++)
+        {
+            if (parameters[i].ParameterType == expectedParamTypes[i])
+                continue;
+
+            Error($"{MemberName}'s parameter at index {i} must be {expectedParamTypes[i].Name}.");
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Validates that a list method matches the expected return type, base parameter types, and an optional integer index.
+    /// </summary>
+    /// <param name="method">The method to validate.</param>
+    /// <param name="expectedReturnType">The expected return type of the method.</param>
+    /// <param name="hasIndex">When the method returns, a flag that indicates if the method has an index parameter.</param>
+    /// <param name="expectedParamTypes">The expected types of the parameters of the method.</param>
+    /// <returns><c>true</c> if the method is valid; <c>false</c> otherwise.</returns>
+    protected bool ValidateListSignature(MethodInfo method, Type expectedReturnType, out bool hasIndex, params Type[] expectedParamTypes)
+    {
+        hasIndex = false;
+
+        if (method.ReturnType != expectedReturnType)
+        {
+            Error($"{MemberName}'s return type must be {expectedReturnType.Name}.");
+            return false;
+        }
+
+        var parameters = method.GetParameters();
+
+        if (parameters.Length < expectedParamTypes.Length || parameters.Length > expectedParamTypes.Length + 1)
+        {
+            Error($"{MemberName} must have {expectedParamTypes.Length} parameter(s), optionally with an extra trailing int parameter.");
+            return false;
+        }
+
+        for (var i = 0; i < expectedParamTypes.Length; i++)
+        {
+            if (parameters[i].ParameterType == expectedParamTypes[i])
+                continue;
+
+            Error($"{MemberName}'s parameter at index {i} must be {expectedParamTypes[i].Name}.");
+            return false;
+        }
+
+        if (parameters.Length == expectedParamTypes.Length + 1)
+        {
+            if (parameters[^1].ParameterType != typeof(int))
+            {
+                Error($"{MemberName}'s final parameter must be an int (the list index).");
+                return false;
+            }
+
+            hasIndex = true;
+        }
+
+        return true;
+    }
 
     /// <summary>
     /// Resolves the target <see cref="MemberInfo"/> (property or method) and its associated singleton instance getter, if applicable.
@@ -123,6 +229,9 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
         bool forwardParameters = true,
         Action<ILGenerator>? postProcessCall = null)
     {
+        if (postProcessCall == null && DelegateCache.TryGetValue(method, out var cachedDelegate))
+            return cachedDelegate;
+
         var dm = new DynamicMethod($"{ownerType.Name}_{method.Name}_{suffix}", returnType, paramTypes, ownerType, true);
         var il = dm.GetILGenerator();
 
@@ -133,16 +242,19 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
         {
             for (byte i = 0; i < paramTypes.Length; i++)
             {
-                if (i == 0)
-                    il.Emit(OpCodes.Ldarg_0);
-                else if (i == 1)
-                    il.Emit(OpCodes.Ldarg_1);
-                else if (i == 2)
-                    il.Emit(OpCodes.Ldarg_2);
-                else if (i == 3)
-                    il.Emit(OpCodes.Ldarg_3);
+                var loadOp = i switch
+                {
+                    0 => OpCodes.Ldarg_0,
+                    1 => OpCodes.Ldarg_1,
+                    2 => OpCodes.Ldarg_2,
+                    3 => OpCodes.Ldarg_3,
+                    _ => OpCodes.Ldarg_S,
+                };
+
+                if (loadOp == OpCodes.Ldarg_S)
+                    il.Emit(loadOp, i);
                 else
-                    il.Emit(OpCodes.Ldarg_S, i);
+                    il.Emit(loadOp);
             }
         }
 
@@ -153,7 +265,12 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
 
         il.Emit(OpCodes.Ret);
 
-        return dm.CreateDelegate(delegateType);
+        var compiledDelegate = dm.CreateDelegate(delegateType);
+
+        if (postProcessCall == null)
+            DelegateCache[method] = compiledDelegate;
+
+        return compiledDelegate;
     }
 
     /// <summary>
@@ -185,7 +302,7 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
         string suffix,
         bool hasIndexParameter,
         Action<ILGenerator>? postProcessCall = null,
-        Action<ILGenerator, int>? postProcessListCall = null)
+        Action<ILGenerator>? postProcessListCall = null)
     {
         if (!hasIndexParameter && postProcessListCall is null)
         {
@@ -203,40 +320,47 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
             return _ => sharedDelegate;
         }
 
-        return index =>
+        var fullParamTypes = new Type[baseParamTypes.Length + 1];
+        fullParamTypes[0] = typeof(DelegateIndexClosure);
+        Array.Copy(baseParamTypes, 0, fullParamTypes, 1, baseParamTypes.Length);
+
+        var dm = new DynamicMethod($"{ownerType.Name}_{method.Name}_{suffix}_List", returnType, fullParamTypes, ownerType, true);
+        var il = dm.GetILGenerator();
+
+        if (!method.IsStatic && instanceGetter != null)
+            il.Emit(OpCodes.Call, instanceGetter);
+
+        for (var i = 0; i < baseParamTypes.Length; i++)
         {
-            var dm = new DynamicMethod($"{ownerType.Name}_{method.Name}_{suffix}_{index}", returnType, baseParamTypes, ownerType, true);
-            var il = dm.GetILGenerator();
-
-            if (!method.IsStatic && instanceGetter != null)
-                il.Emit(OpCodes.Call, instanceGetter);
-
-            for (byte i = 0; i < baseParamTypes.Length; i++)
+            var argPos = (byte)(i + 1);
+            var loadOp = argPos switch
             {
-                if (i == 0)
-                    il.Emit(OpCodes.Ldarg_0);
-                else if (i == 1)
-                    il.Emit(OpCodes.Ldarg_1);
-                else if (i == 2)
-                    il.Emit(OpCodes.Ldarg_2);
-                else if (i == 3)
-                    il.Emit(OpCodes.Ldarg_3);
-                else
-                    il.Emit(OpCodes.Ldarg_S, i);
-            }
+                1 => OpCodes.Ldarg_1,
+                2 => OpCodes.Ldarg_2,
+                3 => OpCodes.Ldarg_3,
+                _ => OpCodes.Ldarg_S,
+            };
 
-            if (hasIndexParameter)
-                il.Emit(OpCodes.Ldc_I4, index);
+            if (loadOp == OpCodes.Ldarg_S)
+                il.Emit(loadOp, argPos);
+            else
+                il.Emit(loadOp);
+        }
 
-            var callOp = method.IsStatic ? OpCodes.Call : OpCodes.Callvirt;
-            il.Emit(callOp, method);
+        if (hasIndexParameter)
+        {
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldfld, IndexClosureField);
+        }
 
-            postProcessCall?.Invoke(il);
-            postProcessListCall?.Invoke(il, index);
+        var callOp = method.IsStatic ? OpCodes.Call : OpCodes.Callvirt;
+        il.Emit(callOp, method);
 
-            il.Emit(OpCodes.Ret);
+        postProcessCall?.Invoke(il);
+        postProcessListCall?.Invoke(il);
 
-            return dm.CreateDelegate(delegateType);
-        };
+        il.Emit(OpCodes.Ret);
+
+        return index => dm.CreateDelegate(delegateType, new DelegateIndexClosure(index));
     }
 }

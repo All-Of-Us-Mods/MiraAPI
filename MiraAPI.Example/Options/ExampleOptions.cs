@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.Attributes;
 using MiraAPI.Utilities;
@@ -43,7 +42,7 @@ public class ExampleOptions : AbstractOptionGroup
     public Api WorstApi { get; set; } = Api.MiraAPI;
 
     [ModdedEnumOptionList<ValueState>("Value State {0}", ["None", "Primary", "Secondary"])]
-    public List<ValueState> ValueStates { get; set; } =
+    public ModdedList<ValueState> ValueStates { get; set; } =
         [ValueState.Primary, ValueState.Secondary, ValueState.None, ValueState.None, ValueState.None];
 
     [ModdedPlayerOption("options.exampleOptions1.players")]

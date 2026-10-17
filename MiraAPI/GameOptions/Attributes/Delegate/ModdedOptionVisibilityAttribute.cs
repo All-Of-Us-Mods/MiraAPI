@@ -105,7 +105,7 @@ public sealed class ModdedOptionVisibilityAttribute(string? memberName = null, T
         return (Func<bool>)CompileDynamicDelegate(type, targetMethod, instanceGetter, typeof(bool), Type.EmptyTypes, typeof(Func<bool>), "Visibility", false, postProcess);
     }
 
-    internal Func<int, Delegate>? GetListVisibility(AbstractOptionGroup group, PropertyInfo property)
+    internal Func<int, Delegate?>? GetListVisibility(AbstractOptionGroup group, PropertyInfo property)
     {
         if (ResolveMember(group, property, out Type type, out var instanceGetter) is not { } member)
         {
@@ -115,7 +115,7 @@ public sealed class ModdedOptionVisibilityAttribute(string? memberName = null, T
 
         MethodInfo? targetMethod;
         Action<ILGenerator>? postProcess = null;
-        Action<ILGenerator, int>? postProcessList = null;
+        Action<ILGenerator>? postProcessList = null;
 
         var hasIndexParam = false;
 
@@ -126,9 +126,10 @@ public sealed class ModdedOptionVisibilityAttribute(string? memberName = null, T
             if (vProperty.PropertyType.IsAssignableTo(typeof(IList<bool>)))
             {
                 isListBool = true;
-                postProcessList = (il, index) =>
+                postProcessList = il =>
                 {
-                    il.Emit(OpCodes.Ldc_I4, index);
+                    il.Emit(OpCodes.Ldarg_0);
+                    il.Emit(OpCodes.Ldfld, IndexClosureField);
                     il.Emit(OpCodes.Callvirt, ListBoolIndexerGetter);
                 };
             }

@@ -4,6 +4,7 @@ using BepInEx.Configuration;
 using MiraAPI.Networking;
 using MiraAPI.PluginLoading;
 using MiraAPI.Translation;
+using MiraAPI.Utilities;
 using Reactor.Networking.Rpc;
 using UnityEngine;
 
@@ -124,7 +125,7 @@ public abstract class ModdedOption<T> : IModdedOption
         DefaultValue = defaultValue;
         Value = defaultValue;
         StringName = MiraLocaleManager.GetOrCreateLocaleString(Title);
-        Visible = () => true;
+        Visible = DelegateUtilities.AlwaysTrue;
         IncludeInPreset = includeInPreset;
     }
 

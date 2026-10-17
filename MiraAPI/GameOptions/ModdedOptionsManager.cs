@@ -26,11 +26,16 @@ namespace MiraAPI.GameOptions;
 public static class ModdedOptionsManager
 {
     private static readonly ConditionalWeakTable<object, ModdedOptionListAttribute> ListInstanceCache = [];
-    private static readonly Dictionary<PropertyInfo, PropertyOptionAttribute> OptionAttributes = [];
     private static readonly Dictionary<MethodBase, PropertyOptionAttribute> GetterLookups = [];
     private static readonly Dictionary<MethodBase, PropertyOptionAttribute> SetterLookups = [];
     private static readonly Dictionary<Type, AbstractOptionGroup> TypeToGroup = [];
+    private static readonly HashSet<PropertyInfo> OptionAttributes = [];
     private static readonly HashSet<Type> PatchedListTypes = [];
+
+    private static readonly HarmonyMethod CachedGetterPatch = new(typeof(ModdedOptionsManager), nameof(PropertyGetterPatch));
+    private static readonly HarmonyMethod CachedSetterPatch = new(typeof(ModdedOptionsManager), nameof(PropertySetterPatch));
+    private static readonly HarmonyMethod CachedListGetterPatch = new(typeof(ModdedOptionsManager), nameof(PropertyListGetterPatch));
+    private static readonly HarmonyMethod CachedListSetterPatch = new(typeof(ModdedOptionsManager), nameof(PropertyListSetterPatch));
 
     internal static readonly Dictionary<OptionBehaviour, ModdedPlayerOption> CreatedPlayerOptions = [];
     internal static readonly Dictionary<OptionBehaviour, ModdedStringOption> CreatedStringOptions = [];
@@ -148,7 +153,7 @@ public static class ModdedOptionsManager
         PropertyInfo property,
         MiraPluginInfo pluginInfo)
     {
-        if (OptionAttributes.ContainsKey(property))
+        if (!OptionAttributes.Add(property))
         {
             Error($"Property {property.Name} already has an attribute registered.");
             return;
@@ -168,52 +173,40 @@ public static class ModdedOptionsManager
             return;
         }
 
-        var getterOriginal = property.GetGetMethod(true);
-        var getterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyGetterPatch));
-        PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: new HarmonyMethod(getterPatch));
-
-        GetterLookups[getterOriginal!] = attribute;
+        var getterOriginal = property.GetGetMethod(true)!;
+        PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: CachedGetterPatch);
+        GetterLookups[getterOriginal] = attribute;
 
         var setterOriginal = property.GetSetMethod(true);
 
         if (setterOriginal != null)
         {
-            var setterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertySetterPatch));
-            PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: new HarmonyMethod(setterPatch));
-
+            PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: CachedSetterPatch);
             SetterLookups[setterOriginal] = attribute;
         }
 
-        OptionAttributes.Add(property, attribute);
         attribute.HolderOption = option;
         attribute.ValueType = property.PropertyType;
 
-        var visibilityAttr = property.GetCustomAttribute<ModdedOptionVisibilityAttribute>();
-        var visibilityFunc = visibilityAttr?.GetVisibility(group, property);
-        if (visibilityFunc != null)
-        {
-            option.Visible = visibilityFunc;
-        }
+        var customAttributes = property.GetCustomAttributes(false);
 
-        var getterAtr = property.GetCustomAttribute<ModdedOptionGetterAttribute>();
-        var getterFunc = getterAtr?.GetGetter(group, property, option);
-        if (getterFunc != null)
+        foreach (var attr in customAttributes)
         {
-            option.Getter = getterFunc;
-        }
-
-        var setterAtr = property.GetCustomAttribute<ModdedOptionSetterAttribute>();
-        var setterFunc = setterAtr?.GetSetter(group, property, option);
-        if (setterFunc != null)
-        {
-            option.Setter = setterFunc;
-        }
-
-        var changedAtr = property.GetCustomAttribute<ModdedOptionChangedAttribute>();
-        var changedFunc = changedAtr?.GetChanged(group, property, option);
-        if (changedFunc != null)
-        {
-            option.ChangedEvent = changedFunc;
+            switch (attr)
+            {
+                case ModdedOptionVisibilityAttribute visibilityAttr:
+                    option.Visible = visibilityAttr.GetVisibility(group, property) ?? DelegateUtilities.AlwaysTrue;
+                    break;
+                case ModdedOptionGetterAttribute getterAttr:
+                    option.Getter = getterAttr.GetGetter(group, property, option);
+                    break;
+                case ModdedOptionSetterAttribute setterAttr:
+                    option.Setter = setterAttr.GetSetter(group, property, option);
+                    break;
+                case ModdedOptionChangedAttribute changedAttr:
+                    option.ChangedEvent = changedAttr.GetChanged(group, property, option);
+                    break;
+            }
         }
 
         RegisterOption(option, group, property.Name, pluginInfo);
@@ -247,7 +240,7 @@ public static class ModdedOptionsManager
         PropertyInfo property,
         MiraPluginInfo pluginInfo)
     {
-        if (OptionAttributes.ContainsKey(property))
+        if (!OptionAttributes.Add(property))
         {
             Error($"Property {property.Name} already has an attribute registered.");
             return;
@@ -282,85 +275,84 @@ public static class ModdedOptionsManager
             return;
         }
 
-        var getterOriginal = property.GetGetMethod(true);
-        var getterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyGetterPatch));
-        PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: new HarmonyMethod(getterPatch));
+        var listType = propertyList.GetType();
+        var valueType = listType.GetGenericArguments()[0];
 
-        GetterLookups[getterOriginal!] = attribute;
+        if (!listType.IsGenericType || listType.GetGenericTypeDefinition() != typeof(ModdedList<>))
+        {
+            Error($"Please use ModdedList<{valueType.Name}> for modded option lists.");
+            return;
+        }
+
+        var getterOriginal = property.GetGetMethod(true)!;
+        PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: CachedGetterPatch);
+        GetterLookups[getterOriginal] = attribute;
 
         var setterOriginal = property.GetSetMethod(true);
 
         if (setterOriginal != null)
         {
-            var setterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertySetterPatch));
-            PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: new HarmonyMethod(setterPatch));
-
+            PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: CachedSetterPatch);
             SetterLookups[setterOriginal] = attribute;
         }
-
-        var listType = propertyList.GetType();
 
         if (PatchedListTypes.Add(listType))
         {
             var listIndex = listType.GetProperty("Item")!;
 
             var listGetterOriginal = listIndex.GetGetMethod(true);
-            var listGetterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyListGetterPatch));
-            PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(listGetterOriginal, prefix: new HarmonyMethod(listGetterPatch));
+            PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(listGetterOriginal, prefix: CachedListGetterPatch);
 
             var listSetterOriginal = listIndex.GetSetMethod(true);
 
             if (listSetterOriginal != null)
-            {
-                var listSetterPatch = typeof(ModdedOptionsManager).GetMethod(nameof(PropertyListSetterPatch));
-                PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(listSetterOriginal, postfix: new HarmonyMethod(listSetterPatch));
-            }
+                PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(listSetterOriginal, postfix: CachedListSetterPatch);
         }
 
-        OptionAttributes.Add(property, attribute);
         attribute.HolderOptionList = optionList;
         attribute.Value = propertyList;
-        attribute.ValueType = listType.GetGenericArguments()[0];
+        attribute.ValueType = valueType;
 
         ListInstanceCache.Add(propertyVal, attribute);
 
-        var valueType = property.PropertyType.GetGenericArguments()[0];
+        var customAttributes = property.GetCustomAttributes(false);
 
-        var visibilityAttr = property.GetCustomAttribute<ModdedOptionVisibilityAttribute>();
-        var visibilityFactory = visibilityAttr?.GetListVisibility(group, property);
+        Func<int, Delegate?>? visibilityFactory = null, getterFactory = null, setterFactory = null, changedFactory = null;
 
-        var getterAttr = property.GetCustomAttribute<ModdedOptionGetterAttribute>();
-        var getterFactory = getterAttr?.GetListGetter(group, property, valueType);
-
-        var setterAttr = property.GetCustomAttribute<ModdedOptionSetterAttribute>();
-        var setterFactory = setterAttr?.GetListSetter(group, property, valueType);
-
-        var changedAttr = property.GetCustomAttribute<ModdedOptionChangedAttribute>();
-        var changedFactory = changedAttr?.GetListChanged(group, property, valueType);
+        foreach (var attr in customAttributes)
+        {
+            switch (attr)
+            {
+                case ModdedOptionVisibilityAttribute visibilityAttr:
+                    visibilityFactory = visibilityAttr.GetListVisibility(group, property);
+                    break;
+                case ModdedOptionGetterAttribute getterAttr:
+                    getterFactory = getterAttr.GetListGetter(group, property, valueType);
+                    break;
+                case ModdedOptionSetterAttribute setterAttr:
+                    setterFactory = setterAttr.GetListSetter(group, property, valueType);
+                    break;
+                case ModdedOptionChangedAttribute changedAttr:
+                    changedFactory = changedAttr.GetListChanged(group, property, valueType);
+                    break;
+            }
+        }
 
         for (var i = 0; i < optionList.Count; i++)
         {
             var option = optionList[i];
 
             if (visibilityFactory != null)
-            {
-                option.Visible = (Func<bool>)visibilityFactory(i);
-            }
+                option.Visible = (Func<bool>)(visibilityFactory(i) ?? DelegateUtilities.AlwaysTrue);
 
             if (getterFactory != null)
-            {
                 option.Getter = getterFactory(i);
-            }
 
             if (setterFactory != null)
-            {
                 option.Setter = setterFactory(i);
-            }
 
             if (changedFactory != null)
-            {
                 option.ChangedEvent = changedFactory(i);
-            }
 
             RegisterOption(option, group, property.Name + (i + 1), pluginInfo);
         }

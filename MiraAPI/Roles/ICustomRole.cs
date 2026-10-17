@@ -339,7 +339,7 @@ public interface ICustomRole : IOptionable
     /// <summary>
     /// Gets the function that determines whether the role should be toggled on or off in the game settings.
     /// </summary>
-    Func<bool> VisibleInSettings => () => true;
+    Func<bool> VisibleInSettings => DelegateUtilities.AlwaysTrue;
 
     /// <summary>
     /// Gets the list of abilities or other similar information to display below the text of a role's wiki page.
