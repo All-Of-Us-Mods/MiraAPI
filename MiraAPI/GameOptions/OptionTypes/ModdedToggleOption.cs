@@ -12,9 +12,35 @@ namespace MiraAPI.GameOptions.OptionTypes;
 public class ModdedToggleOption : ModdedOption<bool>
 {
     /// <summary>
-    /// Gets or sets the delegate that dictates how a toggle option's value is displayed.
+    /// Gets or sets the display value when the option is toggled on.
     /// </summary>
-    public Func<bool, string> DisplayValue { get; set; } = value => value ? "On" : "Off";
+    public string OnValue { get; set; }
+
+    /// <summary>
+    /// Gets or sets the display value when the option is toggled off.
+    /// </summary>
+    public string OffValue { get; set; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedToggleOption"/> class.
+    /// </summary>
+    /// <param name="title">The option title.</param>
+    /// <param name="defaultValue">The default value.</param>
+    /// <param name="on">What the option displays when toggled on.</param>
+    /// <param name="off">What the option displays when toggled off.</param>
+    /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
+    public ModdedToggleOption(string title, bool defaultValue, string on, string off, bool includeInPreset = true)
+        : base(title, defaultValue, includeInPreset)
+    {
+        OnValue = on;
+        OffValue = off;
+
+        var data = ScriptableObject.CreateInstance<CheckboxGameSetting>();
+        data.Title = StringName;
+        data.Type = global::OptionTypes.Checkbox;
+
+        Data = data;
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ModdedToggleOption"/> class.
@@ -23,13 +49,8 @@ public class ModdedToggleOption : ModdedOption<bool>
     /// <param name="defaultValue">The default value.</param>
     /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
     public ModdedToggleOption(string title, bool defaultValue, bool includeInPreset = true)
-        : base(title, defaultValue, includeInPreset)
+        : this(title, defaultValue, "On", "Off", includeInPreset)
     {
-        var data = ScriptableObject.CreateInstance<CheckboxGameSetting>();
-        data.Title = StringName;
-        data.Type = global::OptionTypes.Checkbox;
-
-        Data = data;
     }
 
     /// <inheritdoc />
@@ -81,7 +102,7 @@ public class ModdedToggleOption : ModdedOption<bool>
         ModdedOptionsManager.AddSettingsChangeMessage(
             HudManager.Instance.Notifier,
             StringName,
-            DisplayValue(newValue).Translate(),
+            (newValue ? OnValue : OffValue).Translate(),
             Configuration.PopUpTextColor,
             Configuration.PopUpIconTmp,
             false);

@@ -9,13 +9,28 @@ namespace MiraAPI.GameOptions.Attributes;
 /// Attribute for a list of toggle options.
 /// </summary>
 /// <param name="title">The option's title.</param>
+/// <param name="on">What the option displays when toggled on.</param>
+/// <param name="off">What the option displays when toggled off.</param>
 [AttributeUsage(AttributeTargets.Property)]
-public class ModdedToggleOptionListAttribute(string title) : ModdedOptionListAttribute(title)
+public class ModdedToggleOptionListAttribute(
+    string title,
+    string on,
+    string off)
+    : ModdedOptionListAttribute(title)
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedToggleOptionListAttribute"/> class.
+    /// </summary>
+    /// <param name="title">The option's title.</param>
+    public ModdedToggleOptionListAttribute(string title)
+        : this(title, "On", "Off")
+    {
+    }
+
     internal override IModdedOptionList CreateOptionList(IList value, PropertyInfo property)
     {
         var optList = new ModdedOptionList<ModdedToggleOption>(
-            value.Count, idx => new(GetFormattedTitle(idx), (bool)(value[idx] ?? false)));
+            value.Count, idx => new(GetFormattedTitle(idx), (bool)(value[idx] ?? false), on, off));
         return optList;
     }
 
