@@ -25,18 +25,15 @@ namespace MiraAPI.GameOptions;
 /// </summary>
 public static class ModdedOptionsManager
 {
-    private static readonly ConditionalWeakTable<object, ModdedOptionListAttribute> ListInstanceCache = [];
     private static readonly Dictionary<MethodBase, PropertyOptionAttribute> GetterLookups = [];
     private static readonly Dictionary<MethodBase, PropertyOptionAttribute> SetterLookups = [];
     private static readonly Dictionary<Type, AbstractOptionGroup> TypeToGroup = [];
     private static readonly HashSet<PropertyInfo> OptionAttributes = [];
-    private static readonly HashSet<Type> PatchedListTypes = [];
 
     private static readonly HarmonyMethod CachedGetterPatch = new(typeof(ModdedOptionsManager), nameof(PropertyGetterPatch));
     private static readonly HarmonyMethod CachedSetterPatch = new(typeof(ModdedOptionsManager), nameof(PropertySetterPatch));
-    private static readonly HarmonyMethod CachedListGetterPatch = new(typeof(ModdedOptionsManager), nameof(PropertyListGetterPatch));
-    private static readonly HarmonyMethod CachedListSetterPatch = new(typeof(ModdedOptionsManager), nameof(PropertyListSetterPatch));
 
+    internal static readonly ConditionalWeakTable<object, ModdedOptionListAttribute> ListInstanceCache = [];
     internal static readonly Dictionary<OptionBehaviour, ModdedPlayerOption> CreatedPlayerOptions = [];
     internal static readonly Dictionary<OptionBehaviour, ModdedStringOption> CreatedStringOptions = [];
     internal static readonly Dictionary<Type, List<AbstractOptionGroup>> GameModeOptionGroups = [];
@@ -278,7 +275,7 @@ public static class ModdedOptionsManager
         var listType = propertyList.GetType();
         var valueType = listType.GetGenericArguments()[0];
 
-        if (!listType.IsGenericType || listType.GetGenericTypeDefinition() != typeof(ModdedList<>))
+        if (!listType.IsGenericType || listType.GetGenericTypeDefinition() != typeof(ModdedArray<>))
         {
             Error($"Please use ModdedList<{valueType.Name}> for modded option lists.");
             return;
@@ -294,19 +291,6 @@ public static class ModdedOptionsManager
         {
             PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: CachedSetterPatch);
             SetterLookups[setterOriginal] = attribute;
-        }
-
-        if (PatchedListTypes.Add(listType))
-        {
-            var listIndex = listType.GetProperty("Item")!;
-
-            var listGetterOriginal = listIndex.GetGetMethod(true);
-            PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(listGetterOriginal, prefix: CachedListGetterPatch);
-
-            var listSetterOriginal = listIndex.GetSetMethod(true);
-
-            if (listSetterOriginal != null)
-                PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(listSetterOriginal, postfix: CachedListSetterPatch);
         }
 
         attribute.HolderOptionList = optionList;
@@ -451,38 +435,6 @@ public static class ModdedOptionsManager
             return true;
 
         __result = attribute.GetValue();
-        return false;
-    }
-
-    /// <summary>
-    /// Patches the setter of a list property to update the value of the option.
-    /// </summary>
-    /// <param name="__instance">The list's instance.</param>
-    /// <param name="index">The index to find in the list.</param>
-    /// <param name="value">The new object value.</param>
-    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony naming convention")]
-    [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Read above.")]
-    public static void PropertyListSetterPatch(object __instance, int index, object value)
-    {
-        if (ListInstanceCache.TryGetValue(__instance, out var match))
-            match.SetValue(index, value);
-    }
-
-    /// <summary>
-    /// Patches the getter of a list property to return the value of the option.
-    /// </summary>
-    /// <param name="__instance">The list's instance.</param>
-    /// <param name="index">The index to find in the list.</param>
-    /// <param name="__result">The result of the property getter.</param>
-    /// <returns>False so the original getter gets skipped.</returns>
-    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony naming convention")]
-    [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Read above.")]
-    public static bool PropertyListGetterPatch(object __instance, int index, ref object __result)
-    {
-        if (!ListInstanceCache.TryGetValue(__instance, out var match))
-            return true;
-
-        __result = match.GetValue(index);
         return false;
     }
 }

@@ -2,3 +2,6 @@
 
 # SA1602: Enumeration items should be documented.
 dotnet_diagnostic.SA1602.severity = none
+
+# SA1601: Partial elements should be documented
+dotnet_diagnostic.SA1601.severity = none

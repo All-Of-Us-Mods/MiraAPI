@@ -42,8 +42,7 @@ public class ExampleOptions : AbstractOptionGroup
     public Api WorstApi { get; set; } = Api.MiraAPI;
 
     [ModdedEnumOptionList<ValueState>("Value State {0}", ["None", "Primary", "Secondary"])]
-    public ModdedList<ValueState> ValueStates { get; set; } =
-        [ValueState.Primary, ValueState.Secondary, ValueState.None, ValueState.None, ValueState.None];
+    public ModdedArray<ValueState> ValueStates { get; set; } = [ValueState.Primary, ValueState.Secondary, ValueState.None, ValueState.None, ValueState.None];
 
     [ModdedPlayerOption("options.exampleOptions1.players")]
     public NetworkedPlayerInfo PlayerSelected { get; set; }
