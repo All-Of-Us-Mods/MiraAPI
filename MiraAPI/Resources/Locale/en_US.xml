@@ -8,6 +8,7 @@
     <string name="MiraApi.ShowKeybindsOnButtons">Show Keybinds on Buttons</string>
     <string name="MiraApi.ButtonScaleFactor">Button Scale Factor</string>
     <string name="MiraApi.TopRightButtonScaleFactor">Top-Right UI Scale Factor</string>
+    <string name="MiraApi.MatchInfoGuideScaleFactor">Match Info Guide Scale Factor</string>
     <string name="MiraApi.MaxFps">Max FPS</string>
     <string name="MiraApi.WikiOnBottomRow">Display Wiki on Bottom Row</string>
     <string name="MiraApi.EnableSabotageFlashes">Enable Sabotage Flashes</string>
@@ -60,4 +61,9 @@ Outlive the timer or eliminate the crew.</string>
     <string name="MiraApi.Wiki.FilterLabel">Filter</string>
     <string name="MiraApi.Wiki.GroupingLabel">Grouping</string>
     <string name="MiraApi.Wiki.OrderLabel">Order</string>
+    <string name="MiraApi.Wiki.VanillaSettings">Vanilla</string>
+    <string name="MiraApi.Wiki.SearchResults">Search Results</string>
+    <string name="MiraApi.Wiki.PreviousPage">Previous</string>
+    <string name="MiraApi.Wiki.NextPage">Next</string>
+    <string name="MiraApi.Wiki.NoResultsFound">No Results Found</string>
 </resources>
