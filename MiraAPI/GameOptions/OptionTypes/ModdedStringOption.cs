@@ -26,6 +26,28 @@ public class ModdedStringOption : ModdedOption<string>
     public StringNames[] StringNameValues { get; set; }
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedStringOption"/> class.
+    /// </summary>
+    /// <param name="title">The title of the option.</param>
+    /// <param name="defaultValue">The default value as a string.</param>
+    /// <param name="values">An option list of string values to use.</param>
+    /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
+    public ModdedStringOption(string title, string defaultValue, string[] values, bool includeInPreset = true)
+        : base(title, defaultValue, includeInPreset)
+    {
+        Values = values;
+        StringNameValues = [.. values.Select(MiraLocaleManager.GetOrCreateLocaleString)];
+
+        var data = ScriptableObject.CreateInstance<StringGameSetting>();
+        data.Title = StringName;
+        data.Type = global::OptionTypes.String;
+        data.Values = StringNameValues;
+        data.Index = GetIndex(Value);
+
+        Data = data;
+    }
+
+    /// <summary>
     /// Gets the string's index.
     /// </summary>
     /// <param name="value">The option's string value.</param>
@@ -61,61 +83,37 @@ public class ModdedStringOption : ModdedOption<string>
             StringNameValues = [.. newStrVals];
         }
 
-        if (Data != null)
-        {
-            var data = (StringGameSetting)Data;
-            data.Values = StringNameValues;
-
-            data.Index = GetIndex(Value);
-            if (OptionBehaviour != null)
-            {
-                var strOpt = OptionBehaviour.TryCast<StringOption>();
-                if (strOpt != null)
-                {
-                    strOpt.Values = StringNameValues;
-                    strOpt.Value = GetIndex(Value);
-                    Warning("StringOption is valid");
-                }
-                else
-                {
-                    Error("StringOption is null.");
-                }
-
-                Warning("OptionBehaviour is valid");
-            }
-            else
-            {
-                Error("OptionBehaviour is null.");
-            }
-
-            Warning("Data is valid");
-        }
-        else
+        if (Data == null)
         {
             Error("Data is null.");
+            return;
         }
-    }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedStringOption"/> class.
-    /// </summary>
-    /// <param name="title">The title of the option.</param>
-    /// <param name="defaultValue">The default value as a string.</param>
-    /// <param name="values">An option list of string values to use.</param>
-    /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
-    public ModdedStringOption(string title, string defaultValue, string[] values, bool includeInPreset = true)
-        : base(title, defaultValue, includeInPreset)
-    {
-        Values = values;
-        Data = ScriptableObject.CreateInstance<StringGameSetting>();
         var data = (StringGameSetting)Data;
-
-        data.Title = StringName;
-        data.Type = global::OptionTypes.String;
-        StringNameValues = [.. values.Select(MiraLocaleManager.GetOrCreateLocaleString)];
         data.Values = StringNameValues;
-
         data.Index = GetIndex(Value);
+
+        Warning("Data is valid");
+
+        if (OptionBehaviour == null)
+        {
+            Error("OptionBehaviour is null.");
+            return;
+        }
+
+        var strOpt = OptionBehaviour.TryCast<StringOption>();
+
+        Warning("OptionBehaviour is valid");
+
+        if (strOpt == null)
+        {
+            Error("StringOption is null.");
+            return;
+        }
+
+        strOpt.Values = StringNameValues;
+        strOpt.Value = GetIndex(Value);
+        Warning("StringOption is valid");
     }
 
     /// <inheritdoc />
@@ -126,7 +124,11 @@ public class ModdedStringOption : ModdedOption<string>
             $"{ParentMod!.OptionsTitleText}.StringOption.{TranslationController.Instance.GetString(StringName)}";
 
         stringOption.SetUpFromData(Data, 20);
-        stringOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
+        stringOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
+
+        // Changing the button text to make them more distinct from number options
+        stringOption.MinusBtn.ChangeButtonText("<");
+        stringOption.PlusBtn.ChangeButtonText(">");
 
         // SetUpFromData method doesn't work correctly so we must set the values manually
         stringOption.Title = StringName;

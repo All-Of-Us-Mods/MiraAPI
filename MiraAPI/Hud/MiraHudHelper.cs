@@ -151,7 +151,7 @@ public sealed class MiraHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
             var oldPos = settingsButton.transform.localPosition;
             settingsButton.transform.localPosition = new Vector3(oldPos.x, oldPos.y, -100);
             var chatButton = instance.Chat.chatButton.gameObject;
-            ClonedChatButton = Object.Instantiate(chatButton, chatButton.transform.parent);
+            ClonedChatButton = Instantiate(chatButton, chatButton.transform.parent);
             ClonedChatButton.SetActive(false);
             instance.Chat.chatButtonAspectPosition = ClonedChatButton.GetComponent<AspectPosition>();
             chatButton.GetComponent<AspectPosition>().Destroy();

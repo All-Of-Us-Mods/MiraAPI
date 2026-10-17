@@ -7,9 +7,7 @@ namespace MiraAPI.Example.Options;
 public class ExampleOptions2 : AbstractOptionGroup
 {
     public override string GroupName => "options.exampleOptions2";
-
     public override uint GroupPriority => 0; // This group will be displayed first. The default value is uint.MaxValue.
-
     public override MenuCategory ParentMenu => MenuCategory.CustomTwo;
     public override bool ShowInMatchInfoGuide => true;
 
@@ -28,6 +26,8 @@ public class ExampleOptions2 : AbstractOptionGroup
     public ModdedEnumOption<TestingData> EnumOpt { get; } = new("options.exampleOptions2.enumOpt", 0)
     {
         ChangedEvent = x => Logger<ExamplePlugin>.Info($"changed Enum Opt to {x}"),
+        Getter = currentValue => currentValue,
+        Setter = (newValue, oldValue) => newValue,
     };
 }
 
