@@ -139,7 +139,7 @@ public static class GameModeOption
 
     [HarmonyPatch(typeof(GameOptionsMenu), nameof(GameOptionsMenu.ValueChanged))]
     [HarmonyPrefix]
-    private static bool ValueChanged(GameOptionsMenu __instance, OptionBehaviour option)
+    private static bool ValueChanged(OptionBehaviour option)
     {
         if (!OptionBehaviour.Equals(option))
             return true;

@@ -41,18 +41,17 @@ public static class RoleGuidePatches
     private static readonly List<string> UntrackedRolePanelDiagnostics = [];
 
     private static GameObject searchComponentContainer;
-    public static PassiveButton SearchIconButton;
     private static SpriteRenderer _searchIconIdle;
     private static SpriteRenderer _searchIconHover;
-    public static PassiveButton SearchSortingOrderButton;
+    private static PassiveButton _searchSortingOrderButton;
     private static SpriteRenderer _searchSortingOrderIdle;
     private static SpriteRenderer _searchSortingOrderHover;
-    public static TextMeshPro GroupSortingTmp;
-    public static PassiveButton SearchSortingGroupButton;
+    private static TextMeshPro groupSortingTmp;
+    private static PassiveButton _searchSortingGroupButton;
     private static SpriteRenderer _searchSortingGroupIdle;
     private static SpriteRenderer _searchSortingGroupHover;
-    public static TextMeshPro FilterSortingTmp;
-    public static PassiveButton SearchSortingFilterButton;
+    private static TextMeshPro filterSortingTmp;
+    private static PassiveButton _searchSortingFilterButton;
     private static SpriteRenderer _searchSortingFilterIdle;
     private static SpriteRenderer _searchSortingFilterHover;
     private static Scroller _rolesScroller;
@@ -107,14 +106,14 @@ public static class RoleGuidePatches
 
         var playerMenuGradient = instance.matchInfoPlayersMaskArea.transform.parent.GetAllChildren()
             .First(x => x.name.Contains("BG_Gradient"));
-        var settingsenuGradient = instance.matchInfoSettingsMaskArea.transform.parent.GetAllChildren()
+        var settingsMenuGradient = instance.matchInfoSettingsMaskArea.transform.parent.GetAllChildren()
             .First(x => x.name.Contains("BG_Gradient"));
         var roleMenuGradient = instance.MatchInfoRoleMaskArea.transform.parent.GetAllChildren()
             .First(x => x.name.Contains("BG_Gradient"));
         playerMenuGradient
                 .GetComponent<SpriteRenderer>()
                 .maskInteraction =
-            settingsenuGradient.GetComponent<SpriteRenderer>()
+            settingsMenuGradient.GetComponent<SpriteRenderer>()
                     .maskInteraction =
                 roleMenuGradient.GetComponent<SpriteRenderer>()
                     .maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
@@ -190,10 +189,9 @@ public static class RoleGuidePatches
         _currentWikiPage = null!;
         _loadingSpinner = null;
         ResetSettingsState();
-        SearchIconButton = null!;
-        SearchSortingOrderButton = null!;
-        SearchSortingGroupButton = null!;
-        SearchSortingFilterButton = null!;
+        _searchSortingOrderButton = null!;
+        _searchSortingGroupButton = null!;
+        _searchSortingFilterButton = null!;
         _searchIconIdle = null!;
         _searchIconHover = null!;
         _searchSortingOrderIdle = null!;
@@ -417,9 +415,9 @@ public static class RoleGuidePatches
             HudManager.Instance.SettingsButton,
             searchComponentContainer.transform);
         sortingOrderButton.gameObject.SetActive(true);
-        SearchSortingOrderButton = sortingOrderButton.GetComponent<PassiveButton>();
+        _searchSortingOrderButton = sortingOrderButton.GetComponent<PassiveButton>();
         SetupSearchButton(
-            SearchSortingOrderButton,
+            _searchSortingOrderButton,
             "SearchSortingOrderButton",
             SwitchMethod,
             GetSortMethodSprite(_sortMethod, false),
@@ -432,9 +430,9 @@ public static class RoleGuidePatches
             sortingOrderButton,
             searchComponentContainer.transform);
         sortingGroupButton.gameObject.SetActive(true);
-        SearchSortingGroupButton = sortingGroupButton.GetComponent<PassiveButton>();
+        _searchSortingGroupButton = sortingGroupButton.GetComponent<PassiveButton>();
         SetupSearchButton(
-            SearchSortingGroupButton,
+            _searchSortingGroupButton,
             "SearchSortingGroupButton",
             SwitchGrouping,
             GetSortGroupSprite(_sortGrouping, false),
@@ -447,9 +445,9 @@ public static class RoleGuidePatches
             sortingOrderButton,
             searchComponentContainer.transform);
         sortingFilterButton.gameObject.SetActive(true);
-        SearchSortingFilterButton = sortingFilterButton.GetComponent<PassiveButton>();
+        _searchSortingFilterButton = sortingFilterButton.GetComponent<PassiveButton>();
         SetupSearchButton(
-            SearchSortingFilterButton,
+            _searchSortingFilterButton,
             "SearchSortingFilterButton",
             SwitchFilter,
             GetSortFilterSprite(_sortFilter, false),
@@ -510,9 +508,8 @@ public static class RoleGuidePatches
             sortingOrderButton,
             sortingOrderButton.transform.parent);
         searchIconButton.gameObject.SetActive(true);
-        SearchIconButton = searchIconButton.GetComponent<PassiveButton>();
         SetupSearchButton(
-            SearchIconButton,
+            searchIconButton.GetComponent<PassiveButton>(),
             "SearchIconButton",
             ClearSearchText,
             MiraAssets.SearchIconIdleSprite,
@@ -677,17 +674,17 @@ public static class RoleGuidePatches
         orderSortingTmp.horizontalAlignment = HorizontalAlignmentOptions.Center;
         orderSortingTmp.transform.localPosition = new Vector3(-0.65f, 0.4f, 0);
 
-        GroupSortingTmp = Object.Instantiate(
+        groupSortingTmp = Object.Instantiate(
             orderSortingTmp,
             sortingGroupButton.transform);
-        GroupSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.GroupingLabel");
-        GroupSortingTmp.transform.localPosition = new Vector3(-0.65f, 0.4f, 0);
+        groupSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.GroupingLabel");
+        groupSortingTmp.transform.localPosition = new Vector3(-0.65f, 0.4f, 0);
 
-        FilterSortingTmp = Object.Instantiate(
+        filterSortingTmp = Object.Instantiate(
             orderSortingTmp,
             sortingFilterButton.transform);
-        FilterSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.FilterLabel");
-        FilterSortingTmp.transform.localPosition = new Vector3(-0.65f, 0.4f, 0);
+        filterSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.FilterLabel");
+        filterSortingTmp.transform.localPosition = new Vector3(-0.65f, 0.4f, 0);
 
         playerButton.transform.localPosition = new Vector3(-3.6f, 0.656f, -0.2f);
         settingButton.transform.localPosition = new Vector3(-3.6f, 0.056f, -0.2f);
@@ -1140,10 +1137,9 @@ public static class RoleGuidePatches
             .ThenByDescending(p =>
                 p.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
                 p.Category.Contains(searchText, StringComparison.OrdinalIgnoreCase));
-        return (_sortMethod is SortingMethod.Alphabetical
+        return [.. _sortMethod is SortingMethod.Alphabetical
                 ? sorted.ThenBy(p => p.GetSortKey(_sortGrouping))
-                : sorted.ThenByDescending(p => p.GetSortKey(_sortGrouping)))
-            .ToList();
+                : sorted.ThenByDescending(p => p.GetSortKey(_sortGrouping))];
     }
 
     private static bool MatchesSearch(DetailedPanel entry, string searchText)
@@ -2084,7 +2080,6 @@ public static class RoleGuidePatches
 
         _settingsScroller.gameObject.SetActive(true);
         _settingsPageObject = Helpers.CreateAdvancedSettingsPage(
-            guide,
             _settingsScroller,
             rows,
             columns,
@@ -2155,38 +2150,38 @@ public static class RoleGuidePatches
     /// <param name="paginationVisible">False while searching, since search results are a single page.</param>
     private static void RepurposeSortButtons(bool paginationVisible)
     {
-        if (!SearchSortingFilterButton || !SearchSortingGroupButton || !SearchSortingOrderButton)
+        if (!_searchSortingFilterButton || !_searchSortingGroupButton || !_searchSortingOrderButton)
         {
             return;
         }
 
         if (!_sortButtonsRepurposed)
         {
-            _savedFilterLabel = FilterSortingTmp.text;
-            _savedGroupLabel = GroupSortingTmp.text;
+            _savedFilterLabel = filterSortingTmp.text;
+            _savedGroupLabel = groupSortingTmp.text;
             _savedFilterIconScale = _searchSortingFilterIdle.transform.localScale;
             _savedGroupIconScale = _searchSortingGroupIdle.transform.localScale;
-            _savedFilterLabelPosition = FilterSortingTmp.transform.localPosition;
-            _savedGroupLabelPosition = GroupSortingTmp.transform.localPosition;
+            _savedFilterLabelPosition = filterSortingTmp.transform.localPosition;
+            _savedGroupLabelPosition = groupSortingTmp.transform.localPosition;
 
             SetPaginationSprites(_searchSortingFilterIdle, _searchSortingFilterHover, true);
             SetPaginationSprites(_searchSortingGroupIdle, _searchSortingGroupHover, false);
-            FilterSortingTmp.transform.localPosition = new Vector3(
+            filterSortingTmp.transform.localPosition = new Vector3(
                 -1.25f,
                 0f,
                 _savedFilterLabelPosition.z);
-            GroupSortingTmp.transform.localPosition = new Vector3(
+            groupSortingTmp.transform.localPosition = new Vector3(
                 0f,
                 0f,
                 _savedGroupLabelPosition.z);
-            FilterSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.PrevPage", "Prev");
-            GroupSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.NextPage", "Next");
+            filterSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.PrevPage", "Prev");
+            groupSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.NextPage", "Next");
             _sortButtonsRepurposed = true;
         }
 
-        SearchSortingOrderButton.gameObject.SetActive(false);
-        SearchSortingFilterButton.gameObject.SetActive(paginationVisible);
-        SearchSortingGroupButton.gameObject.SetActive(paginationVisible);
+        _searchSortingOrderButton.gameObject.SetActive(false);
+        _searchSortingFilterButton.gameObject.SetActive(paginationVisible);
+        _searchSortingGroupButton.gameObject.SetActive(paginationVisible);
     }
 
     private static void SetPaginationSprites(SpriteRenderer idle, SpriteRenderer hover, bool isLeft)
@@ -2212,7 +2207,7 @@ public static class RoleGuidePatches
         }
 
         _sortButtonsRepurposed = false;
-        if (!SearchSortingFilterButton || !SearchSortingGroupButton || !SearchSortingOrderButton)
+        if (!_searchSortingFilterButton || !_searchSortingGroupButton || !_searchSortingOrderButton)
         {
             return;
         }
@@ -2227,13 +2222,13 @@ public static class RoleGuidePatches
             _searchSortingFilterHover.transform.localScale = _savedFilterIconScale;
         _searchSortingGroupIdle.transform.localScale =
             _searchSortingGroupHover.transform.localScale = _savedGroupIconScale;
-        FilterSortingTmp.text = _savedFilterLabel;
-        GroupSortingTmp.text = _savedGroupLabel;
-        FilterSortingTmp.transform.localPosition = _savedFilterLabelPosition;
-        GroupSortingTmp.transform.localPosition = _savedGroupLabelPosition;
-        SearchSortingOrderButton.gameObject.SetActive(true);
-        SearchSortingFilterButton.gameObject.SetActive(true);
-        SearchSortingGroupButton.gameObject.SetActive(true);
+        filterSortingTmp.text = _savedFilterLabel;
+        groupSortingTmp.text = _savedGroupLabel;
+        filterSortingTmp.transform.localPosition = _savedFilterLabelPosition;
+        groupSortingTmp.transform.localPosition = _savedGroupLabelPosition;
+        _searchSortingOrderButton.gameObject.SetActive(true);
+        _searchSortingFilterButton.gameObject.SetActive(true);
+        _searchSortingGroupButton.gameObject.SetActive(true);
     }
 }
 

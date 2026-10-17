@@ -141,13 +141,12 @@ internal static class GuideOptionPages
             }
         }
 
-        return pages
+        return [.. pages
             .OrderBy(page => page.MenuOrder)
             .ThenBy(page => page.GroupPriority)
             .ThenBy(page => page.Order)
             .ThenBy(page => page.Group.GroupName, StringComparer.OrdinalIgnoreCase)
-            .ThenBy(page => page.ModAbbreviation, StringComparer.OrdinalIgnoreCase)
-            .ToList();
+            .ThenBy(page => page.ModAbbreviation, StringComparer.OrdinalIgnoreCase)];
     }
 
     private static int GetMenuOrder(MenuCategory menu)
@@ -173,7 +172,7 @@ internal static class GuideOptionPages
         var pageList = pages.ToList();
         var normalizedQuery = NormalizeSearchText(query);
         var matchingModPages = normalizedQuery.Length < 3
-            ? Array.Empty<GuideOptionPage>()
+            ? []
             : pageList
                 .Where(page => page.ModSearchTerms.Any(term =>
                     NormalizeSearchText(term).Contains(normalizedQuery, StringComparison.Ordinal)))
@@ -181,16 +180,15 @@ internal static class GuideOptionPages
 
         if (matchingModPages.Length > 0)
         {
-            return matchingModPages.SelectMany(page => page.Entries).ToList();
+            return [.. matchingModPages.SelectMany(page => page.Entries)];
         }
 
-        return pageList
+        return [.. pageList
             .SelectMany(page => page.Entries
                 .Select(entry => (Entry: entry, Rank: Rank(entry, query, cmp)))
                 .Where(result => result.Rank < int.MaxValue)
                 .OrderBy(result => result.Rank)
-                .Select(result => result.Entry))
-            .ToList();
+                .Select(result => result.Entry))];
     }
 
     private static string[] GetModSearchTerms(MiraPluginInfo plugin, AbstractOptionGroup group)
@@ -211,7 +209,7 @@ internal static class GuideOptionPages
             AddNamespace(terms, option.GetType());
         }
 
-        return terms.Where(term => !string.IsNullOrWhiteSpace(term)).ToArray();
+        return [.. terms.Where(term => !string.IsNullOrWhiteSpace(term))];
     }
 
     private static void AddNamespace(HashSet<string> terms, Type type)
@@ -224,7 +222,7 @@ internal static class GuideOptionPages
 
     private static string NormalizeSearchText(string value)
     {
-        return new string(value.Where(char.IsLetterOrDigit).Select(char.ToLowerInvariant).ToArray());
+        return new string([.. value.Where(char.IsLetterOrDigit).Select(char.ToLowerInvariant)]);
     }
 
     private static int Rank(GuideOptionEntry entry, string query, StringComparison cmp)
@@ -336,7 +334,7 @@ internal static class GuideOptionPages
                 return TrailingZeroRegex.Replace(number.Data.GetValueString(number.Value), string.Empty);
 
             default:
-                return option.Data.Type == global::OptionTypes.Checkbox
+                return option.Data.Type == OptionTypes.Checkbox
                     ? formatBool(Math.Abs(option.GetFloatData() - 1f) < 0.0001f)
                     : option.Data.GetValueString(option.GetFloatData());
         }

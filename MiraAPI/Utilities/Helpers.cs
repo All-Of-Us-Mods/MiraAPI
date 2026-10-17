@@ -914,25 +914,21 @@ public static class Helpers
     /// <summary>
     /// Creates a page of vanilla settings rows inside a roles-style scroller.
     /// </summary>
-    /// <param name="guide">The guide object.</param>
     /// <param name="parent">The <see cref="Scroller"/> the page is parented to.</param>
     /// <param name="settings">The rows to show: key is the label, value is the displayed value.</param>
     /// <returns>The <see cref="GameObject"/> that holds all the rows. Destroy it to remove the page.</returns>
     public static GameObject CreateAdvancedSettingsPage(
-        MatchInfoGuide guide,
         Scroller parent,
         IReadOnlyList<KeyValuePair<string, string>> settings)
     {
         return CreateAdvancedSettingsPage(
-            guide,
             parent,
-            settings.Select(setting => new AdvancedSettingsRow(setting.Key, setting.Value, null)).ToList(),
+            [.. settings.Select(setting => new AdvancedSettingsRow(setting.Key, setting.Value, null))],
             2,
             false);
     }
 
     internal static GameObject CreateAdvancedSettingsPage(
-        MatchInfoGuide guide,
         Scroller parent,
         List<AdvancedSettingsRow> settings,
         int columns = 2,
@@ -997,7 +993,7 @@ public static class Helpers
                 bounds.Encapsulate(next);
                 return bounds;
             });
-        var rowScale = (columnWidth / prefabBounds.size.x) * 1.22f;
+        var rowScale = columnWidth / prefabBounds.size.x * 1.22f;
         var rowHeight = prefabBounds.size.y * rowScale;
         var rowPitch = 0.45f * rowScale;
         var groupedSettings = groupsAsColumns
@@ -1009,7 +1005,7 @@ public static class Helpers
         groupsAsColumns = groupedSettings.Count > 1;
         if (groupsAsColumns)
         {
-            rowScale = (columnWidth / prefabBounds.size.x) * (columns > 2 ? 1.15f : 1f);
+            rowScale = columnWidth / prefabBounds.size.x * (columns > 2 ? 1.15f : 1f);
             rowHeight = prefabBounds.size.y * rowScale;
             rowPitch = 0.45f * rowScale;
         }

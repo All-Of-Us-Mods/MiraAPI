@@ -208,7 +208,7 @@ internal static class GameOptionsMenuPatch
     internal static List<KeyValuePair<string, string>> GetActiveGameSettingsRows(Func<bool, string> formatBool)
     {
         var menu = GameSettingMenu.Instance ? GameSettingMenu.Instance.GameSettingsTab : null;
-        if (!menu || menu.Children == null)
+        if (!menu || menu!.Children == null)
         {
             return [];
         }
@@ -216,7 +216,7 @@ internal static class GameOptionsMenuPatch
         var rows = new List<KeyValuePair<string, string>>();
         foreach (var option in menu.Children)
         {
-            if (!option || !option!.gameObject.activeInHierarchy ||
+            if (!option || !option.gameObject.activeInHierarchy ||
                 option == menu.MapPicker ||
                 (GameModeOption.OptionBehaviour && option == GameModeOption.OptionBehaviour) ||
                 !option.Data)
