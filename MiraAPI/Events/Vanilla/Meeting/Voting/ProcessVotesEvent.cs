@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using MiraAPI.Voting;
 
@@ -7,16 +8,11 @@ namespace MiraAPI.Events.Vanilla.Meeting.Voting;
 /// <summary>
 /// Ran after calculating votes and before displaying the results. Only ran on the host.
 /// </summary>
-/// <remarks>
-/// Initializes a new instance of the <see cref="ProcessVotesEvent"/> class.
-/// </remarks>
 /// <param name="votes">The list of <see cref="CustomVote"/>s that are being processed.</param>
 /// <param name="exiledPlayer">The player to be exiled. Will be <see langword="null"/> if no player is to be exiled.</param>
 public class ProcessVotesEvent(List<CustomVote> votes, NetworkedPlayerInfo? exiledPlayer = null) : MiraEvent
 {
-    private readonly List<CustomVote> _originalVotes = [.. votes];
-
-    private NetworkedPlayerInfo? _exiledPlayer = exiledPlayer;
+    private readonly List<CustomVote> originalVotes = [.. votes];
 
     /// <summary>
     /// Gets a value indicating whether the exiled player has been modified by the event.
@@ -26,7 +22,7 @@ public class ProcessVotesEvent(List<CustomVote> votes, NetworkedPlayerInfo? exil
     /// <summary>
     /// Gets a value indicating whether the votes have been modified by the event.
     /// </summary>
-    public bool VotesModified => !Votes.SequenceEqual(_originalVotes);
+    public bool VotesModified => !Votes.SequenceEqual(originalVotes);
 
     /// <summary>
     /// Gets the list of <see cref="CustomVote"/>s that are being processed.
@@ -46,13 +42,15 @@ public class ProcessVotesEvent(List<CustomVote> votes, NetworkedPlayerInfo? exil
     /// <summary>
     /// Gets or sets the player to be exiled. Will be <see langword="null"/> if no player is to be exiled.
     /// </summary>
+    [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1513:Closing brace should be followed by blank line", Justification = "Looks weird.")]
     public NetworkedPlayerInfo? ExiledPlayer
     {
-        get => _exiledPlayer;
+        get;
         set
         {
-            _exiledPlayer = value;
+            field = value;
             ExiledPlayerModified = true;
         }
     }
+    = exiledPlayer;
 }

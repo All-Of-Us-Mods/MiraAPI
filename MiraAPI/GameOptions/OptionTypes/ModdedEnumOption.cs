@@ -5,7 +5,6 @@ using System.Text;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using MiraAPI.Networking;
 using MiraAPI.Translation;
-using Reactor.Localization.Utilities;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -29,19 +28,18 @@ public class ModdedEnumOption : ModdedOption<int>
     /// <param name="enumType">The <see cref="Enum"/> type.</param>
     /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
     /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
-    public ModdedEnumOption(string title, int defaultValue, Type enumType, string[]? values = null, bool includeInPreset=true) : base(title, defaultValue, includeInPreset)
+    public ModdedEnumOption(string title, int defaultValue, Type enumType, string[]? values = null, bool includeInPreset = true)
+        : base(title, defaultValue, includeInPreset)
     {
         Values = values ?? Enum.GetNames(enumType);
-        Data = ScriptableObject.CreateInstance<StringGameSetting>();
-        var data = (StringGameSetting)Data;
 
+        var data = ScriptableObject.CreateInstance<StringGameSetting>();
         data.Title = StringName;
         data.Type = global::OptionTypes.String;
-        data.Values = values is null ?
-            Enum.GetNames(enumType).Select(MiraLocaleManager.GetOrCreateLocaleString).ToArray()
-            : [.. values.Select(MiraLocaleManager.GetOrCreateLocaleString)];
-
+        data.Values = Values.Select(MiraLocaleManager.GetOrCreateLocaleString).ToArray();
         data.Index = Value;
+
+        Data = data;
     }
 
     /// <inheritdoc />
@@ -52,9 +50,13 @@ public class ModdedEnumOption : ModdedOption<int>
             $"{ParentMod!.OptionsTitleText}.EnumOption.{TranslationController.Instance.GetString(StringName)}";
 
         stringOption.SetUpFromData(Data, 20);
-        stringOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
+        stringOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
 
-        // SetUpFromData method doesnt work correctly so we must set the values manually
+        // Changing the button text to make them more distinct from number options
+        stringOption.MinusBtn.ChangeButtonText("<");
+        stringOption.PlusBtn.ChangeButtonText(">");
+
+        // SetUpFromData method doesn't work correctly so we must set the values manually
         stringOption.Title = StringName;
         stringOption.Values = (Data as StringGameSetting)?.Values ?? new Il2CppStructArray<StringNames>(0);
         stringOption.Value = Value;
@@ -114,7 +116,8 @@ public class ModdedEnumOption : ModdedOption<int>
 /// An option for selecting an <see langword="enum"/> value.
 /// </summary>
 /// <typeparam name="T">The <see cref="Enum"/> type.</typeparam>
-public class ModdedEnumOption<T> : ModdedOption<T> where T : Enum
+public class ModdedEnumOption<T> : ModdedOption<T>
+    where T : struct, Enum
 {
     /// <summary>
     /// Gets the string values of the <see langword="enum"/>.
@@ -128,19 +131,18 @@ public class ModdedEnumOption<T> : ModdedOption<T> where T : Enum
     /// <param name="defaultValue">The default value as an <see langword="int"/>.</param>
     /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
     /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
-    public ModdedEnumOption(string title, T defaultValue, string[]? values = null, bool includeInPreset=true) : base(title, defaultValue, includeInPreset)
+    public ModdedEnumOption(string title, T defaultValue, string[]? values = null, bool includeInPreset = true)
+        : base(title, defaultValue, includeInPreset)
     {
-        Values = values ?? Enum.GetNames(typeof(T));
-        Data = ScriptableObject.CreateInstance<StringGameSetting>();
-        var data = (StringGameSetting)Data;
+        Values = values ?? Enum.GetNames<T>();
 
+        var data = ScriptableObject.CreateInstance<StringGameSetting>();
         data.Title = StringName;
         data.Type = global::OptionTypes.String;
-        data.Values = values is null ?
-            Enum.GetNames(typeof(T)).Select(MiraLocaleManager.GetOrCreateLocaleString).ToArray()
-            : [.. values.Select(MiraLocaleManager.GetOrCreateLocaleString)];
-
+        data.Values = Values.Select(MiraLocaleManager.GetOrCreateLocaleString).ToArray();
         data.Index = Convert.ToInt32(Value, NumberFormatInfo.InvariantInfo);
+
+        Data = data;
     }
 
     /// <inheritdoc />
@@ -151,9 +153,13 @@ public class ModdedEnumOption<T> : ModdedOption<T> where T : Enum
             $"{ParentMod!.OptionsTitleText}.EnumOption.{TranslationController.Instance.GetString(StringName)}";
 
         stringOption.SetUpFromData(Data, 20);
-        stringOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
+        stringOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
 
-        // SetUpFromData method doesnt work correctly so we must set the values manually
+        // Changing the button text to make them more distinct from number options
+        stringOption.MinusBtn.ChangeButtonText("<");
+        stringOption.PlusBtn.ChangeButtonText(">");
+
+        // SetUpFromData method doesn't work correctly so we must set the values manually
         stringOption.Title = StringName;
         stringOption.Values = (Data as StringGameSetting)?.Values ?? new Il2CppStructArray<StringNames>(0);
         stringOption.Value = Convert.ToInt32(Value, NumberFormatInfo.InvariantInfo);
@@ -178,13 +184,13 @@ public class ModdedEnumOption<T> : ModdedOption<T> where T : Enum
     /// <inheritdoc />
     public override void HandleNetData(byte[] data)
     {
-        SetValue((T)Enum.Parse(typeof(T), Encoding.Unicode.GetString(data)));
+        SetValue(Enum.Parse<T>(Encoding.Unicode.GetString(data)));
     }
 
     /// <inheritdoc />
     public override T GetValueFromOptionBehaviour(OptionBehaviour optionBehaviour)
     {
-        return (T)Enum.Parse(typeof(T), optionBehaviour.GetInt().ToString(NumberFormatInfo.InvariantInfo));
+        return Enum.Parse<T>(optionBehaviour.GetInt().ToString(NumberFormatInfo.InvariantInfo));
     }
 
     /// <inheritdoc />

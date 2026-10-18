@@ -4,19 +4,11 @@
 /// The event that is invoked when a meeting is called. This event is not cancelable.
 /// This event is called after Mira resets votes, so if you plan on adding votes to a specific player, do it with this event.
 /// </summary>
-public class StartMeetingEvent : MiraEvent
+/// <param name="meetingHud">The <see cref="global::MeetingHud"/> instance.</param>
+public class StartMeetingEvent(MeetingHud meetingHud) : MiraEvent
 {
     /// <summary>
     /// Gets the <see cref="global::MeetingHud"/> instance.
     /// </summary>
-    public MeetingHud MeetingHud { get; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="StartMeetingEvent"/> class.
-    /// </summary>
-    /// <param name="meetingHud">The <see cref="global::MeetingHud"/> instance.</param>
-    public StartMeetingEvent(MeetingHud meetingHud)
-    {
-        MeetingHud = meetingHud;
-    }
+    public MeetingHud MeetingHud { get; } = meetingHud;
 }

@@ -1,25 +1,169 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using HarmonyLib;
+using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using MiraAPI.GameOptions;
+using MiraAPI.GameOptions.OptionTypes;
+using MiraAPI.Modifiers;
 using MiraAPI.Roles;
 using MiraAPI.Translation;
 using MiraAPI.Utilities.Assets;
 using Rewired;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using MethodBase = System.Reflection.MethodBase;
 using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 
 namespace MiraAPI.Utilities;
+
+internal readonly record struct AdvancedSettingsRow(string Title, string Value, AbstractOptionGroup? Group);
 
 /// <summary>
 /// A class that contains helper methods.
 /// </summary>
 public static class Helpers
 {
+    internal const float MatchInfoGuideBaseScale = 1.3f;
+    private static readonly Regex TrailingZeroRegex = new(@"\.0+(?!\d)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+    private static NumberOption? _advancedSettingsRowPrefab;
+
+    /// <summary>
+    /// Gets all of the options stored within the provided type.
+    /// </summary>
+    /// <param name="classType">The type to get the options of.</param>
+    /// <returns>A readonly list of options from the provided type.</returns>
+    public static ReadOnlyCollection<IModdedOption>? GetModdedOptionsForType(Type classType)
+    {
+        var group = ModdedOptionsManager.Groups.FirstOrDefault(x => x.OptionableType == classType);
+
+        return group?.Children;
+    }
+
+    /// <summary>
+    /// Gets the option text of the provided type.
+    /// </summary>
+    /// <param name="classType">The type to get the text for.</param>
+    /// <returns>The options text of the provided type.</returns>
+    public static string GetOptionsText(Type classType)
+    {
+        var group = ModdedOptionsManager.Groups.FirstOrDefault(x => x.OptionableType == classType);
+        var options = group?.Children;
+        var summaryProvider = group as ISummarizedOptions;
+        var hiddenKeys = summaryProvider?.WikiHiddenOptionKeys;
+
+        if (options == null)
+        {
+            return string.Empty;
+        }
+
+        var lines = new List<string>();
+        var insertedSummary = false;
+        foreach (var option in options)
+        {
+            StringNames? key = option switch
+            {
+                ModdedToggleOption t => t.StringName,
+                ModdedEnumOption e => e.StringName,
+                ModdedNumberOption n => n.StringName,
+                _ => null,
+            };
+
+            if (!insertedSummary && summaryProvider != null && hiddenKeys != null &&
+                key.HasValue && hiddenKeys.Contains(key.Value))
+            {
+                foreach (var line in summaryProvider.GetWikiOptionSummaryLines())
+                {
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        lines.Add(line);
+                    }
+                }
+
+                insertedSummary = true;
+            }
+
+            if (!option.Visible())
+            {
+                continue;
+            }
+
+            if (key.HasValue && hiddenKeys?.Contains(key.Value) == true)
+            {
+                continue;
+            }
+
+            switch (option)
+            {
+                case ModdedToggleOption toggleOption:
+                    lines.Add(
+                        TranslationController.Instance.GetString(toggleOption.StringName) + ": " +
+                        toggleOption.Value);
+                    break;
+                /*case ModdedMultiSelectOption<Enum> enumOption:
+                    if (!enumOption.Visible())
+                    {
+                        continue;
+                    }
+
+                    builder.AppendLine(enumOption.Title + ": " + enumOption.Values[enumOption.Value]);
+                    break;*/
+                case ModdedEnumOption enumOption:
+                    lines.Add(
+                        TranslationController.Instance.GetString(enumOption.StringName) + ": " +
+                        MiraLocaleManager.Get(
+                            enumOption.Values[enumOption.Value],
+                            enumOption.Values[enumOption.Value]));
+                    break;
+                case ModdedNumberOption numberOption:
+                    var optionStr = TrailingZeroRegex.Replace(
+                        numberOption.Data.GetValueString(numberOption.Value),
+                        string.Empty);
+
+                    var title = TranslationController.Instance.GetString(numberOption.StringName);
+                    if (numberOption is { NegativeWordValue: not "#", Value: -1 })
+                    {
+                        lines.Add(title + $": {numberOption.NegativeWordValue}");
+                    }
+                    else if (numberOption is { ZeroWordValue: not "#", Value: 0 })
+                    {
+                        lines.Add(title + $": {numberOption.ZeroWordValue}");
+                    }
+                    else
+                    {
+                        lines.Add(title + ": " + optionStr);
+                    }
+
+                    break;
+            }
+        }
+
+        if (lines.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        var builder = new StringBuilder();
+        builder.AppendLine(
+            MiraApiPlugin.Culture,
+            $"\n<size=50%> \n</size><b><color=#29D7B5>{MiraLocaleManager.Get("Options")}</color></b>");
+        foreach (var line in lines)
+        {
+            builder.AppendLine(line);
+        }
+
+        return builder.ToString();
+    }
+
     /// <summary>
     /// Get all living players.
     /// </summary>
@@ -43,6 +187,7 @@ public static class Helpers
     /// Gets the move next of an <see cref="IEnumerator"/> on <typeparamref name="T"/>.
     /// </summary>
     /// <typeparam name="T">Where the <see cref="Scroller"/> should be parented to.</typeparam>
+    /// <param name="methodName">The name of the method being searched for.</param>
     /// <returns>THe corresponding method to patch.</returns>
     public static MethodBase? GetStateMachineMoveNext<T>(string methodName)
     {
@@ -50,7 +195,7 @@ public static class Helpers
         var showRoleStateMachine =
             typeof(T)
                 .GetNestedTypes()
-                .FirstOrDefault(x=>x.Name.Contains(methodName));
+                .FirstOrDefault(x => x.Name.Contains(methodName));
 
         if (showRoleStateMachine == null)
         {
@@ -136,18 +281,12 @@ public static class Helpers
     /// <returns><see langword="true"/> if the number falls in the range, <see langword="false"/> if not.</returns>
     public static bool CheckChance(int probability)
     {
-        switch (probability)
+        return probability switch
         {
-            case 0:
-                return false;
-            case 100:
-                return true;
-            default:
-                {
-                    var num = Random.RandomRangeInt(1, 101);
-                    return num <= probability;
-                }
-        }
+            0 => false,
+            100 => true,
+            _ => Random.RandomRangeInt(1, 100) <= probability,
+        };
     }
 
     /// <summary>
@@ -184,7 +323,8 @@ public static class Helpers
     /// <param name="position">The position of where you want to check from. For example: <c>PlayerControl.LocalPlayer.transform.position</c>.</param>
     /// <typeparam name="T">The object type.</typeparam>
     /// <returns>The closest object.</returns>
-    public static T? FindClosestObjectOfType<T>(List<T> objectList, Vector3 position) where T : MonoBehaviour
+    public static T? FindClosestObjectOfType<T>(List<T> objectList, Vector3 position)
+        where T : MonoBehaviour
     {
         T? closest = null;
         var closestDistanceSqr = Mathf.Infinity;
@@ -197,11 +337,9 @@ public static class Helpers
             }
 
             var sqrDistance = (obj.transform.position - position).sqrMagnitude;
-            if (sqrDistance < closestDistanceSqr)
-            {
-                closestDistanceSqr = sqrDistance;
-                closest = obj;
-            }
+            if (!(sqrDistance < closestDistanceSqr)) continue;
+            closestDistanceSqr = sqrDistance;
+            closest = obj;
         }
 
         return closest;
@@ -234,7 +372,7 @@ public static class Helpers
         var popper = HudManager.Instance.Notifier;
         var newMessage = Object.Instantiate(popper.notificationMessageOrigin, Vector3.zero, Quaternion.identity, popper.transform);
         newMessage.transform.localPosition = localPos;
-        newMessage.SetUp(text, spr ?? null, color, new System.Action(() => popper.OnMessageDestroy(newMessage)));
+        newMessage.SetUp(text, spr ?? null, color, new Action(() => popper.OnMessageDestroy(newMessage)));
         popper.lastMessageKey = -1;
         popper.ShiftMessages();
         popper.AddMessageToQueue(newMessage);
@@ -284,11 +422,14 @@ public static class Helpers
     /// <returns>A <see cref="List{T}"/> of <see cref="DeadBody"/>s.</returns>
     public static List<DeadBody> GetNearestDeadBodies(Vector2 source, float radius, ContactFilter2D filter)
     {
-        var results = new Il2CppSystem.Collections.Generic.List<Collider2D>();
+        var results = new CppCollections.List<Collider2D>();
         Physics2D.OverlapCircle(source, radius, filter, results);
-        return results.ToArray()
-            .Where(collider2D => collider2D.CompareTag("DeadBody"))
-            .Select(collider2D => collider2D.GetComponent<DeadBody>()).ToList();
+        return
+        [
+            .. results.ToArray()
+                .Where(collider2D => collider2D.CompareTag("DeadBody"))
+                .Select(collider2D => collider2D.GetComponent<DeadBody>())
+        ];
     }
 
     /// <summary>
@@ -303,11 +444,14 @@ public static class Helpers
     public static List<T> GetNearestObjectsOfType<T>(Vector2 source, float radius, ContactFilter2D filter, string? colliderTag = null)
         where T : Component
     {
-        var results = new Il2CppSystem.Collections.Generic.List<Collider2D>();
+        var results = new CppCollections.List<Collider2D>();
         Physics2D.OverlapCircle(source, radius, filter, results);
-        return results.ToArray()
-            .Where(collider2D => colliderTag == null || collider2D.CompareTag(colliderTag))
-            .Select(collider2D => collider2D.GetComponent<T>()).ToList();
+        return
+        [
+            .. results.ToArray()
+                .Where(collider2D => colliderTag == null || collider2D.CompareTag(colliderTag))
+                .Select(collider2D => collider2D.GetComponent<T>())
+        ];
     }
 
     /// <summary>
@@ -324,12 +468,11 @@ public static class Helpers
     {
         var newList = GetNearestObjectsOfType<PlayerControl>(source, radius, CreateFilter(Constants.NotShipMask));
 
-        if (!ignoreColliders)
-        {
-            return newList;
-        }
-
-        return (from player in newList
+        return !ignoreColliders
+            ? newList
+            :
+            [
+                .. from player in newList
                 let vector = player.GetTruePosition() - source
                 let magnitude = vector.magnitude
                 where !PhysicsHelpers.AnyNonTriggersBetween(
@@ -337,7 +480,8 @@ public static class Helpers
                     vector.normalized,
                     magnitude,
                     Constants.ShipAndObjectsMask)
-                select player).ToList();
+                select player
+            ];
     }
 
     /// <summary>
@@ -362,7 +506,7 @@ public static class Helpers
         var myPos = source.GetTruePosition();
         var players = GetClosestPlayers(myPos, distance, ignoreColliders);
 
-        return ignoreSource ? players.Where(plr => plr.PlayerId != source.PlayerId).ToList() : players;
+        return ignoreSource ? [.. players.Where(plr => plr.PlayerId != source.PlayerId)] : players;
     }
 
     /// <summary>
@@ -398,23 +542,16 @@ public static class Helpers
                 Constants.ShipAndObjectsMask))
             select playerControl);
 
-        outputList.Sort(
-            delegate (PlayerControl a, PlayerControl b)
-            {
-                var magnitude2 = (a.GetTruePosition() - source).magnitude;
-                var magnitude3 = (b.GetTruePosition() - source).magnitude;
-                if (magnitude2 > magnitude3)
-                {
-                    return 1;
-                }
-
-                if (magnitude2 < magnitude3)
-                {
-                    return -1;
-                }
-
-                return 0;
-            });
+        outputList.Sort((a, b) =>
+        {
+            var magnitude2 = (a.GetTruePosition() - source).magnitude;
+            var magnitude3 = (b.GetTruePosition() - source).magnitude;
+            return magnitude2 > magnitude3
+                ? 1
+                : magnitude2 < magnitude3
+                    ? -1
+                    : 0;
+        });
         return outputList;
     }
 
@@ -463,7 +600,7 @@ public static class Helpers
     /// Gets a <see cref="DeadBody"/> by its parent ID.
     /// </summary>
     /// <param name="id">The player ID.</param>
-    /// <returns>A <see cref="DeadBody"/> or <see langword="null"/> if its not found.</returns>
+    /// <returns>A <see cref="DeadBody"/> or <see langword="null"/> if it's not found.</returns>
     public static DeadBody? GetBodyById(byte id)
     {
         return Object.FindObjectsOfType<DeadBody>().FirstOrDefault(body => body.ParentId == id);
@@ -504,17 +641,16 @@ public static class Helpers
     /// <returns>The random string.</returns>
     public static string RandomString(int length, string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
     {
-        return new string(Enumerable.Repeat(chars, length)
-            .Select(s => s[Random.RandomRangeInt(0, s.Length)]).ToArray());
+        return new string([.. Enumerable.Repeat(chars, length).Select(s => s[Random.RandomRangeInt(0, s.Length)])]);
     }
 
     /// <summary>
-    /// Returns the formated value using the specified suffix and format string.
+    /// Returns the formatted value using the specified suffix and format string.
     /// </summary>
     /// <param name="value">The value to format.</param>
     /// <param name="suffix">The suffix to add.</param>
     /// <param name="formatString">The format string to use to format.</param>
-    /// <returns>The formated value.</returns>
+    /// <returns>The formatted value.</returns>
     public static string FormatValue(float value, MiraNumberSuffixes suffix = MiraNumberSuffixes.None, string formatString = "0.0")
     {
         return suffix switch
@@ -535,11 +671,7 @@ public static class Helpers
     /// <returns>The <see cref="RoleBehaviour"/>'s name.</returns>
     public static string GetRoleName(this RoleBehaviour role)
     {
-        if (role is ICustomRole custom)
-        {
-            return custom.RoleName;
-        }
-        return role.NiceName;
+        return role is ICustomRole custom ? custom.RoleName : role.NiceName;
     }
 
     /// <summary>
@@ -549,11 +681,7 @@ public static class Helpers
     /// <returns>The <see cref="RoleBehaviour"/>'s intro blurb.</returns>
     public static string GetRoleIntroBlurb(this RoleBehaviour role)
     {
-        if (role is ICustomRole custom)
-        {
-            return custom.RoleDescription;
-        }
-        return role.Blurb;
+        return role is ICustomRole custom ? custom.RoleDescription : role.Blurb;
     }
 
     /// <summary>
@@ -563,11 +691,7 @@ public static class Helpers
     /// <returns>The <see cref="RoleBehaviour"/>'s medium description.</returns>
     public static string GetRoleMedDescription(this RoleBehaviour role)
     {
-        if (role is ICustomRole custom)
-        {
-            return custom.RoleDescription;
-        }
-        return role.BlurbMed;
+        return role is ICustomRole custom ? custom.RoleDescription : role.BlurbMed;
     }
 
     /// <summary>
@@ -577,11 +701,41 @@ public static class Helpers
     /// <returns>The <see cref="RoleBehaviour"/>'s long description.</returns>
     public static string GetRoleLongDescription(this RoleBehaviour role)
     {
-        if (role is ICustomRole custom)
-        {
-            return custom.RoleLongDescription;
-        }
-        return role.BlurbLong;
+        return role is ICustomRole custom ? custom.RoleLongDescription : role.BlurbLong;
+    }
+
+    /// <summary>
+    /// Returns the TextMeshPro sprite tag for a role, matching how role names are shown in-game.
+    /// Uses the role's <see cref="CustomRoleConfiguration.IconTmp"/> if set, otherwise falls back to the faction icon.
+    /// </summary>
+    /// <param name="role">The <see cref="RoleBehaviour"/>.</param>
+    /// <returns>A <c>&lt;sprite&gt;</c> rich text tag.</returns>
+    public static string GetTmpIcon(this RoleBehaviour role)
+    {
+        return role is ICustomRole custom ? custom.GetTmpIcon() : $"<sprite name=\"AmongUs.Role.{role.Role}\">";
+    }
+
+    /// <summary>
+    /// Returns the TextMeshPro sprite tag for a custom role, matching how role names are shown in-game.
+    /// Uses the role's <see cref="CustomRoleConfiguration.IconTmp"/> if set, otherwise falls back to the faction icon.
+    /// </summary>
+    /// <param name="role">The <see cref="ICustomRole"/>.</param>
+    /// <returns>A <c>&lt;sprite&gt;</c> rich text tag.</returns>
+    public static string GetTmpIcon(this ICustomRole role)
+    {
+        return role.Configuration.IconTmp
+            ? $"<sprite name=\"{role.Configuration.IconTmp.name}\">"
+            : $"<sprite name=\"AmongUs.Role.{role.Team}\">";
+    }
+
+    /// <summary>
+    /// Returns the TextMeshPro sprite tag for a modifier, or an empty string if it has no <see cref="BaseModifier.IconTmp"/>.
+    /// </summary>
+    /// <param name="modifier">The <see cref="BaseModifier"/>.</param>
+    /// <returns>A <c>&lt;sprite&gt;</c> rich text tag, or <see cref="string.Empty"/>.</returns>
+    public static string GetTmpIcon(this BaseModifier modifier)
+    {
+        return modifier.IconTmp ? $"<sprite name=\"{modifier.IconTmp.name}\">" : string.Empty;
     }
 
     /// <summary>
@@ -589,9 +743,578 @@ public static class Helpers
     /// </summary>
     /// <param name="role">The <see cref="RoleBehaviour"/> to check.</param>
     /// <returns>The <see cref="RoleBehaviour"/>'s blacklist status.</returns>
+    [SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Intentionally unused because the main intent is for it to be used by dependent mods to add to a blacklist.")]
     public static bool IsRoleBlacklisted(this RoleBehaviour role)
     {
         // This should be patchable by mods when a vanilla role is meant to be replaced by a custom role.
         return false;
+    }
+
+    /// <summary>
+    /// Creates a tab in the advanced wiki.
+    /// </summary>
+    /// <param name="guide">The guide panel to attach the tab to.</param>
+    /// <param name="objName">The name of the tab.</param>
+    /// <param name="title">The title of the tab.</param>
+    /// <param name="icon">The icon of the page.</param>
+    /// <param name="description">The description of the tab.</param>
+    /// <param name="titleTmp">The <see cref="TextMeshPro"/> instance of the title.</param>
+    /// <param name="titleIcon">The <see cref="SpriteRenderer"/> instance for the title.</param>
+    /// <param name="descriptionTmp">The <see cref="TextMeshPro"/> instance of the description.</param>
+    /// <returns>The <see cref="GameObject"/> of the tab.</returns>
+    public static GameObject CreateAdvancedWikiTab(MatchInfoGuide guide, string objName, string title, Sprite icon, string description, TextMeshPro titleTmp, SpriteRenderer titleIcon, out TextMeshPro descriptionTmp)
+    {
+        var obj = new GameObject(objName);
+        titleTmp.richText = true;
+        titleTmp.text = title;
+        titleIcon.sprite = icon;
+        titleIcon.SetSizeLimit(0.55f);
+        descriptionTmp = Object.Instantiate(guide.MatchInfoRolePanelPrefab.roleCount, obj.transform);
+        descriptionTmp.fontSizeMin = descriptionTmp.fontSizeMax = descriptionTmp.fontSize = 2f;
+        var sourceTmp = HudManager.Instance.TaskPanel.taskText;
+        descriptionTmp.font = sourceTmp.font;
+        descriptionTmp.fontMaterial = sourceTmp.fontMaterial;
+        descriptionTmp.EnableStencilMasking();
+        descriptionTmp.text = description;
+        descriptionTmp.rectTransform.sizeDelta = new Vector2(7.5f, 0.3f);
+        descriptionTmp.alignment = TextAlignmentOptions.TopLeft;
+        descriptionTmp.transform.localPosition = new Vector3(0, 1.125f, 0);
+        descriptionTmp.ForceMeshUpdate();
+        return obj;
+    }
+
+    /// <summary>
+    /// Creates a full advanced wiki page with a title, a description, and an optional grid of ability panels.
+    /// </summary>
+    /// <param name="guide">The guide object.</param>
+    /// <param name="titleTmp">The <see cref="TextMeshPro"/> instance of the title.</param>
+    /// <param name="titleIcon">The <see cref="SpriteRenderer"/> instance for the title.</param>
+    /// <param name="parent">The <see cref="Scroller"/> the page should be parented to.</param>
+    /// <param name="objName">The name of the page object.</param>
+    /// <param name="title">The title of the page.</param>
+    /// <param name="icon">The icon of the page.</param>
+    /// <param name="description">The description of the page.</param>
+    /// <param name="abilities">The abilities to display in a grid below the description.</param>
+    /// <param name="variableTextSizing">Whether to use variable text sizing for ability descriptions (allows different heights).</param>
+    /// <returns>The <see cref="GameObject"/> of the wiki page.</returns>
+    public static GameObject CreateAdvancedWikiPage(
+        MatchInfoGuide guide,
+        TextMeshPro titleTmp,
+        SpriteRenderer titleIcon,
+        Scroller parent,
+        string objName,
+        string title,
+        Sprite icon,
+        string description,
+        IReadOnlyCollection<AdvancedWikiAbilityDescription> abilities,
+        bool variableTextSizing = false)
+    {
+        parent.ScrollToTop();
+        var obj = CreateAdvancedWikiTab(
+            guide,
+            objName,
+            title,
+            icon,
+            description,
+            titleTmp,
+            titleIcon,
+            out var desc);
+        var num = 0;
+        var maxTextSize = 0f;
+        if (abilities.Count != 0)
+        {
+            var grid = Object.Instantiate(parent.Inner, obj.transform);
+            var layoutGroup = grid.GetComponent<GridLayoutGroup>();
+            layoutGroup.startAxis = GridLayoutGroup.Axis.Vertical;
+            layoutGroup.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            layoutGroup.spacing = new Vector2(0.75f, 0.4f);
+            grid.DestroyChildren();
+            foreach (var ability in abilities)
+            {
+                num++;
+                var panel = Object.Instantiate(guide.MatchInfoRolePanelPrefab, grid);
+                SetupAbilityPanel(panel, ability, variableTextSizing);
+                if (variableTextSizing)
+                {
+                    var descSize = panel.roleDescription.textBounds.size.y;
+                    if (maxTextSize < descSize)
+                    {
+                        maxTextSize = descSize;
+                    }
+                }
+            }
+
+            grid.localPosition = new Vector3(-3.9f, 1.1f - desc.textBounds.size.y, 0f);
+            grid.localScale = new Vector3(1.3f, 1.3f, 1);
+        }
+
+        obj.transform.SetParent(parent.Inner.transform, false);
+        obj.transform.localScale = Vector3.one / MatchInfoGuideBaseScale;
+        obj.transform.localPosition = new Vector3(0f, 0.5f, 0f);
+        var scrollHeight = variableTextSizing
+            ? desc.textBounds.size.y - 2.5f + maxTextSize + 0.475f
+            : desc.textBounds.size.y - 2.5f + Mathf.Ceil(num / 2f) * 1.45f;
+        parent.SetYBoundsMax(Mathf.Clamp(scrollHeight, 0f, 999f));
+        return obj;
+    }
+
+    /// <summary>
+    /// Caches a persistent clone of the vanilla settings row for use in the Match Info Guide.
+    /// </summary>
+    /// <param name="rowPrefab">The vanilla settings row prefab.</param>
+    internal static void CacheAdvancedSettingsRowPrefab(NumberOption? rowPrefab)
+    {
+        if (!rowPrefab)
+        {
+            foreach (var candidate in Resources.FindObjectsOfTypeAll(Il2CppType.Of<GameSettingMenu>()))
+            {
+                var menu = candidate.TryCast<GameSettingMenu>();
+                var settingsTab = menu ? menu!.GameSettingsTab : null;
+                if (settingsTab && settingsTab!.numberOptionOrigin)
+                {
+                    rowPrefab = settingsTab.numberOptionOrigin;
+                    break;
+                }
+            }
+        }
+
+        if (!rowPrefab)
+        {
+            foreach (var candidate in Resources.FindObjectsOfTypeAll(Il2CppType.Of<NumberOption>()))
+            {
+                var option = candidate.TryCast<NumberOption>();
+                if (!option)
+                {
+                    continue;
+                }
+
+                if (option!.TitleText && option.ValueText && option.PlusBtn && option.MinusBtn)
+                {
+                    rowPrefab = option;
+                    break;
+                }
+            }
+        }
+
+        if (_advancedSettingsRowPrefab || !rowPrefab)
+        {
+            return;
+        }
+
+        var cachedPrefab = Object.Instantiate(rowPrefab!.gameObject);
+        cachedPrefab.name = "MiraAPIAdvancedSettingsRowPrefab";
+        cachedPrefab.transform.SetParent(null, false);
+        cachedPrefab.transform.localPosition = Vector3.zero;
+        cachedPrefab.transform.localRotation = Quaternion.identity;
+        cachedPrefab.SetActive(false);
+        Object.DontDestroyOnLoad(cachedPrefab);
+        _advancedSettingsRowPrefab = cachedPrefab.GetComponent<NumberOption>();
+    }
+
+    /// <summary>
+    /// Creates a page of vanilla settings rows inside a roles-style scroller.
+    /// </summary>
+    /// <param name="parent">The <see cref="Scroller"/> the page is parented to.</param>
+    /// <param name="settings">The rows to show: key is the label, value is the displayed value.</param>
+    /// <returns>The <see cref="GameObject"/> that holds all the rows. Destroy it to remove the page.</returns>
+    public static GameObject CreateAdvancedSettingsPage(
+        Scroller parent,
+        IReadOnlyList<KeyValuePair<string, string>> settings)
+    {
+        return CreateAdvancedSettingsPage(
+            parent,
+            [.. settings.Select(setting => new AdvancedSettingsRow(setting.Key, setting.Value, null))],
+            2,
+            false);
+    }
+
+    internal static GameObject CreateAdvancedSettingsPage(
+        Scroller parent,
+        List<AdvancedSettingsRow> settings,
+        int columns = 2,
+        bool groupsAsColumns = false)
+    {
+        const float contentTop = 0.95f;
+        const float horizontalOffset = -0.2f;
+        const float headerContentGap = 0.2f;
+        const int contentSortingOrder = 151;
+
+        columns = Mathf.Clamp(columns, 1, 6);
+        var inner = parent.Inner;
+        var layout = inner.GetComponent<GridLayoutGroup>();
+        if (layout)
+        {
+            layout.enabled = false;
+        }
+
+        var columnGap = layout ? Mathf.Clamp(layout.spacing.x, 0.1f, 0.6f) : 0.3f;
+        const int baseColumnCount = 2;
+        var baseColumnWidth = layout ? Mathf.Clamp(layout.cellSize.x, 2f, 3.2f) : 2.7f;
+        var availableWidth = baseColumnWidth * baseColumnCount + columnGap * (baseColumnCount - 1);
+        var columnWidth = Mathf.Clamp(
+            (availableWidth - (columns - 1) * columnGap) / columns,
+            1f,
+            3.2f);
+        var layer = inner.gameObject.layer;
+        var page = new GameObject("AdvancedSettingsPage") { layer = layer };
+        page.transform.SetParent(inner, false);
+        page.transform.localPosition = Vector3.zero;
+        page.SetActive(false);
+
+        var gameSettingsMenu = GameSettingMenu.Instance;
+        CacheAdvancedSettingsRowPrefab(gameSettingsMenu ? gameSettingsMenu.GameSettingsTab.numberOptionOrigin : null);
+        var rowPrefab = _advancedSettingsRowPrefab;
+        if (!rowPrefab)
+        {
+            Error("Could not render MiraAPI settings rows because the vanilla NumberOption prefab was not cached.");
+            return page;
+        }
+
+        var spriteBounds = rowPrefab!.GetComponentsInChildren<SpriteRenderer>(true)
+            .Where(renderer =>
+                renderer.enabled &&
+                renderer.sprite &&
+                renderer.transform != rowPrefab.PlusBtn.transform &&
+                !renderer.transform.IsChildOf(rowPrefab.PlusBtn.transform) &&
+                renderer.transform != rowPrefab.MinusBtn.transform &&
+                !renderer.transform.IsChildOf(rowPrefab.MinusBtn.transform))
+            .Select(renderer => renderer.bounds)
+            .ToArray();
+        if (spriteBounds.Length == 0)
+        {
+            Error("Could not render MiraAPI settings rows because the vanilla NumberOption prefab has no sprites.");
+            return page;
+        }
+
+        var prefabBounds = spriteBounds.Skip(1).Aggregate(
+            spriteBounds[0],
+            (bounds, next) =>
+            {
+                bounds.Encapsulate(next);
+                return bounds;
+            });
+        var rowScale = columnWidth / prefabBounds.size.x * 1.22f;
+        var rowHeight = prefabBounds.size.y * rowScale;
+        var rowPitch = 0.45f * rowScale;
+        var groupedSettings = groupsAsColumns
+            ? settings
+                .Where(setting => setting.Group != null)
+                .GroupBy(setting => setting.Group!)
+                .ToList()
+            : [];
+        groupsAsColumns = groupedSettings.Count > 1;
+        if (groupsAsColumns)
+        {
+            rowScale = columnWidth / prefabBounds.size.x * (columns > 2 ? 1.15f : 1f);
+            rowHeight = prefabBounds.size.y * rowScale;
+            rowPitch = 0.45f * rowScale;
+        }
+
+        var groupColumns = new Dictionary<AbstractOptionGroup, int>();
+        var groupTopOffsets = new Dictionary<AbstractOptionGroup, float>();
+        var groupRows = new Dictionary<AbstractOptionGroup, int>();
+        if (groupsAsColumns)
+        {
+            var bandCount = Mathf.CeilToInt(groupedSettings.Count / (float)columns);
+            var bandHeights = new float[bandCount];
+            for (var i = 0; i < groupedSettings.Count; i++)
+            {
+                var group = groupedSettings[i].Key;
+                var band = i / columns;
+                groupColumns[group] = i % columns;
+                bandHeights[band] = Mathf.Max(
+                    bandHeights[band],
+                    rowPitch * (groupedSettings[i].Count() + 1) + headerContentGap + 0.25f);
+            }
+
+            var bandOffset = 0f;
+            for (var band = 0; band < bandCount; band++)
+            {
+                for (var i = band * columns; i < Mathf.Min((band + 1) * columns, groupedSettings.Count); i++)
+                {
+                    groupTopOffsets[groupedSettings[i].Key] = bandOffset;
+                    groupRows[groupedSettings[i].Key] = 0;
+                }
+
+                bandOffset += bandHeights[band];
+            }
+        }
+
+        var contentBottom = float.PositiveInfinity;
+        var previousGroup = (AbstractOptionGroup?)null;
+        var rowIndex = 0;
+        var column = 0;
+        var groupSpacing = 0f;
+
+        for (var i = 0; i < settings.Count; i++)
+        {
+            if (settings[i].Group != previousGroup && settings[i].Group is { } group)
+            {
+                if (groupsAsColumns)
+                {
+                    column = groupColumns[group];
+                }
+                else
+                {
+                    if (previousGroup != null)
+                    {
+                        groupSpacing += 0.2f;
+                    }
+
+                    if (column != 0)
+                    {
+                        rowIndex++;
+                        column = 0;
+                    }
+                }
+
+                var headerSource = group.Header;
+                if (!headerSource && gameSettingsMenu && gameSettingsMenu.GameSettingsTab)
+                {
+                    headerSource = gameSettingsMenu.GameSettingsTab.categoryHeaderOrigin;
+                }
+
+                if (!headerSource)
+                {
+                    foreach (var candidate in Resources.FindObjectsOfTypeAll(Il2CppType.Of<CategoryHeaderMasked>()))
+                    {
+                        var candidateHeader = candidate.TryCast<CategoryHeaderMasked>();
+                        if (candidateHeader && candidateHeader!.Background && candidateHeader.Title)
+                        {
+                            headerSource = candidateHeader;
+                            break;
+                        }
+                    }
+                }
+
+                if (headerSource)
+                {
+                    const float headerScale = 0.46f;
+                    var headerWidth = groupsAsColumns
+                        ? columnWidth / headerScale
+                        : (columns * columnWidth + (columns - 1) * columnGap) / headerScale;
+                    var header = Object.Instantiate(headerSource!, page.transform, false);
+                    header.transform.localScale = Vector3.one * headerScale;
+                    if (groupsAsColumns)
+                    {
+                        var totalWidth = columns * columnWidth + (columns - 1) * columnGap;
+                        var groupColumn = groupColumns[group];
+                        var groupLeft = -totalWidth / 2f + horizontalOffset +
+                                        groupColumn * (columnWidth + columnGap);
+                        header.transform.localPosition = new Vector3(
+                            groupLeft + (columnWidth / 2f) - 0.25f,
+                            contentTop - groupTopOffsets[group],
+                            -1f);
+                    }
+                    else
+                    {
+                        header.transform.localPosition = new Vector3(
+                            horizontalOffset - 0.5f,
+                            contentTop - (rowIndex * rowPitch) - groupSpacing,
+                            -1f);
+                    }
+
+                    header.SetHeader(MiraLocaleManager.GetOrCreateLocaleString(group.GroupName), 20);
+                    if (header.Title)
+                    {
+                        var titleTranslator = header.Title.GetComponent<TextTranslatorTMP>();
+                        if (titleTranslator)
+                        {
+                            Object.Destroy(titleTranslator);
+                        }
+
+                        header.Title.text = group.GroupName.Translate();
+                        header.Title.color = Color.white;
+                        header.Title.horizontalAlignment = HorizontalAlignmentOptions.Left;
+                        var titleTransform = header.Title.rectTransform;
+                        var titlePosition = titleTransform.localPosition;
+                        titlePosition.x = 0.5f;
+                        titleTransform.localPosition = titlePosition;
+                        titleTransform.SetSizeWithCurrentAnchors(
+                            RectTransform.Axis.Horizontal,
+                            headerWidth - 0.3f);
+                    }
+
+                    if (header.Background)
+                    {
+                        header.Background.sprite = MiraAssets.CategoryHeader.LoadAsset();
+                        header.Background.drawMode = SpriteDrawMode.Sliced;
+                        header.Background.color = group.GroupColor;
+                        header.Background.transform.localPosition = new Vector3(0.5f, -0.1833f, 0f);
+                        header.Background.size = new Vector2(headerWidth, header.Background.size.y);
+                    }
+
+                    if (header.Divider)
+                    {
+                        header.Divider.color = group.GroupColor;
+                    }
+
+                    header.gameObject.SetActive(true);
+                    foreach (var renderer in header.GetComponentsInChildren<SpriteRenderer>(true))
+                    {
+                        renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                        renderer.material.SetInt(PlayerMaterial.MaskLayer, 50);
+                        renderer.sortingOrder = contentSortingOrder;
+                        if (renderer.enabled && renderer.sprite)
+                        {
+                            contentBottom = Mathf.Min(
+                                contentBottom,
+                                inner.InverseTransformPoint(renderer.bounds.min).y);
+                        }
+                    }
+
+                    foreach (var text in header.GetComponentsInChildren<TextMeshPro>(true))
+                    {
+                        text.fontMaterial.SetFloat(ShaderID.StencilComp, 3f);
+                        text.fontMaterial.SetFloat(ShaderID.Stencil, 50f);
+                        text.renderer.sortingOrder = contentSortingOrder;
+                        if (text.enabled)
+                        {
+                            text.ForceMeshUpdate();
+                            contentBottom = Mathf.Min(
+                                contentBottom,
+                                inner.InverseTransformPoint(text.bounds.min).y);
+                        }
+                    }
+
+                    if (!groupsAsColumns)
+                    {
+                        rowIndex++;
+                    }
+                }
+
+                previousGroup = group;
+            }
+
+            var originX = -((columns * columnWidth) + ((columns - 1) * columnGap)) / 2f +
+                          (column * (columnWidth + columnGap)) +
+                          horizontalOffset;
+            var centerY = groupsAsColumns && settings[i].Group is { } rowGroup
+                ? contentTop - groupTopOffsets[rowGroup] -
+                  (rowPitch * (groupRows[rowGroup] + 1)) - headerContentGap - (rowHeight / 2f)
+                : contentTop - (rowHeight / 2f) - (rowIndex * rowPitch) - groupSpacing;
+            var row = Object.Instantiate(rowPrefab, page.transform);
+            row.enabled = false;
+            row.PlusBtn.gameObject.SetActive(false);
+            row.MinusBtn.gameObject.SetActive(false);
+
+            foreach (var button in row.GetComponentsInChildren<PassiveButton>(true))
+            {
+                button.enabled = false;
+            }
+
+            foreach (var collider in row.GetComponentsInChildren<Collider2D>(true))
+            {
+                collider.enabled = false;
+            }
+
+            row.transform.localScale = rowPrefab.transform.localScale * rowScale;
+            row.transform.localPosition = new Vector3(
+                originX + (columnWidth / 2f) - (prefabBounds.center.x * rowScale),
+                centerY - (prefabBounds.center.y * rowScale),
+                0f);
+            row.TitleText.text = settings[i].Title;
+            row.ValueText.text = settings[i].Value;
+
+            foreach (var text in row.GetComponentsInChildren<TextMeshPro>(true))
+            {
+                if (text.TryGetComponent<TextTranslatorTMP>(out var translator))
+                {
+                    translator.enabled = false;
+                    Object.Destroy(translator);
+                }
+
+                text.fontMaterial.SetFloat(ShaderID.StencilComp, 3f);
+                text.fontMaterial.SetFloat(ShaderID.Stencil, 50f);
+                text.renderer.sortingOrder = contentSortingOrder;
+                if (text.enabled)
+                {
+                    text.ForceMeshUpdate();
+                }
+            }
+
+            foreach (var renderer in row.GetComponentsInChildren<SpriteRenderer>(true))
+            {
+                renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                renderer.material.SetInt(PlayerMaterial.MaskLayer, 50);
+                renderer.sortingOrder = contentSortingOrder;
+                if (renderer.enabled &&
+                    renderer.sprite &&
+                    renderer.transform != row.PlusBtn.transform &&
+                    !renderer.transform.IsChildOf(row.PlusBtn.transform) &&
+                    renderer.transform != row.MinusBtn.transform &&
+                    !renderer.transform.IsChildOf(row.MinusBtn.transform))
+                {
+                    contentBottom = Mathf.Min(
+                        contentBottom,
+                        inner.InverseTransformPoint(renderer.bounds.min).y);
+                }
+            }
+
+            foreach (var text in row.GetComponentsInChildren<TextMeshPro>(true))
+            {
+                if (text.enabled)
+                {
+                    contentBottom = Mathf.Min(
+                        contentBottom,
+                        inner.InverseTransformPoint(text.bounds.min).y);
+                }
+            }
+
+            row.gameObject.SetActive(true);
+            if (groupsAsColumns && settings[i].Group is { } renderedGroup)
+            {
+                groupRows[renderedGroup]++;
+            }
+            else
+            {
+                column++;
+                if (column == columns)
+                {
+                    column = 0;
+                    rowIndex++;
+                }
+            }
+        }
+
+        var maskArea = parent.transform.FindChild("MaskArea")?.GetComponent<SpriteRenderer>();
+        var maskBottom = maskArea
+            ? inner.InverseTransformPoint(maskArea!.bounds.min).y
+            : -0.75f;
+        var contentOverflow = float.IsPositiveInfinity(contentBottom)
+            ? 0f
+            : maskBottom - contentBottom;
+        var scrollRange = contentOverflow > 0.05f
+            ? contentOverflow + 0.05f
+            : 0f;
+        parent.SetYBoundsMax(Mathf.Clamp(scrollRange, 0f, 999f));
+        page.SetActive(true);
+        return page;
+    }
+
+    private static void SetupAbilityPanel(MatchInfoRolePanel panel, AdvancedWikiAbilityDescription ability, bool variableTextSizing = false)
+    {
+        panel.roleCount.text = ability.AbilityType;
+        panel.roleCount.transform.localPosition += new Vector3(-0.04f, 0);
+        panel.roleName.text = ability.Name;
+        panel.roleName.transform.localPosition += new Vector3(-0.04f, 0);
+        panel.roleDescription.text = ability.Description;
+        panel.roleDescription.rectTransform.sizeDelta = new Vector2(2.601f, 0.8f);
+        panel.roleDescription.transform.localPosition += new Vector3(0, -0.1f);
+        if (variableTextSizing)
+        {
+            panel.roleDescription.alignment = TextAlignmentOptions.Top;
+            panel.roleDescription.fontSizeMin = 1.5f;
+            panel.roleDescription.ForceMeshUpdate();
+        }
+
+        panel.roleIcon.sprite = ability.Icon.LoadAsset();
+        panel.roleIcon.SetSizeLimit(0.13f);
+
+        panel.roleIcon.material.SetInt(PlayerMaterial.MaskLayer, 50);
+        panel.roleName.fontMaterial.SetFloat(panel.STENCIL_NAME, 50f);
+        panel.roleDescription.fontMaterial.SetFloat(panel.STENCIL_NAME, 50f);
+        panel.roleCount.fontMaterial.SetFloat(panel.STENCIL_NAME, 50f);
+        panel.roleIcon.transform.localScale = new Vector3(3.5f, 3.5f, 1f);
     }
 }

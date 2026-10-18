@@ -3,19 +3,18 @@ using MiraAPI.Patches.Stubs;
 using MiraAPI.Roles;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities;
-using TMPro;
 using UnityEngine;
 
 namespace MiraAPI.Example.Roles;
 
-public class ChameloenRole : CrewmateRole, ICustomRole
+public class ChameleonRole : CrewmateRole, ICustomRole
 {
-    public string IdPart => "Chamelon";
+    private bool shouldHide;
+
+    public string IdPart => "Chameleon";
     public string IdPrefix => "ApiExample.Role.Crewmate";
     public Color RoleColor => Palette.AcceptedGreen;
     public ModdedRoleTeams Team => ModdedRoleTeams.Crewmate;
-
-    private bool _shouldHide;
 
     public CustomRoleConfiguration Configuration => new(this)
     {
@@ -29,14 +28,14 @@ public class ChameloenRole : CrewmateRole, ICustomRole
 
     public override void Initialize(PlayerControl player)
     {
-        Logger<ExamplePlugin>.Info("Initializing ChamelonRole for player: " + player.PlayerId);
+        Logger<ExamplePlugin>.Info("Initializing ChameleonRole for player: " + player.PlayerId);
         RoleBehaviourStubs.Initialize(this, player);
-        _shouldHide = true;
+        shouldHide = true;
     }
 
     public void FixedUpdate()
     {
-        if (!Player || !_shouldHide)
+        if (!Player || !shouldHide)
         {
             return;
         }
@@ -55,8 +54,8 @@ public class ChameloenRole : CrewmateRole, ICustomRole
         }
         else
         {
-            SpriteRenderer rend = Player.cosmetics.currentBodySprite.BodySprite;
-            TextMeshPro tmp = Player.cosmetics.nameText;
+            var rend = Player.cosmetics.currentBodySprite.BodySprite;
+            var tmp = Player.cosmetics.nameText;
             tmp.color = Color.Lerp(
                 tmp.color,
                 new Color(tmp.color.r, tmp.color.g, tmp.color.b, Player.AmOwner ? 0.3f : 0),
@@ -75,9 +74,9 @@ public class ChameloenRole : CrewmateRole, ICustomRole
 
     public override void Deinitialize(PlayerControl targetPlayer)
     {
-        Logger<ExamplePlugin>.Info("Deinitializing ChamelonRole for player: " + targetPlayer.PlayerId);
+        Logger<ExamplePlugin>.Info("Deinitializing ChameleonRole for player: " + targetPlayer.PlayerId);
         RoleBehaviourStubs.Deinitialize(this, targetPlayer);
-        _shouldHide = false;
+        shouldHide = false;
         foreach (var cosmetic in Player.cosmetics.transform.GetComponentsInChildren<SpriteRenderer>(true))
         {
             cosmetic.color = Color.white;

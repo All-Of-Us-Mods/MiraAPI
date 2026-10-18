@@ -10,12 +10,8 @@ internal static class MapBehaviourPatch
     public static bool ShowSabotagePatch(MapBehaviour __instance)
     {
         var shouldShow = CustomGameModeManager.ActiveMode?.ShouldShowSabotageMap(__instance);
-        if (shouldShow.HasValue && !shouldShow.Value)
-        {
-            __instance.ShowNormalMap();
-            return false;
-        }
-
-        return true;
+        if (!shouldShow.HasValue || shouldShow.Value) return true;
+        __instance.ShowNormalMap();
+        return false;
     }
 }

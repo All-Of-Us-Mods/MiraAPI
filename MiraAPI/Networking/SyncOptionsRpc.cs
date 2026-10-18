@@ -5,9 +5,12 @@ using Reactor.Networking.Rpc;
 
 namespace MiraAPI.Networking;
 
-// METHOD RPC DOESNT WORK WITH THE ARRAYS AND STUFF SO THIS IS HOW WE WILL DO IT FOR NOW
+// METHOD RPC DOESN'T WORK WITH THE ARRAYS AND STUFF SO THIS IS HOW WE WILL DO IT FOR NOW
 [RegisterCustomRpc((uint)MiraRpc.SyncGameOptions)]
+#pragma warning disable SA1515 // Single-line comment should be preceded by blank line (Justification: ReSharper suppression.)
+// ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated by Reactor.)
 internal sealed class SyncOptionsRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<MiraApiPlugin, NetData[]>(plugin, id)
+#pragma warning restore SA1515 // Single-line comment should be preceded by blank line
 {
     public override RpcLocalHandling LocalHandling => RpcLocalHandling.None;
 

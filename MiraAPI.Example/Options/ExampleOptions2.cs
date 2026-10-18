@@ -7,14 +7,16 @@ namespace MiraAPI.Example.Options;
 public class ExampleOptions2 : AbstractOptionGroup
 {
     public override string GroupName => "options.exampleOptions2";
-
     public override uint GroupPriority => 0; // This group will be displayed first. The default value is uint.MaxValue.
-
     public override MenuCategory ParentMenu => MenuCategory.CustomTwo;
+    public override bool ShowInMatchInfoGuide => true;
 
     public ModdedPlayerOption PlayerOption2 { get; } = new("options.exampleOptions2.youMustChoseAPlayer", false);
     public ModdedPlayerOption PlayerOption { get; } = new("options.exampleOptions2.ehWhatever");
     public ModdedToggleOption ToggleOpt1 { get; } = new("options.exampleOptions2.toggleOption1", false);
+
+    public ModdedOptionList<ModdedNumberOption> PlayerNums { get; } = new(5, i =>
+        new($"PlayerNum{i}", 2, 0, 5, 1, Utilities.MiraNumberSuffixes.None));
 
     public ModdedToggleOption ToggleOpt2 { get; } = new("options.exampleOptions2.toggleOption2", false)
     {
@@ -24,6 +26,8 @@ public class ExampleOptions2 : AbstractOptionGroup
     public ModdedEnumOption<TestingData> EnumOpt { get; } = new("options.exampleOptions2.enumOpt", 0)
     {
         ChangedEvent = x => Logger<ExamplePlugin>.Info($"changed Enum Opt to {x}"),
+        Getter = currentValue => currentValue,
+        Setter = (newValue, oldValue) => newValue,
     };
 }
 

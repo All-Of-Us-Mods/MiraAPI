@@ -1,11 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using HarmonyLib;
 using MiraAPI.Hud;
 using MiraAPI.Keybinds;
 using MiraAPI.LocalSettings;
-using MiraAPI.Roles;
 using MiraAPI.Utilities;
 using Reactor.Utilities;
 using Reactor.Utilities.Extensions;
@@ -29,44 +27,29 @@ public static class HudManagerPatches
 
     private static Dictionary<TextMeshPro, int> vanillaKeybindIcons = [];
 
-    internal static List<TextMeshPro> ModdedKeybindIcons = [];
-
     public static IEnumerator CoResizeUI()
     {
-        while (!HudManager.Instance)
-        {
-            yield return null;
-        }
+        while (!HudManager.Instance) yield return null;
 
         yield return new WaitForSeconds(0.01f);
         ResizeUI(LocalSettingsTabSingleton<MiraApiSettings>.Instance.ButtonUIFactorSlider.Value);
     }
 
     private static Transform _storedButtonsParent;
+
     public static void ResizeUI(float scaleFactor)
     {
-        if (!_storedButtonsParent)
-        {
-            _storedButtonsParent = HudManager.Instance.transform.FindChild("Buttons");
-        }
+        if (!_storedButtonsParent) _storedButtonsParent = HudManager.Instance.transform.FindChild("Buttons");
+
         if (_storedButtonsParent)
         {
             foreach (var aspect in _storedButtonsParent.GetComponentsInChildren<AspectPosition>(true))
             {
-                if (!aspect.gameObject)
-                {
-                    continue;
-                }
+                if (!aspect.gameObject) continue;
 
-                if (aspect.gameObject.transform.parent.name == "TopRight")
-                {
-                    continue;
-                }
+                if (aspect.gameObject.transform.parent.name == "TopRight") continue;
 
-                if (aspect.gameObject.name.Contains("TopRight"))
-                {
-                    continue;
-                }
+                if (aspect.gameObject.name.Contains("TopRight")) continue;
 
                 aspect.gameObject.SetActive(!aspect.isActiveAndEnabled);
                 aspect.DistanceFromEdge *= new Vector2(scaleFactor, scaleFactor);
@@ -76,58 +59,46 @@ public static class HudManagerPatches
 
         foreach (var button in HudManager.Instance.GetComponentsInChildren<ActionButton>(true))
         {
-            if (!button.gameObject)
-            {
-                continue;
-            }
+            if (!button.gameObject) continue;
 
             button.gameObject.SetActive(!button.isActiveAndEnabled);
             button.gameObject.transform.localScale *= scaleFactor;
             button.gameObject.SetActive(!button.isActiveAndEnabled);
         }
 
-        if (_storedButtonsParent)
+        if (!_storedButtonsParent) return;
+        foreach (var arrange in _storedButtonsParent.GetComponentsInChildren<GridArrange>(true))
         {
-            foreach (var arrange in _storedButtonsParent.GetComponentsInChildren<GridArrange>(true))
+            if (!arrange.gameObject || !arrange.transform) continue;
+
+            if (arrange.gameObject.name.Contains("TopRight")) continue;
+
+            arrange.gameObject.SetActive(!arrange.isActiveAndEnabled);
+            arrange.CellSize = new Vector2(scaleFactor, scaleFactor);
+            arrange.gameObject.SetActive(!arrange.isActiveAndEnabled);
+            if (!arrange.isActiveAndEnabled || arrange.gameObject.transform.childCount == 0) continue;
+            try
             {
-                if (!arrange.gameObject || !arrange.transform)
-                {
-                    continue;
-                }
-
-                if (arrange.gameObject.name.Contains("TopRight"))
-                {
-                    continue;
-                }
-
-                arrange.gameObject.SetActive(!arrange.isActiveAndEnabled);
-                arrange.CellSize = new Vector2(scaleFactor, scaleFactor);
-                arrange.gameObject.SetActive(!arrange.isActiveAndEnabled);
-                if (arrange.isActiveAndEnabled && arrange.gameObject.transform.childCount != 0)
-                {
-                    try
-                    {
-                        arrange.ArrangeChilds();
-                    }
-                    catch
-                    {
-                        // Error($"Error arranging child objects in GridArrange: {e}");
-                    }
-                }
+                arrange.ArrangeChilds();
+            }
+            catch
+            {
+                // Error($"Error arranging child objects in GridArrange: {e}");
             }
         }
     }
 
     /*
     /// <summary>
-    /// Trigger hudstart on current custom gamemode
+    /// Trigger HudStart on current custom gamemode
     /// </summary>
     [HarmonyPostfix]
     [HarmonyPatch(nameof(HudManager.OnGameStart))]
     public static void GameStartPatch(HudManager __instance)
     {
         CustomGameModeManager.ActiveMode?.HudStart(__instance);
-    }*/
+    }
+    */
 
     [HarmonyPrefix]
     [HarmonyPriority(Priority.First)]
@@ -144,10 +115,8 @@ public static class HudManagerPatches
     [HarmonyPatch(typeof(ChatController), nameof(ChatController.Close))]
     public static void TogglePrefix(ChatController __instance)
     {
-        if (!MiraHudHelper.ClonedChatButton)
-        {
-            return;
-        }
+        if (!MiraHudHelper.ClonedChatButton) return;
+
         __instance.chatButton.transform.localPosition = MiraHudHelper.ClonedChatButton.transform.localPosition + new Vector3(-0.3f, 0);
     }
 
@@ -155,7 +124,7 @@ public static class HudManagerPatches
     [HarmonyPriority(Priority.First)]
     [HarmonyPatch(typeof(ChatController), nameof(ChatController.Toggle))]
     [HarmonyPatch(typeof(ChatController), nameof(ChatController.Close))]
-    public static void TogglePostfix(ChatController __instance)
+    public static void TogglePostfix()
     {
         MiraHudHelper.UiGrid.ArrangeChilds();
     }
@@ -179,25 +148,13 @@ public static class HudManagerPatches
     public static void StartPostfix(HudManager __instance)
     {
         __instance.gameObject.AddComponent<MiraHudHelper>();
-        if (Buttons == null)
-        {
-            Buttons = __instance.transform.Find("Buttons");
-        }
+        if (Buttons == null) Buttons = __instance.transform.Find("Buttons");
 
-        if (BottomRight == null)
-        {
-            BottomRight = Buttons.Find("BottomRight");
-        }
+        if (BottomRight == null) BottomRight = Buttons.Find("BottomRight");
 
-        if (BottomLeft == null)
-        {
-            BottomLeft = Object.Instantiate(BottomRight.gameObject, Buttons);
-        }
+        if (BottomLeft == null) BottomLeft = Object.Instantiate(BottomRight.gameObject, Buttons);
 
-        foreach (var t in BottomLeft.GetComponentsInChildren<ActionButton>(true))
-        {
-            t.gameObject.Destroy();
-        }
+        foreach (var t in BottomLeft.GetComponentsInChildren<ActionButton>(true)) t.gameObject.Destroy();
 
         var gridArrange = BottomLeft.GetComponent<GridArrange>();
         var aspectPosition = BottomLeft.GetComponent<AspectPosition>();
@@ -209,10 +166,7 @@ public static class HudManagerPatches
         if (Constants.GetPlatformType() is Platforms.Android or Platforms.IPhone)
         {
             var fakeButton = Object.Instantiate(__instance.AbilityButton, BottomLeft.transform);
-            foreach (var renderer in fakeButton.GetComponentsInChildren<Renderer>())
-            {
-                renderer.enabled = false;
-            }
+            foreach (var renderer in fakeButton.GetComponentsInChildren<Renderer>()) renderer.enabled = false;
 
             fakeButton.buttonLabelText.Destroy();
             fakeButton.cooldownTimerText.Destroy();
@@ -221,7 +175,6 @@ public static class HudManagerPatches
             fakeButton.ToggleVisible(true);
             fakeButton.Destroy();
         }
-        ModdedKeybindIcons = [];
 
         foreach (var button in CustomButtonManager.CustomButtons)
         {
@@ -232,10 +185,7 @@ public static class HudManagerPatches
                 _ => null,
             };
 
-            if (location is null)
-            {
-                continue;
-            }
+            if (location is null) continue;
 
             try
             {
@@ -246,6 +196,7 @@ public static class HudManagerPatches
                 Error($"Failed to create custom button {button.GetType().Name}: {e}");
             }
         }
+
         __instance.ImpostorVentButton.transform.SetParent(null);
         __instance.ImpostorVentButton.transform.SetParent(BottomRight.transform);
 
@@ -270,23 +221,21 @@ public static class HudManagerPatches
             var buttonObj = kvp.Key;
             var actionId = kvp.Value;
 
-            var key = KeybindUtils.GetKeycodeByActionId(actionId);
-            if (key == KeyboardKeyCode.None)
-            {
-                continue;
-            }
-            var icon = Helpers.CreateKeybindIcon(buttonObj, key, keybindIconPos);
-            vanillaKeybindIcons.Add(icon.transform.GetChild(0).GetComponent<TextMeshPro>(), actionId);
             if (!MiraApiPlugin.IsMobile)
             {
                 var comp = buttonObj.GetComponent<ActionButton>();
                 KeybindManager.VanillaKeybinds[comp.GetType()].Button = comp;
             }
+
+            var key = KeybindUtils.GetKeycodeByActionId(actionId);
+            if (key == KeyboardKeyCode.None) continue;
+
+            var icon = Helpers.CreateKeybindIcon(buttonObj, key, keybindIconPos);
+            vanillaKeybindIcons.Add(icon.transform.GetChild(0).GetComponent<TextMeshPro>(), actionId);
         }
-        MiraApiSettings.OldButtonScaleFactor =
-            LocalSettingsTabSingleton<MiraApiSettings>.Instance.ButtonUIFactorSlider.Value;
-        MiraApiSettings.OldUiButtonScaleFactor =
-            LocalSettingsTabSingleton<MiraApiSettings>.Instance.TopRightButtonsFactorSlider.Value;
+
+        MiraApiSettings.OldButtonScaleFactor = LocalSettingsTabSingleton<MiraApiSettings>.Instance.ButtonUIFactorSlider.Value;
+        MiraApiSettings.OldUiButtonScaleFactor = LocalSettingsTabSingleton<MiraApiSettings>.Instance.TopRightButtonsFactorSlider.Value;
         Coroutines.Start(CoResizeUI());
     }
 
@@ -302,10 +251,7 @@ public static class HudManagerPatches
     public static void SetHudActivePostfix(HudManager __instance, PlayerControl localPlayer, RoleBehaviour role, bool isActive)
     {
         __instance.AdminButton.ToggleVisible(isActive && role.IsImpostor && GameOptionsManager.Instance.CurrentGameOptions.GameMode == AmongUs.GameOptions.GameModes.HideNSeek);
-        if (localPlayer.Data == null)
-        {
-            return;
-        }
+        if (localPlayer.Data == null) return;
 
         foreach (var button in CustomButtonManager.CustomButtons)
         {
@@ -324,8 +270,7 @@ public static class HudManagerPatches
     [HarmonyPostfix]
     public static void UpdatePostfix()
     {
-        var canSeeBinds = ActiveInputManager.currentControlType == ActiveInputManager.InputType.Keyboard &&
-                          LocalSettingsTabSingleton<MiraApiSettings>.Instance.ShowKeybinds.Value;
+        var canSeeBinds = ActiveInputManager.currentControlType == ActiveInputManager.InputType.Keyboard && LocalSettingsTabSingleton<MiraApiSettings>.Instance.ShowKeybinds.Value;
 
         foreach (var btnIcon in vanillaKeybindIcons)
         {
@@ -333,47 +278,19 @@ public static class HudManagerPatches
             btnIcon.Key.transform.parent.gameObject.SetActive(canSeeBinds);
         }
 
-        foreach (var btnIcon in ModdedKeybindIcons)
-        {
-            btnIcon.transform.parent.gameObject.SetActive(canSeeBinds);
-        }
+        foreach (var button in CustomButtonManager.CustomButtons) button.UpdateKeybindIcon();
 
         var player = ReInput.players.GetPlayer(0);
-        var keyboard = player.controllers.Keyboard;
         foreach (var entry in KeybindManager.Keybinds)
         {
-            var modKeys = entry.ModifierKeys;
-            bool modifierKeysPressed;
-            if (modKeys.Length == 0)
-            {
-                modifierKeysPressed = true;
-            }
-            else
-            {
-                modifierKeysPressed = true;
-                foreach (var key in modKeys)
-                {
-                    if (keyboard.GetModifierKey(key)) continue;
-                    modifierKeysPressed = false;
-                    break;
-                }
-            }
-
-            if (player.GetButtonDown(entry.Id) && modifierKeysPressed)
-            {
+            if (entry.RewiredInputAction != null && player.GetButtonDown(entry.RewiredInputAction.id))
                 entry.Invoke();
-            }
         }
 
-        // suppressed warning because we want minimum allocations here
-#pragma warning disable S3267
         foreach (var entry in KeybindManager.VanillaKeybinds.Values)
-#pragma warning restore S3267
         {
             if (player.GetButtonDown(entry.Id))
-            {
                 entry.Invoke();
-            }
         }
     }
 }

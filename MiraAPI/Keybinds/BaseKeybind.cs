@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Rewired;
 
 namespace MiraAPI.Keybinds;
@@ -9,7 +9,7 @@ namespace MiraAPI.Keybinds;
 public class BaseKeybind
 {
     /// <summary>
-    /// Gets the Rewired <see cref="InputAction"/> assinged for this keybind.
+    /// Gets the Rewired <see cref="InputAction"/> assigned for this keybind.
     /// </summary>
     public InputAction? RewiredInputAction { get; internal set; }
 
@@ -22,6 +22,11 @@ public class BaseKeybind
     /// Gets the currently assigned keycode.
     /// </summary>
     public KeyboardKeyCode CurrentKey => KeybindUtils.GetKeycodeByKeybind(this);
+
+    /// <summary>
+    /// Gets the display label of the currently assigned button on the active controller.
+    /// </summary>
+    public string CurrentControllerButton => KeybindUtils.GetControllerButtonByKeybind(this);
 
     /// <summary>
     /// Gets or sets the handler of the keybind. Invoked when the keybind is activated.
@@ -38,6 +43,9 @@ public class BaseKeybind
         Handler = () => { };
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BaseKeybind"/> class.
+    /// </summary>
     public BaseKeybind()
     {
         Handler = () => { };
@@ -67,6 +75,8 @@ public class BaseKeybind
     /// <param name="action">The <see cref="Action"/> to remove.</param>
     public void RemoveOnActivate(Action action)
     {
+#pragma warning disable CS8601 // Possible null reference assignment (Justification: Shut up.)
         Handler -= action;
+#pragma warning restore CS8601 // Possible null reference assignment
     }
 }

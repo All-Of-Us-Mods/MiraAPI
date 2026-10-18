@@ -2,7 +2,6 @@
 using System.Collections;
 using HarmonyLib;
 using MiraAPI.LocalSettings;
-using MiraAPI.Utilities.Assets;
 using Reactor.Utilities;
 using UnityEngine;
 
@@ -17,16 +16,15 @@ public static class MainMenuManagerPatches
     internal static bool NeedsDeepDestroy { get; private set; }
 
     /// <summary>
-    /// A postifix on <see cref="MainMenuManager.Awake"/> to load all the addressables registered.
+    /// A postfix on <see cref="MainMenuManager.Awake"/> to load all the addressables registered.
     /// </summary>
     [HarmonyPatch(nameof(MainMenuManager.Awake))]
     [HarmonyPostfix]
     public static void AwakePostfix()
     {
-        var requiredVersion = new Version(2026, 6, 5);
+        var requiredVersion = new Version(2026, 9, 29);
         var version = Version.Parse(Application.version);
         NeedsDeepDestroy = version >= requiredVersion;
-        AddressablesLoader.LoadAll();
         Coroutines.Start(SetFps());
     }
 

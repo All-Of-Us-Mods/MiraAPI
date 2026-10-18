@@ -48,7 +48,8 @@ public abstract class CustomGameOver
     /// </summary>
     /// <typeparam name="T">Type of the custom game over.</typeparam>
     /// <returns>The <see cref="global::GameOverReason"/> associated with the custom game over.</returns>
-    public static GameOverReason GameOverReason<T>() where T : CustomGameOver
+    public static GameOverReason GameOverReason<T>()
+        where T : CustomGameOver
     {
         return (GameOverReason)GameOverManager.GetGameOverId<T>();
     }
@@ -58,7 +59,8 @@ public abstract class CustomGameOver
     /// </summary>
     /// <param name="winners">A collection of winners.</param>
     /// <typeparam name="T">Type of the custom game over.</typeparam>
-    public static void Trigger<T>(IEnumerable<NetworkedPlayerInfo> winners) where T : CustomGameOver
+    public static void Trigger<T>(IEnumerable<NetworkedPlayerInfo> winners)
+        where T : CustomGameOver
     {
         var reason = GameOverManager.GetGameOverId<T>();
         var data = new GameOverData(reason, [.. winners]);

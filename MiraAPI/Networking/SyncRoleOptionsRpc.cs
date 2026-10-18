@@ -6,7 +6,10 @@ using Reactor.Networking.Rpc;
 namespace MiraAPI.Networking;
 
 [RegisterCustomRpc((uint)MiraRpc.SyncRoleOptions)]
+#pragma warning disable SA1515 // Single-line comment should be preceded by blank line (Justification: ReSharper suppression.)
+// ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated by Reactor.)
 internal sealed class SyncRoleOptionsRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<MiraApiPlugin, NetData[]>(plugin, id)
+#pragma warning restore SA1515 // Single-line comment should be preceded by blank line
 {
     public override RpcLocalHandling LocalHandling => RpcLocalHandling.None;
 

@@ -61,11 +61,14 @@ public class TeleportButton : CustomActionButton
         {
             Camera.main.orthographicSize = MeetingHud.Instance ? 3f : ft;
             ResolutionManager.ResolutionChanged.Invoke((float)Screen.width / Screen.height, Screen.width, Screen.height, Screen.fullScreen);
-            foreach (var cam in Camera.allCameras) cam.orthographicSize = Camera.main.orthographicSize;
+            foreach (var cam in Camera.allCameras)
+                cam.orthographicSize = Camera.main.orthographicSize;
+
             yield return null;
         }
 
-        foreach (var cam in Camera.allCameras) cam.orthographicSize = zoomDistance;
+        foreach (var cam in Camera.allCameras)
+            cam.orthographicSize = zoomDistance;
         ResolutionManager.ResolutionChanged.Invoke((float)Screen.width / Screen.height, Screen.width, Screen.height, Screen.fullScreen);
     }
 
@@ -75,12 +78,14 @@ public class TeleportButton : CustomActionButton
         {
             Camera.main.orthographicSize = MeetingHud.Instance ? 3f : ft;
             ResolutionManager.ResolutionChanged.Invoke((float)Screen.width / Screen.height, Screen.width, Screen.height, Screen.fullScreen);
-            foreach (var cam in Camera.allCameras) cam.orthographicSize = Camera.main.orthographicSize;
+            foreach (var cam in Camera.allCameras)
+                cam.orthographicSize = Camera.main.orthographicSize;
 
             yield return null;
         }
 
-        foreach (var cam in Camera.allCameras) cam.orthographicSize = 3f;
+        foreach (var cam in Camera.allCameras)
+            cam.orthographicSize = 3f;
         HudManager.Instance.ShadowQuad.gameObject.SetActive(true);
         IsZoom = false;
 

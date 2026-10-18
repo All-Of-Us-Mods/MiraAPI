@@ -1,13 +1,9 @@
 ﻿using HarmonyLib;
-using Il2CppSystem;
-using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
 using MiraAPI.Roles;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;
-using Reactor.Utilities.Extensions;
 using UnityEngine;
-using Object = Il2CppSystem.Object;
 
 namespace MiraAPI.Patches.Options;
 
@@ -36,6 +32,11 @@ public static class OptionsPatches
             __instance.roleChance = 0;
         }
 
+        if (__instance.roleChance == 0)
+        {
+            __instance.roleMaxCount = 0;
+        }
+
         __instance.OnValueChanged.Invoke(__instance);
         return false;
     }
@@ -62,6 +63,11 @@ public static class OptionsPatches
             __instance.roleChance = 100;
         }
 
+        if (__instance.roleChance == 0)
+        {
+            __instance.roleMaxCount = 0;
+        }
+
         __instance.OnValueChanged.Invoke(__instance);
         return false;
     }
@@ -84,6 +90,11 @@ public static class OptionsPatches
         if (__instance.roleMaxCount > __instance.role.MaxCount)
         {
             __instance.roleMaxCount = 0;
+        }
+
+        if (__instance.roleMaxCount == 0)
+        {
+            __instance.roleChance = 0;
         }
 
         __instance.OnValueChanged.Invoke(__instance);
@@ -110,6 +121,11 @@ public static class OptionsPatches
             __instance.roleMaxCount = __instance.role.MaxCount;
         }
 
+        if (__instance.roleMaxCount == 0)
+        {
+            __instance.roleChance = 0;
+        }
+
         __instance.OnValueChanged.Invoke(__instance);
         return false;
     }
@@ -129,11 +145,13 @@ public static class OptionsPatches
                 numberOption.MinusBtn.SetInteractable(true);
                 numberOption.PlusBtn.SetInteractable(true);
             }
+
             if (__instance.TryCast<StringOption>() is { } stringOption)
             {
                 stringOption.MinusBtn.SetInteractable(true);
                 stringOption.PlusBtn.SetInteractable(true);
             }
+
             if (__instance.TryCast<PlayerOption>() is { } playerOption)
             {
                 playerOption.MinusBtn.SetInteractable(true);
@@ -165,14 +183,14 @@ public static class OptionsPatches
             return true;
         }
 
-        __instance.TitleText.text = TranslationController.Instance.GetString(__instance.Title, Array.Empty<Object>()).Translate();
+        __instance.TitleText.text = TranslationController.Instance.GetString(__instance.Title).Translate();
 
         return false;
     }
 
+    // UpdateValue was inlined.
     [HarmonyPrefix]
     [HarmonyPatch(typeof(ToggleOption), nameof(ToggleOption.Toggle))]
-    // UpdateValue was inlined.
     public static bool ToggleUpdate(ToggleOption __instance)
     {
         if (!__instance.IsCustom())
@@ -202,6 +220,7 @@ public static class OptionsPatches
         {
             return true;
         }
+
         __instance.TitleText.text = TranslationController.Instance.GetString(__instance.Title).Translate();
         return false;
     }
@@ -229,6 +248,7 @@ public static class OptionsPatches
         {
             __instance.Value = __instance.ValidRange.min;
         }
+
         __instance.OnValueChanged.Invoke(__instance);
         __instance.AdjustButtonsActiveState();
         return false;
@@ -257,6 +277,7 @@ public static class OptionsPatches
         {
             __instance.Value = __instance.ValidRange.max;
         }
+
         __instance.OnValueChanged.Invoke(__instance);
         __instance.AdjustButtonsActiveState();
         return false;
@@ -276,6 +297,7 @@ public static class OptionsPatches
         {
             __instance.Value = 0;
         }
+
         __instance.OnValueChanged.Invoke(__instance);
         __instance.AdjustButtonsActiveState();
         return false;
@@ -295,6 +317,7 @@ public static class OptionsPatches
         {
             __instance.Value = __instance.Values.Length - 1;
         }
+
         __instance.OnValueChanged.Invoke(__instance);
         __instance.AdjustButtonsActiveState();
         return false;
@@ -309,8 +332,8 @@ public static class OptionsPatches
             return true;
         }
 
-        __instance.TitleText.text = TranslationController.Instance.GetString(__instance.Title, Array.Empty<Object>()).Translate();
-        __instance.ValueText.text = TranslationController.Instance.GetString(__instance.Values[__instance.Value], Array.Empty<Object>());
+        __instance.TitleText.text = TranslationController.Instance.GetString(__instance.Title).Translate();
+        __instance.ValueText.text = TranslationController.Instance.GetString(__instance.Values[__instance.Value]);
 
         return false;
     }

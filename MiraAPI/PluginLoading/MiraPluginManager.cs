@@ -7,7 +7,6 @@ using System.Reflection;
 using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
-using Il2CppInterop.Runtime.Injection;
 using MiraAPI.Colors;
 using MiraAPI.Events;
 using MiraAPI.GameEnd;
@@ -20,12 +19,10 @@ using MiraAPI.LocalSettings;
 using MiraAPI.LocalSettings.Attributes;
 using MiraAPI.MeetingAbilities;
 using MiraAPI.Modifiers;
-using MiraAPI.Patches.Options;
 using MiraAPI.Presets;
 using MiraAPI.Roles;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;
-using Reactor.Localization.Utilities;
 using Reactor.Networking;
 using Reactor.Utilities;
 
@@ -44,8 +41,8 @@ public sealed class MiraPluginManager
 
     internal Dictionary<MiraPluginInfo, List<Type>> QueuedRoleRegistrations { get; } = [];
     internal static MiraPluginManager Instance { get; private set; } = new();
-    public static ConfigFile MiraApiConfig { get; private set; } = null!;
-    public static MiraPluginInfo MiraApiPluginInfo { get; private set; } = null!;
+    internal static ConfigFile MiraApiConfig { get; private set; } = null!;
+    internal static MiraPluginInfo MiraApiPluginInfo { get; private set; } = null!;
 
     internal void Initialize(BasePlugin miraApiPlugin, IMiraPlugin apiPlugin)
     {
@@ -225,7 +222,6 @@ public sealed class MiraPluginManager
                     continue;
                 }
 
-
                 if (RegisterMeetingAbility(type, info))
                 {
                     continue;
@@ -269,7 +265,7 @@ public sealed class MiraPluginManager
             // Cache all the registered plugins into an array for easy access
             RegisteredPlugins = [.. _registeredPlugins.Values];
             RegisteredPluginsWithOptions = [.. RegisteredPlugins.Where(m => m.MiraPlugin.DisplayOnOptionsMenu)];
-            PluginsWithOptionsOrGameModes = [..RegisteredPlugins.Where(m => m.MiraPlugin.DisplayOnOptionsMenu || m.GameModes.Count > 0)];
+            PluginsWithOptionsOrGameModes = [.. RegisteredPlugins.Where(m => m.MiraPlugin.DisplayOnOptionsMenu || m.GameModes.Count > 0)];
 
             ModifierManager.Modifiers = new ReadOnlyCollection<BaseModifier>(ModifierManager.InternalModifiers);
         };
@@ -317,9 +313,12 @@ public sealed class MiraPluginManager
 
             foreach (var property in type.GetProperties())
             {
+                if (property.GetCustomAttribute<MiraIgnoreAttribute>() != null)
+                    continue;
+
                 if (property.GetMethod?.IsStatic == true)
                 {
-                    Error($"Option property {property.Name} in {type.Name} must not be static.");
+                    Error($"Non-ignored option property {property.Name} in {type.Name} must not be static.");
                     continue;
                 }
 
@@ -329,16 +328,28 @@ public sealed class MiraPluginManager
                     continue;
                 }
 
-                var attribute = property.GetCustomAttribute<ModdedOptionAttribute>();
-                if (attribute == null)
+                if (property.PropertyType.IsAssignableTo(typeof(IModdedOptionList)))
                 {
+                    ModdedOptionsManager.RegisterPropertyOptionList(type, property, pluginInfo);
                     continue;
                 }
 
-                ModdedOptionsManager.RegisterAttributeOption(type, attribute, property, pluginInfo);
+                var attribute = property.GetCustomAttribute<ModdedOptionAttribute>();
+                if (attribute != null)
+                {
+                    ModdedOptionsManager.RegisterAttributeOption(type, attribute, property, pluginInfo);
+                    continue;
+                }
+
+                var listAttr = property.GetCustomAttribute<ModdedOptionListAttribute>();
+                if (listAttr != null)
+                {
+                    ModdedOptionsManager.RegisterAttributeOptionList(type, listAttr, property, pluginInfo);
+                }
             }
 
-            foreach (var field in type.GetFields().Where(f => f.FieldType.IsAssignableTo(typeof(IModdedOption))))
+            foreach (var field in type.GetFields()
+                .Where(f => f.FieldType.IsAssignableTo(typeof(IModdedOption)) || f.FieldType.IsAssignableTo(typeof(IModdedOptionList))))
             {
                 Error($"{field.Name} is a field, not a property. Use properties for options.");
             }
@@ -349,6 +360,7 @@ public sealed class MiraPluginManager
         {
             Error($"Failed to register options for {type.Name}: {e.ToString()}");
         }
+
         return false;
     }
 
@@ -375,6 +387,7 @@ public sealed class MiraPluginManager
         {
             Error($"Failed to register role for {type.Name}: {e}");
         }
+
         return false;
     }
 
@@ -395,7 +408,7 @@ public sealed class MiraPluginManager
 
             foreach (var property in type.GetProperties())
             {
-                if (property.PropertyType != typeof(CustomColor))
+                if (!property.PropertyType.IsAssignableTo(typeof(CustomColor)))
                 {
                     continue;
                 }
@@ -407,6 +420,9 @@ public sealed class MiraPluginManager
                 }
 
                 PaletteManager.CustomColors.Add(color);
+
+                if (color is VariableColor)
+                    PaletteManager.VariableColorNames.Add(color.Name);
             }
 
             foreach (var field in type.GetFields().Where(f => f.FieldType.IsAssignableTo(typeof(CustomColor))))
@@ -458,6 +474,7 @@ public sealed class MiraPluginManager
         {
             Error($"Failed to register gamemode {type.Name}: {e}");
         }
+
         return false;
     }
 
@@ -594,6 +611,7 @@ public sealed class MiraPluginManager
             return false;
         }
     }
+
     private static bool RegisterTargetedMeetingAbility(Type type, MiraPluginInfo info)
     {
         try

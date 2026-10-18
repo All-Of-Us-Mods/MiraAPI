@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using MiraAPI.Utilities;
 
 namespace MiraAPI.Patches.Options;
 
@@ -13,6 +14,11 @@ internal static class GameSettingMenuPatches
     [HarmonyPatch(nameof(GameSettingMenu.OnEnable))]
     public static void OnEnablePrefix(GameSettingMenu __instance)
     {
+        if (__instance.GameSettingsTab && __instance.GameSettingsTab.numberOptionOrigin)
+        {
+            Helpers.CacheAdvancedSettingsRowPrefab(__instance.GameSettingsTab.numberOptionOrigin);
+        }
+
         // Add Menu State object
         if (!__instance.gameObject.GetComponent<MenuState>())
         {
@@ -37,6 +43,7 @@ internal static class GameSettingMenuPatches
         {
             Error("MenuState instance is null. Cannot change tab.");
         }
+
         return false;
     }
 }

@@ -17,6 +17,7 @@ internal static class GameManagerPatches
 
         return true;
     }
+
     [HarmonyPrefix, HarmonyPatch(nameof(GameManager.ShowCrewmatesKilled))]
     public static bool ShowCrewmatesKilledPrefix(ref bool __result)
     {
@@ -28,6 +29,7 @@ internal static class GameManagerPatches
 
         return true;
     }
+
     [HarmonyPatch(typeof(NormalGameManager), nameof(NormalGameManager.GetMapOptions))]
     [HarmonyPrefix]
     public static bool GetMapOptions(ref MapOptions __result)

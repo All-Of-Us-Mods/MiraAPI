@@ -1,14 +1,43 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
-    <string name="MiraApi.TopRightButtonScaleFactor">右上角 UI 縮放比例</string>
-    <string name="MiraApi.WikiOnBottomRow">維基按鈕顯示在主界面下方</string>
-    <string name="Roles">職業</string>
-    <string name="Modifier">附加屬性</string>
-    <string name="Modifiers">附加屬性</string>
-    <string name="MiraApi.RoleTeam.Crewmate">船員</string>
-    <string name="MiraApi.RoleTeam.Crewmate.Short">船員</string>
-    <string name="MiraApi.RoleTeam.Impostor">偽裝者</string>
-    <string name="MiraApi.RoleTeam.Impostor.Short">偽裝者</string>
-    <string name="MiraApi.RoleTeam.Neutral">中立</string>
-    <string name="MiraApi.RoleTeam.Neutral.Short">中立</string>
+  <string name="MiraApi.TopRightButtonScaleFactor">右上角 UI 縮放比例</string>
+  <string name="MiraApi.WikiOnBottomRow">維基按鈕顯示在底部</string>
+  <string name="Roles">職業</string>
+  <string name="Modifier">附加屬性</string>
+  <string name="Modifiers">附加屬性</string>
+  <string name="MiraApi.RoleTeam.Crewmate">船員</string>
+  <string name="MiraApi.RoleTeam.Crewmate.Short">船員</string>
+  <string name="MiraApi.RoleTeam.Impostor">偽裝者</string>
+  <string name="MiraApi.RoleTeam.Impostor.Short">偽裝者</string>
+  <string name="MiraApi.RoleTeam.Neutral">中立</string>
+  <string name="MiraApi.RoleTeam.Neutral.Short">中立</string>
+  <string name="MiraApi">Mira API</string>
+  <string name="MiraApi.VisualsUi">視覺/介面</string>
+  <string name="MiraApi.Accessibility">無障礙</string>
+  <string name="MiraApi.MiraApiBrand">MiraAPI</string>
+  <string name="MiraApi.ShowModifiersHudOnLeftSide">在左側顯示附加職業UI</string>
+  <string name="MiraApi.ShowKeybindsOnButtons">在按鈕上顯示快捷鍵</string>
+  <string name="MiraApi.ButtonScaleFactor">按鈕縮放比例</string>
+  <string name="MiraApi.MaxFps">最大幀數</string>
+  <string name="MiraApi.EnableSabotageFlashes">啟用破壞紅色閃爍</string>
+  <string name="MiraApi.EnableSabotageBlare">啟用破壞音效</string>
+  <string name="MiraApi.ReturnToRoleSettings">返回職業設定</string>
+  <string name="MiraApi.CustomCategory1">自定義類別 1</string>
+  <string name="MiraApi.CustomCategory2">自定義類別 2</string>
+  <string name="MiraApi.ModifierMenuDescription">在此配置附加職業及其設定!</string>
+  <string name="MiraApi.CustomOptionMenuDescription">為此模組套用遊戲設定!</string>
+  <string name="MiraApi.GameSetting.Global.ClickToClose">點擊關閉</string>
+  <string name="MiraApi.GameSetting.Global.ClickToOpen">點擊開啟</string>
+  <string name="MiraApi.GameSetting.Preset.Save">保存</string>
+  <string name="MiraApi.GameSetting.Preset.Hint">為本遊戲選擇或創建一個預設</string>
+  <string name="MiraApi.RoleTeam.Crewmate.Group">船員職業</string>
+  <string name="MiraApi.RoleTeam.Impostor.Group">偽裝者職業</string>
+  <string name="MiraApi.RoleTeam.Neutral.Group">中立職業</string>
+  <string name="MiraApi.RoleTeam.Other">其他職業</string>
+  <string name="MiraApi.Gamemode.Classic">經典</string>
+  <string name="MiraApi.Gamemode.Classic.Description">經典的 Among Us 模式體驗!
+找出偽裝者, 或者瞞過船員。</string>
+  <string name="MiraApi.Gamemode.HideAndSeek">捉迷藏</string>
+  <string name="MiraApi.Gamemode.HideAndSeek.Description">你可以逃, 但你躲不掉!
+撐過倒計時, 或消滅所有船員。</string>
 </resources>

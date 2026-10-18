@@ -63,7 +63,8 @@ public static class ModifierFactory
 /// Factory for creating instances of <typeparamref name="T"/>. More efficient than using reflection.
 /// </summary>
 /// <typeparam name="T">The <see cref="BaseModifier"/> type.</typeparam>
-public static class ModifierFactory<T> where T : BaseModifier
+public static class ModifierFactory<T>
+    where T : BaseModifier
 {
     private static readonly Func<object[], T> Constructor = CreateConstructor();
 

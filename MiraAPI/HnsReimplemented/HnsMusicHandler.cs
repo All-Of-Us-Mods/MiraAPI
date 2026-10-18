@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Amongus.GameModes.HideAndSeek;
 using MiraAPI.GameOptions;
 using MiraAPI.HnsReimplemented.Options;
@@ -7,15 +8,38 @@ using UnityEngine;
 
 namespace MiraAPI.HnsReimplemented;
 
+/// <summary>
+/// A Unity script designed to handle the music during Hide and Seek.
+/// </summary>
+/// <param name="cppPtr">The pointer of this instance's equivalent in the Il2Cpp domain.</param>
 [RegisterInIl2Cpp]
+[SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity convention.")]
 public sealed class HnsMusicHandler(nint cppPtr) : MonoBehaviour(cppPtr)
 {
-    public static HnsMusicHandler Instance;
+    /// <summary>
+    /// Gets the instance of the music handler.
+    /// </summary>
+    public static HnsMusicHandler Instance { get; private set; }
 
-    private void Awake()
+    private static readonly Dictionary<LogicHnSMusic.HideAndSeekMusicTrack, string> MusicNames = new()
     {
-        Instance = this;
-    }
+        {
+            LogicHnSMusic.HideAndSeekMusicTrack.Normal,
+            "HnS_Music_Normal"
+        },
+        {
+            LogicHnSMusic.HideAndSeekMusicTrack.Task,
+            "HnS_Music_Task"
+        },
+        {
+            LogicHnSMusic.HideAndSeekMusicTrack.DangerLevel1,
+            "HnS_Music_DangerLevel1"
+        },
+        {
+            LogicHnSMusic.HideAndSeekMusicTrack.DangerLevel2,
+            "HnS_Music_DangerLevel2"
+        },
+    };
 
     private HideAndSeekMusicCollection musicCollection;
 
@@ -41,18 +65,26 @@ public sealed class HnsMusicHandler(nint cppPtr) : MonoBehaviour(cppPtr)
 
     private float musicLerpSpeed = 5f;
 
-    public void Start()
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    private void Start()
     {
         musicCollection = GameManagerCreator.Instance.HideAndSeekManagerPrefab.MusicCollection;
     }
 
+    /// <summary>
+    /// An event that is executed when the round starts.
+    /// </summary>
     public void OnGameStart()
     {
         InitMusic();
         ResetMusic();
     }
 
-    public void OnDestroy()
+    private void OnDestroy()
     {
         ResetMusic();
     }
@@ -62,7 +94,7 @@ public sealed class HnsMusicHandler(nint cppPtr) : MonoBehaviour(cppPtr)
         if (normalSource == null)
         {
             normalSource =
-                SoundManager.Instance.GetNamedSfxSource(musicNames[LogicHnSMusic.HideAndSeekMusicTrack.Normal]);
+                SoundManager.Instance.GetNamedSfxSource(MusicNames[LogicHnSMusic.HideAndSeekMusicTrack.Normal]);
         }
 
         normalSource.outputAudioMixerGroup = SoundManager.Instance.MusicChannel;
@@ -71,7 +103,7 @@ public sealed class HnsMusicHandler(nint cppPtr) : MonoBehaviour(cppPtr)
         if (taskSource == null)
         {
             taskSource =
-                SoundManager.Instance.GetNamedSfxSource(musicNames[LogicHnSMusic.HideAndSeekMusicTrack.Task]);
+                SoundManager.Instance.GetNamedSfxSource(MusicNames[LogicHnSMusic.HideAndSeekMusicTrack.Task]);
         }
 
         taskSource.outputAudioMixerGroup = SoundManager.Instance.MusicChannel;
@@ -82,7 +114,7 @@ public sealed class HnsMusicHandler(nint cppPtr) : MonoBehaviour(cppPtr)
         {
             dangerLevel1Source =
                 SoundManager.Instance.GetNamedSfxSource(
-                    musicNames[LogicHnSMusic.HideAndSeekMusicTrack.DangerLevel1]);
+                    MusicNames[LogicHnSMusic.HideAndSeekMusicTrack.DangerLevel1]);
         }
 
         dangerLevel1Source.outputAudioMixerGroup = SoundManager.Instance.MusicChannel;
@@ -93,7 +125,7 @@ public sealed class HnsMusicHandler(nint cppPtr) : MonoBehaviour(cppPtr)
         {
             dangerLevel2Source =
                 SoundManager.Instance.GetNamedSfxSource(
-                    musicNames[LogicHnSMusic.HideAndSeekMusicTrack.DangerLevel2]);
+                    MusicNames[LogicHnSMusic.HideAndSeekMusicTrack.DangerLevel2]);
         }
 
         dangerLevel2Source.outputAudioMixerGroup = SoundManager.Instance.MusicChannel;
@@ -107,28 +139,33 @@ public sealed class HnsMusicHandler(nint cppPtr) : MonoBehaviour(cppPtr)
         SyncMusic();
     }
 
+    /// <summary>
+    /// Gets the music with the intro.
+    /// </summary>
     public void StartMusicWithIntro()
     {
-        if (PlayerControl.LocalPlayer.Data.Role.IsImpostor)
+        if (!PlayerControl.LocalPlayer.Data.Role.IsImpostor) return;
+        var clip = OptionGroupSingleton<HnsCrewmateOptions>.Instance.HidingTime.Value <= 180f
+            ? musicCollection.ImpostorShortMusic
+            : musicCollection.ImpostorLongMusic;
+        if (AprilFoolsMode.ShouldHorseAround())
         {
-            AudioClip clip = OptionGroupSingleton<HnsCrewmateOptions>.Instance.HidingTime.Value <= 180f
-                ? musicCollection.ImpostorShortMusic
-                : musicCollection.ImpostorLongMusic;
-            if (AprilFoolsMode.ShouldHorseAround())
-            {
-                clip = musicCollection.ImpostorRanchMusic;
-            }
-
-            SoundManager.Instance.PlaySound(clip, true, 1f, SoundManager.Instance.MusicChannel);
+            clip = musicCollection.ImpostorRanchMusic;
         }
+
+        SoundManager.Instance.PlaySound(clip, true, 1f, SoundManager.Instance.MusicChannel);
     }
 
-    public void SetTaskState(bool isDoingTask)
+    /// <summary>
+    /// Sets the current task state to alter music behaviour.
+    /// </summary>
+    /// <param name="taskState">The new value of the state.</param>
+    public void SetTaskState(bool taskState)
     {
-        isDoingTask = isDoingTask;
+        isDoingTask = taskState;
     }
 
-    public void FixedUpdate()
+    private void FixedUpdate()
     {
         if (normalSource == null || taskSource == null || dangerLevel1Source == null ||
             dangerLevel2Source == null)
@@ -167,16 +204,28 @@ public sealed class HnsMusicHandler(nint cppPtr) : MonoBehaviour(cppPtr)
         lastMusicSyncTime = Time.unscaledTime;
     }
 
+    /// <summary>
+    /// Resets the music currently playing.
+    /// </summary>
     public void ResetMusic()
     {
         SetMusicValues(0f, 0f);
     }
 
-    public void SetMusicCrossfadeSpeed(float lerpSpeed)
+    /// <summary>
+    /// Sets the music crossfade speed.
+    /// </summary>
+    /// <param name="lerpSpeed">The new speed.</param>
+    public void SetMusicCrossFadeSpeed(float lerpSpeed)
     {
         musicLerpSpeed = lerpSpeed;
     }
 
+    /// <summary>
+    /// Sets the current music value based on the danger level.
+    /// </summary>
+    /// <param name="dangerLevel1">The first danger level.</param>
+    /// <param name="dangerLevel2">The second danger level.</param>
     public void SetMusicValues(float dangerLevel1, float dangerLevel2)
     {
         if (PlayerControl.LocalPlayer != null && PlayerControl.LocalPlayer.Data.Role.IsImpostor)
@@ -190,8 +239,8 @@ public sealed class HnsMusicHandler(nint cppPtr) : MonoBehaviour(cppPtr)
             return;
         }
 
-        normalVolume = (isDoingTask ? 0f : 1f);
-        taskVolume = (isDoingTask ? 1f : 0f);
+        normalVolume = isDoingTask ? 0f : 1f;
+        taskVolume = isDoingTask ? 1f : 0f;
         dangerLevel1Volume = 0f;
         dangerLevel2Volume = 0f;
         if (dangerLevel1 > 0f)
@@ -213,25 +262,4 @@ public sealed class HnsMusicHandler(nint cppPtr) : MonoBehaviour(cppPtr)
             dangerLevel1Volume = 1f - dangerLevel2;
         }
     }
-
-    private readonly Dictionary<LogicHnSMusic.HideAndSeekMusicTrack, string> musicNames =
-        new Dictionary<LogicHnSMusic.HideAndSeekMusicTrack, string>
-        {
-            {
-                LogicHnSMusic.HideAndSeekMusicTrack.Normal,
-                "HnS_Music_Normal"
-            },
-            {
-                LogicHnSMusic.HideAndSeekMusicTrack.Task,
-                "HnS_Music_Task"
-            },
-            {
-                LogicHnSMusic.HideAndSeekMusicTrack.DangerLevel1,
-                "HnS_Music_DangerLevel1"
-            },
-            {
-                LogicHnSMusic.HideAndSeekMusicTrack.DangerLevel2,
-                "HnS_Music_DangerLevel2"
-            },
-        };
 }

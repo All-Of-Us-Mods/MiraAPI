@@ -7,14 +7,10 @@ namespace MiraAPI.Patches.GameModes;
 [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.CoBegin))]
 internal static class BodyTypePatch
 {
-    public static bool Prefix(IntroCutscene __instance, ref Il2CppSystem.Collections.IEnumerator __result)
+    public static bool Prefix(IntroCutscene __instance, ref CppIEnumerator __result)
     {
-        if (CustomGameModeManager.ActiveMode?.ShowGameModeIntroCutscene == true)
-        {
-            __result = CustomGameModeManager.ActiveMode.IntroCutscene(__instance).WrapToIl2Cpp();
-            return false;
-        }
-
-        return true;
+        if (CustomGameModeManager.ActiveMode?.ShowGameModeIntroCutscene != true) return true;
+        __result = CustomGameModeManager.ActiveMode.IntroCutscene(__instance).WrapToIl2Cpp();
+        return false;
     }
 }

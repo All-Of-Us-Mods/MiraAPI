@@ -33,10 +33,10 @@ public static class NameTagPatch
         if (!PlayerControl.LocalPlayer || !PlayerControl.LocalPlayer.Data || !PlayerControl.LocalPlayer.Data?.Role || !otherPlayerRole)
         {
             __result = Color.white;
+            return false;
         }
 
         __result = PlayerControl.LocalPlayer.Data?.Role == otherPlayerRole ? otherPlayerRole.NameColor : Color.white;
-
         return false;
     }
 }

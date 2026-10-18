@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Linq;
-using HarmonyLib;
+using System.Collections.Generic;
 using Il2CppInterop.Runtime;
 using Reactor.Utilities.Extensions;
 using UnityEngine;
@@ -10,18 +9,14 @@ namespace MiraAPI.Utilities.Assets;
 /// <summary>
 /// A utility class for loading multiple assets from an <see cref="AssetBundle"/>.
 /// </summary>
-public class LoadableBundleSubAssetHolder
+/// <param name="names">The name of the assets to pull from.</param>
+/// <param name="bundle">The <see cref="AssetBundle"/> that contains the assets.</param>
+public class LoadableBundleSubAssetHolder(string[] names, AssetBundle bundle)
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="LoadableBundleSubAssetHolder"/> class.
+    /// Gets the sprites contained within the asset.
     /// </summary>
-    /// <param name="names">The name of the assets to pull from.</param>
-    /// <param name="bundle">The <see cref="AssetBundle"/> that contains the assets.</param>
-    public LoadableBundleSubAssetHolder(string[] names, AssetBundle bundle)
-    {
-        Bundle = bundle;
-        SpriteNames = names;
-    }
+    public Sprite[] SubSprites { get; private set; } = [];
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LoadableBundleSubAssetHolder"/> class.
@@ -29,40 +24,40 @@ public class LoadableBundleSubAssetHolder
     /// <param name="name">The name of the asset.</param>
     /// <param name="bundle">The <see cref="AssetBundle"/> that contains the assets.</param>
     public LoadableBundleSubAssetHolder(string name, AssetBundle bundle)
+        : this([name], bundle)
     {
-        Bundle = bundle;
-        SpriteNames = [name];
     }
-    internal string[] SpriteNames = [];
-    internal AssetBundle Bundle;
-    public Sprite[] SubSprites = [];
 
+    /// <summary>
+    /// Attempts to load all of the sprite assets within the sprite sheet.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if the asset is not actually a sprite sheet.</exception>
     public void TryInit()
     {
-        if (SubSprites.Length == 0)
+        if (SubSprites.Length != 0)
+            return;
+
+        var newSprites = new List<Sprite>();
+        var type = Il2CppType.From(typeof(Sprite));
+
+        foreach (var name in names)
         {
-            var newSprites = Array.Empty<Sprite>();
-            foreach (var name in SpriteNames)
+            var loadedAssets = bundle.LoadAssetWithSubAssets(name, type)
+                ?? throw new InvalidOperationException($"INVALID ASSETS: {name}");
+
+            foreach (var obj in loadedAssets)
             {
-                var loadedAssets = Bundle.LoadAssetWithSubAssets(name, Il2CppType.From(typeof(Sprite))).ToArray();
+                var img = obj.TryCast<Sprite>();
 
-                if (loadedAssets == null)
-                {
-                    throw new InvalidOperationException($"INVALID ASSETS: {name}");
-                }
-                foreach (var obj in loadedAssets)
-                {
-                    var img = obj.TryCast<Sprite>();
-                    if (img != null)
-                    {
-                        img.DontDestroy().DontUnload();
-                        newSprites = newSprites.AddToArray(img);
-                    }
-                }
+                if (img == null)
+                    continue;
+
+                img.DontDestroy().DontUnload();
+                newSprites.Add(img);
             }
-
-            SubSprites = newSprites;
         }
+
+        SubSprites = [.. newSprites];
     }
 
     /// <summary>
@@ -80,6 +75,7 @@ public class LoadableBundleSubAssetHolder
         {
             sprite.DestroyImmediate();
         }
+
         SubSprites = [];
         return true;
     }

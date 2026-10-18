@@ -5,26 +5,17 @@ namespace MiraAPI.Events.Vanilla.Gameplay;
 /// <summary>
 /// Event that is invoked after a player's role is set. This event is not cancelable.
 /// </summary>
-public class SetRoleEvent : MiraEvent
+/// <param name="player">The player.</param>
+/// <param name="role">The new role.</param>
+public class SetRoleEvent(PlayerControl player, RoleTypes role) : MiraEvent
 {
     /// <summary>
     /// Gets the <see cref="PlayerControl"/> whose role was changed.
     /// </summary>
-    public PlayerControl Player { get; }
+    public PlayerControl Player { get; } = player;
 
     /// <summary>
     /// Gets the role that the player was set to.
     /// </summary>
-    public RoleTypes Role { get; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="SetRoleEvent"/> class.
-    /// </summary>
-    /// <param name="player">The player.</param>
-    /// <param name="role">The new role.</param>
-    public SetRoleEvent(PlayerControl player, RoleTypes role)
-    {
-        Player = player;
-        Role = role;
-    }
+    public RoleTypes Role { get; } = role;
 }

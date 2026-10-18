@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Il2CppInterop.Runtime.Attributes;
 using MiraAPI.Modifiers;
 using MiraAPI.Roles;
+using MiraAPI.Utilities;
+using MiraAPI.Utilities.Assets;
 using UnityEngine;
 
 namespace MiraAPI.GameOptions;
@@ -26,6 +30,12 @@ public abstract class AbstractOptionGroup
     public abstract string GroupName { get; }
 
     /// <summary>
+    /// Gets the sprite of the group that is displayed in the match info guide.
+    /// </summary>
+    [HideFromIl2Cpp]
+    public virtual LoadableAsset<Sprite> Sprite => MiraAssets.IconSettings;
+
+    /// <summary>
     /// Gets the Optionable type of the group.
     /// </summary>
     public virtual Type? OptionableType => null;
@@ -33,10 +43,9 @@ public abstract class AbstractOptionGroup
     /// <summary>
     /// Gets a value indicating whether the group should be shown in the modifiers menu.
     /// </summary>
-    // TODO: make this not a boolean
-#pragma warning disable S1133
-    [Obsolete("Use ParentMenu instead.")]
-#pragma warning restore S1133
+    // Completed: make this not a boolean
+    [Obsolete("Use ParentMenu instead.", true)]
+    [SuppressMessage("Info Code Smell", "S1133:Deprecated code should be removed", Justification = "Retained.")]
     public virtual bool ShowInModifiersMenu => false;
 
     /// <summary>
@@ -47,7 +56,43 @@ public abstract class AbstractOptionGroup
     /// <summary>
     /// Gets the function that determines whether the group should be visible or not.
     /// </summary>
-    public virtual Func<bool> GroupVisible => () => true;
+    public virtual Func<bool> GroupVisible => DelegateUtilities.AlwaysTrue;
+
+    /// <summary>
+    /// Gets a value indicating whether this group's options are shown in the Match Info Guide.
+    /// </summary>
+    public virtual bool ShowInMatchInfoGuide => ParentMenu is MenuCategory.Game;
+
+    /// <summary>
+    /// Gets the name title of the group when it is in the match info guide.
+    /// </summary>
+    public virtual string RoleGuideTitle => GroupName;
+
+    /// <summary>
+    /// Gets the key used to combine this group with other option groups on one Match Info Guide page.
+    /// Groups are combined only with groups from the same plugin that use the same non-empty key.
+    /// </summary>
+    public virtual string? MatchInfoGuidePageKey => null;
+
+    /// <summary>
+    /// Gets the title of the Match Info Guide page. For groups sharing a page key, the first
+    /// group in menu order supplies the page title.
+    /// </summary>
+    public virtual string MatchInfoGuidePageTitle => RoleGuideTitle;
+
+    /// <summary>
+    /// Gets the ordering priority of this Match Info Guide page. Lower values appear first
+    /// among pages with the same menu category and group priority. Groups sharing a page key
+    /// use the lowest page-order value among those groups.
+    /// </summary>
+    public virtual int MatchInfoGuidePageOrder => int.MaxValue;
+
+    /// <summary>
+    /// Gets the number of columns used to lay out options on this Match Info Guide page.
+    /// For a combined page, groups are placed into these columns. Values are limited to 1-6;
+    /// for groups sharing a page key, the first group in menu order supplies this value.
+    /// </summary>
+    public virtual int MatchInfoGuidePageColumns => 2;
 
     /// <summary>
     /// Gets the group <see cref="Color"/>. This is used to color the group in the options menu.
@@ -76,7 +121,8 @@ public abstract class AbstractOptionGroup
 /// Base class for option groups. An option group is a collection of options that are displayed together in the options menu.
 /// </summary>
 /// <typeparam name="T">The type of the optionable that this group contains.</typeparam>
-public abstract class AbstractOptionGroup<T> : AbstractOptionGroup where T : IOptionable
+public abstract class AbstractOptionGroup<T> : AbstractOptionGroup
+    where T : IOptionable
 {
     /// <inheritdoc />
     public override Type OptionableType => typeof(T);
@@ -87,14 +133,15 @@ public abstract class AbstractOptionGroup<T> : AbstractOptionGroup where T : IOp
         get
         {
             var type = typeof(T);
-            if (type == typeof(BaseModifier))
+            if (typeof(BaseModifier).IsAssignableFrom(type))
             {
                 return MenuCategory.Modifiers;
             }
-            else if (type == typeof(RoleBehaviour))
+            else if (typeof(RoleBehaviour).IsAssignableFrom(type))
             {
                 return MenuCategory.Roles;
             }
+
             return MenuCategory.Game;
         }
     }
@@ -104,7 +151,8 @@ public abstract class AbstractOptionGroup<T> : AbstractOptionGroup where T : IOp
 /// Base class for option groups. An option group is a collection of options that are displayed together in the options menu.
 /// </summary>
 /// <typeparam name="T">The custom role that the group is for.</typeparam>
-public abstract class AbstractRoleOptionGroup<T>() : AbstractOptionGroup<T> where T : ICustomRole
+public abstract class AbstractRoleOptionGroup<T> : AbstractOptionGroup<T>
+    where T : ICustomRole
 {
     /// <inheritdoc />
     public override Type OptionableType => typeof(T);
@@ -118,11 +166,9 @@ public abstract class AbstractRoleOptionGroup<T>() : AbstractOptionGroup<T> wher
         get
         {
             var role = CustomRoleManager.CustomMiraRoles.FirstOrDefault(x => x.GetType() == OptionableType);
-            if (role == null)
-            {
-                return new(new Color(0.7333f, 0.7333f, 0.7333f, 1));
-            }
-            return new(role.RoleColor, role.Configuration.IconTmp);
+            return role == null
+                ? new(new Color(0.7333f, 0.7333f, 0.7333f, 1))
+                : new(role.RoleColor, role.Configuration.IconTmp);
         }
     }
 }
@@ -133,7 +179,7 @@ public abstract class AbstractRoleOptionGroup<T>() : AbstractOptionGroup<T> wher
 public enum MenuCategory
 {
     /// <summary>
-    /// Placeholder for indexing purposes. Options don't exist in the presset tab.
+    /// Placeholder for indexing purposes. Options don't exist in the preset tab.
     /// </summary>
     Preset,
 

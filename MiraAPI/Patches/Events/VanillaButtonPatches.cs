@@ -23,14 +23,23 @@ public static class VanillaButtonPatches
         {
             playerTarget = role.Cast<TrackerRole>().currentTarget;
         }
+        else if (role.Role is RoleTypes.Detective)
+        {
+            playerTarget = role.Cast<DetectiveRole>().currentTarget;
+        }
         else if (role.Role is RoleTypes.GuardianAngel)
         {
             playerTarget = role.Cast<GuardianAngelRole>().currentTarget;
+        }
+        else if (role.Role is RoleTypes.SpiritGuide)
+        {
+            playerTarget = role.Cast<SpiritGuideRole>().currentTarget;
         }
         else if (role.Role is RoleTypes.Engineer)
         {
             ventTarget = role.Cast<EngineerRole>().currentTarget;
         }
+
         var genericEvent = new VanillaButtonClickEvent(__instance, playerTarget, ventTarget);
         MiraEventManager.InvokeEvent(genericEvent);
         if (genericEvent.IsCancelled)
@@ -38,13 +47,9 @@ public static class VanillaButtonPatches
             MiraEventManager.InvokeEvent(new VanillaButtonCancelledEvent(__instance));
         }
 
-        if (!genericEvent.IsCancelled)
-        {
-            return true;
-        }
-
-        return false;
+        return !genericEvent.IsCancelled;
     }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(SecondaryAbilityButton), nameof(SecondaryAbilityButton.DoClick))]
     public static bool SecondaryDoClickPrefix(AbilityButton __instance)
@@ -56,6 +61,11 @@ public static class VanillaButtonPatches
         {
             playerTarget = role.Cast<DetectiveRole>().currentTarget;
         }
+        else if (role.Role is RoleTypes.SpiritGuide)
+        {
+            playerTarget = role.Cast<SpiritGuideRole>().currentTarget;
+        }
+
         var genericEvent = new VanillaButtonClickEvent(__instance, playerTarget);
         MiraEventManager.InvokeEvent(genericEvent);
         if (genericEvent.IsCancelled)
@@ -63,11 +73,6 @@ public static class VanillaButtonPatches
             MiraEventManager.InvokeEvent(new VanillaButtonCancelledEvent(__instance));
         }
 
-        if (!genericEvent.IsCancelled)
-        {
-            return true;
-        }
-
-        return false;
+        return !genericEvent.IsCancelled;
     }
 }

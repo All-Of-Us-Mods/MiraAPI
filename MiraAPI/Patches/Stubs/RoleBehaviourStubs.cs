@@ -1,7 +1,7 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Hazel;
-using Il2CppSystem.Text;
 
 namespace MiraAPI.Patches.Stubs;
 
@@ -9,6 +9,7 @@ namespace MiraAPI.Patches.Stubs;
 /// Stub methods for the <see cref="RoleBehaviour"/> class. Needed because of Il2Cpp limitations on injected classes.
 /// </summary>
 [HarmonyPatch]
+[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Stub parameters.")]
 public static class RoleBehaviourStubs
 {
     /// <summary>
@@ -38,14 +39,14 @@ public static class RoleBehaviourStubs
     }
 
     /// <summary>
-    /// Stub method for <see cref="RoleBehaviour.AppendTaskHint(StringBuilder)"/>.
+    /// Stub method for <see cref="RoleBehaviour.AppendTaskHint(Il2CppSystem.Text.StringBuilder)"/>.
     /// </summary>
     /// <param name="instance">The <see cref="RoleBehaviour"/> object.</param>
-    /// <param name="taskStringBuilder">The <see cref="StringBuilder"/> to append the task hint to.</param>
+    /// <param name="taskStringBuilder">The <see cref="Il2CppSystem.Text.StringBuilder"/> to append the task hint to.</param>
     [HarmonyReversePatch]
-    [HarmonyPatch(typeof(RoleBehaviour), nameof(RoleBehaviour.AppendTaskHint), typeof(StringBuilder))]
+    [HarmonyPatch(typeof(RoleBehaviour), nameof(RoleBehaviour.AppendTaskHint), typeof(Il2CppSystem.Text.StringBuilder))]
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static void AppendTaskHint(RoleBehaviour instance, StringBuilder taskStringBuilder)
+    public static void AppendTaskHint(RoleBehaviour instance, Il2CppSystem.Text.StringBuilder taskStringBuilder)
     {
         // nothing needed
     }
@@ -283,6 +284,8 @@ public static class RoleBehaviourStubs
     /// Stub method for <see cref="RoleBehaviour.HandleRoleRpc"/>.
     /// </summary>
     /// <param name="instance">The <see cref="RoleBehaviour"/> object.</param>
+    /// <param name="callId">The rpc message id.</param>
+    /// <param name="reader">The <see cref="MessageReader"/> used to parse the message.</param>
     [HarmonyReversePatch]
     [HarmonyPatch(typeof(RoleBehaviour), nameof(RoleBehaviour.HandleRoleRpc))]
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -295,6 +298,9 @@ public static class RoleBehaviourStubs
     /// Stub method for <see cref="RoleBehaviour.KillAnimSpecialSetup"/>.
     /// </summary>
     /// <param name="instance">The <see cref="RoleBehaviour"/> object.</param>
+    /// <param name="deadBody">The <see cref="DeadBody"/> to apply the special setup to.</param>
+    /// <param name="killer">The killer.</param>
+    /// <param name="victim">The victim.</param>
     [HarmonyReversePatch]
     [HarmonyPatch(typeof(RoleBehaviour), nameof(RoleBehaviour.KillAnimSpecialSetup))]
     [MethodImpl(MethodImplOptions.NoInlining)]

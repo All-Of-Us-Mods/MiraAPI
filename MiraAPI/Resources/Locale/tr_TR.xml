@@ -1,4 +1,43 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
-
+  <string name="MiraApi">Mira API</string>
+  <string name="MiraApi.VisualsUi">Görseller/Arayüz</string>
+  <string name="MiraApi.Accessibility">Erişilebilirlik</string>
+  <string name="MiraApi.MiraApiBrand">MiraAPI</string>
+  <string name="MiraApi.ShowModifiersHudOnLeftSide">Değiştiriciler HUD'ını Sol Tarafta Göster</string>
+  <string name="MiraApi.ShowKeybindsOnButtons">Düğmelerde Tuş Atamalarını Göster</string>
+  <string name="MiraApi.ButtonScaleFactor">Düğme Ölçek Katsayısı</string>
+  <string name="MiraApi.TopRightButtonScaleFactor">Sağ Üst Arayüz Ölçek Katsayısı</string>
+  <string name="MiraApi.MaxFps">Maks FPS</string>
+  <string name="MiraApi.WikiOnBottomRow">Wiki'yi Alt Satırda Göster</string>
+  <string name="MiraApi.EnableSabotageFlashes">Sabotaj Flaşlarını Etkinleştir</string>
+  <string name="MiraApi.EnableSabotageBlare">Sabotaj Sirenini Etkinleştir</string>
+  <string name="MiraApi.ReturnToRoleSettings">ROL AYARLARINA DÖN</string>
+  <string name="MiraApi.CustomCategory1">Özel Kategori 1</string>
+  <string name="MiraApi.CustomCategory2">Özel Kategori 2</string>
+  <string name="MiraApi.ModifierMenuDescription">Değiştiricileri ve ayarlarını buradan yapılandırın!</string>
+  <string name="MiraApi.CustomOptionMenuDescription">Bu mod için oyun ayarlarını uygula!</string>
+  <string name="MiraApi.Gamemode.Classic">Klasik</string>
+  <string name="MiraApi.Gamemode.Classic.Description">Klasik Among Us deneyimi!
+Sahtekârları bulun veya Mürettebatı kandırın.</string>
+  <string name="MiraApi.Gamemode.HideAndSeek">Saklambaç</string>
+  <string name="MiraApi.Gamemode.HideAndSeek.Description">Kaçabilirsin ama saklanamazsın!
+Süre dolana kadar hayatta kal veya Mürettebatı ortadan kaldır.</string>
+  <string name="MiraApi.GameSetting.Global.ClickToClose">Kapatmak için tıklayın</string>
+  <string name="MiraApi.GameSetting.Global.ClickToOpen">Açmak için tıklayın</string>
+  <string name="MiraApi.GameSetting.Preset.Hint">Bu oyun için bir seçenek profili seçin veya oluşturun</string>
+  <string name="MiraApi.GameSetting.Preset.Save">Kaydet</string>
+  <string name="Roles">Roller</string>
+  <string name="Modifiers">Değiştiriciler</string>
+  <string name="Modifier">Değiştirici</string>
+  <string name="MiraApi.RoleTeam.Crewmate">Mürettebat</string>
+  <string name="MiraApi.RoleTeam.Crewmate.Short">Mürettebat</string>
+  <string name="MiraApi.RoleTeam.Crewmate.Group">Mürettebat Rolleri</string>
+  <string name="MiraApi.RoleTeam.Impostor">Sahtekâr</string>
+  <string name="MiraApi.RoleTeam.Impostor.Short">Sahtekâr</string>
+  <string name="MiraApi.RoleTeam.Impostor.Group">Sahtekâr Rolleri</string>
+  <string name="MiraApi.RoleTeam.Neutral">Tarafsız</string>
+  <string name="MiraApi.RoleTeam.Neutral.Short">Tarafsız</string>
+  <string name="MiraApi.RoleTeam.Neutral.Group">Tarafsız Roller</string>
+  <string name="MiraApi.RoleTeam.Other">Diğer</string>
 </resources>
