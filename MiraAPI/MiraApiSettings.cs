@@ -258,9 +258,23 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
     public ConfigEntry<bool> EnableVariableColors { get; private set; } = config.Bind("MiraApi.Accessibility", "MiraApi.EnableVariableColors", true);
 }
 
+/// <summary>
+/// An enum that dictates the location of the match info tab buttons.
+/// </summary>
 public enum MatchInfoTabPos
 {
+    /// <summary>
+    /// The left side.
+    /// </summary>
     LeftSide,
+
+    /// <summary>
+    /// The right side.
+    /// </summary>
     RightSide,
+
+    /// <summary>
+    /// Below the menu.
+    /// </summary>
     Below,
 }
