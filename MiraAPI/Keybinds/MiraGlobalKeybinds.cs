@@ -1,10 +1,11 @@
-﻿using Rewired;
+using Rewired;
 
 namespace MiraAPI.Keybinds;
 
 /// <summary>
 /// Class containing all default <see cref="MiraKeybind"/>s.
 /// Recommended for cross-mod compatibility.
+/// Controller bindings are unassigned by default.
 /// </summary>
 [RegisterCustomKeybinds]
 public static class MiraGlobalKeybinds

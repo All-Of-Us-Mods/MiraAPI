@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Linq;
 using MiraAPI.Events;
 using MiraAPI.Events.Mira;
