@@ -62,7 +62,7 @@ Outlive the timer or eliminate the crew.</string>
     <string name="Options">Options</string>
     <string name="MiraApi.Wiki.PlayersTab">Player List</string>
     <string name="MiraApi.Wiki.SettingsTab">Game Settings</string>
-  <string name="MiraApi.Wiki.SearchPlaceholder">Search...</string>
+    <string name="MiraApi.Wiki.SearchPlaceholder">Search...</string>
     <string name="MiraApi.Wiki.FilterLabel">Filter</string>
     <string name="MiraApi.Wiki.GroupingLabel">Grouping</string>
     <string name="MiraApi.Wiki.OrderLabel">Order</string>
@@ -71,4 +71,12 @@ Outlive the timer or eliminate the crew.</string>
     <string name="MiraApi.Wiki.PreviousPage">Previous</string>
     <string name="MiraApi.Wiki.NextPage">Next</string>
     <string name="MiraApi.Wiki.NoResultsFound">No Results Found</string>
+    <string name="On">On</string>
+    <string name="Off">Off</string>
+    <string name="Enabled">Enabled</string>
+    <string name="Disabled">Disabled</string>
+    <string name="Active">Active</string>
+    <string name="Inactive">Inactive</string>
+    <string name="Activated">Activated</string>
+    <string name="Deactivated">Deactivated</string>
 </resources>

@@ -6,6 +6,7 @@ using System.Linq;
 using Il2CppInterop.Runtime.Attributes;
 using MiraAPI.Modifiers;
 using MiraAPI.Roles;
+using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using UnityEngine;
 
@@ -55,7 +56,7 @@ public abstract class AbstractOptionGroup
     /// <summary>
     /// Gets the function that determines whether the group should be visible or not.
     /// </summary>
-    public virtual Func<bool> GroupVisible => () => true;
+    public virtual Func<bool> GroupVisible => DelegateUtilities.AlwaysTrue;
 
     /// <summary>
     /// Gets a value indicating whether this group's options are shown in the Match Info Guide.

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reflection;
 using MiraAPI.GameOptions.OptionTypes;
-using MiraAPI.Translation;
 
 namespace MiraAPI.GameOptions.Attributes;
 
@@ -17,7 +16,7 @@ public class ModdedEnumOptionAttribute(string title, Type enumType, string[]? va
 {
     internal override IModdedOption CreateOption(object? value, PropertyInfo property)
     {
-        var opt = new ModdedEnumOption(Title.Translate(), (int)(value ?? 0), enumType, values);
+        var opt = new ModdedEnumOption(Title, (int)(value ?? 0), enumType, values);
         return opt;
     }
 
@@ -33,7 +32,7 @@ public class ModdedEnumOptionAttribute(string title, Type enumType, string[]? va
     {
         return HolderOption is ModdedEnumOption opt
             ? Enum.ToObject(enumType, opt.Value)
-            : throw new InvalidOperationException($"HolderOption for option \"{Title}\" with EnumType ${enumType.FullName} is not a ModdedEnumOption");
+            : throw new InvalidOperationException($"HolderOption for option \"{Title}\" with EnumType {enumType.FullName} is not a ModdedEnumOption");
     }
 }
 
@@ -41,10 +40,12 @@ public class ModdedEnumOptionAttribute(string title, Type enumType, string[]? va
 /// Attribute for creating an enum option.
 /// </summary>
 /// <typeparam name="T">The enum type.</typeparam>
+/// <param name="title">The title of the option.</param>
+/// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
 [AttributeUsage(AttributeTargets.Property)]
 public class ModdedEnumOptionAttribute<T>(string title, string[]? values = null)
     : ModdedOptionAttribute(title)
-    where T : Enum
+    where T : struct, Enum
 {
     internal override IModdedOption CreateOption(object? value, PropertyInfo property)
     {
@@ -64,6 +65,6 @@ public class ModdedEnumOptionAttribute<T>(string title, string[]? values = null)
     {
         return HolderOption is ModdedEnumOption<T> opt
             ? opt.Value
-            : throw new InvalidOperationException($"HolderOption for option \"{Title}\" with EnumType ${typeof(T).FullName} is not a ModdedEnumOption");
+            : throw new InvalidOperationException($"HolderOption for option \"{Title}\" with EnumType {typeof(T).FullName} is not a ModdedEnumOption<{typeof(T).Name}>");
     }
 }

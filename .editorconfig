@@ -101,3 +101,6 @@ dotnet_diagnostic.IDE0046.severity = none
 
 # S1244: Floating point numbers should not be tested for equality
 dotnet_diagnostic.S1244.severity = none
+
+# S2325: Methods and properties that don't access instance data should be static
+dotnet_diagnostic.S2325.severity = none
