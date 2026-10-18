@@ -318,6 +318,8 @@ public static class RoleGuidePatches
                 Initialize(__instance);
             }
 
+            SetUpTabGrids(LocalSettingsTabSingleton<MiraApiSettings>.Instance.WikiTabPosition.Value);
+
             if (RoleEntries.Count == 0)
             {
                 BuildEntries();
@@ -386,6 +388,33 @@ public static class RoleGuidePatches
         return false;
     }
 
+    private static void SetUpTabGrids(MatchInfoTabPos position)
+    {
+        tabButtonContainer.startCorner = GridLayoutGroup.Corner.UpperLeft;
+        tabButtonContainer.startAxis = GridLayoutGroup.Axis.Horizontal;
+        tabButtonContainer.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        switch (position)
+        {
+            case MatchInfoTabPos.LeftSide:
+                tabButtonContainer.childAlignment = TextAnchor.MiddleLeft;
+                tabButtonContainer.transform.localPosition = new Vector3(-4, 0, -0.2f);
+                break;
+            case MatchInfoTabPos.RightSide:
+                tabButtonContainer.childAlignment = TextAnchor.MiddleRight;
+                tabButtonContainer.transform.localPosition = new Vector3(4, 0, -0.2f);
+                break;
+            default:
+                tabButtonContainer.startCorner = GridLayoutGroup.Corner.LowerLeft;
+                tabButtonContainer.childAlignment = TextAnchor.LowerCenter;
+                tabButtonContainer.startAxis = GridLayoutGroup.Axis.Vertical;
+                tabButtonContainer.constraint = GridLayoutGroup.Constraint.FixedRowCount;
+                tabButtonContainer.transform.localPosition = new Vector3(0, -2.15f, -0.2f);
+                break;
+        }
+
+        tabButtonContainer.constraintCount = 1;
+    }
+
     private static void Initialize(MatchInfoGuide instance)
     {
         if (_uiInitialized)
@@ -415,14 +444,8 @@ public static class RoleGuidePatches
         var newContainer = new GameObject("TabButtonContainer");
         newContainer.transform.SetParent(instance.MatchInfoParent.transform);
         tabButtonContainer = newContainer.AddComponent<GridLayoutGroup>();
-        tabButtonContainer.cellSize = new Vector2(0.8f, 0.55f);
+        tabButtonContainer.cellSize = new Vector2(0.7f, 0.55f);
         tabButtonContainer.rectTransform.offsetMax = tabButtonContainer.rectTransform.offsetMin = Vector2.zero;
-        tabButtonContainer.startAxis = GridLayoutGroup.Axis.Horizontal;
-        tabButtonContainer.startCorner = GridLayoutGroup.Corner.UpperLeft;
-        tabButtonContainer.childAlignment = TextAnchor.MiddleLeft;
-        tabButtonContainer.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-        tabButtonContainer.constraintCount = 1;
-        newContainer.transform.localPosition = new Vector3(-4, 0, -0.2f);
 
         var sortingOrderButton = Object.Instantiate(
             HudManager.Instance.SettingsButton,
