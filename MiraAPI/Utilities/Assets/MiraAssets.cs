@@ -370,5 +370,10 @@ public static class MiraAssets
     /// </summary>
     public static LoadableResourceAsset PageRightIdle { get; } = new("MiraAPI.Resources.Wiki.PageRightIdle.png");
 
+    /// <summary>
+    /// Gets the sprite used below the tab icons in the wiki.
+    /// </summary>
+    public static LoadableResourceAsset TabButtonContainer { get; } = new("MiraAPI.Resources.Wiki.TabButtonContainer.png");
+
     internal static LoadableResourceAsset BlankSprite { get; } = new("MiraAPI.Resources.BlankSprite.png");
 }

@@ -40,6 +40,8 @@ public static class RoleGuidePatches
     private static readonly List<DetailedPanel> ModifierEntries = [];
     private static readonly List<string> UntrackedRolePanelDiagnostics = [];
 
+    private static GridLayoutGroup tabButtonContainer;
+    private static SpriteRenderer tabContainerRend;
     private static GameObject searchComponentContainer;
     private static SpriteRenderer _searchIconIdle;
     private static SpriteRenderer _searchIconHover;
@@ -317,6 +319,8 @@ public static class RoleGuidePatches
                 Initialize(__instance);
             }
 
+            SetUpTabGrids(LocalSettingsTabSingleton<MiraApiSettings>.Instance.WikiTabPosition.Value);
+
             if (RoleEntries.Count == 0)
             {
                 BuildEntries();
@@ -385,6 +389,40 @@ public static class RoleGuidePatches
         return false;
     }
 
+    private static void SetUpTabGrids(MatchInfoTabPos position)
+    {
+        tabButtonContainer.startCorner = GridLayoutGroup.Corner.UpperLeft;
+        tabButtonContainer.startAxis = GridLayoutGroup.Axis.Horizontal;
+        tabButtonContainer.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        tabContainerRend.transform.localScale = new Vector3(0.4f, 0.4125f, 1);
+        tabContainerRend.transform.localRotation = Quaternion.Euler(new Vector3(0, 0, 0));
+        switch (position)
+        {
+            case MatchInfoTabPos.LeftSide:
+                tabButtonContainer.childAlignment = TextAnchor.MiddleLeft;
+                tabButtonContainer.transform.localPosition = new Vector3(-3.95f, 0, -0.2f);
+                tabContainerRend.transform.localPosition = new Vector3(0.325f, 0, 0);
+                break;
+            case MatchInfoTabPos.RightSide:
+                tabButtonContainer.childAlignment = TextAnchor.MiddleRight;
+                tabButtonContainer.transform.localPosition = new Vector3(3.95f, 0, -0.2f);
+                tabContainerRend.transform.localPosition = new Vector3(-0.325f, 0, 0);
+                break;
+            default:
+                tabButtonContainer.startCorner = GridLayoutGroup.Corner.LowerLeft;
+                tabButtonContainer.childAlignment = TextAnchor.LowerCenter;
+                tabButtonContainer.startAxis = GridLayoutGroup.Axis.Vertical;
+                tabButtonContainer.constraint = GridLayoutGroup.Constraint.FixedRowCount;
+                tabButtonContainer.transform.localPosition = new Vector3(0, -2.15f, -0.2f);
+                tabContainerRend.transform.localPosition = new Vector3(-0.025f, 0.3f, 0);
+                tabContainerRend.transform.localRotation = Quaternion.Euler(new Vector3(0, 0, 270));
+                tabContainerRend.transform.localScale = new Vector3(0.4f, 0.475f, 1);
+                break;
+        }
+
+        tabButtonContainer.constraintCount = 1;
+    }
+
     private static void Initialize(MatchInfoGuide instance)
     {
         if (_uiInitialized)
@@ -410,6 +448,17 @@ public static class RoleGuidePatches
         searchComponentContainer.transform.SetParent(instance.MatchInfoParent.transform);
         searchComponentContainer.transform.localPosition = Vector3.zero;
         instance.MatchInfoParent.transform.GetChild(1).transform.SetParent(searchComponentContainer.transform);
+
+        var newContainer = new GameObject("TabButtonContainer");
+        newContainer.transform.SetParent(instance.MatchInfoParent.transform);
+        tabButtonContainer = newContainer.AddComponent<GridLayoutGroup>();
+        tabButtonContainer.cellSize = new Vector2(0.65f, 0.55f);
+        tabButtonContainer.rectTransform.offsetMax = tabButtonContainer.rectTransform.offsetMin = Vector2.zero;
+        tabContainerRend = new GameObject("BackRenderer").AddComponent<SpriteRenderer>();
+        tabContainerRend.transform.SetParent(newContainer.transform);
+        tabContainerRend.sprite = MiraAssets.TabButtonContainer.LoadAsset();
+        tabContainerRend.transform.localPosition = Vector3.zero;
+        tabContainerRend.gameObject.layer = 5;
 
         var sortingOrderButton = Object.Instantiate(
             HudManager.Instance.SettingsButton,
@@ -661,6 +710,7 @@ public static class RoleGuidePatches
             MiraAssets.WikiModifiersButtonIdleSprite,
             MiraAssets.WikiModifiersButtonOpenSprite,
             MiraAssets.WikiModifiersButtonHoverSprite);
+        modifiersButton.name = "ModifiersButton";
         modifiersButton.OnClick = new Button.ButtonClickedEvent();
         modifiersButton.OnClick.AddListener((Action)(() => OpenModifiersTab()));
         instance.TabButtons.Add(modifiersButton);
@@ -765,6 +815,8 @@ public static class RoleGuidePatches
         buttonCollider.size = new Vector2(0.8f, 0.74f);
         buttonCollider.offset = Vector2.zero;
         button.transform.localScale = new Vector3(0.7f, 0.7f, 1);
+        button.transform.SetParent(tabButtonContainer.transform);
+        button.gameObject.AddComponent<RectTransform>();
     }
 
     private static void SetupSearchButton(PassiveButton button, string objName, Action onClick, Sprite inactive, Sprite hover, Vector3 pos, out SpriteRenderer inactiveSprite, out SpriteRenderer hoverSprite)
