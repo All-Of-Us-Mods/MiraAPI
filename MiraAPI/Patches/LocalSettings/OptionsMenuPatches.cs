@@ -2,9 +2,9 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using HarmonyLib;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using MiraAPI.LocalSettings;
 using MiraAPI.Utilities.Assets;
-using Reactor.Utilities.Extensions;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -15,12 +15,18 @@ namespace MiraAPI.Patches.LocalSettings;
 public static class OptionsMenuPatches
 {
     private static readonly Dictionary<int, List<GameObject>> TabButtons = [];
-    private static int currentPage = 1;
+    private static int _currentPage = 1;
 
     internal static OptionsMenuBehaviour? Instance { get; private set; }
 
-    [SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
-    [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
+    [SuppressMessage(
+        "Critical Code Smell",
+        "S2223:Non-constant static fields should not be visible",
+        Justification = "Internal behaviour that does not need property-level validation.")]
+    [SuppressMessage(
+        "StyleCop.CSharp.MaintainabilityRules",
+        "SA1401:Fields should be private",
+        Justification = "Read above.")]
     internal static BoxCollider2D MaskCollider = null!;
 
     private static SpriteRenderer? background;
@@ -69,7 +75,7 @@ public static class OptionsMenuPatches
         MaskCollider.isTrigger = true;
         MaskCollider.enabled = true;
 
-        currentPage = 1;
+        _currentPage = 1;
         TabButtons.Clear();
         float yOffset = 0;
         var i = 0;
@@ -83,7 +89,7 @@ public static class OptionsMenuPatches
             {
                 var button = settings.CreateTabButton(__instance, ref tabIdx, ref yOffset);
                 button.GetComponent<TabGroup>().Content = tab;
-                button.SetActive(page == currentPage);
+                button.SetActive(page == _currentPage);
 
                 if (!TabButtons.TryGetValue(page, out var list))
                 {
@@ -105,20 +111,6 @@ public static class OptionsMenuPatches
             }
         }
 
-        static void ChangePage(int increase)
-        {
-            currentPage += increase;
-            if (currentPage > TabButtons.Count)
-            {
-                currentPage = 1;
-            }
-
-            if (currentPage < 1)
-            {
-                currentPage = TabButtons.Count;
-            }
-        }
-
         // Create page buttons
         // TODO: In-game menu has no close button. I tried making one from scratch but failed. Add one later plz
         if (TabButtons.Count <= 1)
@@ -126,44 +118,56 @@ public static class OptionsMenuPatches
             return;
         }
 
-        var nextButton = Object.Instantiate(__instance.BackButton, __instance.transform).GetComponent<PassiveButton>();
-        nextButton.transform.localPosition = new Vector3(3.2f, 2.6f, -10);
-        nextButton.transform.localScale = new Vector2(0.25f, 0.25f);
-        var nextRend = nextButton.GetComponent<SpriteRenderer>();
-        nextRend.sprite = MiraAssets.NextButton.LoadAsset();
-        nextButton.gameObject.GetComponent<CloseButtonConsoleBehaviour>().DestroyImmediate();
+        CreatePageButton(__instance, 3.2f, false, 1);
+        CreatePageButton(__instance, 2.9f, true, -1);
+    }
 
-        var nextRollover = nextButton.gameObject.AddComponent<ButtonRolloverHandler>();
-        nextRollover.Target = nextRend;
-        nextRollover.OverColor = Palette.AcceptedGreen;
+    private static void CreatePageButton(OptionsMenuBehaviour menu, float x, bool flip, int direction)
+    {
+        var obj = new GameObject("PageButton") { layer = 5 };
+        obj.transform.SetParent(menu.transform);
+        obj.transform.localPosition = new Vector3(x, 2.6f, -10);
+        obj.transform.localScale = new Vector3(0.25f, 0.25f, 1);
 
-        nextButton.OnClick = new Button.ButtonClickedEvent();
-        nextButton.OnClick.AddListener(
+        var rend = obj.AddComponent<SpriteRenderer>();
+        rend.sprite = MiraAssets.NextButton.LoadAsset();
+        rend.flipX = flip;
+
+        var col = obj.AddComponent<BoxCollider2D>();
+        col.size = rend.sprite.bounds.size;
+
+        var rollover = obj.AddComponent<ButtonRolloverHandler>();
+        rollover.Target = rend;
+        rollover.OverColor = Palette.AcceptedGreen;
+        rollover.OutColor = Color.white;
+
+        var button = obj.AddComponent<PassiveButton>();
+        button.Colliders = new Il2CppReferenceArray<Collider2D>([col]);
+        button.OnClick = new Button.ButtonClickedEvent();
+        button.OnClick.AddListener(
             (UnityAction)(() =>
             {
-                ChangePage(1);
+                ChangePage(direction);
                 UpdatePages();
             }));
+        button.OnMouseOver = new UnityEvent();
+        button.OnMouseOver.AddListener((UnityAction)(() => rollover.DoMouseOver()));
+        button.OnMouseOut = new UnityEvent();
+        button.OnMouseOut.AddListener((UnityAction)(() => rollover.DoMouseOut()));
+    }
 
-        var backButton = Object.Instantiate(__instance.BackButton, __instance.transform).GetComponent<PassiveButton>();
-        backButton.transform.localPosition = new Vector3(2.9f, 2.6f, -10);
-        backButton.transform.localScale = new Vector2(0.25f, 0.25f);
-        var backRend = backButton.GetComponent<SpriteRenderer>();
-        backRend.sprite = MiraAssets.NextButton.LoadAsset();
-        backRend.flipX = true;
-        backButton.gameObject.GetComponent<CloseButtonConsoleBehaviour>().DestroyImmediate();
+    private static void ChangePage(int increase)
+    {
+        _currentPage += increase;
+        if (_currentPage > TabButtons.Count)
+        {
+            _currentPage = 1;
+        }
 
-        var backRollover = backButton.gameObject.AddComponent<ButtonRolloverHandler>();
-        backRollover.Target = backRend;
-        backRollover.OverColor = Palette.AcceptedGreen;
-
-        backButton.OnClick = new Button.ButtonClickedEvent();
-        backButton.OnClick.AddListener(
-            (UnityAction)(() =>
-            {
-                ChangePage(-1);
-                UpdatePages();
-            }));
+        if (_currentPage < 1)
+        {
+            _currentPage = TabButtons.Count;
+        }
     }
 
     /// <summary>
@@ -194,7 +198,7 @@ public static class OptionsMenuPatches
     public static void OpenPostfix()
     {
         LocalSettingsManager.AvailableTabs.ForEach(CustomClose);
-        currentPage = 1;
+        _currentPage = 1;
         UpdatePages();
     }
 
@@ -204,9 +208,7 @@ public static class OptionsMenuPatches
         {
             pages.Value?
                 .Where(x => x != null)
-                .Do(
-                   x => x?.SetActive(
-                       pages.Key == currentPage));
+                .Do(x => x?.SetActive(pages.Key == _currentPage));
         }
     }
 

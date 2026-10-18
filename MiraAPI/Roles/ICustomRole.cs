@@ -318,17 +318,20 @@ public interface ICustomRole : IOptionable
     /// </summary>
     /// <param name="guide">The guide object.</param>
     /// <param name="titleText">The title text object.</param>
+    /// <param name="titleIcon">The title's icon.</param>
     /// <param name="parent">The scroller parent.</param>
     /// <returns>The <see cref="GameObject"/> of the wiki.</returns>
-    GameObject GetAdvancedWiki(MatchInfoGuide guide, TextMeshPro titleText, Scroller parent)
+    GameObject GetAdvancedWiki(MatchInfoGuide guide, TextMeshPro titleText, SpriteRenderer titleIcon, Scroller parent)
     {
         var abilities = WikiAbilities;
         return Helpers.CreateAdvancedWikiPage(
             guide,
             titleText,
+            titleIcon,
             parent,
             RoleNameLocale,
-            $"{this.GetTmpIcon()} {RoleName} ({RoleFactionTitle})",
+            $"{RoleName} ({RoleFactionTitle})",
+            Configuration.Icon ?? MiraAssets.IconNeutral.LoadAsset(),
             RoleWikiDescription,
             abilities);
     }
@@ -336,13 +339,20 @@ public interface ICustomRole : IOptionable
     /// <summary>
     /// Gets the function that determines whether the role should be toggled on or off in the game settings.
     /// </summary>
-    Func<bool> VisibleInSettings => () => true;
+    Func<bool> VisibleInSettings => DelegateUtilities.AlwaysTrue;
 
     /// <summary>
     /// Gets the list of abilities or other similar information to display below the text of a role's wiki page.
     /// </summary>
     [HideFromIl2Cpp]
-    public List<AdvancedWikiAbilityDescription> WikiAbilities => [];
+    List<AdvancedWikiAbilityDescription> WikiAbilities => [];
 }
 
+/// <summary>
+/// A data holder of an ability's wiki entry.
+/// </summary>
+/// <param name="Name">The name of the ability.</param>
+/// <param name="AbilityType">The type of the ability.</param>
+/// <param name="Description">The description of the ability.</param>
+/// <param name="Icon">The icon sprite of the ability.</param>
 public record struct AdvancedWikiAbilityDescription(string Name, string AbilityType, string Description, LoadableAsset<Sprite> Icon);

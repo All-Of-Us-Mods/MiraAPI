@@ -126,7 +126,7 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
         currentFinalHideTime = totalFinalHideTime;
         if (timerBar != null)
         {
-            Object.Destroy(timerBar);
+            Destroy(timerBar);
         }
 
         finalHideAlertSfx = GameManagerCreator.Instance.HideAndSeekManagerPrefab.FinalHideAlertSFX;

@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using BepInEx.Configuration;
 using MiraAPI.Networking;
 using MiraAPI.PluginLoading;
 using MiraAPI.Translation;
+using MiraAPI.Utilities;
 using Reactor.Networking.Rpc;
 using UnityEngine;
 
@@ -43,16 +45,32 @@ public abstract class ModdedOption<T> : IModdedOption
     /// <summary>
     /// Gets or sets the value of the option.
     /// </summary>
-    public T Value { get; protected set; }
+    public T Value
+    {
+        get => Getter != null ? Getter(_value) : _value;
+        protected set
+        {
+            if (Setter != null)
+                value = Setter(value, _value);
+
+            _value = value;
+        }
+    }
+
+    private T _value;
 
     /// <summary>
     /// Gets the default value of the option.
     /// </summary>
     public T DefaultValue { get; }
 
-    /// <summary>
-    /// Gets or sets the event that is invoked when the value of the option changes.
-    /// </summary>
+    /// <inheritdoc cref="IModdedOption.Getter"/>
+    public Func<T, T>? Getter { get; set; }
+
+    /// <inheritdoc cref="IModdedOption.Setter"/>
+    public Func<T, T, T>? Setter { get; set; }
+
+    /// <inheritdoc cref="IModdedOption.ChangedEvent"/>
     public Action<T>? ChangedEvent { get; set; }
 
     /// <inheritdoc />
@@ -67,6 +85,33 @@ public abstract class ModdedOption<T> : IModdedOption
     /// <inheritdoc />
     public ConfigDefinition? ConfigDefinition { get; set; }
 
+    /// <inheritdoc />
+    public AbstractOptionGroup ParentGroup { get; set; }
+
+    /// <inheritdoc />
+    public virtual OptionNotifConfiguration Configuration => new(ParentGroup);
+
+    /// <inheritdoc />
+    Delegate? IModdedOption.Getter
+    {
+        get => Getter;
+        set => Getter = value as Func<T, T>;
+    }
+
+    /// <inheritdoc />
+    Delegate? IModdedOption.Setter
+    {
+        get => Setter;
+        set => Setter = value as Func<T, T, T>;
+    }
+
+    /// <inheritdoc />
+    Delegate? IModdedOption.ChangedEvent
+    {
+        get => ChangedEvent;
+        set => ChangedEvent = value as Action<T>;
+    }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ModdedOption{T}"/> class.
     /// </summary>
@@ -80,7 +125,7 @@ public abstract class ModdedOption<T> : IModdedOption
         DefaultValue = defaultValue;
         Value = defaultValue;
         StringName = MiraLocaleManager.GetOrCreateLocaleString(Title);
-        Visible = () => true;
+        Visible = DelegateUtilities.AlwaysTrue;
         IncludeInPreset = includeInPreset;
     }
 
@@ -96,25 +141,25 @@ public abstract class ModdedOption<T> : IModdedOption
     /// <param name="sendRpc">Whether to send the value to other players.</param>
     public void SetValue(T newValue, bool sendRpc = true)
     {
-        var oldVal = Value;
+        var oldVal = _value;
         Value = newValue;
 
-        if (Value?.Equals(oldVal) == false)
+        if (!EqualityComparer<T>.Default.Equals(_value, oldVal))
         {
-            ChangedEvent?.Invoke(Value);
+            ChangedEvent?.Invoke(_value);
         }
 
         if (sendRpc && AmongUsClient.Instance.AmHost)
         {
             if (ParentMod?.GetConfigFile().TryGetEntry<T>(ConfigDefinition, out var entry) == true)
             {
-                entry.Value = Value;
+                entry.Value = _value;
             }
 
             Rpc<SyncOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, [GetNetData()], true);
         }
 
-        OnValueChanged(newValue);
+        OnValueChanged(_value);
     }
 
     /// <inheritdoc />
@@ -147,6 +192,12 @@ public abstract class ModdedOption<T> : IModdedOption
         {
             Error($"Attempted to load {Title} from preset, but ConfigDefinition is not found in preset.");
         }
+    }
+
+    /// <inheritdoc />
+    public Type GetValueType()
+    {
+        return typeof(T);
     }
 
     /// <inheritdoc />
@@ -188,10 +239,4 @@ public abstract class ModdedOption<T> : IModdedOption
     {
         return option.Value;
     }
-
-    /// <inheritdoc />
-    public AbstractOptionGroup ParentGroup { get; set; }
-
-    /// <inheritdoc />
-    public virtual OptionNotifConfiguration Configuration => new(ParentGroup);
 }

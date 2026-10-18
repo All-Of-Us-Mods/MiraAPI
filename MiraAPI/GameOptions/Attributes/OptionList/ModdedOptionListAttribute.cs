@@ -3,6 +3,7 @@ using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using MiraAPI.Translation;
 
 namespace MiraAPI.GameOptions.Attributes;
 
@@ -14,8 +15,8 @@ namespace MiraAPI.GameOptions.Attributes;
 public abstract class ModdedOptionListAttribute(string title) : PropertyOptionAttribute
 {
     internal IModdedOptionList? HolderOptionList { get; set; }
-
-    internal object? Value { get; set; }
+    internal IList? Value { get; set; }
+    internal Type ValueType { get; set; }
 
     /// <summary>
     /// Gets the title of the options.
@@ -31,16 +32,16 @@ public abstract class ModdedOptionListAttribute(string title) : PropertyOptionAt
     /// <param name="value">The new values as an object.</param>
     public override void SetValue(object value)
     {
-        Value = value;
-        var list = (IList)value;
-        if (list.Count != HolderOptionList!.Count)
+        Value = (IList)value;
+
+        if (Value.Count != HolderOptionList!.Count)
         {
             throw new InvalidOperationException($"Value set to option list cannot change the list's length.");
         }
 
-        for (int i = 0; i < list.Count; i++)
+        for (int i = 0; i < Value.Count; i++)
         {
-            SetValue(i, list[i]!);
+            SetValue(i, Value[i]!);
         }
     }
 
@@ -77,18 +78,19 @@ public abstract class ModdedOptionListAttribute(string title) : PropertyOptionAt
     [SuppressMessage("Globalization", "CA1305:Specify IFormatProvider", Justification = "I don't even know if this is worth it.")]
     protected string GetFormattedTitle(int index)
     {
-        Match match = Regex.Match(Title, @"\{(\d+)(?::[^}]+)?\}", default, Regex.InfiniteMatchTimeout);
+        var match = Regex.Match(Title.Translate(), @"\{(\d+)(?::[^}]+)?\}", default, Regex.InfiniteMatchTimeout);
 
-        if (match.Success)
+        if (!match.Success)
         {
-            if (match.Groups.Count == 1 && match.Groups[0].Value == "0")
-            {
-                return string.Format(Title, index);
-            }
-
-            Error("ModdedOptionList Title cannot contain more than the first parameter for formatting.");
+            return Title + index;
         }
 
+        if (match.Value == "{0}" && !match.NextMatch().Success)
+        {
+            return string.Format(Title, index);
+        }
+
+        Error($"ModdedOptionList Title of {Title} cannot contain more than the first parameter for formatting.");
         return Title + index;
     }
 }

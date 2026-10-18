@@ -25,9 +25,9 @@ namespace MiraAPI.Patches.Options;
 [HarmonyPatch(typeof(GameOptionsMenu))]
 internal static class GameOptionsMenuPatch
 {
-    private static readonly List<CategoryHeaderMasked> VanillaHeaders = new();
-    private static readonly List<OptionBehaviour> VanillaOptions = new();
-    private static readonly List<OptionBehaviour> MainOptions = new();
+    private static readonly List<CategoryHeaderMasked> VanillaHeaders = [];
+    private static readonly List<OptionBehaviour> VanillaOptions = [];
+    private static readonly List<OptionBehaviour> MainOptions = [];
     private static readonly Dictionary<AbstractGameMode, List<AbstractOptionGroup>> GameModeGroups = [];
     private static readonly Dictionary<AbstractGameMode, List<OptionBehaviour>> GameModeOptions = [];
     private static readonly Dictionary<AbstractGameMode, List<CategoryHeaderMasked>> GameModeHeaders = [];
@@ -38,6 +38,7 @@ internal static class GameOptionsMenuPatch
     [HarmonyPatch(nameof(GameOptionsMenu.Initialize))]
     public static bool InitPatch(GameOptionsMenu __instance)
     {
+        Helpers.CacheAdvancedSettingsRowPrefab(__instance.numberOptionOrigin);
         __instance.Children ??= new();
         __instance.Children.Clear();
 
@@ -185,6 +186,66 @@ internal static class GameOptionsMenuPatch
         }
 
         instance.scrollBar.SetYBoundsMax(-num - 1.65f);
+    }
+
+    internal static void RefreshForGameMode()
+    {
+        if (CustomGameModeManager.ActiveMode == null ||
+            !GameSettingMenu.Instance ||
+            !GameSettingMenu.Instance.GameSettingsTab ||
+            !MenuState.Instance ||
+            MenuState.Instance.CurrentModIdx != 0 ||
+            GameModeGroups.Count == 0)
+        {
+            return;
+        }
+
+        ToggleGamemodeOptions(CustomGameModeManager.ActiveMode, GameSettingMenu.Instance.GameSettingsTab);
+        GameSettingMenu.Instance.RoleSettingsButton.gameObject.SetActive(
+            CustomGameModeManager.ActiveMode.ShowNormalRoleSettings);
+    }
+
+    internal static List<KeyValuePair<string, string>> GetActiveGameSettingsRows(Func<bool, string> formatBool)
+    {
+        var menu = GameSettingMenu.Instance ? GameSettingMenu.Instance.GameSettingsTab : null;
+        if (!menu || menu!.Children == null)
+        {
+            return [];
+        }
+
+        var rows = new List<KeyValuePair<string, string>>();
+        foreach (var option in menu.Children)
+        {
+            if (!option || !option.gameObject.activeInHierarchy ||
+                option == menu.MapPicker ||
+                (GameModeOption.OptionBehaviour && option == GameModeOption.OptionBehaviour) ||
+                !option.Data)
+            {
+                continue;
+            }
+
+            var title = option switch
+            {
+                ToggleOption toggle => toggle.TitleText.text,
+                NumberOption number => number.TitleText.text,
+                StringOption str => str.TitleText.text,
+                PlayerOption player => player.TitleText.text,
+                _ => TranslationController.Instance.GetString(option.Data.Title),
+            };
+
+            var value = option switch
+            {
+                ToggleOption toggle => formatBool(toggle.GetBool()),
+                NumberOption number => number.ValueText.text,
+                StringOption str => str.ValueText.text,
+                PlayerOption player => player.ValueText.text,
+                _ => option.Data.GetValueString(option.GetFloat()),
+            };
+
+            rows.Add(new KeyValuePair<string, string>(title, value));
+        }
+
+        return rows;
     }
 
     private static void CreateSettings(GameOptionsMenu instance, Transform container)

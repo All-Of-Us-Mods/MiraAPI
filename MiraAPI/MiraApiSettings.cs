@@ -69,6 +69,10 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
 
             OldUiButtonScaleFactor = TopRightButtonsFactorSlider.Value;
         }
+        else if (configEntry == MatchInfoGuideScaleFactor && MatchInfoGuide.Instance)
+        {
+            RoleGuidePatches.ApplyGuideScale(MatchInfoGuide.Instance, MatchInfoGuideScaleFactor.Value);
+        }
         else if (configEntry == WikiOnBottomRow)
         {
             SetUpButtonPositions();
@@ -217,10 +221,23 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
     public ConfigEntry<bool> ShowKeybinds { get; private set; } = config.Bind("MiraApi.VisualsUi", "MiraApi.ShowKeybindsOnButtons", true);
 
     /// <summary>
+    /// Gets the scale of the match info guide.
+    /// </summary>
+    [LocalSliderSetting(min: 0.5f, max: 1f, suffixType: MiraNumberSuffixes.Multiplier, formatString: "0.00", displayValue: true)]
+    public ConfigEntry<float> MatchInfoGuideScaleFactor { get; private set; } = config.Bind("MiraApi.MatchInfoGuide", "MiraApi.MatchInfoGuideScaleFactor", 1f);
+
+    /// <summary>
     /// Gets the flag indicating whether the wiki is on the bottom row.
     /// </summary>
     [LocalToggleSetting]
-    public ConfigEntry<bool> WikiOnBottomRow { get; private set; } = config.Bind("MiraApi.VisualsUi", "MiraApi.WikiOnBottomRow", true);
+    public ConfigEntry<bool> WikiOnBottomRow { get; private set; } = config.Bind("MiraApi.MatchInfoGuide", "MiraApi.WikiOnBottomRow", true);
+
+    /// <summary>
+    /// Gets the flag indicating the position for the wiki's tabs.
+    /// </summary>
+    [LocalEnumSetting(names: ["MiraApi.WikiTabPosition.LeftSide", "MiraApi.WikiTabPosition.RightSide", "MiraApi.WikiTabPosition.Below"])]
+    public ConfigEntry<MatchInfoTabPos> WikiTabPosition { get; private set; } =
+        config.Bind("MiraApi.MatchInfoGuide", "MiraApi.WikiTabPosition", MiraApiPlugin.IsMobile ? MatchInfoTabPos.RightSide : MatchInfoTabPos.LeftSide);
 
     /// <summary>
     /// Gets whether to show the red flash from sabotages.
@@ -233,4 +250,31 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
     /// </summary>
     [LocalToggleSetting]
     public ConfigEntry<bool> EnableSabotageBlares { get; private set; } = config.Bind("MiraApi.Accessibility", "MiraApi.EnableSabotageBlare", true);
+
+    /// <summary>
+    /// Gets whether variable colors will remain static or not.
+    /// </summary>
+    [LocalToggleSetting]
+    public ConfigEntry<bool> EnableVariableColors { get; private set; } = config.Bind("MiraApi.Accessibility", "MiraApi.EnableVariableColors", true);
+}
+
+/// <summary>
+/// An enum that dictates the location of the match info tab buttons.
+/// </summary>
+public enum MatchInfoTabPos
+{
+    /// <summary>
+    /// The left side.
+    /// </summary>
+    LeftSide,
+
+    /// <summary>
+    /// The right side.
+    /// </summary>
+    RightSide,
+
+    /// <summary>
+    /// Below the menu.
+    /// </summary>
+    Below,
 }

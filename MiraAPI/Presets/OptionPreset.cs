@@ -10,9 +10,6 @@ namespace MiraAPI.Presets;
 /// <summary>
 /// Represents a preset of game options that can be applied to the game.
 /// </summary>
-/// <remarks>
-/// Initializes a new instance of the <see cref="OptionPreset"/> class with the specified name and configuration file.
-/// </remarks>
 /// <param name="name">The name of the preset.</param>
 /// <param name="plugin">The plugin associated with the preset.</param>
 /// <param name="presetConfig">The configuration file for the preset.</param>
