@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using MiraAPI.Utilities;
 
 namespace MiraAPI.GameOptions.Attributes;
 
@@ -127,7 +128,7 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
     }
 
     /// <summary>
-    /// Resolves the target <see cref="MemberInfo"/> (property or method) and its associated singleton instance getter, if applicable.
+    /// Resolves the target <see cref="MemberInfo"/> (property, field or method) and its associated singleton instance getter, if applicable.
     /// </summary>
     /// <param name="group">The option group instance the property belongs to.</param>
     /// <param name="property">The option property decorated with this attribute.</param>
@@ -136,15 +137,18 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
     /// When this method returns, contains the <see cref="OptionGroupSingleton{T}.Instance"/> getter <see cref="MethodInfo"/>
     /// if the resolved member is an instance member on an <see cref="AbstractOptionGroup"/>; otherwise, <see langword="null"/>.
     /// </param>
+    /// <param name="notFound">When this method returns, contains a flag that indicates if the member was not found, as null can be returned from other circumstances too.</param>
     /// <returns>The resolved <see cref="MemberInfo"/> if found; otherwise, <see langword="null"/>.</returns>
     [SuppressMessage("Major Code Smell", "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields", Justification = "It is safe.")]
-    protected MemberInfo? ResolveMember(AbstractOptionGroup group, PropertyInfo property, out Type type, out MethodInfo? instanceGetter)
+    protected MemberInfo? ResolveMember(AbstractOptionGroup group, PropertyInfo property, out Type type, out MethodInfo? instanceGetter, out bool notFound)
     {
         var groupType = group.GetType();
         var flags = BindingFlags.Static | BindingFlags.Public;
 
-        type = holderType ?? groupType;
         MemberName ??= property.Name + defaultSuffix;
+
+        type = holderType ?? groupType;
+        instanceGetter = null;
 
         if (type.IsAssignableTo(typeof(AbstractOptionGroup)))
         {
@@ -158,12 +162,69 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
                 .GetProperty(nameof(OptionGroupSingleton<>.Instance))!
                 .GetGetMethod();
         }
-        else
+        else if (!type.IsStatic())
         {
-            instanceGetter = null;
+            flags |= BindingFlags.Instance;
+
+            var canSearchPrivates = type.GetCustomAttribute<SearchPrivateAttribute>() != null;
+
+            if (canSearchPrivates)
+                flags |= BindingFlags.NonPublic;
+
+            var getterFlags = BindingFlags.Static | BindingFlags.Public | (canSearchPrivates ? BindingFlags.NonPublic : BindingFlags.Default);
+
+            foreach (var method in type.GetMethods(getterFlags))
+            {
+                if (method.GetParameters().Length > 0 || (method.GetCustomAttribute<InstanceGetterAttribute>() == null && method.Name != "GetInstance"))
+                    continue;
+
+                instanceGetter = method;
+                break;
+            }
+
+            if (instanceGetter == null)
+            {
+                foreach (var prop in type.GetProperties(getterFlags))
+                {
+                    if (prop.GetCustomAttribute<InstanceGetterAttribute>() == null && prop.Name != "Instance")
+                        continue;
+
+                    var getMethod = prop.GetGetMethod(canSearchPrivates);
+
+                    if (getMethod == null)
+                        continue;
+
+                    instanceGetter = getMethod;
+                    break;
+                }
+            }
+
+            if (instanceGetter == null)
+            {
+                Error($"No valid static instance getter (method GetInstance or property Instance) found in instanced type {type.Name}. Try renaming the method/property, or decorate it with InstanceGetterAttribute.");
+                notFound = false;
+                return null;
+            }
+
+            if (!instanceGetter.ReturnType.IsAssignableTo(type))
+            {
+                Error($"Found instance getter {instanceGetter.Name}, but the return type did not match what was expected ({type.Name}).");
+                notFound = false;
+                return null;
+            }
+        }
+        else if (type.GetCustomAttribute<SearchPrivateAttribute>() != null)
+        {
+            flags |= BindingFlags.NonPublic;
         }
 
         var member = type.GetMember(MemberName, flags).FirstOrDefault();
+        notFound = true;
+
+        if (member == null)
+            return null;
+
+        notFound = false;
 
         if (instanceGetter == null)
             return member;
@@ -196,10 +257,11 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
     /// When this method returns, contains the <see cref="OptionGroupSingleton{T}.Instance"/> getter <see cref="MethodInfo"/>
     /// if the resolved method is an instance method on an <see cref="AbstractOptionGroup"/>; otherwise, <see langword="null"/>.
     /// </param>
+    /// <param name="notFound">When this method returns, contains a flag that indicates if the member was not found, as null can be returned from other circumstances too.</param>
     /// <returns>The resolved <see cref="MethodInfo"/> if found; otherwise, <see langword="null"/>.</returns>
-    protected MethodInfo? ResolveMethod(AbstractOptionGroup group, PropertyInfo property, out Type type, out MethodInfo? instanceGetter)
+    protected MethodInfo? ResolveMethod(AbstractOptionGroup group, PropertyInfo property, out Type type, out MethodInfo? instanceGetter, out bool notFound)
     {
-        return ResolveMember(group, property, out type, out instanceGetter) as MethodInfo;
+        return ResolveMember(group, property, out type, out instanceGetter, out notFound) as MethodInfo;
     }
 
     /// <summary>

@@ -14,8 +14,13 @@ public sealed class ModdedOptionGetterAttribute(string? methodName = null, Type?
 {
     internal Delegate? GetGetter(AbstractOptionGroup group, PropertyInfo property, IModdedOption option)
     {
-        if (ResolveMethod(group, property, out var type, out var instanceGetter) is not { } method)
+        if (ResolveMethod(group, property, out var type, out var instanceGetter, out var notFound) is not { } method)
+        {
+            if (notFound)
+                Error($"Method {MemberName} does not exist in {type.FullName}");
+
             return null;
+        }
 
         var valueType = option.GetValueType();
 
@@ -28,8 +33,13 @@ public sealed class ModdedOptionGetterAttribute(string? methodName = null, Type?
 
     internal Func<int, Delegate?>? GetListGetter(AbstractOptionGroup group, PropertyInfo property, Type valueType)
     {
-        if (ResolveMethod(group, property, out var type, out var instanceGetter) is not { } method)
+        if (ResolveMethod(group, property, out var type, out var instanceGetter, out var notFound) is not { } method)
+        {
+            if (notFound)
+                Error($"Method {MemberName} does not exist in {type.FullName}");
+
             return null;
+        }
 
         if (!ValidateListSignature(method, valueType, out var hasIndex, valueType))
             return null;
