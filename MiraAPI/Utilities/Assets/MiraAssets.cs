@@ -206,6 +206,21 @@ public static class MiraAssets
     public static LoadableResourceAsset WikiRolesButtonOpenSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarRolesButtonOpen.png");
 
     /// <summary>
+    /// Gets the sprite used for the modifiers button while hovering.
+    /// </summary>
+    public static LoadableResourceAsset WikiModifiersButtonHoverSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarModifiersButtonHover.png");
+
+    /// <summary>
+    /// Gets the sprite used for the modifiers button while hovering.
+    /// </summary>
+    public static LoadableResourceAsset WikiModifiersButtonIdleSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarModifiersButtonIdle.png");
+
+    /// <summary>
+    /// Gets the sprite used for the modifiers button while hovering.
+    /// </summary>
+    public static LoadableResourceAsset WikiModifiersButtonOpenSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarModifiersButtonOpen.png");
+
+    /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
     public static LoadableResourceAsset GroupCountHoverSprite { get; } = new("MiraAPI.Resources.Wiki.GroupCountHover.png");
@@ -334,6 +349,31 @@ public static class MiraAssets
     /// Gets the sprite used for terminology.
     /// </summary>
     public static LoadableResourceAsset IconTerminology { get; } = new("MiraAPI.Resources.Wiki.IconTerminology.png");
+
+    /// <summary>
+    /// Gets the Page switching sprite.
+    /// </summary>
+    public static LoadableResourceAsset PageLeftHover { get; } = new("MiraAPI.Resources.Wiki.PageLeftHover.png");
+
+    /// <summary>
+    /// Gets the Page switching sprite.
+    /// </summary>
+    public static LoadableResourceAsset PageLeftIdle { get; } = new("MiraAPI.Resources.Wiki.PageLeftIdle.png");
+
+    /// <summary>
+    /// Gets the Page switching sprite.
+    /// </summary>
+    public static LoadableResourceAsset PageRightHover { get; } = new("MiraAPI.Resources.Wiki.PageRightHover.png");
+
+    /// <summary>
+    /// Gets the Page switching sprite.
+    /// </summary>
+    public static LoadableResourceAsset PageRightIdle { get; } = new("MiraAPI.Resources.Wiki.PageRightIdle.png");
+
+    /// <summary>
+    /// Gets the sprite used below the tab icons in the wiki.
+    /// </summary>
+    public static LoadableResourceAsset TabButtonContainer { get; } = new("MiraAPI.Resources.Wiki.TabButtonContainer.png");
 
     internal static LoadableResourceAsset BlankSprite { get; } = new("MiraAPI.Resources.BlankSprite.png");
 }

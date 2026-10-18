@@ -10,6 +10,7 @@ public class ExampleOptions : AbstractOptionGroup
 {
     public override string GroupName => "options.exampleOptions1";
     public override Color GroupColor => Color.green;
+    public override bool ShowInMatchInfoGuide => true;
 
     [ModdedToggleOption("options.exampleOptions1.toggleOpt1")]
     public bool ToggleOpt { get; set; } = false;
