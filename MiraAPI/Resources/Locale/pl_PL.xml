@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
   <string name="MiraApi.TopRightButtonScaleFactor">Skala Przycisków w Prawym Górnym</string>
-  <string name="MiraApi.WikiOnBottomRow">Pokaż Wiki w Dolnym Rzędzie</string>
+  <string name="MiraApi.WikiOnBottomRow">Pokaż Przycisk w Dolnym Rzędzie</string>
   <string name="Roles">Role</string>
   <string name="Modifier">Modyfikator</string>
   <string name="Modifiers">Modyfikatory</string>
@@ -40,4 +40,43 @@ Przeżyj przez wymagany czas, albo zabij chowających.</string>
   <string name="MiraApi.RoleTeam.Impostor.Group">Role Intruzów</string>
   <string name="MiraApi.RoleTeam.Neutral.Group">Role Neutralne</string>
   <string name="MiraApi.RoleTeam.Other">Inne</string>
+  <string name="MiraApi.MatchInfoGuide">Informacje O Meczu</string>
+  <string name="MiraApi.WikiTabPosition.LeftSide">Po Lewo</string>
+  <string name="MiraApi.WikiTabPosition.RightSide">Po Prawo</string>
+  <string name="MiraApi.WikiTabPosition.Below">Poniżej UI</string>
+  <string name="MiraApi.Gamemode">Tryb Gry</string>
+  <string name="MiraApi.MatchInfoGuideScaleFactor">Skala Menu Z Informacjami O Meczu</string>
+  <string name="MiraApi.WikiTabPosition">Położenie Przycisków Informacji O Meczu</string>
+  <string name="MiraApi.ModifierDisplay.Page">Strona</string>
+  <string name="MiraApi.Page">Strona</string>
+  <string name="MiraApi.Main">Główne</string>
+  <string name="MiraApi.AbilityType.Basic">Umiejętność</string>
+  <string name="MiraApi.AbilityType.Indirect">Umiejętność Pośrednia</string>
+  <string name="MiraApi.AbilityType.Interaction">Umiejętność Interakcyjna</string>
+  <string name="MiraApi.AbilityType.Radius">Umiejętność z Zasięgiem</string>
+  <string name="MiraApi.AbilityType.Menu">Umiejętność z Menu</string>
+  <string name="MiraApi.AbilityType.Meeting">Umiejętność na Spotkaniu</string>
+  <string name="MiraApi.AbilityType.SelectiveMeeting">Umiejętność na Spotkaniu z Wyborem</string>
+  <string name="MiraApi.AbilityType.MeetingMenu">Umiejętność z Menu na Spotkaniu</string>
+  <string name="Options">Opcję</string>
+  <string name="MiraApi.Wiki.PlayersTab">Lista Graczy</string>
+  <string name="MiraApi.Wiki.SettingsTab">Ustawienia Gry</string>
+  <string name="MiraApi.Wiki.SearchPlaceholder">Wyszukaj...</string>
+  <string name="MiraApi.Wiki.FilterLabel">Filtruj</string>
+  <string name="MiraApi.Wiki.OrderLabel">Kolejność</string>
+  <string name="MiraApi.Wiki.GroupingLabel">Grupuj</string>
+  <string name="MiraApi.Wiki.VanillaSettings">Vanilla</string>
+  <string name="MiraApi.Wiki.SearchResults">Wyniki Wyszukiwania</string>
+  <string name="MiraApi.Wiki.PreviousPage">Poprzednia</string>
+  <string name="MiraApi.Wiki.NextPage">Następna</string>
+  <string name="MiraApi.Wiki.NoResultsFound">Brak Wyników</string>
+  <string name="On">Wł</string>
+  <string name="Off">Wył</string>
+  <string name="Enabled">Włączone</string>
+  <string name="Disabled">Wyłączone</string>
+  <string name="Active">Aktywne</string>
+  <string name="Inactive">Nieaktywne</string>
+  <string name="Activated">Aktywowane</string>
+  <string name="Deactivated">Dezaktywowane</string>
+  <string name="MiraApi.EnableVariableColors">Włącz Kolory Zmienne</string>
 </resources>
