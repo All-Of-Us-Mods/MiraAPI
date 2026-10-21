@@ -1157,7 +1157,9 @@ public static class RoleGuidePatches
             entry.Visible = entry.CanShow && MatchesSearch(entry, searchText);
             if (entry.Panel)
             {
-                SetPanelCount(entry.Panel!, entry.Amount, entry.Chance, entry.ModId);
+                dynamic entryType = entry.Modifier != null ? entry.Modifier : entry.Role!;
+                var text = GetPanelCountText(entryType, entry.Amount, entry.Chance, entry.ModId);
+                SetPanelCount(entry.Panel!, text);
                 if (!entry.Visible && entry.Panel!.gameObject.activeSelf)
                 {
                     entry.Panel.gameObject.SetActive(false);
@@ -1793,21 +1795,22 @@ public static class RoleGuidePatches
             return false;
         }
 
-        __instance.roleCount.text = string.Format(
-            CultureInfo.InvariantCulture,
-            "{0} at {1}%",
-            numPerGame.ToString(CultureInfo.InvariantCulture),
-            chancePerGame);
         if (role is ICustomRole customRole)
         {
             __instance.roleName.text = customRole.RoleName;
             __instance.roleDescription.text =
                 $"<size=60%>{role.GetCategoryTitle()}</size>\n" + customRole.RoleMedDescription;
             __instance.roleIcon.sprite = customRole.Configuration.Icon?.LoadAsset();
-            __instance.roleCount.text += $" ({customRole.ParentMod.MiraPlugin.GetAbbreviatedModName()})";
+            var text = GetCustomRolePanelCountText(customRole, numPerGame, chancePerGame, customRole.ParentMod.MiraPlugin.GetAbbreviatedModName());
+            SetPanelCount(__instance, text);
         }
         else
         {
+            __instance.roleCount.text = string.Format(
+                CultureInfo.InvariantCulture,
+                "{0} at {1}%",
+                numPerGame.ToString(CultureInfo.InvariantCulture),
+                chancePerGame);
             __instance.roleName.text = role.NiceName;
             __instance.roleDescription.text = $"<size=60%>{role.GetCategoryTitle()}</size>\n" + role.BlurbMed;
             __instance.roleIcon.sprite = role.RoleIconColor;
@@ -1823,14 +1826,37 @@ public static class RoleGuidePatches
         return false;
     }
 
-    private static void SetPanelCount(MatchInfoRolePanel panel, int amount, int chance, string modId)
+    // NOTE: This is specifically meant to be a different method name as to not have the game check this method and the GetPanelCountText method made for roles overall.
+    private static string GetCustomRolePanelCountText(ICustomRole custom, int amount, int chance, string modId)
     {
-        panel.roleCount.text = string.Format(
+        return custom.GetAmountText(amount, chance, modId);
+    }
+
+    private static string GetPanelCountText(RoleBehaviour role, int amount, int chance, string modId)
+    {
+        if (role is ICustomRole custom)
+        {
+            return custom.GetAmountText(amount, chance, modId);
+        }
+
+        return string.Format(
             CultureInfo.InvariantCulture,
             "{0} at {1}% ({2})",
             amount.ToString(CultureInfo.InvariantCulture),
             chance,
             modId);
+    }
+
+    private static string GetPanelCountText(BaseModifier modifier, int amount, int chance, string modId)
+    {
+        return modifier.GetAmountText(amount, chance, modId);
+    }
+
+    private static void SetPanelCount(MatchInfoRolePanel panel, string amountChanceText)
+    {
+        panel.roleCount.text = string.Format(
+            CultureInfo.InvariantCulture,
+            amountChanceText);
     }
 
     public static void SetRolePanel(
@@ -1845,14 +1871,16 @@ public static class RoleGuidePatches
             instance.roleDescription.text =
                 $"<size=60%>{role.GetCategoryTitle()}</size>\n" + customRole.RoleMedDescription;
             instance.roleIcon.sprite = customRole.Configuration.Icon?.LoadAsset();
-            SetPanelCount(instance, numPerGame, chancePerGame, customRole.ParentMod.MiraPlugin.GetAbbreviatedModName());
+            var text = GetCustomRolePanelCountText(customRole, numPerGame, chancePerGame, customRole.ParentMod.MiraPlugin.GetAbbreviatedModName());
+            SetPanelCount(instance, text);
         }
         else
         {
             instance.roleName.text = role.NiceName;
             instance.roleDescription.text = $"<size=60%>{role.GetCategoryTitle()}</size>\n" + role.BlurbMed;
             instance.roleIcon.sprite = role.RoleIconColor;
-            SetPanelCount(instance, numPerGame, chancePerGame, "AU");
+            var text = GetPanelCountText(role, numPerGame, chancePerGame, "AU");
+            SetPanelCount(instance, text);
         }
 
         instance.roleIcon.SetSizeLimit(0.13f);
@@ -1873,7 +1901,8 @@ public static class RoleGuidePatches
         instance.roleDescription.text =
             $"<size=60%>{modifier.ModifierCategoryTitle}</size>\n" + modifier.ModifierMedDescription;
         instance.roleIcon.sprite = modifier.ModifierIcon?.LoadAsset();
-        SetPanelCount(instance, numPerGame, chancePerGame, modifier.ParentMod.MiraPlugin.GetAbbreviatedModName());
+        var text = GetPanelCountText(modifier, numPerGame, chancePerGame, modifier.ParentMod.MiraPlugin.GetAbbreviatedModName());
+        SetPanelCount(instance, text);
 
         instance.roleIcon.SetSizeLimit(0.13f);
         instance.roleIcon.material.SetInt(PlayerMaterial.MaskLayer, 50);
