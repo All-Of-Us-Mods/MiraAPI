@@ -118,10 +118,12 @@ public abstract class LocalSettingsTab(ConfigFile config)
         tab.transform.DestroyChildren();
         tab.gameObject.SetActive(false);
 
-        if (Scroller == null)
+        if (Scroller == null || Scroller.transform.parent != tab.transform)
         {
             Scroller = Helpers.CreateScroller(tab.transform, OptionsMenuPatches.MaskCollider);
         }
+
+        Labels.Clear();
 
         if (TabButton != null)
         {
@@ -216,7 +218,11 @@ public abstract class LocalSettingsTab(ConfigFile config)
             contentIndex++;
         }
 
-        Scroller.SetBounds(new FloatRange(0, (Settings.Count + Buttons.Count) * 0.5f - 5f), new FloatRange(0, 0));
+        var estimatedScrollRange = (Settings.Count + Buttons.Count) * 0.5f - 5f;
+        var layoutScrollRange = contentOffset - 5f;
+        var scrollRange = Mathf.Max(0f, estimatedScrollRange, layoutScrollRange);
+        Scroller.SetBounds(new FloatRange(0, scrollRange), new FloatRange(0, 0));
+        Scroller.ScrollToTop();
         return tab;
     }
 
