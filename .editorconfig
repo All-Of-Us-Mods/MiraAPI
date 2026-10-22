@@ -104,3 +104,9 @@ dotnet_diagnostic.S1244.severity = none
 
 # S2325: Methods and properties that don't access instance data should be static
 dotnet_diagnostic.S2325.severity = none
+
+# CA1710: Identifiers should have correct suffix
+dotnet_diagnostic.CA1710.severity = silent
+
+# CA1010: Generic interface should also be implemented
+dotnet_diagnostic.CA1010.severity = silent

@@ -17,7 +17,7 @@ public class ModdedStringOptionListAttribute(
     string[] values)
     : ModdedOptionListAttribute(title)
 {
-    internal override IModdedOptionList CreateOptionList(IList value, PropertyInfo property)
+    internal override IBaseModdedOptionList CreateOptionList(IList value, PropertyInfo property)
     {
         return new ModdedOptionList<ModdedStringOption>(value.Count, idx =>
         {
@@ -28,14 +28,14 @@ public class ModdedStringOptionListAttribute(
     /// <inheritdoc />
     public override void SetValue(int idx, object value)
     {
-        var opt = HolderOptionList?[idx] as ModdedStringOption;
+        var opt = HolderOptionList?.ElementAt(idx) as ModdedStringOption;
         opt?.SetValue((string)value);
     }
 
     /// <inheritdoc />
     public override object GetValue(int idx)
     {
-        return HolderOptionList?[idx] is ModdedStringOption opt
+        return HolderOptionList?.ElementAt(idx) is ModdedStringOption opt
             ? opt.Value
             : throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" is not a ModdedStringOption");
     }
