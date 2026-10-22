@@ -80,6 +80,9 @@ public abstract class ModdedOption<T> : IModdedOption
     public bool IncludeInPreset { get; set; }
 
     /// <inheritdoc />
+    public bool ShowNotification { get; set; } = true;
+
+    /// <inheritdoc />
     public OptionBehaviour? OptionBehaviour { get; protected set; }
 
     /// <inheritdoc />
@@ -156,10 +159,11 @@ public abstract class ModdedOption<T> : IModdedOption
                 entry.Value = _value;
             }
 
-            Rpc<SyncOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, [GetNetData()], true);
+            Rpc<SyncOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, new MiraOptionNetData(true, [GetNetData()]), true);
         }
 
         OnValueChanged(_value);
+        ShowNotification = true;
     }
 
     /// <inheritdoc />

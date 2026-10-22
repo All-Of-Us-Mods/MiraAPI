@@ -29,7 +29,7 @@ public static class HudManagerPatches
 
     public static IEnumerator CoResizeUI()
     {
-        while (!HudManager.Instance) yield return null;
+        while (!HudManager.InstanceExists) yield return null;
 
         yield return new WaitForSeconds(0.01f);
         ResizeUI(LocalSettingsTabSingleton<MiraApiSettings>.Instance.ButtonUIFactorSlider.Value);

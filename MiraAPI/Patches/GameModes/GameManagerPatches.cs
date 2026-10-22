@@ -1,5 +1,7 @@
 ﻿using HarmonyLib;
 using MiraAPI.GameModes;
+using MiraAPI.GameOptions;
+using MiraAPI.Roles;
 
 namespace MiraAPI.Patches.GameModes;
 
@@ -54,5 +56,18 @@ internal static class GameStartManagerPatches
         {
             __instance.MinPlayers = 1;
         }
+    }
+
+    [HarmonyPrefix, HarmonyPatch(nameof(GameStartManager.BeginGame))]
+    public static void Prefix(GameStartManager __instance)
+    {
+        if (!AmongUsClient.Instance.AmHost)
+        {
+            return;
+        }
+
+        ModdedOptionsManager.SyncAllOptions();
+        CustomRoleManager.SyncAllRoleSettings();
+        GameModeOption.RpcSyncGamemode(PlayerControl.LocalPlayer, GameModeOption.Value);
     }
 }

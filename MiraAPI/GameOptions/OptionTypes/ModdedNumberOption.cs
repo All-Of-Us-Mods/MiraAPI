@@ -199,13 +199,16 @@ public class ModdedNumberOption : ModdedOption<float>
     protected override void OnValueChanged(float newValue)
     {
         Value = Mathf.Clamp(newValue, Min, Max);
-        ModdedOptionsManager.AddSettingsChangeMessage(
-            HudManager.Instance.Notifier,
-            StringName,
-            Data.GetValueString(newValue),
-            Configuration.PopUpTextColor,
-            Configuration.PopUpIconTmp,
-            false);
+        if (ShowNotification)
+        {
+            ModdedOptionsManager.AddSettingsChangeMessage(
+                HudManager.Instance.Notifier,
+                StringName,
+                Data.GetValueString(newValue),
+                Configuration.PopUpTextColor,
+                Configuration.PopUpIconTmp,
+                false);
+        }
 
         if (OptionBehaviour is NumberOption opt)
         {

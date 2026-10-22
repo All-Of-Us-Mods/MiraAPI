@@ -280,11 +280,11 @@ public static class CustomRoleManager
 
         while (data.Count > 0)
         {
-            Rpc<SyncRoleOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.Dequeue());
+            Rpc<SyncRoleOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, new MiraOptionNetData(false, data.Dequeue()));
         }
     }
 
-    internal static void HandleSyncRoleOptions(NetData[] data)
+    internal static void HandleSyncRoleOptions(bool showNotifs, NetData[] data)
     {
         // necessary to disable then re-enable this setting
         // we don't know how other plugins handle their configs
@@ -312,7 +312,10 @@ public static class CustomRoleManager
             var num = BitConverter.ToInt32(netData.Data, 0);
             var chance = BitConverter.ToInt32(netData.Data, 4);
 
-            HudManager.Instance.Notifier.AddRoleSettingsChangeMessage(role.StringName, num, chance, role.TeamType, false);
+            if (showNotifs)
+            {
+                HudManager.Instance.Notifier.AddRoleSettingsChangeMessage(role.StringName, num, chance, role.TeamType, false);
+            }
 
             try
             {

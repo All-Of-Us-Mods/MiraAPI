@@ -93,13 +93,16 @@ public class ModdedEnumOption : ModdedOption<int>
     /// <inheritdoc />
     protected override void OnValueChanged(int newValue)
     {
-        ModdedOptionsManager.AddSettingsChangeMessage(
-            HudManager.Instance.Notifier,
-            StringName,
-            Data.GetValueString(newValue),
-            Configuration.PopUpTextColor,
-            Configuration.PopUpIconTmp,
-            false);
+        if (ShowNotification)
+        {
+            ModdedOptionsManager.AddSettingsChangeMessage(
+                HudManager.Instance.Notifier,
+                StringName,
+                Data.GetValueString(newValue),
+                Configuration.PopUpTextColor,
+                Configuration.PopUpIconTmp,
+                false);
+        }
         if (!OptionBehaviour)
         {
             return;
@@ -196,13 +199,17 @@ public class ModdedEnumOption<T> : ModdedOption<T>
     /// <inheritdoc />
     protected override void OnValueChanged(T newValue)
     {
-        ModdedOptionsManager.AddSettingsChangeMessage(
-            HudManager.Instance.Notifier,
-            StringName,
-            Data.GetValueString(Convert.ToInt32(newValue, NumberFormatInfo.InvariantInfo)),
-            Configuration.PopUpTextColor,
-            Configuration.PopUpIconTmp,
-            false);
+        if (ShowNotification)
+        {
+            ModdedOptionsManager.AddSettingsChangeMessage(
+                HudManager.Instance.Notifier,
+                StringName,
+                Data.GetValueString(Convert.ToInt32(newValue, NumberFormatInfo.InvariantInfo)),
+                Configuration.PopUpTextColor,
+                Configuration.PopUpIconTmp,
+                false);
+        }
+
         if (!OptionBehaviour)
         {
             return;
