@@ -936,7 +936,7 @@ public static class Helpers
     {
         const float contentTop = 0.95f;
         const float horizontalOffset = -0.2f;
-        const float headerContentGap = 0.05f;
+        const float groupHeaderContentGap = 0.05f;
         const int contentSortingOrder = 151;
 
         columns = Mathf.Clamp(columns, 1, 6);
@@ -1024,7 +1024,7 @@ public static class Helpers
                 groupColumns[group] = i % columns;
                 bandHeights[band] = Mathf.Max(
                     bandHeights[band],
-                    rowPitch * (groupedSettings[i].Count() + 1) + headerContentGap + 0.25f);
+                    rowPitch * (groupedSettings[i].Count() + 1) + groupHeaderContentGap + 0.25f);
             }
 
             var bandOffset = 0f;
@@ -1088,12 +1088,12 @@ public static class Helpers
 
                 if (headerSource)
                 {
-                    const float headerScale = 0.42f;
+                    const float groupHeaderScale = 0.42f;
                     var headerWidth = groupsAsColumns
-                        ? columnWidth / headerScale
-                        : (columns * columnWidth + (columns - 1) * columnGap) / headerScale;
+                        ? columnWidth / groupHeaderScale
+                        : (columns * columnWidth + (columns - 1) * columnGap) / groupHeaderScale;
                     var header = Object.Instantiate(headerSource!, page.transform, false);
-                    header.transform.localScale = Vector3.one * headerScale;
+                    header.transform.localScale = Vector3.one * groupHeaderScale;
                     if (groupsAsColumns)
                     {
                         var totalWidth = columns * columnWidth + (columns - 1) * columnGap;
@@ -1181,7 +1181,7 @@ public static class Helpers
                           horizontalOffset;
             var centerY = groupsAsColumns && settings[i].Group is { } rowGroup
                 ? contentTop - groupTopOffsets[rowGroup] -
-                  (rowPitch * (groupRows[rowGroup] + 1)) - headerContentGap - (rowHeight / 2f)
+                  (rowPitch * (groupRows[rowGroup] + 1)) - groupHeaderContentGap - (rowHeight / 2f)
                 : contentTop - (rowHeight / 2f) - (rowIndex * rowPitch) - groupSpacing;
             var row = Object.Instantiate(rowPrefab, page.transform);
             row.enabled = false;

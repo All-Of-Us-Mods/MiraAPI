@@ -218,10 +218,12 @@ public abstract class LocalSettingsTab(ConfigFile config)
             contentIndex++;
         }
 
-        var estimatedScrollRange = (Settings.Count + Buttons.Count) * 0.5f - 5f;
-        var layoutScrollRange = contentOffset - 4.75f;
-        var scrollRange = Mathf.Max(0f, estimatedScrollRange, layoutScrollRange);
-        Scroller.SetBounds(new FloatRange(0, scrollRange), new FloatRange(0, 0));
+        const float visibleHeight = 5f;
+        const float extraPadding = 0.25f;
+        var itemRange = (Settings.Count + Buttons.Count) * 0.5f - visibleHeight;
+        var offsetRange = contentOffset - visibleHeight + extraPadding;
+        var maxScroll = Mathf.Max(0f, itemRange, offsetRange);
+        Scroller.SetBounds(new FloatRange(0, maxScroll), new FloatRange(0, 0));
         Scroller.ScrollToTop();
         return tab;
     }
