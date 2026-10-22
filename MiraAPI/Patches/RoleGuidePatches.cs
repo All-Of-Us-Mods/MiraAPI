@@ -1187,20 +1187,43 @@ public static class RoleGuidePatches
         return shown;
     }
 
+    public static IEnumerable<GameModifier> GetActiveModifiers()
+    {
+        return PlayerControl.LocalPlayer.GetModifiers<GameModifier>();
+    }
+
+    public static IEnumerable<RoleBehaviour> GetActiveRoles()
+    {
+        IEnumerable<RoleBehaviour> comparisons = [];
+
+        var curRole = PlayerControl.LocalPlayer.Data.Role;
+
+        comparisons = comparisons.AddItem(curRole);
+
+        if (PlayerControl.LocalPlayer && PlayerControl.LocalPlayer.Data && PlayerControl.LocalPlayer.Data.IsDead &&
+            !comparisons.Any(x => x.Role == PlayerControl.LocalPlayer.Data.RoleWhenAlive.Value))
+        {
+            comparisons = comparisons.AddItem(RoleManager.Instance.GetRole(PlayerControl.LocalPlayer.Data.RoleWhenAlive.Value));
+        }
+
+        return comparisons;
+    }
+
+    public static List<uint> GetActiveIds()
+    {
+        var activeModifiers = GetActiveModifiers();
+        List<uint> comparisons = activeModifiers.Select(x => x.TypeId).ToList();
+        comparisons.AddRange(GetActiveRoles().Select(x => (uint)x.Role));
+
+        return comparisons;
+    }
+
     private static List<DetailedPanel> SortEntries(List<DetailedPanel> entries, string searchText)
     {
         var activeModifiers = PlayerControl.LocalPlayer.GetModifiers<GameModifier>().Select(x => x.TypeId);
+        var roles = GetActiveRoles().Select(x => (uint)x.Role).ToList();
         List<uint> comparisons = activeModifiers.ToList();
-
-        var curRole = PlayerControl.LocalPlayer.Data.Role.Role;
-
-        comparisons.Add((ushort)curRole);
-
-        if (PlayerControl.LocalPlayer && PlayerControl.LocalPlayer.Data && PlayerControl.LocalPlayer.Data.IsDead &&
-            !comparisons.Contains((ushort)PlayerControl.LocalPlayer.Data.RoleWhenAlive.Value))
-        {
-            comparisons.Add((ushort)PlayerControl.LocalPlayer.Data.RoleWhenAlive.Value);
-        }
+        comparisons.AddRange(roles);
 
         var comparer = new BasicGuideComparer(comparisons);
 
@@ -1675,10 +1698,15 @@ public static class RoleGuidePatches
 
     public static Sprite GetRandomRoleIcon()
     {
-        var aliveRole = PlayerControl.LocalPlayer.Data?.Role;
-        if (aliveRole != null && aliveRole.RoleIconSolid != null)
+        var roles = GetActiveRoles().Shuffle().ToList();
+        foreach (var role in roles)
         {
-            return aliveRole.RoleIconSolid;
+            if (role.RoleIconSolid == null)
+            {
+                continue;
+            }
+
+            return role.RoleIconSolid;
         }
 
         return GetRandomFactionIcon();
