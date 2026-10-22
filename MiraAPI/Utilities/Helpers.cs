@@ -936,7 +936,7 @@ public static class Helpers
     {
         const float contentTop = 0.95f;
         const float horizontalOffset = -0.2f;
-        const float headerContentGap = 0.2f;
+        const float headerContentGap = 0.05f;
         const int contentSortingOrder = 151;
 
         columns = Mathf.Clamp(columns, 1, 6);
@@ -1088,7 +1088,7 @@ public static class Helpers
 
                 if (headerSource)
                 {
-                    const float headerScale = 0.46f;
+                    const float headerScale = 0.42f;
                     var headerWidth = groupsAsColumns
                         ? columnWidth / headerScale
                         : (columns * columnWidth + (columns - 1) * columnGap) / headerScale;
