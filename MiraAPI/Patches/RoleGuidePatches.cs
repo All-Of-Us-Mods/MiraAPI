@@ -754,7 +754,8 @@ public static class RoleGuidePatches
                     modifier.ModifierCategoryTitle,
                     modifier.ParentMod.MiraPlugin.GetAbbreviatedModName(),
                     null,
-                    modifier));
+                    modifier,
+                    modifier.TypeId));
             }
         }
 
@@ -790,7 +791,8 @@ public static class RoleGuidePatches
                 roleBehaviour.GetCategoryTitle(),
                 modId,
                 roleBehaviour,
-                null));
+                null,
+                (uint)roleBehaviour.Role));
         }
 
         _roleEntriesMode = activeModeType;
@@ -928,7 +930,7 @@ public static class RoleGuidePatches
         }
     }
 
-    private sealed class DetailedPanel(string title, string category, string modId, RoleBehaviour? role, GameModifier? modifier)
+    private sealed class DetailedPanel(string title, string category, string modId, RoleBehaviour? role, GameModifier? modifier, uint typeId)
     {
         public MatchInfoRolePanel? Panel { get; set; }
         public string Title { get; } = title;
@@ -936,6 +938,7 @@ public static class RoleGuidePatches
         public string ModId { get; } = modId;
         public RoleBehaviour? Role { get; } = role;
         public GameModifier? Modifier { get; } = modifier;
+        public uint TypeId { get; } = typeId;
         public int Amount { get; set; }
         public int Chance { get; set; }
         public float Likelihood { get; set; }
@@ -1186,14 +1189,33 @@ public static class RoleGuidePatches
 
     private static List<DetailedPanel> SortEntries(List<DetailedPanel> entries, string searchText)
     {
+        var activeModifiers = PlayerControl.LocalPlayer.GetModifiers<GameModifier>().Select(x => x.TypeId);
+        List<uint> comparisons = activeModifiers.ToList();
+
+        var curRole = PlayerControl.LocalPlayer.Data.Role.Role;
+
+        comparisons.Add((ushort)curRole);
+
+        if (PlayerControl.LocalPlayer && PlayerControl.LocalPlayer.Data && PlayerControl.LocalPlayer.Data.IsDead &&
+            !comparisons.Contains((ushort)PlayerControl.LocalPlayer.Data.RoleWhenAlive.Value))
+        {
+            comparisons.Add((ushort)PlayerControl.LocalPlayer.Data.RoleWhenAlive.Value);
+        }
+
+        var comparer = new BasicGuideComparer(comparisons);
+
         var sorted = entries.Where(p => p.Visible)
             .OrderByDescending(p => p.Title.Equals(searchText, StringComparison.OrdinalIgnoreCase))
             .ThenByDescending(p =>
                 p.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-                p.Category.Contains(searchText, StringComparison.OrdinalIgnoreCase));
-        return [.. _sortMethod is SortingMethod.Alphabetical
+                p.Category.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+            .ThenBy(x => x.Modifier != null ? x.Modifier.TypeId : (uint)x.Role!.Role, comparer);
+        return
+        [
+            .. _sortMethod is SortingMethod.Alphabetical
                 ? sorted.ThenBy(p => p.GetSortKey(_sortGrouping))
-                : sorted.ThenByDescending(p => p.GetSortKey(_sortGrouping))];
+                : sorted.ThenByDescending(p => p.GetSortKey(_sortGrouping))
+        ];
     }
 
     private static bool MatchesSearch(DetailedPanel entry, string searchText)
