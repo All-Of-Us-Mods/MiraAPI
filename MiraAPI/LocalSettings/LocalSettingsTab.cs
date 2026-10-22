@@ -219,7 +219,7 @@ public abstract class LocalSettingsTab(ConfigFile config)
         }
 
         var estimatedScrollRange = (Settings.Count + Buttons.Count) * 0.5f - 5f;
-        var layoutScrollRange = contentOffset - 5f;
+        var layoutScrollRange = contentOffset - 4.75f;
         var scrollRange = Mathf.Max(0f, estimatedScrollRange, layoutScrollRange);
         Scroller.SetBounds(new FloatRange(0, scrollRange), new FloatRange(0, 0));
         Scroller.ScrollToTop();
