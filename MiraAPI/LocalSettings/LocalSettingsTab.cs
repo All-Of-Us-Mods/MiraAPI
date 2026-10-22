@@ -74,6 +74,7 @@ public abstract class LocalSettingsTab(ConfigFile config)
     protected int TabIndex => LocalSettingsManager.Tabs.IndexOf(this) + 10;
 
     private Scroller? Scroller { get; set; }
+    private float MaxScroll { get; set; }
 
     /// <summary>
     /// Invoked when an option value is changed.
@@ -103,6 +104,12 @@ public abstract class LocalSettingsTab(ConfigFile config)
         {
             label.Key.text =
                 $"<font=\"LiberationSans SDF\" material=\"LiberationSans SDF - Chat Message Masked\"><b>{label.Value.Translate()}</b></font>";
+        }
+
+        if (Scroller != null)
+        {
+            Scroller.SetBounds(new FloatRange(0, MaxScroll), new FloatRange(0, 0));
+            Scroller.ScrollToTop();
         }
     }
 
@@ -222,9 +229,7 @@ public abstract class LocalSettingsTab(ConfigFile config)
         const float extraPadding = 0.25f;
         var itemRange = (Settings.Count + Buttons.Count) * 0.5f - visibleHeight;
         var offsetRange = contentOffset - visibleHeight + extraPadding;
-        var maxScroll = Mathf.Max(0f, itemRange, offsetRange);
-        Scroller.SetBounds(new FloatRange(0, maxScroll), new FloatRange(0, 0));
-        Scroller.ScrollToTop();
+        MaxScroll = Mathf.Max(0f, itemRange, offsetRange);
         return tab;
     }
 
