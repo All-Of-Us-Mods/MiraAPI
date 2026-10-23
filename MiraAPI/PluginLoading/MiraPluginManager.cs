@@ -358,7 +358,7 @@ public sealed class MiraPluginManager
         }
         catch (Exception e)
         {
-            Error($"Failed to register options for {type.Name}: {e.ToString()}");
+            Error($"Failed to register options for {type.Name}: {e}");
         }
 
         return false;
@@ -543,7 +543,7 @@ public sealed class MiraPluginManager
         }
         catch (Exception e)
         {
-            Error($"Failed to register options for {type.Name}: {e.ToString()}");
+            Error($"Failed to register options for {type.Name}: {e}");
         }
 
         return false;

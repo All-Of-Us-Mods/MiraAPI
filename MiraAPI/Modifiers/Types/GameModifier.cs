@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using MiraAPI.GameModes;
+﻿using MiraAPI.GameModes;
 using MiraAPI.PluginLoading;
 
 namespace MiraAPI.Modifiers.Types;
