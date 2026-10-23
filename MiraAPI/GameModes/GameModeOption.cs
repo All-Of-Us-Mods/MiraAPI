@@ -4,6 +4,7 @@ using System.Linq;
 using HarmonyLib;
 using MiraAPI.GameOptions;
 using MiraAPI.Networking;
+using MiraAPI.Patches;
 using MiraAPI.Patches.GameModes;
 using MiraAPI.Patches.Options;
 using MiraAPI.Translation;
@@ -39,7 +40,7 @@ public static class GameModeOption
         }
     }
 
-    internal static readonly StringNames GamemodeName = MiraLocaleManager.GetOrCreateLocaleString("Gamemode");
+    internal static readonly StringNames GamemodeName = MiraLocaleManager.GetOrCreateLocaleString("MiraApi.Gamemode");
     internal static readonly StringNames CustomName = MiraLocaleManager.GetOrCreateLocaleString("Custom");
     internal static readonly Dictionary<uint, StringNames> Values = new()
     {
@@ -128,6 +129,9 @@ public static class GameModeOption
                     MenuState.Instance.QueuedRoleMenuRefresh[roleMenu.Key] = true;
                 }
             }
+
+            GameOptionsMenuPatch.RefreshForGameMode();
+            RoleGuidePatches.RefreshSettingsForGameMode();
         }
 
         // TODO: could make Values a dict of AbstractGameMode too
@@ -135,19 +139,13 @@ public static class GameModeOption
 
     [HarmonyPatch(typeof(GameOptionsMenu), nameof(GameOptionsMenu.ValueChanged))]
     [HarmonyPrefix]
-    private static bool ValueChanged(GameOptionsMenu __instance, OptionBehaviour option)
+    private static bool ValueChanged(OptionBehaviour option)
     {
         if (!OptionBehaviour.Equals(option))
             return true;
 
         Info($"Game mode changed to {option.GetInt()}");
         RpcSyncGamemode(PlayerControl.LocalPlayer, option.GetInt());
-
-        if (GameSettingMenu.Instance && CustomGameModeManager.ActiveMode != null)
-        {
-            GameOptionsMenuPatch.ToggleGamemodeOptions(CustomGameModeManager.ActiveMode, __instance);
-            GameSettingMenu.Instance.RoleSettingsButton.gameObject.SetActive(CustomGameModeManager.ActiveMode.ShowNormalRoleSettings);
-        }
 
         return false;
     }

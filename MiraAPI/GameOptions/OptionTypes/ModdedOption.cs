@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using BepInEx.Configuration;
 using MiraAPI.Networking;
 using MiraAPI.PluginLoading;
@@ -47,16 +48,32 @@ public abstract class ModdedOption<T>(string title, T defaultValue, bool include
     /// <summary>
     /// Gets or sets the value of the option.
     /// </summary>
-    public T Value { get; protected set; } = defaultValue;
+    public T Value
+    {
+        get => Getter != null ? Getter(_value) : _value;
+        protected set
+        {
+            if (Setter != null)
+                value = Setter(value, _value);
+
+            _value = value;
+        }
+    }
+
+    private T _value = defaultValue;
 
     /// <summary>
     /// Gets the default value of the option.
     /// </summary>
     public T DefaultValue { get; } = defaultValue;
 
-    /// <summary>
-    /// Gets or sets the event that is invoked when the value of the option changes.
-    /// </summary>
+    /// <inheritdoc cref="IModdedOption.Getter"/>
+    public Func<T, T>? Getter { get; set; }
+
+    /// <inheritdoc cref="IModdedOption.Setter"/>
+    public Func<T, T, T>? Setter { get; set; }
+
+    /// <inheritdoc cref="IModdedOption.ChangedEvent"/>
     public Action<T>? ChangedEvent { get; set; }
 
     /// <inheritdoc />
@@ -64,6 +81,9 @@ public abstract class ModdedOption<T>(string title, T defaultValue, bool include
 
     /// <inheritdoc />
     public bool IncludeInPreset { get; set; } = includeInPreset;
+
+    /// <inheritdoc />
+    public bool ShowNotification { get; set; } = true;
 
     /// <inheritdoc />
     public OptionBehaviour? OptionBehaviour { get; protected set; }
@@ -77,6 +97,27 @@ public abstract class ModdedOption<T>(string title, T defaultValue, bool include
     /// <inheritdoc />
     public virtual OptionNotifConfiguration Configuration => new(ParentGroup);
 
+    /// <inheritdoc />
+    Delegate? IModdedOption.Getter
+    {
+        get => Getter;
+        set => Getter = value as Func<T, T>;
+    }
+
+    /// <inheritdoc />
+    Delegate? IModdedOption.Setter
+    {
+        get => Setter;
+        set => Setter = value as Func<T, T, T>;
+    }
+
+    /// <inheritdoc />
+    Delegate? IModdedOption.ChangedEvent
+    {
+        get => ChangedEvent;
+        set => ChangedEvent = value as Action<T>;
+    }
+
     internal void ValueChanged(OptionBehaviour optionBehaviour)
     {
         SetValue(GetValueFromOptionBehaviour(optionBehaviour));
@@ -89,25 +130,26 @@ public abstract class ModdedOption<T>(string title, T defaultValue, bool include
     /// <param name="sendRpc">Whether to send the value to other players.</param>
     public void SetValue(T newValue, bool sendRpc = true)
     {
-        var oldVal = Value;
+        var oldVal = _value;
         Value = newValue;
 
-        if (Value?.Equals(oldVal) == false)
+        if (!EqualityComparer<T>.Default.Equals(_value, oldVal))
         {
-            ChangedEvent?.Invoke(Value);
+            ChangedEvent?.Invoke(_value);
         }
 
         if (sendRpc && AmongUsClient.Instance.AmHost)
         {
             if (ParentMod?.GetConfigFile().TryGetEntry<T>(ConfigDefinition, out var entry) == true)
             {
-                entry.Value = Value;
+                entry.Value = _value;
             }
 
-            Rpc<SyncOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, [GetNetData()], true);
+            Rpc<SyncOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, new MiraOptionNetData(true, [GetNetData()]), true);
         }
 
-        OnValueChanged(newValue);
+        OnValueChanged(_value);
+        ShowNotification = true;
     }
 
     /// <inheritdoc />
@@ -149,6 +191,12 @@ public abstract class ModdedOption<T>(string title, T defaultValue, bool include
     protected virtual void OnParentModSet(IMiraPlugin plugin)
     {
         StringName = MiraLocaleManager.GetOrCreateLocaleString(plugin.IdBuilder.CreateOptionTitleId(Title));
+    }
+
+    /// <inheritdoc />
+    public Type GetValueType()
+    {
+        return typeof(T);
     }
 
     /// <inheritdoc />

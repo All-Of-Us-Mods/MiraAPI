@@ -58,9 +58,29 @@ public interface IModdedOption
     Func<bool> Visible { get; set; }
 
     /// <summary>
+    /// Gets or sets a getter event for the option, allowing for dynamic values based on external circumstances.
+    /// </summary>
+    Delegate? Getter { get; set; }
+
+    /// <summary>
+    /// Gets or sets a setter event for the option, allowing for dynamic value changes based on external circumstances.
+    /// </summary>
+    Delegate? Setter { get; set; }
+
+    /// <summary>
+    /// Gets or sets the event that is invoked when the value of the option changes.
+    /// </summary>
+    Delegate? ChangedEvent { get; set; }
+
+    /// <summary>
     /// Gets or sets a value indicating whether the option should be included with presets.
     /// </summary>
     bool IncludeInPreset { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the option should show a notification, toggled on by an overall option synchronization.
+    /// </summary>
+    public bool ShowNotification { get; set; }
 
     /// <summary>
     /// Gets or sets the <see cref="BepInEx.Configuration.ConfigDefinition"/> for the option, used for BepInEx configuration.
@@ -114,6 +134,12 @@ public interface IModdedOption
     /// </summary>
     /// <param name="presetConfig">The <see cref="ConfigFile"/> representing the preset configuration.</param>
     void LoadFromPreset(ConfigFile presetConfig);
+
+    /// <summary>
+    /// Gets the type of the value that the option represents.
+    /// </summary>
+    /// <returns>The type of the option value.</returns>
+    Type GetValueType();
 }
 
 /// <summary>
@@ -121,4 +147,24 @@ public interface IModdedOption
 /// </summary>
 public interface IModdedOptionList : IReadOnlyList<IModdedOption>
 {
+    /// <summary>
+    /// Gets the function to name the keys of the individual options in the configuration file.
+    /// <para/>
+    /// Return <see langword="null"/> to use the default of the property's name with its index appended.
+    /// </summary>
+    Func<int, string>? ConfigName { get; init; }
+}
+
+/// <summary>
+/// Interface for list of <typeparamref name="T"/> options.
+/// </summary>
+/// <typeparam name="T">The type of <see cref="IModdedOption"/>.</typeparam>
+public interface IModdedOptionList<out T> : IModdedOptionList
+    where T : IModdedOption
+{
+    /// <inheritdoc cref="IReadOnlyList{T}.this[int]"/>
+    new T this[int index] { get; }
+
+    /// <inheritdoc cref="IEnumerable{T}.GetEnumerator"/>
+    new IEnumerator<T> GetEnumerator();
 }

@@ -1,4 +1,5 @@
-﻿using MiraAPI.GameModes;
+﻿using System.Globalization;
+using MiraAPI.GameModes;
 using MiraAPI.PluginLoading;
 
 namespace MiraAPI.Modifiers.Types;
@@ -9,6 +10,9 @@ namespace MiraAPI.Modifiers.Types;
 [MiraIgnore]
 public abstract class GameModifier : BaseModifier
 {
+    /// <inheritdoc />
+    public override bool? ForceShowModifierOnWiki => null;
+
     /// <inheritdoc />
     public override bool ShowInFreeplay => true;
 

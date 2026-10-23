@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using Il2CppSystem.Collections.Generic;
 using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
 using MiraAPI.Modifiers;
@@ -25,12 +25,12 @@ namespace MiraAPI.Patches.Options;
 [HarmonyPatch(typeof(GameOptionsMenu))]
 internal static class GameOptionsMenuPatch
 {
-    private static readonly List<CategoryHeaderMasked> VanillaHeaders = new();
-    private static readonly List<OptionBehaviour> VanillaOptions = new();
-    private static readonly List<OptionBehaviour> MainOptions = new();
-    private static readonly System.Collections.Generic.Dictionary<AbstractGameMode, System.Collections.Generic.List<AbstractOptionGroup>> GameModeGroups = [];
-    private static readonly System.Collections.Generic.Dictionary<AbstractGameMode, System.Collections.Generic.List<OptionBehaviour>> GameModeOptions = [];
-    private static readonly System.Collections.Generic.Dictionary<AbstractGameMode, System.Collections.Generic.List<CategoryHeaderMasked>> GameModeHeaders = [];
+    private static readonly List<CategoryHeaderMasked> VanillaHeaders = [];
+    private static readonly List<OptionBehaviour> VanillaOptions = [];
+    private static readonly List<OptionBehaviour> MainOptions = [];
+    private static readonly Dictionary<AbstractGameMode, List<AbstractOptionGroup>> GameModeGroups = [];
+    private static readonly Dictionary<AbstractGameMode, List<OptionBehaviour>> GameModeOptions = [];
+    private static readonly Dictionary<AbstractGameMode, List<CategoryHeaderMasked>> GameModeHeaders = [];
     private static TextMeshPro _gamemodeDescription = null!;
     private static SpriteRenderer _modIcon = null!;
 
@@ -38,7 +38,8 @@ internal static class GameOptionsMenuPatch
     [HarmonyPatch(nameof(GameOptionsMenu.Initialize))]
     public static bool InitPatch(GameOptionsMenu __instance)
     {
-        __instance.Children ??= new List<OptionBehaviour>();
+        Helpers.CacheAdvancedSettingsRowPrefab(__instance.numberOptionOrigin);
+        __instance.Children ??= new();
         __instance.Children.Clear();
 
         if (MenuState.Instance.CurrentModIdx == 0)
@@ -187,6 +188,66 @@ internal static class GameOptionsMenuPatch
         instance.scrollBar.SetYBoundsMax(-num - 1.65f);
     }
 
+    internal static void RefreshForGameMode()
+    {
+        if (CustomGameModeManager.ActiveMode == null ||
+            !GameSettingMenu.Instance ||
+            !GameSettingMenu.Instance.GameSettingsTab ||
+            !MenuState.Instance ||
+            MenuState.Instance.CurrentModIdx != 0 ||
+            GameModeGroups.Count == 0)
+        {
+            return;
+        }
+
+        ToggleGamemodeOptions(CustomGameModeManager.ActiveMode, GameSettingMenu.Instance.GameSettingsTab);
+        GameSettingMenu.Instance.RoleSettingsButton.gameObject.SetActive(
+            CustomGameModeManager.ActiveMode.ShowNormalRoleSettings);
+    }
+
+    internal static List<KeyValuePair<string, string>> GetActiveGameSettingsRows(Func<bool, string> formatBool)
+    {
+        var menu = GameSettingMenu.Instance ? GameSettingMenu.Instance.GameSettingsTab : null;
+        if (!menu || menu!.Children == null)
+        {
+            return [];
+        }
+
+        var rows = new List<KeyValuePair<string, string>>();
+        foreach (var option in menu.Children)
+        {
+            if (!option || !option.gameObject.activeInHierarchy ||
+                option == menu.MapPicker ||
+                (GameModeOption.OptionBehaviour && option == GameModeOption.OptionBehaviour) ||
+                !option.Data)
+            {
+                continue;
+            }
+
+            var title = option switch
+            {
+                ToggleOption toggle => toggle.TitleText.text,
+                NumberOption number => number.TitleText.text,
+                StringOption str => str.TitleText.text,
+                PlayerOption player => player.TitleText.text,
+                _ => TranslationController.Instance.GetString(option.Data.Title),
+            };
+
+            var value = option switch
+            {
+                ToggleOption toggle => formatBool(toggle.GetBool()),
+                NumberOption number => number.ValueText.text,
+                StringOption str => str.ValueText.text,
+                PlayerOption player => player.ValueText.text,
+                _ => option.Data.GetValueString(option.GetFloat()),
+            };
+
+            rows.Add(new KeyValuePair<string, string>(title, value));
+        }
+
+        return rows;
+    }
+
     private static void CreateSettings(GameOptionsMenu instance, Transform container)
     {
         var num = 0.713f;
@@ -324,8 +385,8 @@ internal static class GameOptionsMenuPatch
                     .ToList();
             GameModeGroups.Add(mode, [.. filteredGroups]);
 
-            var optionBehaviours = new System.Collections.Generic.List<OptionBehaviour>();
-            var categoryHeaders = new System.Collections.Generic.List<CategoryHeaderMasked>();
+            var optionBehaviours = new List<OptionBehaviour>();
+            var categoryHeaders = new List<CategoryHeaderMasked>();
             var newNum = mode.ShowNormalGameSettings ? num : num - additionalVanillaScrollNum;
             foreach (var group in filteredGroups)
             {
@@ -406,7 +467,7 @@ internal static class GameOptionsMenuPatch
         __instance.scrollBar.SetYBoundsMax(-num - 1.65f);
     }
 
-    private static void CreateGroup(GameOptionsMenu menu, AbstractOptionGroup group, Transform container, ref float num, ref System.Collections.Generic.List<OptionBehaviour> optionBehaviours, ref System.Collections.Generic.List<CategoryHeaderMasked> categoryHeaders)
+    private static void CreateGroup(GameOptionsMenu menu, AbstractOptionGroup group, Transform container, ref float num, ref List<OptionBehaviour> optionBehaviours, ref List<CategoryHeaderMasked> categoryHeaders)
     {
         var categoryHeaderMasked = Object.Instantiate(
             menu.categoryHeaderOrigin,
@@ -618,6 +679,8 @@ internal static class GameOptionsMenuPatch
     {
         menu.MapPicker.gameObject.SetActive(false);
         var mod = MenuState.Instance.CurrentMod;
+        var container = MenuState.Instance.CurrentContainer.transform;
+        PresetManager.DefaultPresets.TryGetValue(mod, out var defaultPreset);
 
         var filteredGroups = MenuState.Instance.CurrentMenu switch
         {
@@ -643,15 +706,13 @@ internal static class GameOptionsMenuPatch
         {
             foreach (var group in filteredGroups)
             {
-                yield return CoCreateGroup(menu, group);
+                yield return CoCreateGroup(menu, group, container, defaultPreset);
             }
         }
     }
 
-    private static IEnumerator CoCreateGroup(GameOptionsMenu menu, AbstractOptionGroup group)
+    private static IEnumerator CoCreateGroup(GameOptionsMenu menu, AbstractOptionGroup group, Transform container, OptionPreset? defaultPreset)
     {
-        var container = MenuState.Instance.CurrentContainer.transform;
-
         group.Ready = false;
         if (group.Header == null || !group.Header)
         {
@@ -713,12 +774,6 @@ internal static class GameOptionsMenuPatch
                 menu.playerOptionOrigin,
                 container));
 
-        OptionPreset? defaultPreset = null;
-        if (PresetManager.DefaultPresets.TryGetValue(MenuState.Instance.CurrentMod, out var preset))
-        {
-            defaultPreset = preset;
-        }
-
         yield return options.CoLoopWithBudget(newOpt =>
         {
             newOpt.SetClickMask(menu.ButtonClickMask);
@@ -765,72 +820,52 @@ internal static class GameOptionsMenuPatch
             }
 
             menu.Children.Add(newOpt);
-            var resetBtn = new GameObject("ResetOption")
+            if (defaultPreset != null && defaultPreset.IsOptionInPreset(newOpt) &&
+                newOpt is ToggleOption or NumberOption or StringOption)
             {
-                transform =
+                var resetBtn = new GameObject("ResetOption")
                 {
-                    parent = newOpt.transform,
-                    localScale = new(.5f, .5f, 1),
-                    localPosition = new Vector3(-3.1f, 0f, -2f),
-                },
-                layer = LayerMask.NameToLayer("UI"),
-            };
-            var resetRend = resetBtn.AddComponent<SpriteRenderer>();
-            resetRend.sprite = MiraAssets.ResetButton.LoadAsset();
-            resetRend.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-            resetRend.color = group.GroupColor.Equals(MiraApiPlugin.DefaultHeaderColor)
-                ? Color.white
-                : group.GroupColor.FindAlternateColor();
-            var resetBoxCol = resetBtn.gameObject.AddComponent<BoxCollider2D>();
-            resetBoxCol.size = new Vector2(1f, 1f);
-            resetBoxCol.offset = new Vector2(0, 0);
-            var passiveButton = resetBtn.AddComponent<PassiveButton>();
-            passiveButton.OnClick = new Button.ButtonClickedEvent();
-            passiveButton.ClickSound = menu.BackButton.GetComponent<PassiveButton>().ClickSound;
-            passiveButton.OnMouseOver = new UnityEvent();
-            passiveButton.OnMouseOver.AddListener(
-                (UnityAction)(() =>
-                {
-                    resetRend.color = group.GroupColor != MiraApiPlugin.DefaultHeaderColor
-                        ? group.GroupColor
-                        : MiraAssets.AcceptedTeal;
-                }));
-            passiveButton.OnMouseOut = new UnityEvent();
-            passiveButton.OnMouseOut.AddListener(
-                (UnityAction)(() =>
-                {
-                    resetRend.color = group.GroupColor.Equals(MiraApiPlugin.DefaultHeaderColor)
-                        ? Color.white
-                        : group.GroupColor.FindAlternateColor();
-                }));
-            if (newOpt is ToggleOption toggleOpt)
-            {
+                    transform =
+                    {
+                        parent = newOpt.transform,
+                        localScale = new(.5f, .5f, 1),
+                        localPosition = new Vector3(-3.1f, 0f, -2f),
+                    },
+                    layer = LayerMask.NameToLayer("UI"),
+                };
+                var resetRend = resetBtn.AddComponent<SpriteRenderer>();
+                resetRend.sprite = MiraAssets.ResetButton.LoadAsset();
+                resetRend.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                resetRend.color = group.GroupColor.Equals(MiraApiPlugin.DefaultHeaderColor)
+                    ? Color.white
+                    : group.GroupColor.FindAlternateColor();
+                var resetBoxCol = resetBtn.gameObject.AddComponent<BoxCollider2D>();
+                resetBoxCol.size = new Vector2(1f, 1f);
+                resetBoxCol.offset = new Vector2(0, 0);
+                var passiveButton = resetBtn.AddComponent<PassiveButton>();
+                passiveButton.OnClick = new Button.ButtonClickedEvent();
+                passiveButton.ClickSound = menu.BackButton.GetComponent<PassiveButton>().ClickSound;
+                passiveButton.OnMouseOver = new UnityEvent();
+                passiveButton.OnMouseOver.AddListener(
+                    (UnityAction)(() =>
+                    {
+                        resetRend.color = group.GroupColor != MiraApiPlugin.DefaultHeaderColor
+                            ? group.GroupColor
+                            : MiraAssets.AcceptedTeal;
+                    }));
+                passiveButton.OnMouseOut = new UnityEvent();
+                passiveButton.OnMouseOut.AddListener(
+                    (UnityAction)(() =>
+                    {
+                        resetRend.color = group.GroupColor.Equals(MiraApiPlugin.DefaultHeaderColor)
+                            ? Color.white
+                            : group.GroupColor.FindAlternateColor();
+                    }));
                 passiveButton.OnClick.AddListener(
                     (UnityAction)(() =>
                     {
-                        defaultPreset!.ResetOption(toggleOpt);
+                        defaultPreset.ResetOption(newOpt);
                     }));
-            }
-            else if (newOpt is NumberOption numOpt)
-            {
-                passiveButton.OnClick.AddListener(
-                    (UnityAction)(() =>
-                    {
-                        defaultPreset!.ResetOption(numOpt);
-                    }));
-            }
-            else if (newOpt is StringOption strOpt)
-            {
-                passiveButton.OnClick.AddListener(
-                    (UnityAction)(() =>
-                    {
-                        defaultPreset!.ResetOption(strOpt);
-                    }));
-            }
-
-            if (!defaultPreset!.IsOptionInPreset(newOpt))
-            {
-                resetBtn.Destroy();
             }
 
             newOpt.Initialize();

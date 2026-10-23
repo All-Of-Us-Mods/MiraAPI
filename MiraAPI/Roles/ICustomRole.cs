@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using BepInEx.Configuration;
+using Il2CppInterop.Runtime.Attributes;
 using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
 using MiraAPI.Modifiers;
 using MiraAPI.PluginLoading;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;
+using MiraAPI.Utilities.Assets;
 using TMPro;
 using UnityEngine;
 
@@ -68,9 +72,10 @@ public interface ICustomRole : IOptionable
     string RoleLongDescriptionLocale => MiraLocaleManager.BuildTranslationId(IdPrefix, IdPart, "TabDescription");
 
     /// <summary>
-    /// Gets the wiki description of the role. Used in the wiki, but not currently required.
+    /// Gets the wiki description of the role. Used in the wiki and normally appends the options text as well.
     /// </summary>
-    string RoleWikiDescription => MiraLocaleManager.Get(RoleWikiDescriptionLocale, RoleLongDescription);
+    string RoleWikiDescription => MiraLocaleManager.Get(RoleWikiDescriptionLocale, RoleLongDescription) +
+                                  Helpers.GetOptionsText(GetType());
 
     /// <summary>
     /// Gets the role's wiki description id for localization.
@@ -87,6 +92,48 @@ public interface ICustomRole : IOptionable
         ModdedRoleTeams.Custom => MiraLocaleManager.Get("MiraApi.RoleTeam.Neutral"),
         _ => MiraLocaleManager.Get("MiraApi.RoleTeam.Other"),
     };
+
+    /// <summary>
+    /// Gets a value indicating whether to exclude the "amount" from the displayed amount text within the role guide.
+    /// </summary>
+    public virtual bool ShowRoleAsUnique => Configuration.MaxRoleCount == 1;
+
+    /// <summary>
+    /// Gets the displayed amount and chance of the role. Used in the role guide.
+    /// By default, 0 amount or chance results in a complete 0 amount and chance, so override if necessary.
+    /// </summary>
+    /// <param name="amount">The amount of the role.</param>
+    /// <param name="chance">The chance of the role.</param>
+    /// <param name="source">The mod source of the role.</param>
+    /// <returns>The <see cref="string"/> result.</returns>
+    public virtual string GetAmountText(int amount, int chance, string source)
+    {
+        if (amount == 0)
+        {
+            chance = 0;
+        }
+
+        if (ShowRoleAsUnique)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "{0}% ({1})",
+                chance.ToString(CultureInfo.InvariantCulture),
+                source);
+        }
+
+        if (chance == 0)
+        {
+            amount = 0;
+        }
+
+        return string.Format(
+            CultureInfo.InvariantCulture,
+            "{0} at {1}% ({2})",
+            amount.ToString(CultureInfo.InvariantCulture),
+            chance.ToString(CultureInfo.InvariantCulture),
+            source);
+    }
 
     /// <summary>
     /// Gets the <see cref="Color"/> of the role.
@@ -314,26 +361,41 @@ public interface ICustomRole : IOptionable
     /// </summary>
     /// <param name="guide">The guide object.</param>
     /// <param name="titleText">The title text object.</param>
+    /// <param name="titleIcon">The title's icon.</param>
     /// <param name="parent">The scroller parent.</param>
     /// <returns>The <see cref="GameObject"/> of the wiki.</returns>
-    GameObject GetAdvancedWiki(MatchInfoGuide guide, TextMeshPro titleText, Scroller parent)
+    GameObject GetAdvancedWiki(MatchInfoGuide guide, TextMeshPro titleText, SpriteRenderer titleIcon, Scroller parent)
     {
-        parent.ScrollToTop();
-        var obj = Helpers.CreateAdvancedWikiTab(
+        var abilities = WikiAbilities;
+        return Helpers.CreateAdvancedWikiPage(
             guide,
-            RoleNameLocale,
-            RoleName + $" ({RoleFactionTitle})",
-            RoleWikiDescription,
             titleText,
-            out var desc);
-        obj.transform.SetParent(parent.Inner.transform);
-        obj.transform.localPosition = new Vector3(0f, 0f, 0f);
-        parent.SetYBoundsMax(Mathf.Clamp(desc.textBounds.size.y - 2, 0f, 999f));
-        return obj;
+            titleIcon,
+            parent,
+            RoleNameLocale,
+            $"{RoleName} ({RoleFactionTitle})",
+            Configuration.Icon ?? MiraAssets.IconNeutral.LoadAsset(),
+            RoleWikiDescription,
+            abilities);
     }
 
     /// <summary>
     /// Gets the function that determines whether the role should be toggled on or off in the game settings.
     /// </summary>
-    Func<bool> VisibleInSettings => () => true;
+    Func<bool> VisibleInSettings => DelegateUtilities.AlwaysTrue;
+
+    /// <summary>
+    /// Gets the list of abilities or other similar information to display below the text of a role's wiki page.
+    /// </summary>
+    [HideFromIl2Cpp]
+    List<AdvancedWikiAbilityDescription> WikiAbilities => [];
 }
+
+/// <summary>
+/// A data holder of an ability's wiki entry.
+/// </summary>
+/// <param name="Name">The name of the ability.</param>
+/// <param name="AbilityType">The type of the ability.</param>
+/// <param name="Description">The description of the ability.</param>
+/// <param name="Icon">The icon sprite of the ability.</param>
+public record struct AdvancedWikiAbilityDescription(string Name, string AbilityType, string Description, LoadableAsset<Sprite> Icon);

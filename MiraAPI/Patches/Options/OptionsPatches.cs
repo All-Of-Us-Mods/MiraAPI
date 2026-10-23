@@ -1,11 +1,9 @@
 ﻿using HarmonyLib;
-using Il2CppSystem;
 using MiraAPI.GameOptions;
 using MiraAPI.Roles;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using UnityEngine;
-using Object = Il2CppSystem.Object;
 
 namespace MiraAPI.Patches.Options;
 
@@ -34,6 +32,11 @@ public static class OptionsPatches
             __instance.roleChance = 0;
         }
 
+        if (__instance.roleChance == 0)
+        {
+            __instance.roleMaxCount = 0;
+        }
+
         __instance.OnValueChanged.Invoke(__instance);
         return false;
     }
@@ -60,6 +63,11 @@ public static class OptionsPatches
             __instance.roleChance = 100;
         }
 
+        if (__instance.roleChance == 0)
+        {
+            __instance.roleMaxCount = 0;
+        }
+
         __instance.OnValueChanged.Invoke(__instance);
         return false;
     }
@@ -84,6 +92,11 @@ public static class OptionsPatches
             __instance.roleMaxCount = 0;
         }
 
+        if (__instance.roleMaxCount == 0)
+        {
+            __instance.roleChance = 0;
+        }
+
         __instance.OnValueChanged.Invoke(__instance);
         return false;
     }
@@ -106,6 +119,11 @@ public static class OptionsPatches
         if (__instance.roleMaxCount < 0)
         {
             __instance.roleMaxCount = __instance.role.MaxCount;
+        }
+
+        if (__instance.roleMaxCount == 0)
+        {
+            __instance.roleChance = 0;
         }
 
         __instance.OnValueChanged.Invoke(__instance);
@@ -165,7 +183,7 @@ public static class OptionsPatches
             return true;
         }
 
-        __instance.TitleText.text = TranslationController.Instance.GetString(__instance.Title, Array.Empty<Object>()).Translate();
+        __instance.TitleText.text = TranslationController.Instance.GetString(__instance.Title).Translate();
 
         return false;
     }
@@ -314,8 +332,8 @@ public static class OptionsPatches
             return true;
         }
 
-        __instance.TitleText.text = TranslationController.Instance.GetString(__instance.Title, Array.Empty<Object>()).Translate();
-        __instance.ValueText.text = TranslationController.Instance.GetString(__instance.Values[__instance.Value], Array.Empty<Object>());
+        __instance.TitleText.text = TranslationController.Instance.GetString(__instance.Title).Translate();
+        __instance.ValueText.text = TranslationController.Instance.GetString(__instance.Values[__instance.Value]);
 
         return false;
     }

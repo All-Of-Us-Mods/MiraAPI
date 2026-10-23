@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using Il2CppSystem.Collections.Generic;
 using MiraAPI.Networking;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;
@@ -30,6 +30,11 @@ public class ModdedPlayerOption : ModdedOption<int>
     public bool AllowNone { get; set; }
 
     /// <summary>
+    /// Gets the player selected by this option. May be <c>null</c> if allowed to have <c>None</c> as an option.
+    /// </summary>
+    public NetworkedPlayerInfo? SelectedPlayer => Value == -1 ? null : Values[Value];
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="ModdedPlayerOption"/> class.
     /// </summary>
     /// <param name="title">The title of the option.</param>
@@ -37,15 +42,16 @@ public class ModdedPlayerOption : ModdedOption<int>
     public ModdedPlayerOption(string title, bool allowNone = true)
         : base(title, allowNone ? -1 : 0, false)
     {
-        Data = ScriptableObject.CreateInstance<PlayerSelectionGameSetting>();
-        var data = (PlayerSelectionGameSetting)Data;
+        Values = [];
+        AllowNone = allowNone;
 
+        Value = DefaultValue;
+
+        var data = ScriptableObject.CreateInstance<PlayerSelectionGameSetting>();
         data.Title = StringName;
         data.Type = global::OptionTypes.Player;
 
-        Values = new List<NetworkedPlayerInfo>();
-        AllowNone = allowNone;
-        Value = DefaultValue;
+        Data = data;
     }
 
     /// <inheritdoc />
@@ -60,17 +66,16 @@ public class ModdedPlayerOption : ModdedOption<int>
         playerOption.name =
             $"{ParentMod!.OptionsTitleText}.PlayerOption.{TranslationController.Instance.GetString(StringName)}";
 
-        var filteredList = GetFilteredPlayers();
-        Values = filteredList.ToIl2CppList();
+        Values = GetFilteredPlayers();
 
         playerOption.SetUpFromData(Data, 20);
-        playerOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
+        playerOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
 
         playerOption.Title = StringName;
         playerOption.TitleText.text = Title.Translate();
-        playerOption.Values = Values;
+        playerOption.Values = Values.ToIl2CppList();
         playerOption.Value = Value;
-        playerOption.playerIndex = filteredList.FindIndex(p => p.PlayerId == Value);
+        playerOption.playerIndex = Values.FindIndex(p => p.PlayerId == Value);
 
         OptionBehaviour = playerOption;
         ModdedOptionsManager.CreatedPlayerOptions.TryAdd(playerOption, this);
@@ -85,9 +90,16 @@ public class ModdedPlayerOption : ModdedOption<int>
     /// Returns a player ran through the filter.
     /// </summary>
     /// <returns>A list of filtered players.</returns>
-    public System.Collections.Generic.List<NetworkedPlayerInfo> GetFilteredPlayers()
+    public List<NetworkedPlayerInfo> GetFilteredPlayers()
     {
-        return [.. GameData.Instance.AllPlayers.ToArray().Where(x => PlayerFilter?.Invoke(x) ?? true)];
+        var players = GameData.Instance.AllPlayers.ToArray();
+
+        IEnumerable<NetworkedPlayerInfo> filtered = players;
+
+        if (PlayerFilter != null)
+            filtered = players.Where(PlayerFilter);
+
+        return [.. filtered.OrderBy(x => x.PlayerId)];
     }
 
     /// <summary>

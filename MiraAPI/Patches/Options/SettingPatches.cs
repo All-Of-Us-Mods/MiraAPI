@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Linq;
 using HarmonyLib;
 using MiraAPI.GameOptions;
@@ -24,7 +23,6 @@ public static class SettingPatches
     /// <returns><see langword="false"/> to skip original method.</returns>
     [HarmonyPrefix]
     [HarmonyPatch(typeof(FloatGameSetting), nameof(FloatGameSetting.GetValueString))]
-    [SuppressMessage("Style", "IDE0045:Convert to conditional expression", Justification = "Warning cascades into forcing the entire tree to be ternary operators.")]
     public static bool ValueStringPatch(
         FloatGameSetting __instance,
         ref string __result,
@@ -48,14 +46,14 @@ public static class SettingPatches
             }
             else
             {
+                var part = value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo);
                 result = suffix switch
                 {
-                    MiraNumberSuffixes.None => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo),
-                    MiraNumberSuffixes.Multiplier => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "x",
-                    MiraNumberSuffixes.Percent => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "%",
-                    _ => TranslationController.Instance.GetString(
-                        StringNames.GameSecondsAbbrev,
-                        (Il2CppSystem.Object[])[value.ToString(__instance.FormatString, CultureInfo.InvariantCulture)]),
+                    MiraNumberSuffixes.None => part,
+                    MiraNumberSuffixes.Multiplier => part + "x",
+                    MiraNumberSuffixes.Percent => part + "%",
+                    MiraNumberSuffixes.Distance => string.Concat(part, " ", MiraApiPlugin.DistanceSuffix.Value),
+                    _ => TranslationController.Instance.GetString(StringNames.GameSecondsAbbrev, part),
                 };
             }
         }
@@ -65,14 +63,14 @@ public static class SettingPatches
         }
         else
         {
+            var part = value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo);
             result = suffix switch
             {
-                MiraNumberSuffixes.None => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo),
-                MiraNumberSuffixes.Multiplier => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "x",
-                MiraNumberSuffixes.Percent => value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo) + "%",
-                _ => TranslationController.Instance.GetString(
-                    StringNames.GameSecondsAbbrev,
-                    (Il2CppSystem.Object[])[value.ToString(__instance.FormatString, CultureInfo.InvariantCulture)]),
+                MiraNumberSuffixes.None => part,
+                MiraNumberSuffixes.Multiplier => part + "x",
+                MiraNumberSuffixes.Percent => part + "%",
+                MiraNumberSuffixes.Distance => string.Concat(part, " ", MiraApiPlugin.DistanceSuffix.Value),
+                _ => TranslationController.Instance.GetString(StringNames.GameSecondsAbbrev, part),
             };
         }
 

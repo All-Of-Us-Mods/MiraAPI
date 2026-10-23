@@ -1,4 +1,24 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
-
+  <string name="MiraApi">Mira API</string>
+  <string name="MiraApi.VisualsUi">視/介</string>
+  <string name="MiraApi.Accessibility">無礙</string>
+  <string name="MiraApi.MiraApiBrand">MiraAPI</string>
+  <string name="MiraApi.ShowModifiersHudOnLeftSide">於左示附職之界</string>
+  <string name="MiraApi.ShowKeybindsOnButtons">於鈕上示熱鍵</string>
+  <string name="MiraApi.ButtonScaleFactor">鈕縮之比</string>
+  <string name="MiraApi.TopRightButtonScaleFactor">右上角界縮之比</string>
+  <string name="MiraApi.MaxFps">幀之極</string>
+  <string name="MiraApi.WikiOnBottomRow">維基之鈕示於底</string>
+  <string name="MiraApi.EnableSabotageFlashes">啟破壞赤爍</string>
+  <string name="MiraApi.EnableSabotageBlare">啟破壞樂</string>
+  <string name="MiraApi.ReturnToRoleSettings">反職之設</string>
+  <string name="MiraApi.CustomCategory1">自訂類者一</string>
+  <string name="MiraApi.CustomCategory2">自訂類者二</string>
+  <string name="MiraApi.ModifierMenuDescription">於此定附職及其設!</string>
+  <string name="MiraApi.CustomOptionMenuDescription">為此模組施以戲之設</string>
+  <string name="MiraApi.Gamemode.Classic">典</string>
+  <string name="MiraApi.Gamemode.Classic.Description">爾虞我詐典式之體驗哉!
+求奸，或欺瞞良眾。</string>
+  <string name="MiraApi.Gamemode.HideAndSeek">藏矇</string>
 </resources>

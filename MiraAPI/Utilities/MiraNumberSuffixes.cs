@@ -24,4 +24,9 @@ public enum MiraNumberSuffixes
     /// Percentage suffix (%).
     /// </summary>
     Percent,
+
+    /// <summary>
+    /// Distance suffix (u).
+    /// </summary>
+    Distance,
 }
