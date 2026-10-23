@@ -105,12 +105,17 @@ public abstract class LocalSettingsTab(ConfigFile config)
             label.Key.text =
                 $"<font=\"LiberationSans SDF\" material=\"LiberationSans SDF - Chat Message Masked\"><b>{label.Value.Translate()}</b></font>";
         }
+    }
 
-        if (Scroller != null)
+    internal void RefreshScrollBounds()
+    {
+        if (Scroller == null)
         {
-            Scroller.SetBounds(new FloatRange(0, MaxScroll), new FloatRange(0, 0));
-            Scroller.ScrollToTop();
+            return;
         }
+
+        Scroller.SetBounds(new FloatRange(0, MaxScroll), new FloatRange(0, 0));
+        Scroller.ScrollToTop();
     }
 
     /// <summary>
