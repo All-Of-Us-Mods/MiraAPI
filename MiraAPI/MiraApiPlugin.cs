@@ -102,7 +102,7 @@ public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
         PluginManager = new MiraPluginManager();
         PluginManager.Initialize(this, this);
 
-        MiraLocaleManager.Register("mira.api");
+        MiraLocaleManager.Register("mira.api", typeof(MiraApiPlugin).Assembly);
         LocalizationManager.Register(new MiraLocalizationProvider());
 
         IL2CPPChainloader.Instance.Finished +=
