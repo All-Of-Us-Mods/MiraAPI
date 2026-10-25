@@ -1,4 +1,5 @@
-﻿using Reactor.Utilities;
+﻿using System.Reflection;
+using Reactor.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.Utilities.Assets;
@@ -8,11 +9,13 @@ namespace MiraAPI.Utilities.Assets;
 /// </summary>
 public static class MiraAssets
 {
+    private static readonly Assembly _assembly = typeof(MiraAssets).Assembly;
+
     static MiraAssets()
     {
         var boxTex = SpriteTools.LoadTextureFromResourcePath(
             "MiraAPI.Resources.RoundedBox.png",
-            System.Reflection.Assembly.GetExecutingAssembly());
+            _assembly);
         var boxSprite = Sprite.Create(
             boxTex,
             new Rect(0, 0, boxTex.width, boxTex.height),
@@ -58,7 +61,7 @@ public static class MiraAssets
     /// <summary>
     /// Gets the empty <see cref="Sprite"/> asset.
     /// </summary>
-    public static LoadableResourceAsset Empty { get; } = new("MiraAPI.Resources.Empty.png");
+    public static LoadableResourceAsset Empty { get; } = new("MiraAPI.Resources.Empty.png", _assembly);
 
     /// <summary>
     /// Gets the RoundedBox <see cref="Sprite"/>, which is a rounded rectangle used for UI elements.
@@ -68,312 +71,312 @@ public static class MiraAssets
     /// <summary>
     /// Gets the Next Button sprite.
     /// </summary>
-    public static LoadableResourceAsset NextButton { get; } = new("MiraAPI.Resources.NextButton.png");
+    public static LoadableResourceAsset NextButton { get; } = new("MiraAPI.Resources.NextButton.png", _assembly);
 
     /// <summary>
     /// Gets the Mira settings icon.
     /// </summary>
-    public static LoadableResourceAsset SettingsIcon { get; } = new("MiraAPI.Resources.Settings.png");
+    public static LoadableResourceAsset SettingsIcon { get; } = new("MiraAPI.Resources.Settings.png", _assembly);
 
     /// <summary>
     /// Gets the highlighted Next Button sprite.
     /// </summary>
-    public static LoadableResourceAsset NextButtonActive { get; } = new("MiraAPI.Resources.NextButtonActive.png");
+    public static LoadableResourceAsset NextButtonActive { get; } = new("MiraAPI.Resources.NextButtonActive.png", _assembly);
 
     /// <summary>
     /// Gets the Cog icon used in Role Settings Menu.
     /// </summary>
-    public static LoadableResourceAsset Cog { get; } = new("MiraAPI.Resources.Cog.png");
+    public static LoadableResourceAsset Cog { get; } = new("MiraAPI.Resources.Cog.png", _assembly);
 
     /// <summary>
     /// Gets the Checkmark Box used in the Settings Menu.
     /// </summary>
-    public static LoadableResourceAsset CheckmarkBox { get; } = new("MiraAPI.Resources.CheckMarkBox.png");
+    public static LoadableResourceAsset CheckmarkBox { get; } = new("MiraAPI.Resources.CheckMarkBox.png", _assembly);
 
     /// <summary>
     /// Gets the Reset Box used in the Settings Menu.
     /// </summary>
-    public static LoadableResourceAsset ResetButton { get; } = new("MiraAPI.Resources.ResetButton.png");
+    public static LoadableResourceAsset ResetButton { get; } = new("MiraAPI.Resources.ResetButton.png", _assembly);
 
     /// <summary>
     /// Gets the Checkmark used in the Settings Menu.
     /// </summary>
-    public static LoadableResourceAsset Checkmark { get; } = new("MiraAPI.Resources.Checkmark.png");
+    public static LoadableResourceAsset Checkmark { get; } = new("MiraAPI.Resources.Checkmark.png", _assembly);
 
     /// <summary>
     /// Gets the white CategoryHeader used in the Settings Menu.
     /// </summary>
-    public static LoadableResourceAsset CategoryHeader { get; } = new("MiraAPI.Resources.CategoryHeader.png");
+    public static LoadableResourceAsset CategoryHeader { get; } = new("MiraAPI.Resources.CategoryHeader.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the Keybind icons.
     /// </summary>
-    public static LoadableResourceAsset KeybindButton { get; } = new("MiraAPI.Resources.KeybindButton.png");
+    public static LoadableResourceAsset KeybindButton { get; } = new("MiraAPI.Resources.KeybindButton.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for crewmate role files in TaskAdderGame.
     /// </summary>
-    public static LoadableResourceAsset CrewmateFile { get; } = new("MiraAPI.Resources.CrewmateFile.png");
+    public static LoadableResourceAsset CrewmateFile { get; } = new("MiraAPI.Resources.CrewmateFile.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for impostor role files in TaskAdderGame.
     /// </summary>
-    public static LoadableResourceAsset ImpostorFile { get; } = new("MiraAPI.Resources.ImpostorFile.png");
+    public static LoadableResourceAsset ImpostorFile { get; } = new("MiraAPI.Resources.ImpostorFile.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for custom team role files in TaskAdderGame.
     /// </summary>
-    public static LoadableResourceAsset CustomTeamFile { get; } = new("MiraAPI.Resources.CustomFile.png");
+    public static LoadableResourceAsset CustomTeamFile { get; } = new("MiraAPI.Resources.CustomFile.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for modifier file in TaskAdderGame.
     /// </summary>
-    public static LoadableResourceAsset ModifierFile { get; } = new("MiraAPI.Resources.ModifierFile.png");
+    public static LoadableResourceAsset ModifierFile { get; } = new("MiraAPI.Resources.ModifierFile.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the Classic gamemode.
     /// </summary>
-    public static LoadableResourceAsset ClassicGamemodeIcon { get; } = new("MiraAPI.Resources.ClassicGamemodeIcon.png");
+    public static LoadableResourceAsset ClassicGamemodeIcon { get; } = new("MiraAPI.Resources.ClassicGamemodeIcon.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the Hide n Seek gamemode.
     /// </summary>
-    public static LoadableResourceAsset HnSGamemodeIcon { get; } = new("MiraAPI.Resources.HnSGamemodeIcon.png");
+    public static LoadableResourceAsset HnSGamemodeIcon { get; } = new("MiraAPI.Resources.HnSGamemodeIcon.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for timed modifier file in TaskAdderGame.
     /// </summary>
-    public static LoadableResourceAsset TimedModifierFile { get; } = new("MiraAPI.Resources.TimedModifierFile.png");
+    public static LoadableResourceAsset TimedModifierFile { get; } = new("MiraAPI.Resources.TimedModifierFile.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the new chat button while hovering.
     /// </summary>
-    public static LoadableResourceAsset ChatHoverSprite { get; } = new("MiraAPI.Resources.NormalChatHover.png");
+    public static LoadableResourceAsset ChatHoverSprite { get; } = new("MiraAPI.Resources.NormalChatHover.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the new chat button while hovering.
     /// </summary>
-    public static LoadableResourceAsset ChatIdleSprite { get; } = new("MiraAPI.Resources.NormalChatIdle.png");
+    public static LoadableResourceAsset ChatIdleSprite { get; } = new("MiraAPI.Resources.NormalChatIdle.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the new chat button while hovering.
     /// </summary>
-    public static LoadableResourceAsset ChatOpenSprite { get; } = new("MiraAPI.Resources.NormalChatOpen.png");
+    public static LoadableResourceAsset ChatOpenSprite { get; } = new("MiraAPI.Resources.NormalChatOpen.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for players button while hovering.
     /// </summary>
-    public static LoadableResourceAsset WikiPlayersButtonHoverSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarPlayersButtonHover.png");
+    public static LoadableResourceAsset WikiPlayersButtonHoverSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarPlayersButtonHover.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the players button while hovering.
     /// </summary>
-    public static LoadableResourceAsset WikiPlayersButtonIdleSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarPlayersButtonIdle.png");
+    public static LoadableResourceAsset WikiPlayersButtonIdleSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarPlayersButtonIdle.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the players button while hovering.
     /// </summary>
-    public static LoadableResourceAsset WikiPlayersButtonOpenSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarPlayersButtonOpen.png");
+    public static LoadableResourceAsset WikiPlayersButtonOpenSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarPlayersButtonOpen.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the settings button while hovering.
     /// </summary>
-    public static LoadableResourceAsset WikiSettingsButtonHoverSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarSettingsButtonHover.png");
+    public static LoadableResourceAsset WikiSettingsButtonHoverSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarSettingsButtonHover.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the settings button while hovering.
     /// </summary>
-    public static LoadableResourceAsset WikiSettingsButtonIdleSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarSettingsButtonIdle.png");
+    public static LoadableResourceAsset WikiSettingsButtonIdleSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarSettingsButtonIdle.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the settings button while hovering.
     /// </summary>
-    public static LoadableResourceAsset WikiSettingsButtonOpenSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarSettingsButtonOpen.png");
+    public static LoadableResourceAsset WikiSettingsButtonOpenSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarSettingsButtonOpen.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset WikiRolesButtonHoverSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarRolesButtonHover.png");
+    public static LoadableResourceAsset WikiRolesButtonHoverSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarRolesButtonHover.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset WikiRolesButtonIdleSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarRolesButtonIdle.png");
+    public static LoadableResourceAsset WikiRolesButtonIdleSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarRolesButtonIdle.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset WikiRolesButtonOpenSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarRolesButtonOpen.png");
+    public static LoadableResourceAsset WikiRolesButtonOpenSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarRolesButtonOpen.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the modifiers button while hovering.
     /// </summary>
-    public static LoadableResourceAsset WikiModifiersButtonHoverSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarModifiersButtonHover.png");
+    public static LoadableResourceAsset WikiModifiersButtonHoverSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarModifiersButtonHover.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the modifiers button while hovering.
     /// </summary>
-    public static LoadableResourceAsset WikiModifiersButtonIdleSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarModifiersButtonIdle.png");
+    public static LoadableResourceAsset WikiModifiersButtonIdleSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarModifiersButtonIdle.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the modifiers button while hovering.
     /// </summary>
-    public static LoadableResourceAsset WikiModifiersButtonOpenSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarModifiersButtonOpen.png");
+    public static LoadableResourceAsset WikiModifiersButtonOpenSprite { get; } = new("MiraAPI.Resources.Wiki.SidebarModifiersButtonOpen.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset GroupCountHoverSprite { get; } = new("MiraAPI.Resources.Wiki.GroupCountHover.png");
+    public static LoadableResourceAsset GroupCountHoverSprite { get; } = new("MiraAPI.Resources.Wiki.GroupCountHover.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset GroupCountIdleSprite { get; } = new("MiraAPI.Resources.Wiki.GroupCountIdle.png");
+    public static LoadableResourceAsset GroupCountIdleSprite { get; } = new("MiraAPI.Resources.Wiki.GroupCountIdle.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset GroupFactionHoverSprite { get; } = new("MiraAPI.Resources.Wiki.GroupFactionHover.png");
+    public static LoadableResourceAsset GroupFactionHoverSprite { get; } = new("MiraAPI.Resources.Wiki.GroupFactionHover.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset GroupFactionIdleSprite { get; } = new("MiraAPI.Resources.Wiki.GroupFactionIdle.png");
+    public static LoadableResourceAsset GroupFactionIdleSprite { get; } = new("MiraAPI.Resources.Wiki.GroupFactionIdle.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset GroupNoneHoverSprite { get; } = new("MiraAPI.Resources.Wiki.GroupNoneHover.png");
+    public static LoadableResourceAsset GroupNoneHoverSprite { get; } = new("MiraAPI.Resources.Wiki.GroupNoneHover.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset GroupNoneIdleSprite { get; } = new("MiraAPI.Resources.Wiki.GroupNoneIdle.png");
+    public static LoadableResourceAsset GroupNoneIdleSprite { get; } = new("MiraAPI.Resources.Wiki.GroupNoneIdle.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset SearchClearHoverSprite { get; } = new("MiraAPI.Resources.Wiki.SearchClearHover.png");
+    public static LoadableResourceAsset SearchClearHoverSprite { get; } = new("MiraAPI.Resources.Wiki.SearchClearHover.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset SearchClearIdleSprite { get; } = new("MiraAPI.Resources.Wiki.SearchClearIdle.png");
+    public static LoadableResourceAsset SearchClearIdleSprite { get; } = new("MiraAPI.Resources.Wiki.SearchClearIdle.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset SearchIconHoverSprite { get; } = new("MiraAPI.Resources.Wiki.SearchIconHover.png");
+    public static LoadableResourceAsset SearchIconHoverSprite { get; } = new("MiraAPI.Resources.Wiki.SearchIconHover.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset SearchIconIdleSprite { get; } = new("MiraAPI.Resources.Wiki.SearchIconIdle.png");
+    public static LoadableResourceAsset SearchIconIdleSprite { get; } = new("MiraAPI.Resources.Wiki.SearchIconIdle.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset SortingAzHoverSprite { get; } = new("MiraAPI.Resources.Wiki.SortingAzHover.png");
+    public static LoadableResourceAsset SortingAzHoverSprite { get; } = new("MiraAPI.Resources.Wiki.SortingAzHover.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset SortingAzIdleSprite { get; } = new("MiraAPI.Resources.Wiki.SortingAzIdle.png");
+    public static LoadableResourceAsset SortingAzIdleSprite { get; } = new("MiraAPI.Resources.Wiki.SortingAzIdle.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset SortingZaHoverSprite { get; } = new("MiraAPI.Resources.Wiki.SortingZaHover.png");
+    public static LoadableResourceAsset SortingZaHoverSprite { get; } = new("MiraAPI.Resources.Wiki.SortingZaHover.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset SortingZaIdleSprite { get; } = new("MiraAPI.Resources.Wiki.SortingZaIdle.png");
+    public static LoadableResourceAsset SortingZaIdleSprite { get; } = new("MiraAPI.Resources.Wiki.SortingZaIdle.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset VisibleAllHoverSprite { get; } = new("MiraAPI.Resources.Wiki.VisibleAllHover.png");
+    public static LoadableResourceAsset VisibleAllHoverSprite { get; } = new("MiraAPI.Resources.Wiki.VisibleAllHover.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset VisibleAllIdleSprite { get; } = new("MiraAPI.Resources.Wiki.VisibleAllIdle.png");
+    public static LoadableResourceAsset VisibleAllIdleSprite { get; } = new("MiraAPI.Resources.Wiki.VisibleAllIdle.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset VisibleOffHoverSprite { get; } = new("MiraAPI.Resources.Wiki.VisibleOffHover.png");
+    public static LoadableResourceAsset VisibleOffHoverSprite { get; } = new("MiraAPI.Resources.Wiki.VisibleOffHover.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset VisibleOffIdleSprite { get; } = new("MiraAPI.Resources.Wiki.VisibleOffIdle.png");
+    public static LoadableResourceAsset VisibleOffIdleSprite { get; } = new("MiraAPI.Resources.Wiki.VisibleOffIdle.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset VisibleOnHoverSprite { get; } = new("MiraAPI.Resources.Wiki.VisibleOnHover.png");
+    public static LoadableResourceAsset VisibleOnHoverSprite { get; } = new("MiraAPI.Resources.Wiki.VisibleOnHover.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the roles button while hovering.
     /// </summary>
-    public static LoadableResourceAsset VisibleOnIdleSprite { get; } = new("MiraAPI.Resources.Wiki.VisibleOnIdle.png");
+    public static LoadableResourceAsset VisibleOnIdleSprite { get; } = new("MiraAPI.Resources.Wiki.VisibleOnIdle.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for crewmates.
     /// </summary>
-    public static LoadableResourceAsset IconCrewmate { get; } = new("MiraAPI.Resources.Wiki.IconCrewmate.png");
+    public static LoadableResourceAsset IconCrewmate { get; } = new("MiraAPI.Resources.Wiki.IconCrewmate.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for impostors.
     /// </summary>
-    public static LoadableResourceAsset IconImpostor { get; } = new("MiraAPI.Resources.Wiki.IconImpostor.png");
+    public static LoadableResourceAsset IconImpostor { get; } = new("MiraAPI.Resources.Wiki.IconImpostor.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for neutrals.
     /// </summary>
-    public static LoadableResourceAsset IconNeutral { get; } = new("MiraAPI.Resources.Wiki.IconNeutral.png");
+    public static LoadableResourceAsset IconNeutral { get; } = new("MiraAPI.Resources.Wiki.IconNeutral.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for the player list.
     /// </summary>
-    public static LoadableResourceAsset IconPlayerList { get; } = new("MiraAPI.Resources.Wiki.IconPlayerList.png");
+    public static LoadableResourceAsset IconPlayerList { get; } = new("MiraAPI.Resources.Wiki.IconPlayerList.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for settings.
     /// </summary>
-    public static LoadableResourceAsset IconSettings { get; } = new("MiraAPI.Resources.Wiki.IconSettings.png");
+    public static LoadableResourceAsset IconSettings { get; } = new("MiraAPI.Resources.Wiki.IconSettings.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used for terminology.
     /// </summary>
-    public static LoadableResourceAsset IconTerminology { get; } = new("MiraAPI.Resources.Wiki.IconTerminology.png");
+    public static LoadableResourceAsset IconTerminology { get; } = new("MiraAPI.Resources.Wiki.IconTerminology.png", _assembly);
 
     /// <summary>
     /// Gets the Page switching sprite.
     /// </summary>
-    public static LoadableResourceAsset PageLeftHover { get; } = new("MiraAPI.Resources.Wiki.PageLeftHover.png");
+    public static LoadableResourceAsset PageLeftHover { get; } = new("MiraAPI.Resources.Wiki.PageLeftHover.png", _assembly);
 
     /// <summary>
     /// Gets the Page switching sprite.
     /// </summary>
-    public static LoadableResourceAsset PageLeftIdle { get; } = new("MiraAPI.Resources.Wiki.PageLeftIdle.png");
+    public static LoadableResourceAsset PageLeftIdle { get; } = new("MiraAPI.Resources.Wiki.PageLeftIdle.png", _assembly);
 
     /// <summary>
     /// Gets the Page switching sprite.
     /// </summary>
-    public static LoadableResourceAsset PageRightHover { get; } = new("MiraAPI.Resources.Wiki.PageRightHover.png");
+    public static LoadableResourceAsset PageRightHover { get; } = new("MiraAPI.Resources.Wiki.PageRightHover.png", _assembly);
 
     /// <summary>
     /// Gets the Page switching sprite.
     /// </summary>
-    public static LoadableResourceAsset PageRightIdle { get; } = new("MiraAPI.Resources.Wiki.PageRightIdle.png");
+    public static LoadableResourceAsset PageRightIdle { get; } = new("MiraAPI.Resources.Wiki.PageRightIdle.png", _assembly);
 
     /// <summary>
     /// Gets the sprite used below the tab icons in the wiki.
     /// </summary>
-    public static LoadableResourceAsset TabButtonContainer { get; } = new("MiraAPI.Resources.Wiki.TabButtonContainer.png");
+    public static LoadableResourceAsset TabButtonContainer { get; } = new("MiraAPI.Resources.Wiki.TabButtonContainer.png", _assembly);
 
-    internal static LoadableResourceAsset BlankSprite { get; } = new("MiraAPI.Resources.BlankSprite.png");
+    internal static LoadableResourceAsset BlankSprite { get; } = new("MiraAPI.Resources.BlankSprite.png", _assembly);
 }

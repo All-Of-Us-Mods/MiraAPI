@@ -103,6 +103,7 @@ public class ModdedEnumOption : ModdedOption<int>
                 Configuration.PopUpIconTmp,
                 false);
         }
+
         if (!OptionBehaviour)
         {
             return;

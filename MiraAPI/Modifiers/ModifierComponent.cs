@@ -77,7 +77,7 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
             }
             catch (Exception e)
             {
-                Error($"Error while deactivating modifier {modifier.ModifierName}: {e.ToString()}");
+                Error($"Error while deactivating modifier {modifier.ModifierName}: {e}");
             }
 
             Modifiers.Remove(modifier);
@@ -95,7 +95,7 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
             }
             catch (Exception e)
             {
-                Error($"Error while activating modifier {modifier.ModifierName}: {e.ToString()}");
+                Error($"Error while activating modifier {modifier.ModifierName}: {e}");
             }
 
             if (modifier is TimedModifier { AutoStart: true } timer)
@@ -122,7 +122,7 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
             }
             catch (Exception e)
             {
-                Error($"Error while (fixed) updating modifier {modifier.ModifierName}: {e.ToString()}");
+                Error($"Error while (fixed) updating modifier {modifier.ModifierName}: {e}");
             }
         }
 
@@ -153,7 +153,7 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
             }
             catch (Exception e)
             {
-                Error($"Error while updating modifier {modifier.ModifierName}: {e.ToString()}");
+                Error($"Error while updating modifier {modifier.ModifierName}: {e}");
             }
         }
     }
