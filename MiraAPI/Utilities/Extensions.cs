@@ -492,11 +492,24 @@ public static class Extensions
     }
 
     /// <summary>
-    /// Gets a proper string for an <see cref="Enum"/>. (with spaces).
+    /// Gets a proper string for an <see cref="Enum"/> (with spaces).
     /// </summary>
     /// <param name="enum">The <see cref="Enum"/> you would like to change.</param>
-    /// <returns>A proper string for the <see cref="Enum"/>.</returns>
+    /// <returns>A proper string for the provided <see cref="Enum"/>.</returns>
     public static string ToDisplayString(this Enum @enum)
+    {
+        var regex = new Regex(@"([^\^])([A-Z][a-z$])", default, Regex.InfiniteMatchTimeout);
+        return regex.Replace(@enum.ToString(), m => $"{m.Groups[1].Value} {m.Groups[2].Value}");
+    }
+
+    /// <summary>
+    /// Gets a proper string for a(n) <typeparamref name="T"/> value (with spaces).
+    /// </summary>
+    /// <typeparam name="T">The type of the enum value.</typeparam>
+    /// <param name="enum">The <typeparamref name="T"/> enum value you would like to change.</param>
+    /// <returns>A proper string for the provided <typeparamref name="T"/> value.</returns>
+    public static string ToDisplayString<T>(this T @enum)
+        where T : struct, Enum
     {
         var regex = new Regex(@"([^\^])([A-Z][a-z$])", default, Regex.InfiniteMatchTimeout);
         return regex.Replace(@enum.ToString(), m => $"{m.Groups[1].Value} {m.Groups[2].Value}");

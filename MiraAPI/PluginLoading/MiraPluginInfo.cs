@@ -26,6 +26,26 @@ public class MiraPluginInfo
     }
 
     /// <summary>
+    /// Gets the plugin's ID, as defined in the plugin's BepInEx metadata.
+    /// </summary>
+    public string PluginId { get; }
+
+    /// <summary>
+    /// Gets the plugin's instance as an <see cref="IMiraPlugin"/>.
+    /// </summary>
+    public IMiraPlugin MiraPlugin { get; }
+
+    /// <summary>
+    /// Gets the plugin's BepInEx metadata.
+    /// </summary>
+    public PluginInfo PluginInfo { get; }
+
+    /// <summary>
+    /// Gets the plugin's <see cref="ConfigFile"/>.
+    /// </summary>
+    public ConfigFile PluginConfig { get; }
+
+    /// <summary>
     /// Gets a <see cref="IReadOnlyCollection{T}"/> of this <see cref="IMiraPlugin"/>'s <see cref="BaseModifier"/>s. This is not safe for <see cref="BaseModifier"/>s with constructors.
     /// </summary>
     public IReadOnlyCollection<BaseModifier> Modifiers { get; private set; } = null!;
@@ -44,15 +64,6 @@ public class MiraPluginInfo
     /// Gets a <see cref="ReadOnlyDictionary{TKey, TValue}"/> of Role IDs and the <see cref="RoleBehaviour"/> object they are associated with.
     /// </summary>
     public ReadOnlyDictionary<ushort, RoleBehaviour> Roles { get; private set; } = null!;
-
-    /// <summary>
-    /// Gets a read only dictionary of Game Mode IDs and the AbstractGameMode object they are associated with.
-    /// </summary>
-    /// <returns>Read only dictionary of IDs and Game Modes.</returns>
-    public ReadOnlyDictionary<uint, AbstractGameMode> GetModes()
-    {
-        return new ReadOnlyDictionary<uint, AbstractGameMode>(GameModes);
-    }
 
     /// <summary>
     /// Gets a <see cref="IReadOnlyCollection{T}"/> of this <see cref="IMiraPlugin"/>'s <see cref="CustomActionButton"/>.
@@ -74,6 +85,15 @@ public class MiraPluginInfo
     /// </summary>
     public IReadOnlyCollection<OptionPreset> Presets { get; internal set; } = null!;
 
+    /// <summary>
+    /// Gets a read only dictionary of Game Mode IDs and the AbstractGameMode object they are associated with.
+    /// </summary>
+    /// <returns>Read only dictionary of IDs and Game Modes.</returns>
+    public ReadOnlyDictionary<uint, AbstractGameMode> GetModes()
+    {
+        return new ReadOnlyDictionary<uint, AbstractGameMode>(GameModes);
+    }
+
     internal void SavePublicCollections()
     {
         Presets = [.. InternalPresets];
@@ -87,39 +107,13 @@ public class MiraPluginInfo
     }
 
     internal List<OptionPreset> InternalPresets { get; } = [];
-
-    internal List<AbstractOptionGroup> InternalOptionGroups { get; } = [];
-
     internal List<IModdedOption> InternalOptions { get; } = [];
-
     internal List<BaseModifier> InternalModifiers { get; } = [];
+    internal List<CustomActionButton> InternalButtons { get; } = [];
+    internal List<AbstractOptionGroup> InternalOptionGroups { get; } = [];
+    internal List<MeetingActionButton> InternalMeetingButtons { get; } = [];
+    internal List<TargetedMeetingButton> InternalTargetedMeetingButtons { get; } = [];
 
     internal Dictionary<uint, AbstractGameMode> GameModes { get; } = [];
     internal Dictionary<ushort, RoleBehaviour> InternalRoles { get; } = [];
-
-    internal List<CustomActionButton> InternalButtons { get; } = [];
-
-    internal List<TargetedMeetingButton> InternalTargetedMeetingButtons { get; } = [];
-
-    internal List<MeetingActionButton> InternalMeetingButtons { get; } = [];
-
-    /// <summary>
-    /// Gets the plugin's ID, as defined in the plugin's BepInEx metadata.
-    /// </summary>
-    public string PluginId { get; }
-
-    /// <summary>
-    /// Gets the plugin's instance as an <see cref="IMiraPlugin"/>.
-    /// </summary>
-    public IMiraPlugin MiraPlugin { get; }
-
-    /// <summary>
-    /// Gets the plugin's BepInEx metadata.
-    /// </summary>
-    public PluginInfo PluginInfo { get; }
-
-    /// <summary>
-    /// Gets the plugin's <see cref="ConfigFile"/>.
-    /// </summary>
-    public ConfigFile PluginConfig { get; }
 }

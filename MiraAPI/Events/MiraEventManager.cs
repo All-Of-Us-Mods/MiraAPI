@@ -35,7 +35,7 @@ public static class MiraEventManager
             }
             catch (Exception ex)
             {
-                Error($"Error invoking event handler for {typeof(T).Name}: {ex.ToString()}");
+                Error($"Error invoking event handler for {typeof(T).Name}: {ex}");
             }
         }
 
@@ -65,7 +65,7 @@ public static class MiraEventManager
             }
             catch (Exception ex)
             {
-                Error($"Error invoking event handler for {type.Name}: {ex.ToString()}");
+                Error($"Error invoking event handler for {type.Name}: {ex}");
             }
         }
 
