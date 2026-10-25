@@ -387,6 +387,7 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
     protected void Begin(Action registerEntryPanels)
     {
         MinigameStubs.Begin(Component, null);
+        MeetingVoteAreaVisibility.HideNameplates(Component);
 
         searchText = string.Empty;
         currentPage = 0;

@@ -362,6 +362,7 @@ public static class RoleSettingMenuPatches
         }
 
         roleMenu.SetScrollBounds();
+        roleMenu.scrollBar.ScrollToTop();
         _quotaTabCoroutine = null;
     }
 
