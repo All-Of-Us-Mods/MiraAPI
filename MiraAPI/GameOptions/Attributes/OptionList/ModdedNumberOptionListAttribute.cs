@@ -113,7 +113,7 @@ public class ModdedNumberOptionListAttribute(
         var value = opt.Value;
 
         if (ValueType == typeof(int))
-            return (int)Math.Round(value);
+            return (int)MathF.Round(value);
 
         return value;
     }

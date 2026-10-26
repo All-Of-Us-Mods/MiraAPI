@@ -58,13 +58,13 @@ public class CustomColor(StringNames name, Color32 mainColor, Color32 shadowColo
 
     /// <inheritdoc cref="CustomColor"/>
     public CustomColor(StringNames name, Color32 mainColor)
-        : this(name, mainColor, mainColor.GetShadowColor(60))
+        : this(name, mainColor, mainColor.DarkenAbsolute(60))
     {
     }
 
     /// <inheritdoc cref="CustomColor"/>
     public CustomColor(string name, Color32 mainColor)
-        : this(name, mainColor, mainColor.GetShadowColor(60))
+        : this(name, mainColor, mainColor.DarkenAbsolute(60))
     {
     }
 
