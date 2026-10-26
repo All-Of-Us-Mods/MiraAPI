@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
-using MiraAPI.GameOptions.OptionTypes;
 using MiraAPI.PluginLoading;
 using MiraAPI.Translation;
 using MiraAPI.Utilities.Assets;
@@ -56,9 +54,7 @@ internal sealed class GuideOptionPage(
 
 internal static class GuideOptionPages
 {
-    private static readonly Regex TrailingZeroRegex = new(@"\.0+(?!\d)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
-
-    public static List<GuideOptionPage> BuildPages(Func<bool, string> formatBool)
+    public static List<GuideOptionPage> BuildPages()
     {
         var pages = new List<GuideOptionPage>();
         var combinedPages = new Dictionary<string, GuideOptionPage>(StringComparer.OrdinalIgnoreCase);
@@ -94,8 +90,7 @@ internal static class GuideOptionPages
                     item.Group,
                     groupName,
                     item.ModAbbreviation,
-                    modSearchTerms,
-                    formatBool);
+                    modSearchTerms);
                 if (entry != null)
                 {
                     entries.Add(entry);
@@ -293,51 +288,18 @@ internal static class GuideOptionPages
         AbstractOptionGroup group,
         string groupName,
         string modAbbreviation,
-        IReadOnlyList<string> modSearchTerms,
-        Func<bool, string> formatBool)
+        IReadOnlyList<string> modSearchTerms)
     {
         try
         {
             var title = TranslationController.Instance.GetString(option.StringName);
-            var value = FormatValue(option, formatBool);
+            var value = option.GetDisplayValue();
             return new GuideOptionEntry(title, value, group, groupName, modAbbreviation, modSearchTerms);
         }
         catch (Exception e)
         {
             Warning($"Could not format option '{option.Title}' for the guide: {e.Message}");
             return null;
-        }
-    }
-
-    private static string FormatValue(IModdedOption option, Func<bool, string> formatBool)
-    {
-        switch (option)
-        {
-            case ModdedToggleOption toggle:
-                return formatBool(toggle.Value);
-
-            case ModdedEnumOption enumOption:
-                return MiraLocaleManager.Get(
-                    enumOption.Values[enumOption.Value],
-                    enumOption.Values[enumOption.Value]);
-
-            case ModdedNumberOption number:
-                if (number is { NegativeWordValue: not "#", Value: -1 })
-                {
-                    return number.NegativeWordValue;
-                }
-
-                if (number is { ZeroWordValue: not "#", Value: 0 })
-                {
-                    return number.ZeroWordValue;
-                }
-
-                return TrailingZeroRegex.Replace(number.Data.GetValueString(number.Value), string.Empty);
-
-            default:
-                return option.Data.Type == OptionTypes.Checkbox
-                    ? formatBool(Math.Abs(option.GetFloatData() - 1f) < 0.0001f)
-                    : option.Data.GetValueString(option.GetFloatData());
         }
     }
 }

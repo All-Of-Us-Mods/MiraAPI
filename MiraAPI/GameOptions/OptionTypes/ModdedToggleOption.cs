@@ -73,6 +73,18 @@ public class ModdedToggleOption : ModdedOption<bool>
     }
 
     /// <inheritdoc />
+    public override string GetDisplayValue()
+    {
+        return Value
+            ? (OnValue == "On"
+                ? TranslationController.Instance.GetString(StringNames.SettingsOn)
+                : OnValue.Translate())
+            : (OffValue == "Off"
+                ? TranslationController.Instance.GetString(StringNames.SettingsOff)
+                : OffValue.Translate());
+    }
+
+    /// <inheritdoc />
     public override float GetFloatData()
     {
         return Value ? 1 : 0;
@@ -99,23 +111,7 @@ public class ModdedToggleOption : ModdedOption<bool>
     /// <inheritdoc />
     protected override void OnValueChanged(bool newValue)
     {
-        if (ShowNotification)
-        {
-            ModdedOptionsManager.AddSettingsChangeMessage(
-                HudManager.Instance.Notifier,
-                StringName,
-                (newValue ? OnValue : OffValue).Translate(),
-                Configuration.PopUpTextColor,
-                Configuration.PopUpIconTmp,
-                false);
-        }
-
-        if (!OptionBehaviour)
-        {
-            return;
-        }
-
-        if (OptionBehaviour is ToggleOption toggleOpt)
+        if (OptionBehaviour && OptionBehaviour is ToggleOption toggleOpt)
         {
             toggleOpt.CheckMark.enabled = newValue;
         }

@@ -443,7 +443,7 @@ public static class ModdedOptionsManager
     /// <param name="value">The new object value.</param>
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony naming convention.")]
     [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Read above.")]
-    [Obsolete("Use PropertySetterPatch<T> instead.")]
+    [Obsolete("Use PropertySetterPatch<T> instead. This will be removed in a future version.")]
     public static void PropertySetterPatch(MethodBase __originalMethod, object value)
     {
         if (!SetterLookups.TryGetValue(__originalMethod, out var attribute))
@@ -485,7 +485,7 @@ public static class ModdedOptionsManager
     /// <returns><see langword="false"/> so the original getter gets skipped.</returns>
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony naming convention")]
     [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Read above.")]
-    [Obsolete("Use PropertyGetterPatch<T> instead.")]
+    [Obsolete("Use PropertyGetterPatch<T> instead. This will be removed in a future version.")]
     public static bool PropertyGetterPatch(MethodBase __originalMethod, ref object __result)
     {
         if (!GetterLookups.TryGetValue(__originalMethod, out var attribute))

@@ -12,7 +12,7 @@ namespace MiraAPI.GameOptions.Attributes;
 /// <param name="enumType">The <see cref="Enum"/> type.</param>
 /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
 [AttributeUsage(AttributeTargets.Property)]
-[Obsolete("Use ModdedEnumOptionListAttribute<T> instead.")]
+[Obsolete("Use ModdedEnumOptionListAttribute<T> instead. This will be removed in a future version.")]
 public class ModdedEnumOptionListAttribute(string title, Type enumType, string[]? values = null)
     : ModdedOptionListAttribute(title)
 {
