@@ -607,14 +607,10 @@ public static class Extensions
     /// <param name="color">The original <see cref="Color32"/>.</param>
     /// <param name="darknessAmount">A darkness amount between 0 and 255.</param>
     /// <returns>The darkened <see cref="Color32"/>.</returns>
+    [Obsolete("Use ColorExtensions.DarkenAbsolute instead. This will be removed in a future version.")]
     public static Color32 GetShadowColor(this Color32 color, byte darknessAmount)
     {
-        return
-            new Color32(
-                (byte)Mathf.Clamp(color.r - darknessAmount, 0, 255),
-                (byte)Mathf.Clamp(color.g - darknessAmount, 0, 255),
-                (byte)Mathf.Clamp(color.b - darknessAmount, 0, 255),
-                color.a);
+        return color.DarkenAbsolute(darknessAmount);
     }
 
     /// <summary>
@@ -623,14 +619,10 @@ public static class Extensions
     /// <param name="color">The original <see cref="Color"/>.</param>
     /// <param name="darknessAmount">A darkness amount between 0 and 1.</param>
     /// <returns>The darkened <see cref="Color"/>.</returns>
+    [Obsolete("Use ColorExtensions.DarkenAbsolute instead. This will be removed in a future version.")]
     public static Color GetShadowColor(this Color color, float darknessAmount)
     {
-        return
-            new Color(
-                MathUtilities.Clamp01(color.r - darknessAmount),
-                MathUtilities.Clamp01(color.g - darknessAmount),
-                MathUtilities.Clamp01(color.b - darknessAmount),
-                color.a);
+        return color.DarkenAbsolute(darknessAmount);
     }
 
     /// <summary>
@@ -719,9 +711,10 @@ public static class Extensions
     /// <param name="color">The original <see cref="Color"/>.</param>
     /// <param name="amount">A <see langword="float"/> amount between 0 and 1.</param>
     /// <returns>The darkened <see cref="Color"/>.</returns>
+    [Obsolete("Use ColorExtensions.DarkenAbsolute instead. This will be removed in a future version.")]
     public static Color DarkenColor(this Color color, float amount = 0.45f)
     {
-        return new Color(color.r - amount, color.g - amount, color.b - amount);
+        return color.DarkenAbsolute(amount);
     }
 
     /// <summary>
@@ -730,9 +723,10 @@ public static class Extensions
     /// <param name="color">The original <see cref="Color"/>.</param>
     /// <param name="amount">A <see langword="float"/> amount between 0.0 and 1.0.</param>
     /// <returns>The lightened <see cref="Color"/>.</returns>
+    [Obsolete("Use ColorExtensions.LightenAbsolute instead. This will be removed in a future version.")]
     public static Color LightenColor(this Color color, float amount = 0.45f)
     {
-        return new Color(color.r + amount, color.g + amount, color.b + amount);
+        return color.LightenAbsolute(amount);
     }
 
     /// <summary>

@@ -51,7 +51,7 @@ public abstract class TimedModifier : BaseModifier
     /// <returns>A string with the time remaining.</returns>
     public override string GetDescription()
     {
-        return $"Remaining Time: {Math.Round(Duration - TimeRemaining, 0)}s/{Duration}s";
+        return $"Remaining Time: {MathF.Round(Duration - TimeRemaining, 0)}s/{Duration}s";
     }
 
     /// <summary>
