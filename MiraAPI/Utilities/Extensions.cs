@@ -26,6 +26,8 @@ namespace MiraAPI.Utilities;
 /// </summary>
 public static class Extensions
 {
+    private static readonly Regex DisplayRegex = new(@"([^\^])([A-Z][a-z$])", default, Regex.InfiniteMatchTimeout);
+
     internal static NetData GetNetData(this ICustomRole role)
     {
         var count = role.GetCount();
@@ -498,8 +500,7 @@ public static class Extensions
     /// <returns>A proper string for the provided <see cref="Enum"/>.</returns>
     public static string ToDisplayString(this Enum @enum)
     {
-        var regex = new Regex(@"([^\^])([A-Z][a-z$])", default, Regex.InfiniteMatchTimeout);
-        return regex.Replace(@enum.ToString(), m => $"{m.Groups[1].Value} {m.Groups[2].Value}");
+        return DisplayRegex.Replace(@enum.ToString(), m => $"{m.Groups[1].Value} {m.Groups[2].Value}");
     }
 
     /// <summary>
@@ -511,8 +512,7 @@ public static class Extensions
     public static string ToDisplayString<T>(this T @enum)
         where T : struct, Enum
     {
-        var regex = new Regex(@"([^\^])([A-Z][a-z$])", default, Regex.InfiniteMatchTimeout);
-        return regex.Replace(@enum.ToString(), m => $"{m.Groups[1].Value} {m.Groups[2].Value}");
+        return DisplayRegex.Replace(@enum.ToString(), m => $"{m.Groups[1].Value} {m.Groups[2].Value}");
     }
 
     /// <summary>
@@ -539,17 +539,46 @@ public static class Extensions
     /// <returns>The distance between the types.</returns>
     public static int GetInheritanceDistance(Type from, Type to)
     {
-        if (!from.IsAssignableFrom(to)) return int.MaxValue;
+        if (from == null || to == null)
+            throw new ArgumentNullException(from == null ? nameof(from) : nameof(to));
 
-        var type = from;
-        var distance = 0;
-        while (type != null && type != to)
+        if (from == to)
+            return 0;
+
+        if (!to.IsGenericTypeDefinition && !to.IsAssignableFrom(from))
+            return int.MaxValue;
+
+        var queue = new Queue<(Type Type, int Distance)>();
+        var visited = new HashSet<Type>();
+
+        queue.Enqueue((from, 0));
+        visited.Add(from);
+
+        while (queue.Count > 0)
         {
-            type = type.BaseType;
-            distance++;
+            var (current, dist) = queue.Dequeue();
+
+            if (current == to || (current.IsGenericType && current.GetGenericTypeDefinition() == to))
+                return dist;
+
+            if (current.BaseType != null && visited.Add(current.BaseType))
+                queue.Enqueue((current.BaseType, dist + 1));
+
+            var allInterfaces = current.GetInterfaces();
+            var baseInterfaces = current.BaseType?.GetInterfaces() ?? Type.EmptyTypes;
+
+            var directInterfaces = allInterfaces.Except(baseInterfaces).ToList();
+            var inheritedInterfaces = directInterfaces.SelectMany(i => i.GetInterfaces());
+            var immediateInterfaces = directInterfaces.Except(inheritedInterfaces);
+
+            foreach (var iFace in immediateInterfaces)
+            {
+                if (visited.Add(iFace))
+                    queue.Enqueue((iFace, dist + 1));
+            }
         }
 
-        return type == to ? distance : int.MaxValue;
+        return to.IsAssignableFrom(from) ? int.MaxValue - 1 : int.MaxValue;
     }
 
     /// <summary>
