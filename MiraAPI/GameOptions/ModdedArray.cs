@@ -75,12 +75,14 @@ public sealed class ModdedArray<T> : IList<T>, IReadOnlyList<T>, IList
     {
         get
         {
-            if (!ModdedOptionsManager.ListInstanceCache.TryGetValue(this, out var attribute))
-                return items[index];
+            if (ModdedOptionsManager.ListInstanceCache.TryGetValue(this, out var attribute))
+            {
+                items[index] = attribute is ITypedOptionList<T> typedAttr
+                    ? typedAttr.GetValueUnboxed(index)
+                    : (T)attribute.GetValue(index);
+            }
 
-            return attribute is ITypedOptionList<T> typedAttr
-                ? typedAttr.GetValueUnboxed(index)
-                : (T)attribute.GetValue(index);
+            return items[index];
         }
         set
         {
@@ -90,6 +92,10 @@ public sealed class ModdedArray<T> : IList<T>, IReadOnlyList<T>, IList
                     typedAttr.SetValueUnboxed(index, value);
                 else
                     attribute.SetValue(index, value!);
+
+                items[index] = attribute is ITypedOptionList<T> typedAttr2
+                    ? typedAttr2.GetValueUnboxed(index)
+                    : (T)attribute.GetValue(index);
             }
             else
             {
@@ -192,31 +198,31 @@ public sealed class ModdedArray<T> : IList<T>, IReadOnlyList<T>, IList
     }
 
     /// <inheritdoc/>
-    public void Insert(int index, T item)
+    void IList<T>.Insert(int index, T item)
     {
         throw new NotSupportedException("ModdedArray is of a fixed size.");
     }
 
     /// <inheritdoc/>
-    public void RemoveAt(int index)
+    void IList<T>.RemoveAt(int index)
     {
         throw new NotSupportedException("ModdedArray is of a fixed size.");
     }
 
     /// <inheritdoc/>
-    public void Add(T item)
+    void ICollection<T>.Add(T item)
     {
         throw new NotSupportedException("ModdedArray is of a fixed size.");
     }
 
     /// <inheritdoc/>
-    public void Clear()
+    void ICollection<T>.Clear()
     {
         throw new NotSupportedException("ModdedArray is of a fixed size.");
     }
 
     /// <inheritdoc/>
-    public bool Remove(T item)
+    bool ICollection<T>.Remove(T item)
     {
         throw new NotSupportedException("ModdedArray is of a fixed size.");
     }
