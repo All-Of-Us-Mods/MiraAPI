@@ -36,8 +36,8 @@ public static class ModdedOptionsManager
     private static readonly MethodInfo OpenSetterPatch = typeof(ModdedOptionsManager)
         .GetMethods(BindingFlags.Public | BindingFlags.Static)
         .First(m => m.Name == nameof(PropertySetterPatch) && m.IsGenericMethodDefinition);
-    private static readonly Dictionary<Type, MethodInfo> ConcretisedGetters = [];
-    private static readonly Dictionary<Type, MethodInfo> ConcretisedSetters = [];
+    private static readonly Dictionary<Type, HarmonyMethod> ConcretisedGetters = [];
+    private static readonly Dictionary<Type, HarmonyMethod> ConcretisedSetters = [];
 
     internal static readonly ConditionalWeakTable<object, ModdedOptionListAttribute> ListInstanceCache = [];
     internal static readonly Dictionary<OptionBehaviour, ModdedPlayerOption> CreatedPlayerOptions = [];
@@ -180,12 +180,12 @@ public static class ModdedOptionsManager
 
         if (!ConcretisedGetters.TryGetValue(propType, out var concreteGetter))
         {
-            concreteGetter = OpenGetterPatch.MakeGenericMethod(propType);
+            concreteGetter = new(OpenGetterPatch.MakeGenericMethod(propType));
             ConcretisedGetters[propType] = concreteGetter;
         }
 
         var getterOriginal = property.GetGetMethod(true)!;
-        PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: new HarmonyMethod(concreteGetter));
+        PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: concreteGetter);
         GetterLookups[getterOriginal] = attribute;
 
         var setterOriginal = property.GetSetMethod(true);
@@ -194,11 +194,11 @@ public static class ModdedOptionsManager
         {
             if (!ConcretisedSetters.TryGetValue(propType, out var concreteSetter))
             {
-                concreteSetter = OpenSetterPatch.MakeGenericMethod(propType);
+                concreteSetter = new(OpenSetterPatch.MakeGenericMethod(propType));
                 ConcretisedSetters[propType] = concreteSetter;
             }
 
-            PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: new HarmonyMethod(concreteSetter));
+            PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: concreteSetter);
             SetterLookups[setterOriginal] = attribute;
         }
 
@@ -303,12 +303,12 @@ public static class ModdedOptionsManager
 
         if (!ConcretisedGetters.TryGetValue(listType, out var concreteGetter))
         {
-            concreteGetter = OpenGetterPatch.MakeGenericMethod(listType);
+            concreteGetter = new(OpenGetterPatch.MakeGenericMethod(listType));
             ConcretisedGetters[listType] = concreteGetter;
         }
 
         var getterOriginal = property.GetGetMethod(true)!;
-        PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: new HarmonyMethod(concreteGetter));
+        PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(getterOriginal, prefix: concreteGetter);
         GetterLookups[getterOriginal] = attribute;
 
         var setterOriginal = property.GetSetMethod(true);
@@ -317,11 +317,11 @@ public static class ModdedOptionsManager
         {
             if (!ConcretisedSetters.TryGetValue(listType, out var concreteSetter))
             {
-                concreteSetter = OpenSetterPatch.MakeGenericMethod(listType);
+                concreteSetter = new(OpenSetterPatch.MakeGenericMethod(listType));
                 ConcretisedSetters[listType] = concreteSetter;
             }
 
-            PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: new HarmonyMethod(concreteSetter));
+            PluginSingleton<MiraApiPlugin>.Instance.Harmony.Patch(setterOriginal, postfix: concreteSetter);
             SetterLookups[setterOriginal] = attribute;
         }
 
