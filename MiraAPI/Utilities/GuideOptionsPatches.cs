@@ -8,7 +8,6 @@ using MiraAPI.GameOptions.OptionTypes;
 using MiraAPI.PluginLoading;
 using MiraAPI.Translation;
 using MiraAPI.Utilities.Assets;
-using Reactor.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.Utilities;
@@ -103,40 +102,42 @@ internal static class GuideOptionPages
                 }
             }
 
-            if (entries.Count > 0)
+            if (entries.Count <= 0)
             {
-                var pageKey = item.Group.MatchInfoGuidePageKey?.Trim();
-                var combinedKey = string.IsNullOrEmpty(pageKey) ? null : $"{item.Plugin.PluginId}\0{pageKey}";
-                if (combinedKey != null && combinedPages.TryGetValue(combinedKey, out var combinedPage))
+                continue;
+            }
+
+            var pageKey = item.Group.MatchInfoGuidePageKey?.Trim();
+            var combinedKey = string.IsNullOrEmpty(pageKey) ? null : $"{item.Plugin.PluginId}\0{pageKey}";
+            if (combinedKey != null && combinedPages.TryGetValue(combinedKey, out var combinedPage))
+            {
+                combinedPage.Groups.Add(item.Group);
+                combinedPage.Entries.AddRange(entries);
+                combinedPage.ModSearchTerms.UnionWith(modSearchTerms);
+                combinedPage.Order = Math.Min(combinedPage.Order, item.Group.MatchInfoGuidePageOrder);
+                combinedPage.MenuOrder = Math.Min(
+                    combinedPage.MenuOrder,
+                    GetMenuOrder(item.Group.ParentMenu));
+                combinedPage.GroupPriority = Math.Min(
+                    combinedPage.GroupPriority,
+                    item.Group.GroupPriority);
+            }
+            else
+            {
+                var page = new GuideOptionPage(
+                    item.Group,
+                    item.Group.MatchInfoGuidePageTitle,
+                    item.Group.MatchInfoGuidePageOrder,
+                    GetMenuOrder(item.Group.ParentMenu),
+                    item.Group.GroupPriority,
+                    Mathf.Clamp(item.Group.MatchInfoGuidePageColumns, 1, 6),
+                    item.ModAbbreviation,
+                    modSearchTerms,
+                    entries);
+                pages.Add(page);
+                if (combinedKey != null)
                 {
-                    combinedPage.Groups.Add(item.Group);
-                    combinedPage.Entries.AddRange(entries);
-                    combinedPage.ModSearchTerms.UnionWith(modSearchTerms);
-                    combinedPage.Order = Math.Min(combinedPage.Order, item.Group.MatchInfoGuidePageOrder);
-                    combinedPage.MenuOrder = Math.Min(
-                        combinedPage.MenuOrder,
-                        GetMenuOrder(item.Group.ParentMenu));
-                    combinedPage.GroupPriority = Math.Min(
-                        combinedPage.GroupPriority,
-                        item.Group.GroupPriority);
-                }
-                else
-                {
-                    var page = new GuideOptionPage(
-                        item.Group,
-                        item.Group.MatchInfoGuidePageTitle,
-                        item.Group.MatchInfoGuidePageOrder,
-                        GetMenuOrder(item.Group.ParentMenu),
-                        item.Group.GroupPriority,
-                        Mathf.Clamp(item.Group.MatchInfoGuidePageColumns, 1, 6),
-                        item.ModAbbreviation,
-                        modSearchTerms,
-                        entries);
-                    pages.Add(page);
-                    if (combinedKey != null)
-                    {
-                        combinedPages.Add(combinedKey, page);
-                    }
+                    combinedPages.Add(combinedKey, page);
                 }
             }
         }
@@ -269,7 +270,7 @@ internal static class GuideOptionPages
         }
         catch (Exception e)
         {
-            Logger<MiraApiPlugin>.Warning($"GroupVisible threw for {group.GetType().Name}: {e.Message}");
+            Warning($"GroupVisible threw for {group.GetType().Name}: {e.Message}");
             return false;
         }
     }
@@ -282,7 +283,7 @@ internal static class GuideOptionPages
         }
         catch (Exception e)
         {
-            Logger<MiraApiPlugin>.Warning($"Visible threw for option '{option.Title}': {e.Message}");
+            Warning($"Visible threw for option '{option.Title}': {e.Message}");
             return false;
         }
     }
@@ -303,7 +304,7 @@ internal static class GuideOptionPages
         }
         catch (Exception e)
         {
-            Logger<MiraApiPlugin>.Warning($"Could not format option '{option.Title}' for the guide: {e.Message}");
+            Warning($"Could not format option '{option.Title}' for the guide: {e.Message}");
             return null;
         }
     }

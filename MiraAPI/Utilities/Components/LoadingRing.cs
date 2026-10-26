@@ -2,7 +2,7 @@ using System;
 using Reactor.Utilities.Attributes;
 using UnityEngine;
 
-namespace MiraAPI.Utilities;
+namespace MiraAPI.Utilities.Components;
 
 /// <summary>
 /// A spinning ring used to indicate that content is loading.
