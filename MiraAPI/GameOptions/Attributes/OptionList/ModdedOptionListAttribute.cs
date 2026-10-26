@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using MiraAPI.Translation;
 
 namespace MiraAPI.GameOptions.Attributes;
 
@@ -75,10 +74,9 @@ public abstract class ModdedOptionListAttribute(string title) : PropertyOptionAt
     /// </summary>
     /// <param name="index">The option's index.</param>
     /// <returns>The formatted option's title.</returns>
-    [SuppressMessage("Globalization", "CA1305:Specify IFormatProvider", Justification = "I don't even know if this is worth it.")]
     protected string GetFormattedTitle(int index)
     {
-        var match = Regex.Match(Title.Translate(), @"\{(\d+)(?::[^}]+)?\}", default, Regex.InfiniteMatchTimeout);
+        var match = Regex.Match(Title, @"\{(\d+)(?::[^}]+)?\}", default, Regex.InfiniteMatchTimeout);
 
         if (!match.Success)
         {
@@ -87,7 +85,7 @@ public abstract class ModdedOptionListAttribute(string title) : PropertyOptionAt
 
         if (match.Value == "{0}" && !match.NextMatch().Success)
         {
-            return string.Format(Title, index);
+            return string.Format(CultureInfo.InvariantCulture, Title, index);
         }
 
         Error($"ModdedOptionList Title of {Title} cannot contain more than the first parameter for formatting.");

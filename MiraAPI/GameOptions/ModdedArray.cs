@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using MiraAPI.GameOptions.Attributes;
 
 namespace MiraAPI.GameOptions;
 
@@ -72,15 +73,28 @@ public sealed class ModdedArray<T> : IList<T>, IReadOnlyList<T>, IList
     /// <param name="index">The index of the value.</param>
     public T this[int index]
     {
-        get => ModdedOptionsManager.ListInstanceCache.TryGetValue(this, out var attribute)
-            ? (T)attribute.GetValue(index)
-            : items[index];
+        get
+        {
+            if (!ModdedOptionsManager.ListInstanceCache.TryGetValue(this, out var attribute))
+                return items[index];
+
+            return attribute is ITypedOptionList<T> typedAttr
+                ? typedAttr.GetValueUnboxed(index)
+                : (T)attribute.GetValue(index);
+        }
         set
         {
             if (ModdedOptionsManager.ListInstanceCache.TryGetValue(this, out var attribute))
-                attribute.SetValue(index, value!);
+            {
+                if (attribute is ITypedOptionList<T> typedAttr)
+                    typedAttr.SetValueUnboxed(index, value);
+                else
+                    attribute.SetValue(index, value!);
+            }
             else
+            {
                 items[index] = value;
+            }
 
             version++;
         }

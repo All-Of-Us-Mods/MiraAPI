@@ -13,6 +13,7 @@ namespace MiraAPI.GameOptions.OptionTypes;
 /// <summary>
 /// An option for selecting an <see langword="enum"/> value.
 /// </summary>
+[Obsolete("Use ModdedEnum<T> instead.")]
 public class ModdedEnumOption : ModdedOption<int>
 {
     /// <summary>

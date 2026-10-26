@@ -28,7 +28,7 @@ public class ModdedNumberOptionAttribute(
     MiraNumberSuffixes suffixType = MiraNumberSuffixes.None,
     string? formatString = null,
     bool halfIncrements = false)
-    : ModdedOptionAttribute(title)
+    : ModdedOptionAttribute(title), ITypedOption<int>, ITypedOption<float>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ModdedNumberOptionAttribute"/> class.
@@ -89,6 +89,18 @@ public class ModdedNumberOptionAttribute(
     }
 
     /// <inheritdoc />
+    public void SetValueUnboxed(float value)
+    {
+        (HolderOption as ModdedNumberOption)?.SetValue(value);
+    }
+
+    /// <inheritdoc />
+    void ITypedOption<int>.SetValueUnboxed(int value)
+    {
+        (HolderOption as ModdedNumberOption)?.SetValue(value);
+    }
+
+    /// <inheritdoc />
     public override object GetValue()
     {
         if (HolderOption is not ModdedNumberOption opt)
@@ -100,5 +112,19 @@ public class ModdedNumberOptionAttribute(
             return (int)Math.Round(value);
 
         return value;
+    }
+
+    /// <inheritdoc />
+    public float GetValueUnboxed()
+    {
+        return HolderOption is ModdedNumberOption opt
+            ? opt.Value
+            : throw new InvalidOperationException($"HolderOption for option \"{Title}\" is not a ModdedNumberOption");
+    }
+
+    /// <inheritdoc />
+    int ITypedOption<int>.GetValueUnboxed()
+    {
+        return (int)Math.Round(GetValueUnboxed());
     }
 }
