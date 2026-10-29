@@ -464,7 +464,7 @@ public static class LobbyViewPanePatches
 
             if (name is not (StringNames.CrewmateRolesHeader or StringNames.ImpostorRolesHeader))
             {
-                var veryDarkColor = group.Color.DarkenColor(.35f);
+                var veryDarkColor = group.Color.DarkenRelative(.35f);
                 categoryHeaderRoleVariant.Title.color = veryDarkColor;
                 categoryHeaderRoleVariant.Background.color = group.Color;
             }
