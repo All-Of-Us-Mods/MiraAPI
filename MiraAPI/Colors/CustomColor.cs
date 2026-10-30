@@ -49,6 +49,11 @@ public class CustomColor(StringNames name, Color32 mainColor, Color32 shadowColo
     public StringNames Name { get; set; } = name;
 
     /// <summary>
+    /// Gets the id of the color.
+    /// </summary>
+    public int ColorId { get; internal set; } = -1;
+
+    /// <summary>
     /// Gets or sets whether the color is lighter or darker. Can be used to help with colorblind stuff.
     /// </summary>
     public CustomColorBrightness ColorBrightness { get; set; } = CustomColorBrightness.Darker;
