@@ -14,7 +14,7 @@ namespace MiraAPI.GameOptions.Attributes;
 [AttributeUsage(AttributeTargets.Property)]
 public abstract class ModdedOptionListAttribute(string title) : PropertyOptionAttribute
 {
-    internal IModdedOptionList? HolderOptionList { get; set; }
+    internal IBaseModdedOptionList? HolderOptionList { get; set; }
     internal IList? Value { get; set; }
     internal Type ValueType { get; set; }
 
@@ -68,7 +68,7 @@ public abstract class ModdedOptionListAttribute(string title) : PropertyOptionAt
     /// <returns>The value of the option as an object.</returns>
     public abstract object GetValue(int idx);
 
-    internal abstract IModdedOptionList? CreateOptionList(IList value, PropertyInfo property);
+    internal abstract IBaseModdedOptionList? CreateOptionList(IList value, PropertyInfo property);
 
     /// <summary>
     /// Gets the <see cref="Title"/> formatted with the option's index.

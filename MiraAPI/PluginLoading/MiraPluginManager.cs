@@ -238,7 +238,7 @@ public sealed class MiraPluginManager
                     continue;
                 }
 
-                if (property.PropertyType.IsAssignableTo(typeof(IModdedOptionList)))
+                if (property.PropertyType.IsAssignableTo(typeof(IBaseModdedOptionList)))
                 {
                     ModdedOptionsManager.RegisterPropertyOptionList(type, property, pluginInfo);
                     continue;
@@ -259,7 +259,7 @@ public sealed class MiraPluginManager
             }
 
             foreach (var field in type.GetFields()
-                .Where(f => f.FieldType.IsAssignableTo(typeof(IModdedOption)) || f.FieldType.IsAssignableTo(typeof(IModdedOptionList))))
+                .Where(f => f.FieldType.IsAssignableTo(typeof(IModdedOption)) || f.FieldType.IsAssignableTo(typeof(IBaseModdedOptionList))))
             {
                 Error($"{field.Name} is a field, not a property. Use properties for options.");
             }

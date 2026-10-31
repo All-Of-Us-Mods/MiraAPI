@@ -53,7 +53,7 @@ public class ModdedNumberOptionListAttribute(
     {
     }
 
-    internal override IModdedOptionList CreateOptionList(IList value, PropertyInfo property)
+    internal override IBaseModdedOptionList CreateOptionList(IList value, PropertyInfo property)
     {
         return new ModdedOptionList<ModdedNumberOption>(value.Count, idx =>
         {
@@ -81,7 +81,7 @@ public class ModdedNumberOptionListAttribute(
     /// <inheritdoc />
     public override void SetValue(int idx, object value)
     {
-        if (HolderOptionList?[idx] is not ModdedNumberOption opt)
+        if (HolderOptionList?.ElementAt(idx) is not ModdedNumberOption opt)
             return;
 
         var final = value switch
@@ -95,7 +95,7 @@ public class ModdedNumberOptionListAttribute(
     /// <inheritdoc />
     public override object GetValue(int idx)
     {
-        if (HolderOptionList?[idx] is not ModdedNumberOption opt)
+        if (HolderOptionList?.ElementAt(idx) is not ModdedNumberOption opt)
             throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" is not a ModdedNumberOption");
 
         var value = opt.Value;
