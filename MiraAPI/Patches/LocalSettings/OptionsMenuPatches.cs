@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using BepInEx.Unity.IL2CPP.Utils.Collections;
 using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using MiraAPI.LocalSettings;
@@ -183,7 +185,9 @@ public static class OptionsMenuPatches
         // Tabs with index 10 and above are the mod settings tabs
         if (index >= 10)
         {
-            CustomOpen(LocalSettingsManager.AvailableTabs[index - 10]);
+            var tab = LocalSettingsManager.AvailableTabs[index - 10];
+            CustomOpen(tab);
+            __instance.StartCoroutine(RefreshScrollBoundsAfterOpen(__instance, tab).WrapToIl2Cpp());
             return false;
         }
 
@@ -227,6 +231,16 @@ public static class OptionsMenuPatches
             background.color = tab.TabAppearance.TabColor;
 
         tab.Open();
+    }
+
+    private static IEnumerator RefreshScrollBoundsAfterOpen(OptionsMenuBehaviour menu, LocalSettingsTab tab)
+    {
+        yield return new WaitForEndOfFrame();
+
+        if (menu && tab.TabButton?.Content && tab.TabButton.Content.activeInHierarchy)
+        {
+            tab.RefreshScrollBounds();
+        }
     }
 
     private static void CustomClose(LocalSettingsTab tab)

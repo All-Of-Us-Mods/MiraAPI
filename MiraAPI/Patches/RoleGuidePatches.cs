@@ -279,6 +279,8 @@ public static class RoleGuidePatches
             MapBehaviour.Instance.Close();
         }
 
+        MeetingVoteAreaVisibility.HideNameplates(__instance);
+
         if (HudManager.InstanceExists)
         {
             ConsoleJoystick.SetMode_MenuAdditive();
@@ -388,6 +390,13 @@ public static class RoleGuidePatches
         }
 
         return false;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(MatchInfoGuide), nameof(MatchInfoGuide.Close))]
+    private static void ClosePostfix(MatchInfoGuide __instance)
+    {
+        MeetingVoteAreaVisibility.Restore(__instance);
     }
 
     private static void SetUpTabGrids(MatchInfoTabPos position)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using AmongUs.GameOptions;
+using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities.Attributes;
 using Reactor.Utilities.Extensions;
@@ -21,6 +22,7 @@ public class CustomPhoneMenuComponent(IntPtr cppPtr) : Minigame(cppPtr)
     [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity convention.")]
     private void OnDisable()
     {
+        MeetingVoteAreaVisibility.Restore(this);
         if (ControllerManager.Instance)
         {
             ControllerManager.Instance.CloseOverlayMenu(name);
