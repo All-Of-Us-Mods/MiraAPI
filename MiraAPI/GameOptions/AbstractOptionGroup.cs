@@ -44,7 +44,7 @@ public abstract class AbstractOptionGroup
     /// Gets a value indicating whether the group should be shown in the modifiers menu.
     /// </summary>
     // Completed: make this not a boolean
-    [Obsolete("Use ParentMenu instead.", true)]
+    [Obsolete("Use ParentMenu instead. This will be removed in a future version.", true)]
     [SuppressMessage("Info Code Smell", "S1133:Deprecated code should be removed", Justification = "Retained.")]
     public virtual bool ShowInModifiersMenu => false;
 

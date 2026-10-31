@@ -50,6 +50,8 @@ public abstract class ModdedOption<T> : IModdedOption
         get => Getter != null ? Getter(_value) : _value;
         protected set
         {
+            value = ModifyValue(value, _value);
+
             if (Setter != null)
                 value = Setter(value, _value);
 
@@ -162,6 +164,17 @@ public abstract class ModdedOption<T> : IModdedOption
             Rpc<SyncOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, new MiraOptionNetData(true, [GetNetData()]), true);
         }
 
+        if (ShowNotification)
+        {
+            ModdedOptionsManager.AddSettingsChangeMessage(
+                HudManager.Instance.Notifier,
+                StringName,
+                GetDisplayValue(),
+                Configuration.PopUpTextColor,
+                Configuration.PopUpIconTmp,
+                false);
+        }
+
         OnValueChanged(_value);
         ShowNotification = true;
     }
@@ -213,11 +226,28 @@ public abstract class ModdedOption<T> : IModdedOption
     /// <inheritdoc />
     public abstract void HandleNetData(byte[] data);
 
+    /// <inheritdoc />
+    public virtual string GetDisplayValue()
+    {
+        return Data.GetValueString(GetFloatData());
+    }
+
     /// <summary>
     /// Handles the value changed event.
     /// </summary>
     /// <param name="newValue">The new value.</param>
     protected abstract void OnValueChanged(T newValue);
+
+    /// <summary>
+    /// Modifies the incoming value with respect to the previous value. This is invoked before the <see cref="ModdedOption{T}.Setter"/> (if it's set).
+    /// </summary>
+    /// <param name="newValue">The new value.</param>
+    /// <param name="oldValue">The old value.</param>
+    /// <returns>The modified value.</returns>
+    protected virtual T ModifyValue(T newValue, T oldValue)
+    {
+        return newValue;
+    }
 
     /// <summary>
     /// Gets the value from the option behaviour.

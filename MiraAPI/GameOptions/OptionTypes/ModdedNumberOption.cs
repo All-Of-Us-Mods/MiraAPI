@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using AmongUs.GameOptions;
 using MiraAPI.Networking;
 using MiraAPI.Utilities;
@@ -51,6 +52,8 @@ public class ModdedNumberOption : ModdedOption<float>
     /// Gets a value indicating whether holding shift will divide the increment.
     /// </summary>
     public bool ShiftIncrement { get; }
+
+    private static readonly Regex TrailingZeroRegex = new(@"\.0+(?!\d)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ModdedNumberOption"/> class.
@@ -155,7 +158,7 @@ public class ModdedNumberOption : ModdedOption<float>
         optionComponent.ZeroValue = ZeroWordValue;
 
         numberOption.SetUpFromData(Data, 20);
-        numberOption.OnValueChanged = (Il2CppSystem.Action<OptionBehaviour>)ValueChanged;
+        numberOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
 
         numberOption.Title = StringName;
         numberOption.Value = Value;
@@ -169,6 +172,22 @@ public class ModdedNumberOption : ModdedOption<float>
         OptionBehaviour = numberOption;
 
         return numberOption;
+    }
+
+    /// <inheritdoc />
+    public override string GetDisplayValue()
+    {
+        if (this is { NegativeWordValue: not "#", Value: -1 })
+        {
+            return NegativeWordValue;
+        }
+
+        if (this is { ZeroWordValue: not "#", Value: 0 })
+        {
+            return ZeroWordValue;
+        }
+
+        return TrailingZeroRegex.Replace(Data.GetValueString(Value), string.Empty);
     }
 
     /// <inheritdoc />
@@ -198,22 +217,16 @@ public class ModdedNumberOption : ModdedOption<float>
     /// <inheritdoc />
     protected override void OnValueChanged(float newValue)
     {
-        Value = Mathf.Clamp(newValue, Min, Max);
-        if (ShowNotification)
-        {
-            ModdedOptionsManager.AddSettingsChangeMessage(
-                HudManager.Instance.Notifier,
-                StringName,
-                Data.GetValueString(newValue),
-                Configuration.PopUpTextColor,
-                Configuration.PopUpIconTmp,
-                false);
-        }
-
-        if (OptionBehaviour is NumberOption opt)
+        if (OptionBehaviour && OptionBehaviour is NumberOption opt)
         {
             opt.Value = Value;
         }
+    }
+
+    /// <inheritdoc />
+    protected override float ModifyValue(float newValue, float oldValue)
+    {
+        return Math.Clamp(newValue, Min, Max);
     }
 
     /// <summary>
@@ -223,6 +236,6 @@ public class ModdedNumberOption : ModdedOption<float>
     /// <returns>Integer value.</returns>
     public static implicit operator int(ModdedNumberOption option)
     {
-        return (int)option.Value;
+        return (int)Math.Round(option.Value);
     }
 }

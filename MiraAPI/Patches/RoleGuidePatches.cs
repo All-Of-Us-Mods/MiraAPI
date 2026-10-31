@@ -2086,7 +2086,7 @@ public static class RoleGuidePatches
             vanillaEntries = BuildVanillaSettingsEntries(guide);
         }
 
-        _settingsPages = GuideOptionPages.BuildPages(guide.GetBoolString);
+        _settingsPages = GuideOptionPages.BuildPages();
         if (_settingsPage > _settingsPages.Count)
         {
             _settingsPage = 0;

@@ -13,7 +13,7 @@ namespace MiraAPI.GameOptions.Attributes;
 public class ModdedPlayerOptionAttribute(
     string title,
     bool allowNone = true)
-    : ModdedOptionAttribute(title)
+    : ModdedOptionAttribute(title), ITypedOption<int>, ITypedOption<NetworkedPlayerInfo?>
 {
     internal override IModdedOption? CreateOption(object? value, PropertyInfo property)
     {
@@ -34,6 +34,22 @@ public class ModdedPlayerOptionAttribute(
     }
 
     /// <inheritdoc />
+    public NetworkedPlayerInfo? GetValueUnboxed()
+    {
+        return HolderOption is ModdedPlayerOption opt
+            ? opt.SelectedPlayer
+            : throw new InvalidOperationException($"Holder option for {Title} is not a ModdedPlayerOption.");
+    }
+
+    /// <inheritdoc />
+    int ITypedOption<int>.GetValueUnboxed()
+    {
+        return HolderOption is ModdedPlayerOption opt
+            ? opt.Value
+            : throw new InvalidOperationException($"Holder option for {Title} is not a ModdedPlayerOption.");
+    }
+
+    /// <inheritdoc />
     public override void SetValue(object value)
     {
         if (HolderOption is not ModdedPlayerOption opt)
@@ -41,9 +57,32 @@ public class ModdedPlayerOptionAttribute(
 
         var final = value switch
         {
-            NetworkedPlayerInfo info => info ? opt.Values.IndexOf(info) : (allowNone ? -1 : 0),
+            NetworkedPlayerInfo info => info ? opt.Values.IndexOf(info) : -1,
             _ => (int)value,
         };
+
+        if (final == -1 && !allowNone)
+            throw new ArgumentException("Cannot assign -1 or null to a ModdedPlayerOption that does not allow none as an option.");
+
         opt?.SetValue(final);
+    }
+
+    /// <inheritdoc />
+    public void SetValueUnboxed(NetworkedPlayerInfo? value)
+    {
+        if (!value && !allowNone)
+            throw new ArgumentException("Cannot assign null to a ModdedPlayerOption that does not allow none as an option.");
+
+        if (HolderOption is ModdedPlayerOption opt)
+            opt.SetValue(value ? opt.Values.IndexOf(value!) : -1);
+    }
+
+    /// <inheritdoc />
+    void ITypedOption<int>.SetValueUnboxed(int value)
+    {
+        if (value == -1 && !allowNone)
+            throw new ArgumentException("Cannot assign -1 to a ModdedPlayerOption that does not allow none as an option.");
+
+        (HolderOption as ModdedPlayerOption)?.SetValue(value);
     }
 }

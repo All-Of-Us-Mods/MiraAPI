@@ -12,6 +12,7 @@ namespace MiraAPI.GameOptions.Attributes;
 /// <param name="enumType">The <see cref="Enum"/> type.</param>
 /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
 [AttributeUsage(AttributeTargets.Property)]
+[Obsolete("Use ModdedEnumOptionListAttribute<T> instead. This will be removed in a future version.")]
 public class ModdedEnumOptionListAttribute(string title, Type enumType, string[]? values = null)
     : ModdedOptionListAttribute(title)
 {
@@ -34,7 +35,7 @@ public class ModdedEnumOptionListAttribute(string title, Type enumType, string[]
     {
         return HolderOptionList?[idx] is ModdedEnumOption opt
             ? Enum.ToObject(enumType, opt.Value)
-            : throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" with EnumType {enumType.FullName} is not a ModdedEnumOption");
+            : throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" is not a ModdedEnumOption with enum type {enumType.FullName}");
     }
 }
 
@@ -46,7 +47,7 @@ public class ModdedEnumOptionListAttribute(string title, Type enumType, string[]
 /// <param name="values">The option's possible values.</param>
 [AttributeUsage(AttributeTargets.Property)]
 public class ModdedEnumOptionListAttribute<T>(string title, string[]? values = null)
-    : ModdedOptionListAttribute(title)
+    : ModdedOptionListAttribute(title), ITypedOptionList<T>
     where T : struct, Enum
 {
     internal override IModdedOptionList CreateOptionList(IList value, PropertyInfo property)
@@ -59,15 +60,26 @@ public class ModdedEnumOptionListAttribute<T>(string title, string[]? values = n
     /// <inheritdoc />
     public override void SetValue(int idx, object value)
     {
-        var opt = HolderOptionList?[idx] as ModdedEnumOption<T>;
-        opt?.SetValue((T)value);
+        SetValueUnboxed(idx, (T)value);
+    }
+
+    /// <inheritdoc />
+    public void SetValueUnboxed(int idx, T value)
+    {
+        (HolderOptionList?[idx] as ModdedEnumOption<T>)?.SetValue(value);
     }
 
     /// <inheritdoc />
     public override object GetValue(int idx)
     {
+        return GetValueUnboxed(idx);
+    }
+
+    /// <inheritdoc />
+    public T GetValueUnboxed(int idx)
+    {
         return HolderOptionList?[idx] is ModdedEnumOption<T> opt
             ? opt.Value
-            : throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" with EnumType {typeof(T).FullName} is not a ModdedEnumOption<{typeof(T).FullName}>");
+            : throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" is not a ModdedEnumOption<{typeof(T).FullName}>");
     }
 }

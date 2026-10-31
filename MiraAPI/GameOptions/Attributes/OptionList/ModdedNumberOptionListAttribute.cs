@@ -29,7 +29,7 @@ public class ModdedNumberOptionListAttribute(
     MiraNumberSuffixes suffixType = MiraNumberSuffixes.None,
     string? formatString = null,
     bool halfIncrements = false)
-    : ModdedOptionListAttribute(title)
+    : ModdedOptionListAttribute(title), ITypedOptionList<int>, ITypedOptionList<float>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ModdedNumberOptionListAttribute"/> class.
@@ -93,6 +93,18 @@ public class ModdedNumberOptionListAttribute(
     }
 
     /// <inheritdoc />
+    public void SetValueUnboxed(int idx, float value)
+    {
+        (HolderOptionList?[idx] as ModdedNumberOption)?.SetValue(value);
+    }
+
+    /// <inheritdoc />
+    void ITypedOptionList<int>.SetValueUnboxed(int idx, int value)
+    {
+        (HolderOptionList?[idx] as ModdedNumberOption)?.SetValue(value);
+    }
+
+    /// <inheritdoc />
     public override object GetValue(int idx)
     {
         if (HolderOptionList?[idx] is not ModdedNumberOption opt)
@@ -104,5 +116,19 @@ public class ModdedNumberOptionListAttribute(
             return (int)MathF.Round(value);
 
         return value;
+    }
+
+    /// <inheritdoc />
+    public float GetValueUnboxed(int idx)
+    {
+        return HolderOptionList?[idx] is ModdedNumberOption opt
+            ? opt.Value
+            : throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" is not a ModdedNumberOption");
+    }
+
+    /// <inheritdoc />
+    int ITypedOptionList<int>.GetValueUnboxed(int idx)
+    {
+        return (int)Math.Round(GetValueUnboxed(idx));
     }
 }

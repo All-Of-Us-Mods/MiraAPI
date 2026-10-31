@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using MiraAPI.GameOptions.Attributes;
 
 namespace MiraAPI.GameOptions;
 
@@ -72,15 +73,34 @@ public sealed class ModdedArray<T> : IList<T>, IReadOnlyList<T>, IList
     /// <param name="index">The index of the value.</param>
     public T this[int index]
     {
-        get => ModdedOptionsManager.ListInstanceCache.TryGetValue(this, out var attribute)
-            ? (T)attribute.GetValue(index)
-            : items[index];
+        get
+        {
+            if (ModdedOptionsManager.ListInstanceCache.TryGetValue(this, out var attribute))
+            {
+                items[index] = attribute is ITypedOptionList<T> typedAttr
+                    ? typedAttr.GetValueUnboxed(index)
+                    : (T)attribute.GetValue(index);
+            }
+
+            return items[index];
+        }
         set
         {
             if (ModdedOptionsManager.ListInstanceCache.TryGetValue(this, out var attribute))
-                attribute.SetValue(index, value!);
+            {
+                if (attribute is ITypedOptionList<T> typedAttr)
+                    typedAttr.SetValueUnboxed(index, value);
+                else
+                    attribute.SetValue(index, value!);
+
+                items[index] = attribute is ITypedOptionList<T> typedAttr2
+                    ? typedAttr2.GetValueUnboxed(index)
+                    : (T)attribute.GetValue(index);
+            }
             else
+            {
                 items[index] = value;
+            }
 
             version++;
         }
@@ -178,31 +198,31 @@ public sealed class ModdedArray<T> : IList<T>, IReadOnlyList<T>, IList
     }
 
     /// <inheritdoc/>
-    public void Insert(int index, T item)
+    void IList<T>.Insert(int index, T item)
     {
         throw new NotSupportedException("ModdedArray is of a fixed size.");
     }
 
     /// <inheritdoc/>
-    public void RemoveAt(int index)
+    void IList<T>.RemoveAt(int index)
     {
         throw new NotSupportedException("ModdedArray is of a fixed size.");
     }
 
     /// <inheritdoc/>
-    public void Add(T item)
+    void ICollection<T>.Add(T item)
     {
         throw new NotSupportedException("ModdedArray is of a fixed size.");
     }
 
     /// <inheritdoc/>
-    public void Clear()
+    void ICollection<T>.Clear()
     {
         throw new NotSupportedException("ModdedArray is of a fixed size.");
     }
 
     /// <inheritdoc/>
-    public bool Remove(T item)
+    bool ICollection<T>.Remove(T item)
     {
         throw new NotSupportedException("ModdedArray is of a fixed size.");
     }

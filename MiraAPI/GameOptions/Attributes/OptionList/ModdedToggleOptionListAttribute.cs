@@ -16,7 +16,7 @@ public class ModdedToggleOptionListAttribute(
     string title,
     string on,
     string off)
-    : ModdedOptionListAttribute(title)
+    : ModdedOptionListAttribute(title), ITypedOptionList<bool>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ModdedToggleOptionListAttribute"/> class.
@@ -37,12 +37,23 @@ public class ModdedToggleOptionListAttribute(
     /// <inheritdoc />
     public override void SetValue(int idx, object value)
     {
-        var opt = HolderOptionList?[idx] as ModdedToggleOption;
-        opt?.SetValue((bool)value);
+        SetValueUnboxed(idx, (bool)value);
+    }
+
+    /// <inheritdoc />
+    public void SetValueUnboxed(int idx, bool value)
+    {
+        (HolderOptionList?[idx] as ModdedToggleOption)?.SetValue(value);
     }
 
     /// <inheritdoc />
     public override object GetValue(int idx)
+    {
+        return GetValueUnboxed(idx);
+    }
+
+    /// <inheritdoc />
+    public bool GetValueUnboxed(int idx)
     {
         return HolderOptionList?[idx] is ModdedToggleOption opt
             ? opt.Value

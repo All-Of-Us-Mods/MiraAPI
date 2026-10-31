@@ -168,13 +168,7 @@ public class ModdedStringOption : ModdedOption<string>
     /// <inheritdoc />
     protected override void OnValueChanged(string newValue)
     {
-        HudManager.Instance.Notifier.AddSettingsChangeMessage(StringName, Data.GetValueString(GetIndex(newValue)), false);
-        if (!OptionBehaviour)
-        {
-            return;
-        }
-
-        if (OptionBehaviour is StringOption opt)
+        if (OptionBehaviour && OptionBehaviour is StringOption opt)
         {
             opt.Value = GetIndex(newValue);
         }

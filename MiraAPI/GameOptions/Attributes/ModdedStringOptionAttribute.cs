@@ -13,7 +13,7 @@ namespace MiraAPI.GameOptions.Attributes;
 public class ModdedStringOptionAttribute(
     string title,
     string[] values)
-    : ModdedOptionAttribute(title)
+    : ModdedOptionAttribute(title), ITypedOption<string>
 {
     internal override IModdedOption? CreateOption(object? value, PropertyInfo property)
     {
@@ -24,6 +24,12 @@ public class ModdedStringOptionAttribute(
     /// <inheritdoc />
     public override object GetValue()
     {
+        return GetValueUnboxed();
+    }
+
+    /// <inheritdoc />
+    public string GetValueUnboxed()
+    {
         return HolderOption is ModdedStringOption opt
             ? opt.Value
             : throw new InvalidOperationException($"Holder option for {Title} is not a ModdedStringOption.");
@@ -32,7 +38,12 @@ public class ModdedStringOptionAttribute(
     /// <inheritdoc />
     public override void SetValue(object value)
     {
-        var opt = HolderOption as ModdedStringOption;
-        opt?.SetValue((string)value);
+        SetValueUnboxed((string)value);
+    }
+
+    /// <inheritdoc />
+    public void SetValueUnboxed(string value)
+    {
+        (HolderOption as ModdedStringOption)?.SetValue(value);
     }
 }

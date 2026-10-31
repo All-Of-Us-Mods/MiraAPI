@@ -138,19 +138,7 @@ public class ModdedPlayerOption : ModdedOption<int>
     /// <inheritdoc />
     protected override void OnValueChanged(int newValue)
     {
-        ModdedOptionsManager.AddSettingsChangeMessage(
-            HudManager.Instance.Notifier,
-            StringName,
-            Data.GetValueString(newValue),
-            Configuration.PopUpTextColor,
-            Configuration.PopUpIconTmp,
-            false);
-        if (!OptionBehaviour)
-        {
-            return;
-        }
-
-        if (OptionBehaviour is PlayerOption opt)
+        if (OptionBehaviour && OptionBehaviour is PlayerOption opt)
         {
             opt.Value = newValue;
         }

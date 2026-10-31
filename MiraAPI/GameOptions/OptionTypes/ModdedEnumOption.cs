@@ -13,6 +13,7 @@ namespace MiraAPI.GameOptions.OptionTypes;
 /// <summary>
 /// An option for selecting an <see langword="enum"/> value.
 /// </summary>
+[Obsolete("Use ModdedEnumOption<T> instead. This will be removed in a future version.")]
 public class ModdedEnumOption : ModdedOption<int>
 {
     /// <summary>
@@ -93,23 +94,7 @@ public class ModdedEnumOption : ModdedOption<int>
     /// <inheritdoc />
     protected override void OnValueChanged(int newValue)
     {
-        if (ShowNotification)
-        {
-            ModdedOptionsManager.AddSettingsChangeMessage(
-                HudManager.Instance.Notifier,
-                StringName,
-                Data.GetValueString(newValue),
-                Configuration.PopUpTextColor,
-                Configuration.PopUpIconTmp,
-                false);
-        }
-
-        if (!OptionBehaviour)
-        {
-            return;
-        }
-
-        if (OptionBehaviour is StringOption opt)
+        if (OptionBehaviour && OptionBehaviour is StringOption opt)
         {
             opt.Value = newValue;
         }
@@ -200,23 +185,7 @@ public class ModdedEnumOption<T> : ModdedOption<T>
     /// <inheritdoc />
     protected override void OnValueChanged(T newValue)
     {
-        if (ShowNotification)
-        {
-            ModdedOptionsManager.AddSettingsChangeMessage(
-                HudManager.Instance.Notifier,
-                StringName,
-                Data.GetValueString(Convert.ToInt32(newValue, NumberFormatInfo.InvariantInfo)),
-                Configuration.PopUpTextColor,
-                Configuration.PopUpIconTmp,
-                false);
-        }
-
-        if (!OptionBehaviour)
-        {
-            return;
-        }
-
-        if (OptionBehaviour is StringOption opt)
+        if (OptionBehaviour && OptionBehaviour is StringOption opt)
         {
             opt.Value = Convert.ToInt32(newValue, NumberFormatInfo.InvariantInfo);
         }
