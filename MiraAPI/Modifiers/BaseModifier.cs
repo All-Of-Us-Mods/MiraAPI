@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using Il2CppInterop.Runtime.Attributes;
-using MiraAPI.GameOptions;
 using MiraAPI.PluginLoading;
 using MiraAPI.Roles;
 using MiraAPI.Translation;
@@ -16,7 +15,7 @@ namespace MiraAPI.Modifiers;
 /// <summary>
 /// Base class for all modifiers.
 /// </summary>
-public abstract class BaseModifier : IOptionable
+public abstract class BaseModifier : IBaseModifier
 {
     /// <summary>
     /// Gets the <see cref="PlayerControl"/> that the modifier is attached to.
