@@ -8,30 +8,30 @@ using Reactor.Networking.Serialization;
 namespace MiraAPI.Networking.Modifiers;
 
 /// <summary>
-/// Converter for serializing and deserializing <see cref="BaseModifier"/> objects.
+/// Converter for serializing and deserializing <see cref="IBaseModifier"/> objects.
 /// </summary>
 [MessageConverter]
-public class ModifierConverter : MessageConverter<BaseModifier>
+public class ModifierConverter : MessageConverter<IBaseModifier>
 {
     /// <summary>
-    /// Writes a <see cref="BaseModifier"/> to the writer.
+    /// Writes a <see cref="IBaseModifier"/> to the writer.
     /// </summary>
     /// <param name="writer">The writer to write to.</param>
-    /// <param name="value">The <see cref="BaseModifier"/> to write.</param>
-    public override void Write(MessageWriter writer, BaseModifier value)
+    /// <param name="value">The <see cref="IBaseModifier"/> to write.</param>
+    public override void Write(MessageWriter writer, IBaseModifier value)
     {
         writer.WriteNetObject(value.Player);
         writer.WriteBytesAndSize(value.UniqueId.ToByteArray());
     }
 
     /// <summary>
-    /// Reads a <see cref="BaseModifier"/> from the reader.
+    /// Reads a <see cref="IBaseModifier"/> from the reader.
     /// </summary>
     /// <param name="reader">The reader to read from.</param>
     /// <param name="objectType">The type of the object to read.</param>
-    /// <returns>The <see cref="BaseModifier"/> that was read.</returns>
+    /// <returns>The <see cref="IBaseModifier"/> that was read.</returns>
     /// <exception cref="InvalidOperationException">Thrown if the modifier is not found.</exception>
-    public override BaseModifier Read(MessageReader reader, Type objectType)
+    public override IBaseModifier Read(MessageReader reader, Type objectType)
     {
         var player = reader.ReadNetObject<PlayerControl>();
         var guid = new Guid(reader.ReadBytesAndSize());

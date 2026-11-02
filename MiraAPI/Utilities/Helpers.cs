@@ -729,11 +729,11 @@ public static class Helpers
     }
 
     /// <summary>
-    /// Returns the TextMeshPro sprite tag for a modifier, or an empty string if it has no <see cref="BaseModifier.IconTmp"/>.
+    /// Returns the TextMeshPro sprite tag for a modifier, or an empty string if it has no <see cref="IBaseModifier.IconTmp"/>.
     /// </summary>
-    /// <param name="modifier">The <see cref="BaseModifier"/>.</param>
+    /// <param name="modifier">The <see cref="IBaseModifier"/>.</param>
     /// <returns>A <c>&lt;sprite&gt;</c> rich text tag, or <see cref="string.Empty"/>.</returns>
-    public static string GetTmpIcon(this BaseModifier modifier)
+    public static string GetTmpIcon(this IBaseModifier modifier)
     {
         return modifier.IconTmp ? $"<sprite name=\"{modifier.IconTmp.name}\">" : string.Empty;
     }

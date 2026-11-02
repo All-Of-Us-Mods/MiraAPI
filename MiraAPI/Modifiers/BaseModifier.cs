@@ -17,9 +17,7 @@ namespace MiraAPI.Modifiers;
 /// </summary>
 public abstract class BaseModifier : IBaseModifier
 {
-    /// <summary>
-    /// Gets the <see cref="PlayerControl"/> that the modifier is attached to.
-    /// </summary>
+    /// <inheritdoc/>
     public PlayerControl Player { get; internal set; } = null!;
 
     /// <summary>
@@ -32,14 +30,10 @@ public abstract class BaseModifier : IBaseModifier
     /// </summary>
     public bool Initialized { get; internal set; }
 
-    /// <summary>
-    /// Gets the unique ID of the modifier.
-    /// </summary>
+    /// <inheritdoc/>
     public Guid UniqueId { get; internal set; } = Guid.Empty;
 
-    /// <summary>
-    /// Gets the type ID of the modifier.
-    /// </summary>
+    /// <inheritdoc/>
     public uint TypeId => ModifierManager.GetModifierTypeId(GetType()) ?? throw new InvalidOperationException("Modifier is not registered.");
 
     /// <summary>
@@ -60,9 +54,7 @@ public abstract class BaseModifier : IBaseModifier
     /// </summary>
     public virtual string IdPrefix => GetType().Namespace!;
 
-    /// <summary>
-    /// Gets the modifier name.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual string ModifierName => MiraLocaleManager.Get(ModifierNameLocale);
 
     /// <summary>
@@ -101,14 +93,7 @@ public abstract class BaseModifier : IBaseModifier
     /// </summary>
     public virtual bool ShowModifierAsUnique => false;
 
-    /// <summary>
-    /// Gets the displayed amount and chance of the modifier. Used in the role guide.
-    /// By default, 0 amount or chance results in a complete 0 amount and chance, so override if necessary.
-    /// </summary>
-    /// <param name="amount">The amount of the modifier.</param>
-    /// <param name="chance">The chance of the modifier.</param>
-    /// <param name="source">The mod source of the modifier.</param>
-    /// <returns>The <see cref="string"/> result.</returns>
+    /// <inheritdoc/>
     public virtual string GetAmountText(int amount, int chance, string source)
     {
         if (amount == 0)
@@ -144,14 +129,7 @@ public abstract class BaseModifier : IBaseModifier
     /// <returns><see langword="true"/> if the modifier is always displayed, otherwise <see langword="false"/> if it is never displayable, or <see langword="null"/> if it is dictated by amount and chance.</returns>
     public virtual bool? ForceShowModifierOnWiki => false;
 
-    /// <summary>
-    /// Gets the information to display in the wiki.
-    /// </summary>
-    /// <param name="guide">The guide object.</param>
-    /// <param name="titleText">The title text object.</param>
-    /// <param name="titleIcon">The title's icon.</param>
-    /// <param name="parent">The scroller parent.</param>
-    /// <returns>The <see cref="GameObject"/> of the wiki.</returns>
+    /// <inheritdoc/>
     public virtual GameObject GetAdvancedWiki(MatchInfoGuide guide, TextMeshPro titleText, SpriteRenderer titleIcon, Scroller parent)
     {
         var abilities = WikiAbilities;
@@ -173,30 +151,20 @@ public abstract class BaseModifier : IBaseModifier
     [HideFromIl2Cpp]
     public virtual List<AdvancedWikiAbilityDescription> WikiAbilities => [];
 
-    /// <summary>
-    /// Gets the modifier icon. Useless if <see cref="HideOnUi"/> is <see langword="true"/>.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual LoadableAsset<Sprite>? ModifierIcon => null;
 
-    /// <summary>
-    /// Gets the <see cref="TMP_SpriteAsset"/> for the Modifier Icon.
-    /// </summary>
+    /// <inheritdoc/>
     [HideFromIl2Cpp]
     public virtual TMP_SpriteAsset IconTmp => null!;
 
-    /// <summary>
-    /// Gets a value indicating whether the modifier is hidden on the UI. Will be hidden either way if no description is provided.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual bool HideOnUi => GetDescription() == string.Empty;
 
-    /// <summary>
-    /// Gets a value indicating whether the modifier is shown in the freeplay menu.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual bool ShowInFreeplay => false;
 
-    /// <summary>
-    /// Gets a value indicating the <see cref="Color"/> that should be used for the modifier within freeplay.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual Color FreeplayFileColor => Color.gray;
 
     /// <summary>
@@ -204,67 +172,46 @@ public abstract class BaseModifier : IBaseModifier
     /// </summary>
     public virtual Color GeneralColor => FreeplayFileColor;
 
-    /// <summary>
-    /// Gets a value indicating whether the modifier is unique. If <see langword="true"/>, the player can only have one instance of this modifier.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual bool Unique => true;
 
-    /// <summary>
-    /// Gets the HUD description for this modifier. Does nothing if <see cref="HideOnUi"/> is <see langword="true"/>. Required to be visible on UI.
-    /// </summary>
-    /// <returns>The description string for the HUD.</returns>
+    /// <inheritdoc/>
     public virtual string GetDescription()
     {
         return string.Empty;
     }
 
-    /// <summary>
-    /// Called when the modifier is activated.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual void OnActivate()
     {
     }
 
-    /// <summary>
-    /// Called when the modifier is deactivated.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual void OnDeactivate()
     {
     }
 
-    /// <summary>
-    /// Called when the modifier is updated. Attached to <see cref="ModifierComponent"/>'s <see cref="ModifierComponent.Update"/> method.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual void Update()
     {
     }
 
-    /// <summary>
-    /// Called when the modifier is updated. Attached to <see cref="ModifierComponent"/>'s <see cref="ModifierComponent.FixedUpdate"/> method.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual void FixedUpdate()
     {
     }
 
-    /// <summary>
-    /// Called when the player dies.
-    /// </summary>
-    /// <param name="reason">The Death Reason.</param>
+    /// <inheritdoc/>
     public virtual void OnDeath(DeathReason reason)
     {
     }
 
-    /// <summary>
-    /// Called when a meeting starts.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual void OnMeetingStart()
     {
     }
 
-    /// <summary>
-    /// Determines whether the player can vent.
-    /// </summary>
-    /// <returns><see langword="true"/> if the player can vent, <see langword="false"/> otherwise. <see langword="null"/> for no effect.</returns>
+    /// <inheritdoc/>
     public virtual bool? CanVent()
     {
         return null;

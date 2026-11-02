@@ -423,7 +423,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
             var customRoles = CurrentMod.InternalRoles.Values.OfType<ICustomRole>();
             var hasRoles = customRoles.Any(x => x.VisibleInSettings.Invoke());
             var hasModifiers = CurrentMod.InternalOptionGroups.Exists(g =>
-                g.OptionableType?.IsAssignableTo(typeof(BaseModifier)) == true
+                g.OptionableType?.IsAssignableTo(typeof(IBaseModifier)) == true
                 || g.ParentMenu == MenuCategory.Modifiers);
             var hasC1 = CurrentMod.InternalOptionGroups.Exists(g => g.ParentMenu == MenuCategory.CustomOne);
             var hasC2 = CurrentMod.InternalOptionGroups.Exists(g => g.ParentMenu == MenuCategory.CustomTwo);
@@ -652,7 +652,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
                     g.OptionableType == null && g.ParentMenu == MenuCategory.Game);
             var hasRoles = CurrentMod.InternalRoles.Count > 0;
             var hasModifiers = CurrentMod.InternalOptionGroups.Exists(g =>
-                g.OptionableType?.IsAssignableTo(typeof(BaseModifier)) == true
+                g.OptionableType?.IsAssignableTo(typeof(IBaseModifier)) == true
                 || g.ParentMenu == MenuCategory.Modifiers);
             var hasC1 = CurrentMod.InternalOptionGroups.Exists(g => g.ParentMenu == MenuCategory.CustomOne);
             var hasC2 = CurrentMod.InternalOptionGroups.Exists(g => g.ParentMenu == MenuCategory.CustomTwo);

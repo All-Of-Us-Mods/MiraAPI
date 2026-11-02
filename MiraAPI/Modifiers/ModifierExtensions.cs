@@ -9,7 +9,7 @@ using Reactor.Networking.Rpc;
 namespace MiraAPI.Modifiers;
 
 /// <summary>
-/// Extensions for <see cref="BaseModifier"/>s.
+/// Extensions for <see cref="IBaseModifier"/>s.
 /// </summary>
 public static class ModifierExtensions
 {
@@ -19,11 +19,11 @@ public static class ModifierExtensions
     public static Dictionary<PlayerControl, ModifierComponent> ModifierComponents { get; } = [];
 
     /// <summary>
-    /// Remote Procedure Call to add a <see cref="BaseModifier"/> to a <see cref="PlayerControl"/>.
+    /// Remote Procedure Call to add a <see cref="IBaseModifier"/> to a <see cref="PlayerControl"/>.
     /// </summary>
-    /// <param name="target">The <see cref="PlayerControl"/> to add the <see cref="BaseModifier"/> to.</param>
-    /// <param name="typeId">The <see cref="BaseModifier"/> type ID.</param>
-    /// <param name="args">The arguments to initialize the <see cref="BaseModifier"/> with.</param>
+    /// <param name="target">The <see cref="PlayerControl"/> to add the <see cref="IBaseModifier"/> to.</param>
+    /// <param name="typeId">The <see cref="IBaseModifier"/> type ID.</param>
+    /// <param name="args">The arguments to initialize the <see cref="IBaseModifier"/> with.</param>
     public static void RpcAddModifier(this PlayerControl target, uint typeId, params object[] args)
     {
         _ = ModifierManager.GetModifierType(typeId) ?? throw new InvalidOperationException(
@@ -33,11 +33,11 @@ public static class ModifierExtensions
     }
 
     /// <summary>
-    /// Remote Procedure Call to add a <see cref="BaseModifier"/> to a <see cref="PlayerControl"/>.
+    /// Remote Procedure Call to add a <see cref="IBaseModifier"/> to a <see cref="PlayerControl"/>.
     /// </summary>
-    /// <param name="player">The <see cref="PlayerControl"/> to add the <see cref="BaseModifier"/> to.</param>
-    /// <param name="type">The type of the <see cref="BaseModifier"/>.</param>
-    /// <param name="args">The arguments to initialize the <see cref="BaseModifier"/> with.</param>
+    /// <param name="player">The <see cref="PlayerControl"/> to add the <see cref="IBaseModifier"/> to.</param>
+    /// <param name="type">The type of the <see cref="IBaseModifier"/>.</param>
+    /// <param name="args">The arguments to initialize the <see cref="IBaseModifier"/> with.</param>
     public static void RpcAddModifier(this PlayerControl player, Type type, params object[] args)
     {
         var id = ModifierManager.GetModifierTypeId(type) ?? throw new InvalidOperationException(
@@ -51,18 +51,18 @@ public static class ModifierExtensions
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> to add the <typeparamref name="T"/> to.</param>
     /// <param name="args">The arguments to initialize the <typeparamref name="T"/> with.</param>
-    /// <typeparam name="T">The <see cref="BaseModifier"/> Type.</typeparam>
+    /// <typeparam name="T">The <see cref="IBaseModifier"/> Type.</typeparam>
     public static void RpcAddModifier<T>(this PlayerControl player, params object[] args)
-        where T : BaseModifier
+        where T : class, IBaseModifier
     {
         player.RpcAddModifier(typeof(T), args);
     }
 
     /// <summary>
-    /// Remote Procedure Call to remove a <see cref="BaseModifier"/> from a <see cref="PlayerControl"/>.
+    /// Remote Procedure Call to remove a <see cref="IBaseModifier"/> from a <see cref="PlayerControl"/>.
     /// </summary>
-    /// <param name="target">The <see cref="PlayerControl"/> to remove the <see cref="BaseModifier"/> from.</param>
-    /// <param name="uniqueId">The unique ID of the <see cref="BaseModifier"/>.</param>
+    /// <param name="target">The <see cref="PlayerControl"/> to remove the <see cref="IBaseModifier"/> from.</param>
+    /// <param name="uniqueId">The unique ID of the <see cref="IBaseModifier"/>.</param>
     [MethodRpc((uint)MiraRpc.RemoveModifier)]
     public static void RpcRemoveModifier(this PlayerControl target, Guid uniqueId)
     {
@@ -70,15 +70,15 @@ public static class ModifierExtensions
     }
 
     /// <summary>
-    /// Remote Procedure Call to remove a <see cref="BaseModifier"/> from a <see cref="PlayerControl"/> by type ID.
+    /// Remote Procedure Call to remove a <see cref="IBaseModifier"/> from a <see cref="PlayerControl"/> by type ID.
     /// </summary>
-    /// <param name="target">The <see cref="PlayerControl"/> to remove the <see cref="BaseModifier"/> from.</param>
-    /// <param name="typeId">The type ID of the <see cref="BaseModifier"/>.</param>
-    /// <param name="predicate">Optional predicate to filter the <see cref="BaseModifier"/>s.</param>
+    /// <param name="target">The <see cref="PlayerControl"/> to remove the <see cref="IBaseModifier"/> from.</param>
+    /// <param name="typeId">The type ID of the <see cref="IBaseModifier"/>.</param>
+    /// <param name="predicate">Optional predicate to filter the <see cref="IBaseModifier"/>s.</param>
     public static void RpcRemoveModifier(
         this PlayerControl target,
         uint typeId,
-        Func<BaseModifier, bool>? predicate = null)
+        Func<IBaseModifier, bool>? predicate = null)
     {
         var modifier = target.GetModifier(typeId, predicate);
         if (modifier is null)
@@ -91,15 +91,15 @@ public static class ModifierExtensions
     }
 
     /// <summary>
-    /// Remote Procedure Call to remove a <see cref="BaseModifier"/> from a <see cref="PlayerControl"/>.
+    /// Remote Procedure Call to remove a <see cref="IBaseModifier"/> from a <see cref="PlayerControl"/>.
     /// </summary>
-    /// <param name="player">The <see cref="PlayerControl"/> to remove the <see cref="BaseModifier"/> from.</param>
-    /// <param name="type">The type of the <see cref="BaseModifier"/>.</param>
-    /// <param name="predicate">Optional predicate to filter the <see cref="BaseModifier"/>s.</param>
+    /// <param name="player">The <see cref="PlayerControl"/> to remove the <see cref="IBaseModifier"/> from.</param>
+    /// <param name="type">The type of the <see cref="IBaseModifier"/>.</param>
+    /// <param name="predicate">Optional predicate to filter the <see cref="IBaseModifier"/>s.</param>
     public static void RpcRemoveModifier(
         this PlayerControl player,
         Type type,
-        Func<BaseModifier, bool>? predicate = null)
+        Func<IBaseModifier, bool>? predicate = null)
     {
         var id = ModifierManager.GetModifierTypeId(type) ?? throw new InvalidOperationException(
             $"Modifier {type.Name} is not registered.");
@@ -112,9 +112,9 @@ public static class ModifierExtensions
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> to remove the <typeparamref name="T"/> from.</param>
     /// <param name="predicate">Optional predicate to filter the <typeparamref name="T"/>s.</param>
-    /// <typeparam name="T">The Type of the <see cref="BaseModifier"/>.</typeparam>
-    public static void RpcRemoveModifier<T>(this PlayerControl player, Func<BaseModifier, bool>? predicate = null)
-        where T : BaseModifier
+    /// <typeparam name="T">The Type of the <see cref="IBaseModifier"/>.</typeparam>
+    public static void RpcRemoveModifier<T>(this PlayerControl player, Func<IBaseModifier, bool>? predicate = null)
+        where T : class, IBaseModifier
     {
         player.RpcRemoveModifier(typeof(T), predicate);
     }
@@ -144,39 +144,39 @@ public static class ModifierExtensions
     /// <summary>
     /// Checks if the <see cref="PlayerControl"/> has a specific <typeparamref name="T"/>.
     /// </summary>
-    /// <typeparam name="T">The type of the <see cref="BaseModifier"/>.</typeparam>
+    /// <typeparam name="T">The type of the <see cref="IBaseModifier"/>.</typeparam>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="predicate">Optional predicate to filter the <see cref="BaseModifier"/>s.</param>
+    /// <param name="predicate">Optional predicate to filter the <see cref="IBaseModifier"/>s.</param>
     /// <returns><see langword="true"/> if the <see cref="PlayerControl"/> has the <typeparamref name="T"/>, <see langword="false"/> otherwise.</returns>
     public static bool HasModifier<T>(this PlayerControl player, Func<T, bool>? predicate = null)
-        where T : BaseModifier
+        where T : class, IBaseModifier
     {
         return player.GetModifierComponent().HasModifier(predicate);
     }
 
     /// <summary>
-    /// Checks if the <see cref="PlayerControl"/> has a specific <see cref="BaseModifier"/> by type.
+    /// Checks if the <see cref="PlayerControl"/> has a specific <see cref="IBaseModifier"/> by type.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
     /// <param name="type">The type of the modifier.</param>
-    /// <param name="predicate">Optional predicate to filter the <see cref="BaseModifier"/>s.</param>
-    /// <returns><see langword="true"/> if the <see cref="PlayerControl"/> has the <see cref="BaseModifier"/>, <see langword="false"/> otherwise.</returns>
-    public static bool HasModifier(this PlayerControl player, Type type, Func<BaseModifier, bool>? predicate = null)
+    /// <param name="predicate">Optional predicate to filter the <see cref="IBaseModifier"/>s.</param>
+    /// <returns><see langword="true"/> if the <see cref="PlayerControl"/> has the <see cref="IBaseModifier"/>, <see langword="false"/> otherwise.</returns>
+    public static bool HasModifier(this PlayerControl player, Type type, Func<IBaseModifier, bool>? predicate = null)
     {
         return player.GetModifierComponent().HasModifier(type, predicate);
     }
 
     /// <summary>
-    /// Checks if the <see cref="PlayerControl"/> has a specific <see cref="BaseModifier"/> by type ID.
+    /// Checks if the <see cref="PlayerControl"/> has a specific <see cref="IBaseModifier"/> by type ID.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="typeId">The type ID of the <see cref="BaseModifier"/>.</param>
-    /// <param name="predicate">Optional predicate to filter the <see cref="BaseModifier"/>s.</param>
-    /// <returns><see langword="true"/> if the <see cref="PlayerControl"/> has the <see cref="BaseModifier"/>, <see langword="false"/> otherwise.</returns>
+    /// <param name="typeId">The type ID of the <see cref="IBaseModifier"/>.</param>
+    /// <param name="predicate">Optional predicate to filter the <see cref="IBaseModifier"/>s.</param>
+    /// <returns><see langword="true"/> if the <see cref="PlayerControl"/> has the <see cref="IBaseModifier"/>, <see langword="false"/> otherwise.</returns>
     public static bool HasModifier(
         this PlayerControl player,
         uint typeId,
-        Func<BaseModifier, bool>? predicate = null)
+        Func<IBaseModifier, bool>? predicate = null)
     {
         return player.GetModifierComponent().HasModifier(typeId, predicate);
     }
@@ -185,20 +185,20 @@ public static class ModifierExtensions
     /// Checks if the <see cref="PlayerControl"/> has a specific modifier by its GUID.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="uniqueId">The unique ID of the <see cref="BaseModifier"/>.</param>
-    /// <returns><see langword="true"/> if the <see cref="PlayerControl"/> has the <see cref="BaseModifier"/>, <see langword="false"/> otherwise.</returns>
+    /// <param name="uniqueId">The unique ID of the <see cref="IBaseModifier"/>.</param>
+    /// <returns><see langword="true"/> if the <see cref="PlayerControl"/> has the <see cref="IBaseModifier"/>, <see langword="false"/> otherwise.</returns>
     public static bool HasModifier(this PlayerControl player, Guid uniqueId)
     {
         return player.GetModifierComponent().HasModifier(uniqueId);
     }
 
     /// <summary>
-    /// Checks if the <see cref="PlayerControl"/> has a specific <see cref="BaseModifier"/>, if the type is an interface.
+    /// Checks if the <see cref="PlayerControl"/> has a specific <see cref="IBaseModifier"/>, if the type is an interface.
     /// </summary>
-    /// <typeparam name="T">The type of the interface of the <see cref="BaseModifier"/>.</typeparam>
+    /// <typeparam name="T">The type of the interface of the <see cref="IBaseModifier"/>.</typeparam>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="predicate">Optional predicate to filter the <see cref="BaseModifier"/>s.</param>
-    /// <returns><see langword="true"/> if the <see cref="PlayerControl"/> has the <see cref="BaseModifier"/> of type <typeparamref name="T"/>, <see langword="false"/> otherwise.</returns>
+    /// <param name="predicate">Optional predicate to filter the <see cref="IBaseModifier"/>s.</param>
+    /// <returns><see langword="true"/> if the <see cref="PlayerControl"/> has the <see cref="IBaseModifier"/> of type <typeparamref name="T"/>, <see langword="false"/> otherwise.</returns>
     public static bool HasModifierOfType<T>(this PlayerControl player, Func<T, bool>? predicate = null)
         where T : class
     {
@@ -206,9 +206,9 @@ public static class ModifierExtensions
     }
 
     /// <summary>
-    /// Clears all <see cref="BaseModifier"/>s from the <see cref="PlayerControl"/>.
+    /// Clears all <see cref="IBaseModifier"/>s from the <see cref="PlayerControl"/>.
     /// </summary>
-    /// <param name="plr">The player you want to clear <see cref="BaseModifier"/>s for.</param>
+    /// <param name="plr">The player you want to clear <see cref="IBaseModifier"/>s for.</param>
     public static void ClearModifiers(this PlayerControl plr)
     {
         foreach (var mod in plr.GetModifierComponent().ActiveModifiers)
@@ -218,9 +218,9 @@ public static class ModifierExtensions
     }
 
     /// <summary>
-    /// Clears all <see cref="BaseModifier"/>s from the <see cref="PlayerControl"/>.
+    /// Clears all <see cref="IBaseModifier"/>s from the <see cref="PlayerControl"/>.
     /// </summary>
-    /// <param name="plr">The player you want to clear <see cref="BaseModifier"/>s for.</param>
+    /// <param name="plr">The player you want to clear <see cref="IBaseModifier"/>s for.</param>
     public static void RpcClearModifiers(this PlayerControl plr)
     {
         foreach (var mod in plr.GetModifierComponent().ActiveModifiers)
@@ -235,60 +235,60 @@ public static class ModifierExtensions
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
     /// <param name="modifier">The <typeparamref name="T"/> or <see langword="null"/>.</param>
     /// <param name="predicate">The predicate to check the <typeparamref name="T"/> by.</param>
-    /// <typeparam name="T">The Type of the <see cref="BaseModifier"/>.</typeparam>
+    /// <typeparam name="T">The Type of the <see cref="IBaseModifier"/>.</typeparam>
     /// <returns><see langword="true"/> if the <typeparamref name="T"/> was found, <see langword="false"/> otherwise.</returns>
     public static bool TryGetModifier<T>(this PlayerControl player, [NotNullWhen(true)] out T? modifier, Func<T, bool>? predicate = null)
-        where T : BaseModifier
+        where T : class, IBaseModifier
     {
         return player.GetModifierComponent().TryGetModifier(out modifier, predicate);
     }
 
     /// <summary>
-    /// Tries to get a <see cref="BaseModifier"/> by its type.
+    /// Tries to get a <see cref="IBaseModifier"/> by its type.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
     /// <param name="type">The modifier type.</param>
-    /// <param name="modifier">The <see cref="BaseModifier"/> or <see langword="null"/>.</param>
-    /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/> by.</param>
-    /// <returns><see langword="true"/> if the <see cref="BaseModifier"/> was found, <see langword="false"/> otherwise.</returns>
-    public static bool TryGetModifier(this PlayerControl player, Type type, [NotNullWhen(true)] out BaseModifier? modifier, Func<BaseModifier, bool>? predicate = null)
+    /// <param name="modifier">The <see cref="IBaseModifier"/> or <see langword="null"/>.</param>
+    /// <param name="predicate">The predicate to check the <see cref="IBaseModifier"/> by.</param>
+    /// <returns><see langword="true"/> if the <see cref="IBaseModifier"/> was found, <see langword="false"/> otherwise.</returns>
+    public static bool TryGetModifier(this PlayerControl player, Type type, [NotNullWhen(true)] out IBaseModifier? modifier, Func<IBaseModifier, bool>? predicate = null)
     {
         return player.GetModifierComponent().TryGetModifier(type, out modifier, predicate);
     }
 
     /// <summary>
-    /// Tries to get a <see cref="BaseModifier"/> by its type ID.
+    /// Tries to get a <see cref="IBaseModifier"/> by its type ID.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="id">The <see cref="BaseModifier"/> type ID.</param>
-    /// <param name="modifier">The <see cref="BaseModifier"/> or <see langword="null"/>.</param>
-    /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/> by.</param>
-    /// <returns><see langword="true"/> if the <see cref="BaseModifier"/> was found, <see langword="false"/> otherwise.</returns>
-    public static bool TryGetModifier(this PlayerControl player, uint id, [NotNullWhen(true)] out BaseModifier? modifier, Func<BaseModifier, bool>? predicate = null)
+    /// <param name="id">The <see cref="IBaseModifier"/> type ID.</param>
+    /// <param name="modifier">The <see cref="IBaseModifier"/> or <see langword="null"/>.</param>
+    /// <param name="predicate">The predicate to check the <see cref="IBaseModifier"/> by.</param>
+    /// <returns><see langword="true"/> if the <see cref="IBaseModifier"/> was found, <see langword="false"/> otherwise.</returns>
+    public static bool TryGetModifier(this PlayerControl player, uint id, [NotNullWhen(true)] out IBaseModifier? modifier, Func<IBaseModifier, bool>? predicate = null)
     {
         return player.GetModifierComponent().TryGetModifier(id, out modifier, predicate);
     }
 
     /// <summary>
-    /// Tries to get a <see cref="BaseModifier"/> by its unique ID.
+    /// Tries to get a <see cref="IBaseModifier"/> by its unique ID.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="modifierGuid">The <see cref="BaseModifier"/> unique ID.</param>
-    /// <param name="modifier">The <see cref="BaseModifier"/> or <see langword="null"/>.</param>
-    /// <returns><see langword="true"/> if the <see cref="BaseModifier"/> was found, <see langword="false"/> otherwise.</returns>
-    public static bool TryGetModifier(this PlayerControl player, Guid modifierGuid, [NotNullWhen(true)] out BaseModifier? modifier)
+    /// <param name="modifierGuid">The <see cref="IBaseModifier"/> unique ID.</param>
+    /// <param name="modifier">The <see cref="IBaseModifier"/> or <see langword="null"/>.</param>
+    /// <returns><see langword="true"/> if the <see cref="IBaseModifier"/> was found, <see langword="false"/> otherwise.</returns>
+    public static bool TryGetModifier(this PlayerControl player, Guid modifierGuid, [NotNullWhen(true)] out IBaseModifier? modifier)
     {
         return player.GetModifierComponent().TryGetModifier(modifierGuid, out modifier);
     }
 
     /// <summary>
-    /// Tries to get a <see cref="BaseModifier"/> by its type, if the type is an interface.
+    /// Tries to get a <see cref="IBaseModifier"/> by its type, if the type is an interface.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="modifier">The <see cref="BaseModifier"/> of type <typeparamref name="T"/> or null.</param>
-    /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/> of type <typeparamref name="T"/> by.</param>
-    /// <typeparam name="T">The Type of the interface of the <see cref="BaseModifier"/>.</typeparam>
-    /// <returns><see langword="true"/> if the <see cref="BaseModifier"/> of type <typeparamref name="T"/> was found, <see langword="false"/> otherwise.</returns>
+    /// <param name="modifier">The <see cref="IBaseModifier"/> of type <typeparamref name="T"/> or null.</param>
+    /// <param name="predicate">The predicate to check the <see cref="IBaseModifier"/> of type <typeparamref name="T"/> by.</param>
+    /// <typeparam name="T">The Type of the interface of the <see cref="IBaseModifier"/>.</typeparam>
+    /// <returns><see langword="true"/> if the <see cref="IBaseModifier"/> of type <typeparamref name="T"/> was found, <see langword="false"/> otherwise.</returns>
     public static bool TryGetModifierOfType<T>(this PlayerControl player, [NotNullWhen(true)] out T? modifier, Func<T, bool>? predicate = null)
         where T : class
     {
@@ -298,53 +298,53 @@ public static class ModifierExtensions
     /// <summary>
     /// Gets a specific <typeparamref name="T"/> from the <see cref="PlayerControl"/>.
     /// </summary>
-    /// <typeparam name="T">The type of the <see cref="BaseModifier"/>.</typeparam>
+    /// <typeparam name="T">The type of the <see cref="IBaseModifier"/>.</typeparam>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
     /// <param name="predicate">Optional predicate to filter the <typeparamref name="T"/>s.</param>
     /// <returns>The <typeparamref name="T"/> if found, <see langword="null"/> otherwise.</returns>
     public static T? GetModifier<T>(this PlayerControl player, Func<T, bool>? predicate = null)
-        where T : BaseModifier
+        where T : class, IBaseModifier
     {
         return player.GetModifierComponent().GetModifier(predicate);
     }
 
     /// <summary>
-    /// Gets a specific <see cref="BaseModifier"/> from the <see cref="PlayerControl"/> by type.
+    /// Gets a specific <see cref="IBaseModifier"/> from the <see cref="PlayerControl"/> by type.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
     /// <param name="type">The type of the modifier.</param>
-    /// <param name="predicate">Optional predicate to filter the <see cref="BaseModifier"/>s.</param>
-    /// <returns>The <see cref="BaseModifier"/> if found, <see langword="null"/> otherwise.</returns>
-    public static BaseModifier? GetModifier(
+    /// <param name="predicate">Optional predicate to filter the <see cref="IBaseModifier"/>s.</param>
+    /// <returns>The <see cref="IBaseModifier"/> if found, <see langword="null"/> otherwise.</returns>
+    public static IBaseModifier? GetModifier(
         this PlayerControl player,
         Type type,
-        Func<BaseModifier, bool>? predicate = null)
+        Func<IBaseModifier, bool>? predicate = null)
     {
         return player.GetModifierComponent().GetModifier(type, predicate);
     }
 
     /// <summary>
-    /// Gets a specific <see cref="BaseModifier"/> from the <see cref="PlayerControl"/> by its type ID.
+    /// Gets a specific <see cref="IBaseModifier"/> from the <see cref="PlayerControl"/> by its type ID.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="typeId">The type ID of the <see cref="BaseModifier"/>.</param>
-    /// <param name="predicate">Optional predicate to filter the <see cref="BaseModifier"/>s.</param>
-    /// <returns>The <see cref="BaseModifier"/> if found, <see langword="null"/> otherwise.</returns>
-    public static BaseModifier? GetModifier(
+    /// <param name="typeId">The type ID of the <see cref="IBaseModifier"/>.</param>
+    /// <param name="predicate">Optional predicate to filter the <see cref="IBaseModifier"/>s.</param>
+    /// <returns>The <see cref="IBaseModifier"/> if found, <see langword="null"/> otherwise.</returns>
+    public static IBaseModifier? GetModifier(
         this PlayerControl player,
         uint typeId,
-        Func<BaseModifier, bool>? predicate = null)
+        Func<IBaseModifier, bool>? predicate = null)
     {
         return player.GetModifierComponent().GetModifier(typeId, predicate);
     }
 
     /// <summary>
-    /// Gets a specific <see cref="BaseModifier"/> from the <see cref="PlayerControl"/> by its GUID.
+    /// Gets a specific <see cref="IBaseModifier"/> from the <see cref="PlayerControl"/> by its GUID.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="uniqueId">The GUID of the <see cref="BaseModifier"/>.</param>
-    /// <returns>The <see cref="BaseModifier"/> if found, <see langword="null"/> otherwise.</returns>
-    public static BaseModifier? GetModifier(
+    /// <param name="uniqueId">The GUID of the <see cref="IBaseModifier"/>.</param>
+    /// <returns>The <see cref="IBaseModifier"/> if found, <see langword="null"/> otherwise.</returns>
+    public static IBaseModifier? GetModifier(
         this PlayerControl player,
         Guid uniqueId)
     {
@@ -352,12 +352,12 @@ public static class ModifierExtensions
     }
 
     /// <summary>
-    /// Gets a specific <see cref="BaseModifier"/> of type <typeparamref name="T"/> from the <see cref="PlayerControl"/>, if the type is an interface.
+    /// Gets a specific <see cref="IBaseModifier"/> of type <typeparamref name="T"/> from the <see cref="PlayerControl"/>, if the type is an interface.
     /// </summary>
     /// <typeparam name="T">The type of the interface of the modifier.</typeparam>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="predicate">Optional predicate to filter the <see cref="BaseModifier"/>s.</param>
-    /// <returns>The <see cref="BaseModifier"/> of type <typeparamref name="T"/> if found, <see langword="null"/> otherwise.</returns>
+    /// <param name="predicate">Optional predicate to filter the <see cref="IBaseModifier"/>s.</param>
+    /// <returns>The <see cref="IBaseModifier"/> of type <typeparamref name="T"/> if found, <see langword="null"/> otherwise.</returns>
     public static T? GetModifierOfType<T>(this PlayerControl player, Func<T, bool>? predicate = null)
         where T : class
     {
@@ -372,48 +372,48 @@ public static class ModifierExtensions
     /// <param name="predicate">Optional predicate to filter the <typeparamref name="T"/>s.</param>
     /// <returns>An <see cref="IEnumerable{T}"/> of <typeparamref name="T"/>s.</returns>
     public static IEnumerable<T> GetModifiers<T>(this PlayerControl player, Func<T, bool>? predicate = null)
-        where T : BaseModifier
+        where T : class, IBaseModifier
     {
         return player.GetModifierComponent().GetModifiers(predicate);
     }
 
     /// <summary>
-    /// Gets all <see cref="BaseModifier"/>s of a specific type from the <see cref="PlayerControl"/>.
+    /// Gets all <see cref="IBaseModifier"/>s of a specific type from the <see cref="PlayerControl"/>.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
     /// <param name="type">The type of the modifiers.</param>
-    /// <param name="predicate">Optional predicate to filter the <see cref="BaseModifier"/>s.</param>
-    /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="BaseModifier"/>s.</returns>
-    public static IEnumerable<BaseModifier> GetModifiers(
+    /// <param name="predicate">Optional predicate to filter the <see cref="IBaseModifier"/>s.</param>
+    /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="IBaseModifier"/>s.</returns>
+    public static IEnumerable<IBaseModifier> GetModifiers(
         this PlayerControl player,
         Type type,
-        Func<BaseModifier, bool>? predicate = null)
+        Func<IBaseModifier, bool>? predicate = null)
     {
         return player.GetModifierComponent().GetModifiers(type, predicate);
     }
 
     /// <summary>
-    /// Gets all <see cref="BaseModifier"/>s of a specific type from the <see cref="PlayerControl"/> by type ID.
+    /// Gets all <see cref="IBaseModifier"/>s of a specific type from the <see cref="PlayerControl"/> by type ID.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="typeId">The type ID of the <see cref="BaseModifier"/>s.</param>
-    /// <param name="predicate">Optional predicate to filter the <see cref="BaseModifier"/>s.</param>
-    /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="BaseModifier"/>s.</returns>
-    public static IEnumerable<BaseModifier> GetModifiers(
+    /// <param name="typeId">The type ID of the <see cref="IBaseModifier"/>s.</param>
+    /// <param name="predicate">Optional predicate to filter the <see cref="IBaseModifier"/>s.</param>
+    /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="IBaseModifier"/>s.</returns>
+    public static IEnumerable<IBaseModifier> GetModifiers(
         this PlayerControl player,
         uint typeId,
-        Func<BaseModifier, bool>? predicate = null)
+        Func<IBaseModifier, bool>? predicate = null)
     {
         return player.GetModifierComponent().GetModifiers(typeId, predicate);
     }
 
     /// <summary>
-    /// Gets all <see cref="BaseModifier"/>s of a specific type from the <see cref="PlayerControl"/>, if the type is an interface.
+    /// Gets all <see cref="IBaseModifier"/>s of a specific type from the <see cref="PlayerControl"/>, if the type is an interface.
     /// </summary>
-    /// <typeparam name="T">The type of the interface of the <see cref="BaseModifier"/>s.</typeparam>
+    /// <typeparam name="T">The type of the interface of the <see cref="IBaseModifier"/>s.</typeparam>
     /// <param name="player">The PlayerControl instance.</param>
-    /// <param name="predicate">Optional predicate to filter the <see cref="BaseModifier"/>s.</param>
-    /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="BaseModifier"/>s of type <typeparamref name="T"/>.</returns>
+    /// <param name="predicate">Optional predicate to filter the <see cref="IBaseModifier"/>s.</param>
+    /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="IBaseModifier"/>s of type <typeparamref name="T"/>.</returns>
     public static IEnumerable<T> GetModifiersOfType<T>(this PlayerControl player, Func<T, bool>? predicate = null)
         where T : class
     {
@@ -421,11 +421,11 @@ public static class ModifierExtensions
     }
 
     /// <summary>
-    /// Removes a specific <see cref="BaseModifier"/> from the <see cref="PlayerControl"/>.
+    /// Removes a specific <see cref="IBaseModifier"/> from the <see cref="PlayerControl"/>.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="modifier">The <see cref="BaseModifier"/> to remove.</param>
-    public static void RemoveModifier(this PlayerControl player, BaseModifier modifier)
+    /// <param name="modifier">The <see cref="IBaseModifier"/> to remove.</param>
+    public static void RemoveModifier(this PlayerControl player, IBaseModifier modifier)
     {
         player.GetModifierComponent().RemoveModifier(modifier);
     }
@@ -433,45 +433,45 @@ public static class ModifierExtensions
     /// <summary>
     /// Removes a specific <typeparamref name="T"/> from the <see cref="PlayerControl"/>.
     /// </summary>
-    /// <typeparam name="T">The type of the <see cref="BaseModifier"/>.</typeparam>
+    /// <typeparam name="T">The type of the <see cref="IBaseModifier"/>.</typeparam>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="predicate">Optional predicate to filter the <see cref="BaseModifier"/>s.</param>
+    /// <param name="predicate">Optional predicate to filter the <see cref="IBaseModifier"/>s.</param>
     public static void RemoveModifier<T>(this PlayerControl player, Func<T, bool>? predicate = null)
-        where T : BaseModifier
+        where T : class, IBaseModifier
     {
         player.GetModifierComponent().RemoveModifier(predicate);
     }
 
     /// <summary>
-    /// Removes a specific <see cref="BaseModifier"/> from the <see cref="PlayerControl"/> by type.
+    /// Removes a specific <see cref="IBaseModifier"/> from the <see cref="PlayerControl"/> by type.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
     /// <param name="type">The type of the modifier.</param>
-    /// <param name="predicate">Optional predicate to filter the <see cref="BaseModifier"/>s.</param>
-    public static void RemoveModifier(this PlayerControl player, Type type, Func<BaseModifier, bool>? predicate = null)
+    /// <param name="predicate">Optional predicate to filter the <see cref="IBaseModifier"/>s.</param>
+    public static void RemoveModifier(this PlayerControl player, Type type, Func<IBaseModifier, bool>? predicate = null)
     {
         player.GetModifierComponent().RemoveModifier(type, predicate);
     }
 
     /// <summary>
-    /// Removes a specific <see cref="BaseModifier"/> from the <see cref="PlayerControl"/> by its type ID.
+    /// Removes a specific <see cref="IBaseModifier"/> from the <see cref="PlayerControl"/> by its type ID.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="typeId">The type ID of the <see cref="BaseModifier"/>.</param>
-    /// <param name="predicate">Optional predicate to filter the <see cref="BaseModifier"/>s.</param>
+    /// <param name="typeId">The type ID of the <see cref="IBaseModifier"/>.</param>
+    /// <param name="predicate">Optional predicate to filter the <see cref="IBaseModifier"/>s.</param>
     public static void RemoveModifier(
         this PlayerControl player,
         uint typeId,
-        Func<BaseModifier, bool>? predicate = null)
+        Func<IBaseModifier, bool>? predicate = null)
     {
         player.GetModifierComponent().RemoveModifier(typeId, predicate);
     }
 
     /// <summary>
-    /// Removes a specific <see cref="BaseModifier"/> from the <see cref="PlayerControl"/> by its GUID.
+    /// Removes a specific <see cref="IBaseModifier"/> from the <see cref="PlayerControl"/> by its GUID.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="uniqueId">The GUID of the <see cref="BaseModifier"/>.</param>
+    /// <param name="uniqueId">The GUID of the <see cref="IBaseModifier"/>.</param>
     public static void RemoveModifier(
         this PlayerControl player,
         Guid uniqueId)
@@ -480,65 +480,65 @@ public static class ModifierExtensions
     }
 
     /// <summary>
-    /// Tries to remove a specific <see cref="BaseModifier"/> from the <see cref="PlayerControl"/>.
+    /// Tries to remove a specific <see cref="IBaseModifier"/> from the <see cref="PlayerControl"/>.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="modifier">The <see cref="BaseModifier"/> to remove.</param>
-    /// <returns><see langword="false"/> if the <see cref="BaseModifier"/> is not active on this <see cref="PlayerControl"/>, else <see langword="true"/>.</returns>
-    public static bool TryRemoveModifier(this PlayerControl player, BaseModifier modifier)
+    /// <param name="modifier">The <see cref="IBaseModifier"/> to remove.</param>
+    /// <returns><see langword="false"/> if the <see cref="IBaseModifier"/> is not active on this <see cref="PlayerControl"/>, else <see langword="true"/>.</returns>
+    public static bool TryRemoveModifier(this PlayerControl player, IBaseModifier modifier)
     {
         return player.GetModifierComponent().TryRemoveModifier(modifier);
     }
 
     /// <summary>
-    /// Tries to remove a specific <see cref="BaseModifier"/> from the <see cref="PlayerControl"/>.
+    /// Tries to remove a specific <see cref="IBaseModifier"/> from the <see cref="PlayerControl"/>.
     /// </summary>
-    /// <typeparam name="T">The type of the <see cref="BaseModifier"/>.</typeparam>
+    /// <typeparam name="T">The type of the <see cref="IBaseModifier"/>.</typeparam>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="predicate">Optional predicate to filter the <see cref="BaseModifier"/>s.</param>
-    /// <returns><see langword="false"/> if the <see cref="BaseModifier"/> is not active on this <see cref="PlayerControl"/>, or there are multiple instances;
+    /// <param name="predicate">Optional predicate to filter the <see cref="IBaseModifier"/>s.</param>
+    /// <returns><see langword="false"/> if the <see cref="IBaseModifier"/> is not active on this <see cref="PlayerControl"/>, or there are multiple instances;
     ///     else <see langword="true"/>.</returns>
     public static bool TryRemoveModifier<T>(this PlayerControl player, Func<T, bool>? predicate = null)
-        where T : BaseModifier
+        where T : class, IBaseModifier
     {
         return player.GetModifierComponent().TryRemoveModifier(predicate);
     }
 
     /// <summary>
-    /// Tries to remove a specific <see cref="BaseModifier"/> from the <see cref="PlayerControl"/> by type.
+    /// Tries to remove a specific <see cref="IBaseModifier"/> from the <see cref="PlayerControl"/> by type.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="type">The type of the <see cref="BaseModifier"/>.</param>
-    /// <param name="predicate">Optional predicate to filter the <see cref="BaseModifier"/>s.</param>
-    /// <returns><see langword="false"/> if the <see cref="BaseModifier"/> is not active on this <see cref="PlayerControl"/>, or there are multiple instances;
+    /// <param name="type">The type of the <see cref="IBaseModifier"/>.</param>
+    /// <param name="predicate">Optional predicate to filter the <see cref="IBaseModifier"/>s.</param>
+    /// <returns><see langword="false"/> if the <see cref="IBaseModifier"/> is not active on this <see cref="PlayerControl"/>, or there are multiple instances;
     ///     else <see langword="true"/>.</returns>
-    public static bool TryRemoveModifier(this PlayerControl player, Type type, Func<BaseModifier, bool>? predicate = null)
+    public static bool TryRemoveModifier(this PlayerControl player, Type type, Func<IBaseModifier, bool>? predicate = null)
     {
         return player.GetModifierComponent().TryRemoveModifier(type, predicate);
     }
 
     /// <summary>
-    /// Tries to remove a specific <see cref="BaseModifier"/> from the <see cref="PlayerControl"/> by its type ID.
+    /// Tries to remove a specific <see cref="IBaseModifier"/> from the <see cref="PlayerControl"/> by its type ID.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="typeId">The type ID of the <see cref="BaseModifier"/>.</param>
-    /// <param name="predicate">Optional predicate to filter the <see cref="BaseModifier"/>s.</param>
-    /// <returns><see langword="false"/> if the <see cref="BaseModifier"/> is not active on this <see cref="PlayerControl"/>, or there are multiple instances;
+    /// <param name="typeId">The type ID of the <see cref="IBaseModifier"/>.</param>
+    /// <param name="predicate">Optional predicate to filter the <see cref="IBaseModifier"/>s.</param>
+    /// <returns><see langword="false"/> if the <see cref="IBaseModifier"/> is not active on this <see cref="PlayerControl"/>, or there are multiple instances;
     ///     else <see langword="true"/>.</returns>
     public static bool TryRemoveModifier(
         this PlayerControl player,
         uint typeId,
-        Func<BaseModifier, bool>? predicate = null)
+        Func<IBaseModifier, bool>? predicate = null)
     {
         return player.GetModifierComponent().TryRemoveModifier(typeId, predicate);
     }
 
     /// <summary>
-    /// Tries to remove a specific <see cref="BaseModifier"/> from the <see cref="PlayerControl"/> by its GUID.
+    /// Tries to remove a specific <see cref="IBaseModifier"/> from the <see cref="PlayerControl"/> by its GUID.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="uniqueId">The GUID of the <see cref="BaseModifier"/>.</param>
-    /// <returns><see langword="false"/> if the <see cref="BaseModifier"/> is not active on this <see cref="PlayerControl"/>, else <see langword="true"/>.</returns>
+    /// <param name="uniqueId">The GUID of the <see cref="IBaseModifier"/>.</param>
+    /// <returns><see langword="false"/> if the <see cref="IBaseModifier"/> is not active on this <see cref="PlayerControl"/>, else <see langword="true"/>.</returns>
     public static bool TryRemoveModifier(
         this PlayerControl player,
         Guid uniqueId)
@@ -549,12 +549,12 @@ public static class ModifierExtensions
     /// <summary>
     /// Adds a specific <typeparamref name="T"/> to the <see cref="PlayerControl"/>.
     /// </summary>
-    /// <typeparam name="T">The type of the <see cref="BaseModifier"/>.</typeparam>
+    /// <typeparam name="T">The type of the <see cref="IBaseModifier"/>.</typeparam>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
     /// <param name="args">The arguments to initialize the <typeparamref name="T"/> with.</param>
     /// <returns>The added <typeparamref name="T"/>.</returns>
     public static T? AddModifier<T>(this PlayerControl player, params object[] args)
-        where T : BaseModifier
+        where T : class, IBaseModifier
     {
         return player.GetModifierComponent().AddModifier<T>(args);
     }
@@ -564,32 +564,32 @@ public static class ModifierExtensions
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
     /// <param name="modifier">The <see cref="BaseModifier"/> to add.</param>
-    /// <returns>The added <see cref="BaseModifier"/>.</returns>
-    public static BaseModifier? AddModifier(this PlayerControl player, BaseModifier modifier)
+    /// <returns>The added <see cref="IBaseModifier"/>.</returns>
+    public static IBaseModifier? AddModifier(this PlayerControl player, BaseModifier modifier)
     {
         return player.GetModifierComponent().AddModifier(modifier);
     }
 
     /// <summary>
-    /// Adds a specific <see cref="BaseModifier"/> to the <see cref="PlayerControl"/> by type.
+    /// Adds a specific <see cref="IBaseModifier"/> to the <see cref="PlayerControl"/> by type.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
     /// <param name="type">The type of the modifier.</param>
-    /// <param name="args">The arguments to initialize the <see cref="BaseModifier"/> with.</param>
-    /// <returns>The added <see cref="BaseModifier"/>.</returns>
-    public static BaseModifier? AddModifier(this PlayerControl player, Type type, params object[] args)
+    /// <param name="args">The arguments to initialize the <see cref="IBaseModifier"/> with.</param>
+    /// <returns>The added <see cref="IBaseModifier"/>.</returns>
+    public static IBaseModifier? AddModifier(this PlayerControl player, Type type, params object[] args)
     {
         return player.GetModifierComponent().AddModifier(type, args);
     }
 
     /// <summary>
-    /// Adds a specific <see cref="BaseModifier"/> to the <see cref="PlayerControl"/> by type ID.
+    /// Adds a specific <see cref="IBaseModifier"/> to the <see cref="PlayerControl"/> by type ID.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="typeId">The type ID of the <see cref="BaseModifier"/>.</param>
-    /// <param name="args">The arguments to initialize the <see cref="BaseModifier"/> with.</param>
-    /// <returns>The added <see cref="BaseModifier"/>.</returns>
-    public static BaseModifier? AddModifier(this PlayerControl player, uint typeId, params object[] args)
+    /// <param name="typeId">The type ID of the <see cref="IBaseModifier"/>.</param>
+    /// <param name="args">The arguments to initialize the <see cref="IBaseModifier"/> with.</param>
+    /// <returns>The added <see cref="IBaseModifier"/>.</returns>
+    public static IBaseModifier? AddModifier(this PlayerControl player, uint typeId, params object[] args)
     {
         return player.GetModifierComponent().AddModifier(typeId, args);
     }

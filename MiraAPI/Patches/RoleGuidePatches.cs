@@ -1765,7 +1765,7 @@ public static class RoleGuidePatches
         }
     }
 
-    public static void DisplayAdvancedWiki(MatchInfoGuide instance, BaseModifier modifier)
+    public static void DisplayAdvancedWiki(MatchInfoGuide instance, IBaseModifier modifier)
     {
         var remaining = _openedAt + instance.transitionOpen.duration - Time.time;
         if (remaining > 0f)
@@ -1898,7 +1898,7 @@ public static class RoleGuidePatches
             modId);
     }
 
-    private static string GetPanelCountText(BaseModifier modifier, int amount, int chance, string modId)
+    private static string GetPanelCountText(IBaseModifier modifier, int amount, int chance, string modId)
     {
         return modifier.GetAmountText(amount, chance, modId);
     }

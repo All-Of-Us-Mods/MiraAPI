@@ -150,7 +150,7 @@ public static class LobbyViewPanePatches
         else
         {
             var showModifierButton = SelectedMod.InternalOptionGroups.Any(m =>
-                m.ParentMenu is MenuCategory.Modifiers || m.OptionableType?.IsAssignableTo(typeof(BaseModifier)) == true);
+                m.ParentMenu is MenuCategory.Modifiers || m.OptionableType?.IsAssignableTo(typeof(IBaseModifier)) == true);
             var showRolesButton = SelectedMod.InternalOptionGroups.Any(r =>
                 r.ParentMenu is MenuCategory.Roles || r.OptionableType?.IsAssignableTo(typeof(ICustomRole)) == true);
 
@@ -181,7 +181,7 @@ public static class LobbyViewPanePatches
         ModifiersTabButton?.SelectButton(true);
 
         var filteredGroups = SelectedMod.InternalOptionGroups
-            .Where(x => x.GroupVisible() && (x.ParentMenu is MenuCategory.Modifiers || (x.OptionableType != null && x.OptionableType.IsAssignableTo(typeof(BaseModifier)))));
+            .Where(x => x.GroupVisible() && (x.ParentMenu is MenuCategory.Modifiers || (x.OptionableType != null && x.OptionableType.IsAssignableTo(typeof(IBaseModifier)))));
 
         DrawOptions(__instance, filteredGroups);
     }
