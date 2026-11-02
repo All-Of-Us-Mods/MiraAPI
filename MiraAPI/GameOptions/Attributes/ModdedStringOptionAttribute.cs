@@ -10,15 +10,23 @@ namespace MiraAPI.GameOptions.Attributes;
 /// <param name="title">The title of the option.</param>
 /// <param name="values">An option list of string value.</param>
 [AttributeUsage(AttributeTargets.Property)]
-public class ModdedStringOptionAttribute(
-    string title,
-    string[] values)
+public class ModdedStringOptionAttribute(string? title, string[] values)
     : ModdedOptionAttribute(title), ITypedOption<string>
 {
-    internal override IModdedOption? CreateOption(object? value, PropertyInfo property)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedStringOptionAttribute"/> class.
+    /// </summary>
+    /// <param name="values">An option list of string value.</param>
+    public ModdedStringOptionAttribute(string[] values)
+        : this(null, values)
     {
-        var option = new ModdedStringOption(Title, (string)(value ?? string.Empty), values);
-        return option;
+    }
+
+    internal override IModdedOption? CreateOption(object? value, PropertyInfo property, AbstractOptionGroup group)
+    {
+        var opt = new ModdedStringOption(group.GroupPrefix, Title ?? property.Name, value as string ?? string.Empty, values);
+        Title = opt.Title;
+        return opt;
     }
 
     /// <inheritdoc />

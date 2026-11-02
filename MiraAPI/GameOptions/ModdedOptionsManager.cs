@@ -170,7 +170,7 @@ public static class ModdedOptionsManager
             return;
         }
 
-        var option = attribute.CreateOption(property.GetValue(group), property);
+        var option = attribute.CreateOption(property.GetValue(group), property, group);
 
         if (option == null)
         {
@@ -277,8 +277,11 @@ public static class ModdedOptionsManager
             return;
         }
 
-        var propertyList = (IList)propertyVal;
-        var optionList = attribute.CreateOptionList(propertyList, property);
+        var list = (IList)propertyVal;
+
+        attribute.Titles = new string[list.Count];
+
+        var optionList = attribute.CreateOptionList(list, property, group);
 
         if (optionList == null)
         {
@@ -286,7 +289,7 @@ public static class ModdedOptionsManager
             return;
         }
 
-        if (propertyList.Count != optionList.Count)
+        if (list.Count != optionList.Count)
         {
             Error("Mismatch in count between values and created options.");
             return;
@@ -326,7 +329,7 @@ public static class ModdedOptionsManager
         var valueType = propType.GetGenericArguments()[0];
 
         attribute.HolderOptionList = optionList;
-        attribute.Value = propertyList;
+        attribute.Value = list;
         attribute.ValueType = valueType;
 
         ListInstanceCache.Add(propertyVal, attribute);

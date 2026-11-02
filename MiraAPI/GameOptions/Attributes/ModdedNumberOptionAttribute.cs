@@ -19,7 +19,7 @@ namespace MiraAPI.GameOptions.Attributes;
 /// <param name="halfIncrements">Whether increments can be split in half (using Shift).</param>
 [AttributeUsage(AttributeTargets.Property)]
 public class ModdedNumberOptionAttribute(
-    string title,
+    string? title,
     float min,
     float max,
     float increment,
@@ -33,6 +33,30 @@ public class ModdedNumberOptionAttribute(
     /// <summary>
     /// Initializes a new instance of the <see cref="ModdedNumberOptionAttribute"/> class.
     /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="increment">The increment.</param>
+    /// <param name="zeroBehavior">Determines what is shown for zero.</param>
+    /// <param name="negativeBehavior">Determines what is shown for negative 1.</param>
+    /// <param name="suffixType">The suffix type.</param>
+    /// <param name="formatString">Optional format string for the option screen.</param>
+    /// <param name="halfIncrements">Whether increments can be split in half (using Shift).</param>
+    public ModdedNumberOptionAttribute(
+        float min,
+        float max,
+        float increment,
+        string zeroBehavior,
+        string negativeBehavior,
+        MiraNumberSuffixes suffixType = MiraNumberSuffixes.None,
+        string? formatString = null,
+        bool halfIncrements = false)
+        : this(null, min, max, increment, zeroBehavior, negativeBehavior, suffixType, formatString, halfIncrements)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedNumberOptionAttribute"/> class.
+    /// </summary>
     /// <param name="title">The title of the option.</param>
     /// <param name="min">The minimum value.</param>
     /// <param name="max">The maximum value.</param>
@@ -41,7 +65,7 @@ public class ModdedNumberOptionAttribute(
     /// <param name="zeroInfinity">Whether zero is infinity or not.</param>
     /// <param name="formatString">Optional format string for the option screen.</param>
     public ModdedNumberOptionAttribute(
-        string title,
+        string? title,
         float min,
         float max,
         float increment = 1,
@@ -52,7 +76,27 @@ public class ModdedNumberOptionAttribute(
     {
     }
 
-    internal override IModdedOption CreateOption(object? value, PropertyInfo property)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedNumberOptionAttribute"/> class.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="increment">The increment.</param>
+    /// <param name="suffixType">The suffix type.</param>
+    /// <param name="zeroInfinity">Whether zero is infinity or not.</param>
+    /// <param name="formatString">Optional format string for the option screen.</param>
+    public ModdedNumberOptionAttribute(
+        float min,
+        float max,
+        float increment = 1,
+        MiraNumberSuffixes suffixType = MiraNumberSuffixes.None,
+        string? formatString = null,
+        bool zeroInfinity = false)
+        : this(null, min, max, increment, suffixType, formatString, zeroInfinity)
+    {
+    }
+
+    internal override IModdedOption CreateOption(object? value, PropertyInfo property, AbstractOptionGroup group)
     {
         var final = value switch
         {
@@ -61,8 +105,9 @@ public class ModdedNumberOptionAttribute(
             _ => (float)value,
         };
 
-        return new ModdedNumberOption(
-            Title,
+        var opt = new ModdedNumberOption(
+            group.GroupPrefix,
+            Title ?? property.Name,
             final,
             min,
             max,
@@ -72,6 +117,8 @@ public class ModdedNumberOptionAttribute(
             suffixType,
             formatString,
             halfIncrements);
+        Title = opt.Title;
+        return opt;
     }
 
     /// <inheritdoc />

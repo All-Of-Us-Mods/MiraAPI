@@ -10,15 +10,23 @@ namespace MiraAPI.GameOptions.Attributes;
 /// <param name="title">The title of the option.</param>
 /// <param name="allowNone">Whether the option includes a none option. If None is selected, value will return -1.</param>
 [AttributeUsage(AttributeTargets.Property)]
-public class ModdedPlayerOptionAttribute(
-    string title,
-    bool allowNone = true)
+public class ModdedPlayerOptionAttribute(string? title, bool allowNone = true)
     : ModdedOptionAttribute(title), ITypedOption<int>, ITypedOption<NetworkedPlayerInfo?>
 {
-    internal override IModdedOption? CreateOption(object? value, PropertyInfo property)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedPlayerOptionAttribute"/> class.
+    /// </summary>
+    /// <param name="allowNone">Whether the option includes a none option. If None is selected, value will return -1.</param>
+    public ModdedPlayerOptionAttribute(bool allowNone = true)
+        : this(null, allowNone)
     {
-        var option = new ModdedPlayerOption(Title, allowNone);
-        return option;
+    }
+
+    internal override IModdedOption? CreateOption(object? value, PropertyInfo property, AbstractOptionGroup group)
+    {
+        var opt = new ModdedPlayerOption(group.GroupPrefix, Title ?? property.Name, allowNone);
+        Title = opt.Title;
+        return opt;
     }
 
     /// <inheritdoc />

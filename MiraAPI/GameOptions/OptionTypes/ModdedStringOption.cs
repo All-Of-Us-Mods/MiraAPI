@@ -28,12 +28,13 @@ public class ModdedStringOption : ModdedOption<string>
     /// <summary>
     /// Initializes a new instance of the <see cref="ModdedStringOption"/> class.
     /// </summary>
+    /// <param name="groupPrefix">The translation ID prefix of the group containing this option.</param>
     /// <param name="title">The title of the option.</param>
     /// <param name="defaultValue">The default value as a string.</param>
     /// <param name="values">An option list of string values to use.</param>
     /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
-    public ModdedStringOption(string title, string defaultValue, string[] values, bool includeInPreset = true)
-        : base(title, defaultValue, includeInPreset)
+    public ModdedStringOption(string groupPrefix, string title, string defaultValue, string[] values, bool includeInPreset = true)
+        : base(groupPrefix, title, defaultValue, includeInPreset)
     {
         Values = values;
         StringNameValues = [.. values.Select(MiraLocaleManager.GetOrCreateLocaleString)];
@@ -45,6 +46,18 @@ public class ModdedStringOption : ModdedOption<string>
         data.Index = GetIndex(Value);
 
         Data = data;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedStringOption"/> class.
+    /// </summary>
+    /// <param name="title">The title of the option.</param>
+    /// <param name="defaultValue">The default value as a string.</param>
+    /// <param name="values">An option list of string values to use.</param>
+    /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
+    public ModdedStringOption(string title, string defaultValue, string[] values, bool includeInPreset = true)
+        : this(string.Empty, title, defaultValue, values, includeInPreset)
+    {
     }
 
     /// <summary>
@@ -120,8 +133,7 @@ public class ModdedStringOption : ModdedOption<string>
     public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, PlayerOption playerOpt, Transform container)
     {
         var stringOption = Object.Instantiate(stringOpt, container);
-        stringOption.name =
-            $"{ParentMod!.OptionsTitleText}.StringOption.{TranslationController.Instance.GetString(StringName)}";
+        stringOption.name = $"{ParentMod!.OptionsTitleText}.StringOption.{Title}";
 
         stringOption.SetUpFromData(Data, 20);
         stringOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;

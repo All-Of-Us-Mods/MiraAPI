@@ -9,15 +9,49 @@ namespace MiraAPI.GameOptions.Attributes;
 /// </summary>
 /// <param name="title">The title of the option.</param>
 /// <param name="enumType">The <see cref="Enum"/> type.</param>
+/// <param name="idPrefix">The common translation ID prefix of all enum values.</param>
 /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
 [AttributeUsage(AttributeTargets.Property)]
 [Obsolete("Use ModdedEnumOptionAttribute<T> instead. This will be removed in a future version.")]
-public class ModdedEnumOptionAttribute(string title, Type enumType, string[]? values = null)
+public class ModdedEnumOptionAttribute(string? title, Type enumType, string idPrefix, string[]? values = null)
     : ModdedOptionAttribute(title)
 {
-    internal override IModdedOption CreateOption(object? value, PropertyInfo property)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedEnumOptionAttribute"/> class.
+    /// </summary>
+    /// <param name="title">The title of the option.</param>
+    /// <param name="enumType">The <see cref="Enum"/> type.</param>
+    /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
+    public ModdedEnumOptionAttribute(string? title, Type enumType, string[]? values = null)
+        : this(title, enumType, string.Empty, values)
     {
-        var opt = new ModdedEnumOption(Title, (int)(value ?? 0), enumType, values);
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedEnumOptionAttribute"/> class.
+    /// </summary>
+    /// <param name="enumType">The <see cref="Enum"/> type.</param>
+    /// <param name="idPrefix">The common translation ID prefix of all enum values.</param>
+    /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
+    public ModdedEnumOptionAttribute(Type enumType, string idPrefix, string[]? values = null)
+        : this(null, enumType, idPrefix, values)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedEnumOptionAttribute"/> class.
+    /// </summary>
+    /// <param name="enumType">The <see cref="Enum"/> type.</param>
+    /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
+    public ModdedEnumOptionAttribute(Type enumType, string[]? values = null)
+        : this(null, enumType, string.Empty, values)
+    {
+    }
+
+    internal override IModdedOption CreateOption(object? value, PropertyInfo property, AbstractOptionGroup group)
+    {
+        var opt = new ModdedEnumOption(group.GroupPrefix, Title ?? property.Name, (int)(value ?? 0), enumType, idPrefix, values);
+        Title = opt.Title;
         return opt;
     }
 
@@ -42,15 +76,36 @@ public class ModdedEnumOptionAttribute(string title, Type enumType, string[]? va
 /// </summary>
 /// <typeparam name="T">The enum type.</typeparam>
 /// <param name="title">The title of the option.</param>
+/// <param name="idPrefix">The common translation ID prefix of all enum values.</param>
 /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
 [AttributeUsage(AttributeTargets.Property)]
-public class ModdedEnumOptionAttribute<T>(string title, string[]? values = null)
+public class ModdedEnumOptionAttribute<T>(string? title, string idPrefix, string[]? values = null)
     : ModdedOptionAttribute(title), ITypedOption<T>
     where T : struct, Enum
 {
-    internal override IModdedOption CreateOption(object? value, PropertyInfo property)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedEnumOptionAttribute{T}"/> class.
+    /// </summary>
+    /// <param name="title">The title of the option.</param>
+    /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
+    public ModdedEnumOptionAttribute(string? title, string[]? values = null)
+        : this(title, string.Empty, values)
     {
-        var opt = new ModdedEnumOption<T>(Title, (T)(value ?? 0), values);
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedEnumOptionAttribute{T}"/> class.
+    /// </summary>
+    /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
+    public ModdedEnumOptionAttribute(string[]? values = null)
+        : this(null, string.Empty, values)
+    {
+    }
+
+    internal override IModdedOption CreateOption(object? value, PropertyInfo property, AbstractOptionGroup group)
+    {
+        var opt = new ModdedEnumOption<T>(group.GroupPrefix, Title ?? property.Name, (T)(value ?? 0), idPrefix, values);
+        Title = opt.Title;
         return opt;
     }
 

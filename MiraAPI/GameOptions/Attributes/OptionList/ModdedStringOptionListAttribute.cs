@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Reflection;
 using MiraAPI.GameOptions.OptionTypes;
-using MiraAPI.Translation;
 
 namespace MiraAPI.GameOptions.Attributes;
 
@@ -12,16 +11,23 @@ namespace MiraAPI.GameOptions.Attributes;
 /// <param name="title">The title of the option.</param>
 /// <param name="values">An option list of string value.</param>
 [AttributeUsage(AttributeTargets.Property)]
-public class ModdedStringOptionListAttribute(
-    string title,
-    string[] values)
+public class ModdedStringOptionListAttribute(string? title, string[] values)
     : ModdedOptionListAttribute(title), ITypedOptionList<string>
 {
-    internal override IModdedOptionList CreateOptionList(IList value, PropertyInfo property)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedStringOptionListAttribute"/> class.
+    /// </summary>
+    /// <param name="values">An option list of string value.</param>
+    public ModdedStringOptionListAttribute(string[] values)
+        : this(null, values)
     {
-        return new ModdedOptionList<ModdedStringOption>(value.Count, idx =>
+    }
+
+    internal override IModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
+    {
+        return new ModdedOptionList<ModdedStringOption>(list.Count, idx =>
         {
-            return new ModdedStringOption(Title.Translate(), (string)(value[idx] ?? string.Empty), values);
+            return new ModdedStringOption(group.GroupPrefix, GetFormattedTitle(idx, property), (string)(list[idx] ?? string.Empty), values);
         });
     }
 
@@ -48,6 +54,6 @@ public class ModdedStringOptionListAttribute(
     {
         return HolderOptionList?[idx] is ModdedStringOption opt
             ? opt.Value
-            : throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" is not a ModdedStringOption");
+            : throw new InvalidOperationException($"HolderOption for option \"{Titles[idx]}\" is not a ModdedStringOption");
     }
 }

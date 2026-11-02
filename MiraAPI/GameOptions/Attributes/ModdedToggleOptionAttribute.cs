@@ -11,25 +11,41 @@ namespace MiraAPI.GameOptions.Attributes;
 /// <param name="on">What the option displays when toggled on.</param>
 /// <param name="off">What the option displays when toggled off.</param>
 [AttributeUsage(AttributeTargets.Property)]
-public class ModdedToggleOptionAttribute(
-    string title,
-    string on,
-    string off)
+public class ModdedToggleOptionAttribute(string? title, string on, string off)
     : ModdedOptionAttribute(title), ITypedOption<bool>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ModdedToggleOptionAttribute"/> class.
     /// </summary>
+    /// <param name="on">What the option displays when toggled on.</param>
+    /// <param name="off">What the option displays when toggled off.</param>
+    public ModdedToggleOptionAttribute(string on, string off)
+        : this(null, on, off)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedToggleOptionAttribute"/> class.
+    /// </summary>
     /// <param name="title">The option title.</param>
-    public ModdedToggleOptionAttribute(string title)
+    public ModdedToggleOptionAttribute(string? title)
         : this(title, "On", "Off")
     {
     }
 
-    internal override IModdedOption CreateOption(object? value, PropertyInfo property)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedToggleOptionAttribute"/> class.
+    /// </summary>
+    public ModdedToggleOptionAttribute()
+        : this(null, "On", "Off")
     {
-        var toggleOpt = new ModdedToggleOption(Title, (bool)(value ?? false), on, off);
-        return toggleOpt;
+    }
+
+    internal override IModdedOption CreateOption(object? value, PropertyInfo property, AbstractOptionGroup group)
+    {
+        var opt = new ModdedToggleOption(group.GroupPrefix, Title ?? property.Name, (bool)(value ?? false), on, off);
+        Title = opt.Title;
+        return opt;
     }
 
     /// <inheritdoc />

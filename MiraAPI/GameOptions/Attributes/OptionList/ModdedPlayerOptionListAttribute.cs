@@ -11,16 +11,23 @@ namespace MiraAPI.GameOptions.Attributes;
 /// <param name="title">The option title.</param>
 /// <param name="allowNone">Whether the option includes a none option. If None is selected, value will return -1.</param>
 [AttributeUsage(AttributeTargets.Property)]
-public class ModdedPlayerOptionListAttribute(
-    string title,
-    bool allowNone = true)
+public class ModdedPlayerOptionListAttribute(string? title, bool allowNone = true)
     : ModdedOptionListAttribute(title), ITypedOptionList<int>, ITypedOptionList<NetworkedPlayerInfo?>
 {
-    internal override IModdedOptionList CreateOptionList(IList value, PropertyInfo property)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedPlayerOptionListAttribute"/> class.
+    /// </summary>
+    /// <param name="allowNone">Whether the option includes a none option. If None is selected, value will return -1.</param>
+    public ModdedPlayerOptionListAttribute(bool allowNone = true)
+        : this(null, allowNone)
     {
-        return new ModdedOptionList<ModdedPlayerOption>(value.Count, idx =>
+    }
+
+    internal override IModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
+    {
+        return new ModdedOptionList<ModdedPlayerOption>(list.Count, idx =>
         {
-            return new(GetFormattedTitle(idx), allowNone);
+            return new(group.GroupPrefix, GetFormattedTitle(idx, property), allowNone);
         });
     }
 
@@ -65,7 +72,7 @@ public class ModdedPlayerOptionListAttribute(
     public override object GetValue(int idx)
     {
         if (HolderOptionList?[idx] is not ModdedPlayerOption opt)
-            throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" is not a ModdedPlayerOption");
+            throw new InvalidOperationException($"HolderOption for option \"{Titles[idx]}\" is not a ModdedPlayerOption");
 
         if (ValueType == typeof(int))
             return opt.Value;
@@ -78,7 +85,7 @@ public class ModdedPlayerOptionListAttribute(
     {
         return HolderOptionList?[idx] is ModdedPlayerOption opt
             ? opt.SelectedPlayer
-            : throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" is not a ModdedPlayerOption");
+            : throw new InvalidOperationException($"HolderOption for option \"{Titles[idx]}\" is not a ModdedPlayerOption");
     }
 
     /// <inheritdoc />
@@ -86,6 +93,6 @@ public class ModdedPlayerOptionListAttribute(
     {
         return HolderOptionList?[idx] is ModdedPlayerOption opt
             ? opt.Value
-            : throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" is not a ModdedPlayerOption");
+            : throw new InvalidOperationException($"HolderOption for option \"{Titles[idx]}\" is not a ModdedPlayerOption");
     }
 }
