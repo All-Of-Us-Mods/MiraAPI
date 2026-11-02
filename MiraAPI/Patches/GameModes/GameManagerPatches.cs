@@ -20,16 +20,13 @@ internal static class GameManagerPatches
         return true;
     }
 
-    [HarmonyPrefix, HarmonyPatch(nameof(GameManager.ShowCrewmatesKilled))]
-    public static bool ShowCrewmatesKilledPrefix(ref bool __result)
+    [HarmonyPostfix, HarmonyPatch(nameof(GameManager.StartGame))]
+    public static void StartGamePostfix()
     {
-        if (CustomGameModeManager.ActiveMode != null)
+        if (CustomGameModeManager.ActiveMode != null && HudManager.InstanceExists)
         {
-            __result = CustomGameModeManager.ActiveMode is HideAndSeekMode;
-            return false;
+            HudManager.Instance.CrewmatesKilled.gameObject.SetActive(CustomGameModeManager.ActiveMode is HideAndSeekMode);
         }
-
-        return true;
     }
 
     [HarmonyPatch(typeof(NormalGameManager), nameof(NormalGameManager.GetMapOptions))]

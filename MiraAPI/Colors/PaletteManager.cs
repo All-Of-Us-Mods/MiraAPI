@@ -50,6 +50,11 @@ public static class PaletteManager
         var colors = CustomColors.Select(x => x.MainColor).ToArray();
         var shadowColors = CustomColors.Select(x => x.ShadowColor).ToArray();
         var stringNames = CustomColors.Select(x => x.Name).ToArray();
+        var newColorId = originalLength;
+        foreach (var color in CustomColors)
+        {
+            color.ColorId = newColorId++;
+        }
 
         Palette.PlayerColors = Palette.PlayerColors.ToArray().AddRangeToArray(colors);
         Palette.ShadowColors = Palette.ShadowColors.ToArray().AddRangeToArray(shadowColors);
