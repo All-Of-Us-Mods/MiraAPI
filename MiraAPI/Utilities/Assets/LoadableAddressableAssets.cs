@@ -10,6 +10,7 @@ namespace MiraAPI.Utilities.Assets;
 /// A utility class for loading groups of assets from ALL addressable locations.
 /// </summary>
 /// <typeparam name="T">The type of the asset to be loaded.</typeparam>
+/// <param name="key">The asset key.</param>
 public class LoadableAddressableAssets<T>(string key)
     where T : UnityEngine.Object
 {

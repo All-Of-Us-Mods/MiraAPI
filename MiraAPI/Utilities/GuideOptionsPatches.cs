@@ -142,7 +142,7 @@ internal static class GuideOptionPages
             .ThenBy(page => page.GroupPriority)
             .ThenBy(page => page.Order)
             .ThenBy(page => page.Group.GroupName, StringComparer.OrdinalIgnoreCase)
-            .ThenBy(page => page.ModAbbreviation, StringComparer.OrdinalIgnoreCase)];
+            .ThenBy(page => page.ModAbbreviation, StringComparer.OrdinalIgnoreCase),];
     }
 
     private static int GetMenuOrder(MenuCategory menu)
@@ -184,7 +184,7 @@ internal static class GuideOptionPages
                 .Select(entry => (Entry: entry, Rank: Rank(entry, query, cmp)))
                 .Where(result => result.Rank < int.MaxValue)
                 .OrderBy(result => result.Rank)
-                .Select(result => result.Entry))];
+                .Select(result => result.Entry)),];
     }
 
     private static string[] GetModSearchTerms(MiraPluginInfo plugin, AbstractOptionGroup group)

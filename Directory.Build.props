@@ -5,6 +5,8 @@
         <DebugType>embedded</DebugType>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <GenerateFullPaths>false</GenerateFullPaths>
+        <PathMap>$(MSBuildProjectDirectory)=.</PathMap>
 
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 
@@ -32,11 +34,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Roslynator.Analyzers" Version="5.0.0" PrivateAssets="all" />
-        <PackageReference Include="Roslynator.Formatting.Analyzers" Version="5.0.0" PrivateAssets="all" />
-        <PackageReference Include="Roslynator.CodeAnalysis.Analyzers" Version="5.0.0" PrivateAssets="all" />
-        <PackageReference Include="SonarAnalyzer.CSharp" Version="10.32.0.713" PrivateAssets="all" />
-        <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" PrivateAssets="all" />
+        <PackageReference Include="Roslynator.Analyzers" Version="*-*" PrivateAssets="all" />
+        <PackageReference Include="Roslynator.Formatting.Analyzers" Version="*-*" PrivateAssets="all" />
+        <PackageReference Include="Roslynator.CodeAnalysis.Analyzers" Version="*-*" PrivateAssets="all" />
+        <PackageReference Include="SonarAnalyzer.CSharp" Version="*-*" PrivateAssets="all" />
+        <PackageReference Include="StyleCop.Analyzers" Version="*-*" PrivateAssets="all" />
         <AdditionalFiles Include="$(MSBuildThisFileDirectory)/stylecop.json" Link="stylecop.json" Visible="false" />
     </ItemGroup>
 </Project>
