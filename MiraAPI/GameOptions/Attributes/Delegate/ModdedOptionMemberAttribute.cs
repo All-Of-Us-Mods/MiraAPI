@@ -175,7 +175,7 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
 
             foreach (var method in type.GetMethods(getterFlags))
             {
-                if (method.GetParameters().Length > 0 || (method.IsDefined<InstanceGetterAttribute>() && method.Name != "GetInstance"))
+                if (method.GetParameters().Length > 0 || (!method.IsDefined<InstanceGetterAttribute>() && method.Name != "GetInstance"))
                     continue;
 
                 instanceGetter = method;
@@ -186,7 +186,7 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
             {
                 foreach (var prop in type.GetProperties(getterFlags))
                 {
-                    if (prop.IsDefined<InstanceGetterAttribute>() && prop.Name != "Instance")
+                    if (!prop.IsDefined<InstanceGetterAttribute>() && prop.Name != "Instance")
                         continue;
 
                     var getMethod = prop.GetGetMethod(canSearchPrivates);
