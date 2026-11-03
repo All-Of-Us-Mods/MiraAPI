@@ -162,21 +162,8 @@ public static class MiraEventManager
             throw new InvalidOperationException($"Type must be a subclass of MiraEvent: {type.FullName}");
         }
 
-        EventWrappers.TryAdd(type, []);
-        var handlers = EventWrappers[type];
-
         var @delegate = Delegate.CreateDelegate(typeof(Action<>).MakeGenericType(type), methodInfo);
-        var eventWrapper = new MiraEventWrapper(@delegate, priority);
-
-        var index = handlers.BinarySearch(eventWrapper, Comparer<MiraEventWrapper>.Create((a, b) => a.Priority.CompareTo(b.Priority)));
-
-        if (index < 0)
-        {
-            index = ~index;
-        }
-
-        handlers.Insert(index, eventWrapper);
-        return new MiraEventHandle(type, eventWrapper);
+        return RegisterEventHandler(type, @delegate, priority);
     }
 
     /// <summary>
@@ -189,10 +176,22 @@ public static class MiraEventManager
     public static MiraEventHandle RegisterEventHandler<T>(Action<T> handler, int priority = 0)
         where T : MiraEvent
     {
-        EventWrappers.TryAdd(typeof(T), []);
+        return RegisterEventHandler(typeof(T), handler, priority);
+    }
 
-        var handlers = EventWrappers[typeof(T)];
-        var eventWrapper = new MiraEventWrapper(handler, priority);
+    /// <summary>
+    /// Register a <see cref="MiraEvent"/> handler.
+    /// </summary>
+    /// <param name="type">The type of <see cref="MiraEvent"/> event.</param>
+    /// <param name="delegate">The <see cref="Delegate"/> method/handler for the event.</param>
+    /// <param name="priority">The priority of the event handler. Lower values are called first.</param>
+    /// <returns>A <see cref="MiraEventHandle"/> to use when unregistering the event.</returns>
+    private static MiraEventHandle RegisterEventHandler(Type type, Delegate @delegate, int priority)
+    {
+        EventWrappers.TryAdd(type, []);
+        var handlers = EventWrappers[type];
+
+        var eventWrapper = new MiraEventWrapper(@delegate, priority);
 
         var index = handlers.BinarySearch(eventWrapper, Comparer<MiraEventWrapper>.Create((a, b) => a.Priority.CompareTo(b.Priority)));
 
@@ -202,7 +201,7 @@ public static class MiraEventManager
         }
 
         handlers.Insert(index, eventWrapper);
-        return new MiraEventHandle(typeof(T), eventWrapper);
+        return new MiraEventHandle(type, eventWrapper);
     }
 
     /// <summary>
