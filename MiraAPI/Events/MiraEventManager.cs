@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using MiraAPI.PluginLoading;
 
 namespace MiraAPI.Events;
 
@@ -10,6 +12,17 @@ namespace MiraAPI.Events;
 public static class MiraEventManager
 {
     private static readonly Dictionary<Type, List<MiraEventWrapper>> EventWrappers = [];
+
+    /// <summary>
+    /// Gets the list of all registered <see cref="MiraEvent"/> types.
+    /// </summary>
+    public static IReadOnlyList<Type> EventTypes { get; internal set; } = [];
+
+    internal static List<Type> InternalEventTypes { get; } = [];
+
+    private static readonly Dictionary<Type, List<Type>> TrackedEventTypes = [];
+
+    private static readonly HashSet<Type> StoredEventTypes = [];
 
     /// <summary>
     /// Invoke a <see cref="MiraEvent"/>.
@@ -68,6 +81,54 @@ public static class MiraEventManager
                 Error($"Error invoking event handler for {type.Name}: {ex}");
             }
         }
+
+        return true;
+    }
+
+    internal static bool RegisterEventType(Type eventType, MiraPluginInfo info)
+    {
+        if (!typeof(MiraEvent).IsAssignableFrom(eventType))
+        {
+            return false;
+        }
+
+        info.InternalEventTypes.Add(eventType);
+        InternalEventTypes.Add(eventType);
+
+        if (!eventType.IsAbstract)
+        {
+            if (!TrackedEventTypes.TryGetValue(eventType, out var trackedEvents))
+            {
+                trackedEvents = [];
+                TrackedEventTypes.Add(eventType, trackedEvents);
+            }
+
+            trackedEvents.Add(eventType);
+        }
+
+        foreach (var superType in StoredEventTypes.Where(x => x.IsAssignableFrom(eventType)))
+        {
+            if (!eventType.IsAbstract)
+            {
+                TrackedEventTypes[eventType].Add(superType);
+            }
+        }
+
+        foreach (var subType in StoredEventTypes.Where(x => x.IsAssignableTo(eventType)))
+        {
+            if (!subType.IsAbstract)
+            {
+                if (!TrackedEventTypes.TryGetValue(subType, out var trackedSubEvents))
+                {
+                    trackedSubEvents = [];
+                    TrackedEventTypes.Add(subType, trackedSubEvents);
+                }
+
+                trackedSubEvents.Add(eventType);
+            }
+        }
+
+        StoredEventTypes.Add(eventType);
 
         return true;
     }

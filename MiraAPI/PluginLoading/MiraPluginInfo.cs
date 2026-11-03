@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using BepInEx;
 using BepInEx.Configuration;
+using MiraAPI.Events;
 using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
 using MiraAPI.Hud;
@@ -86,6 +88,11 @@ public class MiraPluginInfo
     public IReadOnlyCollection<OptionPreset> Presets { get; internal set; } = null!;
 
     /// <summary>
+    /// Gets a <see cref="IReadOnlyCollection{T}"/> of this <see cref="IMiraPlugin"/>'s <see cref="MiraEvent"/> types.
+    /// </summary>
+    public IReadOnlyCollection<Type> EventTypes { get; internal set; } = null!;
+
+    /// <summary>
     /// Gets a read only dictionary of Game Mode IDs and the AbstractGameMode object they are associated with.
     /// </summary>
     /// <returns>Read only dictionary of IDs and Game Modes.</returns>
@@ -104,6 +111,7 @@ public class MiraPluginInfo
         Buttons = [.. InternalButtons];
         MeetingButtons = [.. InternalMeetingButtons];
         TargetedMeetingButtons = [.. InternalTargetedMeetingButtons];
+        EventTypes = [.. InternalEventTypes];
     }
 
     internal List<OptionPreset> InternalPresets { get; } = [];
@@ -113,6 +121,7 @@ public class MiraPluginInfo
     internal List<AbstractOptionGroup> InternalOptionGroups { get; } = [];
     internal List<MeetingActionButton> InternalMeetingButtons { get; } = [];
     internal List<TargetedMeetingButton> InternalTargetedMeetingButtons { get; } = [];
+    internal List<Type> InternalEventTypes { get; } = [];
 
     internal Dictionary<uint, AbstractGameMode> GameModes { get; } = [];
     internal Dictionary<ushort, RoleBehaviour> InternalRoles { get; } = [];

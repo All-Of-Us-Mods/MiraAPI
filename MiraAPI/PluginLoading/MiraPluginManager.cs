@@ -89,6 +89,7 @@ public sealed class MiraPluginManager
             PluginsWithOptionsOrGameModes = [.. RegisteredPlugins.Where(m => m.MiraPlugin.DisplayOnOptionsMenu || m.GameModes.Count > 0)];
 
             ModifierManager.Modifiers = new ReadOnlyCollection<BaseModifier>(ModifierManager.InternalModifiers);
+            MiraEventManager.EventTypes = new ReadOnlyCollection<Type>(MiraEventManager.InternalEventTypes);
         };
     }
 
@@ -124,6 +125,9 @@ public sealed class MiraPluginManager
                 continue;
 
             RegisterEventHandlers(type);
+
+            if (RegisterEventType(type, info))
+                continue;
 
             if (RegisterModifier(type, info))
                 continue;
@@ -184,6 +188,19 @@ public sealed class MiraPluginManager
 
             var paramType = parameters[0].ParameterType;
             MiraEventManager.RegisterEventHandler(paramType, method, eventAttribute.Priority);
+        }
+    }
+
+    private static bool RegisterEventType(Type type, MiraPluginInfo info)
+    {
+        try
+        {
+            return MiraEventManager.RegisterEventType(type, info);
+        }
+        catch (Exception e)
+        {
+            Error($"Failed to register event type {type.Name}: {e}");
+            return false;
         }
     }
 
