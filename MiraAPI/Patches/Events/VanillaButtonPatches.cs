@@ -1,4 +1,5 @@
-﻿using AmongUs.GameOptions;
+﻿using System;
+using AmongUs.GameOptions;
 using HarmonyLib;
 using MiraAPI.Events;
 using MiraAPI.Events.Vanilla.Gameplay;
@@ -71,6 +72,17 @@ public static class VanillaButtonPatches
             MiraEventManager.InvokeEvent(new VanillaButtonCancelledEvent(__instance));
         }
 
-        return !genericEvent.IsCancelled;
+        var eventType = typeof(VanillaButtonClickEvent<>).MakeGenericType(__instance.GetType());
+        var @event = (MiraCancelableEvent)Activator.CreateInstance(eventType, __instance)!;
+        var specificInvoked = MiraEventManager.InvokeEvent(@event, eventType);
+        if (@event.IsCancelled)
+        {
+            var cancelEventType = typeof(VanillaButtonCancelledEvent<>).MakeGenericType(__instance.GetType());
+            var cancelEvent = (MiraCancelableEvent)Activator.CreateInstance(cancelEventType, __instance)!;
+            MiraEventManager.InvokeEvent(cancelEvent, cancelEventType);
+        }
+
+        MiraCancelableEvent eventCheck = specificInvoked ? @event : genericEvent;
+        return !eventCheck.IsCancelled;
     }
 }
