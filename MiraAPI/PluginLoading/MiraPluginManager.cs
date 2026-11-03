@@ -305,7 +305,9 @@ public sealed class MiraPluginManager
     {
         try
         {
-            if (type.GetCustomAttribute<RegisterCustomColorsAttribute>() == null)
+            var attribute = type.GetCustomAttribute<RegisterCustomColorsAttribute>();
+
+            if (attribute == null)
             {
                 return;
             }
@@ -327,6 +329,11 @@ public sealed class MiraPluginManager
                 {
                     Error($"Color property {property.Name} in {type.Name} is not a CustomColor.");
                     continue;
+                }
+
+                if (!string.IsNullOrEmpty(color.RawId))
+                {
+                    color.Name = MiraLocaleManager.GetOrCreateLocaleString(attribute.IdPrefix + color.RawId);
                 }
 
                 PaletteManager.CustomColors.Add(color);

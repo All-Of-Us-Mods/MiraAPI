@@ -1,6 +1,5 @@
 using System;
 using MiraAPI.LocalSettings;
-using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using UnityEngine;
 
@@ -9,40 +8,189 @@ namespace MiraAPI.Colors;
 /// <summary>
 /// Represents a dynamic custom color that changes over time.
 /// </summary>
-/// <param name="name">The name of the color.</param>
+/// <param name="nameId">The name of the option as a <see cref="StringNames"/> value.</param>
+/// <param name="rawId">The name of the option as a <see cref="string"/> value.</param>
 /// <param name="mainEvaluator">The function to evaluate the dynamic main color.</param>
 /// <param name="shadowEvaluator">The function to evaluate the dynamic shadow color.</param>
 /// <param name="mainColor">The static main color used when dynamic colors are disabled.</param>
 /// <param name="shadowColor">The static shadow color used when dynamic colors are disabled.</param>
 /// <param name="defaultTime">The default time that is used to automatically fill in the static colors when the latter is not provided.</param>
-public sealed class VariableColor(StringNames name, Func<float, Color> mainEvaluator, Func<float, Color>? shadowEvaluator, Color32? mainColor = null, Color32? shadowColor = null, float defaultTime = 0f)
-    : CustomColor(name, mainColor ?? mainEvaluator(defaultTime), shadowColor ?? shadowEvaluator?.Invoke(defaultTime) ?? (mainColor ?? mainEvaluator(defaultTime)).DarkenAbsolute(60))
+/// <param name="brightness">The brightness type of the color.</param>
+public sealed class VariableColor(
+    StringNames? nameId,
+    string? rawId,
+    Func<float, Color> mainEvaluator,
+    Func<float, Color>? shadowEvaluator,
+    Color32? mainColor,
+    Color32? shadowColor,
+    float defaultTime,
+    CustomColorBrightness brightness)
+    : CustomColor(
+        nameId,
+        rawId,
+        mainColor ?? mainEvaluator(defaultTime),
+        shadowColor ?? shadowEvaluator?.Invoke(defaultTime) ?? (mainColor ?? mainEvaluator(defaultTime)).DarkenAbsolute(60),
+        brightness)
 {
     /// <summary>
-    /// Gets or sets a delegate that takes in a time value and returns the dynamic main color.
+    /// Gets a delegate that takes in a time value and returns the dynamic main color.
     /// </summary>
-    public Func<float, Color> MainEvaluator { get; set; } = mainEvaluator;
+    public Func<float, Color> MainEvaluator { get; } = mainEvaluator;
 
     /// <summary>
-    /// Gets or sets a delegate that takes in a time value and returns the dynamic shadow color.
+    /// Gets a delegate that takes in a time value and returns the dynamic shadow color.
     /// </summary>
-    public Func<float, Color> ShadowEvaluator { get; set; } = shadowEvaluator ?? (t => mainEvaluator(t).DarkenAbsolute(0.24f));
+    public Func<float, Color> ShadowEvaluator { get; } = shadowEvaluator ?? (t => mainEvaluator(t).DarkenAbsolute(0.24f));
 
-    /// <inheritdoc cref="VariableColor"/>
-    public VariableColor(StringNames name, Func<float, Color> mainEvaluator, Color32? mainColor = null, float defaultTime = 0f)
-        : this(name, mainEvaluator, null, mainColor, null, defaultTime)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="VariableColor"/> class.
+    /// </summary>
+    /// <param name="nameId">The name of the option as a <see cref="StringNames"/> value.</param>
+    /// <param name="mainEvaluator">The function to evaluate the dynamic main color.</param>
+    /// <param name="shadowEvaluator">The function to evaluate the dynamic shadow color.</param>
+    /// <param name="mainColor">The static main color used when dynamic colors are disabled.</param>
+    /// <param name="shadowColor">The static shadow color used when dynamic colors are disabled.</param>
+    /// <param name="defaultTime">The default time that is used to automatically fill in the static colors when the latter is not provided.</param>
+    /// <param name="brightness">The brightness type of the color.</param>
+    public VariableColor(
+        StringNames nameId,
+        Func<float, Color> mainEvaluator,
+        Func<float, Color>? shadowEvaluator,
+        CustomColorBrightness brightness,
+        Color32? mainColor = null,
+        Color32? shadowColor = null,
+        float defaultTime = 0f)
+        : this(nameId, null, mainEvaluator, shadowEvaluator, mainColor, shadowColor, defaultTime, brightness)
     {
     }
 
-    /// <inheritdoc cref="VariableColor"/>
-    public VariableColor(string name, Func<float, Color> mainEvaluator, Color32? mainColor = null, float defaultTime = 0f)
-        : this(name, mainEvaluator, null, mainColor, null, defaultTime)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="VariableColor"/> class.
+    /// </summary>
+    /// <param name="nameId">The name of the option as a <see cref="StringNames"/> value.</param>
+    /// <param name="mainEvaluator">The function to evaluate the dynamic main color.</param>
+    /// <param name="mainColor">The static main color used when dynamic colors are disabled.</param>
+    /// <param name="defaultTime">The default time that is used to automatically fill in the static colors when the latter is not provided.</param>
+    /// <param name="brightness">The brightness type of the color.</param>
+    public VariableColor(
+        StringNames nameId,
+        Func<float, Color> mainEvaluator,
+        CustomColorBrightness brightness,
+        Color32? mainColor = null,
+        float defaultTime = 0f)
+        : this(nameId, null, mainEvaluator, null, mainColor, null, defaultTime, brightness)
     {
     }
 
-    /// <inheritdoc cref="VariableColor"/>
-    public VariableColor(string name, Func<float, Color> mainEvaluator, Func<float, Color>? shadowEvaluator, Color32? mainColor = null, Color32? shadowColor = null, float defaultTime = 0f)
-        : this(MiraLocaleManager.GetOrCreateLocaleString(name), mainEvaluator, shadowEvaluator, mainColor, shadowColor, defaultTime)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="VariableColor"/> class.
+    /// </summary>
+    /// <param name="rawId">The name of the option as a <see cref="string"/> value.</param>
+    /// <param name="mainEvaluator">The function to evaluate the dynamic main color.</param>
+    /// <param name="shadowEvaluator">The function to evaluate the dynamic shadow color.</param>
+    /// <param name="mainColor">The static main color used when dynamic colors are disabled.</param>
+    /// <param name="shadowColor">The static shadow color used when dynamic colors are disabled.</param>
+    /// <param name="defaultTime">The default time that is used to automatically fill in the static colors when the latter is not provided.</param>
+    /// <param name="brightness">The brightness type of the color.</param>
+    public VariableColor(
+        string rawId,
+        Func<float, Color> mainEvaluator,
+        Func<float, Color>? shadowEvaluator,
+        CustomColorBrightness brightness,
+        Color32? mainColor = null,
+        Color32? shadowColor = null,
+        float defaultTime = 0f)
+        : this(null, rawId, mainEvaluator, shadowEvaluator, mainColor, shadowColor, defaultTime, brightness)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="VariableColor"/> class.
+    /// </summary>
+    /// <param name="rawId">The name of the option as a <see cref="string"/> value.</param>
+    /// <param name="mainEvaluator">The function to evaluate the dynamic main color.</param>
+    /// <param name="mainColor">The static main color used when dynamic colors are disabled.</param>
+    /// <param name="defaultTime">The default time that is used to automatically fill in the static colors when the latter is not provided.</param>
+    /// <param name="brightness">The brightness type of the color.</param>
+    public VariableColor(
+        string rawId,
+        Func<float, Color> mainEvaluator,
+        CustomColorBrightness brightness,
+        Color32? mainColor = null,
+        float defaultTime = 0f)
+        : this(null, rawId, mainEvaluator, null, mainColor, null, defaultTime, brightness)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="VariableColor"/> class.
+    /// </summary>
+    /// <param name="nameId">The name of the option as a <see cref="StringNames"/> value.</param>
+    /// <param name="mainEvaluator">The function to evaluate the dynamic main color.</param>
+    /// <param name="shadowEvaluator">The function to evaluate the dynamic shadow color.</param>
+    /// <param name="mainColor">The static main color used when dynamic colors are disabled.</param>
+    /// <param name="shadowColor">The static shadow color used when dynamic colors are disabled.</param>
+    /// <param name="defaultTime">The default time that is used to automatically fill in the static colors when the latter is not provided.</param>
+    public VariableColor(
+        StringNames nameId,
+        Func<float, Color> mainEvaluator,
+        Func<float, Color>? shadowEvaluator,
+        Color32? mainColor = null,
+        Color32? shadowColor = null,
+        float defaultTime = 0f)
+        : this(nameId, null, mainEvaluator, shadowEvaluator, mainColor, shadowColor, defaultTime, CustomColorBrightness.Darker)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="VariableColor"/> class.
+    /// </summary>
+    /// <param name="nameId">The name of the option as a <see cref="StringNames"/> value.</param>
+    /// <param name="mainEvaluator">The function to evaluate the dynamic main color.</param>
+    /// <param name="mainColor">The static main color used when dynamic colors are disabled.</param>
+    /// <param name="defaultTime">The default time that is used to automatically fill in the static colors when the latter is not provided.</param>
+    public VariableColor(
+        StringNames nameId,
+        Func<float, Color> mainEvaluator,
+        Color32? mainColor = null,
+        float defaultTime = 0f)
+        : this(nameId, null, mainEvaluator, null, mainColor, null, defaultTime, CustomColorBrightness.Darker)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="VariableColor"/> class.
+    /// </summary>
+    /// <param name="rawId">The name of the option as a <see cref="string"/> value.</param>
+    /// <param name="mainEvaluator">The function to evaluate the dynamic main color.</param>
+    /// <param name="shadowEvaluator">The function to evaluate the dynamic shadow color.</param>
+    /// <param name="mainColor">The static main color used when dynamic colors are disabled.</param>
+    /// <param name="shadowColor">The static shadow color used when dynamic colors are disabled.</param>
+    /// <param name="defaultTime">The default time that is used to automatically fill in the static colors when the latter is not provided.</param>
+    public VariableColor(
+        string rawId,
+        Func<float, Color> mainEvaluator,
+        Func<float, Color>? shadowEvaluator,
+        Color32? mainColor = null,
+        Color32? shadowColor = null,
+        float defaultTime = 0f)
+        : this(null, rawId, mainEvaluator, shadowEvaluator, mainColor, shadowColor, defaultTime, CustomColorBrightness.Darker)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="VariableColor"/> class.
+    /// </summary>
+    /// <param name="rawId">The name of the option as a <see cref="string"/> value.</param>
+    /// <param name="mainEvaluator">The function to evaluate the dynamic main color.</param>
+    /// <param name="mainColor">The static main color used when dynamic colors are disabled.</param>
+    /// <param name="defaultTime">The default time that is used to automatically fill in the static colors when the latter is not provided.</param>
+    public VariableColor(
+        string rawId,
+        Func<float, Color> mainEvaluator,
+        Color32? mainColor = null,
+        float defaultTime = 0f)
+        : this(null, rawId, mainEvaluator, null, mainColor, null, defaultTime, CustomColorBrightness.Darker)
     {
     }
 

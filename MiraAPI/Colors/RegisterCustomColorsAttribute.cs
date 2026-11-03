@@ -6,4 +6,18 @@ namespace MiraAPI.Colors;
 /// Used to mark a class for <see cref="CustomColor"/> registration.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class RegisterCustomColorsAttribute : Attribute;
+public class RegisterCustomColorsAttribute(string idPrefix) : Attribute
+{
+    /// <summary>
+    /// Gets the translation ID prefix for all of the colors within the container type.
+    /// </summary>
+    public string IdPrefix { get; } = idPrefix;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RegisterCustomColorsAttribute"/> class.
+    /// </summary>
+    public RegisterCustomColorsAttribute()
+        : this(string.Empty)
+    {
+    }
+}
