@@ -29,11 +29,6 @@ public class ModdedPlayerOption : ModdedOption<int>
     public bool AllowNone { get; set; }
 
     /// <summary>
-    /// Gets the player selected by this option. May be <c>null</c> if allowed to have <c>None</c> as an option.
-    /// </summary>
-    public NetworkedPlayerInfo? SelectedPlayer => Value == -1 ? null : Values[Value];
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="ModdedPlayerOption"/> class.
     /// </summary>
     /// <param name="groupPrefix">The translation ID prefix of the group containing this option.</param>
@@ -116,7 +111,7 @@ public class ModdedPlayerOption : ModdedOption<int>
     /// <returns>A player or <see langword="null"/> if chosen none.</returns>
     public NetworkedPlayerInfo? GetPlayerValue()
     {
-        return Value < 0 ? null : Values[Value];
+        return (uint)Value >= (uint)Values.Count ? null : Values[Value];
     }
 
     /// <inheritdoc />
@@ -156,7 +151,7 @@ public class ModdedPlayerOption : ModdedOption<int>
     public override string GetDisplayValue()
     {
         var player = GetPlayerValue();
-        return player
+        return !player
             ? TranslationController.Instance.GetString(StringNames.None)
             : player!.PlayerName;
     }

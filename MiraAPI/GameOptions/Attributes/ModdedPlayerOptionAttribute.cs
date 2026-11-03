@@ -38,14 +38,14 @@ public class ModdedPlayerOptionAttribute(string? title, bool allowNone = true)
         if (ValueType == typeof(int))
             return opt.Value;
 
-        return opt.SelectedPlayer!;
+        return opt.GetPlayerValue()!;
     }
 
     /// <inheritdoc />
     public NetworkedPlayerInfo? GetValueUnboxed()
     {
         return HolderOption is ModdedPlayerOption opt
-            ? opt.SelectedPlayer
+            ? opt.GetPlayerValue()
             : throw new InvalidOperationException($"Holder option for {Title} is not a ModdedPlayerOption.");
     }
 
