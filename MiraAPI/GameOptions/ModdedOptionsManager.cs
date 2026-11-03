@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using BepInEx.Configuration;
 using HarmonyLib;
 using MiraAPI.GameModes;
@@ -39,7 +38,6 @@ public static class ModdedOptionsManager
     private static readonly Dictionary<Type, HarmonyMethod> ConcretisedGetters = [];
     private static readonly Dictionary<Type, HarmonyMethod> ConcretisedSetters = [];
 
-    internal static readonly ConditionalWeakTable<object, ModdedOptionListAttribute> ListInstanceCache = [];
     internal static readonly Dictionary<OptionBehaviour, ModdedPlayerOption> CreatedPlayerOptions = [];
     internal static readonly Dictionary<OptionBehaviour, ModdedStringOption> CreatedStringOptions = [];
     internal static readonly Dictionary<Type, List<AbstractOptionGroup>> GameModeOptionGroups = [];
@@ -332,7 +330,7 @@ public static class ModdedOptionsManager
         attribute.Value = list;
         attribute.ValueType = valueType;
 
-        ListInstanceCache.Add(propertyVal, attribute);
+        ((IModdedArrayBinding)propertyVal).Bind(attribute);
 
         Func<int, Delegate?>? visibilityFactory = null, getterFactory = null, setterFactory = null, changedFactory = null;
 
@@ -452,8 +450,8 @@ public static class ModdedOptionsManager
 
         attribute.SetValue(value);
 
-        if (attribute is ModdedOptionListAttribute listAttribute && value != null)
-            ListInstanceCache.AddOrUpdate(value, listAttribute);
+        if (attribute is ModdedOptionListAttribute listAttribute && value is IModdedArrayBinding binding)
+            binding.Bind(listAttribute);
     }
 
     /// <summary>
@@ -474,8 +472,8 @@ public static class ModdedOptionsManager
         else
             attribute.SetValue(value!);
 
-        if (attribute is ModdedOptionListAttribute listAttribute && value is not null)
-            ListInstanceCache.AddOrUpdate(value, listAttribute);
+        if (attribute is ModdedOptionListAttribute listAttribute && value is IModdedArrayBinding binding)
+            binding.Bind(listAttribute);
     }
 
     /// <summary>
