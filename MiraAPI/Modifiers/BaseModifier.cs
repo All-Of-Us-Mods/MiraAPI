@@ -17,21 +17,25 @@ namespace MiraAPI.Modifiers;
 /// </summary>
 public abstract class BaseModifier : IBaseModifier
 {
-    /// <inheritdoc/>
-    public PlayerControl Player { get; internal set; } = null!;
+    /// <summary>
+    /// Gets the <see cref="PlayerControl"/> that the modifier is attached to.
+    /// </summary>
+    public PlayerControl Player => (this as IBaseModifier).Player;
 
     /// <summary>
     /// Gets the <see cref="Modifiers.ModifierComponent"/> that the modifier is attached to.
     /// </summary>
-    public ModifierComponent? ModifierComponent { get; internal set; }
+    public ModifierComponent? ModifierComponent => (this as IBaseModifier).ModifierComponent;
 
     /// <summary>
     /// Gets a value indicating whether the modifier has been initialized.
     /// </summary>
-    public bool Initialized { get; internal set; }
+    public bool Initialized => (this as IBaseModifier).Initialized;
 
-    /// <inheritdoc/>
-    public Guid UniqueId { get; internal set; } = Guid.Empty;
+    /// <summary>
+    /// Gets the unique ID of the modifier.
+    /// </summary>
+    public Guid UniqueId => (this as IBaseModifier).UniqueId;
 
     /// <inheritdoc/>
     public uint TypeId => ModifierManager.GetModifierTypeId(GetType()) ?? throw new InvalidOperationException("Modifier is not registered.");
@@ -174,6 +178,34 @@ public abstract class BaseModifier : IBaseModifier
 
     /// <inheritdoc/>
     public virtual bool Unique => true;
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// Internal explicit implementation of interface. Only required to provide a backing field
+    /// for the interface's internal setter and not expose such setter beyond intended.
+    /// </remarks>
+    PlayerControl IBaseModifier.Player { get; set; }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// Internal explicit implementation of interface. Only required to provide a backing field
+    /// for the interface's internal setter and not expose such setter beyond intended.
+    /// </remarks>
+    ModifierComponent? IBaseModifier.ModifierComponent { get; set; }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// Internal explicit implementation of interface. Only required to provide a backing field
+    /// for the interface's internal setter and not expose such setter beyond intended.
+    /// </remarks>
+    bool IBaseModifier.Initialized { get; set; }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// Internal explicit implementation of interface. Only required to provide a backing field
+    /// for the interface's internal setter and not expose such setter beyond intended.
+    /// </remarks>
+    Guid IBaseModifier.UniqueId { get; set; }
 
     /// <inheritdoc/>
     public virtual string GetDescription()

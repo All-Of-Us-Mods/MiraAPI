@@ -28,7 +28,7 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
 
     private readonly List<IBaseModifier> _toRemove = [];
 
-    private readonly List<BaseModifier> _toAdd = [];
+    private readonly List<IBaseModifier> _toAdd = [];
 
     private ModifierDisplayComponent? ModifierDisplay { get; set; }
 
@@ -522,10 +522,10 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <summary>
     /// Adds a <see cref="IBaseModifier"/> to the player.
     /// </summary>
-    /// <param name="modifier">The <see cref="BaseModifier"/> to add.</param>
+    /// <param name="modifier">The <see cref="IBaseModifier"/> to add.</param>
     /// <returns>The <see cref="IBaseModifier"/> that was added.</returns>
     [HideFromIl2Cpp]
-    public IBaseModifier? AddModifier(BaseModifier modifier)
+    public IBaseModifier? AddModifier(IBaseModifier modifier)
     {
         // TODO: Make a proper synchronization system.
         if (LobbyBehaviour.Instance)
@@ -558,17 +558,17 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     }
 
     /// <summary>
-    /// Adds a <see cref="BaseModifier"/> to the player.
+    /// Adds a <see cref="IBaseModifier"/> to the player.
     /// </summary>
     /// <param name="type">The modifier type.</param>
-    /// <param name="args">The arguments to initialize the <see cref="BaseModifier"/> with.</param>
+    /// <param name="args">The arguments to initialize the <see cref="IBaseModifier"/> with.</param>
     /// <returns>The <see cref="IBaseModifier"/> that was added.</returns>
     [HideFromIl2Cpp]
     public IBaseModifier? AddModifier(Type type, params object[] args)
     {
         var modifier = args.Length > 0
             ? ModifierFactory.CreateInstance(type, args)
-            : Activator.CreateInstance(type) as BaseModifier
+            : Activator.CreateInstance(type) as IBaseModifier
                 ?? throw new InvalidOperationException($"Cannot add modifier {type.Name} because it is not a valid modifier.");
         return AddModifier(modifier);
     }

@@ -13,14 +13,24 @@ namespace MiraAPI.Modifiers;
 public interface IBaseModifier : IOptionable
 {
     /// <summary>
-    /// Gets the <see cref="PlayerControl"/> that the modifier is attached to.
+    /// Gets or sets the <see cref="PlayerControl"/> that the modifier is attached to.
     /// </summary>
-    PlayerControl Player { get; }
+    PlayerControl Player { get; internal set; }
 
     /// <summary>
-    /// Gets the unique ID of the modifier.
+    /// Gets or sets the <see cref="Modifiers.ModifierComponent"/> that the modifier is attached to.
     /// </summary>
-    Guid UniqueId { get; }
+    ModifierComponent? ModifierComponent { get; internal set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the modifier has been initialized.
+    /// </summary>
+    bool Initialized { get; internal set; }
+
+    /// <summary>
+    /// Gets or sets the unique ID of the modifier.
+    /// </summary>
+    Guid UniqueId { get; internal set; }
 
     /// <summary>
     /// Gets the type ID of the modifier.

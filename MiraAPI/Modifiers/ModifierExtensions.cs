@@ -560,12 +560,12 @@ public static class ModifierExtensions
     }
 
     /// <summary>
-    /// Adds a specific <see cref="BaseModifier"/> to the <see cref="PlayerControl"/>.
+    /// Adds a specific <see cref="IBaseModifier"/> to the <see cref="PlayerControl"/>.
     /// </summary>
     /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="modifier">The <see cref="BaseModifier"/> to add.</param>
+    /// <param name="modifier">The <see cref="IBaseModifier"/> to add.</param>
     /// <returns>The added <see cref="IBaseModifier"/>.</returns>
-    public static IBaseModifier? AddModifier(this PlayerControl player, BaseModifier modifier)
+    public static IBaseModifier? AddModifier(this PlayerControl player, IBaseModifier modifier)
     {
         return player.GetModifierComponent().AddModifier(modifier);
     }
