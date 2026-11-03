@@ -125,4 +125,9 @@ public interface IBaseModifier : IOptionable
     /// </summary>
     /// <returns><see langword="true"/> if the player can vent, <see langword="false"/> otherwise. <see langword="null"/> for no effect.</returns>
     bool? CanVent();
+
+    /// <summary>
+    /// Removes this modifier instance from the player.
+    /// </summary>
+    void RemoveSelf();
 }

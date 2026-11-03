@@ -217,9 +217,7 @@ public abstract class BaseModifier : IBaseModifier
         return null;
     }
 
-    /// <summary>
-    /// Removes this modifier instance from the player.
-    /// </summary>
+    /// <inheritdoc/>
     public void RemoveSelf()
     {
         ModifierComponent?.RemoveModifier(this);
