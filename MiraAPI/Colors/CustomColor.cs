@@ -42,7 +42,10 @@ public class CustomColor(StringNames? nameId, string? rawId, Color32 mainColor, 
 
             return name.GetValueOrDefault();
         }
-        internal set => name = value;
+        internal set
+        {
+            name = value;
+        }
     }
 
     /// <summary>
