@@ -106,15 +106,9 @@ public static class MiraEventManager
             trackedEvents.Add(eventType);
         }
 
-        foreach (var superType in StoredEventTypes.Where(x => x.IsAssignableFrom(eventType)))
-        {
-            if (!eventType.IsAbstract)
-            {
-                TrackedEventTypes[eventType].Add(superType);
-            }
-        }
+        TrackedEventTypes[eventType].AddRange(StoredEventTypes.Where(x => IsSubclassOf(eventType, x)));
 
-        foreach (var subType in StoredEventTypes.Where(x => x.IsAssignableTo(eventType)))
+        foreach (var subType in StoredEventTypes.Where(x => IsSubclassOf(x, eventType)))
         {
             if (!subType.IsAbstract)
             {
@@ -131,6 +125,28 @@ public static class MiraEventManager
         StoredEventTypes.Add(eventType);
 
         return true;
+    }
+
+    private static bool IsSubclassOf(Type? type, Type super)
+    {
+        if (type == null || type == typeof(MiraEvent))
+        {
+            return false;
+        }
+
+        if (type == super)
+        {
+            return true;
+        }
+
+        if (super.IsGenericTypeDefinition &&
+            type.IsGenericType &&
+            type.GetGenericTypeDefinition() == super)
+        {
+            return true;
+        }
+
+        return IsSubclassOf(type.BaseType, super);
     }
 
     /// <summary>
