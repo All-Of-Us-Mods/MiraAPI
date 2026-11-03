@@ -842,4 +842,20 @@ public static class Extensions
         var comp = go.GetComponent<T>();
         return comp ? comp : go.AddComponent<T>();
     }
+
+    /// <inheritdoc cref="Attribute.IsDefined(MemberInfo, Type, bool)"/>
+    /// <typeparam name="T">The type of the attribute.</typeparam>
+    /// <returns>true if a custom attribute of type <typeparamref name="T"/> is applied to element; otherwise, false.</returns>
+    public static bool IsDefined<T>(this MemberInfo element, bool inherit)
+        where T : Attribute
+    {
+        return Attribute.IsDefined(element, typeof(T), inherit);
+    }
+
+    /// <inheritdoc cref="IsDefined{T}(MemberInfo, bool)"/>
+    public static bool IsDefined<T>(this MemberInfo element)
+        where T : Attribute
+    {
+        return Attribute.IsDefined(element, typeof(T));
+    }
 }
