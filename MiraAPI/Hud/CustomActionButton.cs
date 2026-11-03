@@ -179,14 +179,8 @@ public abstract class CustomActionButton
                 MiraEventManager.InvokeEvent(cancelEvent, cancelEventType);
             }
 
-            if (specificInvoked)
-            {
-                if (!@event.IsCancelled) ClickHandler();
-            }
-            else
-            {
-                if (!genericEvent.IsCancelled) ClickHandler();
-            }
+            MiraCancelableEvent eventCheck = specificInvoked ? @event : genericEvent;
+            if (!eventCheck.IsCancelled) ClickHandler();
         }));
 
         if (Keybind == null) return;
