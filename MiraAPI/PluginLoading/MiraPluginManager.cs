@@ -123,7 +123,7 @@ public sealed class MiraPluginManager
             if ((isMira && type.IsAbstract) || type.GetCustomAttribute<MiraIgnoreAttribute>() != null)
                 continue;
 
-            RegisterEvents(type);
+            RegisterEventHandlers(type);
 
             if (RegisterModifier(type, info))
                 continue;
@@ -160,7 +160,7 @@ public sealed class MiraPluginManager
         }
     }
 
-    private static void RegisterEvents(Type type)
+    private static void RegisterEventHandlers(Type type)
     {
         foreach (var method in AccessTools.GetDeclaredMethods(type))
         {
@@ -171,14 +171,14 @@ public sealed class MiraPluginManager
 
             if (!method.IsStatic)
             {
-                Error($"Event method {method.Name} in {type.Name} must be static.");
+                Error($"Event handler method {method.Name} in {type.Name} must be static.");
                 continue;
             }
 
             var parameters = method.GetParameters();
             if (parameters.Length != 1 || !parameters[0].ParameterType.IsSubclassOf(typeof(MiraEvent)))
             {
-                Error($"Invalid event registration method {method.Name} in {type.Name}");
+                Error($"Invalid event handler registration: method {method.Name} in {type.Name}");
                 continue;
             }
 
