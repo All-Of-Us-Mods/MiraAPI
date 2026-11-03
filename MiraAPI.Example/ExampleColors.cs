@@ -10,9 +10,9 @@ public static class ExampleColors
 {
     public static CustomColor Cerulean { get; } = new("cerulean", new Color(0.0f, 0.48f, 0.65f), CustomColorBrightness.Lighter);
 
-    public static CustomColor Rose { get; } = new("rose", new Color(0.98f, 0.26f, 0.62f));
+    public static CustomColor Rose { get; } = new("rose", new Color(0.98f, 0.26f, 0.62f), CustomColorBrightness.Lighter);
 
-    public static CustomColor Gold { get; } = new("gold", new Color(1.0f, 0.84f, 0.0f));
+    public static CustomColor Gold { get; } = new("gold", new Color(1.0f, 0.84f, 0.0f), CustomColorBrightness.Lighter);
 
     public static VariableColor Rainbow { get; } = new("rainbow", t => new HsbColor(MathUtilities.PingPong(t, 1f, 0.3f), 1f, 1f), CustomColorBrightness.Lighter);
 }

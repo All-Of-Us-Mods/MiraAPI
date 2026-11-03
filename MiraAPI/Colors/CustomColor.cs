@@ -116,6 +116,7 @@ public class CustomColor(StringNames? nameId, string? rawId, Color32 mainColor, 
     /// <param name="nameId">The name of the option as a <see cref="StringNames"/> value.</param>
     /// <param name="mainColor">The main color.</param>
     /// <param name="shadowColor">The shadow color.</param>
+    [Obsolete("Use the constructor that takes in a CustomColorBrightness parameter. This will be removed in a future version.")]
     public CustomColor(StringNames nameId, Color32 mainColor, Color32 shadowColor)
         : this(nameId, null, mainColor, shadowColor, CustomColorBrightness.Darker)
     {
@@ -126,6 +127,7 @@ public class CustomColor(StringNames? nameId, string? rawId, Color32 mainColor, 
     /// </summary>
     /// <param name="nameId">The name of the option as a <see cref="StringNames"/> value.</param>
     /// <param name="mainColor">The main color.</param>
+    [Obsolete("Use the constructor that takes in a CustomColorBrightness parameter. This will be removed in a future version.")]
     public CustomColor(StringNames nameId, Color32 mainColor)
         : this(nameId, null, mainColor, mainColor.DarkenAbsolute(60), CustomColorBrightness.Darker)
     {
@@ -137,6 +139,7 @@ public class CustomColor(StringNames? nameId, string? rawId, Color32 mainColor, 
     /// <param name="rawId">The name of the option as a <see cref="string"/> value.</param>
     /// <param name="mainColor">The main color.</param>
     /// <param name="shadowColor">The shadow color.</param>
+    [Obsolete("Use the constructor that takes in a CustomColorBrightness parameter. This will be removed in a future version.")]
     public CustomColor(string rawId, Color32 mainColor, Color32 shadowColor)
         : this(null, rawId, mainColor, shadowColor, CustomColorBrightness.Darker)
     {
@@ -147,6 +150,7 @@ public class CustomColor(StringNames? nameId, string? rawId, Color32 mainColor, 
     /// </summary>
     /// <param name="rawId">The name of the option as a <see cref="string"/> value.</param>
     /// <param name="mainColor">The main color.</param>
+    [Obsolete("Use the constructor that takes in a CustomColorBrightness parameter. This will be removed in a future version.")]
     public CustomColor(string rawId, Color32 mainColor)
         : this(null, rawId, mainColor, mainColor.DarkenAbsolute(60), CustomColorBrightness.Darker)
     {

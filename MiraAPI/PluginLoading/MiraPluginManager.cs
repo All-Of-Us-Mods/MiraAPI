@@ -331,7 +331,7 @@ public sealed class MiraPluginManager
                     continue;
                 }
 
-                if (!string.IsNullOrEmpty(color.RawId))
+                if (!string.IsNullOrEmpty(color.RawId) && !string.IsNullOrEmpty(attribute.IdPrefix))
                 {
                     color.Name = MiraLocaleManager.GetOrCreateLocaleString(attribute.IdPrefix + color.RawId);
                 }
