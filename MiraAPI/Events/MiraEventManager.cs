@@ -95,36 +95,35 @@ public static class MiraEventManager
         info.InternalEventTypes.Add(eventType);
         InternalEventTypes.Add(eventType);
 
-        if (!eventType.IsAbstract)
-        {
-            if (!TrackedEventTypes.TryGetValue(eventType, out var trackedEvents))
-            {
-                trackedEvents = [];
-                TrackedEventTypes.Add(eventType, trackedEvents);
-            }
-
-            trackedEvents.Add(eventType);
-        }
+        AddTypeToTracked(eventType);
 
         TrackedEventTypes[eventType].AddRange(StoredEventTypes.Where(x => IsSubclassOf(eventType, x)));
 
         foreach (var subType in StoredEventTypes.Where(x => IsSubclassOf(x, eventType)))
         {
-            if (!subType.IsAbstract)
-            {
-                if (!TrackedEventTypes.TryGetValue(subType, out var trackedSubEvents))
-                {
-                    trackedSubEvents = [];
-                    TrackedEventTypes.Add(subType, trackedSubEvents);
-                }
-
-                trackedSubEvents.Add(eventType);
-            }
+            AddTypeToTracked(subType, eventType);
         }
 
         StoredEventTypes.Add(eventType);
 
         return true;
+    }
+
+    private static void AddTypeToTracked(Type eventType, Type trackedAs = null!)
+    {
+        if (eventType.IsAbstract)
+        {
+            return;
+        }
+
+        if (!TrackedEventTypes.TryGetValue(eventType, out var trackedEvents))
+        {
+            trackedEvents = [];
+            TrackedEventTypes.Add(eventType, trackedEvents);
+        }
+
+        trackedAs ??= eventType;
+        trackedEvents.Add(trackedAs);
     }
 
     private static bool IsSubclassOf(Type? type, Type super)
