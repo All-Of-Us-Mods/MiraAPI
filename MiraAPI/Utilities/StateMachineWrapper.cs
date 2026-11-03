@@ -22,12 +22,10 @@ public class StateMachineWrapper<T>
     private readonly PropertyInfo _currentProperty;
     private readonly Dictionary<string, PropertyInfo> _propertyCache;
 
-    private T? _parentInstance;
-
     /// <summary>
     /// Gets the instance of the <typeparamref name="T"/>.
     /// </summary>
-    public T Instance => _parentInstance ??= (T)_thisProperty.GetValue(_stateMachine)!;
+    public T Instance => field ??= (T)_thisProperty.GetValue(_stateMachine)!;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StateMachineWrapper{T}"/> class.
