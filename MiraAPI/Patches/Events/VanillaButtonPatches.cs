@@ -40,14 +40,7 @@ public static class VanillaButtonPatches
             ventTarget = role.Cast<EngineerRole>().currentTarget;
         }
 
-        var genericEvent = new VanillaButtonClickEvent(__instance, playerTarget, ventTarget);
-        MiraEventManager.InvokeEvent(genericEvent);
-        if (genericEvent.IsCancelled)
-        {
-            MiraEventManager.InvokeEvent(new VanillaButtonCancelledEvent(__instance));
-        }
-
-        return !genericEvent.IsCancelled;
+        return InvokeEvents(__instance, playerTarget, ventTarget);
     }
 
     [HarmonyPrefix]
@@ -66,7 +59,12 @@ public static class VanillaButtonPatches
             playerTarget = role.Cast<SpiritGuideRole>().currentTarget;
         }
 
-        var genericEvent = new VanillaButtonClickEvent(__instance, playerTarget);
+        return InvokeEvents(__instance, playerTarget);
+    }
+
+    private static bool InvokeEvents(AbilityButton __instance, PlayerControl? playerTarget, Vent? ventTarget = null)
+    {
+        var genericEvent = new VanillaButtonClickEvent(__instance, playerTarget, ventTarget);
         MiraEventManager.InvokeEvent(genericEvent);
         if (genericEvent.IsCancelled)
         {
