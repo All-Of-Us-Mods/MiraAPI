@@ -61,7 +61,7 @@ public static class RoleManagerPatches
         }
 
         var @event = new SetRoleEvent(targetPlayer, roleType);
-        MiraEventManager.InvokeEvent(@event);
+        @event.InvokeEvent();
 
         return false;
     }

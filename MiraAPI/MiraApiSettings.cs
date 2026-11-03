@@ -95,10 +95,10 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
             return;
 
         var genericEvent = new UiButtonResetEvent();
-        MiraEventManager.InvokeEvent(genericEvent);
+        genericEvent.InvokeEvent();
 
         var genericEvent2 = new UiButtonPostResetEvent(topUi, extraTopUi);
-        MiraEventManager.InvokeEvent(genericEvent2);
+        genericEvent2.InvokeEvent();
         MiraHudHelper.UiGrid.ArrangeChilds();
         MiraHudHelper.ExtraUiGrid.ArrangeChilds();
     }

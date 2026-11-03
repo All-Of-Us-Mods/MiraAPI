@@ -165,18 +165,18 @@ public abstract class CustomActionButton
         {
             // Invoke the generic button click event.
             var genericEvent = new MiraButtonClickEvent(this);
-            MiraEventManager.InvokeEvent(genericEvent);
+            genericEvent.InvokeEvent();
             if (genericEvent.IsCancelled) MiraEventManager.InvokeEvent(new MiraButtonCancelledEvent(this));
 
             // Invoke the button click event for specific button.
             var eventType = CustomButtonManager.ButtonEventTypes[GetType()];
             var @event = (MiraCancelableEvent)Activator.CreateInstance(eventType, this, genericEvent)!;
-            var specificInvoked = MiraEventManager.InvokeEvent(@event, eventType);
+            var specificInvoked = @event.InvokeEvent(eventType);
             if (@event.IsCancelled)
             {
                 var cancelEventType = CustomButtonManager.ButtonCancelledEventTypes[GetType()];
                 var cancelEvent = (MiraEvent)Activator.CreateInstance(cancelEventType, this)!;
-                MiraEventManager.InvokeEvent(cancelEvent, cancelEventType);
+                cancelEvent.InvokeEvent(cancelEventType);
             }
 
             MiraCancelableEvent eventCheck = specificInvoked ? @event : genericEvent;

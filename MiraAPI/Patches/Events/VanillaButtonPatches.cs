@@ -66,7 +66,7 @@ public static class VanillaButtonPatches
     private static bool InvokeEvents(AbilityButton __instance, PlayerControl? playerTarget, Vent? ventTarget = null)
     {
         var genericEvent = new VanillaButtonClickEvent(__instance, playerTarget, ventTarget);
-        MiraEventManager.InvokeEvent(genericEvent);
+        genericEvent.InvokeEvent();
         if (genericEvent.IsCancelled)
         {
             MiraEventManager.InvokeEvent(new VanillaButtonCancelledEvent(__instance));
@@ -74,12 +74,12 @@ public static class VanillaButtonPatches
 
         var eventType = typeof(VanillaButtonClickEvent<>).MakeGenericType(__instance.GetType());
         var @event = (MiraCancelableEvent)Activator.CreateInstance(eventType, __instance)!;
-        var specificInvoked = MiraEventManager.InvokeEvent(@event, eventType);
+        var specificInvoked = @event.InvokeEvent(eventType);
         if (@event.IsCancelled)
         {
             var cancelEventType = typeof(VanillaButtonCancelledEvent<>).MakeGenericType(__instance.GetType());
             var cancelEvent = (MiraCancelableEvent)Activator.CreateInstance(cancelEventType, __instance)!;
-            MiraEventManager.InvokeEvent(cancelEvent, cancelEventType);
+            cancelEvent.InvokeEvent(cancelEventType);
         }
 
         MiraCancelableEvent eventCheck = specificInvoked ? @event : genericEvent;
