@@ -33,6 +33,10 @@ namespace MiraAPI.PluginLoading;
 /// </summary>
 public sealed class MiraPluginManager
 {
+    private MiraPluginManager()
+    {
+    }
+
     private readonly Dictionary<Assembly, MiraPluginInfo> _registeredPlugins = [];
 
     internal MiraPluginInfo[] RegisteredPlugins { get; private set; } = [];
@@ -40,13 +44,12 @@ public sealed class MiraPluginManager
     internal MiraPluginInfo[] PluginsWithOptionsOrGameModes { get; private set; } = [];
 
     internal Dictionary<MiraPluginInfo, List<Type>> QueuedRoleRegistrations { get; } = [];
-    internal static MiraPluginManager Instance { get; private set; } = new();
+    internal static MiraPluginManager Instance { get; } = new();
     internal static ConfigFile MiraApiConfig { get; private set; } = null!;
     internal static MiraPluginInfo MiraApiPluginInfo { get; private set; } = null!;
 
     internal void Initialize(BasePlugin miraApiPlugin, IMiraPlugin apiPlugin)
     {
-        Instance = this;
         CustomGameModeManager.RegisterDefaultMode();
         CustomGameModeManager.GetAndSetGameMode();
 
