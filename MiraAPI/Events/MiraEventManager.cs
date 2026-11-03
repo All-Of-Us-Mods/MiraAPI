@@ -20,7 +20,7 @@ public static class MiraEventManager
 
     internal static List<Type> InternalEventTypes { get; } = [];
 
-    private static readonly Dictionary<Type, List<Type>> TrackedEventTypes = [];
+    private static readonly Dictionary<Type, HashSet<Type>> TrackedEventTypes = [];
 
     private static readonly HashSet<Type> StoredEventTypes = [];
 
@@ -97,7 +97,7 @@ public static class MiraEventManager
 
         AddTypeToTracked(eventType);
 
-        TrackedEventTypes[eventType].AddRange(StoredEventTypes.Where(x => IsSubclassOf(eventType, x)));
+        TrackedEventTypes[eventType].UnionWith(StoredEventTypes.Where(x => IsSubclassOf(eventType, x)));
 
         foreach (var subType in StoredEventTypes.Where(x => IsSubclassOf(x, eventType)))
         {
