@@ -22,8 +22,6 @@ public static class MiraEventManager
 
     private static readonly Dictionary<Type, HashSet<Type>> TrackedEventTypes = [];
 
-    private static readonly HashSet<Type> StoredEventTypes = [];
-
     /// <summary>
     /// Invoke a <see cref="MiraEvent"/>.
     /// </summary>
@@ -92,19 +90,17 @@ public static class MiraEventManager
             return false;
         }
 
-        info.InternalEventTypes.Add(eventType);
-        InternalEventTypes.Add(eventType);
-
         AddTypeToTracked(eventType);
 
-        TrackedEventTypes[eventType].UnionWith(StoredEventTypes.Where(x => IsSubclassOf(eventType, x)));
+        TrackedEventTypes[eventType].UnionWith(InternalEventTypes.Where(x => IsSubclassOf(eventType, x)));
 
-        foreach (var subType in StoredEventTypes.Where(x => IsSubclassOf(x, eventType)))
+        foreach (var subType in InternalEventTypes.Where(x => IsSubclassOf(x, eventType)))
         {
             AddTypeToTracked(subType, eventType);
         }
 
-        StoredEventTypes.Add(eventType);
+        info.InternalEventTypes.Add(eventType);
+        InternalEventTypes.Add(eventType);
 
         return true;
     }
