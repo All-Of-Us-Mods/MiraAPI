@@ -81,7 +81,7 @@ public class MiraPluginInfo
     public IReadOnlyCollection<MeetingActionButton> MeetingButtons { get; private set; } = null!;
 
     /// <summary>
-    /// Gets a <see cref="ReadOnlyDictionary{TKey, TValue}"/> of this <see cref="IMiraPlugin"/>'s <see cref="OptionPreset"/>s.
+    /// Gets a <see cref="IReadOnlyCollection{T}"/> of this <see cref="IMiraPlugin"/>'s <see cref="OptionPreset"/>s.
     /// </summary>
     public IReadOnlyCollection<OptionPreset> Presets { get; internal set; } = null!;
 
