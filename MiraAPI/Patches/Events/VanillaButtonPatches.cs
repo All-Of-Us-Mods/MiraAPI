@@ -73,12 +73,12 @@ public static class VanillaButtonPatches
         }
 
         var eventType = typeof(VanillaButtonClickEvent<>).MakeGenericType(__instance.GetType());
-        var @event = (MiraCancelableEvent)Activator.CreateInstance(eventType, __instance)!;
+        var @event = (MiraCancelableEvent)Activator.CreateInstance(eventType, [__instance])!;
         var specificInvoked = @event.InvokeEvent(eventType);
         if (@event.IsCancelled)
         {
             var cancelEventType = typeof(VanillaButtonCancelledEvent<>).MakeGenericType(__instance.GetType());
-            var cancelEvent = (MiraEvent)Activator.CreateInstance(cancelEventType, __instance)!;
+            var cancelEvent = (MiraEvent)Activator.CreateInstance(cancelEventType, [__instance])!;
             cancelEvent.InvokeEvent(cancelEventType);
         }
 
