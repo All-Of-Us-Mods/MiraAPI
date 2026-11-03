@@ -193,19 +193,6 @@ public static class ModifierExtensions
     }
 
     /// <summary>
-    /// Checks if the <see cref="PlayerControl"/> has a specific <see cref="IBaseModifier"/>, if the type is an interface.
-    /// </summary>
-    /// <typeparam name="T">The type of the interface of the <see cref="IBaseModifier"/>.</typeparam>
-    /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="predicate">Optional predicate to filter the <see cref="IBaseModifier"/>s.</param>
-    /// <returns><see langword="true"/> if the <see cref="PlayerControl"/> has the <see cref="IBaseModifier"/> of type <typeparamref name="T"/>, <see langword="false"/> otherwise.</returns>
-    public static bool HasModifierOfType<T>(this PlayerControl player, Func<T, bool>? predicate = null)
-        where T : class
-    {
-        return player.GetModifierComponent().HasModifierOfType(predicate);
-    }
-
-    /// <summary>
     /// Clears all <see cref="IBaseModifier"/>s from the <see cref="PlayerControl"/>.
     /// </summary>
     /// <param name="plr">The player you want to clear <see cref="IBaseModifier"/>s for.</param>
@@ -282,20 +269,6 @@ public static class ModifierExtensions
     }
 
     /// <summary>
-    /// Tries to get a <see cref="IBaseModifier"/> by its type, if the type is an interface.
-    /// </summary>
-    /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="modifier">The <see cref="IBaseModifier"/> of type <typeparamref name="T"/> or null.</param>
-    /// <param name="predicate">The predicate to check the <see cref="IBaseModifier"/> of type <typeparamref name="T"/> by.</param>
-    /// <typeparam name="T">The Type of the interface of the <see cref="IBaseModifier"/>.</typeparam>
-    /// <returns><see langword="true"/> if the <see cref="IBaseModifier"/> of type <typeparamref name="T"/> was found, <see langword="false"/> otherwise.</returns>
-    public static bool TryGetModifierOfType<T>(this PlayerControl player, [NotNullWhen(true)] out T? modifier, Func<T, bool>? predicate = null)
-        where T : class
-    {
-        return player.GetModifierComponent().TryGetModifierOfType(out modifier, predicate);
-    }
-
-    /// <summary>
     /// Gets a specific <typeparamref name="T"/> from the <see cref="PlayerControl"/>.
     /// </summary>
     /// <typeparam name="T">The type of the <see cref="IBaseModifier"/>.</typeparam>
@@ -352,19 +325,6 @@ public static class ModifierExtensions
     }
 
     /// <summary>
-    /// Gets a specific <see cref="IBaseModifier"/> of type <typeparamref name="T"/> from the <see cref="PlayerControl"/>, if the type is an interface.
-    /// </summary>
-    /// <typeparam name="T">The type of the interface of the modifier.</typeparam>
-    /// <param name="player">The <see cref="PlayerControl"/> instance.</param>
-    /// <param name="predicate">Optional predicate to filter the <see cref="IBaseModifier"/>s.</param>
-    /// <returns>The <see cref="IBaseModifier"/> of type <typeparamref name="T"/> if found, <see langword="null"/> otherwise.</returns>
-    public static T? GetModifierOfType<T>(this PlayerControl player, Func<T, bool>? predicate = null)
-        where T : class
-    {
-        return player.GetModifierComponent().GetModifierOfType(predicate);
-    }
-
-    /// <summary>
     /// Gets all <typeparamref name="T"/>s from the <see cref="PlayerControl"/>.
     /// </summary>
     /// <typeparam name="T">The type of the <typeparamref name="T"/>s.</typeparam>
@@ -405,19 +365,6 @@ public static class ModifierExtensions
         Func<IBaseModifier, bool>? predicate = null)
     {
         return player.GetModifierComponent().GetModifiers(typeId, predicate);
-    }
-
-    /// <summary>
-    /// Gets all <see cref="IBaseModifier"/>s of a specific type from the <see cref="PlayerControl"/>, if the type is an interface.
-    /// </summary>
-    /// <typeparam name="T">The type of the interface of the <see cref="IBaseModifier"/>s.</typeparam>
-    /// <param name="player">The PlayerControl instance.</param>
-    /// <param name="predicate">Optional predicate to filter the <see cref="IBaseModifier"/>s.</param>
-    /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="IBaseModifier"/>s of type <typeparamref name="T"/>.</returns>
-    public static IEnumerable<T> GetModifiersOfType<T>(this PlayerControl player, Func<T, bool>? predicate = null)
-        where T : class
-    {
-        return player.GetModifierComponent().GetModifiersOfType(predicate);
     }
 
     /// <summary>

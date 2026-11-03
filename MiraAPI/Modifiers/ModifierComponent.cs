@@ -205,19 +205,6 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     }
 
     /// <summary>
-    /// Gets a collection of <see cref="IBaseModifier"/>s by type, if the type is an interface.
-    /// </summary>
-    /// <param name="predicate">The predicate to check the <see cref="IBaseModifier"/> by.</param>
-    /// <typeparam name="T">The Type of the interface of the <see cref="IBaseModifier"/>.</typeparam>
-    /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="IBaseModifier"/>s of type <typeparamref name="T"/>.</returns>
-    [HideFromIl2Cpp]
-    public IEnumerable<T> GetModifiersOfType<T>(Func<T, bool>? predicate = null)
-        where T : class
-    {
-        return ActiveModifiers.OfType<T>().Where(x => predicate == null || predicate(x));
-    }
-
-    /// <summary>
     /// Tries to get a <typeparamref name="T"/>.
     /// </summary>
     /// <param name="modifier">The <typeparamref name="T"/> or <see langword="null"/>.</param>
@@ -274,21 +261,6 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     }
 
     /// <summary>
-    /// Tries to get a <see cref="IBaseModifier"/> by its type, if the type is an interface.
-    /// </summary>
-    /// <param name="modifier">The <see cref="IBaseModifier"/> of type <typeparamref name="T"/> or null.</param>
-    /// <param name="predicate">The predicate to check the <see cref="IBaseModifier"/> by.</param>
-    /// <typeparam name="T">The Type of the interface of the <see cref="IBaseModifier"/>.</typeparam>
-    /// <returns><see langword="true"/> if the <see cref="IBaseModifier"/> of type <typeparamref name="T"/> was found, <see langword="false"/> otherwise.</returns>
-    [HideFromIl2Cpp]
-    public bool TryGetModifierOfType<T>([NotNullWhen(true)] out T? modifier, Func<T, bool>? predicate = null)
-        where T : class
-    {
-        modifier = GetModifierOfType(predicate);
-        return modifier != null;
-    }
-
-    /// <summary>
     /// Gets a <typeparamref name="T"/>.
     /// </summary>
     /// <param name="predicate">The predicate to check the <typeparamref name="T"/> by.</param>
@@ -337,19 +309,6 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     public IBaseModifier? GetModifier(Guid modifierGuid)
     {
         return ActiveModifiers.Find(x => x.UniqueId == modifierGuid);
-    }
-
-    /// <summary>
-    /// Gets a <see cref="IBaseModifier"/> by its type, if the type is an interface.
-    /// </summary>
-    /// <param name="predicate">The predicate to check the <see cref="IBaseModifier"/> by.</param>
-    /// <typeparam name="T">The Type of the interface of the <see cref="IBaseModifier"/>.</typeparam>
-    /// <returns>The <see cref="IBaseModifier"/> of type <typeparamref name="T"/> if it is found, <see langword="null"/> otherwise.</returns>
-    [HideFromIl2Cpp]
-    public T? GetModifierOfType<T>(Func<T, bool>? predicate = null)
-        where T : class
-    {
-        return GetModifiersOfType(predicate).FirstOrDefault();
     }
 
     /// <summary>
@@ -703,37 +662,6 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
         bool MatchExpr(IBaseModifier bm)
         {
             return bm.UniqueId == id;
-        }
-    }
-
-    /// <summary>
-    /// Checks if a player has an active modifier by its type, if the type is an interface.
-    /// </summary>
-    /// <param name="predicate">The predicate to check the modifier.</param>
-    /// <typeparam name="T">The Type of the interface of the Modifier.</typeparam>
-    /// <returns>True if the Modifier is present, false otherwise.</returns>
-    [HideFromIl2Cpp]
-    public bool HasModifierOfType<T>(Func<T, bool>? predicate = null)
-        where T : class
-    {
-        return ActiveModifiers.Exists(x => x is T modifier && (predicate == null || predicate(modifier)));
-    }
-
-    /// <summary>
-    /// Checks if a player has an active modifier by its type, if the type is an interface.
-    /// </summary>
-    /// <param name="checkInactive">Whether to check inactive modifiers (those pending to be added).</param>
-    /// <param name="predicate">The predicate to check the modifier.</param>
-    /// <typeparam name="T">The Type of the interface of the Modifier.</typeparam>
-    /// <returns>True if the Modifier is present, false otherwise.</returns>
-    [HideFromIl2Cpp]
-    public bool HasModifierOfType<T>(bool checkInactive, Func<T, bool>? predicate = null)
-        where T : class
-    {
-        return ActiveModifiers.Exists(MatchExpr) || (checkInactive && _toAdd.Exists(MatchExpr));
-        bool MatchExpr(IBaseModifier bm)
-        {
-            return bm is T modifier && (predicate == null || predicate(modifier));
         }
     }
 }
