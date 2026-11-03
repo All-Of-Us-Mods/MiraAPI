@@ -16,6 +16,7 @@ namespace MiraAPI.LocalSettings;
 /// <summary>
 /// Represents a local settings tab. Gets a button by default.
 /// </summary>
+/// <param name="config">The config file that this settings tab wraps around.</param>
 public abstract class LocalSettingsTab(ConfigFile config)
 {
     /// <summary>
