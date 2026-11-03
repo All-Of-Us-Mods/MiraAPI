@@ -151,4 +151,13 @@ public class ModdedPlayerOption : ModdedOption<int>
             opt.Value = newValue;
         }
     }
+
+    /// <inheritdoc />
+    public override string GetDisplayValue()
+    {
+        var player = GetPlayerValue();
+        return player
+            ? TranslationController.Instance.GetString(StringNames.None)
+            : player!.PlayerName;
+    }
 }

@@ -185,4 +185,14 @@ public class ModdedStringOption : ModdedOption<string>
             opt.Value = GetIndex(newValue);
         }
     }
+
+    /// <inheritdoc />
+    public override string GetDisplayValue()
+    {
+        var index = Array.IndexOf(Values, Value);
+
+        return (uint)index >= (uint)StringNameValues.Length
+            ? TranslationController.Instance.GetString(StringNameValues[index])
+            : Value;
+    }
 }

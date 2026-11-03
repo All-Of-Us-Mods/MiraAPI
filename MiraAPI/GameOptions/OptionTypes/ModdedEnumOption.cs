@@ -160,6 +160,16 @@ public class ModdedEnumOption : ModdedOption<int>
             opt.Value = Array.IndexOf(underlyingValues, newValue);
         }
     }
+
+    /// <inheritdoc />
+    public override string GetDisplayValue()
+    {
+        var index = Array.IndexOf(underlyingValues, Value);
+
+        return (uint)index >= (uint)StringNameValues.Length
+            ? TranslationController.Instance.GetString(StringNameValues[index])
+            : Value.ToString(CultureInfo.InvariantCulture);
+    }
 }
 
 /// <summary>
@@ -291,7 +301,12 @@ public class ModdedEnumOption<T> : ModdedOption<T>
     /// <inheritdoc />
     public override T GetValueFromOptionBehaviour(OptionBehaviour optionBehaviour)
     {
-        return Enum.Parse<T>(optionBehaviour.GetInt().ToString(NumberFormatInfo.InvariantInfo));
+        var index = optionBehaviour.GetInt();
+
+        if (index >= 0 && index < underlyingValues.Length)
+            return underlyingValues[index];
+
+        return underlyingValues.Length > 0 ? underlyingValues[0] : default;
     }
 
     /// <inheritdoc />
@@ -299,7 +314,17 @@ public class ModdedEnumOption<T> : ModdedOption<T>
     {
         if (OptionBehaviour && OptionBehaviour is StringOption opt)
         {
-            opt.Value = Convert.ToInt32(newValue, NumberFormatInfo.InvariantInfo);
+            opt.Value = Array.IndexOf(underlyingValues, newValue);
         }
+    }
+
+    /// <inheritdoc />
+    public override string GetDisplayValue()
+    {
+        var index = Array.IndexOf(underlyingValues, Value);
+
+        return (uint)index >= (uint)StringNameValues.Length
+            ? TranslationController.Instance.GetString(StringNameValues[index])
+            : Value.ToString();
     }
 }

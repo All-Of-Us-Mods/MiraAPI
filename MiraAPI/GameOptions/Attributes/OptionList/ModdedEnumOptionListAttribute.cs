@@ -10,26 +10,49 @@ namespace MiraAPI.GameOptions.Attributes;
 /// </summary>
 /// <param name="title">The title of the option.</param>
 /// <param name="enumType">The <see cref="Enum"/> type.</param>
+/// <param name="idPrefix">The common translation ID prefix of all enum values.</param>
 /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
 [AttributeUsage(AttributeTargets.Property)]
 [Obsolete("Use ModdedEnumOptionListAttribute<T> instead. This will be removed in a future version.")]
-public class ModdedEnumOptionListAttribute(string? title, Type enumType, string[]? values = null)
+public class ModdedEnumOptionListAttribute(string? title, Type enumType, string idPrefix, string[]? values = null)
     : ModdedOptionListAttribute(title)
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedEnumOptionListAttribute"/> class.
+    /// </summary>
+    /// <param name="title">The title of the option.</param>
+    /// <param name="enumType">The <see cref="Enum"/> type.</param>
+    /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
+    public ModdedEnumOptionListAttribute(string? title, Type enumType, string[]? values = null)
+        : this(title, enumType, string.Empty, values)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedEnumOptionListAttribute"/> class.
+    /// </summary>
+    /// <param name="enumType">The <see cref="Enum"/> type.</param>
+    /// <param name="idPrefix">The common translation ID prefix of all enum values.</param>
+    /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
+    public ModdedEnumOptionListAttribute(Type enumType, string idPrefix, string[]? values = null)
+        : this(null, enumType, idPrefix, values)
+    {
+    }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ModdedEnumOptionListAttribute"/> class.
     /// </summary>
     /// <param name="enumType">The <see cref="Enum"/> type.</param>
     /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
     public ModdedEnumOptionListAttribute(Type enumType, string[]? values = null)
-        : this(null, enumType, values)
+        : this(null, enumType, string.Empty, values)
     {
     }
 
     internal override IModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
     {
         var optList = new ModdedOptionList<ModdedEnumOption>(
-            list.Count, idx => new(group.GroupPrefix, GetFormattedTitle(idx, property), (int)(list[idx] ?? 0), enumType, values));
+            list.Count, idx => new(group.GroupPrefix, GetFormattedTitle(idx, property), (int)(list[idx] ?? 0), enumType, idPrefix, values));
         return optList;
     }
 
