@@ -117,7 +117,7 @@ public sealed class MiraPluginManager
     {
         foreach (var type in assembly.GetTypes())
         {
-            if ((isMira && type.IsAbstract) || type.GetCustomAttribute<MiraIgnoreAttribute>() != null)
+            if ((isMira && type.IsAbstract) || type.IsDefined<MiraIgnoreAttribute>())
                 continue;
 
             RegisterEvents(type);
@@ -226,7 +226,7 @@ public sealed class MiraPluginManager
 
             foreach (var property in type.GetProperties())
             {
-                if (property.IsDefined<MiraIgnoreAttribute>(false))
+                if (property.IsDefined<MiraIgnoreAttribute>())
                     continue;
 
                 var getter = property.GetMethod;
@@ -426,7 +426,7 @@ public sealed class MiraPluginManager
                     continue;
                 }
 
-                if (property.GetCustomAttribute<LocalSettingsButtonAttribute>() != null &&
+                if (property.IsDefined<LocalSettingsButtonAttribute>() &&
                     property.PropertyType.IsAssignableTo(typeof(LocalSettingsButton)))
                 {
                     var button = property.GetValue(tabInstance) as LocalSettingsButton;
@@ -453,15 +453,13 @@ public sealed class MiraPluginManager
                 }
 
                 var attribute = property.GetCustomAttribute<LocalSettingAttribute>();
-                if (attribute == null)
+                if (attribute != null)
                 {
-                    continue;
+                    attribute.CreateSetting(type, configEntry);
                 }
-
-                attribute.CreateSetting(type, configEntry);
             }
 
-            foreach (var field in type.GetFields().Where(f => f.FieldType.IsAssignableTo(typeof(ConfigEntryBase)) && f.GetCustomAttribute<LocalSettingAttribute>() != null))
+            foreach (var field in type.GetFields().Where(f => f.FieldType.IsAssignableTo(typeof(ConfigEntryBase)) && f.IsDefined<LocalSettingAttribute>()))
             {
                 Error($"{field.Name} is a field, not a property. Use properties for local settings.");
             }
@@ -480,7 +478,7 @@ public sealed class MiraPluginManager
     {
         try
         {
-            if (type.GetCustomAttribute<RegisterCustomKeybindsAttribute>() == null)
+            if (type.IsDefined<RegisterCustomKeybindsAttribute>())
             {
                 return;
             }
