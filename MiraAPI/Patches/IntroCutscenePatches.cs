@@ -135,13 +135,13 @@ public static class IntroCutscenePatches
             Info("IntroCutscene ended");
 
             MeetingButtonManager.OnGameStart();
-            MiraEventManager.InvokeEvent(new IntroEndEvent(introCutscene));
+            new IntroEndEvent(introCutscene).InvokeEvent();
 
             var @event = new BeforeRoundStartEvent(true);
             @event.InvokeEvent();
 
             if (@event.IsCancelled) return;
-            MiraEventManager.InvokeEvent(new RoundStartEvent(true));
+            new RoundStartEvent(true).InvokeEvent();
         }
     }
 }

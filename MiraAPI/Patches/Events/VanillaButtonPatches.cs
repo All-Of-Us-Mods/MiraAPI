@@ -69,7 +69,7 @@ public static class VanillaButtonPatches
         genericEvent.InvokeEvent();
         if (genericEvent.IsCancelled)
         {
-            MiraEventManager.InvokeEvent(new VanillaButtonCancelledEvent(__instance));
+            new VanillaButtonCancelledEvent(__instance).InvokeEvent();
         }
 
         var eventType = typeof(VanillaButtonClickEvent<>).MakeGenericType(__instance.GetType());

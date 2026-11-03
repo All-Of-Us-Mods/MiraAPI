@@ -106,7 +106,7 @@ internal static class MeetingHudPatches
     [HarmonyPatch(nameof(MeetingHud.OnDestroy))]
     public static void OnDestroyPatch(MeetingHud __instance)
     {
-        MiraEventManager.InvokeEvent(new EndMeetingEvent(__instance));
+        new EndMeetingEvent(__instance).InvokeEvent();
     }
 
     [HarmonyPostfix]
@@ -123,7 +123,7 @@ internal static class MeetingHudPatches
             }
         }
 
-        MiraEventManager.InvokeEvent(new VotingCompleteEvent(__instance));
+        new VotingCompleteEvent(__instance).InvokeEvent();
     }
 
     // this is necessary because the actual ForceSkipAll method is inlined.
