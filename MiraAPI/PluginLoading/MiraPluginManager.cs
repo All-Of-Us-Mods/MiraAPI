@@ -461,7 +461,7 @@ public sealed class MiraPluginManager
     {
         try
         {
-            if (type.IsDefined<RegisterCustomKeybindsAttribute>())
+            if (!type.IsDefined<RegisterCustomKeybindsAttribute>())
             {
                 return;
             }
