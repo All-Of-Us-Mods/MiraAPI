@@ -428,7 +428,7 @@ public static class Helpers
         [
             .. results.ToArray()
                 .Where(collider2D => collider2D.CompareTag("DeadBody"))
-                .Select(collider2D => collider2D.GetComponent<DeadBody>())
+                .Select(collider2D => collider2D.GetComponent<DeadBody>()),
         ];
     }
 
@@ -450,7 +450,7 @@ public static class Helpers
         [
             .. results.ToArray()
                 .Where(collider2D => colliderTag == null || collider2D.CompareTag(colliderTag))
-                .Select(collider2D => collider2D.GetComponent<T>())
+                .Select(collider2D => collider2D.GetComponent<T>()),
         ];
     }
 
@@ -480,7 +480,7 @@ public static class Helpers
                     vector.normalized,
                     magnitude,
                     Constants.ShipAndObjectsMask)
-                select player
+                select player,
             ];
     }
 

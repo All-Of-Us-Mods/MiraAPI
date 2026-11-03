@@ -16,6 +16,7 @@ namespace MiraAPI.Modifiers;
 /// <summary>
 /// The component for handling <see cref="BaseModifier"/>s.
 /// </summary>
+/// <param name="cppPtr">The pointer to the C++ object.</param>
 [RegisterInIl2Cpp]
 [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity Convention.")]
 public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)

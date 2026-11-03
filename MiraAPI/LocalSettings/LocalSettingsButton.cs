@@ -12,6 +12,8 @@ namespace MiraAPI.LocalSettings;
 /// <summary>
 /// Represents a <see cref="LocalSettingsTab"/> button.
 /// </summary>
+/// <param name="text">The text on the button.</param>
+/// <param name="onClick">The event that is invoked when the button is clicked.</param>
 public class LocalSettingsButton(string text, Action onClick)
 {
     /// <summary>

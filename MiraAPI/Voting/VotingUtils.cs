@@ -279,7 +279,7 @@ public static class VotingUtils
         return
         [
             .. Helpers.GetAlivePlayers()
-            .SelectMany(player => player.GetVoteData().Votes)
+            .SelectMany(player => player.GetVoteData().Votes),
         ];
     }
 
