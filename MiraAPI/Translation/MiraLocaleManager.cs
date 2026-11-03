@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml;
+using AmongUs.Data;
 using MiraAPI.Utilities;
 using Reactor.Localization.Utilities;
 using UnityEngine;
@@ -16,6 +17,8 @@ namespace MiraAPI.Translation;
 public static class MiraLocaleManager
 {
     private const string LangDirectory = "mira_languages";
+    private const string RefPrefix = "@ref:";
+    private const int MaxDepth = 10;
 
     // Language, XML Name, then Value
 
@@ -40,6 +43,7 @@ public static class MiraLocaleManager
     /// </summary>
     public static Dictionary<MiraLanguage, string> LangList { get; } = new()
     {
+        // Vanilla
         { MiraLanguage.English, "en_US" },
         { MiraLanguage.Latam, "es_419" },
         { MiraLanguage.Brazilian, "pt_BR" },
@@ -56,16 +60,20 @@ public static class MiraLocaleManager
         { MiraLanguage.SChinese, "zh_CN" },
         { MiraLanguage.TChinese, "zh_TW" },
         { MiraLanguage.Irish, "ga_IE" },
-        { MiraLanguage.Polish, "pl_PL" }, // Custom
-        { MiraLanguage.Turkish, "tr_TR" }, // Custom
-        { MiraLanguage.Swedish, "sv_SE" }, // Custom
-        { MiraLanguage.Lithuanian, "lt_LT" }, // Custom
-        { MiraLanguage.Czech, "cs_CZ" }, // Custom
-        { MiraLanguage.LChinese, "lzh_CN" }, // Custom
-        { MiraLanguage.Greek, "el_GR" }, // Custom
-        { MiraLanguage.Arabic, "arb" }, // Custom
-        { MiraLanguage.Hebrew, "heb" }, // Custom
+
+        // Custom
+        { MiraLanguage.Polish, "pl_PL" },
+        { MiraLanguage.Turkish, "tr_TR" },
+        { MiraLanguage.Swedish, "sv_SE" },
+        { MiraLanguage.Lithuanian, "lt_LT" },
+        { MiraLanguage.Czech, "cs_CZ" },
+        { MiraLanguage.LChinese, "lzh_CN" },
+        { MiraLanguage.Greek, "el_GR" },
+        { MiraLanguage.Arabic, "arb" },
+        { MiraLanguage.Hebrew, "heb" },
     };
+    private static readonly Dictionary<string, MiraLanguage> ReverseLangLookup =
+        LangList.ToDictionary(x => x.Value, x => x.Key);
 
     /// <summary>
     /// Gets a dictionary mapping <see cref="MiraLanguage"/> values to their standard language codes.
@@ -111,7 +119,7 @@ public static class MiraLocaleManager
         {
             try
             {
-                var langName = AmongUs.Data.DataManager.Settings.Language.CurrentLanguage;
+                var langName = DataManager.Settings.Language.CurrentLanguage;
                 return (MiraLanguage)langName;
             }
             catch
@@ -248,7 +256,7 @@ public static class MiraLocaleManager
             text = translation;
         }
 
-        foreach (var tmpText in parseList.Where(x => text.Contains(x.Key)))
+        foreach (var tmpText in parseList)
         {
             text = text.Replace(tmpText.Key, tmpText.Value);
         }
@@ -329,16 +337,16 @@ public static class MiraLocaleManager
         {
             var fileName = Path.GetFileNameWithoutExtension(filePath);
 
-            var lang = LangList.ContainsValue(fileName)
-                ? LangList.First(x => x.Value == fileName).Key
-                : (MiraLanguage)(-1);
-            if ((int)lang == -1) continue;
+            if (!ReverseLangLookup.TryGetValue(fileName, out var lang))
+            {
+                continue;
+            }
 
             try
             {
                 Locale.TryAdd(lang, []);
-                var xmlContent = File.ReadAllText(filePath);
-                ParseXmlFile(xmlContent, lang, false);
+                using var fileStream = File.OpenRead(filePath);
+                ParseXmlFile(fileStream, lang, false);
             }
             catch (Exception e)
             {
@@ -354,27 +362,26 @@ public static class MiraLocaleManager
         RegisteredModIds.Add(modGuid);
 
         var atLeastOneLoaded = false;
-        foreach (var locale in LangList)
+
+        foreach (var (lang, name) in LangList)
         {
-            using var resourceStream =
-                assembly.GetManifestResourceStream(resourcePrefix + locale.Value + ".xml");
+            using var resourceStream = assembly.GetManifestResourceStream(resourcePrefix + name + ".xml");
+
             if (resourceStream == null)
             {
                 // Silently skipped
                 continue;
             }
 
-            using StreamReader reader = new(resourceStream);
-            var xmlContent = reader.ReadToEnd();
             try
             {
-                Locale.TryAdd(locale.Key, []);
-                ParseXmlFile(xmlContent, locale.Key, true);
+                Locale.TryAdd(lang, []);
+                ParseXmlFile(resourceStream, lang, true);
                 atLeastOneLoaded = true;
             }
             catch (Exception e)
             {
-                Error($"Failed to load translation {resourcePrefix}{locale.Value}: {e.Message}");
+                Error($"Failed to load translation {resourcePrefix}{name}: {e.Message}");
             }
         }
 
@@ -392,51 +399,95 @@ public static class MiraLocaleManager
     /// <param name="loadingInternal">Flag that indicates if the xml being parsed is internal or not.</param>
     public static void ParseXmlFile(string xmlContent, MiraLanguage language, bool loadingInternal)
     {
+        using var stringReader = new StringReader(xmlContent);
+        using var xmlReader = XmlReader.Create(stringReader);
+        ParseXml(xmlReader, language, loadingInternal);
+    }
+
+    /// <summary>
+    /// Parses the provided xml stream into translation keys and values and registers them to the locale manager.
+    /// </summary>
+    /// <param name="xmlStream">The stream to the xml content.</param>
+    /// <param name="language">The language that the xml file corresponds to.</param>
+    /// <param name="loadingInternal">Flag that indicates if the xml being parsed is internal or not.</param>
+    public static void ParseXmlFile(Stream xmlStream, MiraLanguage language, bool loadingInternal)
+    {
+        using var reader = XmlReader.Create(xmlStream);
+        ParseXml(reader, language, loadingInternal);
+    }
+
+    private static void ParseXml(XmlReader reader, MiraLanguage language, bool loadingInternal)
+    {
         var dict = Locale[language];
-        XmlDocument xmlDoc = new();
+        var total = 0;
+
+        var pendingRefs = new Dictionary<string, string>();
+
         try
         {
-            xmlDoc.LoadXml(xmlContent);
-            var stringNodes = xmlDoc.SelectNodes("/resources/string");
-
-            if (stringNodes == null)
+            while (reader.ReadToFollowing("string"))
             {
-                return;
+                var name = reader.GetAttribute("name");
+
+                if (string.IsNullOrEmpty(name))
+                    continue;
+
+                if (loadingInternal && dict.ContainsKey(name))
+                {
+                    Error($"String for \"{name}\" in {language} was overwritten by a duplicate!");
+                }
+
+                var value = reader.ReadElementContentAsString();
+
+                if (value.StartsWith(RefPrefix, StringComparison.Ordinal))
+                {
+                    pendingRefs[name] = value[RefPrefix.Length..];
+                }
+                else
+                {
+                    value = value.Replace('[', '<')
+                        .Replace(']', '>')
+                        .Replace("<nl>", "\n")
+                        .Replace("<and>", "&");
+
+                    dict[name] = value;
+                    total++;
+                }
             }
 
-            var total = 0;
-
-            foreach (XmlNode node in stringNodes)
+            foreach (var unresolved in pendingRefs)
             {
-                if (node.Attributes?["name"] == null)
+                var originalKey = unresolved.Key;
+                var currentTarget = unresolved.Value;
+                var depth = 0;
+                var resolved = false;
+
+                while (depth < MaxDepth)
                 {
-                    continue;
+                    if (dict.TryGetValue(currentTarget, out var resolvedValue))
+                    {
+                        dict[originalKey] = resolvedValue;
+                        total++;
+                        resolved = true;
+                        break;
+                    }
+
+                    if (pendingRefs.TryGetValue(currentTarget, out var nextTarget))
+                    {
+                        currentTarget = nextTarget;
+                        depth++;
+                    }
+                    else
+                    {
+                        Error($"Translation reference '{unresolved.Value}' for '{originalKey}' not found.");
+                        break;
+                    }
                 }
 
-                var name = node.Attributes["name"]!.Value;
-                var value = node.InnerText;
-
-                if (string.IsNullOrEmpty(name)) continue;
-
-                if (value.Contains('['))
+                if (!resolved && depth >= MaxDepth)
                 {
-                    value = value.Replace('[', '<');
+                    Error($"Circular translation reference or max depth exceeded for '{originalKey}'.");
                 }
-
-                if (value.Contains(']'))
-                {
-                    value = value.Replace(']', '>');
-                }
-
-                value = value.Replace("<nl>", "\n").Replace("<and>", "&");
-
-                if (loadingInternal && Locale[language].ContainsKey(name))
-                {
-                    Error($"String for \"{name}\" in {language} was overwritten by duplicate!");
-                }
-
-                dict[name] = value;
-                total++;
             }
 
             Info($"Loaded {language.ToDisplayString()} translation with ({total} keys)");
