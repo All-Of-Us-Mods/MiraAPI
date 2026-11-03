@@ -216,7 +216,7 @@ public class ModdedEnumOption<T> : ModdedOption<T>
     /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
     /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
     public ModdedEnumOption(string groupPrefix, string title, T defaultValue, string[]? values = null, bool includeInPreset = true)
-        : this(groupPrefix, title, defaultValue, groupPrefix, values, includeInPreset)
+        : this(groupPrefix, title, defaultValue, string.Empty, values, includeInPreset)
     {
     }
 
