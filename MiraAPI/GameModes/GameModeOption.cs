@@ -18,7 +18,7 @@ namespace MiraAPI.GameModes;
 /// </summary>
 [HarmonyPatch]
 [SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
-[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")] // why so many warnings???
+[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
 public static class GameModeOption
 {
     /// <summary>

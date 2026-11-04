@@ -12,21 +12,14 @@ using UnityEngine.UI;
 namespace MiraAPI.Patches.LocalSettings;
 
 [HarmonyPatch(typeof(OptionsMenuBehaviour))]
+[SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
+[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
 public static class OptionsMenuPatches
 {
     private static readonly Dictionary<int, List<GameObject>> TabButtons = [];
     private static int _currentPage = 1;
 
-    internal static OptionsMenuBehaviour? Instance { get; private set; }
-
-    [SuppressMessage(
-        "Critical Code Smell",
-        "S2223:Non-constant static fields should not be visible",
-        Justification = "Internal behaviour that does not need property-level validation.")]
-    [SuppressMessage(
-        "StyleCop.CSharp.MaintainabilityRules",
-        "SA1401:Fields should be private",
-        Justification = "Read above.")]
+    internal static OptionsMenuBehaviour? Instance;
     internal static BoxCollider2D MaskCollider = null!;
 
     private static SpriteRenderer? background;
