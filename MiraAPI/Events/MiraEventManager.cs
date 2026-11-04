@@ -307,6 +307,10 @@ public static class MiraEventManager
             {
                 EventHandlerAdded(concreteType, eventHandler);
             }
+
+            eventHandlers.Clear();
         }
+
+        EventWrappersToLoad.Clear();
     }
 }
