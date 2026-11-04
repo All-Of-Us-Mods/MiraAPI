@@ -17,6 +17,8 @@ namespace MiraAPI.GameModes;
 /// The game mode option.
 /// </summary>
 [HarmonyPatch]
+[SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
+[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")] // why so many warnings???
 public static class GameModeOption
 {
     /// <summary>
@@ -47,10 +49,7 @@ public static class GameModeOption
         [0] = MiraLocaleManager.GetOrCreateLocaleString("MiraApi.Gamemode.Classic"),
     };
 
-    internal static StringOption OptionBehaviour { get; set; } = null!;
-
-    [SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
-    [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")] // why so many warnings???
+    internal static StringOption OptionBehaviour = null!;
     internal static int LastValue;
 
     internal static void AddOption(AbstractGameMode mode)
