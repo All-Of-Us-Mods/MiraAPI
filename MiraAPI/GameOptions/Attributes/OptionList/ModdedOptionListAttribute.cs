@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -11,12 +12,14 @@ namespace MiraAPI.GameOptions.Attributes;
 /// </summary>
 /// <param name="title">The title of the options.</param>
 [AttributeUsage(AttributeTargets.Property)]
+[SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
+[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")] // why so many warnings???
 public abstract class ModdedOptionListAttribute(string? title = null) : PropertyOptionAttribute
 {
-    internal IModdedOptionList? HolderOptionList { get; set; }
-    internal IList? Value { get; set; }
-    internal Type ValueType { get; set; }
-    internal string[] Titles { get; set; }
+    internal IModdedOptionList? HolderOptionList;
+    internal IList? Value;
+    internal Type ValueType;
+    internal string[] Titles;
 
     private static readonly Regex FormatParams = new(@"\{(\d+)(?::[^}]+)?\}", default, Regex.InfiniteMatchTimeout);
 

@@ -12,12 +12,12 @@ public static class CustomGameModeManager
 {
     internal static readonly Dictionary<uint, AbstractGameMode> IdToModeMap = [];
 
+    private static uint lastId;
+
     private static uint GetNextId()
     {
-        return ++LastId;
+        return ++lastId;
     }
-
-    private static uint LastId { get; set; }
 
     /// <summary>
     /// Register gamemode from type.
@@ -45,8 +45,8 @@ public static class CustomGameModeManager
             return true;
 
         IdToModeMap.Add(GetNextId(), mode);
-        pluginInfo.GameModes.Add(LastId, mode);
-        mode.ID = LastId;
+        pluginInfo.GameModes.Add(lastId, mode);
+        mode.ID = lastId;
         GameModeOption.AddOption(mode);
         return true;
     }
@@ -121,7 +121,7 @@ public static class CustomGameModeManager
         IdToModeMap.Add(1, hnsMode);
         hnsMode.ID = 1;
         GameModeOption.AddOption(hnsMode);
-        LastId++;
+        lastId++;
     }
 
     internal static void GetAndSetGameMode()

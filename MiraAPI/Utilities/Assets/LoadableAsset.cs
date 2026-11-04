@@ -37,7 +37,7 @@ public abstract class LoadableAsset<T>
     /// <returns>True if the asset was unloaded, false otherwise.</returns>
     public virtual bool UnloadAsset()
     {
-        if (LoadedAsset == null || !LoadedAsset)
+        if (LoadedAsset == null)
         {
             return false;
         }

@@ -858,4 +858,18 @@ public static class Extensions
     {
         return Attribute.IsDefined(element, typeof(T));
     }
+
+    /// <summary>
+    /// Attempts to get a specified custom attribute on an element.
+    /// </summary>
+    /// <typeparam name="T">The type of the attribute.</typeparam>
+    /// <param name="member">The member to get the attribute from.</param>
+    /// <param name="attribute">If the method returns true, a non-null reference to the attribute.</param>
+    /// <returns>true if the member has the specified attribute; otherwise false.</returns>
+    public static bool TryGetCustomAttribute<T>(this MemberInfo member, [NotNullWhen(true)] out T? attribute)
+        where T : Attribute
+    {
+        attribute = member.GetCustomAttribute<T>();
+        return attribute != null;
+    }
 }
