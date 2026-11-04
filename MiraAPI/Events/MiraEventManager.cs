@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using MiraAPI.PluginLoading;
@@ -29,24 +28,6 @@ public static class MiraEventManager
 
     private static bool loadFinilized = false;
 
-    private static bool TryGetEventHandlers(Type type, [NotNullWhen(true)] out List<MiraEventWrapper>? eventHandlers)
-    {
-        eventHandlers = null;
-        if (!EventWrappers.TryGetValue(type.GetTrackedType(), out var handlers))
-        {
-            return false;
-        }
-
-        var callableHandlers = handlers.Where(x => x.DefinedType.IsAssignableTo(type)).ToList();
-        if (callableHandlers.Count == 0)
-        {
-            return false;
-        }
-
-        eventHandlers = callableHandlers;
-        return true;
-    }
-
     /// <summary>
     /// Invoke a <see cref="MiraEvent"/>.
     /// </summary>
@@ -67,12 +48,18 @@ public static class MiraEventManager
     /// <returns>If there was an event handler invoked for this event, return <see langword="true"/>. Otherwise, return <see langword="false"/>.</returns>
     public static bool InvokeEvent(this MiraEvent eventInstance, Type type)
     {
-        if (!TryGetEventHandlers(type, out var handlers))
+        if (!EventWrappers.TryGetValue(type.GetTrackedType(), out var handlers))
         {
             return false;
         }
 
-        foreach (var handler in handlers)
+        var callableHandlers = handlers.Where(x => x.DefinedType.IsAssignableTo(type)).ToList();
+        if (callableHandlers.Count == 0)
+        {
+            return false;
+        }
+
+        foreach (var handler in callableHandlers)
         {
             try
             {
