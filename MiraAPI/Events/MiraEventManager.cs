@@ -19,6 +19,7 @@ public static class MiraEventManager
 
     /// <summary>
     /// Gets the list of all registered <see cref="MiraEvent"/> types.
+    /// Generic event types are registered as their generic type definitions.
     /// </summary>
     public static IReadOnlyList<Type> EventTypes { get; internal set; } = [];
 
