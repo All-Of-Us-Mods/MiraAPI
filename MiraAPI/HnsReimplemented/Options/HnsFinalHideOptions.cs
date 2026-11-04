@@ -6,7 +6,7 @@ using MiraAPI.Utilities;
 namespace MiraAPI.HnsReimplemented.Options;
 
 /// <summary>
-/// Gets or sets the Final Hide options for Hide and Seek.
+/// Final Hide options for Hide and Seek.
 /// </summary>
 // ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated via Activator.CreateInstance.)
 public class HnsFinalHideOptions : AbstractOptionGroup<HideAndSeekMode>
@@ -15,9 +15,9 @@ public class HnsFinalHideOptions : AbstractOptionGroup<HideAndSeekMode>
     public override string GroupName => "Final Hide";
 
     /// <summary>
-    /// Gets or sets the duration of the Final Hide phase.
+    /// Gets the duration of the Final Hide phase.
     /// </summary>
-    public ModdedNumberOption FinalHideTime { get; set; } = new(
+    public ModdedNumberOption FinalHideTime { get; } = new(
         "Hiding Time",
         50,
         30,
@@ -28,9 +28,9 @@ public class HnsFinalHideOptions : AbstractOptionGroup<HideAndSeekMode>
         MiraNumberSuffixes.Seconds);
 
     /// <summary>
-    /// Gets or sets the Seeker's speed when the Final Hide phase begins.
+    /// Gets the Seeker's speed when the Final Hide phase begins.
     /// </summary>
-    public ModdedNumberOption FinalHideImpostorSpeed { get; set; } = new(
+    public ModdedNumberOption FinalHideImpostorSpeed { get; } = new(
         "Final Hide Impostor Speed",
         1.2f,
         1f,
@@ -42,16 +42,16 @@ public class HnsFinalHideOptions : AbstractOptionGroup<HideAndSeekMode>
         "0.00");
 
     /// <summary>
-    /// Gets or sets whether the Seeker sees the Final hide player pings.
+    /// Gets whether the Seeker sees the Final hide player pings.
     /// </summary>
-    public ModdedToggleOption FinalHidePings { get; set; } = new(
+    public ModdedToggleOption FinalHidePings { get; } = new(
         "Final Hide Pings",
         true);
 
     /// <summary>
-    /// Gets or sets the interval between each ping.
+    /// Gets the interval between each ping.
     /// </summary>
-    public ModdedNumberOption PingInterval { get; set; } = new(
+    public ModdedNumberOption PingInterval { get; } = new(
         "Ping Interval",
         6,
         3,
@@ -62,9 +62,9 @@ public class HnsFinalHideOptions : AbstractOptionGroup<HideAndSeekMode>
         MiraNumberSuffixes.Seconds);
 
     /// <summary>
-    /// Gets or sets whether the Seeker can see players on an admin map.
+    /// Gets whether the Seeker can see players on an admin map.
     /// </summary>
-    public ModdedToggleOption FinalHideSeekMap { get; set; } = new(
+    public ModdedToggleOption FinalHideSeekMap { get; } = new(
         "Final Hide Seek Map",
         true);
 }
