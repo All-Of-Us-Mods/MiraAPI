@@ -312,9 +312,7 @@ public sealed class MiraPluginManager
     {
         try
         {
-            var attribute = type.GetCustomAttribute<RegisterCustomColorsAttribute>();
-
-            if (attribute == null)
+            if (!type.TryGetCustomAttribute<RegisterCustomColorsAttribute>(out var attribute))
             {
                 return false;
             }
