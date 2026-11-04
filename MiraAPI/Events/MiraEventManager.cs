@@ -236,7 +236,6 @@ public static class MiraEventManager
 
         foreach (Type eventType in trackedEvents)
         {
-            EventWrappers.TryAdd(eventType, []);
             var handlers = EventWrappers[eventType];
 
             var index = handlers.BinarySearch(eventWrapper, Comparer<MiraEventWrapper>.Create((a, b) => a.Priority.CompareTo(b.Priority)));
@@ -304,14 +303,9 @@ public static class MiraEventManager
 
         foreach (var (concreteType, eventHandlers) in EventWrappersToLoad)
         {
-            if (!TrackedEventTypes.TryGetValue(concreteType.GetTrackedType(), out var trackedEventTypes))
+            foreach (var eventHandler in eventHandlers)
             {
-                continue;
-            }
-
-            foreach (var eventType in trackedEventTypes)
-            {
-                EventWrappers[eventType].AddRange(eventHandlers);
+                EventHandlerAdded(concreteType, eventHandler);
             }
         }
     }
