@@ -28,6 +28,23 @@ public static class MiraEventManager
 
     private static bool loadFinilized = false;
 
+    private static bool TryGetEventHandlers(Type type, [NotNullWhen(true)] out List<MiraEventWrapper>? eventHandlers)
+    {
+        eventHandlers = null;
+        if (!EventWrappers.TryGetValue(type.GetTrackedType(), out var handlers))
+        {
+            return false;
+        }
+
+        if (handlers.Count == 0)
+        {
+            return false;
+        }
+
+        eventHandlers = handlers;
+        return true;
+    }
+
     /// <summary>
     /// Invoke a <see cref="MiraEvent"/>.
     /// </summary>
@@ -37,9 +54,7 @@ public static class MiraEventManager
     public static bool InvokeEvent<T>(this T eventInstance)
         where T : MiraEvent
     {
-        EventWrappers.TryGetValue(typeof(T), out var handlers);
-
-        if (handlers == null || handlers.Count == 0)
+        if (!TryGetEventHandlers(typeof(T), out var handlers))
         {
             return false;
         }
@@ -67,9 +82,7 @@ public static class MiraEventManager
     /// <returns>If there was an event handler invoked for this event, return <see langword="true"/>. Otherwise, return <see langword="false"/>.</returns>
     public static bool InvokeEvent(this MiraEvent eventInstance, Type type)
     {
-        EventWrappers.TryGetValue(type, out var handlers);
-
-        if (handlers == null || handlers.Count == 0)
+        if (!TryGetEventHandlers(type, out var handlers))
         {
             return false;
         }
@@ -195,13 +208,14 @@ public static class MiraEventManager
         return new MiraEventHandle(type, eventWrapper);
     }
 
-    private static bool TryGetTrackedEventType(Type type, [NotNullWhen(true)] out HashSet<Type>? trackedEventTypes)
+    private static Type GetTrackedType(this Type type)
     {
-        Type typeToCheck = type.IsGenericType
-            ? type.GetGenericTypeDefinition()
-            : type;
+        if (type.IsGenericType)
+        {
+            return type.GetGenericTypeDefinition();
+        }
 
-        return TrackedEventTypes.TryGetValue(typeToCheck, out trackedEventTypes);
+        return type;
     }
 
     private static void EventHandlerAdded(Type type, MiraEventWrapper eventWrapper)
@@ -213,7 +227,7 @@ public static class MiraEventManager
             return;
         }
 
-        if (!TryGetTrackedEventType(type, out var trackedEvents))
+        if (!TrackedEventTypes.TryGetValue(type.GetTrackedType(), out var trackedEvents))
         {
             return;
         }
@@ -256,7 +270,7 @@ public static class MiraEventManager
             return true;
         }
 
-        if (!TryGetTrackedEventType(eventHandle.EventType, out var eventTypes))
+        if (!TrackedEventTypes.TryGetValue(eventHandle.EventType.GetTrackedType(), out var eventTypes))
         {
             return false;
         }
@@ -287,7 +301,7 @@ public static class MiraEventManager
 
         foreach (var (concreteType, eventHandlers) in EventWrappersToLoad)
         {
-            if (!TryGetTrackedEventType(concreteType, out var trackedEventTypes))
+            if (!TrackedEventTypes.TryGetValue(concreteType.GetTrackedType(), out var trackedEventTypes))
             {
                 continue;
             }
