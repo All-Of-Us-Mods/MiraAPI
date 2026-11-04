@@ -184,10 +184,15 @@ public static class MiraEventManager
     /// <returns>A <see cref="MiraEventHandle"/> to use when unregistering the event.</returns>
     private static MiraEventHandle RegisterEventHandler(Type type, Delegate @delegate, int priority)
     {
+        var eventWrapper = new MiraEventWrapper(@delegate, priority);
+        EventHandlerAdded(type, eventWrapper);
+        return new MiraEventHandle(type, eventWrapper);
+    }
+
+    private static void EventHandlerAdded(Type type, MiraEventWrapper eventWrapper)
+    {
         EventWrappers.TryAdd(type, []);
         var handlers = EventWrappers[type];
-
-        var eventWrapper = new MiraEventWrapper(@delegate, priority);
 
         var index = handlers.BinarySearch(eventWrapper, Comparer<MiraEventWrapper>.Create((a, b) => a.Priority.CompareTo(b.Priority)));
 
@@ -197,7 +202,6 @@ public static class MiraEventManager
         }
 
         handlers.Insert(index, eventWrapper);
-        return new MiraEventHandle(type, eventWrapper);
     }
 
     /// <summary>
