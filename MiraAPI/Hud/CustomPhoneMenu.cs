@@ -16,6 +16,7 @@ namespace MiraAPI.Hud;
 /// <summary>
 /// Component registered in Il2Cpp domain to handle Unity events for custom menus.
 /// </summary>
+/// <param name="cppPtr">The pointer to the C++ object.</param>
 [RegisterInIl2Cpp]
 public class CustomPhoneMenuComponent(IntPtr cppPtr) : Minigame(cppPtr)
 {

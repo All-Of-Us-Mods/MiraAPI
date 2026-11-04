@@ -113,7 +113,7 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
             .OrderByDescending(e => e.SortKey.Equals(query, StringComparison.OrdinalIgnoreCase))
             .ThenByDescending(e => e.SortKey.StartsWith(query, StringComparison.OrdinalIgnoreCase))
             .ThenByDescending(e => e.SortKey.Contains(query, StringComparison.OrdinalIgnoreCase))
-            .ThenBy(e => e.SortKey, StringComparer.OrdinalIgnoreCase)];
+            .ThenBy(e => e.SortKey, StringComparer.OrdinalIgnoreCase),];
     }
 
     private static int GetTotalPages(int itemCount)

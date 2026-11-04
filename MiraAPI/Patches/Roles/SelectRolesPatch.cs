@@ -47,7 +47,7 @@ public static class SelectRolesPatch
         AmongUsClient.Instance.GetAllClients(list);
         List<NetworkedPlayerInfo> list2 = [.. list.ToArray()
             .Where(c => c.Character != null && c.Character.Data != null && !c.Character.Data.Disconnected &&
-                        !c.Character.Data.IsDead).OrderBy(c => c.Id).Select(c => c.Character.Data)];
+                        !c.Character.Data.IsDead).OrderBy(c => c.Id).Select(c => c.Character.Data),];
 
         foreach (var networkedPlayerInfo in GameData.Instance.AllPlayers)
         {

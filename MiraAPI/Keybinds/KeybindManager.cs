@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Il2CppInterop.Runtime.Attributes;
 using MiraAPI.Utilities;
 using Rewired;
 
@@ -17,8 +17,9 @@ public static class KeybindManager
     /// </summary>
     public static List<MiraKeybind> Keybinds { get; } = [];
 
-    [HideFromIl2Cpp]
-    internal static Dictionary<Type, VanillaKeybind> VanillaKeybinds { get; set; } = [];
+    [SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
+    [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
+    internal static readonly Dictionary<Type, VanillaKeybind> VanillaKeybinds = [];
 
     internal static void RewiredInit()
     {

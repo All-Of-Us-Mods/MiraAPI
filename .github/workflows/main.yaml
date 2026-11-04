@@ -5,6 +5,8 @@ on: ["workflow_dispatch", "push", "pull_request"]
 jobs:
   build:
     runs-on: ubuntu-22.04
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -38,14 +40,21 @@ jobs:
         with:
           name: AllOfUs.MiraAPI.nupkg
           path: MiraAPI/bin/Release/AllOfUs.MiraAPI.*.nupkg
-          
+
       - uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
         with:
           draft: true
           files: MiraAPI/bin/Release/net6.0/MiraAPI.dll
-          
+
+      - name: NuGet login
+        if: github.ref_type == 'tag'
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: xtracube
+
       - name: Push NuGet package
         if: github.ref_type == 'tag'
         run: |
-          dotnet nuget push MiraAPI/bin/Release/AllOfUs.MiraAPI.*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+          dotnet nuget push MiraAPI/bin/Release/AllOfUs.MiraAPI.*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ steps.login.outputs.NUGET_API_KEY }}

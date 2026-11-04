@@ -6,7 +6,7 @@ using MiraAPI.Utilities;
 namespace MiraAPI.HnsReimplemented.Options;
 
 /// <summary>
-/// Gets or sets the seeker settings on Hide and Seek.
+/// Seeker settings on Hide and Seek.
 /// </summary>
 // ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated via Activator.CreateInstance.)
 public class HnsImpostorOptions : AbstractOptionGroup<HideAndSeekMode>
@@ -15,15 +15,15 @@ public class HnsImpostorOptions : AbstractOptionGroup<HideAndSeekMode>
     public override string GroupName => "Impostors";
 
     /// <summary>
-    /// Gets or sets the player who will be the seeker.
+    /// Gets the player who will be the seeker.
     /// </summary>
-    public ModdedPlayerOption SelectedSeeker { get; set; } = new(
+    public ModdedPlayerOption SelectedSeeker { get; } = new(
         "Forced Impostor");
 
     /// <summary>
-    /// Gets or sets the range of a seeker's vision.
+    /// Gets the range of a seeker's vision.
     /// </summary>
-    public ModdedNumberOption ImpostorVision { get; set; } = new(
+    public ModdedNumberOption ImpostorVision { get; } = new(
         "Impostor Vision",
         0.6f,
         0.25f,
@@ -35,9 +35,9 @@ public class HnsImpostorOptions : AbstractOptionGroup<HideAndSeekMode>
         "0.00");
 
     /// <summary>
-    /// Gets or sets the range of a seeker's flashlight.
+    /// Gets the range of a seeker's flashlight.
     /// </summary>
-    public ModdedNumberOption ImpostorFlashlightSize { get; set; } = new(
+    public ModdedNumberOption ImpostorFlashlightSize { get; } = new(
         "Impostor Flashlight Size",
         0.35f,
         0.1f,

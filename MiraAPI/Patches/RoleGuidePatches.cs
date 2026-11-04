@@ -16,6 +16,7 @@ using MiraAPI.Roles;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
+using MiraAPI.Utilities.Components;
 using Reactor.Utilities;
 using Reactor.Utilities.Extensions;
 using TMPro;
@@ -1246,7 +1247,7 @@ public static class RoleGuidePatches
         [
             .. _sortMethod is SortingMethod.Alphabetical
                 ? sorted.ThenBy(p => p.GetSortKey(_sortGrouping))
-                : sorted.ThenByDescending(p => p.GetSortKey(_sortGrouping))
+                : sorted.ThenByDescending(p => p.GetSortKey(_sortGrouping)),
         ];
     }
 

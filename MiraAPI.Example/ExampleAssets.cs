@@ -5,7 +5,7 @@ namespace MiraAPI.Example;
 
 public static class ExampleAssets
 {
-    private static readonly Assembly _assembly = typeof(MiraAssets).Assembly;
+    private static readonly Assembly _assembly = typeof(ExampleAssets).Assembly;
 
     public static LoadableResourceAsset ExampleButton { get; } = new("MiraAPI.Example.Resources.ExampleButton.png", _assembly);
     public static LoadableResourceAsset CallMeetingButton { get; } = new("MiraAPI.Example.Resources.CallMeeting.png", _assembly);

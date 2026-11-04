@@ -16,6 +16,7 @@ namespace MiraAPI.LocalSettings;
 /// <summary>
 /// Represents a local settings tab. Gets a button by default.
 /// </summary>
+/// <param name="config">The config file that this settings tab wraps around.</param>
 public abstract class LocalSettingsTab(ConfigFile config)
 {
     /// <summary>
@@ -73,7 +74,7 @@ public abstract class LocalSettingsTab(ConfigFile config)
     /// </summary>
     protected int TabIndex => LocalSettingsManager.Tabs.IndexOf(this) + 10;
 
-    private Scroller? Scroller { get; set; }
+    private Scroller? scroller;
     private float MaxScroll { get; set; }
 
     /// <summary>
@@ -109,13 +110,13 @@ public abstract class LocalSettingsTab(ConfigFile config)
 
     internal void RefreshScrollBounds()
     {
-        if (Scroller == null)
+        if (scroller == null)
         {
             return;
         }
 
-        Scroller.SetBounds(new FloatRange(0, MaxScroll), new FloatRange(0, 0));
-        Scroller.ScrollToTop();
+        scroller.SetBounds(new FloatRange(0, MaxScroll), new FloatRange(0, 0));
+        scroller.ScrollToTop();
     }
 
     /// <summary>
@@ -130,9 +131,9 @@ public abstract class LocalSettingsTab(ConfigFile config)
         tab.transform.DestroyChildren();
         tab.gameObject.SetActive(false);
 
-        if (Scroller == null || Scroller.transform.parent != tab.transform)
+        if (scroller == null || scroller.transform.parent != tab.transform)
         {
-            Scroller = Helpers.CreateScroller(tab.transform, OptionsMenuPatches.MaskCollider);
+            scroller = Helpers.CreateScroller(tab.transform, OptionsMenuPatches.MaskCollider);
         }
 
         Labels.Clear();
@@ -165,7 +166,7 @@ public abstract class LocalSettingsTab(ConfigFile config)
         {
             if (ShouldCreateLabels)
             {
-                CreateLabel(generalLabel, Scroller.Inner, pair.Key, ref contentOffset);
+                CreateLabel(generalLabel, scroller.Inner, pair.Key, ref contentOffset);
                 contentOrder = 1;
                 contentIndex = 1;
             }
@@ -175,7 +176,7 @@ public abstract class LocalSettingsTab(ConfigFile config)
                 var obj = setting.CreateOption(
                     toggle,
                     slider,
-                    Scroller.Inner,
+                    scroller.Inner,
                     ref contentOffset,
                     ref contentOrder,
                     contentIndex == pair.Value.Count);
@@ -207,7 +208,7 @@ public abstract class LocalSettingsTab(ConfigFile config)
         {
             var obj = button.CreateButton(
                 toggle,
-                Scroller.Inner,
+                scroller.Inner,
                 ref contentOffset,
                 ref contentOrder,
                 contentIndex == Buttons.Count);

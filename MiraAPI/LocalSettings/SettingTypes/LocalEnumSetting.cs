@@ -39,7 +39,7 @@ public class LocalEnumSetting(
     public string[] Values { get; } = values ?? [.. Enum
         .GetValues(configEntry.SettingType)
         .Cast<Enum>()
-        .Select(x => x.ToDisplayString())];
+        .Select(x => x.ToDisplayString()),];
 
     private SpriteRenderer _highlight;
     private TextMeshPro _btnText;
