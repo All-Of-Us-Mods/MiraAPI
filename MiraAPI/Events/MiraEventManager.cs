@@ -36,12 +36,13 @@ public static class MiraEventManager
             return false;
         }
 
-        if (handlers.Count == 0)
+        var callableHandlers = handlers.Where(x => x.ConstructedType.IsAssignableTo(type)).ToList();
+        if (callableHandlers.Count == 0)
         {
             return false;
         }
 
-        eventHandlers = handlers;
+        eventHandlers = callableHandlers;
         return true;
     }
 
@@ -203,7 +204,7 @@ public static class MiraEventManager
     /// <returns>A <see cref="MiraEventHandle"/> to use when unregistering the event.</returns>
     private static MiraEventHandle RegisterEventHandler(Type type, Delegate @delegate, int priority)
     {
-        var eventWrapper = new MiraEventWrapper(@delegate, priority);
+        var eventWrapper = new MiraEventWrapper(@delegate, priority, type);
         EventHandlerAdded(type, eventWrapper);
         return new MiraEventHandle(type, eventWrapper);
     }
