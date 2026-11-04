@@ -37,7 +37,7 @@ public static class MiraEventManager
             return false;
         }
 
-        var callableHandlers = handlers.Where(x => x.DefinedType.IsSubclassOf(type)).ToList();
+        var callableHandlers = handlers.Where(x => x.DefinedType.IsAssignableTo(type)).ToList();
         if (callableHandlers.Count == 0)
         {
             return false;
@@ -174,7 +174,7 @@ public static class MiraEventManager
     /// <returns>A <see cref="MiraEventHandle"/> to use when unregistering the event.</returns>
     public static MiraEventHandle RegisterEventHandler(Type type, MethodInfo methodInfo, int priority = 0)
     {
-        if (!type.IsSubclassOf(typeof(MiraEvent)))
+        if (!type.IsAssignableTo(typeof(MiraEvent)))
         {
             throw new InvalidOperationException($"Type must be a subclass of MiraEvent: {type.FullName}");
         }
