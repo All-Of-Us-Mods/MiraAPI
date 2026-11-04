@@ -37,7 +37,7 @@ public static class MiraEventManager
             return false;
         }
 
-        var callableHandlers = handlers.Where(x => type.IsSubclassOfWithGeneric(x.DefinedType)).ToList();
+        var callableHandlers = handlers.Where(x => x.DefinedType.IsSubclassOf(type)).ToList();
         if (callableHandlers.Count == 0)
         {
             return false;
@@ -113,11 +113,11 @@ public static class MiraEventManager
 
         AddTypeToTracked(eventType);
 
-        TrackedEventTypes[eventType].UnionWith(InternalEventTypes.Where(x => eventType.IsSubclassOfWithGeneric(x)));
-
-        foreach (var subType in InternalEventTypes.Where(x => x.IsSubclassOfWithGeneric(eventType)))
+        // subtypes are added to their supertypes, regardless of which were added first
+        TrackedEventTypes[eventType].UnionWith(InternalEventTypes.Where(x => x.IsSubclassOfWithGeneric(eventType)));
+        foreach (var supertype in InternalEventTypes.Where(x => eventType.IsSubclassOfWithGeneric(x)))
         {
-            AddTypeToTracked(subType, eventType);
+            AddTypeToTracked(supertype, eventType);
         }
 
         info.InternalEventTypes.Add(eventType);
