@@ -106,7 +106,7 @@ public static class MiraEventManager
 
     internal static bool RegisterEventType(Type eventType, MiraPluginInfo info)
     {
-        if (!typeof(MiraEvent).IsAssignableFrom(eventType))
+        if (!eventType.IsSubclassOf(typeof(MiraEvent)))
         {
             return false;
         }
