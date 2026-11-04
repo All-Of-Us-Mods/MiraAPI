@@ -18,10 +18,10 @@ namespace MiraAPI.LocalSettings.SettingTypes;
 /// <param name="name">The name of the setting.</param>
 /// <param name="description">The description of the setting.</param>
 /// <param name="sliderRange">The value range.</param>
+/// <param name="displayValue">Should display the value next to the name.</param>
 /// <param name="suffixType">The suffix used for formatting.</param>
 /// <param name="formatString">The format string used for formatting.</param>
 /// <param name="roundValue">Should the value be rounded.</param>
-/// <param name="displayValue">Should display the value next to the name.</param>
 public class LocalSliderSetting(
     Type tab,
     ConfigEntryBase configEntry,

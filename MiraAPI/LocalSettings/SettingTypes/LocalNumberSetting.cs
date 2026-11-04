@@ -15,9 +15,9 @@ namespace MiraAPI.LocalSettings.SettingTypes;
 /// </summary>
 /// <param name="tab">The tab to create the setting in.</param>
 /// <param name="configEntry">The config entry.</param>
-/// <param name="numberRange">The value range.</param>
 /// <param name="name">The name of the setting.</param>
 /// <param name="description">The description of the setting.</param>
+/// <param name="numberRange">The value range.</param>
 /// <param name="increment">The increment per click.</param>
 /// <param name="suffixType">The suffix used for formatting.</param>
 /// <param name="formatString">The format string used for formatting.</param>

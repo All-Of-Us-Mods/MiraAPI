@@ -29,7 +29,6 @@ public static class GameOverManager
 
         if (gameOverType.IsAbstract)
         {
-            Error("The type must not be abstract.");
             return false;
         }
 

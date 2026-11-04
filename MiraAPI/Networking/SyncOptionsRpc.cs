@@ -47,9 +47,9 @@ internal sealed class SyncOptionsRpc(MiraApiPlugin plugin, uint id) : PlayerCust
         return new MiraOptionNetData(shouldShowNotif, data);
     }
 
-    public override void Handle(PlayerControl playerControl, MiraOptionNetData data)
+    public override void Handle(PlayerControl innerNetObject, MiraOptionNetData data)
     {
-        if (AmongUsClient.Instance.HostId != playerControl.OwnerId)
+        if (AmongUsClient.Instance.HostId != innerNetObject.OwnerId)
         {
             return;
         }

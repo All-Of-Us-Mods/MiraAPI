@@ -15,6 +15,7 @@ namespace MiraAPI;
 /// <summary>
 /// Mira API <see cref="ConfigFile"/> Handler.
 /// </summary>
+/// <param name="config">The config file that the tab wraps around.</param>
 public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
 {
     /// <inheritdoc />

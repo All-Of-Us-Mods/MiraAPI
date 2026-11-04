@@ -38,7 +38,7 @@ public static class CustomRoleManager
     /// <summary>
     /// Gets the array of all roles from vanilla <see cref="RoleManager"/>.
     /// </summary>
-    public static RoleBehaviour[] AllRoles => RoleManager.Instance.AllRoles.ToArray();
+    public static RoleBehaviour[] AllRoles => RoleManager.InstanceExists ? RoleManager.Instance.AllRoles.ToArray() : [];
 
     /// <summary>
     /// Gets the <see cref="IReadOnlyList{T}"/> of custom roles as <see cref="RoleBehaviour"/> objects.

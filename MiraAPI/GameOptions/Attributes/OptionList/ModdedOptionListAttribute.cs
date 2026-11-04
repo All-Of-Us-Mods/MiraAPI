@@ -12,11 +12,13 @@ namespace MiraAPI.GameOptions.Attributes;
 /// </summary>
 /// <param name="title">The title of the options.</param>
 [AttributeUsage(AttributeTargets.Property)]
+[SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
+[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")] // why so many warnings???
 public abstract class ModdedOptionListAttribute(string title) : PropertyOptionAttribute
 {
-    internal IBaseModdedOptionList? HolderOptionList { get; set; }
-    internal IList? Value { get; set; }
-    internal Type ValueType { get; set; }
+    internal IBaseModdedOptionList? HolderOptionList;
+    internal IList? Value;
+    internal Type ValueType;
 
     /// <summary>
     /// Gets the title of the options.
