@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using MiraAPI.PluginLoading;
@@ -194,6 +195,15 @@ public static class MiraEventManager
         return new MiraEventHandle(type, eventWrapper);
     }
 
+    private static bool TryGetTrackedEventType(Type type, [NotNullWhen(true)] out HashSet<Type>? trackedEventTypes)
+    {
+        Type typeToCheck = type.IsGenericType
+            ? type.GetGenericTypeDefinition()
+            : type;
+
+        return TrackedEventTypes.TryGetValue(typeToCheck, out trackedEventTypes);
+    }
+
     private static void EventHandlerAdded(Type type, MiraEventWrapper eventWrapper)
     {
         if (!loadFinilized)
@@ -203,7 +213,7 @@ public static class MiraEventManager
             return;
         }
 
-        if (!TrackedEventTypes.TryGetValue(type, out var trackedEvents))
+        if (!TryGetTrackedEventType(type, out var trackedEvents))
         {
             return;
         }
@@ -246,7 +256,7 @@ public static class MiraEventManager
             return true;
         }
 
-        if (!TrackedEventTypes.TryGetValue(eventHandle.EventType, out var eventTypes))
+        if (!TryGetTrackedEventType(eventHandle.EventType, out var eventTypes))
         {
             return false;
         }
@@ -272,7 +282,7 @@ public static class MiraEventManager
 
         foreach (var eventType in EventTypes)
         {
-            EventWrappers.TryAdd(eventType, []);
+            EventWrappers.Add(eventType, []);
         }
     }
 }
