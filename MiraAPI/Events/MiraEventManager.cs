@@ -56,24 +56,7 @@ public static class MiraEventManager
     public static bool InvokeEvent<T>(this T eventInstance)
         where T : MiraEvent
     {
-        if (!TryGetEventHandlers(typeof(T), out var handlers))
-        {
-            return false;
-        }
-
-        foreach (var handler in handlers)
-        {
-            try
-            {
-                ((Action<T>)handler.EventHandler).Invoke(eventInstance);
-            }
-            catch (Exception ex)
-            {
-                Error($"Error invoking event handler for {typeof(T).Name}: {ex}");
-            }
-        }
-
-        return true;
+        return InvokeEvent(eventInstance, typeof(T));
     }
 
     /// <summary>
