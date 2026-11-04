@@ -10,13 +10,12 @@ public class MiraEventHandle
     /// <summary>
     /// Gets the type of event.
     /// </summary>
-    public Type EventType { get; }
+    public Type EventType => EventWrapper.DefinedType;
 
     internal MiraEventWrapper EventWrapper { get; }
 
-    internal MiraEventHandle(Type type, MiraEventWrapper eventWrapper)
+    internal MiraEventHandle(MiraEventWrapper eventWrapper)
     {
-        EventType = type;
         EventWrapper = eventWrapper;
     }
 }
