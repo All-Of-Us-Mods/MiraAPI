@@ -17,5 +17,6 @@ public interface ISummarizedOptions
     /// Gets summary lines to insert when the first hidden option would have appeared.
     /// Lines should already be formatted as "Title: Value".
     /// </summary>
+    /// <returns>The summarisation of the hidden options.</returns>
     IEnumerable<string> GetWikiOptionSummaryLines();
 }
