@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using MiraAPI.PluginLoading;
@@ -11,6 +12,8 @@ namespace MiraAPI.Events;
 /// </summary>
 public static class MiraEventManager
 {
+    private static readonly Dictionary<Type, List<MiraEventWrapper>> EventWrappersToLoad = [];
+
     private static readonly Dictionary<Type, List<MiraEventWrapper>> EventWrappers = [];
 
     /// <summary>
@@ -21,6 +24,8 @@ public static class MiraEventManager
     internal static List<Type> InternalEventTypes { get; } = [];
 
     private static readonly Dictionary<Type, HashSet<Type>> TrackedEventTypes = [];
+
+    private static bool loadFinilized = false;
 
     /// <summary>
     /// Invoke a <see cref="MiraEvent"/>.
@@ -191,17 +196,32 @@ public static class MiraEventManager
 
     private static void EventHandlerAdded(Type type, MiraEventWrapper eventWrapper)
     {
-        EventWrappers.TryAdd(type, []);
-        var handlers = EventWrappers[type];
-
-        var index = handlers.BinarySearch(eventWrapper, Comparer<MiraEventWrapper>.Create((a, b) => a.Priority.CompareTo(b.Priority)));
-
-        if (index < 0)
+        if (!loadFinilized)
         {
-            index = ~index;
+            EventWrappersToLoad.TryAdd(type, []);
+            EventWrappersToLoad[type].Add(eventWrapper);
+            return;
         }
 
-        handlers.Insert(index, eventWrapper);
+        if (!TrackedEventTypes.TryGetValue(type, out var trackedEvents))
+        {
+            return;
+        }
+
+        foreach (Type eventType in trackedEvents)
+        {
+            EventWrappers.TryAdd(eventType, []);
+            var handlers = EventWrappers[eventType];
+
+            var index = handlers.BinarySearch(eventWrapper, Comparer<MiraEventWrapper>.Create((a, b) => a.Priority.CompareTo(b.Priority)));
+
+            if (index < 0)
+            {
+                index = ~index;
+            }
+
+            handlers.Insert(index, eventWrapper);
+        }
     }
 
     /// <summary>
@@ -211,21 +231,48 @@ public static class MiraEventManager
     /// <returns><see langword="true"/> if the event was unregistered successfully, <see langword="false"/> otherwise.</returns>
     public static bool UnregisterEventHandler(MiraEventHandle eventHandle)
     {
-        if (!EventWrappers.TryGetValue(eventHandle.EventType, out var handlers))
+        if (!loadFinilized)
+        {
+            if (!EventWrappersToLoad.TryGetValue(eventHandle.EventType, out var handlersToLoad))
+            {
+                return false;
+            }
+
+            if (!handlersToLoad.Remove(eventHandle.EventWrapper))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        if (!TrackedEventTypes.TryGetValue(eventHandle.EventType, out var eventTypes))
         {
             return false;
         }
 
-        if (!handlers.Remove(eventHandle.EventWrapper))
+        var removed = false;
+        foreach (var type in eventTypes)
         {
-            return false;
+            if (!EventWrappers.TryGetValue(type, out var handlers))
+            {
+                continue;
+            }
+
+            removed |= handlers.Remove(eventHandle.EventWrapper);
         }
 
-        if (handlers.Count == 0)
-        {
-            EventWrappers.Remove(eventHandle.EventType);
-        }
+        return removed;
+    }
 
-        return true;
+    internal static void OnLoadFinilize()
+    {
+        loadFinilized = true;
+        EventTypes = new ReadOnlyCollection<Type>(InternalEventTypes);
+
+        foreach (var eventType in EventTypes)
+        {
+            EventWrappers.TryAdd(eventType, []);
+        }
     }
 }
