@@ -30,11 +30,6 @@ public class HandleVoteEvent(PlayerVoteData playerVoteData, byte targetId, bool 
     public byte TargetId { get; } = targetId;
 
     /// <summary>
-    /// Gets or sets a value indicating whether to prevent the vote from commencing.
-    /// </summary>
-    public bool PreventVote { get; set; } = false;
-
-    /// <summary>
     /// Gets the <see cref="NetworkedPlayerInfo"/> of the target.
     /// </summary>
     public NetworkedPlayerInfo TargetPlayerInfo { get; } = GameData.Instance.GetPlayerById(targetId);
@@ -43,4 +38,9 @@ public class HandleVoteEvent(PlayerVoteData playerVoteData, byte targetId, bool 
     /// Gets or sets a value indicating whether the vote event is an Overrule caused by a Judge.
     /// </summary>
     public bool IsOverruling { get; set; } = isOverruling;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to prevent the vote from commencing.
+    /// </summary>
+    public bool PreventVote { get; set; } = false;
 }

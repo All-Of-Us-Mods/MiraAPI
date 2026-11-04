@@ -47,7 +47,10 @@ public abstract class ModdedOption<T> : IModdedOption
     /// </summary>
     public T Value
     {
-        get => Getter != null ? Getter(_value) : _value;
+        get
+        {
+            return Getter != null ? Getter(_value) : _value;
+        }
         protected set
         {
             if (Setter != null)

@@ -30,6 +30,11 @@ public sealed class BeforeMurderEvent(PlayerControl source, PlayerControl target
     public PlayerControl? Framed { get; } = framed;
 
     /// <summary>
+    /// Gets whether the murder was meant to be done in a meeting, via an enum.
+    /// </summary>
+    public MeetingCheck InMeeting { get; } = inMeeting;
+
+    /// <summary>
     /// Gets or sets a value indicating whether the murder is done indirectly.
     /// This is commonly used to prevent the <see cref="Source"/> <see cref="PlayerControl"/> from being killed.
     /// </summary>
@@ -39,11 +44,6 @@ public sealed class BeforeMurderEvent(PlayerControl source, PlayerControl target
     /// Gets or sets  a value indicating whether the murder should bypass protective roles or general defense, such as <see cref="GuardianAngelRole"/>.
     /// </summary>
     public bool IgnoreDefense { get; set; } = ignoreDefense;
-
-    /// <summary>
-    /// Gets whether the murder was meant to be done in a meeting, via an enum.
-    /// </summary>
-    public MeetingCheck InMeeting { get; } = inMeeting;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BeforeMurderEvent"/> class.

@@ -260,7 +260,7 @@ internal static class MeetingHudPatches
             {
                 VoterId = v.Voter,
                 VotedForId = v.Suspect,
-            })
+            }),
         ]);
 
         __instance.RpcVotingComplete(voterStates, exiled, isTie, @event.OverruledVote, @event.OverruledNonce);

@@ -9,6 +9,7 @@ namespace MiraAPI.Modifiers.ModifierDisplay;
 /// <summary>
 /// The code placed on every <see cref="IBaseModifier"/> HUD object. Used to handle updating.
 /// </summary>
+/// <param name="cppPtr">The pointer to the C++ object.</param>
 [RegisterInIl2Cpp]
 [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity Convention.")]
 public class ModifierUiComponent(nint cppPtr) : MonoBehaviour(cppPtr)

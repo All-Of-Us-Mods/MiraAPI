@@ -10,6 +10,7 @@ namespace MiraAPI.Utilities.Assets;
 /// A utility class for loading groups of assets from ALL addressable locations.
 /// </summary>
 /// <typeparam name="T">The type of the asset to be loaded.</typeparam>
+/// <param name="key">The asset key.</param>
 public class LoadableAddressableAssets<T>(string key)
     where T : UnityEngine.Object
 {
@@ -18,7 +19,17 @@ public class LoadableAddressableAssets<T>(string key)
     /// <summary>
     /// Gets or sets reference to the loaded asset. Intended to be used for caching purposes.
     /// </summary>
-    protected List<T>? LoadedAssets { get; set; }
+    protected List<T>? LoadedAssets
+    {
+        get;
+        set
+        {
+            field = value;
+            loaded = value?.AsReadOnly();
+        }
+    }
+
+    private ReadOnlyCollection<T>? loaded;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LoadableAddressableAssets{T}"/> class, with added garbageCollector logic,
@@ -41,7 +52,7 @@ public class LoadableAddressableAssets<T>(string key)
     {
         if (LoadedAssets != null)
         {
-            return LoadedAssets.AsReadOnly();
+            return loaded!;
         }
 
         var locations = Addressables.LoadResourceLocationsAsync(key).WaitForCompletion();
@@ -61,6 +72,6 @@ public class LoadableAddressableAssets<T>(string key)
         _gcAction?.Invoke(this);
         GC.EndNoGCRegion();
 
-        return LoadedAssets.AsReadOnly();
+        return loaded!;
     }
 }
