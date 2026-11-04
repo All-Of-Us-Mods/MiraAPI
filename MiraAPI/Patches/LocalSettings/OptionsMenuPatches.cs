@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using HarmonyLib;
@@ -70,7 +71,7 @@ public static class OptionsMenuPatches
 
         _currentPage = 1;
         TabButtons.Clear();
-        float yOffset = 0;
+        var yOffset = 0f;
         var i = 0;
         var tabIdx = 0;
         var page = 1;
@@ -144,9 +145,9 @@ public static class OptionsMenuPatches
                 UpdatePages();
             }));
         button.OnMouseOver = new UnityEvent();
-        button.OnMouseOver.AddListener((UnityAction)(() => rollover.DoMouseOver()));
+        button.OnMouseOver.AddListener((Action)rollover.DoMouseOver);
         button.OnMouseOut = new UnityEvent();
-        button.OnMouseOut.AddListener((UnityAction)(() => rollover.DoMouseOut()));
+        button.OnMouseOut.AddListener((Action)rollover.DoMouseOut);
     }
 
     private static void ChangePage(int increase)
@@ -207,14 +208,17 @@ public static class OptionsMenuPatches
 
     private static void CustomOpen(LocalSettingsTab tab)
     {
-        if (tab.TabButton?.Button)
-            tab.TabButton!.Button.color = tab.TabAppearance.TabButtonHoverColor;
+        if (tab.TabButton)
+        {
+            if (tab.TabButton!.Button)
+                tab.TabButton.Button.color = tab.TabAppearance.TabButtonHoverColor;
 
-        if (tab.TabButton?.Rollover)
-            tab.TabButton!.Rollover.OutColor = tab.TabAppearance.TabButtonHoverColor;
+            if (tab.TabButton.Rollover)
+                tab.TabButton.Rollover.OutColor = tab.TabAppearance.TabButtonHoverColor;
 
-        if (tab.TabButton?.Content)
-            tab.TabButton!.Content.SetActive(true);
+            if (tab.TabButton.Content)
+                tab.TabButton.Content.SetActive(true);
+        }
 
         if (background != null)
             background.color = tab.TabAppearance.TabColor;
@@ -224,14 +228,17 @@ public static class OptionsMenuPatches
 
     private static void CustomClose(LocalSettingsTab tab)
     {
-        if (tab.TabButton?.Button)
-            tab.TabButton!.Button.color = tab.TabAppearance.TabButtonColor;
+        if (tab.TabButton)
+        {
+            if (tab.TabButton!.Button)
+                tab.TabButton.Button.color = tab.TabAppearance.TabButtonColor;
 
-        if (tab.TabButton?.Rollover)
-            tab.TabButton!.Rollover.OutColor = tab.TabAppearance.TabButtonColor;
+            if (tab.TabButton.Rollover)
+                tab.TabButton.Rollover.OutColor = tab.TabAppearance.TabButtonColor;
 
-        if (tab.TabButton?.Content)
-            tab.TabButton!.Content.SetActive(false);
+            if (tab.TabButton.Content)
+                tab.TabButton.Content.SetActive(false);
+        }
 
         if (background != null)
             background.color = Color.white;

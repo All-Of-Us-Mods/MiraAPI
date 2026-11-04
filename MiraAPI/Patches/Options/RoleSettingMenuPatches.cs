@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using AmongUs.GameOptions;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
@@ -12,6 +13,7 @@ using MiraAPI.Roles;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
+using MiraAPI.Utilities.Components;
 using Reactor.Networking.Rpc;
 using Reactor.Utilities.Extensions;
 using TMPro;
@@ -23,14 +25,23 @@ using Object = UnityEngine.Object;
 namespace MiraAPI.Patches.Options;
 
 [HarmonyPatch(typeof(RolesSettingsMenu))]
+[SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Is internal code. Property-level protections are not required.")]
+[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
 public static class RoleSettingMenuPatches
 {
     private static readonly Dictionary<RoleOptionsGroup, bool> RoleGroupHidden = [];
 
-    private static RoleBehaviour? currentRole;
-    private static List<IModdedOption>? currentRoleOptions;
+    internal static RoleBehaviour? CurrentRole;
+    internal static List<IModdedOption>? CurrentRoleOptions;
 
     private static float scrollerNum = 0.522f;
+
+    [HarmonyPostfix]
+    [HarmonyPatch(nameof(RolesSettingsMenu.Awake))]
+    public static void OnAwake(RolesSettingsMenu __instance)
+    {
+        __instance.gameObject.AddComponent<RoleSettingsMenuUpdater>();
+    }
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(RolesSettingsMenu.OnEnable))]
@@ -41,8 +52,8 @@ public static class RoleSettingMenuPatches
 
     private static IEnumerator CoQuotaTabPatch(RolesSettingsMenu roleMenu)
     {
-        currentRole = null;
-        currentRoleOptions = null;
+        CurrentRole = null;
+        CurrentRoleOptions = null;
 
         roleMenu.QuotaTabSelectables.Clear();
         roleMenu.roleChances.Clear();
@@ -91,7 +102,7 @@ public static class RoleSettingMenuPatches
                 Object.Destroy(child.gameObject);
             }
 
-            yield return new WaitForEndOfFrame();
+            yield return null;
             MenuState.Instance.QueuedRoleMenuRefresh[MenuState.Instance.CurrentModIdx] = false;
         }
 
@@ -186,7 +197,7 @@ public static class RoleSettingMenuPatches
                     Object.Destroy(child.gameObject);
                 }
 
-                yield return new WaitForEndOfFrame();
+                yield return null;
 
                 var roleGroups = MenuState.Instance.CurrentMod.InternalRoles.Values.OfType<ICustomRole>()
                     .ToLookup(x => x.RoleOptionsGroup);
@@ -431,32 +442,12 @@ public static class RoleSettingMenuPatches
         scroller.SetYBoundsMax(-scrollerNum - 2);
     }
 
-    // TODO: turn this into a fixed update
+    // Completed: turn this into a fixed update
     [HarmonyPrefix]
     [HarmonyPatch(nameof(RolesSettingsMenu.Update))]
     public static bool UpdatePatch(RolesSettingsMenu __instance)
     {
-        if (MenuState.Instance.CurrentModIdx == 0) return true;
-        if (currentRole == null || currentRoleOptions == null) return false;
-
-        var hasImage = currentRole.RoleScreenshot != null;
-        var num = hasImage ? -0.872f : -1;
-        foreach (var opt in currentRoleOptions)
-        {
-            if (opt.OptionBehaviour == null) continue;
-
-            if (!opt.Visible.Invoke())
-            {
-                opt.OptionBehaviour.gameObject.SetActive(false);
-                continue;
-            }
-
-            opt.OptionBehaviour.transform.localPosition = new Vector3(hasImage ? 2.17f : 1.1f, num, -2f);
-            opt.OptionBehaviour.gameObject.SetActive(true);
-            num += -0.45f;
-        }
-
-        __instance.scrollBar.SetYBoundsMax(-num - 3);
+        // See RoleSettingsMenuUpdater.FixedUpdate in Utilities/Components/RoleSettingsMenuUpdater.cs
         return false;
     }
 
@@ -508,7 +499,7 @@ public static class RoleSettingMenuPatches
             optBehaviour.gameObject.Destroy();
         }
 
-        currentRole = role;
+        CurrentRole = role;
         __instance.advancedSettingChildren.Clear();
 
         // TODO: create sub groups under the role settings.
@@ -547,7 +538,7 @@ public static class RoleSettingMenuPatches
             newOpt.Initialize();
         }
 
-        currentRoleOptions = filteredOptions;
+        CurrentRoleOptions = filteredOptions;
     }
 
     [HarmonyPrefix]
