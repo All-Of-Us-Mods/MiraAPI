@@ -17,7 +17,7 @@ public class MiraEventWrapper
     /// </summary>
     public int Priority { get; }
 
-    internal Type ConstructedType { get; }
+    internal Type DefinedType { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MiraEventWrapper"/> class.
@@ -29,6 +29,6 @@ public class MiraEventWrapper
     {
         EventHandler = eventHandler;
         Priority = priority;
-        ConstructedType = type;
+        DefinedType = type;
     }
 }

@@ -36,7 +36,7 @@ public static class MiraEventManager
             return false;
         }
 
-        var callableHandlers = handlers.Where(x => x.ConstructedType.IsAssignableTo(type)).ToList();
+        var callableHandlers = handlers.Where(x => IsSubclassOf(type, x.DefinedType)).ToList();
         if (callableHandlers.Count == 0)
         {
             return false;
