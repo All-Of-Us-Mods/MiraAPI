@@ -284,5 +284,18 @@ public static class MiraEventManager
         {
             EventWrappers.Add(eventType, []);
         }
+
+        foreach (var (concreteType, eventHandlers) in EventWrappersToLoad)
+        {
+            if (!TryGetTrackedEventType(concreteType, out var trackedEventTypes))
+            {
+                continue;
+            }
+
+            foreach (var eventType in trackedEventTypes)
+            {
+                EventWrappers[eventType].AddRange(eventHandlers);
+            }
+        }
     }
 }
