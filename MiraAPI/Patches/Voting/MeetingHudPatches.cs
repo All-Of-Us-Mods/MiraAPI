@@ -106,6 +106,7 @@ internal static class MeetingHudPatches
     [HarmonyPatch(nameof(MeetingHud.OnDestroy))]
     public static void OnDestroyPatch(MeetingHud __instance)
     {
+        MeetingVoteAreaVisibility.RestoreAll();
         MiraEventManager.InvokeEvent(new EndMeetingEvent(__instance));
     }
 
@@ -113,6 +114,7 @@ internal static class MeetingHudPatches
     [HarmonyPatch(nameof(MeetingHud.VotingComplete))]
     public static void VotingCompletePatch(MeetingHud __instance)
     {
+        MeetingVoteAreaVisibility.RestoreAll();
         foreach (var meetingAbility in MeetingButtonManager.UntargetedButtons.Where(x => x.Enabled(PlayerControl.LocalPlayer.Data.Role) &&
                      (x.DisableUponVoting || x.HideUponWrapUp)))
         {
@@ -269,7 +271,7 @@ internal static class MeetingHudPatches
 
     [HarmonyPrefix]
     [HarmonyPatch(nameof(MeetingHud.PopulateResults))]
-    public static bool PopulateResultsPatch(ref Il2CppStructArray<MeetingHud.VoterState> states)
+    public static bool PopulateResultsPatch(Il2CppStructArray<MeetingHud.VoterState> states)
     {
         var votes = states.Select(x => new CustomVote(x.VoterId, x.VotedForId)).ToList();
 
