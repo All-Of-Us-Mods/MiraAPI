@@ -234,7 +234,7 @@ public static class OptionsMenuPatches
     {
         yield return new WaitForEndOfFrame();
 
-        if (menu && tab.TabButton?.Content && tab.TabButton.Content.activeInHierarchy)
+        if (menu && tab.TabButton && tab.TabButton!.Content && tab.TabButton.Content.activeInHierarchy)
         {
             tab.RefreshScrollBounds();
         }
