@@ -136,7 +136,12 @@ public static class CustomRoleUtils
     public static LoadableAsset<AudioClip>? GetIntroSound(RoleTypes roleType)
     {
         var role = CustomRoleManager.AllRoles.FirstOrDefault(role => role.Role == roleType);
-        return role is ICustomRole customRole ? customRole.Configuration.IntroSound : new PreloadedAsset<AudioClip>(role!.IntroSound);
+        if (role == null)
+        {
+            return null;
+        }
+
+        return role is ICustomRole customRole ? customRole.Configuration.IntroSound : new PreloadedAsset<AudioClip>(role.IntroSound);
     }
 
     /// <summary>

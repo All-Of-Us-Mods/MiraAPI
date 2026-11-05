@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace MiraAPI.GameOptions.Attributes;
@@ -10,10 +11,12 @@ namespace MiraAPI.GameOptions.Attributes;
 /// <param name="roleType">Optional parameter to specify a role Type.</param>
 /// <param name="modeType">Optional parameter to specify a game mode Type.</param>
 [AttributeUsage(AttributeTargets.Property)]
+[SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
+[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
 public abstract class ModdedOptionAttribute(string title, Type? roleType = null, Type? modeType = null) : PropertyOptionAttribute
 {
-    internal IModdedOption? HolderOption { get; set; }
-    internal Type ValueType { get; set; }
+    internal IModdedOption? HolderOption;
+    internal Type ValueType;
 
     /// <summary>
     /// Gets the title of the option.
@@ -23,12 +26,12 @@ public abstract class ModdedOptionAttribute(string title, Type? roleType = null,
     /// <summary>
     /// Gets the role type of the option.
     /// </summary>
-    protected Type? RoleType { get; private set; } = roleType;
+    protected Type? RoleType => roleType;
 
     /// <summary>
     /// Gets the game mode type of the option.
     /// </summary>
-    protected Type? ModeType { get; private set; } = modeType;
+    protected Type? ModeType => modeType;
 
     internal abstract IModdedOption? CreateOption(object? value, PropertyInfo property);
 }

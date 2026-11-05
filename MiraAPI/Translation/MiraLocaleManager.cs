@@ -72,6 +72,7 @@ public static class MiraLocaleManager
     /// </summary>
     public static Dictionary<MiraLanguage, string> LangCultureList { get; } = new()
     {
+        // Vanilla
         { MiraLanguage.English, "en-US" },
         { MiraLanguage.Latam, "es-419" },
         { MiraLanguage.Brazilian, "pt-BR" },
@@ -88,15 +89,17 @@ public static class MiraLocaleManager
         { MiraLanguage.SChinese, "zh-CN" },
         { MiraLanguage.TChinese, "zh-TW" },
         { MiraLanguage.Irish, "ga-IE" },
-        { MiraLanguage.Polish, "pl-PL" }, // Custom
-        { MiraLanguage.Turkish, "tr-TR" }, // Custom
-        { MiraLanguage.Swedish, "sv-SE" }, // Custom
-        { MiraLanguage.Lithuanian, "lt-LT" }, // Custom
-        { MiraLanguage.Czech, "cs-CZ" }, // Custom
-        { MiraLanguage.LChinese, "lzh-CN" }, // Custom
-        { MiraLanguage.Greek, "el-GR" }, // Custom
-        { MiraLanguage.Arabic, "arb" }, // Custom
-        { MiraLanguage.Hebrew, "heb" }, // Custom
+
+        // Custom
+        { MiraLanguage.Polish, "pl-PL" },
+        { MiraLanguage.Turkish, "tr-TR" },
+        { MiraLanguage.Swedish, "sv-SE" },
+        { MiraLanguage.Lithuanian, "lt-LT" },
+        { MiraLanguage.Czech, "cs-CZ" },
+        { MiraLanguage.LChinese, "lzh-CN" },
+        { MiraLanguage.Greek, "el-GR" },
+        { MiraLanguage.Arabic, "arb" },
+        { MiraLanguage.Hebrew, "heb" },
     };
 
     /// <summary>
@@ -123,10 +126,10 @@ public static class MiraLocaleManager
     /// Call once per mod during plugin Load().
     /// </summary>
     /// <param name="modGuid">The mod GUID (e.g., "mira.example").</param>
+    [Obsolete("Pass typeof(YourPlugin).Assembly directly to Register for better performance.")]
     public static void Register(string modGuid)
     {
         var callingAssembly = Assembly.GetCallingAssembly();
-
         LoadInternalStrings(callingAssembly, callingAssembly.GetName().Name!, modGuid);
     }
 
@@ -135,12 +138,35 @@ public static class MiraLocaleManager
     /// Call once per mod during plugin Load().
     /// </summary>
     /// <param name="modGuid">The mod GUID (e.g., "mira.example").</param>
+    /// <param name="assembly">The <see cref="Assembly"/> to load the strings from.</param>
+    public static void Register(string modGuid, Assembly assembly)
+    {
+        LoadInternalStrings(assembly, assembly.GetName().Name!, modGuid);
+    }
+
+    /// <summary>
+    /// Registers translations for a mod.
+    /// Call once per mod during plugin Load().
+    /// </summary>
+    /// <param name="modGuid">The mod GUID (e.g., "mira.example").</param>
     /// <param name="internalName">The mod's root namespace (e.g., "mira.api").</param>
+    [Obsolete("Pass typeof(YourPlugin).Assembly directly to Register for better performance.")]
     public static void Register(string modGuid, string internalName)
     {
         var callingAssembly = Assembly.GetCallingAssembly();
-
         LoadInternalStrings(callingAssembly, internalName, modGuid);
+    }
+
+    /// <summary>
+    /// Registers translations for a mod.
+    /// Call once per mod during plugin Load().
+    /// </summary>
+    /// <param name="modGuid">The mod GUID (e.g., "mira.example").</param>
+    /// <param name="internalName">The mod's root namespace (e.g., "mira.api").</param>
+    /// <param name="assembly">The <see cref="Assembly"/> to load the strings from.</param>
+    public static void Register(string modGuid, string internalName, Assembly assembly)
+    {
+        LoadInternalStrings(assembly, internalName, modGuid);
     }
 
     /// <summary>

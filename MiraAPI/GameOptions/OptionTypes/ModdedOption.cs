@@ -47,7 +47,10 @@ public abstract class ModdedOption<T> : IModdedOption
     /// </summary>
     public T Value
     {
-        get => Getter != null ? Getter(_value) : _value;
+        get
+        {
+            return Getter != null ? Getter(_value) : _value;
+        }
         protected set
         {
             if (Setter != null)
@@ -78,6 +81,9 @@ public abstract class ModdedOption<T> : IModdedOption
 
     /// <inheritdoc />
     public bool IncludeInPreset { get; set; }
+
+    /// <inheritdoc />
+    public bool ShowNotification { get; set; } = true;
 
     /// <inheritdoc />
     public OptionBehaviour? OptionBehaviour { get; protected set; }
@@ -156,10 +162,11 @@ public abstract class ModdedOption<T> : IModdedOption
                 entry.Value = _value;
             }
 
-            Rpc<SyncOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, [GetNetData()], true);
+            Rpc<SyncOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, new MiraOptionNetData(true, [GetNetData()]), true);
         }
 
         OnValueChanged(_value);
+        ShowNotification = true;
     }
 
     /// <inheritdoc />

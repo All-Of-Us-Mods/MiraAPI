@@ -571,7 +571,7 @@ public static class CustomMurderRpc
                 }
                 catch (Exception e)
                 {
-                    Error($"Error with kill animation: {e.ToString()}");
+                    Error($"Error with kill animation: {e}");
                 }
             }
 
@@ -705,7 +705,7 @@ public static class CustomMurderRpc
                 }
                 catch (Exception e)
                 {
-                    Error($"Error with kill animation: {e.ToString()}");
+                    Error($"Error with kill animation: {e}");
                 }
             }
 

@@ -78,6 +78,11 @@ public interface IModdedOption
     bool IncludeInPreset { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the option should show a notification, toggled on by an overall option synchronization.
+    /// </summary>
+    public bool ShowNotification { get; set; }
+
+    /// <summary>
     /// Gets or sets the <see cref="BepInEx.Configuration.ConfigDefinition"/> for the option, used for BepInEx configuration.
     /// </summary>
     ConfigDefinition? ConfigDefinition { get; set; }

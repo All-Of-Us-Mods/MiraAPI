@@ -166,7 +166,7 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
         {
             flags |= BindingFlags.Instance;
 
-            var canSearchPrivates = type.GetCustomAttribute<SearchPrivateAttribute>() != null;
+            var canSearchPrivates = type.IsDefined<SearchPrivateAttribute>();
 
             if (canSearchPrivates)
                 flags |= BindingFlags.NonPublic;
@@ -175,7 +175,7 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
 
             foreach (var method in type.GetMethods(getterFlags))
             {
-                if (method.GetParameters().Length > 0 || (method.GetCustomAttribute<InstanceGetterAttribute>() == null && method.Name != "GetInstance"))
+                if (method.GetParameters().Length > 0 || (!method.IsDefined<InstanceGetterAttribute>() && method.Name != "GetInstance"))
                     continue;
 
                 instanceGetter = method;
@@ -186,7 +186,7 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
             {
                 foreach (var prop in type.GetProperties(getterFlags))
                 {
-                    if (prop.GetCustomAttribute<InstanceGetterAttribute>() == null && prop.Name != "Instance")
+                    if (!prop.IsDefined<InstanceGetterAttribute>() && prop.Name != "Instance")
                         continue;
 
                     var getMethod = prop.GetGetMethod(canSearchPrivates);
@@ -213,7 +213,7 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
                 return null;
             }
         }
-        else if (type.GetCustomAttribute<SearchPrivateAttribute>() != null)
+        else if (type.IsDefined<SearchPrivateAttribute>())
         {
             flags |= BindingFlags.NonPublic;
         }

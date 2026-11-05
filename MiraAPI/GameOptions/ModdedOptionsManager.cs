@@ -365,11 +365,11 @@ public static class ModdedOptionsManager
 
         while (chunks.Count > 0)
         {
-            Rpc<SyncOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, chunks.Dequeue());
+            Rpc<SyncOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, new MiraOptionNetData(false, chunks.Dequeue()));
         }
     }
 
-    internal static void HandleSyncOptions(NetData[] data)
+    internal static void HandleSyncOptions(bool showNotifs, NetData[] data)
     {
         // necessary to disable then re-enable this setting
         // we don't know how other plugins handle their configs
@@ -388,6 +388,7 @@ public static class ModdedOptionsManager
                 continue;
             }
 
+            option.ShowNotification = showNotifs;
             option.HandleNetData(netData.Data);
         }
 
@@ -397,7 +398,7 @@ public static class ModdedOptionsManager
             plugin.PluginConfig.SaveOnConfigSet = oldConfigSetting[plugin];
         }
 
-        if (LobbyInfoPane.Instance)
+        if (LobbyInfoPane.InstanceExists)
         {
             LobbyInfoPane.Instance.RefreshPane();
         }

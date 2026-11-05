@@ -186,9 +186,11 @@ public static class TaskAdderPatches
                 systemTypes = SystemTypes.UpperEngine;
             }
 
-            if (!folders.TryGetValue(systemTypes.ToString(), out var taskFolder3))
+            var systemType = systemTypes.ToString();
+
+            if (!folders.TryGetValue(systemType, out var taskFolder3))
             {
-                taskFolder3 = folders[systemTypes.ToString()] = Object.Instantiate(__instance.RootFolderPrefab, __instance.transform);
+                taskFolder3 = folders[systemType] = Object.Instantiate(__instance.RootFolderPrefab, __instance.transform);
                 taskFolder3.SetFolderColor(TaskFolder.FolderColor.Tan);
                 taskFolder3.gameObject.SetActive(false);
                 taskFolder3.FolderName = systemTypes == SystemTypes.UpperEngine

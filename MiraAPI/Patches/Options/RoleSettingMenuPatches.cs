@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using AmongUs.GameOptions;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
@@ -12,6 +13,7 @@ using MiraAPI.Roles;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
+using MiraAPI.Utilities.Components;
 using Reactor.Networking.Rpc;
 using Reactor.Utilities.Extensions;
 using TMPro;
@@ -23,14 +25,23 @@ using Object = UnityEngine.Object;
 namespace MiraAPI.Patches.Options;
 
 [HarmonyPatch(typeof(RolesSettingsMenu))]
+[SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Is internal code. Property-level protections are not required.")]
+[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
 public static class RoleSettingMenuPatches
 {
-    private static Dictionary<RoleOptionsGroup, bool> RoleGroupHidden { get; set; } = [];
+    private static readonly Dictionary<RoleOptionsGroup, bool> RoleGroupHidden = [];
 
-    private static float ScrollerNum { get; set; } = 0.522f;
+    internal static RoleBehaviour? CurrentRole;
+    internal static IModdedOption[]? CurrentRoleOptions;
 
-    private static RoleBehaviour? CurrentRole { get; set; }
-    private static List<IModdedOption>? CurrentRoleOptions { get; set; }
+    private static float scrollerNum = 0.522f;
+
+    [HarmonyPostfix]
+    [HarmonyPatch(nameof(RolesSettingsMenu.Awake))]
+    public static void OnAwake(RolesSettingsMenu __instance)
+    {
+        __instance.gameObject.AddComponent<RoleSettingsMenuUpdater>();
+    }
 
     [HarmonyPostfix]
     [HarmonyPatch(nameof(RolesSettingsMenu.OnEnable))]
@@ -91,7 +102,7 @@ public static class RoleSettingMenuPatches
                 Object.Destroy(child.gameObject);
             }
 
-            yield return new WaitForEndOfFrame();
+            yield return null;
             MenuState.Instance.QueuedRoleMenuRefresh[MenuState.Instance.CurrentModIdx] = false;
         }
 
@@ -171,7 +182,7 @@ public static class RoleSettingMenuPatches
             }
             else
             {
-                ScrollerNum = 0.522f;
+                scrollerNum = 0.522f;
 
                 var num4 = 0;
                 var roleOptionSettings = roleMenu.scrollBar.Inner.GetComponentsInChildren<RoleOptionSetting>(false);
@@ -186,7 +197,7 @@ public static class RoleSettingMenuPatches
                     Object.Destroy(child.gameObject);
                 }
 
-                yield return new WaitForEndOfFrame();
+                yield return null;
 
                 var roleGroups = MenuState.Instance.CurrentMod.InternalRoles.Values.OfType<ICustomRole>()
                     .ToLookup(x => x.RoleOptionsGroup);
@@ -288,7 +299,7 @@ public static class RoleSettingMenuPatches
                             categoryHeaderMasked.Background.size.y);
 
                         categoryHeaderMasked.transform.localScale = Vector3.one * 0.63f;
-                        categoryHeaderMasked.transform.localPosition = new Vector3(-0.44f, ScrollerNum, -2f);
+                        categoryHeaderMasked.transform.localPosition = new Vector3(-0.44f, scrollerNum, -2f);
                         categoryHeaderMasked.gameObject.SetActive(true);
                         quotaInst.gameObject.SetActive(!RoleGroupHidden[group]);
 
@@ -300,7 +311,7 @@ public static class RoleSettingMenuPatches
                         newText.transform.localPosition = new Vector3(2.6249f, -0.165f, 0f);
                         newText.gameObject.GetComponent<TextTranslatorTMP>().Destroy();
 
-                        ScrollerNum -= 0.422f;
+                        scrollerNum -= 0.422f;
 
                         if (!RoleGroupHidden[group])
                         {
@@ -351,7 +362,7 @@ public static class RoleSettingMenuPatches
 
                         if (RoleGroupHidden.TryGetValue(group, out var value) && !value)
                         {
-                            ScrollerNum -= 0.4f;
+                            scrollerNum -= 0.4f;
                         }
                     }
                 }
@@ -428,35 +439,15 @@ public static class RoleSettingMenuPatches
         }
 
         scroller.Inner = isRolesConfig ? menu.AdvancedRolesSettings.transform : menu.RoleChancesSettings.transform;
-        scroller.SetYBoundsMax(-ScrollerNum - 2);
+        scroller.SetYBoundsMax(-scrollerNum - 2);
     }
 
-    // TODO: turn this into a fixed update
+    // Completed: turn this into a fixed update
     [HarmonyPrefix]
     [HarmonyPatch(nameof(RolesSettingsMenu.Update))]
     public static bool UpdatePatch(RolesSettingsMenu __instance)
     {
-        if (MenuState.Instance.CurrentModIdx == 0) return true;
-        if (CurrentRole == null || CurrentRoleOptions == null) return false;
-
-        var hasImage = CurrentRole.RoleScreenshot != null;
-        var num = hasImage ? -0.872f : -1;
-        foreach (var opt in CurrentRoleOptions)
-        {
-            if (opt.OptionBehaviour == null) continue;
-
-            if (!opt.Visible.Invoke())
-            {
-                opt.OptionBehaviour.gameObject.SetActive(false);
-                continue;
-            }
-
-            opt.OptionBehaviour.transform.localPosition = new Vector3(hasImage ? 2.17f : 1.1f, num, -2f);
-            opt.OptionBehaviour.gameObject.SetActive(true);
-            num += -0.45f;
-        }
-
-        __instance.scrollBar.SetYBoundsMax(-num - 3);
+        // See RoleSettingsMenuUpdater.FixedUpdate in Utilities/Components/RoleSettingsMenuUpdater.cs
         return false;
     }
 
@@ -495,7 +486,7 @@ public static class RoleSettingMenuPatches
 
         if (AmongUsClient.Instance.AmHost)
         {
-            Rpc<SyncRoleOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, [role.GetNetData()], true);
+            Rpc<SyncRoleOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, new MiraOptionNetData(true, [role.GetNetData()]), true);
         }
 
         GameOptionsManager.Instance.GameHostOptions = GameOptionsManager.Instance.CurrentGameOptions;
@@ -512,10 +503,11 @@ public static class RoleSettingMenuPatches
         __instance.advancedSettingChildren.Clear();
 
         // TODO: create sub groups under the role settings.
+        var type = role.GetType();
         var filteredOptions = MenuState.Instance.CurrentMod.InternalOptionGroups
-            .Where(x => x.GroupVisible() && x.OptionableType == role.GetType())
+            .Where(x => x.OptionableType == type && x.GroupVisible())
             .SelectMany(x => x.Options)
-            .ToList();
+            .ToArray();
 
         foreach (var option in filteredOptions)
         {
@@ -698,7 +690,7 @@ public static class RoleSettingMenuPatches
             Vector3.zero,
             Quaternion.identity,
             __instance.RoleChancesSettings.transform);
-        roleOptionSetting.transform.localPosition = new Vector3(-0.1f, ScrollerNum, -2f);
+        roleOptionSetting.transform.localPosition = new Vector3(-0.1f, scrollerNum, -2f);
 
         roleOptionSetting.SetRole(GameOptionsManager.Instance.CurrentGameOptions.RoleOptions, role, 20);
         roleOptionSetting.titleText.text = role.GetRoleName();
@@ -767,7 +759,7 @@ public static class RoleSettingMenuPatches
 
         if (index < MenuState.Instance.CurrentMod.InternalRoles.Count - 1)
         {
-            ScrollerNum -= 0.43f;
+            scrollerNum -= 0.43f;
         }
 
         return roleOptionSetting;

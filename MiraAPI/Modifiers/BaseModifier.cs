@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Il2CppInterop.Runtime.Attributes;
 using MiraAPI.GameOptions;
 using MiraAPI.PluginLoading;
@@ -95,6 +96,48 @@ public abstract class BaseModifier : IOptionable
     /// Gets the category of the modifier. Used in the wiki.
     /// </summary>
     public virtual string ModifierCategoryTitle => MiraLocaleManager.Get("Modifier");
+
+    /// <summary>
+    /// Gets a value indicating whether to exclude the "amount" from the displayed amount text within the role guide.
+    /// </summary>
+    public virtual bool ShowModifierAsUnique => false;
+
+    /// <summary>
+    /// Gets the displayed amount and chance of the modifier. Used in the role guide.
+    /// By default, 0 amount or chance results in a complete 0 amount and chance, so override if necessary.
+    /// </summary>
+    /// <param name="amount">The amount of the modifier.</param>
+    /// <param name="chance">The chance of the modifier.</param>
+    /// <param name="source">The mod source of the modifier.</param>
+    /// <returns>The <see cref="string"/> result.</returns>
+    public virtual string GetAmountText(int amount, int chance, string source)
+    {
+        if (amount == 0)
+        {
+            chance = 0;
+        }
+
+        if (ShowModifierAsUnique)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "{0}% ({1})",
+                chance.ToString(CultureInfo.InvariantCulture),
+                source);
+        }
+
+        if (chance == 0)
+        {
+            amount = 0;
+        }
+
+        return string.Format(
+            CultureInfo.InvariantCulture,
+            "{0} at {1}% ({2})",
+            amount.ToString(CultureInfo.InvariantCulture),
+            chance.ToString(CultureInfo.InvariantCulture),
+            source);
+    }
 
     /// <summary>
     /// Gets whether the modifier is forcibly shown or disabled in the wiki screen.

@@ -61,7 +61,6 @@ public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
     /// </summary>
     public static bool IsDevBuild => Version.Contains("ci", StringComparison.OrdinalIgnoreCase) || Version.Contains("dev", StringComparison.OrdinalIgnoreCase);
 
-    private static MiraPluginManager? PluginManager { get; set; }
     internal Harmony Harmony { get; } = new(Id);
 
     internal static ConfigEntry<SortingGroups> WikiSortingGroup { get; private set; }
@@ -99,10 +98,9 @@ public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
 
         ReactorCredits.Register("Mira API", Version, IsDevBuild, ReactorCredits.AlwaysShow);
 
-        PluginManager = new MiraPluginManager();
-        PluginManager.Initialize(this, this);
+        MiraPluginManager.Instance.Initialize(this, this);
 
-        MiraLocaleManager.Register("mira.api");
+        MiraLocaleManager.Register("mira.api", typeof(MiraApiPlugin).Assembly);
         LocalizationManager.Register(new MiraLocalizationProvider());
 
         IL2CPPChainloader.Instance.Finished +=

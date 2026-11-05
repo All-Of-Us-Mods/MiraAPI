@@ -22,15 +22,15 @@ namespace MiraAPI.Patches.Options;
 [HarmonyPatch(typeof(LobbyViewSettingsPane))]
 public static class LobbyViewPanePatches
 {
-    private static int SelectedModIdx { get; set; }
+    private static int selectedModIdx;
 
     private static MiraPluginInfo[] Plugins => MiraPluginManager.Instance.RegisteredPluginsWithOptions;
 
-    private static MiraPluginInfo? SelectedMod => SelectedModIdx == 0
+    private static MiraPluginInfo? SelectedMod => selectedModIdx == 0
         ? null
-        : Plugins[SelectedModIdx - 1];
+        : Plugins[selectedModIdx - 1];
 
-    private static PassiveButton? ModifiersTabButton { get; set; }
+    private static PassiveButton? modifiersTabButton;
     internal static StringNames ModifiersTabName { get; } = MiraLocaleManager.GetOrCreateLocaleString("ModifiersTab");
 
     private static AbstractGameMode? GetCustomGamemode()
@@ -71,20 +71,20 @@ public static class LobbyViewPanePatches
         __instance.gameModeText.GetComponent<TextTranslatorTMP>().Destroy();
 
         // create modifiers button
-        ModifiersTabButton = Object.Instantiate(__instance.rolesTabButton, __instance.rolesTabButton.transform.parent);
-        ModifiersTabButton.buttonText.gameObject.GetComponent<TextTranslatorTMP>().Destroy();
-        ModifiersTabButton.name = "ModifiersTabButton";
-        var pos = ModifiersTabButton.transform.localPosition;
+        modifiersTabButton = Object.Instantiate(__instance.rolesTabButton, __instance.rolesTabButton.transform.parent);
+        modifiersTabButton.buttonText.gameObject.GetComponent<TextTranslatorTMP>().Destroy();
+        modifiersTabButton.name = "ModifiersTabButton";
+        var pos = modifiersTabButton.transform.localPosition;
         pos.x = 2.1f;
-        ModifiersTabButton.transform.localPosition = pos;
-        ModifiersTabButton.buttonText.text = "Modifiers".Translate();
-        ModifiersTabButton.OnClick = new Button.ButtonClickedEvent();
-        ModifiersTabButton.OnClick.AddListener(
+        modifiersTabButton.transform.localPosition = pos;
+        modifiersTabButton.buttonText.text = "Modifiers".Translate();
+        modifiersTabButton.OnClick = new Button.ButtonClickedEvent();
+        modifiersTabButton.OnClick.AddListener(
             (UnityAction)(() =>
             {
                 __instance.ChangeTab(ModifiersTabName);
             }));
-        ModifiersTabButton.gameObject.SetActive(SelectedModIdx != 0);
+        modifiersTabButton.gameObject.SetActive(selectedModIdx != 0);
 
         // Create the next button
         var nextButton = Object.Instantiate(__instance.BackButton, __instance.BackButton.transform.parent).gameObject;
@@ -106,10 +106,10 @@ public static class LobbyViewPanePatches
         passiveButton.OnClick.AddListener(
             (UnityAction)(() =>
             {
-                SelectedModIdx += 1;
-                if (SelectedModIdx > Plugins.Length)
+                selectedModIdx += 1;
+                if (selectedModIdx > Plugins.Length)
                 {
-                    SelectedModIdx = 0;
+                    selectedModIdx = 0;
                 }
 
                 Refresh(__instance);
@@ -128,10 +128,10 @@ public static class LobbyViewPanePatches
         passiveButton2.OnClick.AddListener(
             (UnityAction)(() =>
             {
-                SelectedModIdx -= 1;
-                if (SelectedModIdx < 0)
+                selectedModIdx -= 1;
+                if (selectedModIdx < 0)
                 {
-                    SelectedModIdx = Plugins.Length;
+                    selectedModIdx = Plugins.Length;
                 }
 
                 Refresh(__instance);
@@ -143,7 +143,7 @@ public static class LobbyViewPanePatches
         if (SelectedMod == null)
         {
             var cgm = GetCustomGamemode();
-            ModifiersTabButton?.gameObject.SetActive(false);
+            modifiersTabButton?.gameObject.SetActive(false);
             menu.rolesTabButton.gameObject.SetActive(cgm is null or { ShowNormalRoleSettings: true });
             menu.gameModeText.text = cgm is null ? MiraLocaleManager.Get("MiraApi.Gamemode.Classic") : cgm.ColoredName;
         }
@@ -154,7 +154,7 @@ public static class LobbyViewPanePatches
             var showRolesButton = SelectedMod.InternalOptionGroups.Any(r =>
                 r.ParentMenu is MenuCategory.Roles || r.OptionableType?.IsAssignableTo(typeof(ICustomRole)) == true);
 
-            ModifiersTabButton?.gameObject.SetActive(showModifierButton);
+            modifiersTabButton?.gameObject.SetActive(showModifierButton);
             menu.rolesTabButton.gameObject.SetActive(showRolesButton);
             menu.gameModeText.text = SelectedMod.PluginInfo.Metadata.Name;
         }
@@ -171,14 +171,14 @@ public static class LobbyViewPanePatches
     {
         if (__instance.currentTab != ModifiersTabName || SelectedMod == null)
         {
-            ModifiersTabButton?.SelectButton(false);
+            modifiersTabButton?.SelectButton(false);
             return;
         }
 
         __instance.taskTabButton.SelectButton(false);
         __instance.rolesTabButton.SelectButton(false);
 
-        ModifiersTabButton?.SelectButton(true);
+        modifiersTabButton?.SelectButton(true);
 
         var filteredGroups = SelectedMod.InternalOptionGroups
             .Where(x => x.GroupVisible() && (x.ParentMenu is MenuCategory.Modifiers || (x.OptionableType != null && x.OptionableType.IsAssignableTo(typeof(BaseModifier)))));
@@ -218,7 +218,7 @@ public static class LobbyViewPanePatches
     [HarmonyPatch(nameof(LobbyViewSettingsPane.DrawRolesTab))]
     public static bool DrawRolesTabPatch(LobbyViewSettingsPane __instance)
     {
-        if (SelectedModIdx == 0)
+        if (selectedModIdx == 0)
         {
             var num = 0.95f;
             var num2 = -6.53f;
@@ -464,7 +464,7 @@ public static class LobbyViewPanePatches
 
             if (name is not (StringNames.CrewmateRolesHeader or StringNames.ImpostorRolesHeader))
             {
-                var veryDarkColor = group.Color.DarkenColor(.35f);
+                var veryDarkColor = group.Color.DarkenRelative(.35f);
                 categoryHeaderRoleVariant.Title.color = veryDarkColor;
                 categoryHeaderRoleVariant.Background.color = group.Color;
             }

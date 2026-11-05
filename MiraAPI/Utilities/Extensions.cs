@@ -26,6 +26,8 @@ namespace MiraAPI.Utilities;
 /// </summary>
 public static class Extensions
 {
+    private static readonly Regex DisplayRegex = new(@"([^\^])([A-Z][a-z$])", default, Regex.InfiniteMatchTimeout);
+
     internal static NetData GetNetData(this ICustomRole role)
     {
         var count = role.GetCount();
@@ -492,14 +494,25 @@ public static class Extensions
     }
 
     /// <summary>
-    /// Gets a proper string for an <see cref="Enum"/>. (with spaces).
+    /// Gets a proper string for an <see cref="Enum"/> (with spaces).
     /// </summary>
     /// <param name="enum">The <see cref="Enum"/> you would like to change.</param>
-    /// <returns>A proper string for the <see cref="Enum"/>.</returns>
+    /// <returns>A proper string for the provided <see cref="Enum"/>.</returns>
     public static string ToDisplayString(this Enum @enum)
     {
-        var regex = new Regex(@"([^\^])([A-Z][a-z$])", default, Regex.InfiniteMatchTimeout);
-        return regex.Replace(@enum.ToString(), m => $"{m.Groups[1].Value} {m.Groups[2].Value}");
+        return DisplayRegex.Replace(@enum.ToString(), m => $"{m.Groups[1].Value} {m.Groups[2].Value}");
+    }
+
+    /// <summary>
+    /// Gets a proper string for a(n) <typeparamref name="T"/> value (with spaces).
+    /// </summary>
+    /// <typeparam name="T">The type of the enum value.</typeparam>
+    /// <param name="enum">The <typeparamref name="T"/> enum value you would like to change.</param>
+    /// <returns>A proper string for the provided <typeparamref name="T"/> value.</returns>
+    public static string ToDisplayString<T>(this T @enum)
+        where T : struct, Enum
+    {
+        return DisplayRegex.Replace(@enum.ToString(), m => $"{m.Groups[1].Value} {m.Groups[2].Value}");
     }
 
     /// <summary>
@@ -526,17 +539,46 @@ public static class Extensions
     /// <returns>The distance between the types.</returns>
     public static int GetInheritanceDistance(Type from, Type to)
     {
-        if (!from.IsAssignableFrom(to)) return int.MaxValue;
+        if (from == null || to == null)
+            throw new ArgumentNullException(from == null ? nameof(from) : nameof(to));
 
-        var type = from;
-        var distance = 0;
-        while (type != null && type != to)
+        if (from == to)
+            return 0;
+
+        if (!to.IsGenericTypeDefinition && !to.IsAssignableFrom(from))
+            return int.MaxValue;
+
+        var queue = new Queue<(Type Type, int Distance)>();
+        var visited = new HashSet<Type>();
+
+        queue.Enqueue((from, 0));
+        visited.Add(from);
+
+        while (queue.Count > 0)
         {
-            type = type.BaseType;
-            distance++;
+            var (current, dist) = queue.Dequeue();
+
+            if (current == to || (current.IsGenericType && current.GetGenericTypeDefinition() == to))
+                return dist;
+
+            if (current.BaseType != null && visited.Add(current.BaseType))
+                queue.Enqueue((current.BaseType, dist + 1));
+
+            var allInterfaces = current.GetInterfaces();
+            var baseInterfaces = current.BaseType?.GetInterfaces() ?? Type.EmptyTypes;
+
+            var directInterfaces = allInterfaces.Except(baseInterfaces).ToList();
+            var inheritedInterfaces = directInterfaces.SelectMany(i => i.GetInterfaces());
+            var immediateInterfaces = directInterfaces.Except(inheritedInterfaces);
+
+            foreach (var iFace in immediateInterfaces)
+            {
+                if (visited.Add(iFace))
+                    queue.Enqueue((iFace, dist + 1));
+            }
         }
 
-        return type == to ? distance : int.MaxValue;
+        return to.IsAssignableFrom(from) ? int.MaxValue - 1 : int.MaxValue;
     }
 
     /// <summary>
@@ -565,14 +607,10 @@ public static class Extensions
     /// <param name="color">The original <see cref="Color32"/>.</param>
     /// <param name="darknessAmount">A darkness amount between 0 and 255.</param>
     /// <returns>The darkened <see cref="Color32"/>.</returns>
+    [Obsolete("Use ColorExtensions.DarkenAbsolute instead. This will be removed in a future version.")]
     public static Color32 GetShadowColor(this Color32 color, byte darknessAmount)
     {
-        return
-            new Color32(
-                (byte)Mathf.Clamp(color.r - darknessAmount, 0, 255),
-                (byte)Mathf.Clamp(color.g - darknessAmount, 0, 255),
-                (byte)Mathf.Clamp(color.b - darknessAmount, 0, 255),
-                color.a);
+        return color.DarkenAbsolute(darknessAmount);
     }
 
     /// <summary>
@@ -581,14 +619,10 @@ public static class Extensions
     /// <param name="color">The original <see cref="Color"/>.</param>
     /// <param name="darknessAmount">A darkness amount between 0 and 1.</param>
     /// <returns>The darkened <see cref="Color"/>.</returns>
+    [Obsolete("Use ColorExtensions.DarkenAbsolute instead. This will be removed in a future version.")]
     public static Color GetShadowColor(this Color color, float darknessAmount)
     {
-        return
-            new Color(
-                MathUtilities.Clamp01(color.r - darknessAmount),
-                MathUtilities.Clamp01(color.g - darknessAmount),
-                MathUtilities.Clamp01(color.b - darknessAmount),
-                color.a);
+        return color.DarkenAbsolute(darknessAmount);
     }
 
     /// <summary>
@@ -648,7 +682,7 @@ public static class Extensions
     /// <returns><see langword="true"/> if the <see cref="OptionBehaviour"/> is for a custom options, <see langword="false"/> otherwise.</returns>
     public static bool IsCustom(this OptionBehaviour optionBehaviour)
     {
-        return ModdedOptionsManager.ModdedOptions.Values.Any(opt => opt.OptionBehaviour && opt.OptionBehaviour == optionBehaviour) || optionBehaviour.Equals(GameModeOption.OptionBehaviour);
+        return ModdedOptionsManager.ModdedOptions.Values.Any(opt => opt.OptionBehaviour == optionBehaviour) || optionBehaviour.Equals(GameModeOption.OptionBehaviour);
     }
 
     /// <summary>
@@ -677,9 +711,10 @@ public static class Extensions
     /// <param name="color">The original <see cref="Color"/>.</param>
     /// <param name="amount">A <see langword="float"/> amount between 0 and 1.</param>
     /// <returns>The darkened <see cref="Color"/>.</returns>
+    [Obsolete("Use ColorExtensions.DarkenAbsolute instead. This will be removed in a future version.")]
     public static Color DarkenColor(this Color color, float amount = 0.45f)
     {
-        return new Color(color.r - amount, color.g - amount, color.b - amount);
+        return color.DarkenAbsolute(amount);
     }
 
     /// <summary>
@@ -688,9 +723,10 @@ public static class Extensions
     /// <param name="color">The original <see cref="Color"/>.</param>
     /// <param name="amount">A <see langword="float"/> amount between 0.0 and 1.0.</param>
     /// <returns>The lightened <see cref="Color"/>.</returns>
+    [Obsolete("Use ColorExtensions.LightenAbsolute instead. This will be removed in a future version.")]
     public static Color LightenColor(this Color color, float amount = 0.45f)
     {
-        return new Color(color.r + amount, color.g + amount, color.b + amount);
+        return color.LightenAbsolute(amount);
     }
 
     /// <summary>
@@ -805,5 +841,35 @@ public static class Extensions
     {
         var comp = go.GetComponent<T>();
         return comp ? comp : go.AddComponent<T>();
+    }
+
+    /// <inheritdoc cref="Attribute.IsDefined(MemberInfo, Type, bool)"/>
+    /// <typeparam name="T">The type of the attribute.</typeparam>
+    /// <returns>true if a custom attribute of type <typeparamref name="T"/> is applied to element; otherwise, false.</returns>
+    public static bool IsDefined<T>(this MemberInfo element, bool inherit)
+        where T : Attribute
+    {
+        return Attribute.IsDefined(element, typeof(T), inherit);
+    }
+
+    /// <inheritdoc cref="IsDefined{T}(MemberInfo, bool)"/>
+    public static bool IsDefined<T>(this MemberInfo element)
+        where T : Attribute
+    {
+        return Attribute.IsDefined(element, typeof(T));
+    }
+
+    /// <summary>
+    /// Attempts to get a specified custom attribute on an element.
+    /// </summary>
+    /// <typeparam name="T">The type of the attribute.</typeparam>
+    /// <param name="member">The member to get the attribute from.</param>
+    /// <param name="attribute">If the method returns true, a non-null reference to the attribute.</param>
+    /// <returns>true if the member has the specified attribute; otherwise false.</returns>
+    public static bool TryGetCustomAttribute<T>(this MemberInfo member, [NotNullWhen(true)] out T? attribute)
+        where T : Attribute
+    {
+        attribute = member.GetCustomAttribute<T>();
+        return attribute != null;
     }
 }

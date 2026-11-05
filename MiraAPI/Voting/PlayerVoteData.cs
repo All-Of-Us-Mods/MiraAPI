@@ -10,6 +10,7 @@ namespace MiraAPI.Voting;
 /// <summary>
 /// Handles player votes, and removing/adding additional votes.
 /// </summary>
+/// <param name="cppPtr">The pointer to the C++ object.</param>
 [RegisterInIl2Cpp]
 public class PlayerVoteData(nint cppPtr) : MonoBehaviour(cppPtr)
 {
@@ -22,7 +23,7 @@ public class PlayerVoteData(nint cppPtr) : MonoBehaviour(cppPtr)
     /// Gets the list of <see cref="CustomVote"/>s the owner has.
     /// </summary>
     [HideFromIl2Cpp]
-    public List<CustomVote> Votes { get; private set; } = [];
+    public List<CustomVote> Votes { get; } = [];
 
     /// <summary>
     /// Gets or sets the amount of votes the owner has left.

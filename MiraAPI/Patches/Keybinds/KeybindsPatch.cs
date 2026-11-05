@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using HarmonyLib;
 using MiraAPI.Keybinds;
 using Rewired;
@@ -23,14 +21,11 @@ public static class KeybindMenuPatch
         _registered = true;
 
         // Set these here right after input manager initializes
-        KeybindManager.VanillaKeybinds = new Dictionary<Type, VanillaKeybind>
-        {
-            { typeof(KillButton), new VanillaKeybind(8) },
-            { typeof(UseButton), new VanillaKeybind(6) },
-            { typeof(ReportButton), new VanillaKeybind(7) },
-            { typeof(VentButton), new VanillaKeybind(50) },
-            { typeof(SabotageButton), new VanillaKeybind(4) },
-            { typeof(AbilityButton), new VanillaKeybind(49) },
-        };
+        KeybindManager.VanillaKeybinds[typeof(KillButton)] = new VanillaKeybind(8);
+        KeybindManager.VanillaKeybinds[typeof(UseButton)] = new VanillaKeybind(6);
+        KeybindManager.VanillaKeybinds[typeof(ReportButton)] = new VanillaKeybind(7);
+        KeybindManager.VanillaKeybinds[typeof(VentButton)] = new VanillaKeybind(50);
+        KeybindManager.VanillaKeybinds[typeof(SabotageButton)] = new VanillaKeybind(4);
+        KeybindManager.VanillaKeybinds[typeof(AbilityButton)] = new VanillaKeybind(49);
     }
 }

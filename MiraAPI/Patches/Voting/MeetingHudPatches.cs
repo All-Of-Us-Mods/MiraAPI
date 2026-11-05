@@ -260,7 +260,7 @@ internal static class MeetingHudPatches
             {
                 VoterId = v.Voter,
                 VotedForId = v.Suspect,
-            })
+            }),
         ]);
 
         __instance.RpcVotingComplete(voterStates, exiled, isTie, @event.OverruledVote, @event.OverruledNonce);
@@ -269,7 +269,7 @@ internal static class MeetingHudPatches
 
     [HarmonyPrefix]
     [HarmonyPatch(nameof(MeetingHud.PopulateResults))]
-    public static bool PopulateResultsPatch(ref Il2CppStructArray<MeetingHud.VoterState> states)
+    public static bool PopulateResultsPatch(Il2CppStructArray<MeetingHud.VoterState> states)
     {
         var votes = states.Select(x => new CustomVote(x.VoterId, x.VotedForId)).ToList();
 

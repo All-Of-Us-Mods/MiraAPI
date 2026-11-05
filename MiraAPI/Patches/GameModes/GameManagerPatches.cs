@@ -1,5 +1,7 @@
 ﻿using HarmonyLib;
 using MiraAPI.GameModes;
+using MiraAPI.GameOptions;
+using MiraAPI.Roles;
 
 namespace MiraAPI.Patches.GameModes;
 
@@ -18,16 +20,13 @@ internal static class GameManagerPatches
         return true;
     }
 
-    [HarmonyPrefix, HarmonyPatch(nameof(GameManager.ShowCrewmatesKilled))]
-    public static bool ShowCrewmatesKilledPrefix(ref bool __result)
+    [HarmonyPostfix, HarmonyPatch(nameof(GameManager.StartGame))]
+    public static void StartGamePostfix()
     {
-        if (CustomGameModeManager.ActiveMode != null)
+        if (CustomGameModeManager.ActiveMode != null && HudManager.InstanceExists)
         {
-            __result = CustomGameModeManager.ActiveMode is HideAndSeekMode;
-            return false;
+            HudManager.Instance.CrewmatesKilled.gameObject.SetActive(CustomGameModeManager.ActiveMode is HideAndSeekMode);
         }
-
-        return true;
     }
 
     [HarmonyPatch(typeof(NormalGameManager), nameof(NormalGameManager.GetMapOptions))]
@@ -54,5 +53,18 @@ internal static class GameStartManagerPatches
         {
             __instance.MinPlayers = 1;
         }
+    }
+
+    [HarmonyPrefix, HarmonyPatch(nameof(GameStartManager.BeginGame))]
+    public static void Prefix(GameStartManager __instance)
+    {
+        if (!AmongUsClient.Instance.AmHost)
+        {
+            return;
+        }
+
+        ModdedOptionsManager.SyncAllOptions();
+        CustomRoleManager.SyncAllRoleSettings();
+        GameModeOption.RpcSyncGamemode(PlayerControl.LocalPlayer, GameModeOption.Value);
     }
 }
