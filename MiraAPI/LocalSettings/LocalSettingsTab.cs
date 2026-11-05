@@ -75,7 +75,7 @@ public abstract class LocalSettingsTab(ConfigFile config)
     protected int TabIndex => LocalSettingsManager.Tabs.IndexOf(this) + 10;
 
     private Scroller? scroller;
-    private float MaxScroll { get; set; }
+    private float maxScroll;
 
     /// <summary>
     /// Invoked when an option value is changed.
@@ -115,7 +115,7 @@ public abstract class LocalSettingsTab(ConfigFile config)
             return;
         }
 
-        scroller.SetBounds(new FloatRange(0, MaxScroll), new FloatRange(0, 0));
+        scroller.SetBounds(new FloatRange(0, maxScroll), new FloatRange(0, 0));
         scroller.ScrollToTop();
     }
 
@@ -235,7 +235,7 @@ public abstract class LocalSettingsTab(ConfigFile config)
         const float extraPadding = 0.25f;
         var itemRange = (Settings.Count + Buttons.Count) * 0.5f - visibleHeight;
         var offsetRange = contentOffset - visibleHeight + extraPadding;
-        MaxScroll = Mathf.Max(0f, itemRange, offsetRange);
+        maxScroll = Mathf.Max(0f, itemRange, offsetRange);
         return tab;
     }
 

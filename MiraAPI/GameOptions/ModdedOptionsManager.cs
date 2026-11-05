@@ -39,7 +39,6 @@ public static class ModdedOptionsManager
     private static readonly Dictionary<Type, HarmonyMethod> ConcretisedSetters = [];
 
     internal static readonly Dictionary<OptionBehaviour, ModdedPlayerOption> CreatedPlayerOptions = [];
-    internal static readonly Dictionary<OptionBehaviour, ModdedStringOption> CreatedStringOptions = [];
     internal static readonly Dictionary<Type, List<AbstractOptionGroup>> GameModeOptionGroups = [];
     internal static readonly Dictionary<uint, IModdedOption> ModdedOptions = [];
     internal static readonly List<AbstractOptionGroup> Groups = [];
