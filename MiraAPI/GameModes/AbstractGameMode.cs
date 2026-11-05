@@ -77,6 +77,8 @@ public abstract class AbstractGameMode : IOptionable
     /// </summary>
     public virtual float DefaultImpostorKillCooldown => GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown);
 
+    internal StringNames StringName { get; set; }
+
     /// <summary>
     /// Called on GameManager.GetBodyType().
     /// </summary>

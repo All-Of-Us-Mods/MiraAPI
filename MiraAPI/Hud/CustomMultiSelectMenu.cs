@@ -30,12 +30,7 @@ public abstract class CustomMultiSelectMenu<TEntry> : CustomPhoneMenu<CustomMult
     private Color? activeColor;
     private Color? hoverSelectColor;
     private Color? hoverDeselectColor;
-
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-    [SuppressMessage("Minor Code Smell", "S1104:Fields should not have public accessibility", Justification = "Unity convention.")]
-    public UiElement confirmButton;
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
-
+    private UiElement confirmButton;
     private Action<List<TEntry>>? onSelection;
 
     /// <summary>

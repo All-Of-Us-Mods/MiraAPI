@@ -370,7 +370,7 @@ public static class Helpers
     public static LobbyNotificationMessage CreateAndShowNotification(string text, Color color, Vector3 localPos, AudioClip? clip = null, Sprite? spr = null)
     {
         var popper = HudManager.Instance.Notifier;
-        var newMessage = Object.Instantiate(popper.notificationMessageOrigin, Vector3.zero, Quaternion.identity, popper.transform);
+        var newMessage = Object.Instantiate(popper.notificationMessageOrigin, popper.transform);
         newMessage.transform.localPosition = localPos;
         newMessage.SetUp(text, spr ?? null, color, new Action(() => popper.OnMessageDestroy(newMessage)));
         popper.lastMessageKey = -1;
