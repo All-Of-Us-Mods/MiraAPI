@@ -175,13 +175,13 @@ public static class OptionsMenuPatches
         LocalSettingsManager.AvailableTabs.ForEach(CustomClose); // Close all mod tabs
 
         // Tabs with index 10 and above are the mod settings tabs
-        if (index >= 10)
+        if (index < 10)
         {
-            CustomOpen(LocalSettingsManager.AvailableTabs[index - 10]);
-            return false;
+            return true;
         }
 
-        return true;
+        CustomOpen(LocalSettingsManager.AvailableTabs[index - 10]);
+        return false;
     }
 
     /// <summary>

@@ -32,7 +32,7 @@ public static class RoleSettingMenuPatches
     private static readonly Dictionary<RoleOptionsGroup, bool> RoleGroupHidden = [];
 
     internal static RoleBehaviour? CurrentRole;
-    internal static List<IModdedOption>? CurrentRoleOptions;
+    internal static IModdedOption[]? CurrentRoleOptions;
 
     private static float scrollerNum = 0.522f;
 
@@ -503,10 +503,11 @@ public static class RoleSettingMenuPatches
         __instance.advancedSettingChildren.Clear();
 
         // TODO: create sub groups under the role settings.
+        var type = role.GetType();
         var filteredOptions = MenuState.Instance.CurrentMod.InternalOptionGroups
-            .Where(x => x.GroupVisible() && x.OptionableType == role.GetType())
+            .Where(x => x.OptionableType == type && x.GroupVisible())
             .SelectMany(x => x.Options)
-            .ToList();
+            .ToArray();
 
         foreach (var option in filteredOptions)
         {
