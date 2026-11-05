@@ -936,7 +936,7 @@ public static class Helpers
     {
         const float contentTop = 0.95f;
         const float horizontalOffset = -0.2f;
-        const float headerContentGap = 0.2f;
+        const float groupHeaderContentGap = 0.05f;
         const int contentSortingOrder = 151;
 
         columns = Mathf.Clamp(columns, 1, 6);
@@ -1024,7 +1024,7 @@ public static class Helpers
                 groupColumns[group] = i % columns;
                 bandHeights[band] = Mathf.Max(
                     bandHeights[band],
-                    rowPitch * (groupedSettings[i].Count() + 1) + headerContentGap + 0.25f);
+                    rowPitch * (groupedSettings[i].Count() + 1) + groupHeaderContentGap + 0.25f);
             }
 
             var bandOffset = 0f;
@@ -1040,7 +1040,6 @@ public static class Helpers
             }
         }
 
-        var contentBottom = float.PositiveInfinity;
         var previousGroup = (AbstractOptionGroup?)null;
         var rowIndex = 0;
         var column = 0;
@@ -1089,12 +1088,12 @@ public static class Helpers
 
                 if (headerSource)
                 {
-                    const float headerScale = 0.46f;
+                    const float groupHeaderScale = 0.42f;
                     var headerWidth = groupsAsColumns
-                        ? columnWidth / headerScale
-                        : (columns * columnWidth + (columns - 1) * columnGap) / headerScale;
+                        ? columnWidth / groupHeaderScale
+                        : (columns * columnWidth + (columns - 1) * columnGap) / groupHeaderScale;
                     var header = Object.Instantiate(headerSource!, page.transform, false);
-                    header.transform.localScale = Vector3.one * headerScale;
+                    header.transform.localScale = Vector3.one * groupHeaderScale;
                     if (groupsAsColumns)
                     {
                         var totalWidth = columns * columnWidth + (columns - 1) * columnGap;
@@ -1155,12 +1154,6 @@ public static class Helpers
                         renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                         renderer.material.SetInt(PlayerMaterial.MaskLayer, 50);
                         renderer.sortingOrder = contentSortingOrder;
-                        if (renderer.enabled && renderer.sprite)
-                        {
-                            contentBottom = Mathf.Min(
-                                contentBottom,
-                                inner.InverseTransformPoint(renderer.bounds.min).y);
-                        }
                     }
 
                     foreach (var text in header.GetComponentsInChildren<TextMeshPro>(true))
@@ -1171,9 +1164,6 @@ public static class Helpers
                         if (text.enabled)
                         {
                             text.ForceMeshUpdate();
-                            contentBottom = Mathf.Min(
-                                contentBottom,
-                                inner.InverseTransformPoint(text.bounds.min).y);
                         }
                     }
 
@@ -1191,7 +1181,7 @@ public static class Helpers
                           horizontalOffset;
             var centerY = groupsAsColumns && settings[i].Group is { } rowGroup
                 ? contentTop - groupTopOffsets[rowGroup] -
-                  (rowPitch * (groupRows[rowGroup] + 1)) - headerContentGap - (rowHeight / 2f)
+                  (rowPitch * (groupRows[rowGroup] + 1)) - groupHeaderContentGap - (rowHeight / 2f)
                 : contentTop - (rowHeight / 2f) - (rowIndex * rowPitch) - groupSpacing;
             var row = Object.Instantiate(rowPrefab, page.transform);
             row.enabled = false;
@@ -1238,27 +1228,6 @@ public static class Helpers
                 renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                 renderer.material.SetInt(PlayerMaterial.MaskLayer, 50);
                 renderer.sortingOrder = contentSortingOrder;
-                if (renderer.enabled &&
-                    renderer.sprite &&
-                    renderer.transform != row.PlusBtn.transform &&
-                    !renderer.transform.IsChildOf(row.PlusBtn.transform) &&
-                    renderer.transform != row.MinusBtn.transform &&
-                    !renderer.transform.IsChildOf(row.MinusBtn.transform))
-                {
-                    contentBottom = Mathf.Min(
-                        contentBottom,
-                        inner.InverseTransformPoint(renderer.bounds.min).y);
-                }
-            }
-
-            foreach (var text in row.GetComponentsInChildren<TextMeshPro>(true))
-            {
-                if (text.enabled)
-                {
-                    contentBottom = Mathf.Min(
-                        contentBottom,
-                        inner.InverseTransformPoint(text.bounds.min).y);
-                }
             }
 
             row.gameObject.SetActive(true);
@@ -1277,6 +1246,26 @@ public static class Helpers
             }
         }
 
+        page.SetActive(true);
+        var contentBottom = float.PositiveInfinity;
+        foreach (var text in page.GetComponentsInChildren<TextMeshPro>(true))
+        {
+            if (text.enabled && text.gameObject.activeInHierarchy)
+            {
+                text.ForceMeshUpdate();
+            }
+        }
+
+        foreach (var renderer in page.GetComponentsInChildren<Renderer>(true))
+        {
+            if (renderer.enabled && renderer.gameObject.activeInHierarchy)
+            {
+                contentBottom = Mathf.Min(
+                    contentBottom,
+                    inner.InverseTransformPoint(renderer.bounds.min).y);
+            }
+        }
+
         var maskArea = parent.transform.FindChild("MaskArea")?.GetComponent<SpriteRenderer>();
         var maskBottom = maskArea
             ? inner.InverseTransformPoint(maskArea!.bounds.min).y
@@ -1288,7 +1277,6 @@ public static class Helpers
             ? contentOverflow + 0.05f
             : 0f;
         parent.SetYBoundsMax(Mathf.Clamp(scrollRange, 0f, 999f));
-        page.SetActive(true);
         return page;
     }
 
