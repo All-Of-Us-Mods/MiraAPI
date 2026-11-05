@@ -108,12 +108,15 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
         if (string.IsNullOrEmpty(query))
             return MenuEntries;
 
-        return [.. MenuEntries
-            .Where(e => e.SortKey.Contains(query, StringComparison.OrdinalIgnoreCase))
-            .OrderByDescending(e => e.SortKey.Equals(query, StringComparison.OrdinalIgnoreCase))
-            .ThenByDescending(e => e.SortKey.StartsWith(query, StringComparison.OrdinalIgnoreCase))
-            .ThenByDescending(e => e.SortKey.Contains(query, StringComparison.OrdinalIgnoreCase))
-            .ThenBy(e => e.SortKey, StringComparer.OrdinalIgnoreCase),];
+        return
+        [
+            .. MenuEntries
+                .Where(e => e.SortKey.Contains(query, StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(e => e.SortKey.Equals(query, StringComparison.OrdinalIgnoreCase))
+                .ThenByDescending(e => e.SortKey.StartsWith(query, StringComparison.OrdinalIgnoreCase))
+                .ThenByDescending(e => e.SortKey.Contains(query, StringComparison.OrdinalIgnoreCase))
+                .ThenBy(e => e.SortKey, StringComparer.OrdinalIgnoreCase),
+        ];
     }
 
     private static int GetTotalPages(int itemCount)
@@ -387,6 +390,7 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
     protected void Begin(Action registerEntryPanels)
     {
         MinigameStubs.Begin(Component, null);
+        MeetingVoteAreaVisibility.HideNameplates(Component);
 
         searchText = string.Empty;
         currentPage = 0;
