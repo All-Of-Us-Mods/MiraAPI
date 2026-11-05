@@ -36,10 +36,13 @@ public class LocalEnumSetting(
     /// <summary>
     /// Gets the <see langword="enum"/> values.
     /// </summary>
-    public string[] Values { get; } = values ?? [.. Enum
-        .GetValues(configEntry.SettingType)
-        .Cast<Enum>()
-        .Select(x => x.ToDisplayString()),];
+    public string[] Values { get; } = values ??
+    [
+        .. Enum
+            .GetValues(configEntry.SettingType)
+            .Cast<Enum>()
+            .Select(x => x.ToDisplayString()),
+    ];
 
     private SpriteRenderer _highlight;
     private TextMeshPro _btnText;
