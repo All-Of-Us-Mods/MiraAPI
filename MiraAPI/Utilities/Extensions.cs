@@ -682,7 +682,7 @@ public static class Extensions
     /// <returns><see langword="true"/> if the <see cref="OptionBehaviour"/> is for a custom options, <see langword="false"/> otherwise.</returns>
     public static bool IsCustom(this OptionBehaviour optionBehaviour)
     {
-        return ModdedOptionsManager.ModdedOptions.Values.Any(opt => opt.OptionBehaviour && opt.OptionBehaviour == optionBehaviour) || optionBehaviour.Equals(GameModeOption.OptionBehaviour);
+        return ModdedOptionsManager.ModdedOptions.Values.Any(opt => opt.OptionBehaviour == optionBehaviour) || optionBehaviour.Equals(GameModeOption.OptionBehaviour);
     }
 
     /// <summary>
