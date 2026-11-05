@@ -5,10 +5,10 @@ namespace MiraAPI.Utilities;
 
 internal static class MeetingVoteAreaVisibility
 {
-    private static readonly Dictionary<Renderer, bool> originalRendererStates = [];
-    private static readonly HashSet<int> activeOwners = [];
+    private static readonly Dictionary<Renderer, bool> OriginalRendererStates = [];
+    private static readonly HashSet<int> ActiveOwners = [];
 
-    internal static void HideNameplates(UnityEngine.Object owner)
+    internal static void HideNameplates(Object owner)
     {
         var meetingHud = MeetingHud.Instance;
         if (!owner ||
@@ -20,7 +20,7 @@ internal static class MeetingVoteAreaVisibility
             return;
         }
 
-        activeOwners.Add(owner.GetInstanceID());
+        ActiveOwners.Add(owner.GetInstanceID());
         foreach (var playerVoteArea in meetingHud.playerStates)
         {
             if (!playerVoteArea)
@@ -38,9 +38,9 @@ internal static class MeetingVoteAreaVisibility
                     continue;
                 }
 
-                if (!originalRendererStates.ContainsKey(renderer))
+                if (!OriginalRendererStates.ContainsKey(renderer))
                 {
-                    originalRendererStates.Add(renderer, renderer.enabled);
+                    OriginalRendererStates.Add(renderer, renderer.enabled);
                 }
 
                 renderer.enabled = false;
@@ -48,9 +48,9 @@ internal static class MeetingVoteAreaVisibility
         }
     }
 
-    internal static void Restore(UnityEngine.Object owner)
+    internal static void Restore(Object owner)
     {
-        if (!owner || !activeOwners.Remove(owner.GetInstanceID()) || activeOwners.Count > 0)
+        if (!owner || !ActiveOwners.Remove(owner.GetInstanceID()) || ActiveOwners.Count > 0)
         {
             return;
         }
@@ -60,8 +60,8 @@ internal static class MeetingVoteAreaVisibility
 
     internal static void RestoreAll()
     {
-        activeOwners.Clear();
-        foreach (var rendererState in originalRendererStates)
+        ActiveOwners.Clear();
+        foreach (var rendererState in OriginalRendererStates)
         {
             if (rendererState.Key)
             {
@@ -69,6 +69,6 @@ internal static class MeetingVoteAreaVisibility
             }
         }
 
-        originalRendererStates.Clear();
+        OriginalRendererStates.Clear();
     }
 }
