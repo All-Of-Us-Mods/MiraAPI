@@ -217,7 +217,7 @@ public static class ModdedOptionsManager
             return;
         }
 
-        if (property.GetValue(group) is not IModdedOptionList optionList)
+        if (property.GetValue(group) is not IBaseModdedOptionList optionList)
         {
             Error($"Failed to get option list for {property.Name}");
             return;
@@ -227,7 +227,7 @@ public static class ModdedOptionsManager
 
         for (var i = 0; i < optionList.Count; i++)
         {
-            RegisterOption(optionList[i], group, configName(i), pluginInfo);
+            RegisterOption(optionList.ElementAt(i), group, configName(i), pluginInfo);
         }
     }
 
@@ -324,7 +324,7 @@ public static class ModdedOptionsManager
 
         for (var i = 0; i < optionList.Count; i++)
         {
-            var option = optionList[i];
+            var option = optionList.ElementAt(i);
 
             if (visibilityFactory != null)
                 option.Visible = (Func<bool>)(visibilityFactory(i) ?? DelegateUtilities.AlwaysTrue);

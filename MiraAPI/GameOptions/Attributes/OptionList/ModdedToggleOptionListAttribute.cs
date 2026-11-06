@@ -27,7 +27,7 @@ public class ModdedToggleOptionListAttribute(
     {
     }
 
-    internal override IModdedOptionList CreateOptionList(IList value, PropertyInfo property)
+    internal override IBaseModdedOptionList CreateOptionList(IList value, PropertyInfo property)
     {
         var optList = new ModdedOptionList<ModdedToggleOption>(
             value.Count, idx => new(GetFormattedTitle(idx), (bool)(value[idx] ?? false), on, off));
@@ -37,14 +37,14 @@ public class ModdedToggleOptionListAttribute(
     /// <inheritdoc />
     public override void SetValue(int idx, object value)
     {
-        var opt = HolderOptionList?[idx] as ModdedToggleOption;
+        var opt = HolderOptionList?.ElementAt(idx) as ModdedToggleOption;
         opt?.SetValue((bool)value);
     }
 
     /// <inheritdoc />
     public override object GetValue(int idx)
     {
-        return HolderOptionList?[idx] is ModdedToggleOption opt
+        return HolderOptionList?.ElementAt(idx) is ModdedToggleOption opt
             ? opt.Value
             : throw new InvalidOperationException($"Holder option for {GetFormattedTitle(idx)} is not a ModdedToggleOption.");
     }

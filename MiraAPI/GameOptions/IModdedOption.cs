@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using BepInEx.Configuration;
 using MiraAPI.Networking;
@@ -143,9 +144,11 @@ public interface IModdedOption
 }
 
 /// <summary>
-/// Interface for list of modded options.
+/// Base interface for list of modded options.
+/// <para/>
+/// Do not implement directly, implement <see cref="IModdedOptionList"/> or <see cref="IModdedOptionList{T}"/> instead.
 /// </summary>
-public interface IModdedOptionList : IReadOnlyList<IModdedOption>
+public interface IBaseModdedOptionList : IEnumerable
 {
     /// <summary>
     /// Gets the function to name the keys of the individual options in the configuration file.
@@ -153,18 +156,34 @@ public interface IModdedOptionList : IReadOnlyList<IModdedOption>
     /// Return <see langword="null"/> to use the default of the property's name with its index appended.
     /// </summary>
     Func<int, string>? ConfigName { get; init; }
+
+    /// <inheritdoc cref="IReadOnlyCollection{T}.Count"/>
+    int Count { get; }
+
+    /// <inheritdoc cref="System.Linq.Enumerable.ElementAt{TSource}(IEnumerable{TSource}, int)"/>
+    IModdedOption ElementAt(int index);
+}
+
+/// <summary>
+/// Interface for list of modded options.
+/// </summary>
+public interface IModdedOptionList : IBaseModdedOptionList, IReadOnlyList<IModdedOption>
+{
+    IModdedOption IBaseModdedOptionList.ElementAt(int index)
+    {
+        return this[index];
+    }
 }
 
 /// <summary>
 /// Interface for list of <typeparamref name="T"/> options.
 /// </summary>
 /// <typeparam name="T">The type of <see cref="IModdedOption"/>.</typeparam>
-public interface IModdedOptionList<out T> : IModdedOptionList
+public interface IModdedOptionList<out T> : IBaseModdedOptionList, IReadOnlyList<T>
     where T : IModdedOption
 {
-    /// <inheritdoc cref="IReadOnlyList{T}.this[int]"/>
-    new T this[int index] { get; }
-
-    /// <inheritdoc cref="IEnumerable{T}.GetEnumerator"/>
-    new IEnumerator<T> GetEnumerator();
+    IModdedOption IBaseModdedOptionList.ElementAt(int index)
+    {
+        return this[index];
+    }
 }

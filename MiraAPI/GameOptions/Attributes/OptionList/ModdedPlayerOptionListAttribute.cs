@@ -16,7 +16,7 @@ public class ModdedPlayerOptionListAttribute(
     bool allowNone = true)
     : ModdedOptionListAttribute(title)
 {
-    internal override IModdedOptionList CreateOptionList(IList value, PropertyInfo property)
+    internal override IBaseModdedOptionList CreateOptionList(IList value, PropertyInfo property)
     {
         return new ModdedOptionList<ModdedPlayerOption>(value.Count, idx =>
         {
@@ -27,7 +27,7 @@ public class ModdedPlayerOptionListAttribute(
     /// <inheritdoc />
     public override void SetValue(int idx, object value)
     {
-        if (HolderOptionList?[idx] is not ModdedPlayerOption opt)
+        if (HolderOptionList?.ElementAt(idx) is not ModdedPlayerOption opt)
             return;
 
         var final = value switch
@@ -41,7 +41,7 @@ public class ModdedPlayerOptionListAttribute(
     /// <inheritdoc />
     public override object GetValue(int idx)
     {
-        if (HolderOptionList?[idx] is not ModdedPlayerOption opt)
+        if (HolderOptionList?.ElementAt(idx) is not ModdedPlayerOption opt)
             throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" is not a ModdedPlayerOption");
 
         if (ValueType == typeof(int))
