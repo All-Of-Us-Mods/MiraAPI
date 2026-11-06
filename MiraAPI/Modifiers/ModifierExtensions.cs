@@ -11,7 +11,7 @@ namespace MiraAPI.Modifiers;
 /// <summary>
 /// Extensions for <see cref="IBaseModifier"/>s.
 /// </summary>
-public static class ModifierExtensions
+public static partial class ModifierExtensions
 {
     /// <summary>
     /// Gets the <see cref="Dictionary{TKey, TValue}"/> to cache <see cref="ModifierComponent"/>s.

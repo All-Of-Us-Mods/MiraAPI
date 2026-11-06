@@ -31,7 +31,7 @@ internal readonly record struct AdvancedSettingsRow(string Title, string Value, 
 /// <summary>
 /// A class that contains helper methods.
 /// </summary>
-public static class Helpers
+public static partial class Helpers
 {
     internal const float MatchInfoGuideBaseScale = 1.3f;
     private static readonly Regex TrailingZeroRegex = new(@"\.0+(?!\d)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));

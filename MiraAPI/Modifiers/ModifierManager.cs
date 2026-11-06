@@ -15,7 +15,7 @@ namespace MiraAPI.Modifiers;
 /// <summary>
 /// The manager for handling <see cref="IBaseModifier"/>s.
 /// </summary>
-public static class ModifierManager
+public static partial class ModifierManager
 {
     /// <summary>
     /// Gets or sets a value indicating whether <see cref="IBaseModifier"/>s should be assigned to players.
@@ -25,7 +25,7 @@ public static class ModifierManager
     /// <summary>
     /// Gets the list of all registered <see cref="IBaseModifier"/>s.
     /// </summary>
-    public static IReadOnlyList<IBaseModifier> Modifiers { get; internal set; } = [];
+    public static IReadOnlyList<IBaseModifier> AllModifiers { get; internal set; } = [];
 
     internal static List<IBaseModifier> InternalModifiers { get; } = [];
 
