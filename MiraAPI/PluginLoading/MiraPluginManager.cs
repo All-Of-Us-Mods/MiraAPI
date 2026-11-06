@@ -197,7 +197,7 @@ public sealed class MiraPluginManager
                 continue;
             }
 
-            MiraEventManager.RegisterEventHandler(method, eventAttribute.Priority);
+            MiraEventManager.RegisterEventHandler(method, eventAttribute.Priority, eventAttribute.InvokeOnSubtype);
         }
     }
 

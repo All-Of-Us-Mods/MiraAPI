@@ -23,10 +23,27 @@ public class MiraEventHandle
     /// </summary>
     internal Delegate EventHandler { get; }
 
-    internal MiraEventHandle(Delegate eventHandler, int priority, Type type)
+    /// <summary>
+    /// Gets a value indicating whether the event handler should also be
+    /// tirggered by subclasses of <see cref="EventType"/>.
+    /// </summary>
+    internal bool InvokeOnSubtype { get; }
+
+    internal MiraEventHandle(Delegate eventHandler, int priority, Type type, bool invokeOnSubtype)
     {
         EventHandler = eventHandler;
         Priority = priority;
         EventType = type;
+        InvokeOnSubtype = invokeOnSubtype;
+    }
+
+    internal bool IsTriggeredBy(Type type)
+    {
+        if (InvokeOnSubtype)
+        {
+            return EventType.IsAssignableTo(type);
+        }
+
+        return EventType == type;
     }
 }
