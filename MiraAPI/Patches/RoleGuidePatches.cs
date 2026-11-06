@@ -1168,11 +1168,21 @@ public static class RoleGuidePatches
         {
             ComputeCounts(entry);
             entry.Visible = entry.CanShow && MatchesSearch(entry, searchText);
+
+            // This *was* using dynamic, but we believe it's crashing android.
             if (entry.Panel)
             {
-                dynamic entryType = entry.Modifier != null ? entry.Modifier : entry.Role!;
-                var text = GetPanelCountText(entryType, entry.Amount, entry.Chance, entry.ModId);
-                SetPanelCount(entry.Panel!, text);
+                if (entry.Modifier != null)
+                {
+                    var text = GetPanelCountText(entry.Modifier, entry.Amount, entry.Chance, entry.ModId);
+                    SetPanelCount(entry.Panel!, text);
+                }
+                else
+                {
+                    var text = GetPanelCountText(entry.Role!, entry.Amount, entry.Chance, entry.ModId);
+                    SetPanelCount(entry.Panel!, text);
+                }
+
                 if (!entry.Visible && entry.Panel!.gameObject.activeSelf)
                 {
                     entry.Panel.gameObject.SetActive(false);
