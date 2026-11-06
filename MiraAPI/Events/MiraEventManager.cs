@@ -138,12 +138,12 @@ public static class MiraEventManager
     /// <summary>
     /// Register a <see cref="MiraEvent"/> handler.
     /// </summary>
+    /// <param name="type">The type of <see cref="MiraEvent"/> event.</param>
     /// <param name="methodInfo">The <see cref="MethodInfo"/> of the event handler.</param>
     /// <param name="priority">The priority of the event handler. Lower values are called first.</param>
     /// <returns>A <see cref="MiraEventHandle"/> to use when unregistering the event.</returns>
-    public static MiraEventHandle RegisterEventHandler(MethodInfo methodInfo, int priority = 0)
+    public static MiraEventHandle RegisterEventHandler(Type type, MethodInfo methodInfo, int priority = 0)
     {
-        Type type = methodInfo.GetParameters()[0].ParameterType;
         if (!type.IsAssignableTo(typeof(MiraEvent)))
         {
             throw new InvalidOperationException($"Type must be a subclass of MiraEvent: {type.FullName}");

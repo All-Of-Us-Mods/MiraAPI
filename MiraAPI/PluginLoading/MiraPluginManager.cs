@@ -197,7 +197,8 @@ public sealed class MiraPluginManager
                 continue;
             }
 
-            MiraEventManager.RegisterEventHandler(method, eventAttribute.Priority);
+            var paramType = parameters[0].ParameterType;
+            MiraEventManager.RegisterEventHandler(paramType, method, eventAttribute.Priority);
         }
     }
 
