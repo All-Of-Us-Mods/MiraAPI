@@ -602,6 +602,35 @@ public static class Extensions
     }
 
     /// <summary>
+    /// Checks if <paramref name="type"/> is a subclass of <paramref name="super"/>, including
+    /// account for generics, or given generic type definitions.
+    /// </summary>
+    /// <param name="type">The type to check.</param>
+    /// <param name="super">The type to compare against.</param>
+    /// <returns><see langword="true"/> if <paramref name="type"/> is a sublass of <paramref name="type"/>, <see langword="false"/> otherwise.</returns>
+    public static bool IsSubclassOfWithGeneric(this Type? type, Type super)
+    {
+        if (type == null || type == typeof(object))
+        {
+            return false;
+        }
+
+        if (type == super)
+        {
+            return true;
+        }
+
+        if (super.IsGenericTypeDefinition &&
+            type.IsGenericType &&
+            type.GetGenericTypeDefinition() == super)
+        {
+            return true;
+        }
+
+        return type.BaseType.IsSubclassOfWithGeneric(super);
+    }
+
+    /// <summary>
     /// Gets a darkened version of a <see cref="Color32"/>.
     /// </summary>
     /// <param name="color">The original <see cref="Color32"/>.</param>

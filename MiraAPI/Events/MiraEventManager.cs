@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using MiraAPI.PluginLoading;
+using MiraAPI.Utilities;
 
 namespace MiraAPI.Events;
 
@@ -111,28 +112,6 @@ public static class MiraEventManager
 
         trackedAs ??= eventType;
         trackedEvents.Add(trackedAs);
-    }
-
-    private static bool IsSubclassOfWithGeneric(this Type? type, Type super)
-    {
-        if (type == null || type == typeof(MiraEvent))
-        {
-            return false;
-        }
-
-        if (type == super)
-        {
-            return true;
-        }
-
-        if (super.IsGenericTypeDefinition &&
-            type.IsGenericType &&
-            type.GetGenericTypeDefinition() == super)
-        {
-            return true;
-        }
-
-        return type.BaseType.IsSubclassOfWithGeneric(super);
     }
 
     /// <summary>
