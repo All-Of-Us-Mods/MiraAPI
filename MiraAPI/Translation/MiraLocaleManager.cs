@@ -129,11 +129,7 @@ public static class MiraLocaleManager
         }
     }
 
-    /// <summary>
-    /// Registers translations for a mod.
-    /// Call once per mod during plugin Load().
-    /// </summary>
-    /// <param name="modGuid">The mod GUID (e.g., "mira.example").</param>
+    /// <inheritdoc cref="Register(string, string, Assembly)"/>
     [Obsolete("Pass typeof(YourPlugin).Assembly directly to Register for better performance.")]
     public static void Register(string modGuid)
     {
@@ -141,23 +137,13 @@ public static class MiraLocaleManager
         LoadInternalStrings(callingAssembly, callingAssembly.GetName().Name!, modGuid);
     }
 
-    /// <summary>
-    /// Registers translations for a mod.
-    /// Call once per mod during plugin Load().
-    /// </summary>
-    /// <param name="modGuid">The mod GUID (e.g., "mira.example").</param>
-    /// <param name="assembly">The <see cref="Assembly"/> to load the strings from.</param>
+    /// <inheritdoc cref="Register(string, string, Assembly)"/>
     public static void Register(string modGuid, Assembly assembly)
     {
         LoadInternalStrings(assembly, assembly.GetName().Name!, modGuid);
     }
 
-    /// <summary>
-    /// Registers translations for a mod.
-    /// Call once per mod during plugin Load().
-    /// </summary>
-    /// <param name="modGuid">The mod GUID (e.g., "mira.example").</param>
-    /// <param name="internalName">The mod's root namespace (e.g., "mira.api").</param>
+    /// <inheritdoc cref="Register(string, string, Assembly)"/>
     [Obsolete("Pass typeof(YourPlugin).Assembly directly to Register for better performance.")]
     public static void Register(string modGuid, string internalName)
     {
@@ -177,12 +163,7 @@ public static class MiraLocaleManager
         LoadInternalStrings(assembly, internalName, modGuid);
     }
 
-    /// <summary>
-    /// Translates a key into the current language.
-    /// </summary>
-    /// <param name="key">The string id to find.</param>
-    /// <param name="fallback">Fallback string to use if no translation is found.</param>
-    /// <returns>A <see cref="string"/> based on the key provided.</returns>
+    /// <inheritdoc cref="Get(MiraLanguage, string, string)"/>
     public static string Get(string key, string fallback = "")
     {
         return Get(CurrentLanguage, key, fallback != string.Empty ? fallback : key);
@@ -212,13 +193,7 @@ public static class MiraLocaleManager
         return fallback;
     }
 
-    /// <summary>
-    /// Translates a key into the current language.
-    /// </summary>
-    /// <param name="key">The string id to find.</param>
-    /// <param name="parseList">List of keys to change into other text.</param>
-    /// <param name="fallback">Fallback string to use if no translation is found.</param>
-    /// <returns>A <see cref="string"/> based on the key provided.</returns>
+    /// <inheritdoc cref="GetParsed(MiraLanguage, string, Dictionary{string, string}, string)"/>
     public static string GetParsed(
         string key,
         Dictionary<string, string> parseList,
@@ -241,20 +216,9 @@ public static class MiraLocaleManager
         Dictionary<string, string> parseList,
         string fallback = "")
     {
-        var text = fallback;
-
-        if (Locale.TryGetValue(MiraLanguage.English, out var translationsEng) &&
-            translationsEng.TryGetValue(key, out var translationEng))
-        {
-            text = translationEng;
-        }
-
-        if (language is not MiraLanguage.English &&
-            Locale.TryGetValue(language, out var translations) &&
-            translations.TryGetValue(key, out var translation))
-        {
-            text = translation;
-        }
+        var text = Locale.GetValueOrDefault(language)?.GetValueOrDefault(key)
+                ?? Locale.GetValueOrDefault(MiraLanguage.English)?.GetValueOrDefault(key)
+                ?? fallback;
 
         foreach (var tmpText in parseList)
         {
@@ -276,12 +240,7 @@ public static class MiraLocaleManager
         return idPart.StartsWith('#') ? idPart[1..] : $"{modId}.{idPart}.{suffix}";
     }
 
-    /// <summary>
-    /// Builds a formatted translation ID string using a mod ID and a specific ID part.
-    /// </summary>
-    /// <param name="modId">The mod GUID.</param>
-    /// <param name="idPart">The core part of the ID. If it starts with '#', the character is stripped.</param>
-    /// <returns>A formatted translation ID <see cref="string"/>.</returns>
+    /// <inheritdoc cref="BuildTranslationId(string, string, string)"/>
     public static string BuildTranslationId(string modId, string idPart)
     {
         return idPart.StartsWith('#') ? idPart[1..] : $"{modId}.{idPart}";
