@@ -42,16 +42,7 @@ public sealed class VariableColor(
     /// </summary>
     public Func<float, Color> ShadowEvaluator { get; } = shadowEvaluator ?? (t => mainEvaluator(t).DarkenAbsolute(0.24f));
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="VariableColor"/> class.
-    /// </summary>
-    /// <param name="nameId">The name of the option as a <see cref="StringNames"/> value.</param>
-    /// <param name="mainEvaluator">The function to evaluate the dynamic main color.</param>
-    /// <param name="shadowEvaluator">The function to evaluate the dynamic shadow color.</param>
-    /// <param name="mainColor">The static main color used when dynamic colors are disabled.</param>
-    /// <param name="shadowColor">The static shadow color used when dynamic colors are disabled.</param>
-    /// <param name="defaultTime">The default time that is used to automatically fill in the static colors when the latter is not provided.</param>
-    /// <param name="brightness">The brightness type of the color.</param>
+    /// <inheritdoc cref="VariableColor(StringNames?, string?, Func{float, Color}, Func{float, Color}?, Color32?, Color32?, float, CustomColorBrightness)"/>
     public VariableColor(
         StringNames nameId,
         Func<float, Color> mainEvaluator,
@@ -64,14 +55,7 @@ public sealed class VariableColor(
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="VariableColor"/> class.
-    /// </summary>
-    /// <param name="nameId">The name of the option as a <see cref="StringNames"/> value.</param>
-    /// <param name="mainEvaluator">The function to evaluate the dynamic main color.</param>
-    /// <param name="mainColor">The static main color used when dynamic colors are disabled.</param>
-    /// <param name="defaultTime">The default time that is used to automatically fill in the static colors when the latter is not provided.</param>
-    /// <param name="brightness">The brightness type of the color.</param>
+    /// <inheritdoc cref="VariableColor(StringNames?, string?, Func{float, Color}, Func{float, Color}?, Color32?, Color32?, float, CustomColorBrightness)"/>
     public VariableColor(
         StringNames nameId,
         Func<float, Color> mainEvaluator,
@@ -82,16 +66,7 @@ public sealed class VariableColor(
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="VariableColor"/> class.
-    /// </summary>
-    /// <param name="rawId">The name of the option as a <see cref="string"/> value.</param>
-    /// <param name="mainEvaluator">The function to evaluate the dynamic main color.</param>
-    /// <param name="shadowEvaluator">The function to evaluate the dynamic shadow color.</param>
-    /// <param name="mainColor">The static main color used when dynamic colors are disabled.</param>
-    /// <param name="shadowColor">The static shadow color used when dynamic colors are disabled.</param>
-    /// <param name="defaultTime">The default time that is used to automatically fill in the static colors when the latter is not provided.</param>
-    /// <param name="brightness">The brightness type of the color.</param>
+    /// <inheritdoc cref="VariableColor(StringNames?, string?, Func{float, Color}, Func{float, Color}?, Color32?, Color32?, float, CustomColorBrightness)"/>
     public VariableColor(
         string rawId,
         Func<float, Color> mainEvaluator,
@@ -104,14 +79,7 @@ public sealed class VariableColor(
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="VariableColor"/> class.
-    /// </summary>
-    /// <param name="rawId">The name of the option as a <see cref="string"/> value.</param>
-    /// <param name="mainEvaluator">The function to evaluate the dynamic main color.</param>
-    /// <param name="mainColor">The static main color used when dynamic colors are disabled.</param>
-    /// <param name="defaultTime">The default time that is used to automatically fill in the static colors when the latter is not provided.</param>
-    /// <param name="brightness">The brightness type of the color.</param>
+    /// <inheritdoc cref="VariableColor(StringNames?, string?, Func{float, Color}, Func{float, Color}?, Color32?, Color32?, float, CustomColorBrightness)"/>
     public VariableColor(
         string rawId,
         Func<float, Color> mainEvaluator,
@@ -122,15 +90,7 @@ public sealed class VariableColor(
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="VariableColor"/> class.
-    /// </summary>
-    /// <param name="nameId">The name of the option as a <see cref="StringNames"/> value.</param>
-    /// <param name="mainEvaluator">The function to evaluate the dynamic main color.</param>
-    /// <param name="shadowEvaluator">The function to evaluate the dynamic shadow color.</param>
-    /// <param name="mainColor">The static main color used when dynamic colors are disabled.</param>
-    /// <param name="shadowColor">The static shadow color used when dynamic colors are disabled.</param>
-    /// <param name="defaultTime">The default time that is used to automatically fill in the static colors when the latter is not provided.</param>
+    /// <inheritdoc cref="VariableColor(StringNames?, string?, Func{float, Color}, Func{float, Color}?, Color32?, Color32?, float, CustomColorBrightness)"/>
     public VariableColor(
         StringNames nameId,
         Func<float, Color> mainEvaluator,
@@ -142,13 +102,7 @@ public sealed class VariableColor(
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="VariableColor"/> class.
-    /// </summary>
-    /// <param name="nameId">The name of the option as a <see cref="StringNames"/> value.</param>
-    /// <param name="mainEvaluator">The function to evaluate the dynamic main color.</param>
-    /// <param name="mainColor">The static main color used when dynamic colors are disabled.</param>
-    /// <param name="defaultTime">The default time that is used to automatically fill in the static colors when the latter is not provided.</param>
+    /// <inheritdoc cref="VariableColor(StringNames?, string?, Func{float, Color}, Func{float, Color}?, Color32?, Color32?, float, CustomColorBrightness)"/>
     public VariableColor(
         StringNames nameId,
         Func<float, Color> mainEvaluator,
@@ -158,15 +112,7 @@ public sealed class VariableColor(
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="VariableColor"/> class.
-    /// </summary>
-    /// <param name="rawId">The name of the option as a <see cref="string"/> value.</param>
-    /// <param name="mainEvaluator">The function to evaluate the dynamic main color.</param>
-    /// <param name="shadowEvaluator">The function to evaluate the dynamic shadow color.</param>
-    /// <param name="mainColor">The static main color used when dynamic colors are disabled.</param>
-    /// <param name="shadowColor">The static shadow color used when dynamic colors are disabled.</param>
-    /// <param name="defaultTime">The default time that is used to automatically fill in the static colors when the latter is not provided.</param>
+    /// <inheritdoc cref="VariableColor(StringNames?, string?, Func{float, Color}, Func{float, Color}?, Color32?, Color32?, float, CustomColorBrightness)"/>
     public VariableColor(
         string rawId,
         Func<float, Color> mainEvaluator,
@@ -178,13 +124,7 @@ public sealed class VariableColor(
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="VariableColor"/> class.
-    /// </summary>
-    /// <param name="rawId">The name of the option as a <see cref="string"/> value.</param>
-    /// <param name="mainEvaluator">The function to evaluate the dynamic main color.</param>
-    /// <param name="mainColor">The static main color used when dynamic colors are disabled.</param>
-    /// <param name="defaultTime">The default time that is used to automatically fill in the static colors when the latter is not provided.</param>
+    /// <inheritdoc cref="VariableColor(StringNames?, string?, Func{float, Color}, Func{float, Color}?, Color32?, Color32?, float, CustomColorBrightness)"/>
     public VariableColor(
         string rawId,
         Func<float, Color> mainEvaluator,

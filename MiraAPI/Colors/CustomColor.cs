@@ -67,92 +67,52 @@ public class CustomColor(StringNames? nameId, string? rawId, Color32 mainColor, 
     internal Color InternalMainColor = mainColor;
     internal Color InternalShadowColor = shadowColor;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CustomColor"/> class.
-    /// </summary>
-    /// <param name="nameId">The name of the option as a <see cref="StringNames"/> value.</param>
-    /// <param name="mainColor">The main color.</param>
-    /// <param name="shadowColor">The shadow color.</param>
-    /// <param name="brightness">The brightness type of the color.</param>
+    /// <inheritdoc cref="CustomColor(StringNames?, string?, Color32, Color32, CustomColorBrightness)"/>
     public CustomColor(StringNames nameId, Color32 mainColor, Color32 shadowColor, CustomColorBrightness brightness)
         : this(nameId, null, mainColor, shadowColor, brightness)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CustomColor"/> class.
-    /// </summary>
-    /// <param name="nameId">The name of the option as a <see cref="StringNames"/> value.</param>
-    /// <param name="mainColor">The main color.</param>
-    /// <param name="brightness">The brightness type of the color.</param>
+    /// <inheritdoc cref="CustomColor(StringNames?, string?, Color32, Color32, CustomColorBrightness)"/>
     public CustomColor(StringNames nameId, Color32 mainColor, CustomColorBrightness brightness)
         : this(nameId, null, mainColor, mainColor.DarkenAbsolute(60), brightness)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CustomColor"/> class.
-    /// </summary>
-    /// <param name="rawId">The name of the option as a <see cref="string"/> value.</param>
-    /// <param name="mainColor">The main color.</param>
-    /// <param name="shadowColor">The shadow color.</param>
-    /// <param name="brightness">The brightness type of the color.</param>
+    /// <inheritdoc cref="CustomColor(StringNames?, string?, Color32, Color32, CustomColorBrightness)"/>
     public CustomColor(string rawId, Color32 mainColor, Color32 shadowColor, CustomColorBrightness brightness)
         : this(null, rawId, mainColor, shadowColor, brightness)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CustomColor"/> class.
-    /// </summary>
-    /// <param name="rawId">The name of the option as a <see cref="string"/> value.</param>
-    /// <param name="mainColor">The main color.</param>
-    /// <param name="brightness">The brightness type of the color.</param>
+    /// <inheritdoc cref="CustomColor(StringNames?, string?, Color32, Color32, CustomColorBrightness)"/>
     public CustomColor(string rawId, Color32 mainColor, CustomColorBrightness brightness)
         : this(null, rawId, mainColor, mainColor.DarkenAbsolute(60), brightness)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CustomColor"/> class.
-    /// </summary>
-    /// <param name="nameId">The name of the option as a <see cref="StringNames"/> value.</param>
-    /// <param name="mainColor">The main color.</param>
-    /// <param name="shadowColor">The shadow color.</param>
+    /// <inheritdoc cref="CustomColor(StringNames?, string?, Color32, Color32, CustomColorBrightness)"/>
     [Obsolete("Use the constructor that takes in a CustomColorBrightness parameter. This will be removed in a future version.")]
     public CustomColor(StringNames nameId, Color32 mainColor, Color32 shadowColor)
         : this(nameId, null, mainColor, shadowColor, CustomColorBrightness.Darker)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CustomColor"/> class.
-    /// </summary>
-    /// <param name="nameId">The name of the option as a <see cref="StringNames"/> value.</param>
-    /// <param name="mainColor">The main color.</param>
+    /// <inheritdoc cref="CustomColor(StringNames?, string?, Color32, Color32, CustomColorBrightness)"/>
     [Obsolete("Use the constructor that takes in a CustomColorBrightness parameter. This will be removed in a future version.")]
     public CustomColor(StringNames nameId, Color32 mainColor)
         : this(nameId, null, mainColor, mainColor.DarkenAbsolute(60), CustomColorBrightness.Darker)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CustomColor"/> class.
-    /// </summary>
-    /// <param name="rawId">The name of the option as a <see cref="string"/> value.</param>
-    /// <param name="mainColor">The main color.</param>
-    /// <param name="shadowColor">The shadow color.</param>
+    /// <inheritdoc cref="CustomColor(StringNames?, string?, Color32, Color32, CustomColorBrightness)"/>
     [Obsolete("Use the constructor that takes in a CustomColorBrightness parameter. This will be removed in a future version.")]
     public CustomColor(string rawId, Color32 mainColor, Color32 shadowColor)
         : this(null, rawId, mainColor, shadowColor, CustomColorBrightness.Darker)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CustomColor"/> class.
-    /// </summary>
-    /// <param name="rawId">The name of the option as a <see cref="string"/> value.</param>
-    /// <param name="mainColor">The main color.</param>
+    /// <inheritdoc cref="CustomColor(StringNames?, string?, Color32, Color32, CustomColorBrightness)"/>
     [Obsolete("Use the constructor that takes in a CustomColorBrightness parameter. This will be removed in a future version.")]
     public CustomColor(string rawId, Color32 mainColor)
         : this(null, rawId, mainColor, mainColor.DarkenAbsolute(60), CustomColorBrightness.Darker)
