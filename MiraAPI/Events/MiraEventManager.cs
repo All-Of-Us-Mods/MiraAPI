@@ -122,7 +122,7 @@ public static class MiraEventManager
     /// <param name="priority">The priority of the event handler. Lower values are called first.</param>
     /// <param name="invokeOnSubtype">Whether the event handler should also be triggered by subclasses of the <see cref="MiraEvent"/> type of the handler.</param>
     /// <returns>A <see cref="MiraEventHandle"/> to use when unregistering the event.</returns>
-    public static MiraEventHandle RegisterEventHandler(Type type, MethodInfo methodInfo, int priority = 0, bool invokeOnSubtype = true)
+    public static MiraEventHandle RegisterEventHandler(Type type, MethodInfo methodInfo, int priority, bool invokeOnSubtype)
     {
         if (!type.IsAssignableTo(typeof(MiraEvent)))
         {
@@ -133,6 +133,24 @@ public static class MiraEventManager
         return RegisterEventHandler(type, @delegate, priority, invokeOnSubtype);
     }
 
+    /// <inheritdoc cref="RegisterEventHandler(Type, MethodInfo, int, bool)"/>
+    public static MiraEventHandle RegisterEventHandler(Type type, MethodInfo methodInfo, int priority)
+    {
+        return RegisterEventHandler(type, methodInfo, priority, true);
+    }
+
+    /// <inheritdoc cref="RegisterEventHandler(Type, MethodInfo, int, bool)"/>
+    public static MiraEventHandle RegisterEventHandler(Type type, MethodInfo methodInfo, bool invokeOnSubtype)
+    {
+        return RegisterEventHandler(type, methodInfo, 0, invokeOnSubtype);
+    }
+
+    /// <inheritdoc cref="RegisterEventHandler(Type, MethodInfo, int, bool)"/>
+    public static MiraEventHandle RegisterEventHandler(Type type, MethodInfo methodInfo)
+    {
+        return RegisterEventHandler(type, methodInfo, 0, true);
+    }
+
     /// <summary>
     /// Register a <see cref="MiraEvent"/> handler.
     /// </summary>
@@ -140,9 +158,27 @@ public static class MiraEventManager
     /// <param name="priority">The priority of the event handler. Lower values are called first.</param>
     /// <param name="invokeOnSubtype">Whether the event handler should also be triggered by subclasses of the <see cref="MiraEvent"/> type of the handler.</param>
     /// <returns>A <see cref="MiraEventHandle"/> to use when unregistering the event.</returns>
-    public static MiraEventHandle RegisterEventHandler(MethodInfo methodInfo, int priority = 0, bool invokeOnSubtype = true)
+    public static MiraEventHandle RegisterEventHandler(MethodInfo methodInfo, int priority, bool invokeOnSubtype)
     {
         return RegisterEventHandler(methodInfo.GetParameters()[0].ParameterType, methodInfo, priority, invokeOnSubtype);
+    }
+
+    /// <inheritdoc cref="RegisterEventHandler(MethodInfo, int, bool)"/>
+    public static MiraEventHandle RegisterEventHandler(MethodInfo methodInfo, int priority)
+    {
+        return RegisterEventHandler(methodInfo, priority, true);
+    }
+
+    /// <inheritdoc cref="RegisterEventHandler(MethodInfo, int, bool)"/>
+    public static MiraEventHandle RegisterEventHandler(MethodInfo methodInfo, bool invokeOnSubtype)
+    {
+        return RegisterEventHandler(methodInfo, 0, invokeOnSubtype);
+    }
+
+    /// <inheritdoc cref="RegisterEventHandler(MethodInfo, int, bool)"/>
+    public static MiraEventHandle RegisterEventHandler(MethodInfo methodInfo)
+    {
+        return RegisterEventHandler(methodInfo, 0, true);
     }
 
     /// <summary>
@@ -153,10 +189,31 @@ public static class MiraEventManager
     /// <param name="invokeOnSubtype">Whether the event handler should also be triggered by subclasses of the <see cref="MiraEvent"/> type of the handler.</param>
     /// <typeparam name="T">Type of <see cref="MiraEvent"/> event.</typeparam>
     /// <returns>A <see cref="MiraEventHandle"/> to use when unregistering the event.</returns>
-    public static MiraEventHandle RegisterEventHandler<T>(Action<T> handler, int priority = 0, bool invokeOnSubtype = true)
+    public static MiraEventHandle RegisterEventHandler<T>(Action<T> handler, int priority, bool invokeOnSubtype)
         where T : MiraEvent
     {
         return RegisterEventHandler(typeof(T), handler, priority, invokeOnSubtype);
+    }
+
+    /// <inheritdoc cref="RegisterEventHandler{T}(Action{T}, int, bool)"/>
+    public static MiraEventHandle RegisterEventHandler<T>(Action<T> handler, int priority)
+        where T : MiraEvent
+    {
+        return RegisterEventHandler(handler, priority, true);
+    }
+
+    /// <inheritdoc cref="RegisterEventHandler{T}(Action{T}, int, bool)"/>
+    public static MiraEventHandle RegisterEventHandler<T>(Action<T> handler, bool invokeOnSubtype)
+        where T : MiraEvent
+    {
+        return RegisterEventHandler(handler, 0, invokeOnSubtype);
+    }
+
+    /// <inheritdoc cref="RegisterEventHandler{T}(Action{T}, int, bool)"/>
+    public static MiraEventHandle RegisterEventHandler<T>(Action<T> handler)
+        where T : MiraEvent
+    {
+        return RegisterEventHandler(handler, 0, true);
     }
 
     /// <summary>
