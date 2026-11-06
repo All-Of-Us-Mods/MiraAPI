@@ -257,7 +257,7 @@ public static class CustomRoleManager
 
     internal static void UpdateRoleTab(TaskPanelBehaviour panel, ICustomRole role)
     {
-        var tabText = panel.tab.gameObject.GetComponentInChildren<TextMeshPro>();
+        var tabText = panel.tab.GetComponentInChildren<TextMeshPro>();
         var ogPanel = HudManager.Instance.TaskStuff.transform.FindChild("TaskPanel").GetComponent<TaskPanelBehaviour>();
         if (tabText.text != role.RoleName)
         {

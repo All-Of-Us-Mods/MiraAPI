@@ -322,7 +322,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
             // Create game options container
             var gameContainer = Containers[MenuCategory.Game][idx + 1] = Instantiate(
                 Gsm.GameSettingsTab.settingsContainer.gameObject,
-                Gsm.GameSettingsTab.settingsContainer.gameObject.transform.parent);
+                Gsm.GameSettingsTab.settingsContainer.transform.parent);
             gameContainer.name = $"GameSettings_{mod.PluginInfo.Metadata.Name}";
             gameContainer.transform.DestroyChildren();
             gameContainer.SetActive(false);
@@ -340,7 +340,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
             {
                 var cont = Containers[i][idx + 1] = Instantiate(
                     Gsm.GameSettingsTab.settingsContainer.gameObject,
-                    Gsm.GameSettingsTab.settingsContainer.gameObject.transform.parent);
+                    Gsm.GameSettingsTab.settingsContainer.transform.parent);
                 cont.name = $"{i}_{mod.PluginInfo.Metadata.Name}";
                 cont.transform.DestroyChildren();
                 cont.SetActive(false);

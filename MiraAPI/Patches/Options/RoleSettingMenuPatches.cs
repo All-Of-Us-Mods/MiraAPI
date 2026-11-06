@@ -604,14 +604,14 @@ public static class RoleSettingMenuPatches
 
         var categoryHeaderMasked = __instance.AdvancedRolesSettings.transform.Find("CategoryHeaderMasked").GetComponent<CategoryHeaderMasked>();
 
-        if (categoryHeaderMasked.Title.gameObject.TryGetComponent<TextTranslatorTMP>(out var comp))
+        if (categoryHeaderMasked.Title.TryGetComponent<TextTranslatorTMP>(out var comp))
         {
             comp.Destroy();
         }
 
         categoryHeaderMasked.Title.text = "MiraApi.ReturnToRoleSettings".Translate();
 
-        if (!categoryHeaderMasked.gameObject.TryGetComponent<PassiveButton>(out _))
+        if (!categoryHeaderMasked.TryGetComponent<PassiveButton>(out _))
         {
             var boxCol = categoryHeaderMasked.gameObject.AddComponent<BoxCollider2D>();
             boxCol.size = new Vector2(7, 0.7f);

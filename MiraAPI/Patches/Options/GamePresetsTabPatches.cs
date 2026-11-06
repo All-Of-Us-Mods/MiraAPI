@@ -184,7 +184,7 @@ internal static class GamePresetsTabPatches
         {
             saveButton = Object.Instantiate(prefab, presetTab.transform);
             _saveButton = saveButton.gameObject;
-            _saveButton.gameObject.name = "SaveButton";
+            _saveButton.name = "SaveButton";
             _saveButton.transform.localPosition = new Vector3(3.2f, 1.7f, -2);
 
             // set the button text and alignment
