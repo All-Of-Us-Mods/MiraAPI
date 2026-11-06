@@ -296,7 +296,7 @@ public static class RoleGuidePatches
             if (_titleText)
             {
                 _titleText.transform.localPosition += new Vector3(0.5f, 0);
-                _titleText.transform.GetComponent<TextTranslatorTMP>().Destroy();
+                _titleText.GetComponent<TextTranslatorTMP>().Destroy();
             }
         }
 
