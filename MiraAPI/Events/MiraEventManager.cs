@@ -154,6 +154,17 @@ public static class MiraEventManager
     }
 
     /// <summary>
+    /// Register a <see cref="MiraEvent"/> handler.
+    /// </summary>
+    /// <param name="methodInfo">The <see cref="MethodInfo"/> of the event handler.</param>
+    /// <param name="priority">The priority of the event handler. Lower values are called first.</param>
+    /// <returns>A <see cref="MiraEventHandle"/> to use when unregistering the event.</returns>
+    public static MiraEventHandle RegisterEventHandler(MethodInfo methodInfo, int priority = 0)
+    {
+        return RegisterEventHandler(methodInfo.GetParameters()[0].ParameterType, methodInfo, priority);
+    }
+
+    /// <summary>
     /// Register a <typeparamref name="T"/> handler.
     /// </summary>
     /// <param name="handler">The callback method/handler for the event.</param>
