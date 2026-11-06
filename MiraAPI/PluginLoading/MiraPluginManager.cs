@@ -68,7 +68,7 @@ public sealed class MiraPluginManager
             MiraApiPluginInfo = info;
 
             registrationTimer.Stop();
-            Info($"Registering Mira API as mod in {registrationTimer.ElapsedMilliseconds}ms.");
+            Info($"Registered Mira API as mod in {registrationTimer.ElapsedMilliseconds}ms.");
         }
 
         IL2CPPChainloader.Instance.PluginLoad += (pluginInfo, assembly, plugin) =>
@@ -81,7 +81,7 @@ public sealed class MiraPluginManager
             var registrationTimer = Stopwatch.StartNew();
             RegisterPlugin(assembly, miraPlugin, pluginInfo, plugin, false);
             registrationTimer.Stop();
-            Info($"Registering mod {pluginInfo.Metadata.Name} with Mira API in {registrationTimer.ElapsedMilliseconds}ms.");
+            Info($"Registered mod {pluginInfo.Metadata.Name} with Mira API in {registrationTimer.ElapsedMilliseconds}ms.");
         };
 
         IL2CPPChainloader.Instance.Finished += () =>

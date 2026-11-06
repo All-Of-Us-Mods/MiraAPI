@@ -144,15 +144,15 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
 
                 if (button.transform.name.Contains("Friends List Button"))
                 {
-                    button.gameObject.transform.localScale = new Vector3(0.2675f * actualScaleVal, 0.2675f * actualScaleVal, 1);
+                    button.transform.localScale = new Vector3(0.2675f * actualScaleVal, 0.2675f * actualScaleVal, 1);
                     continue;
                 }
 
-                button.gameObject.transform.localScale = actualScale;
+                button.transform.localScale = actualScale;
             }
 
             baseGrid.CellSize = new Vector2(alteredScale, alteredScale);
-            if (baseGrid.gameObject.transform.childCount != 0)
+            if (baseGrid.transform.childCount != 0)
             {
                 baseGrid.ArrangeChilds();
             }
@@ -175,15 +175,15 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
 
             if (button.transform.name.Contains("Modifiers"))
             {
-                button.gameObject.transform.localScale = new Vector3(0.65f * scaleFactor, 0.65f * scaleFactor, 1);
+                button.transform.localScale = new Vector3(0.65f * scaleFactor, 0.65f * scaleFactor, 1);
                 continue;
             }
 
-            button.gameObject.transform.localScale = actualScale;
+            button.transform.localScale = actualScale;
         }
 
         extraGrid.CellSize = new Vector2(alteredScale, alteredScale);
-        if (extraGrid.gameObject.transform.childCount != 0)
+        if (extraGrid.transform.childCount != 0)
         {
             extraGrid.ArrangeChilds();
         }

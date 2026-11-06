@@ -55,9 +55,12 @@ public abstract class MultiTargetButton<T> : CustomActionButton
             }
         }
 
-        Targets = [.. newTargets
-            .Where(IsTargetValid)
-            .Take(MaxTargets),];
+        Targets =
+        [
+            .. newTargets
+                .Where(IsTargetValid)
+                .Take(MaxTargets),
+        ];
         Targets.Do(t => SetOutline(t, true));
 
         return base.CanUse() && Targets.Length > 0;

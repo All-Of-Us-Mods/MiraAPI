@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using MiraAPI.Patches.Stubs;
+using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using UnityEngine;
 using UnityEngine.Events;
@@ -29,12 +30,7 @@ public abstract class CustomMultiSelectMenu<TEntry> : CustomPhoneMenu<CustomMult
     private Color? activeColor;
     private Color? hoverSelectColor;
     private Color? hoverDeselectColor;
-
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-    [SuppressMessage("Minor Code Smell", "S1104:Fields should not have public accessibility", Justification = "Unity convention.")]
-    public UiElement confirmButton;
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
-
+    private UiElement confirmButton;
     private Action<List<TEntry>>? onSelection;
 
     /// <summary>
@@ -106,6 +102,7 @@ public abstract class CustomMultiSelectMenu<TEntry> : CustomPhoneMenu<CustomMult
     protected void Begin(IEnumerable<TEntry> entries, Action<List<TEntry>?> onClick, int totalSelections, bool shouldConfirm, bool canRepeat = false)
     {
         MinigameStubs.Begin(Component, null);
+        MeetingVoteAreaVisibility.HideNameplates(Component);
 
         this.totalSelections = totalSelections;
         this.shouldConfirm = shouldConfirm;
@@ -116,6 +113,7 @@ public abstract class CustomMultiSelectMenu<TEntry> : CustomPhoneMenu<CustomMult
         back.OnClick.AddListener((UnityAction)(() =>
         {
             selectedEntries.Clear();
+            MeetingVoteAreaVisibility.Restore(Component);
             onClick(null);
         }));
 
@@ -177,6 +175,7 @@ public abstract class CustomMultiSelectMenu<TEntry> : CustomPhoneMenu<CustomMult
         }
 
         selectedEntries.Add(menuEntry);
+        MeetingVoteAreaVisibility.Restore(Component);
 
         // Add choice to list of selections
         if (selectedEntries.Count <= totalSelections)
