@@ -44,9 +44,10 @@ public static class CustomGameModeManager
         if (mode.HideMode)
             return true;
 
-        IdToModeMap.Add(GetNextId(), mode);
-        pluginInfo.GameModes.Add(lastId, mode);
-        mode.ID = lastId;
+        var id = GetNextId();
+        mode.ID = id;
+        IdToModeMap.Add(id, mode);
+        pluginInfo.GameModes.Add(id, mode);
         GameModeOption.AddOption(mode);
         return true;
     }
@@ -107,34 +108,31 @@ public static class CustomGameModeManager
 
     internal static void RegisterDefaultMode()
     {
-        var defaultMode = new ClassicMode();
+        var defaultMode = new ClassicMode { ID = 0 };
         IdToModeMap.Add(0, defaultMode);
+        GameModeOption.AddOption(defaultMode);
 
-        // no need to add to game mode option as it already contains it
-        // because we cannot have the option be created with no values
-        defaultMode.ID = 0;
-        var hnsMode = new HideAndSeekMode();
+        var hnsMode = new HideAndSeekMode() { ID = 1 };
 
         if (hnsMode.HideMode)
             return;
 
         IdToModeMap.Add(1, hnsMode);
-        hnsMode.ID = 1;
         GameModeOption.AddOption(hnsMode);
         lastId++;
     }
 
     internal static void GetAndSetGameMode()
     {
-        var id = (uint)GameModeOption.Value;
+        var index = GameModeOption.Value;
 
-        if (IdToModeMap.TryGetValue(id, out var mode))
+        if ((uint)index < (uint)GameModeOption.Values.Count)
         {
-            ActiveMode = mode;
+            ActiveMode = GameModeOption.Values[index];
             return;
         }
 
         ActiveMode = IdToModeMap[0];
-        Warning($"Unable to find game mode of id {id}!");
+        Warning($"Unable to find game mode at index {index}!");
     }
 }

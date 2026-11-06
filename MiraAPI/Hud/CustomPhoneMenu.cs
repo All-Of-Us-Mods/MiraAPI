@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using AmongUs.GameOptions;
+using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities.Attributes;
 using Reactor.Utilities.Extensions;
@@ -22,6 +23,7 @@ public class CustomPhoneMenuComponent(IntPtr cppPtr) : Minigame(cppPtr)
     [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity convention.")]
     private void OnDisable()
     {
+        MeetingVoteAreaVisibility.Restore(this);
         if (ControllerManager.Instance)
         {
             ControllerManager.Instance.CloseOverlayMenu(name);
@@ -258,7 +260,7 @@ public abstract class CustomPhoneMenu : ICustomMenu
             MenuEntries.Add(menuEntry);
 
             var button = shapeshifterPanel.Button;
-            var nameplate = shapeshifterPanel.gameObject.transform.FindChild("Nameplate");
+            var nameplate = shapeshifterPanel.transform.FindChild("Nameplate");
             var highlight = nameplate.FindChild("Highlight").GetComponent<SpriteRenderer>();
             var icon = highlight.transform.GetChild(0).GetComponent<SpriteRenderer>();
 
@@ -315,7 +317,7 @@ public abstract class CustomPhoneMenu : ICustomMenu
     {
         ShapeshifterPanel panel = menuEntry.Panel;
 
-        var nameplate = panel.gameObject.transform.FindChild("Nameplate");
+        var nameplate = panel.transform.FindChild("Nameplate");
         var highlight = nameplate.FindChild("Highlight").GetComponent<SpriteRenderer>();
         var icon = highlight.transform.GetChild(0).GetComponent<SpriteRenderer>();
         if (sprite != null)

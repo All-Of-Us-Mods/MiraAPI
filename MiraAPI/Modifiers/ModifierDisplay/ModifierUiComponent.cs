@@ -37,7 +37,7 @@ public class ModifierUiComponent(nint cppPtr) : MonoBehaviour(cppPtr)
         icon = modBg.transform.GetChild(1).GetComponent<SpriteRenderer>();
         var nameBg = transform.GetChild(1);
         nameText = nameBg.GetChild(0).GetComponent<TextMeshPro>();
-        descRect = desc.gameObject.GetComponent<RectTransform>();
+        descRect = desc.GetComponent<RectTransform>();
 
         nameText.font = desc.font = HudManager.Instance.TaskPanel.taskText.font;
         nameText.fontMaterial = desc.fontMaterial = HudManager.Instance.TaskPanel.taskText.fontMaterial;

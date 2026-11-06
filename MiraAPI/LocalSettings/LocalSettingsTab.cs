@@ -75,6 +75,7 @@ public abstract class LocalSettingsTab(ConfigFile config)
     protected int TabIndex => LocalSettingsManager.Tabs.IndexOf(this) + 10;
 
     private Scroller? scroller;
+    private float MaxScroll { get; set; }
 
     /// <summary>
     /// Invoked when an option value is changed.
@@ -107,6 +108,17 @@ public abstract class LocalSettingsTab(ConfigFile config)
         }
     }
 
+    internal void RefreshScrollBounds()
+    {
+        if (scroller == null)
+        {
+            return;
+        }
+
+        scroller.SetBounds(new FloatRange(0, MaxScroll), new FloatRange(0, 0));
+        scroller.ScrollToTop();
+    }
+
     /// <summary>
     /// Creates the tab <see cref="GameObject"/> and it's content.
     /// </summary>
@@ -119,10 +131,12 @@ public abstract class LocalSettingsTab(ConfigFile config)
         tab.transform.DestroyChildren();
         tab.gameObject.SetActive(false);
 
-        if (scroller == null)
+        if (scroller == null || scroller.transform.parent != tab.transform)
         {
             scroller = Helpers.CreateScroller(tab.transform, OptionsMenuPatches.MaskCollider);
         }
+
+        Labels.Clear();
 
         if (TabButton != null)
         {
@@ -217,7 +231,11 @@ public abstract class LocalSettingsTab(ConfigFile config)
             contentIndex++;
         }
 
-        scroller.SetBounds(new FloatRange(0, (Settings.Count + Buttons.Count) * 0.5f - 5f), new FloatRange(0, 0));
+        const float visibleHeight = 5f;
+        const float extraPadding = 0.25f;
+        var itemRange = (Settings.Count + Buttons.Count) * 0.5f - visibleHeight;
+        var offsetRange = contentOffset - visibleHeight + extraPadding;
+        MaxScroll = Mathf.Max(0f, itemRange, offsetRange);
         return tab;
     }
 

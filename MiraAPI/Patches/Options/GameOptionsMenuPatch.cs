@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using HarmonyLib;
-using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
 using MiraAPI.Modifiers;
@@ -16,7 +15,6 @@ using Reactor.Utilities.Extensions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.ProBuilder;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
@@ -218,7 +216,7 @@ internal static class GameOptionsMenuPatch
         {
             if (!option || !option.gameObject.activeInHierarchy ||
                 option == menu.MapPicker ||
-                (GameModeOption.OptionBehaviour && option == GameModeOption.OptionBehaviour) ||
+                option == GameModeOption.OptionBehaviour ||
                 !option.Data)
             {
                 continue;
@@ -250,7 +248,6 @@ internal static class GameOptionsMenuPatch
 
     private static void CreateSettings(GameOptionsMenu instance, Transform container)
     {
-        var num = 0.713f;
         VanillaHeaders.Clear();
         VanillaOptions.Clear();
         MainOptions.Clear();
@@ -258,33 +255,34 @@ internal static class GameOptionsMenuPatch
         GameModeOptions.Clear();
         GameModeGroups.Clear();
 
-        var gmCategory = Object.Instantiate(instance.categoryHeaderOrigin, Vector3.zero, Quaternion.identity, container);
+        var num = 0.713f;
+
+        var gmCategory = Object.Instantiate(instance.categoryHeaderOrigin, container);
         gmCategory.SetHeader(GameModeOption.CustomName, 20);
         gmCategory.transform.localScale = Vector3.one * 0.63f;
         gmCategory.transform.localPosition = new Vector3(-0.903f, num, -2f);
-        GameModeOption.OptionBehaviour = Object.Instantiate(instance.stringOptionOrigin, container);
+
         num -= 0.63f;
+
+        GameModeOption.OptionBehaviour = Object.Instantiate(instance.stringOptionOrigin, container);
         GameModeOption.OptionBehaviour.transform.localPosition = new Vector3(0.952f, num, -2f);
         GameModeOption.OptionBehaviour.SetClickMask(instance.ButtonClickMask);
+
         var setting = ScriptableObject.CreateInstance<StringGameSetting>();
         setting.Type = OptionTypes.MultipleChoice;
         setting.Title = GameModeOption.GamemodeName;
         setting.Index = GameModeOption.LastValue;
-        setting.Values = new Il2CppStructArray<StringNames>([GameModeOption.Values[0]]);
+        setting.Values = GameModeOption.Values.Select(x => x.StringName).ToArray();
+
         GameModeOption.OptionBehaviour.SetUpFromData(setting, 20);
         GameModeOption.Set(GameModeOption.LastValue);
         GameModeOption.OptionBehaviour.TitleText.fontSize = 3;
+
         instance.Children.Add(GameModeOption.OptionBehaviour);
+
         foreach (var optionBehaviour in instance.Children)
         {
             MainOptions.Add(optionBehaviour);
-        }
-
-        for (var i = 1; i < GameModeOption.Values.Count; i++)
-        {
-            GameModeOption.OptionBehaviour.Values =
-                (Il2CppStructArray<StringNames>)GameModeOption.OptionBehaviour.Values.Add(
-                    GameModeOption.Values.ElementAt(i).Value);
         }
 
         var modeInfoHolder = new GameObject("GamemodeInfo")
@@ -298,7 +296,7 @@ internal static class GameOptionsMenuPatch
             layer = container.gameObject.layer,
         }.transform;
 
-        var gamemodeBg = Object.Instantiate(GameModeOption.OptionBehaviour.transform.GetChild(0).gameObject, Vector3.zero, Quaternion.identity, modeInfoHolder);
+        var gamemodeBg = Object.Instantiate(GameModeOption.OptionBehaviour.transform.GetChild(0).gameObject, modeInfoHolder);
         gamemodeBg.transform.localPosition = Vector3.zero;
         gamemodeBg.transform.localScale = new Vector3(1.35f, 0.85f, 1);
         gamemodeBg.name = "Background";
@@ -315,9 +313,9 @@ internal static class GameOptionsMenuPatch
         };
         _modIcon = modIconObj.AddComponent<SpriteRenderer>();
         _modIcon.sprite = MiraAssets.BlankSprite.LoadAsset();
-        _modIcon.material = gamemodeBg.gameObject.GetComponent<SpriteRenderer>().material;
+        _modIcon.material = gamemodeBg.GetComponent<SpriteRenderer>().material;
 
-        var gamemodeTextObj = Object.Instantiate(GameModeOption.OptionBehaviour.transform.GetChild(1).gameObject, Vector3.zero, Quaternion.identity, modeInfoHolder);
+        var gamemodeTextObj = Object.Instantiate(GameModeOption.OptionBehaviour.transform.GetChild(1).gameObject, modeInfoHolder);
         gamemodeTextObj.transform.localPosition = new Vector3(0.3f, 0, -0.01f);
         gamemodeTextObj.transform.localScale = new Vector3(2.12f, 2.12f, 1);
         _gamemodeDescription = gamemodeTextObj.GetComponentInChildren<TextMeshPro>();
@@ -469,11 +467,7 @@ internal static class GameOptionsMenuPatch
 
     private static void CreateGroup(GameOptionsMenu menu, AbstractOptionGroup group, Transform container, ref float num, ref List<OptionBehaviour> optionBehaviours, ref List<CategoryHeaderMasked> categoryHeaders)
     {
-        var categoryHeaderMasked = Object.Instantiate(
-            menu.categoryHeaderOrigin,
-            Vector3.zero,
-            Quaternion.identity,
-            container);
+        var categoryHeaderMasked = Object.Instantiate(menu.categoryHeaderOrigin, container);
         categoryHeaderMasked.transform.localPosition = new Vector3(-0.903f, num + 1, -2f);
         categoryHeaderMasked.transform.localScale = Vector3.one * 0.63f;
         categoryHeaders.Add(categoryHeaderMasked);
@@ -510,12 +504,14 @@ internal static class GameOptionsMenuPatch
         foreach (var newOpt in options)
         {
             newOpt.SetClickMask(menu.ButtonClickMask);
-            SpriteRenderer[] componentsInChildren = newOpt.GetComponentsInChildren<SpriteRenderer>(true);
+            var componentsInChildren = newOpt.GetComponentsInChildren<SpriteRenderer>(true);
+
             foreach (var renderer in componentsInChildren)
             {
                 if (group.GroupColor != MiraApiPlugin.DefaultHeaderColor)
                 {
                     renderer.color = group.GroupColor.FindAlternateColor();
+
                     if (renderer.transform.parent.TryGetComponent<GameOptionButton>(out var btn))
                     {
                         btn.interactableColor = group.GroupColor.FindAlternateColor();
@@ -743,7 +739,7 @@ internal static class GameOptionsMenuPatch
             var newText = Object.Instantiate(categoryHeaderMasked.Title, categoryHeaderMasked.transform);
             newText.text = $"<size=70%>({"MiraApi.GameSetting.Global.ClickToClose".Translate()})</size>";
             newText.transform.localPosition = new Vector3(2.6249f, -0.165f, 0f);
-            newText.gameObject.GetComponent<TextTranslatorTMP>().Destroy();
+            newText.GetComponent<TextTranslatorTMP>().Destroy();
 
             var boxCol = categoryHeaderMasked.gameObject.AddComponent<BoxCollider2D>();
             boxCol.size = new Vector2(7, 0.7f);
