@@ -72,7 +72,7 @@ public static class LobbyViewPanePatches
 
         // create modifiers button
         modifiersTabButton = Object.Instantiate(__instance.rolesTabButton, __instance.rolesTabButton.transform.parent);
-        modifiersTabButton.buttonText.gameObject.GetComponent<TextTranslatorTMP>().Destroy();
+        modifiersTabButton.buttonText.GetComponent<TextTranslatorTMP>().Destroy();
         modifiersTabButton.name = "ModifiersTabButton";
         var pos = modifiersTabButton.transform.localPosition;
         pos.x = 2.1f;
@@ -101,7 +101,7 @@ public static class LobbyViewPanePatches
         hover.transform.localPosition = new Vector3(0, 0f, 0.3f);
         hover.sprite = MiraAssets.NextButtonActive.LoadAsset();
 
-        var passiveButton = nextButton.gameObject.GetComponent<PassiveButton>();
+        var passiveButton = nextButton.GetComponent<PassiveButton>();
         passiveButton.OnClick = new Button.ButtonClickedEvent();
         passiveButton.OnClick.AddListener(
             (UnityAction)(() =>
@@ -123,7 +123,7 @@ public static class LobbyViewPanePatches
             = backButton.transform.FindChild("Hover").gameObject.GetComponentInChildren<SpriteRenderer>().flipX
                 = true;
 
-        var passiveButton2 = backButton.gameObject.GetComponent<PassiveButton>();
+        var passiveButton2 = backButton.GetComponent<PassiveButton>();
         passiveButton2.OnClick = new Button.ButtonClickedEvent();
         passiveButton2.OnClick.AddListener(
             (UnityAction)(() =>

@@ -92,9 +92,9 @@ public class HideAndSeekMode : AbstractGameMode
         runOriginal = false;
         CppCollections.List<ClientData> list = new();
         AmongUsClient.Instance.GetAllClients(list);
-        List<NetworkedPlayerInfo> list2 = [.. list.ToArray()
+        var list2 = list.ToArray()
             .Where(c => c.Character != null && c.Character.Data != null && !c.Character.Data.Disconnected &&
-                        !c.Character.Data.IsDead).OrderBy(c => c.Id).Select(c => c.Character.Data),];
+                        !c.Character.Data.IsDead).OrderBy(c => c.Id).Select(c => c.Character.Data).ToList();
 
         foreach (var networkedPlayerInfo in GameData.Instance.AllPlayers)
         {

@@ -239,7 +239,7 @@ public static class CustomRoleManager
 
     internal static TaskPanelBehaviour CreateRoleTab(ICustomRole role)
     {
-        var ogPanel = HudManager.Instance.TaskStuff.transform.FindChild("TaskPanel").gameObject.GetComponent<TaskPanelBehaviour>();
+        var ogPanel = HudManager.Instance.TaskStuff.transform.FindChild("TaskPanel").GetComponent<TaskPanelBehaviour>();
         var clonePanel = Object.Instantiate(ogPanel.gameObject, ogPanel.transform.parent);
         clonePanel.name = "RolePanel";
 
@@ -257,8 +257,8 @@ public static class CustomRoleManager
 
     internal static void UpdateRoleTab(TaskPanelBehaviour panel, ICustomRole role)
     {
-        var tabText = panel.tab.gameObject.GetComponentInChildren<TextMeshPro>();
-        var ogPanel = HudManager.Instance.TaskStuff.transform.FindChild("TaskPanel").gameObject.GetComponent<TaskPanelBehaviour>();
+        var tabText = panel.tab.GetComponentInChildren<TextMeshPro>();
+        var ogPanel = HudManager.Instance.TaskStuff.transform.FindChild("TaskPanel").GetComponent<TaskPanelBehaviour>();
         if (tabText.text != role.RoleName)
         {
             tabText.text = role.RoleName;

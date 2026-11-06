@@ -177,7 +177,7 @@ public static class Helpers
     {
         var keybindIcon = Object.Instantiate(HudManager.Instance.AbilityButton.usesRemainingSprite.gameObject, button.transform);
         keybindIcon.GetComponent<SpriteRenderer>().sprite = MiraAssets.KeybindButton.LoadAsset();
-        keybindIcon.transform.GetComponentInChildren<TextMeshPro>().text = keyCode.ToString();
+        keybindIcon.GetComponentInChildren<TextMeshPro>().text = keyCode.ToString();
         keybindIcon.name = "KeybindIcon";
         keybindIcon.transform.localPosition = localPos;
         return keybindIcon;
@@ -191,26 +191,21 @@ public static class Helpers
     /// <returns>THe corresponding method to patch.</returns>
     public static MethodBase? GetStateMachineMoveNext<T>(string methodName)
     {
-        var typeName = typeof(T).FullName;
-        var showRoleStateMachine =
-            typeof(T)
-                .GetNestedTypes()
-                .FirstOrDefault(x => x.Name.Contains(methodName));
+        var stateMachine = typeof(T).GetNestedTypes().FirstOrDefault(x => x.Name.Contains(methodName, StringComparison.Ordinal));
 
-        if (showRoleStateMachine == null)
+        if (stateMachine == null)
         {
-            Error($"Failed to find {methodName} state machine for {typeName}");
+            Error($"Failed to find {methodName} state machine for {typeof(T).FullName}");
             return null;
         }
 
-        var moveNext = AccessTools.Method(showRoleStateMachine, "MoveNext");
+        var moveNext = AccessTools.Method(stateMachine, "MoveNext");
+
         if (moveNext == null)
-        {
-            Error($"Failed to find MoveNext method for {typeName}.{methodName}");
-            return null;
-        }
+            Error($"Failed to find MoveNext method for {typeof(T).FullName}.{methodName}");
+        else
+            Info($"Found {methodName}.MoveNext");
 
-        Info($"Found {methodName}.MoveNext");
         return moveNext;
     }
 
@@ -309,7 +304,7 @@ public static class Helpers
     {
         var prefab = Object.FindObjectOfType<ArrowBehaviour>(true);
         var arrow = Object.Instantiate(prefab, parent);
-        arrow.image = arrow.gameObject.GetComponent<SpriteRenderer>();
+        arrow.image = arrow.GetComponent<SpriteRenderer>();
         arrow.image.color = color;
         arrow.gameObject.layer = 5;
         arrow.gameObject.SetActive(true);
@@ -370,7 +365,7 @@ public static class Helpers
     public static LobbyNotificationMessage CreateAndShowNotification(string text, Color color, Vector3 localPos, AudioClip? clip = null, Sprite? spr = null)
     {
         var popper = HudManager.Instance.Notifier;
-        var newMessage = Object.Instantiate(popper.notificationMessageOrigin, Vector3.zero, Quaternion.identity, popper.transform);
+        var newMessage = Object.Instantiate(popper.notificationMessageOrigin, popper.transform);
         newMessage.transform.localPosition = localPos;
         newMessage.SetUp(text, spr ?? null, color, new Action(() => popper.OnMessageDestroy(newMessage)));
         popper.lastMessageKey = -1;
@@ -619,6 +614,7 @@ public static class Helpers
             MiraNumberSuffixes.Multiplier => "x",
             MiraNumberSuffixes.Seconds => "s",
             MiraNumberSuffixes.Percent => "%",
+            MiraNumberSuffixes.Distance => MiraApiPlugin.DistanceSuffix.Value,
             _ => string.Empty,
         };
     }
@@ -653,14 +649,14 @@ public static class Helpers
     /// <returns>The formatted value.</returns>
     public static string FormatValue(float value, MiraNumberSuffixes suffix = MiraNumberSuffixes.None, string formatString = "0.0")
     {
+        var part = value.ToString(formatString, NumberFormatInfo.InvariantInfo);
         return suffix switch
         {
-            MiraNumberSuffixes.None => value.ToString(formatString, NumberFormatInfo.InvariantInfo),
-            MiraNumberSuffixes.Multiplier => value.ToString(formatString, NumberFormatInfo.InvariantInfo) + "x",
-            MiraNumberSuffixes.Percent => value.ToString(formatString, NumberFormatInfo.InvariantInfo) + "%",
-            _ => TranslationController.Instance.GetString(
-                StringNames.GameSecondsAbbrev,
-                (Il2CppSystem.Object[])[value.ToString(formatString, CultureInfo.InvariantCulture)]),
+            MiraNumberSuffixes.None => part,
+            MiraNumberSuffixes.Percent => part + "%",
+            MiraNumberSuffixes.Multiplier => part + "x",
+            MiraNumberSuffixes.Distance => part + MiraApiPlugin.DistanceSuffix.Value,
+            _ => TranslationController.Instance.GetString(StringNames.GameSecondsAbbrev, part),
         };
     }
 
@@ -936,7 +932,7 @@ public static class Helpers
     {
         const float contentTop = 0.95f;
         const float horizontalOffset = -0.2f;
-        const float headerContentGap = 0.2f;
+        const float groupHeaderContentGap = 0.05f;
         const int contentSortingOrder = 151;
 
         columns = Mathf.Clamp(columns, 1, 6);
@@ -1024,7 +1020,7 @@ public static class Helpers
                 groupColumns[group] = i % columns;
                 bandHeights[band] = Mathf.Max(
                     bandHeights[band],
-                    rowPitch * (groupedSettings[i].Count() + 1) + headerContentGap + 0.25f);
+                    rowPitch * (groupedSettings[i].Count() + 1) + groupHeaderContentGap + 0.25f);
             }
 
             var bandOffset = 0f;
@@ -1040,7 +1036,6 @@ public static class Helpers
             }
         }
 
-        var contentBottom = float.PositiveInfinity;
         var previousGroup = (AbstractOptionGroup?)null;
         var rowIndex = 0;
         var column = 0;
@@ -1089,12 +1084,12 @@ public static class Helpers
 
                 if (headerSource)
                 {
-                    const float headerScale = 0.46f;
+                    const float groupHeaderScale = 0.42f;
                     var headerWidth = groupsAsColumns
-                        ? columnWidth / headerScale
-                        : (columns * columnWidth + (columns - 1) * columnGap) / headerScale;
+                        ? columnWidth / groupHeaderScale
+                        : (columns * columnWidth + (columns - 1) * columnGap) / groupHeaderScale;
                     var header = Object.Instantiate(headerSource!, page.transform, false);
-                    header.transform.localScale = Vector3.one * headerScale;
+                    header.transform.localScale = Vector3.one * groupHeaderScale;
                     if (groupsAsColumns)
                     {
                         var totalWidth = columns * columnWidth + (columns - 1) * columnGap;
@@ -1155,12 +1150,6 @@ public static class Helpers
                         renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                         renderer.material.SetInt(PlayerMaterial.MaskLayer, 50);
                         renderer.sortingOrder = contentSortingOrder;
-                        if (renderer.enabled && renderer.sprite)
-                        {
-                            contentBottom = Mathf.Min(
-                                contentBottom,
-                                inner.InverseTransformPoint(renderer.bounds.min).y);
-                        }
                     }
 
                     foreach (var text in header.GetComponentsInChildren<TextMeshPro>(true))
@@ -1171,9 +1160,6 @@ public static class Helpers
                         if (text.enabled)
                         {
                             text.ForceMeshUpdate();
-                            contentBottom = Mathf.Min(
-                                contentBottom,
-                                inner.InverseTransformPoint(text.bounds.min).y);
                         }
                     }
 
@@ -1191,7 +1177,7 @@ public static class Helpers
                           horizontalOffset;
             var centerY = groupsAsColumns && settings[i].Group is { } rowGroup
                 ? contentTop - groupTopOffsets[rowGroup] -
-                  (rowPitch * (groupRows[rowGroup] + 1)) - headerContentGap - (rowHeight / 2f)
+                  (rowPitch * (groupRows[rowGroup] + 1)) - groupHeaderContentGap - (rowHeight / 2f)
                 : contentTop - (rowHeight / 2f) - (rowIndex * rowPitch) - groupSpacing;
             var row = Object.Instantiate(rowPrefab, page.transform);
             row.enabled = false;
@@ -1238,27 +1224,6 @@ public static class Helpers
                 renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                 renderer.material.SetInt(PlayerMaterial.MaskLayer, 50);
                 renderer.sortingOrder = contentSortingOrder;
-                if (renderer.enabled &&
-                    renderer.sprite &&
-                    renderer.transform != row.PlusBtn.transform &&
-                    !renderer.transform.IsChildOf(row.PlusBtn.transform) &&
-                    renderer.transform != row.MinusBtn.transform &&
-                    !renderer.transform.IsChildOf(row.MinusBtn.transform))
-                {
-                    contentBottom = Mathf.Min(
-                        contentBottom,
-                        inner.InverseTransformPoint(renderer.bounds.min).y);
-                }
-            }
-
-            foreach (var text in row.GetComponentsInChildren<TextMeshPro>(true))
-            {
-                if (text.enabled)
-                {
-                    contentBottom = Mathf.Min(
-                        contentBottom,
-                        inner.InverseTransformPoint(text.bounds.min).y);
-                }
             }
 
             row.gameObject.SetActive(true);
@@ -1277,6 +1242,26 @@ public static class Helpers
             }
         }
 
+        page.SetActive(true);
+        var contentBottom = float.PositiveInfinity;
+        foreach (var text in page.GetComponentsInChildren<TextMeshPro>(true))
+        {
+            if (text.enabled && text.gameObject.activeInHierarchy)
+            {
+                text.ForceMeshUpdate();
+            }
+        }
+
+        foreach (var renderer in page.GetComponentsInChildren<Renderer>(true))
+        {
+            if (renderer.enabled && renderer.gameObject.activeInHierarchy)
+            {
+                contentBottom = Mathf.Min(
+                    contentBottom,
+                    inner.InverseTransformPoint(renderer.bounds.min).y);
+            }
+        }
+
         var maskArea = parent.transform.FindChild("MaskArea")?.GetComponent<SpriteRenderer>();
         var maskBottom = maskArea
             ? inner.InverseTransformPoint(maskArea!.bounds.min).y
@@ -1288,7 +1273,6 @@ public static class Helpers
             ? contentOverflow + 0.05f
             : 0f;
         parent.SetYBoundsMax(Mathf.Clamp(scrollRange, 0f, 999f));
-        page.SetActive(true);
         return page;
     }
 
