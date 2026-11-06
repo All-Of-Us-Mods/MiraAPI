@@ -20,9 +20,10 @@ internal static class GameSettingMenuPatches
         }
 
         // Add Menu State object
-        if (!__instance.gameObject.GetComponent<MenuState>())
+        __instance.gameObject.GetOrAddComponent<MenuState>(out var existed);
+
+        if (!existed)
         {
-            __instance.gameObject.AddComponent<MenuState>();
             Info("MenuState component added to GameSettingMenu.");
         }
         else

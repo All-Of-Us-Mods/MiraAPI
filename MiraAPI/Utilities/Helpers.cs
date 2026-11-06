@@ -304,7 +304,7 @@ public static class Helpers
     {
         var prefab = Object.FindObjectOfType<ArrowBehaviour>(true);
         var arrow = Object.Instantiate(prefab, parent);
-        arrow.image = arrow.gameObject.GetComponent<SpriteRenderer>();
+        arrow.image = arrow.GetComponent<SpriteRenderer>();
         arrow.image.color = color;
         arrow.gameObject.layer = 5;
         arrow.gameObject.SetActive(true);
