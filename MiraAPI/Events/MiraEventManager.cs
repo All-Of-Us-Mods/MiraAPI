@@ -37,7 +37,7 @@ public static class MiraEventManager
     public static bool InvokeEvent<T>(this T eventInstance)
         where T : MiraEvent
     {
-        return InvokeEvent(eventInstance, typeof(T));
+        return eventInstance.InvokeEvent(typeof(T));
     }
 
     /// <summary>

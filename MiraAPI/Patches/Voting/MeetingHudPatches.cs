@@ -107,7 +107,7 @@ internal static class MeetingHudPatches
     public static void OnDestroyPatch(MeetingHud __instance)
     {
         MeetingVoteAreaVisibility.RestoreAll();
-        MiraEventManager.InvokeEvent(new EndMeetingEvent(__instance));
+        new EndMeetingEvent(__instance).InvokeEvent();
     }
 
     [HarmonyPostfix]
