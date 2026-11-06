@@ -843,6 +843,21 @@ public static class Extensions
         return comp ? comp : go.AddComponent<T>();
     }
 
+    /// <summary>
+    /// Gets a component that is attached to the provided <see cref="GameObject"/>, attaching and returning the component if it wasn't found, and returns a bool that indicates if the component already existed before.
+    /// </summary>
+    /// <typeparam name="T">The component type.</typeparam>
+    /// <param name="go">The <see cref="GameObject"/> to get the component from.</param>
+    /// <param name="exists">When this method returns true if the component already existed; otherwise false.</param>
+    /// <returns>The component.</returns>
+    public static T GetOrAddComponent<T>(this GameObject go, out bool exists)
+        where T : Component
+    {
+        var comp = go.GetComponent<T>();
+        exists = comp;
+        return exists ? comp : go.AddComponent<T>();
+    }
+
     /// <inheritdoc cref="Attribute.IsDefined(MemberInfo, Type, bool)"/>
     /// <typeparam name="T">The type of the attribute.</typeparam>
     /// <returns>true if a custom attribute of type <typeparamref name="T"/> is applied to element; otherwise, false.</returns>

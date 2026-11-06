@@ -111,8 +111,7 @@ public static class TaskAdderPatches
 
             if (plugin.InternalModifiers.Exists(x => x.ShowInFreeplay))
             {
-                __instance.CreateFolder(plugin.PluginInfo.Metadata.Name, modifiersFolder)
-                    .gameObject.name = plugin.PluginId;
+                __instance.CreateFolder(plugin.PluginInfo.Metadata.Name, modifiersFolder).name = plugin.PluginId;
             }
         }
 

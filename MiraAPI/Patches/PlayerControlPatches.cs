@@ -22,12 +22,12 @@ internal static class PlayerControlPatches
     [HarmonyPatch(nameof(PlayerControl.Start))]
     public static void PlayerControlStartPostfix(PlayerControl __instance)
     {
-        if (__instance.gameObject.TryGetComponent<ModifierComponent>(out var modifierComp))
+        if (__instance.TryGetComponent<ModifierComponent>(out var modifierComp))
         {
             modifierComp.DestroyImmediate();
         }
 
-        if (__instance.gameObject.TryGetComponent<PlayerVoteData>(out var voteComp))
+        if (__instance.TryGetComponent<PlayerVoteData>(out var voteComp))
         {
             voteComp.DestroyImmediate();
         }
