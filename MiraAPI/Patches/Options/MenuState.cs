@@ -1,4 +1,7 @@
-﻿using Il2CppInterop.Runtime.Attributes;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Il2CppInterop.Runtime.Attributes;
 using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
 using MiraAPI.Modifiers;
@@ -9,15 +12,10 @@ using MiraAPI.Translation;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities.Attributes;
 using Reactor.Utilities.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using static UnityEngine.ProBuilder.AutoUnwrapSettings;
-using static UnityEngine.UI.Image;
 
 namespace MiraAPI.Patches.Options;
 
