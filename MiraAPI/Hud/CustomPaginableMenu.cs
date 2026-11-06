@@ -72,18 +72,18 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
         nextButton.transform.localScale = new Vector3(0.65f, 0.65f, 1);
         nextButton.name = "RightArrowButton";
         nextButton.GetComponent<SpriteRenderer>().sprite = MiraAssets.NextButton.LoadAsset();
-        nextButton.gameObject.GetComponent<CloseButtonConsoleBehaviour>().DestroyImmediate();
+        nextButton.GetComponent<CloseButtonConsoleBehaviour>().DestroyImmediate();
 
-        var passiveButton = nextButton.gameObject.GetComponent<PassiveButton>();
+        var passiveButton = nextButton.GetComponent<PassiveButton>();
         passiveButton.OnClick = new Button.ButtonClickedEvent();
         passiveButton.OnClick.AddListener((UnityAction)customMenu.NextPage);
 
         var backButton = Object.Instantiate(nextButton, customMenu.transform).gameObject;
         backButton.transform.localPosition = new Vector3(-1.85f, -2.185f, customMenu.MenuDepth);
         backButton.name = "LeftArrowButton";
-        backButton.gameObject.GetComponent<CloseButtonConsoleBehaviour>().Destroy();
+        backButton.GetComponent<CloseButtonConsoleBehaviour>().Destroy();
         backButton.GetComponent<SpriteRenderer>().flipX = true;
-        var prevPassive = backButton.gameObject.GetComponent<PassiveButton>();
+        var prevPassive = backButton.GetComponent<PassiveButton>();
         prevPassive.OnClick.AddListener((UnityAction)customMenu.PreviousPage);
 
         customMenu.PhoneUI.GetChild(0).GetComponent<SpriteRenderer>().material =

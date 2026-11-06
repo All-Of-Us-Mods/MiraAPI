@@ -177,7 +177,7 @@ public static class Helpers
     {
         var keybindIcon = Object.Instantiate(HudManager.Instance.AbilityButton.usesRemainingSprite.gameObject, button.transform);
         keybindIcon.GetComponent<SpriteRenderer>().sprite = MiraAssets.KeybindButton.LoadAsset();
-        keybindIcon.transform.GetComponentInChildren<TextMeshPro>().text = keyCode.ToString();
+        keybindIcon.GetComponentInChildren<TextMeshPro>().text = keyCode.ToString();
         keybindIcon.name = "KeybindIcon";
         keybindIcon.transform.localPosition = localPos;
         return keybindIcon;
@@ -191,26 +191,21 @@ public static class Helpers
     /// <returns>THe corresponding method to patch.</returns>
     public static MethodBase? GetStateMachineMoveNext<T>(string methodName)
     {
-        var typeName = typeof(T).FullName;
-        var showRoleStateMachine =
-            typeof(T)
-                .GetNestedTypes()
-                .FirstOrDefault(x => x.Name.Contains(methodName));
+        var stateMachine = typeof(T).GetNestedTypes().FirstOrDefault(x => x.Name.Contains(methodName, StringComparison.Ordinal));
 
-        if (showRoleStateMachine == null)
+        if (stateMachine == null)
         {
-            Error($"Failed to find {methodName} state machine for {typeName}");
+            Error($"Failed to find {methodName} state machine for {typeof(T).FullName}");
             return null;
         }
 
-        var moveNext = AccessTools.Method(showRoleStateMachine, "MoveNext");
+        var moveNext = AccessTools.Method(stateMachine, "MoveNext");
+
         if (moveNext == null)
-        {
-            Error($"Failed to find MoveNext method for {typeName}.{methodName}");
-            return null;
-        }
+            Error($"Failed to find MoveNext method for {typeof(T).FullName}.{methodName}");
+        else
+            Info($"Found {methodName}.MoveNext");
 
-        Info($"Found {methodName}.MoveNext");
         return moveNext;
     }
 
@@ -309,7 +304,7 @@ public static class Helpers
     {
         var prefab = Object.FindObjectOfType<ArrowBehaviour>(true);
         var arrow = Object.Instantiate(prefab, parent);
-        arrow.image = arrow.gameObject.GetComponent<SpriteRenderer>();
+        arrow.image = arrow.GetComponent<SpriteRenderer>();
         arrow.image.color = color;
         arrow.gameObject.layer = 5;
         arrow.gameObject.SetActive(true);
@@ -619,6 +614,7 @@ public static class Helpers
             MiraNumberSuffixes.Multiplier => "x",
             MiraNumberSuffixes.Seconds => "s",
             MiraNumberSuffixes.Percent => "%",
+            MiraNumberSuffixes.Distance => MiraApiPlugin.DistanceSuffix.Value,
             _ => string.Empty,
         };
     }
@@ -653,14 +649,14 @@ public static class Helpers
     /// <returns>The formatted value.</returns>
     public static string FormatValue(float value, MiraNumberSuffixes suffix = MiraNumberSuffixes.None, string formatString = "0.0")
     {
+        var part = value.ToString(formatString, NumberFormatInfo.InvariantInfo);
         return suffix switch
         {
-            MiraNumberSuffixes.None => value.ToString(formatString, NumberFormatInfo.InvariantInfo),
-            MiraNumberSuffixes.Multiplier => value.ToString(formatString, NumberFormatInfo.InvariantInfo) + "x",
-            MiraNumberSuffixes.Percent => value.ToString(formatString, NumberFormatInfo.InvariantInfo) + "%",
-            _ => TranslationController.Instance.GetString(
-                StringNames.GameSecondsAbbrev,
-                (Il2CppSystem.Object[])[value.ToString(formatString, CultureInfo.InvariantCulture)]),
+            MiraNumberSuffixes.None => part,
+            MiraNumberSuffixes.Percent => part + "%",
+            MiraNumberSuffixes.Multiplier => part + "x",
+            MiraNumberSuffixes.Distance => part + MiraApiPlugin.DistanceSuffix.Value,
+            _ => TranslationController.Instance.GetString(StringNames.GameSecondsAbbrev, part),
         };
     }
 
