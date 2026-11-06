@@ -12,9 +12,9 @@ namespace MiraAPI.Events;
 /// </summary>
 public static class MiraEventManager
 {
-    private static readonly Dictionary<Type, List<MiraEventWrapper>> EventWrappersToLoad = [];
+    private static readonly Dictionary<Type, List<MiraEventHandle>> EventHandlersToLoad = [];
 
-    private static readonly Dictionary<Type, List<MiraEventWrapper>> EventWrappers = [];
+    private static readonly Dictionary<Type, List<MiraEventHandle>> EventHandlers = [];
 
     /// <summary>
     /// Gets the list of all registered <see cref="MiraEvent"/> types.
@@ -48,12 +48,12 @@ public static class MiraEventManager
     /// <returns>If there was an event handler invoked for this event, return <see langword="true"/>. Otherwise, return <see langword="false"/>.</returns>
     public static bool InvokeEvent(this MiraEvent eventInstance, Type type)
     {
-        if (!EventWrappers.TryGetValue(type.GetTrackedType(), out var handlers))
+        if (!EventHandlers.TryGetValue(type.GetTrackedType(), out var handlers))
         {
             return false;
         }
 
-        var callableHandlers = handlers.Where(x => x.DefinedType.IsAssignableTo(type)).ToList();
+        var callableHandlers = handlers.Where(x => x.EventType.IsAssignableTo(type)).ToList();
         if (callableHandlers.Count == 0)
         {
             return false;
@@ -186,9 +186,9 @@ public static class MiraEventManager
     /// <returns>A <see cref="MiraEventHandle"/> to use when unregistering the event.</returns>
     private static MiraEventHandle RegisterEventHandler(Type type, Delegate @delegate, int priority)
     {
-        var eventWrapper = new MiraEventWrapper(@delegate, priority, type);
-        EventHandlerAdded(type, eventWrapper);
-        return new MiraEventHandle(eventWrapper);
+        var eventHandler = new MiraEventHandle(@delegate, priority, type);
+        EventHandlerAdded(type, eventHandler);
+        return eventHandler;
     }
 
     private static Type GetTrackedType(this Type type)
@@ -201,12 +201,12 @@ public static class MiraEventManager
         return type;
     }
 
-    private static void EventHandlerAdded(Type type, MiraEventWrapper eventWrapper)
+    private static void EventHandlerAdded(Type type, MiraEventHandle eventHandler)
     {
         if (!loadFinilized)
         {
-            EventWrappersToLoad.TryAdd(type, []);
-            EventWrappersToLoad[type].Add(eventWrapper);
+            EventHandlersToLoad.TryAdd(type, []);
+            EventHandlersToLoad[type].Add(eventHandler);
             return;
         }
 
@@ -217,16 +217,16 @@ public static class MiraEventManager
 
         foreach (Type eventType in trackedEvents)
         {
-            var handlers = EventWrappers[eventType];
+            var handlers = EventHandlers[eventType];
 
-            var index = handlers.BinarySearch(eventWrapper, Comparer<MiraEventWrapper>.Create((a, b) => a.Priority.CompareTo(b.Priority)));
+            var index = handlers.BinarySearch(eventHandler, Comparer<MiraEventHandle>.Create((a, b) => a.Priority.CompareTo(b.Priority)));
 
             if (index < 0)
             {
                 index = ~index;
             }
 
-            handlers.Insert(index, eventWrapper);
+            handlers.Insert(index, eventHandler);
         }
     }
 
@@ -237,15 +237,14 @@ public static class MiraEventManager
     /// <returns><see langword="true"/> if the event was unregistered successfully, <see langword="false"/> otherwise.</returns>
     public static bool UnregisterEventHandler(MiraEventHandle eventHandle)
     {
-        MiraEventWrapper wrapper = eventHandle.EventWrapper;
         if (!loadFinilized)
         {
-            if (!EventWrappersToLoad.TryGetValue(wrapper.DefinedType, out var handlersToLoad))
+            if (!EventHandlersToLoad.TryGetValue(eventHandle.EventType, out var handlersToLoad))
             {
                 return false;
             }
 
-            if (!handlersToLoad.Remove(eventHandle.EventWrapper))
+            if (!handlersToLoad.Remove(eventHandle))
             {
                 return false;
             }
@@ -253,7 +252,7 @@ public static class MiraEventManager
             return true;
         }
 
-        if (!TrackedEventTypes.TryGetValue(wrapper.DefinedType.GetTrackedType(), out var eventTypes))
+        if (!TrackedEventTypes.TryGetValue(eventHandle.EventType.GetTrackedType(), out var eventTypes))
         {
             return false;
         }
@@ -261,12 +260,12 @@ public static class MiraEventManager
         var removed = false;
         foreach (var type in eventTypes)
         {
-            if (!EventWrappers.TryGetValue(type, out var handlers))
+            if (!EventHandlers.TryGetValue(type, out var handlers))
             {
                 continue;
             }
 
-            removed |= handlers.Remove(wrapper);
+            removed |= handlers.Remove(eventHandle);
         }
 
         return removed;
@@ -279,10 +278,10 @@ public static class MiraEventManager
 
         foreach (var eventType in EventTypes)
         {
-            EventWrappers.Add(eventType, []);
+            EventHandlers.Add(eventType, []);
         }
 
-        foreach (var (concreteType, eventHandlers) in EventWrappersToLoad)
+        foreach (var (concreteType, eventHandlers) in EventHandlersToLoad)
         {
             foreach (var eventHandler in eventHandlers)
             {
@@ -292,6 +291,6 @@ public static class MiraEventManager
             eventHandlers.Clear();
         }
 
-        EventWrappersToLoad.Clear();
+        EventHandlersToLoad.Clear();
     }
 }
