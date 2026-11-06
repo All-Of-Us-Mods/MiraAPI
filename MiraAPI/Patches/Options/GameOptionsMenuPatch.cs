@@ -313,7 +313,7 @@ internal static class GameOptionsMenuPatch
         };
         _modIcon = modIconObj.AddComponent<SpriteRenderer>();
         _modIcon.sprite = MiraAssets.BlankSprite.LoadAsset();
-        _modIcon.material = gamemodeBg.gameObject.GetComponent<SpriteRenderer>().material;
+        _modIcon.material = gamemodeBg.GetComponent<SpriteRenderer>().material;
 
         var gamemodeTextObj = Object.Instantiate(GameModeOption.OptionBehaviour.transform.GetChild(1).gameObject, modeInfoHolder);
         gamemodeTextObj.transform.localPosition = new Vector3(0.3f, 0, -0.01f);
@@ -739,7 +739,7 @@ internal static class GameOptionsMenuPatch
             var newText = Object.Instantiate(categoryHeaderMasked.Title, categoryHeaderMasked.transform);
             newText.text = $"<size=70%>({"MiraApi.GameSetting.Global.ClickToClose".Translate()})</size>";
             newText.transform.localPosition = new Vector3(2.6249f, -0.165f, 0f);
-            newText.gameObject.GetComponent<TextTranslatorTMP>().Destroy();
+            newText.GetComponent<TextTranslatorTMP>().Destroy();
 
             var boxCol = categoryHeaderMasked.gameObject.AddComponent<BoxCollider2D>();
             boxCol.size = new Vector2(7, 0.7f);

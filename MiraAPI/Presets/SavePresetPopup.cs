@@ -70,7 +70,7 @@ public class SavePresetPopup(nint cppPtr) : Minigame(cppPtr)
 
         foreach (var tmp in gameObject.GetComponentsInChildren<TextMeshPro>())
         {
-            if (tmp.gameObject.transform.parent.name == "Textbox")
+            if (tmp.transform.parent.name == "Textbox")
             {
                 continue;
             }

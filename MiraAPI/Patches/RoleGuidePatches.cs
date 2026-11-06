@@ -296,7 +296,7 @@ public static class RoleGuidePatches
             if (_titleText)
             {
                 _titleText.transform.localPosition += new Vector3(0.5f, 0);
-                _titleText.transform.GetComponent<TextTranslatorTMP>().Destroy();
+                _titleText.GetComponent<TextTranslatorTMP>().Destroy();
             }
         }
 
@@ -1565,20 +1565,13 @@ public static class RoleGuidePatches
 
     private static void SetupPanelButton(MatchInfoRolePanel panel, Action onClick)
     {
-        var collider = panel.roleIcon.gameObject.GetComponent<BoxCollider2D>();
-        if (!collider)
-        {
-            collider = panel.roleIcon.gameObject.AddComponent<BoxCollider2D>();
-        }
+        var collider = panel.roleIcon.gameObject.GetOrAddComponent<BoxCollider2D>();
 
         collider.size = new Vector2(0.13f, 0.13f);
         collider.offset = new Vector2(0, 0);
         collider.enabled = true;
-        var passiveButton = panel.roleIcon.gameObject.GetComponent<PassiveButton>();
-        if (!passiveButton)
-        {
-            passiveButton = panel.roleIcon.gameObject.AddComponent<PassiveButton>();
-        }
+
+        var passiveButton = panel.roleIcon.gameObject.GetOrAddComponent<PassiveButton>();
 
         passiveButton.enabled = true;
         passiveButton.ClickSound = HudManager.Instance.MapButton.ClickSound;
