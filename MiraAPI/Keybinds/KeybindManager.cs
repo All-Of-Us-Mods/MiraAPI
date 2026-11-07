@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using MiraAPI.PluginLoading;
+using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using Rewired;
 
@@ -76,6 +78,48 @@ public static class KeybindManager
         }
     }
 
+    internal static bool RegisterKeybinds(Type type, IMiraPlugin plugin)
+    {
+        if (!type.IsDefined<RegisterCustomKeybindsAttribute>())
+        {
+            return false;
+        }
+
+        if (!type.IsStatic())
+        {
+            Error($"Keybinds class {type.Name} must be static.");
+            return false;
+        }
+
+        foreach (var property in type.GetProperties(MiraPluginManager.DeclaredStaticMembers))
+        {
+            if (property.PropertyType != typeof(MiraKeybind))
+            {
+                continue;
+            }
+
+            if (property.GetValue(null) is not MiraKeybind keybind)
+            {
+                Error($"Keybind property {property.Name} in {type.Name} is not a MiraKeybind.");
+                continue;
+            }
+
+            Keybinds.Add(keybind);
+            keybind.SourcePluginName = plugin.OptionsTitleText.Translate();
+        }
+
+        if (!plugin.DebugMode)
+            return true;
+
+        foreach (var field in type.GetFields(MiraPluginManager.DeclaredStaticMembers)
+            .Where(f => !MiraPluginManager.IsAutoPropertyBackingField(f) && f.FieldType.IsAssignableTo(typeof(MiraKeybind))))
+        {
+            Error($"{field.Name} is a field, not a property. Use properties for keybinds.");
+        }
+
+        return true;
+    }
+
     /// <summary>
     /// Returns all conflicts where <see cref="MiraKeybind"/>s use the same key.
     /// </summary>
@@ -89,16 +133,18 @@ public static class KeybindManager
             if (key == KeyboardKeyCode.None) continue;
 
             var all = GetKeybindsForKey(key, true);
-            if (all.Length > 1)
+            if (all.Length <= 1)
             {
-                if (!conflicts.TryGetValue(key, out var group))
-                {
-                    group = [];
-                    conflicts.Add(key, group);
-                }
-
-                if (!group.Contains(keybind)) group.Add(keybind);
+                continue;
             }
+
+            if (!conflicts.TryGetValue(key, out var group))
+            {
+                group = [];
+                conflicts.Add(key, group);
+            }
+
+            if (!group.Contains(keybind)) group.Add(keybind);
         }
 
         return conflicts;
