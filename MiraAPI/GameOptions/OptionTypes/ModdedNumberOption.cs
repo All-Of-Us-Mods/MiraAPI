@@ -44,6 +44,11 @@ public class ModdedNumberOption : ModdedOption<float>
     public string NegativeWordValue { get; }
 
     /// <summary>
+    /// Gets the format string used to display the values.
+    /// </summary>
+    public string FormatString { get; }
+
+    /// <summary>
     /// Gets a value indicating whether holding shift will divide the increment.
     /// </summary>
     public bool ShiftIncrement { get; }
@@ -92,6 +97,12 @@ public class ModdedNumberOption : ModdedOption<float>
         ZeroWordValue = zeroBehavior;
         ShiftIncrement = halfIncrements;
         NegativeWordValue = negativeBehavior;
+        FormatString = formatString ??
+                       (defaultValue.IsInteger() &&
+                        Increment.IsInteger() &&
+                        Value.IsInteger() &&
+                        Min.IsInteger() &&
+                        Max.IsInteger() ? "0" : "0.0");
 
         Value = Mathf.Clamp(defaultValue, min, max);
 
@@ -101,12 +112,7 @@ public class ModdedNumberOption : ModdedOption<float>
         data.Value = Value;
         data.Increment = Increment;
         data.ValidRange = new FloatRange(Min, Max);
-        data.FormatString = formatString ??
-                            (defaultValue.IsInteger() &&
-                             Increment.IsInteger() &&
-                             Value.IsInteger() &&
-                             Min.IsInteger() &&
-                             Max.IsInteger() ? "0" : "0.0");
+        data.FormatString = FormatString;
 
         data.ZeroIsInfinity = ZeroInfinity;
         data.SuffixType = (NumberSuffixes)SuffixType;
@@ -223,7 +229,7 @@ public class ModdedNumberOption : ModdedOption<float>
         numberOption.Value = Value;
         numberOption.Increment = Increment;
         numberOption.ValidRange = new FloatRange(Min, Max);
-        numberOption.FormatString = (Data as FloatGameSetting)?.FormatString ?? "0.0";
+        numberOption.FormatString = FormatString;
         numberOption.ZeroIsInfinity = ZeroInfinity;
         numberOption.SuffixType = (NumberSuffixes)SuffixType;
         numberOption.floatOptionName = FloatOptionNames.Invalid;

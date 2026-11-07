@@ -183,12 +183,9 @@ public static class Helpers
     /// <param name="amount">How much you want to divide by.</param>
     public static void DivideSize(GameObject obj, float amount)
     {
-        foreach (var collider in obj.GetComponentsInChildren<Collider2D>(true))
+        foreach (var col in obj.GetComponentsInChildren<BoxCollider2D>(true))
         {
-            if (collider.TryCast<BoxCollider2D>() is { } col)
-            {
-                col.size = new Vector2(col.size.x / amount, col.size.y);
-            }
+            col.size = new Vector2(col.size.x / amount, col.size.y);
         }
 
         foreach (var rend in obj.GetComponentsInChildren<SpriteRenderer>(true))
