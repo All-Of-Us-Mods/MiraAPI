@@ -49,6 +49,16 @@ public sealed class MiraPluginManager
     internal static ConfigFile MiraApiConfig { get; private set; } = null!;
     internal static MiraPluginInfo MiraApiPluginInfo { get; private set; } = null!;
 
+    /// <summary>
+    /// Get a mira plugin by its GUID.
+    /// </summary>
+    /// <param name="pluginId">The plugin GUID.</param>
+    /// <returns>A <see cref="MiraPluginInfo"/>.</returns>
+    public static MiraPluginInfo? GetPluginByGuid(string pluginId)
+    {
+        return Instance._registeredPlugins.GetValueOrDefault(pluginId);
+    }
+
     internal void Initialize(BasePlugin miraApiPlugin, IMiraPlugin apiPlugin)
     {
         CustomGameModeManager.RegisterDefaultMode();
@@ -135,7 +145,7 @@ public sealed class MiraPluginManager
             if ((isMira && type.IsAbstract) || type.IsDefined<MiraIgnoreAttribute>())
                 continue;
 
-            RegisterEvents(type);
+            RegisterEvents(type, plugin);
 
             if (RegisterOptions(type, info))
                 continue;
@@ -172,26 +182,16 @@ public sealed class MiraPluginManager
         }
     }
 
-    private static void RegisterEvents(Type type)
+    private static void RegisterEvents(Type type, IMiraPlugin miraPlugin)
     {
         try
         {
-            MiraEventManager.RegisterEvents(type);
+            MiraEventManager.RegisterEvents(type, miraPlugin);
         }
         catch (Exception e)
         {
             Error($"Failed to register events in {type.Name}: {e}");
         }
-    }
-
-    /// <summary>
-    /// Get a mira plugin by its GUID.
-    /// </summary>
-    /// <param name="pluginId">The plugin GUID.</param>
-    /// <returns>A <see cref="MiraPluginInfo"/>.</returns>
-    public static MiraPluginInfo? GetPluginByGuid(string pluginId)
-    {
-        return Instance._registeredPlugins.GetValueOrDefault(pluginId);
     }
 
     private static bool RegisterGameOver(Type type)

@@ -85,12 +85,6 @@ public static class KeybindManager
             return false;
         }
 
-        if (!type.IsStatic())
-        {
-            Error($"Keybinds class {type.Name} must be static.");
-            return false;
-        }
-
         foreach (var property in type.GetProperties(MiraPluginManager.DeclaredStaticMembers))
         {
             if (property.PropertyType != typeof(MiraKeybind))
