@@ -35,12 +35,12 @@ public sealed class VariableColor(
     /// <summary>
     /// Gets a delegate that takes in a time value and returns the dynamic main color.
     /// </summary>
-    public Func<float, Color> MainEvaluator { get; } = mainEvaluator;
+    public Func<float, Color> MainEvaluator => mainEvaluator;
 
     /// <summary>
     /// Gets a delegate that takes in a time value and returns the dynamic shadow color.
     /// </summary>
-    public Func<float, Color> ShadowEvaluator { get; } = shadowEvaluator ?? (t => mainEvaluator(t).DarkenAbsolute(0.24f));
+    public Func<float, Color> ShadowEvaluator => shadowEvaluator ?? (t => mainEvaluator(t).DarkenAbsolute(0.24f));
 
     /// <inheritdoc cref="VariableColor(StringNames?, string?, Func{float, Color}, Func{float, Color}?, Color32?, Color32?, float, CustomColorBrightness)"/>
     public VariableColor(

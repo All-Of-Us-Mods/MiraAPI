@@ -31,7 +31,7 @@ public class LocalEnumSetting(
     /// <summary>
     /// Gets the <see cref="Enum"/> type of the setting.
     /// </summary>
-    public Type EnumType { get; } = enumType;
+    public Type EnumType => enumType;
 
     /// <summary>
     /// Gets the <see langword="enum"/> values.

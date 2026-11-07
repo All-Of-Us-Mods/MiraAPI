@@ -23,12 +23,12 @@ public class CustomColor(StringNames? nameId, string? rawId, Color32 mainColor, 
     /// <summary>
     /// Gets the main color.
     /// </summary>
-    public Color32 MainColor { get; } = mainColor;
+    public Color32 MainColor => mainColor;
 
     /// <summary>
     /// Gets the shadow color.
     /// </summary>
-    public Color32 ShadowColor { get; } = shadowColor;
+    public Color32 ShadowColor => shadowColor;
 
     /// <summary>
     /// Gets the name of the color.

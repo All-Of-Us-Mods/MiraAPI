@@ -13,7 +13,7 @@ public sealed class MiraButtonCancelledEvent<T>(T button) : MiraEvent
     /// <summary>
     /// Gets the <see cref="CustomActionButton"/> whose click was cancelled.
     /// </summary>
-    public T Button { get; } = button;
+    public T Button => button;
 }
 
 /// <summary>
@@ -25,5 +25,5 @@ public sealed class MiraButtonCancelledEvent(CustomActionButton button) : MiraEv
     /// <summary>
     /// Gets the <see cref="CustomActionButton"/> whose click was cancelled.
     /// </summary>
-    public CustomActionButton Button { get; } = button;
+    public CustomActionButton Button => button;
 }

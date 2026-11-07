@@ -27,7 +27,7 @@ public class ProcessVotesEvent(List<CustomVote> votes, NetworkedPlayerInfo? exil
     /// <summary>
     /// Gets the list of <see cref="CustomVote"/>s that are being processed.
     /// </summary>
-    public List<CustomVote> Votes { get; } = votes;
+    public List<CustomVote> Votes => votes;
 
     /// <summary>
     /// Gets or sets a value indicating whether an overruling was done. Normally set by judge but can be overwritten.

@@ -365,7 +365,7 @@ public static class ModdedOptionsManager
 
         while (chunks.Count > 0)
         {
-            Rpc<SyncOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, new MiraOptionNetData(false, chunks.Dequeue()));
+            Rpc<SyncGameOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, new MiraOptionNetData(false, chunks.Dequeue()));
         }
     }
 

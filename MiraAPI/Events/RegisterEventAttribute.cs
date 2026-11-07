@@ -12,5 +12,5 @@ public class RegisterEventAttribute(int priority = 0) : Attribute
     /// <summary>
     /// Gets the priority of the event. Lower values are called first.
     /// </summary>
-    public int Priority { get; } = priority;
+    public int Priority => priority;
 }

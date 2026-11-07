@@ -14,12 +14,12 @@ public class MiraButtonClickEvent<T>(T button, MiraButtonClickEvent genericClick
     /// <summary>
     /// Gets the <see cref="CustomActionButton"/> that was clicked.
     /// </summary>
-    public T Button { get; } = button;
+    public T Button => button;
 
     /// <summary>
     /// Gets the generic <see cref="MiraButtonClickEvent"/> that is invoked before this button-specific event.
     /// </summary>
-    public MiraButtonClickEvent GenericClickEvent { get; } = genericClickEvent;
+    public MiraButtonClickEvent GenericClickEvent => genericClickEvent;
 }
 
 /// <summary>
@@ -31,5 +31,5 @@ public class MiraButtonClickEvent(CustomActionButton button) : MiraCancelableEve
     /// <summary>
     /// Gets the <see cref="CustomActionButton"/> that was clicked.
     /// </summary>
-    public CustomActionButton Button { get; } = button;
+    public CustomActionButton Button => button;
 }

@@ -17,22 +17,22 @@ public sealed class BeforeMurderEvent(PlayerControl source, PlayerControl target
     /// <summary>
     /// Gets the <see cref="PlayerControl"/> that is killing the <see cref="Target"/>.
     /// </summary>
-    public PlayerControl Source { get; } = source;
+    public PlayerControl Source => source;
 
     /// <summary>
     /// Gets the <see cref="PlayerControl"/> that is being killed.
     /// </summary>
-    public PlayerControl Target { get; } = target;
+    public PlayerControl Target => target;
 
     /// <summary>
     /// Gets the <see cref="PlayerControl"/> that is being framed, if any.
     /// </summary>
-    public PlayerControl? Framed { get; } = framed;
+    public PlayerControl? Framed => framed;
 
     /// <summary>
     /// Gets whether the murder was meant to be done in a meeting, via an enum.
     /// </summary>
-    public MeetingCheck InMeeting { get; } = inMeeting;
+    public MeetingCheck InMeeting => inMeeting;
 
     /// <summary>
     /// Gets or sets a value indicating whether the murder is done indirectly.
