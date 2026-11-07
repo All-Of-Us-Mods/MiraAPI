@@ -14,6 +14,7 @@ using Reactor.Utilities;
 
 namespace MiraAPI.Example;
 
+[RegisterEventContainer]
 public static class ExampleEventHandlers
 {
     public static void Initialize()
