@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using MiraAPI.Networking;
-using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -30,17 +29,13 @@ public class ModdedPlayerOption : ModdedOption<int>
     public bool AllowNone { get; set; }
 
     /// <summary>
-    /// Gets the player selected by this option. May be <c>null</c> if allowed to have <c>None</c> as an option.
-    /// </summary>
-    public NetworkedPlayerInfo? SelectedPlayer => Value == -1 ? null : Values[Value];
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="ModdedPlayerOption"/> class.
     /// </summary>
+    /// <param name="groupPrefix">The translation ID prefix of the group containing this option.</param>
     /// <param name="title">The title of the option.</param>
     /// <param name="allowNone">Whether the option includes a none option. If None is selected, value will return -1.</param>
-    public ModdedPlayerOption(string title, bool allowNone = true)
-        : base(title, allowNone ? -1 : 0, false)
+    public ModdedPlayerOption(string groupPrefix, string title, bool allowNone = true)
+        : base(groupPrefix, title, allowNone ? -1 : 0, false)
     {
         Values = [];
         AllowNone = allowNone;
@@ -54,6 +49,16 @@ public class ModdedPlayerOption : ModdedOption<int>
         Data = data;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedPlayerOption"/> class.
+    /// </summary>
+    /// <param name="title">The title of the option.</param>
+    /// <param name="allowNone">Whether the option includes a none option. If None is selected, value will return -1.</param>
+    public ModdedPlayerOption(string title, bool allowNone = true)
+        : this(string.Empty, title, allowNone)
+    {
+    }
+
     /// <inheritdoc />
     public override OptionBehaviour CreateOption(
         ToggleOption toggleOpt,
@@ -63,8 +68,7 @@ public class ModdedPlayerOption : ModdedOption<int>
         Transform container)
     {
         var playerOption = Object.Instantiate(playerOpt, container);
-        playerOption.name =
-            $"{ParentMod!.OptionsTitleText}.PlayerOption.{TranslationController.Instance.GetString(StringName)}";
+        playerOption.name = $"{ParentMod!.OptionsTitleText}.PlayerOption.{Title}";
 
         Values = GetFilteredPlayers();
 
@@ -72,7 +76,6 @@ public class ModdedPlayerOption : ModdedOption<int>
         playerOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
 
         playerOption.Title = StringName;
-        playerOption.TitleText.text = Title.Translate();
         playerOption.Values = Values.ToIl2CppList();
         playerOption.Value = Value;
         playerOption.playerIndex = Values.FindIndex(p => p.PlayerId == Value);
@@ -108,7 +111,7 @@ public class ModdedPlayerOption : ModdedOption<int>
     /// <returns>A player or <see langword="null"/> if chosen none.</returns>
     public NetworkedPlayerInfo? GetPlayerValue()
     {
-        return Value < 0 ? null : Values[Value];
+        return (uint)Value >= (uint)Values.Count ? null : Values[Value];
     }
 
     /// <inheritdoc />
@@ -138,21 +141,18 @@ public class ModdedPlayerOption : ModdedOption<int>
     /// <inheritdoc />
     protected override void OnValueChanged(int newValue)
     {
-        ModdedOptionsManager.AddSettingsChangeMessage(
-            HudManager.Instance.Notifier,
-            StringName,
-            Data.GetValueString(newValue),
-            Configuration.PopUpTextColor,
-            Configuration.PopUpIconTmp,
-            false);
-        if (!OptionBehaviour)
-        {
-            return;
-        }
-
-        if (OptionBehaviour is PlayerOption opt)
+        if (OptionBehaviour && OptionBehaviour is PlayerOption opt)
         {
             opt.Value = newValue;
         }
+    }
+
+    /// <inheritdoc />
+    public override string GetDisplayValue()
+    {
+        var player = GetPlayerValue();
+        return !player
+            ? TranslationController.Instance.GetString(StringNames.None)
+            : player!.PlayerName;
     }
 }

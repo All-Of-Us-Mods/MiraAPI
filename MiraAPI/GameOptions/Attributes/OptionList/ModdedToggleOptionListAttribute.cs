@@ -12,40 +12,66 @@ namespace MiraAPI.GameOptions.Attributes;
 /// <param name="on">What the option displays when toggled on.</param>
 /// <param name="off">What the option displays when toggled off.</param>
 [AttributeUsage(AttributeTargets.Property)]
-public class ModdedToggleOptionListAttribute(
-    string title,
-    string on,
-    string off)
-    : ModdedOptionListAttribute(title)
+public class ModdedToggleOptionListAttribute(string? title, string on, string off)
+    : ModdedOptionListAttribute(title), ITypedOptionList<bool>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ModdedToggleOptionListAttribute"/> class.
     /// </summary>
+    /// <param name="on">What the option displays when toggled on.</param>
+    /// <param name="off">What the option displays when toggled off.</param>
+    public ModdedToggleOptionListAttribute(string on, string off)
+        : this(null, on, off)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedToggleOptionListAttribute"/> class.
+    /// </summary>
     /// <param name="title">The option's title.</param>
-    public ModdedToggleOptionListAttribute(string title)
+    public ModdedToggleOptionListAttribute(string? title)
         : this(title, "On", "Off")
     {
     }
 
-    internal override IModdedOptionList CreateOptionList(IList value, PropertyInfo property)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedToggleOptionListAttribute"/> class.
+    /// </summary>
+    public ModdedToggleOptionListAttribute()
+        : this(null, "On", "Off")
+    {
+    }
+
+    internal override IModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
     {
         var optList = new ModdedOptionList<ModdedToggleOption>(
-            value.Count, idx => new(GetFormattedTitle(idx), (bool)(value[idx] ?? false), on, off));
+            list.Count, idx => new(group.GroupPrefix, GetFormattedTitle(idx, property), (bool)(list[idx] ?? false), on, off));
         return optList;
     }
 
     /// <inheritdoc />
     public override void SetValue(int idx, object value)
     {
-        var opt = HolderOptionList?[idx] as ModdedToggleOption;
-        opt?.SetValue((bool)value);
+        SetValueUnboxed(idx, (bool)value);
+    }
+
+    /// <inheritdoc />
+    public void SetValueUnboxed(int idx, bool value)
+    {
+        (HolderOptionList?[idx] as ModdedToggleOption)?.SetValue(value);
     }
 
     /// <inheritdoc />
     public override object GetValue(int idx)
     {
+        return GetValueUnboxed(idx);
+    }
+
+    /// <inheritdoc />
+    public bool GetValueUnboxed(int idx)
+    {
         return HolderOptionList?[idx] is ModdedToggleOption opt
             ? opt.Value
-            : throw new InvalidOperationException($"Holder option for {GetFormattedTitle(idx)} is not a ModdedToggleOption.");
+            : throw new InvalidOperationException($"Holder option \"{Titles[idx]}\" is not a ModdedToggleOption.");
     }
 }

@@ -58,12 +58,12 @@ public class LocalSettingsButton(string text, Action onClick)
 
         tmp.text = Text.Translate();
         _btnText = tmp;
-        button.name = Text;
-        button.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
         rollover.OutColor = Tab!.TabAppearance.ButtonColor;
         rollover.OverColor = Tab.TabAppearance.ButtonHoverColor;
         rollover.Target = background;
         background.color = Tab.TabAppearance.ButtonColor;
+        button.name = Text;
+        button.OnClick = new();
         button.OnClick.AddListener((UnityAction)OnClick);
 
         background.transform.localScale = new Vector3(1, 1.25f, 1);

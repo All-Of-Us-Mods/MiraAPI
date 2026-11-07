@@ -126,7 +126,7 @@ public static class MiraLocaleManager
     /// Call once per mod during plugin Load().
     /// </summary>
     /// <param name="modGuid">The mod GUID (e.g., "mira.example").</param>
-    [Obsolete("Pass typeof(YourPlugin).Assembly directly to Register for better performance.")]
+    [Obsolete("Pass typeof(YourPlugin).Assembly directly to Register for better performance. This will be removed in a future version.")]
     public static void Register(string modGuid)
     {
         var callingAssembly = Assembly.GetCallingAssembly();
@@ -150,7 +150,7 @@ public static class MiraLocaleManager
     /// </summary>
     /// <param name="modGuid">The mod GUID (e.g., "mira.example").</param>
     /// <param name="internalName">The mod's root namespace (e.g., "mira.api").</param>
-    [Obsolete("Pass typeof(YourPlugin).Assembly directly to Register for better performance.")]
+    [Obsolete("Pass typeof(YourPlugin).Assembly directly to Register for better performance. This will be removed in a future version.")]
     public static void Register(string modGuid, string internalName)
     {
         var callingAssembly = Assembly.GetCallingAssembly();

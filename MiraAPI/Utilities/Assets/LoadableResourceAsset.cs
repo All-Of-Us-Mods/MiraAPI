@@ -31,7 +31,7 @@ public class LoadableResourceAsset : LoadableAsset<Sprite>
     /// </summary>
     /// <param name="path">The path to the embedded resource.</param>
     /// <param name="pixelsPerUnit">The pixels per unit for the loaded sprite.</param>
-    [Obsolete("Pass typeof(YourPlugin).Assembly directly to the constructor for better performance.")]
+    [Obsolete("Pass typeof(YourPlugin).Assembly directly to the constructor for better performance. This will be removed in a future version.")]
     public LoadableResourceAsset(string path, float pixelsPerUnit = 100f)
     {
         _path = path;
