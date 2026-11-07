@@ -140,6 +140,11 @@ public sealed class MiraPluginManager
     [SuppressMessage("Minor Code Smell", "S3626:Jump statements should not be redundant", Justification = "Code consistency.")]
     private static void ProcessAssemblyTypes(Assembly assembly, MiraPluginInfo info, BasePlugin basePlugin, IMiraPlugin plugin, List<Type> roles, bool isMira)
     {
+        if (plugin.ForceRegisterEvents)
+        {
+            Warning("For optimisation reasons, MiraAPI no longer automatically searches every type for events. Please use RegisterEventsAttribute moving forward.");
+        }
+
         foreach (var type in assembly.GetTypes())
         {
             if ((isMira && type.IsAbstract) || type.IsDefined<MiraIgnoreAttribute>())

@@ -158,11 +158,7 @@ public static class MiraEventManager
 
     internal static void RegisterEvents(Type type, IMiraPlugin miraPlugin)
     {
-        if (miraPlugin.ForceRegisterEvents)
-        {
-            Warning("For optimisation reasons, MiraAPI no longer automatically searches every type for events. Please use RegisterEventsAttribute moving forward.");
-        }
-        else if (!type.IsDefined<RegisterEventContainerAttribute>())
+        if (!miraPlugin.ForceRegisterEvents && !type.IsDefined<RegisterEventContainerAttribute>())
         {
             return;
         }
