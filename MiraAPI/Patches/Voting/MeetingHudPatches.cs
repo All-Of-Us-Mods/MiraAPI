@@ -24,7 +24,7 @@ internal static class MeetingHudPatches
     public static bool VotePatch(PlayerVoteArea __instance)
     {
         var beforeVoteEvent = new BeforeVoteEvent(__instance, PlayerControl.LocalPlayer);
-        MiraEventManager.InvokeEvent(beforeVoteEvent);
+        beforeVoteEvent.InvokeEvent();
 
         if (beforeVoteEvent.IsCancelled)
         {
@@ -32,7 +32,7 @@ internal static class MeetingHudPatches
         }
 
         var afterVoteEvent = new AfterVoteEvent(__instance, PlayerControl.LocalPlayer);
-        MiraEventManager.InvokeEvent(afterVoteEvent);
+        afterVoteEvent.InvokeEvent();
 
         return true;
     }
@@ -99,7 +99,7 @@ internal static class MeetingHudPatches
         }
 
         var @event = new StartMeetingEvent(__instance);
-        MiraEventManager.InvokeEvent(@event);
+        @event.InvokeEvent();
     }
 
     [HarmonyPostfix]
@@ -107,7 +107,7 @@ internal static class MeetingHudPatches
     public static void OnDestroyPatch(MeetingHud __instance)
     {
         MeetingVoteAreaVisibility.RestoreAll();
-        MiraEventManager.InvokeEvent(new EndMeetingEvent(__instance));
+        new EndMeetingEvent(__instance).InvokeEvent();
     }
 
     [HarmonyPostfix]
@@ -125,7 +125,7 @@ internal static class MeetingHudPatches
             }
         }
 
-        MiraEventManager.InvokeEvent(new VotingCompleteEvent(__instance));
+        new VotingCompleteEvent(__instance).InvokeEvent();
     }
 
     // this is necessary because the actual ForceSkipAll method is inlined.
@@ -179,7 +179,7 @@ internal static class MeetingHudPatches
         var hasVotedFor = voteData.VotedFor((byte)suspectStateIdx);
 
         var @event = new MeetingSelectEvent(voteData, suspectStateIdx, hasVotes && !hasVotedFor);
-        MiraEventManager.InvokeEvent(@event);
+        @event.InvokeEvent();
 
         return @event.AllowSelect;
     }
@@ -231,7 +231,7 @@ internal static class MeetingHudPatches
         var shouldEnd = !Helpers.GetAlivePlayers().Exists(plr => plr.GetVoteData().VotesRemaining > 0);
 
         var checkEndEvent = new CheckForEndVotingEvent(shouldEnd);
-        MiraEventManager.InvokeEvent(checkEndEvent);
+        checkEndEvent.InvokeEvent();
         shouldEnd = checkEndEvent.ForceEndVoting || checkEndEvent is { IsCancelled: false, IsVotingComplete: true };
 
         if (!shouldEnd)
@@ -243,7 +243,7 @@ internal static class MeetingHudPatches
         var exiled = VotingUtils.GetExiled(votes, out var isTie);
 
         var @event = new ProcessVotesEvent(votes, exiled);
-        MiraEventManager.InvokeEvent(@event);
+        @event.InvokeEvent();
 
         if (@event.VotesModified)
         {

@@ -47,7 +47,7 @@ public static class VotingUtils
     private static void HandleVote(PlayerVoteData voteData, byte suspectIdx, bool byJudge, out bool cancelVote)
     {
         var @event = new HandleVoteEvent(voteData, suspectIdx, byJudge);
-        MiraEventManager.InvokeEvent(@event);
+        @event.InvokeEvent();
 
         cancelVote = @event.PreventVote;
 
@@ -290,7 +290,7 @@ public static class VotingUtils
     public static void HandlePopulateResults(List<CustomVote> votes)
     {
         var @event = new PopulateResultsEvent(votes);
-        MiraEventManager.InvokeEvent(@event);
+        @event.InvokeEvent();
 
         if (@event.IsCancelled)
         {

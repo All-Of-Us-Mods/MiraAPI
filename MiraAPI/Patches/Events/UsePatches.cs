@@ -29,7 +29,7 @@ public static class UsePatches
     public static bool UsePatch(MonoBehaviour __instance)
     {
         var @event = new PlayerUseEvent(__instance.Cast<IUsable>());
-        MiraEventManager.InvokeEvent(@event);
+        @event.InvokeEvent();
 
         return !@event.IsCancelled;
     }

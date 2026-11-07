@@ -15,7 +15,7 @@ public static class SabotageEventPatches
     public static bool ShipStatusUpdateSystemPrefix(SystemTypes systemType, byte amount)
     {
         var @event = new UpdateSystemEvent(systemType, PlayerControl.LocalPlayer, amount);
-        MiraEventManager.InvokeEvent(@event);
+        @event.InvokeEvent();
         return !@event.IsCancelled;
     }
 
@@ -24,7 +24,7 @@ public static class SabotageEventPatches
     public static bool ShipStatusCloseDoorsOfTypePrefix(SystemTypes type)
     {
         var @event = new CloseDoorsEvent(type);
-        MiraEventManager.InvokeEvent(@event);
+        @event.InvokeEvent();
         return !@event.IsCancelled;
     }
 }

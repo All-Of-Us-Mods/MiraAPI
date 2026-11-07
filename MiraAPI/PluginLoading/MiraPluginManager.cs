@@ -99,6 +99,7 @@ public sealed class MiraPluginManager
             PluginsWithOptionsOrGameModes = [.. RegisteredPlugins.Where(m => m.MiraPlugin.DisplayOnOptionsMenu || m.GameModes.Count > 0)];
 
             ModifierManager.Modifiers = new ReadOnlyCollection<BaseModifier>(ModifierManager.InternalModifiers);
+            MiraEventManager.OnLoadFinilize();
         };
     }
 
@@ -139,7 +140,10 @@ public sealed class MiraPluginManager
             if ((isMira && type.IsAbstract) || type.IsDefined<MiraIgnoreAttribute>())
                 continue;
 
-            RegisterEvents(type);
+            RegisterEventHandlers(type);
+
+            if (RegisterEventType(type, info))
+                continue;
 
             if (RegisterModifier(type, info))
                 continue;
@@ -173,7 +177,7 @@ public sealed class MiraPluginManager
         }
     }
 
-    private static void RegisterEvents(Type type)
+    private static void RegisterEventHandlers(Type type)
     {
         foreach (var method in AccessTools.GetDeclaredMethods(type))
         {
@@ -182,19 +186,31 @@ public sealed class MiraPluginManager
 
             if (!method.IsStatic)
             {
-                Error($"Event method {method.Name} in {type.Name} must be static.");
+                Error($"Event handler method {method.Name} in {type.Name} must be static.");
                 continue;
             }
 
             var parameters = method.GetParameters();
             if (parameters.Length != 1 || !parameters[0].ParameterType.IsSubclassOf(typeof(MiraEvent)))
             {
-                Error($"Invalid event registration method {method.Name} in {type.Name}");
+                Error($"Invalid event handler registration: method {method.Name} in {type.Name}");
                 continue;
             }
 
-            var paramType = parameters[0].ParameterType;
-            MiraEventManager.RegisterEventHandler(paramType, method, eventAttribute.Priority);
+            MiraEventManager.RegisterEventHandler(method, eventAttribute.Priority, eventAttribute.InvokeOnSubtype);
+        }
+    }
+
+    private static bool RegisterEventType(Type type, MiraPluginInfo info)
+    {
+        try
+        {
+            return MiraEventManager.RegisterEventType(type, info);
+        }
+        catch (Exception e)
+        {
+            Error($"Failed to register event type {type.Name}: {e}");
+            return false;
         }
     }
 

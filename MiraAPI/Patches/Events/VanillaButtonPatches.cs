@@ -1,4 +1,5 @@
-﻿using AmongUs.GameOptions;
+﻿using System;
+using AmongUs.GameOptions;
 using HarmonyLib;
 using MiraAPI.Events;
 using MiraAPI.Events.Vanilla.Gameplay;
@@ -40,14 +41,7 @@ public static class VanillaButtonPatches
             ventTarget = role.Cast<EngineerRole>().currentTarget;
         }
 
-        var genericEvent = new VanillaButtonClickEvent(__instance, playerTarget, ventTarget);
-        MiraEventManager.InvokeEvent(genericEvent);
-        if (genericEvent.IsCancelled)
-        {
-            MiraEventManager.InvokeEvent(new VanillaButtonCancelledEvent(__instance));
-        }
-
-        return !genericEvent.IsCancelled;
+        return InvokeEvents(__instance, playerTarget, ventTarget);
     }
 
     [HarmonyPrefix]
@@ -66,13 +60,29 @@ public static class VanillaButtonPatches
             playerTarget = role.Cast<SpiritGuideRole>().currentTarget;
         }
 
-        var genericEvent = new VanillaButtonClickEvent(__instance, playerTarget);
-        MiraEventManager.InvokeEvent(genericEvent);
+        return InvokeEvents(__instance, playerTarget);
+    }
+
+    private static bool InvokeEvents(AbilityButton __instance, PlayerControl? playerTarget, Vent? ventTarget = null)
+    {
+        var genericEvent = new VanillaButtonClickEvent(__instance, playerTarget, ventTarget);
+        genericEvent.InvokeEvent();
         if (genericEvent.IsCancelled)
         {
-            MiraEventManager.InvokeEvent(new VanillaButtonCancelledEvent(__instance));
+            new VanillaButtonCancelledEvent(__instance).InvokeEvent();
         }
 
-        return !genericEvent.IsCancelled;
+        var eventType = typeof(VanillaButtonClickEvent<>).MakeGenericType(__instance.GetType());
+        var @event = (MiraCancelableEvent)Activator.CreateInstance(eventType, [__instance])!;
+        var specificInvoked = @event.InvokeEvent(eventType);
+        if (@event.IsCancelled)
+        {
+            var cancelEventType = typeof(VanillaButtonCancelledEvent<>).MakeGenericType(__instance.GetType());
+            var cancelEvent = (MiraEvent)Activator.CreateInstance(cancelEventType, [__instance])!;
+            cancelEvent.InvokeEvent(cancelEventType);
+        }
+
+        MiraCancelableEvent eventCheck = specificInvoked ? @event : genericEvent;
+        return !eventCheck.IsCancelled;
     }
 }
