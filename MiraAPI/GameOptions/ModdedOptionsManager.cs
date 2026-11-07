@@ -38,6 +38,9 @@ public static class ModdedOptionsManager
     private static readonly Dictionary<Type, HarmonyMethod> ConcretisedGetters = [];
     private static readonly Dictionary<Type, HarmonyMethod> ConcretisedSetters = [];
 
+    private static readonly Type OptionType = typeof(IModdedOption);
+    private static readonly Type OptionListType = typeof(IModdedOptionList);
+
     internal static readonly Dictionary<OptionBehaviour, ModdedPlayerOption> CreatedPlayerOptions = [];
     internal static readonly Dictionary<Type, List<AbstractOptionGroup>> GameModeOptionGroups = [];
     internal static readonly Dictionary<uint, IModdedOption> ModdedOptions = [];
@@ -113,29 +116,46 @@ public static class ModdedOptionsManager
 
         foreach (var property in type.GetProperties(MiraPluginManager.DeclaredInstanceMembers))
         {
-            if (property.PropertyType.IsAssignableTo(typeof(IModdedOption)))
+            if (property.GetMethod == null)
+            {
+                Error($"Non-ignored option property {property.Name} in {type.Name} must at least have a getter.");
+                continue;
+            }
+
+            var propType = property.PropertyType;
+
+            if (propType.IsAssignableTo(OptionType))
             {
                 RegisterPropertyOption(type, property, pluginInfo);
                 continue;
             }
 
-            if (property.PropertyType.IsAssignableTo(typeof(IModdedOptionList)))
+            if (propType.IsAssignableTo(OptionListType))
             {
                 RegisterPropertyOptionList(type, property, pluginInfo);
                 continue;
             }
 
-            if (property.TryGetCustomAttribute<ModdedOptionAttribute>(out var attribute))
-            {
-                RegisterAttributeOption(type, attribute, property, pluginInfo);
-                continue;
-            }
+            var attributes = property.GetCustomAttributes(false);
 
-            if (property.TryGetCustomAttribute<ModdedOptionListAttribute>(out var listAttr))
+            foreach (var attr in attributes)
             {
-                RegisterAttributeOptionList(type, listAttr, property, pluginInfo);
+                if (attr is ModdedOptionAttribute moddedAttr)
+                {
+                    RegisterAttributeOption(type, moddedAttr, property, pluginInfo, propType, attributes);
+                    break;
+                }
+
+                if (attr is ModdedOptionListAttribute listAttr)
+                {
+                    RegisterAttributeOptionList(type, listAttr, property, pluginInfo, propType, attributes);
+                    break;
+                }
             }
         }
+
+        if (!pluginInfo.DebugMode)
+            return true;
 
         foreach (var field in type.GetFields(MiraPluginManager.DeclaredInstanceMembers)
             .Where(f => !MiraPluginManager.IsAutoPropertyBackingField(f)
