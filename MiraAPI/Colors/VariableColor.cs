@@ -40,7 +40,7 @@ public sealed class VariableColor(
     /// <summary>
     /// Gets a delegate that takes in a time value and returns the dynamic shadow color.
     /// </summary>
-    public Func<float, Color> ShadowEvaluator => shadowEvaluator ?? (t => mainEvaluator(t).DarkenAbsolute(0.24f));
+    public Func<float, Color> ShadowEvaluator { get; } = shadowEvaluator ?? (t => mainEvaluator(t).DarkenAbsolute(0.24f));
 
     /// <inheritdoc cref="VariableColor(StringNames?, string?, Func{float, Color}, Func{float, Color}?, Color32?, Color32?, float, CustomColorBrightness)"/>
     public VariableColor(
@@ -91,6 +91,7 @@ public sealed class VariableColor(
     }
 
     /// <inheritdoc cref="VariableColor(StringNames?, string?, Func{float, Color}, Func{float, Color}?, Color32?, Color32?, float, CustomColorBrightness)"/>
+    [Obsolete("Use the constructor that takes in a CustomColorBrightness parameter. This will be removed in a future version.")]
     public VariableColor(
         StringNames nameId,
         Func<float, Color> mainEvaluator,
@@ -103,6 +104,7 @@ public sealed class VariableColor(
     }
 
     /// <inheritdoc cref="VariableColor(StringNames?, string?, Func{float, Color}, Func{float, Color}?, Color32?, Color32?, float, CustomColorBrightness)"/>
+    [Obsolete("Use the constructor that takes in a CustomColorBrightness parameter. This will be removed in a future version.")]
     public VariableColor(
         StringNames nameId,
         Func<float, Color> mainEvaluator,
@@ -113,6 +115,7 @@ public sealed class VariableColor(
     }
 
     /// <inheritdoc cref="VariableColor(StringNames?, string?, Func{float, Color}, Func{float, Color}?, Color32?, Color32?, float, CustomColorBrightness)"/>
+    [Obsolete("Use the constructor that takes in a CustomColorBrightness parameter. This will be removed in a future version.")]
     public VariableColor(
         string rawId,
         Func<float, Color> mainEvaluator,
@@ -125,6 +128,7 @@ public sealed class VariableColor(
     }
 
     /// <inheritdoc cref="VariableColor(StringNames?, string?, Func{float, Color}, Func{float, Color}?, Color32?, Color32?, float, CustomColorBrightness)"/>
+    [Obsolete("Use the constructor that takes in a CustomColorBrightness parameter. This will be removed in a future version.")]
     public VariableColor(
         string rawId,
         Func<float, Color> mainEvaluator,
