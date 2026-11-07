@@ -8,7 +8,7 @@ using Reactor.Networking.Serialization;
 namespace MiraAPI.Networking.Modifiers;
 
 /// <summary>
-/// Remote procedure call for adding a <see cref="BaseModifier"/>.
+/// Remote procedure call for adding a <see cref="IBaseModifier"/>.
 /// </summary>
 /// <param name="plugin">Mira plugin.</param>
 /// <param name="id">RPC ID.</param>
@@ -62,7 +62,7 @@ public class AddModifierRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<Mir
         var type = ModifierManager.GetModifierType(data.TypeId) ?? throw new InvalidOperationException($"Modifier type not found for ID {data.TypeId}.");
         var modifier = data.Args.Length > 0
             ? ModifierFactory.CreateInstance(type, data.Args)
-            : Activator.CreateInstance(type) as BaseModifier
+            : Activator.CreateInstance(type) as IBaseModifier
                 ?? throw new InvalidOperationException($"Cannot add modifier {type.Name} because it is not a valid modifier.");
         modifier.UniqueId = data.UniqueId;
         innerNetObject.AddModifier(modifier);

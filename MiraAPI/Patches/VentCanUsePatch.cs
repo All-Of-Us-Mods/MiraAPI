@@ -8,7 +8,7 @@ using UnityEngine;
 namespace MiraAPI.Patches;
 
 /// <summary>
-/// Used to change <see cref="Vent"/> behaviour for the <see cref="MiraEvent"/> system, <see cref="ICustomRole"/>s, and <see cref="BaseModifier"/>s.
+/// Used to change <see cref="Vent"/> behaviour for the <see cref="MiraEvent"/> system, <see cref="ICustomRole"/>s, and <see cref="IBaseModifier"/>s.
 /// </summary>
 [HarmonyPatch(typeof(Vent), nameof(Vent.CanUse))]
 internal static class VentCanUsePatch

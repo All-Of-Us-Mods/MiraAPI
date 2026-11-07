@@ -13,21 +13,21 @@ using Random = System.Random;
 namespace MiraAPI.Modifiers;
 
 /// <summary>
-/// The manager for handling <see cref="BaseModifier"/>s.
+/// The manager for handling <see cref="IBaseModifier"/>s.
 /// </summary>
-public static class ModifierManager
+public static partial class ModifierManager
 {
     /// <summary>
-    /// Gets or sets a value indicating whether <see cref="BaseModifier"/>s should be assigned to players.
+    /// Gets or sets a value indicating whether <see cref="IBaseModifier"/>s should be assigned to players.
     /// </summary>
     public static bool MiraAssignsModifiers { get; set; } = true;
 
     /// <summary>
-    /// Gets the list of all registered <see cref="BaseModifier"/>s.
+    /// Gets the list of all registered <see cref="IBaseModifier"/>s.
     /// </summary>
-    public static IReadOnlyList<BaseModifier> Modifiers { get; internal set; } = [];
+    public static IReadOnlyList<IBaseModifier> AllModifiers { get; internal set; } = [];
 
-    internal static List<BaseModifier> InternalModifiers { get; } = [];
+    internal static List<IBaseModifier> InternalModifiers { get; } = [];
 
     private static readonly Dictionary<uint, Type> IdToTypeModifierMap = [];
     private static readonly Dictionary<Type, uint> TypeToIdModifierMap = [];
@@ -63,7 +63,7 @@ public static class ModifierManager
 
     internal static bool RegisterModifier(Type modifierType, MiraPluginInfo info)
     {
-        if (!typeof(BaseModifier).IsAssignableFrom(modifierType))
+        if (!typeof(IBaseModifier).IsAssignableFrom(modifierType))
         {
             return false;
         }
@@ -71,15 +71,15 @@ public static class ModifierManager
         IdToTypeModifierMap.Add(GetNextTypeId(), modifierType);
         TypeToIdModifierMap.Add(modifierType, _nextTypeId);
 
-        BaseModifier modifier;
+        IBaseModifier modifier;
         if (modifierType.GetConstructor(Type.EmptyTypes) != null)
         {
-            modifier = (BaseModifier)Activator.CreateInstance(modifierType)!;
+            modifier = (IBaseModifier)Activator.CreateInstance(modifierType)!;
         }
         else
         {
             // this is probably terrible but its good enough for now.
-            modifier = (BaseModifier)FormatterServices.GetUninitializedObject(modifierType);
+            modifier = (IBaseModifier)FormatterServices.GetUninitializedObject(modifierType);
         }
 
         info.InternalModifiers.Add(modifier);

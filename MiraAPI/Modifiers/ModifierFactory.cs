@@ -8,13 +8,13 @@ using MiraAPI.Utilities;
 namespace MiraAPI.Modifiers;
 
 /// <summary>
-/// Factory for creating instances of a <see cref="BaseModifier"/>. More efficient than using reflection.
+/// Factory for creating instances of a <see cref="IBaseModifier"/>. More efficient than using reflection.
 /// </summary>
 public static class ModifierFactory
 {
-    private static readonly Dictionary<(Type, Type[]), Func<object[], BaseModifier>> ConstructorCache = [];
+    private static readonly Dictionary<(Type, Type[]), Func<object[], IBaseModifier>> ConstructorCache = [];
 
-    private static Func<object[], BaseModifier> CreateConstructor(Type type, params object[] args)
+    private static Func<object[], IBaseModifier> CreateConstructor(Type type, params object[] args)
     {
         var constructorInfo = type.GetBestConstructor(args) ?? throw new InvalidOperationException(
             $"Could not find a constructor for type {type} with the specified arguments.");
@@ -33,18 +33,18 @@ public static class ModifierFactory
         }
 
         var newExpr = Expression.New(constructorInfo, constructorParams);
-        var lambda = Expression.Lambda<Func<object[], BaseModifier>>(newExpr, argsParam);
+        var lambda = Expression.Lambda<Func<object[], IBaseModifier>>(newExpr, argsParam);
 
         return lambda.Compile();
     }
 
     /// <summary>
-    /// Creates a <see cref="BaseModifier"/> with the specified type and arguments.
+    /// Creates a <see cref="IBaseModifier"/> with the specified type and arguments.
     /// </summary>
     /// <param name="type">Modifier type.</param>
     /// <param name="args">Arguments.</param>
-    /// <returns>An instance of the <see cref="BaseModifier"/>.</returns>
-    public static BaseModifier CreateInstance(Type type, params object[] args)
+    /// <returns>An instance of the <see cref="IBaseModifier"/>.</returns>
+    public static IBaseModifier CreateInstance(Type type, params object[] args)
     {
         var argTypes = args.Select(arg => arg.GetType()).ToArray();
         var key = (type, argTypes);
@@ -62,9 +62,9 @@ public static class ModifierFactory
 /// <summary>
 /// Factory for creating instances of <typeparamref name="T"/>. More efficient than using reflection.
 /// </summary>
-/// <typeparam name="T">The <see cref="BaseModifier"/> type.</typeparam>
+/// <typeparam name="T">The <see cref="IBaseModifier"/> type.</typeparam>
 public static class ModifierFactory<T>
-    where T : BaseModifier
+    where T : class, IBaseModifier
 {
     private static readonly Func<object[], T> Constructor = CreateConstructor();
 

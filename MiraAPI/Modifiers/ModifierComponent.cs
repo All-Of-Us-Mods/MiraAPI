@@ -14,22 +14,22 @@ using UnityEngine;
 namespace MiraAPI.Modifiers;
 
 /// <summary>
-/// The component for handling <see cref="BaseModifier"/>s.
+/// The component for handling <see cref="IBaseModifier"/>s.
 /// </summary>
 /// <param name="cppPtr">The pointer to the C++ object.</param>
 [RegisterInIl2Cpp]
 [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity Convention.")]
-public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
+public partial class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
 {
     /// <summary>
-    /// Gets the active <see cref="BaseModifier"/>s on the player.
+    /// Gets the active <see cref="IBaseModifier"/>s on the player.
     /// </summary>
     [HideFromIl2Cpp]
-    public ImmutableList<BaseModifier> ActiveModifiers { get; private set; } = ImmutableList<BaseModifier>.Empty;
+    public ImmutableList<IBaseModifier> ActiveModifiers { get; private set; } = ImmutableList<IBaseModifier>.Empty;
 
-    private readonly List<BaseModifier> _toRemove = [];
-    private readonly List<BaseModifier> _toAdd = [];
-    private readonly List<BaseModifier> _modifiers = [];
+    private readonly List<IBaseModifier> _toRemove = [];
+    private readonly List<IBaseModifier> _toAdd = [];
+    private readonly List<IBaseModifier> _modifiers = [];
 
     private ModifierDisplayComponent? modifierDisplay;
 
@@ -164,35 +164,35 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// Gets a collection of <typeparamref name="T"/>.
     /// </summary>
     /// <param name="predicate">The predicate to check the <typeparamref name="T"/> by.</param>
-    /// <typeparam name="T">The Type of the <see cref="BaseModifier"/>e.</typeparam>
+    /// <typeparam name="T">The Type of the <see cref="IBaseModifier"/>e.</typeparam>
     /// <returns>An <see cref="IEnumerable{T}"/> of <typeparamref name="T"/>s.</returns>
     [HideFromIl2Cpp]
     public IEnumerable<T> GetModifiers<T>(Func<T, bool>? predicate = null)
-        where T : BaseModifier
+        where T : class, IBaseModifier
     {
         return ActiveModifiers.OfType<T>().Where(x => predicate == null || predicate(x));
     }
 
     /// <summary>
-    /// Gets a collection of <see cref="BaseModifier"/>s by type.
+    /// Gets a collection of <see cref="IBaseModifier"/>s by type.
     /// </summary>
     /// <param name="type">The modifier type.</param>
-    /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/> by.</param>
-    /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="BaseModifier"/>s.</returns>
+    /// <param name="predicate">The predicate to check the <see cref="IBaseModifier"/> by.</param>
+    /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="IBaseModifier"/>s.</returns>
     [HideFromIl2Cpp]
-    public IEnumerable<BaseModifier> GetModifiers(Type type, Func<BaseModifier, bool>? predicate = null)
+    public IEnumerable<IBaseModifier> GetModifiers(Type type, Func<IBaseModifier, bool>? predicate = null)
     {
         return ActiveModifiers.Where(x => x.GetType() == type && (predicate == null || predicate(x)));
     }
 
     /// <summary>
-    /// Gets a collection of <see cref="BaseModifier"/>s by type ID.
+    /// Gets a collection of <see cref="IBaseModifier"/>s by type ID.
     /// </summary>
-    /// <param name="id">The <see cref="BaseModifier"/>'s type ID.</param>
-    /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/> by.</param>
-    /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="BaseModifier"/>s.</returns>
+    /// <param name="id">The <see cref="IBaseModifier"/>'s type ID.</param>
+    /// <param name="predicate">The predicate to check the <see cref="IBaseModifier"/> by.</param>
+    /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="IBaseModifier"/>s.</returns>
     [HideFromIl2Cpp]
-    public IEnumerable<BaseModifier> GetModifiers(uint id, Func<BaseModifier, bool>? predicate = null)
+    public IEnumerable<IBaseModifier> GetModifiers(uint id, Func<IBaseModifier, bool>? predicate = null)
     {
         var type = ModifierManager.GetModifierType(id) ?? throw new InvalidOperationException(
             $"Cannot get modifier with id {id} because it is not registered.");
@@ -201,86 +201,58 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     }
 
     /// <summary>
-    /// Gets a collection of <see cref="BaseModifier"/>s by type, if the type is an interface.
-    /// </summary>
-    /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/> by.</param>
-    /// <typeparam name="T">The Type of the interface of the <see cref="BaseModifier"/>.</typeparam>
-    /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="BaseModifier"/>s of type <typeparamref name="T"/>.</returns>
-    [HideFromIl2Cpp]
-    public IEnumerable<T> GetModifiersOfType<T>(Func<T, bool>? predicate = null)
-        where T : class
-    {
-        return ActiveModifiers.OfType<T>().Where(x => predicate == null || predicate(x));
-    }
-
-    /// <summary>
     /// Tries to get a <typeparamref name="T"/>.
     /// </summary>
     /// <param name="modifier">The <typeparamref name="T"/> or <see langword="null"/>.</param>
     /// <param name="predicate">The predicate to check the <typeparamref name="T"/> by.</param>
-    /// <typeparam name="T">The Type of the <see cref="BaseModifier"/>.</typeparam>
+    /// <typeparam name="T">The Type of the <see cref="IBaseModifier"/>.</typeparam>
     /// <returns><see langword="true"/> if the <typeparamref name="T"/> was found, <see langword="false"/> otherwise.</returns>
     [HideFromIl2Cpp]
     public bool TryGetModifier<T>([NotNullWhen(true)] out T? modifier, Func<T, bool>? predicate = null)
-        where T : BaseModifier
+        where T : class, IBaseModifier
     {
         modifier = GetModifier(predicate);
         return modifier != null;
     }
 
     /// <summary>
-    /// Tries to get a <see cref="BaseModifier"/> by its type.
+    /// Tries to get a <see cref="IBaseModifier"/> by its type.
     /// </summary>
     /// <param name="type">The modifier type.</param>
-    /// <param name="modifier">The <see cref="BaseModifier"/> or <see langword="null"/>.</param>
-    /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/> by.</param>
-    /// <returns><see langword="true"/> if the <see cref="BaseModifier"/> was found, <see langword="false"/> otherwise.</returns>
+    /// <param name="modifier">The <see cref="IBaseModifier"/> or <see langword="null"/>.</param>
+    /// <param name="predicate">The predicate to check the <see cref="IBaseModifier"/> by.</param>
+    /// <returns><see langword="true"/> if the <see cref="IBaseModifier"/> was found, <see langword="false"/> otherwise.</returns>
     [HideFromIl2Cpp]
-    public bool TryGetModifier(Type type, [NotNullWhen(true)] out BaseModifier? modifier, Func<BaseModifier, bool>? predicate = null)
+    public bool TryGetModifier(Type type, [NotNullWhen(true)] out IBaseModifier? modifier, Func<IBaseModifier, bool>? predicate = null)
     {
         modifier = GetModifier(type, predicate);
         return modifier != null;
     }
 
     /// <summary>
-    /// Tries to get a <see cref="BaseModifier"/> by its type ID.
+    /// Tries to get a <see cref="IBaseModifier"/> by its type ID.
     /// </summary>
-    /// <param name="id">The <see cref="BaseModifier"/>'s type ID.</param>
-    /// <param name="modifier">The <see cref="BaseModifier"/> or <see langword="null"/>.</param>
-    /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/> by.</param>
-    /// <returns><see langword="true"/> if the <see cref="BaseModifier"/> was found, <see langword="false"/> otherwise.</returns>
+    /// <param name="id">The <see cref="IBaseModifier"/>'s type ID.</param>
+    /// <param name="modifier">The <see cref="IBaseModifier"/> or <see langword="null"/>.</param>
+    /// <param name="predicate">The predicate to check the <see cref="IBaseModifier"/> by.</param>
+    /// <returns><see langword="true"/> if the <see cref="IBaseModifier"/> was found, <see langword="false"/> otherwise.</returns>
     [HideFromIl2Cpp]
-    public bool TryGetModifier(uint id, [NotNullWhen(true)] out BaseModifier? modifier, Func<BaseModifier, bool>? predicate = null)
+    public bool TryGetModifier(uint id, [NotNullWhen(true)] out IBaseModifier? modifier, Func<IBaseModifier, bool>? predicate = null)
     {
         modifier = GetModifier(id, predicate);
         return modifier != null;
     }
 
     /// <summary>
-    /// Tries to get a <see cref="BaseModifier"/> by its unique ID.
+    /// Tries to get a <see cref="IBaseModifier"/> by its unique ID.
     /// </summary>
-    /// <param name="modifierGuid">The <see cref="BaseModifier"/>'s unique ID.</param>
-    /// <param name="modifier">The <see cref="BaseModifier"/> or <see langword="null"/>.</param>
-    /// <returns><see langword="true"/> if the <see cref="BaseModifier"/> was found, <see langword="false"/> otherwise.</returns>
+    /// <param name="modifierGuid">The <see cref="IBaseModifier"/>'s unique ID.</param>
+    /// <param name="modifier">The <see cref="IBaseModifier"/> or <see langword="null"/>.</param>
+    /// <returns><see langword="true"/> if the <see cref="IBaseModifier"/> was found, <see langword="false"/> otherwise.</returns>
     [HideFromIl2Cpp]
-    public bool TryGetModifier(Guid modifierGuid, [NotNullWhen(true)] out BaseModifier? modifier)
+    public bool TryGetModifier(Guid modifierGuid, [NotNullWhen(true)] out IBaseModifier? modifier)
     {
         modifier = GetModifier(modifierGuid);
-        return modifier != null;
-    }
-
-    /// <summary>
-    /// Tries to get a <see cref="BaseModifier"/> by its type, if the type is an interface.
-    /// </summary>
-    /// <param name="modifier">The <see cref="BaseModifier"/> of type <typeparamref name="T"/> or null.</param>
-    /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/> by.</param>
-    /// <typeparam name="T">The Type of the interface of the <see cref="BaseModifier"/>.</typeparam>
-    /// <returns><see langword="true"/> if the <see cref="BaseModifier"/> of type <typeparamref name="T"/> was found, <see langword="false"/> otherwise.</returns>
-    [HideFromIl2Cpp]
-    public bool TryGetModifierOfType<T>([NotNullWhen(true)] out T? modifier, Func<T, bool>? predicate = null)
-        where T : class
-    {
-        modifier = GetModifierOfType(predicate);
         return modifier != null;
     }
 
@@ -288,35 +260,35 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// Gets a <typeparamref name="T"/>.
     /// </summary>
     /// <param name="predicate">The predicate to check the <typeparamref name="T"/> by.</param>
-    /// <typeparam name="T">The Type of the <see cref="BaseModifier"/>.</typeparam>
+    /// <typeparam name="T">The Type of the <see cref="IBaseModifier"/>.</typeparam>
     /// <returns>The <typeparamref name="T"/> if it is found, <see langword="null"/> otherwise.</returns>
     [HideFromIl2Cpp]
     public T? GetModifier<T>(Func<T, bool>? predicate = null)
-        where T : BaseModifier
+        where T : class, IBaseModifier
     {
         return GetModifiers(predicate).FirstOrDefault();
     }
 
     /// <summary>
-    /// Gets a <see cref="BaseModifier"/> by its type.
+    /// Gets a <see cref="IBaseModifier"/> by its type.
     /// </summary>
     /// <param name="type">The modifier type.</param>
-    /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/> by.</param>
-    /// <returns>The <see cref="BaseModifier"/> if it is found, <see langword="null"/> otherwise.</returns>
+    /// <param name="predicate">The predicate to check the <see cref="IBaseModifier"/> by.</param>
+    /// <returns>The <see cref="IBaseModifier"/> if it is found, <see langword="null"/> otherwise.</returns>
     [HideFromIl2Cpp]
-    public BaseModifier? GetModifier(Type type, Func<BaseModifier, bool>? predicate = null)
+    public IBaseModifier? GetModifier(Type type, Func<IBaseModifier, bool>? predicate = null)
     {
         return GetModifiers(type).FirstOrDefault(predicate ?? (_ => true));
     }
 
     /// <summary>
-    /// Gets a <see cref="BaseModifier"/> by its type ID.
+    /// Gets a <see cref="IBaseModifier"/> by its type ID.
     /// </summary>
-    /// <param name="id">The <see cref="BaseModifier"/> ID.</param>
-    /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/> by.</param>
-    /// <returns>The <see cref="BaseModifier"/> if it is found, <see langword="null"/> otherwise.</returns>
+    /// <param name="id">The <see cref="IBaseModifier"/> ID.</param>
+    /// <param name="predicate">The predicate to check the <see cref="IBaseModifier"/> by.</param>
+    /// <returns>The <see cref="IBaseModifier"/> if it is found, <see langword="null"/> otherwise.</returns>
     [HideFromIl2Cpp]
-    public BaseModifier? GetModifier(uint id, Func<BaseModifier, bool>? predicate = null)
+    public IBaseModifier? GetModifier(uint id, Func<IBaseModifier, bool>? predicate = null)
     {
         var type = ModifierManager.GetModifierType(id) ?? throw new InvalidOperationException(
             $"Cannot get modifier with id {id} because it is not registered.");
@@ -325,48 +297,35 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     }
 
     /// <summary>
-    /// Gets a <see cref="BaseModifier"/> by unique ID.
+    /// Gets a <see cref="IBaseModifier"/> by unique ID.
     /// </summary>
-    /// <param name="modifierGuid">The <see cref="BaseModifier"/>'s unique ID.</param>
-    /// <returns>The <see cref="BaseModifier"/> if it is found, or <see langword="null"/>.</returns>
+    /// <param name="modifierGuid">The <see cref="IBaseModifier"/>'s unique ID.</param>
+    /// <returns>The <see cref="IBaseModifier"/> if it is found, or <see langword="null"/>.</returns>
     [HideFromIl2Cpp]
-    public BaseModifier? GetModifier(Guid modifierGuid)
+    public IBaseModifier? GetModifier(Guid modifierGuid)
     {
         return ActiveModifiers.Find(x => x.UniqueId == modifierGuid);
     }
 
     /// <summary>
-    /// Gets a <see cref="BaseModifier"/> by its type, if the type is an interface.
-    /// </summary>
-    /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/> by.</param>
-    /// <typeparam name="T">The Type of the interface of the <see cref="BaseModifier"/>.</typeparam>
-    /// <returns>The <see cref="BaseModifier"/> of type <typeparamref name="T"/> if it is found, <see langword="null"/> otherwise.</returns>
-    [HideFromIl2Cpp]
-    public T? GetModifierOfType<T>(Func<T, bool>? predicate = null)
-        where T : class
-    {
-        return GetModifiersOfType(predicate).FirstOrDefault();
-    }
-
-    /// <summary>
     /// Removes a <typeparamref name="T"/> from the player.
     /// </summary>
-    /// <typeparam name="T">The <see cref="BaseModifier"/> type.</typeparam>
+    /// <typeparam name="T">The <see cref="IBaseModifier"/> type.</typeparam>
     /// <param name="predicate">The predicate to check the <typeparamref name="T"/> by.</param>
     [HideFromIl2Cpp]
     public void RemoveModifier<T>(Func<T, bool>? predicate = null)
-        where T : BaseModifier
+        where T : class, IBaseModifier
     {
         RemoveModifier(typeof(T), x => predicate == null || predicate((T)x));
     }
 
     /// <summary>
-    /// Removes a <see cref="BaseModifier"/> from the player.
+    /// Removes a <see cref="IBaseModifier"/> from the player.
     /// </summary>
     /// <param name="type">The modifier type.</param>
-    /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/> by.</param>
+    /// <param name="predicate">The predicate to check the <see cref="IBaseModifier"/> by.</param>
     [HideFromIl2Cpp]
-    public void RemoveModifier(Type type, Func<BaseModifier, bool>? predicate = null)
+    public void RemoveModifier(Type type, Func<IBaseModifier, bool>? predicate = null)
     {
         var modifiers = ActiveModifiers.Where(x => x.GetType() == type && (predicate == null || predicate(x))).ToList();
         if (modifiers.Count > 1)
@@ -385,11 +344,11 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     }
 
     /// <summary>
-    /// Removes a <see cref="BaseModifier"/> from the player.
+    /// Removes a <see cref="IBaseModifier"/> from the player.
     /// </summary>
-    /// <param name="modifier">The <see cref="BaseModifier"/> object.</param>
+    /// <param name="modifier">The <see cref="IBaseModifier"/> object.</param>
     [HideFromIl2Cpp]
-    public void RemoveModifier(BaseModifier modifier)
+    public void RemoveModifier(IBaseModifier modifier)
     {
         if (!ActiveModifiers.Contains(modifier))
         {
@@ -401,12 +360,12 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     }
 
     /// <summary>
-    /// Removes a <see cref="BaseModifier"/> from the player.
+    /// Removes a <see cref="IBaseModifier"/> from the player.
     /// </summary>
-    /// <param name="typeId">The <see cref="BaseModifier"/>'s type ID.</param>
-    /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/> by.</param>
+    /// <param name="typeId">The <see cref="IBaseModifier"/>'s type ID.</param>
+    /// <param name="predicate">The predicate to check the <see cref="IBaseModifier"/> by.</param>
     [HideFromIl2Cpp]
-    public void RemoveModifier(uint typeId, Func<BaseModifier, bool>? predicate = null)
+    public void RemoveModifier(uint typeId, Func<IBaseModifier, bool>? predicate = null)
     {
         var type = ModifierManager.GetModifierType(typeId) ?? throw new InvalidOperationException(
             $"Cannot remove modifier with id {typeId} because it is not registered.");
@@ -414,9 +373,9 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     }
 
     /// <summary>
-    /// Removes a <see cref="BaseModifier"/> from the player.
+    /// Removes a <see cref="IBaseModifier"/> from the player.
     /// </summary>
-    /// <param name="uniqueId">The <see cref="BaseModifier"/>'s unique ID.</param>
+    /// <param name="uniqueId">The <see cref="IBaseModifier"/>'s unique ID.</param>
     [HideFromIl2Cpp]
     public void RemoveModifier(Guid uniqueId)
     {
@@ -433,39 +392,39 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// <summary>
     /// Tries to remove a <typeparamref name="T"/> from the player.
     /// </summary>
-    /// <typeparam name="T">The <see cref="BaseModifier"/> type.</typeparam>
-    /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/> by.</param>
+    /// <typeparam name="T">The <see cref="IBaseModifier"/> type.</typeparam>
+    /// <param name="predicate">The predicate to check the <see cref="IBaseModifier"/> by.</param>
     /// <returns><see langword="false"/> if the <typeparamref name="T"/> is not active on this player, or there are multiple instances;
     ///     else <see langword="true"/>.</returns>
     [HideFromIl2Cpp]
     public bool TryRemoveModifier<T>(Func<T, bool>? predicate = null)
-        where T : BaseModifier
+        where T : class, IBaseModifier
     {
         return TryGetModifier(out var modifier, predicate) &&
                TryRemoveModifier(modifier);
     }
 
     /// <summary>
-    /// Tries to remove a <see cref="BaseModifier"/> from the player.
+    /// Tries to remove a <see cref="IBaseModifier"/> from the player.
     /// </summary>
-    /// <param name="type">The <see cref="BaseModifier"/> type.</param>
+    /// <param name="type">The <see cref="IBaseModifier"/> type.</param>
     /// <param name="predicate">The predicate to check the modifier by.</param>
-    /// <returns><see langword="false"/> if the <see cref="BaseModifier"/> is not active on this player, or there are multiple instances;
+    /// <returns><see langword="false"/> if the <see cref="IBaseModifier"/> is not active on this player, or there are multiple instances;
     ///     else <see langword="true"/>.</returns>
     [HideFromIl2Cpp]
-    public bool TryRemoveModifier(Type type, Func<BaseModifier, bool>? predicate = null)
+    public bool TryRemoveModifier(Type type, Func<IBaseModifier, bool>? predicate = null)
     {
         return TryGetModifier(type, out var modifier, predicate) &&
                TryRemoveModifier(modifier);
     }
 
     /// <summary>
-    /// Tries to remove a <see cref="BaseModifier"/> from the player.
+    /// Tries to remove a <see cref="IBaseModifier"/> from the player.
     /// </summary>
-    /// <param name="modifier">The <see cref="BaseModifier"/> object.</param>
-    /// <returns><see langword="false"/> if the <see cref="BaseModifier"/> is not active on this player, else <see langword="true"/>.</returns>
+    /// <param name="modifier">The <see cref="IBaseModifier"/> object.</param>
+    /// <returns><see langword="false"/> if the <see cref="IBaseModifier"/> is not active on this player, else <see langword="true"/>.</returns>
     [HideFromIl2Cpp]
-    public bool TryRemoveModifier(BaseModifier modifier)
+    public bool TryRemoveModifier(IBaseModifier modifier)
     {
         if (!ActiveModifiers.Contains(modifier))
         {
@@ -477,24 +436,24 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     }
 
     /// <summary>
-    /// Tries to remove a <see cref="BaseModifier"/> from the player.
+    /// Tries to remove a <see cref="IBaseModifier"/> from the player.
     /// </summary>
-    /// <param name="typeId">The <see cref="BaseModifier"/>'s type ID.</param>
-    /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/> by.</param>
-    /// <returns><see langword="false"/> if the <see cref="BaseModifier"/> is not active on this player, or there are multiple instances;
+    /// <param name="typeId">The <see cref="IBaseModifier"/>'s type ID.</param>
+    /// <param name="predicate">The predicate to check the <see cref="IBaseModifier"/> by.</param>
+    /// <returns><see langword="false"/> if the <see cref="IBaseModifier"/> is not active on this player, or there are multiple instances;
     ///     else <see langword="true"/>.</returns>
     [HideFromIl2Cpp]
-    public bool TryRemoveModifier(uint typeId, Func<BaseModifier, bool>? predicate = null)
+    public bool TryRemoveModifier(uint typeId, Func<IBaseModifier, bool>? predicate = null)
     {
         return TryGetModifier(typeId, out var modifier, predicate) &&
                TryRemoveModifier(modifier);
     }
 
     /// <summary>
-    /// Tries to remove a <see cref="BaseModifier"/> from the player.
+    /// Tries to remove a <see cref="IBaseModifier"/> from the player.
     /// </summary>
-    /// <param name="uniqueId">The <see cref="BaseModifier"/>'s unique ID.</param>
-    /// <returns><see langword="false"/> if the <see cref="BaseModifier"/> is not active on this player, else <see langword="true"/>.</returns>
+    /// <param name="uniqueId">The <see cref="IBaseModifier"/>'s unique ID.</param>
+    /// <returns><see langword="false"/> if the <see cref="IBaseModifier"/> is not active on this player, else <see langword="true"/>.</returns>
     [HideFromIl2Cpp]
     public bool TryRemoveModifier(Guid uniqueId)
     {
@@ -506,22 +465,22 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// Adds a <typeparamref name="T"/> to the player.
     /// </summary>
     /// <param name="args">The arguments to initialize the <typeparamref name="T"/> with.</param>
-    /// <typeparam name="T">The Type of the <see cref="BaseModifier"/>.</typeparam>
+    /// <typeparam name="T">The Type of the <see cref="IBaseModifier"/>.</typeparam>
     /// <returns>The new <typeparamref name="T"/>.</returns>
     [HideFromIl2Cpp]
     public T? AddModifier<T>(params object[] args)
-        where T : BaseModifier
+        where T : class, IBaseModifier
     {
         return AddModifier(typeof(T), args) as T;
     }
 
     /// <summary>
-    /// Adds a <see cref="BaseModifier"/> to the player.
+    /// Adds a <see cref="IBaseModifier"/> to the player.
     /// </summary>
-    /// <param name="modifier">The <see cref="BaseModifier"/> to add.</param>
-    /// <returns>The <see cref="BaseModifier"/> that was added.</returns>
+    /// <param name="modifier">The <see cref="IBaseModifier"/> to add.</param>
+    /// <returns>The <see cref="IBaseModifier"/> that was added.</returns>
     [HideFromIl2Cpp]
-    public BaseModifier? AddModifier(BaseModifier modifier)
+    public IBaseModifier? AddModifier(IBaseModifier modifier)
     {
         // TODO: Make a proper synchronization system.
         if (LobbyBehaviour.Instance)
@@ -554,29 +513,29 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     }
 
     /// <summary>
-    /// Adds a <see cref="BaseModifier"/> to the player.
+    /// Adds a <see cref="IBaseModifier"/> to the player.
     /// </summary>
     /// <param name="type">The modifier type.</param>
-    /// <param name="args">The arguments to initialize the <see cref="BaseModifier"/> with.</param>
-    /// <returns>The <see cref="BaseModifier"/> that was added.</returns>
+    /// <param name="args">The arguments to initialize the <see cref="IBaseModifier"/> with.</param>
+    /// <returns>The <see cref="IBaseModifier"/> that was added.</returns>
     [HideFromIl2Cpp]
-    public BaseModifier? AddModifier(Type type, params object[] args)
+    public IBaseModifier? AddModifier(Type type, params object[] args)
     {
         var modifier = args.Length > 0
             ? ModifierFactory.CreateInstance(type, args)
-            : Activator.CreateInstance(type) as BaseModifier
+            : Activator.CreateInstance(type) as IBaseModifier
                 ?? throw new InvalidOperationException($"Cannot add modifier {type.Name} because it is not a valid modifier.");
         return AddModifier(modifier);
     }
 
     /// <summary>
-    /// Adds a <see cref="BaseModifier"/> to the player.
+    /// Adds a <see cref="IBaseModifier"/> to the player.
     /// </summary>
-    /// <param name="id">The ID of the <see cref="BaseModifier"/>.</param>
-    /// <param name="args">The arguments to initialize the <see cref="BaseModifier"/> with.</param>
-    /// <returns>The <see cref="BaseModifier"/> if it was created, or <see langword="null"/> if it failed.</returns>
+    /// <param name="id">The ID of the <see cref="IBaseModifier"/>.</param>
+    /// <param name="args">The arguments to initialize the <see cref="IBaseModifier"/> with.</param>
+    /// <returns>The <see cref="IBaseModifier"/> if it was created, or <see langword="null"/> if it failed.</returns>
     [HideFromIl2Cpp]
-    public BaseModifier? AddModifier(uint id, params object[] args)
+    public IBaseModifier? AddModifier(uint id, params object[] args)
     {
         var type = ModifierManager.GetModifierType(id) ?? throw new InvalidOperationException(
             $"Cannot add modifier with id {id} because it is not registered.");
@@ -588,35 +547,35 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// Checks if a player has an active <typeparamref name="T"/>.
     /// </summary>
     /// <param name="predicate">The predicate to check the <typeparamref name="T"/>.</param>
-    /// <typeparam name="T">The Type of the <see cref="BaseModifier"/>.</typeparam>
+    /// <typeparam name="T">The Type of the <see cref="IBaseModifier"/>.</typeparam>
     /// <returns><see langword="true"/> if the <typeparamref name="T"/> is present, <see langword="false"/> otherwise.</returns>
     [HideFromIl2Cpp]
     public bool HasModifier<T>(Func<T, bool>? predicate = null)
-        where T : BaseModifier
+        where T : class, IBaseModifier
     {
         return ActiveModifiers.Exists(x => x is T modifier && (predicate == null || predicate(modifier)));
     }
 
     /// <summary>
-    /// Checks if a player has an active <see cref="BaseModifier"/> by its type.
+    /// Checks if a player has an active <see cref="IBaseModifier"/> by its type.
     /// </summary>
     /// <param name="type">The modifier type.</param>
-    /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/>.</param>
-    /// <returns><see langword="true"/> if the <see cref="BaseModifier"/> is present, <see langword="false"/> otherwise.</returns>
+    /// <param name="predicate">The predicate to check the <see cref="IBaseModifier"/>.</param>
+    /// <returns><see langword="true"/> if the <see cref="IBaseModifier"/> is present, <see langword="false"/> otherwise.</returns>
     [HideFromIl2Cpp]
-    public bool HasModifier(Type type, Func<BaseModifier, bool>? predicate = null)
+    public bool HasModifier(Type type, Func<IBaseModifier, bool>? predicate = null)
     {
         return ActiveModifiers.Exists(x => x.GetType() == type && (predicate == null || predicate(x)));
     }
 
     /// <summary>
-    /// Checks if a player has an active <see cref="BaseModifier"/> by its type ID.
+    /// Checks if a player has an active <see cref="IBaseModifier"/> by its type ID.
     /// </summary>
-    /// <param name="id">The <see cref="BaseModifier"/>'s type ID.</param>
-    /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/>.</param>
-    /// <returns><see langword="true"/> if the <see cref="BaseModifier"/> is present, <see langword="false"/> otherwise.</returns>
+    /// <param name="id">The <see cref="IBaseModifier"/>'s type ID.</param>
+    /// <param name="predicate">The predicate to check the <see cref="IBaseModifier"/>.</param>
+    /// <returns><see langword="true"/> if the <see cref="IBaseModifier"/> is present, <see langword="false"/> otherwise.</returns>
     [HideFromIl2Cpp]
-    public bool HasModifier(uint id, Func<BaseModifier, bool>? predicate = null)
+    public bool HasModifier(uint id, Func<IBaseModifier, bool>? predicate = null)
     {
         var type = ModifierManager.GetModifierType(id) ?? throw new InvalidOperationException(
             $"Cannot get modifier with id {id} because it is not registered.");
@@ -625,10 +584,10 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     }
 
     /// <summary>
-    /// Checks if a player has an active <see cref="BaseModifier"/> by its unique ID.
+    /// Checks if a player has an active <see cref="IBaseModifier"/> by its unique ID.
     /// </summary>
-    /// <param name="id">The <see cref="BaseModifier"/>'s guid.</param>
-    /// <returns><see langword="true"/> if the <see cref="BaseModifier"/> is present, <see langword="false"/> otherwise.</returns>
+    /// <param name="id">The <see cref="IBaseModifier"/>'s guid.</param>
+    /// <returns><see langword="true"/> if the <see cref="IBaseModifier"/> is present, <see langword="false"/> otherwise.</returns>
     [HideFromIl2Cpp]
     public bool HasModifier(Guid id)
     {
@@ -640,45 +599,45 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// </summary>
     /// <param name="checkInactive">Whether to check inactive <typeparamref name="T"/>s (those pending to be added).</param>
     /// <param name="predicate">The predicate to check the <typeparamref name="T"/>.</param>
-    /// <typeparam name="T">The Type of the <see cref="BaseModifier"/>.</typeparam>
+    /// <typeparam name="T">The Type of the <see cref="IBaseModifier"/>.</typeparam>
     /// <returns><see langword="true"/> if the <typeparamref name="T"/> is present, <see langword="false"/> otherwise.</returns>
     [HideFromIl2Cpp]
     public bool HasModifier<T>(bool checkInactive, Func<T, bool>? predicate = null)
-        where T : BaseModifier
+        where T : class, IBaseModifier
     {
         return ActiveModifiers.Exists(MatchExpr) || (checkInactive && _toAdd.Exists(MatchExpr));
-        bool MatchExpr(BaseModifier bm)
+        bool MatchExpr(IBaseModifier bm)
         {
             return bm is T modifier && (predicate == null || predicate(modifier));
         }
     }
 
     /// <summary>
-    /// Checks if a player has an active <see cref="BaseModifier"/> by its type.
+    /// Checks if a player has an active <see cref="IBaseModifier"/> by its type.
     /// </summary>
     /// <param name="type">The modifier type.</param>
-    /// <param name="checkInactive">Whether to check inactive <see cref="BaseModifier"/>s (those pending to be added).</param>
-    /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/>.</param>
-    /// <returns><see langword="true"/> if the <see cref="BaseModifier"/> is present, <see langword="false"/> otherwise.</returns>
+    /// <param name="checkInactive">Whether to check inactive <see cref="IBaseModifier"/>s (those pending to be added).</param>
+    /// <param name="predicate">The predicate to check the <see cref="IBaseModifier"/>.</param>
+    /// <returns><see langword="true"/> if the <see cref="IBaseModifier"/> is present, <see langword="false"/> otherwise.</returns>
     [HideFromIl2Cpp]
-    public bool HasModifier(Type type, bool checkInactive, Func<BaseModifier, bool>? predicate = null)
+    public bool HasModifier(Type type, bool checkInactive, Func<IBaseModifier, bool>? predicate = null)
     {
         return ActiveModifiers.Exists(MatchExpr) || (checkInactive && _toAdd.Exists(MatchExpr));
-        bool MatchExpr(BaseModifier bm)
+        bool MatchExpr(IBaseModifier bm)
         {
             return bm.GetType() == type && (predicate == null || predicate(bm));
         }
     }
 
     /// <summary>
-    /// Checks if a player has an active <see cref="BaseModifier"/> by its type ID.
+    /// Checks if a player has an active <see cref="IBaseModifier"/> by its type ID.
     /// </summary>
-    /// <param name="id">The <see cref="BaseModifier"/>'s type ID.</param>
-    /// <param name="checkInactive">Whether to check inactive <see cref="BaseModifier"/>s (those pending to be added).</param>
-    /// <param name="predicate">The predicate to check the <see cref="BaseModifier"/>.</param>
-    /// <returns><see langword="true"/> if the <see cref="BaseModifier"/> is present, <see langword="false"/> otherwise.</returns>
+    /// <param name="id">The <see cref="IBaseModifier"/>'s type ID.</param>
+    /// <param name="checkInactive">Whether to check inactive <see cref="IBaseModifier"/>s (those pending to be added).</param>
+    /// <param name="predicate">The predicate to check the <see cref="IBaseModifier"/>.</param>
+    /// <returns><see langword="true"/> if the <see cref="IBaseModifier"/> is present, <see langword="false"/> otherwise.</returns>
     [HideFromIl2Cpp]
-    public bool HasModifier(uint id, bool checkInactive, Func<BaseModifier, bool>? predicate = null)
+    public bool HasModifier(uint id, bool checkInactive, Func<IBaseModifier, bool>? predicate = null)
     {
         var type = ModifierManager.GetModifierType(id) ?? throw new InvalidOperationException(
             $"Cannot get modifier with id {id} because it is not registered.");
@@ -687,49 +646,18 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     }
 
     /// <summary>
-    /// Checks if a player has an active <see cref="BaseModifier"/> by its unique ID.
+    /// Checks if a player has an active <see cref="IBaseModifier"/> by its unique ID.
     /// </summary>
-    /// <param name="id">The <see cref="BaseModifier"/>'s guid.</param>
-    /// <param name="checkInactive">Whether to check inactive <see cref="BaseModifier"/>s (those pending to be added).</param>
-    /// <returns><see langword="true"/> if the <see cref="BaseModifier"/> is present, <see langword="false"/> otherwise.</returns>
+    /// <param name="id">The <see cref="IBaseModifier"/>'s guid.</param>
+    /// <param name="checkInactive">Whether to check inactive <see cref="IBaseModifier"/>s (those pending to be added).</param>
+    /// <returns><see langword="true"/> if the <see cref="IBaseModifier"/> is present, <see langword="false"/> otherwise.</returns>
     [HideFromIl2Cpp]
     public bool HasModifier(Guid id, bool checkInactive)
     {
         return ActiveModifiers.Exists(MatchExpr) || (checkInactive && _toAdd.Exists(MatchExpr));
-        bool MatchExpr(BaseModifier bm)
+        bool MatchExpr(IBaseModifier bm)
         {
             return bm.UniqueId == id;
-        }
-    }
-
-    /// <summary>
-    /// Checks if a player has an active modifier by its type, if the type is an interface.
-    /// </summary>
-    /// <param name="predicate">The predicate to check the modifier.</param>
-    /// <typeparam name="T">The Type of the interface of the Modifier.</typeparam>
-    /// <returns>True if the Modifier is present, false otherwise.</returns>
-    [HideFromIl2Cpp]
-    public bool HasModifierOfType<T>(Func<T, bool>? predicate = null)
-        where T : class
-    {
-        return ActiveModifiers.Exists(x => x is T modifier && (predicate == null || predicate(modifier)));
-    }
-
-    /// <summary>
-    /// Checks if a player has an active modifier by its type, if the type is an interface.
-    /// </summary>
-    /// <param name="checkInactive">Whether to check inactive modifiers (those pending to be added).</param>
-    /// <param name="predicate">The predicate to check the modifier.</param>
-    /// <typeparam name="T">The Type of the interface of the Modifier.</typeparam>
-    /// <returns>True if the Modifier is present, false otherwise.</returns>
-    [HideFromIl2Cpp]
-    public bool HasModifierOfType<T>(bool checkInactive, Func<T, bool>? predicate = null)
-        where T : class
-    {
-        return ActiveModifiers.Exists(MatchExpr) || (checkInactive && _toAdd.Exists(MatchExpr));
-        bool MatchExpr(BaseModifier bm)
-        {
-            return bm is T modifier && (predicate == null || predicate(modifier));
         }
     }
 }

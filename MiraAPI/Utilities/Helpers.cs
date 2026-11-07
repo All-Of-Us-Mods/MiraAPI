@@ -31,7 +31,7 @@ internal readonly record struct AdvancedSettingsRow(string Title, string Value, 
 /// <summary>
 /// A class that contains helper methods.
 /// </summary>
-public static class Helpers
+public static partial class Helpers
 {
     internal const float MatchInfoGuideBaseScale = 1.3f;
     private static readonly Regex TrailingZeroRegex = new(@"\.0+(?!\d)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
@@ -725,11 +725,11 @@ public static class Helpers
     }
 
     /// <summary>
-    /// Returns the TextMeshPro sprite tag for a modifier, or an empty string if it has no <see cref="BaseModifier.IconTmp"/>.
+    /// Returns the TextMeshPro sprite tag for a modifier, or an empty string if it has no <see cref="IBaseModifier.IconTmp"/>.
     /// </summary>
-    /// <param name="modifier">The <see cref="BaseModifier"/>.</param>
+    /// <param name="modifier">The <see cref="IBaseModifier"/>.</param>
     /// <returns>A <c>&lt;sprite&gt;</c> rich text tag, or <see cref="string.Empty"/>.</returns>
-    public static string GetTmpIcon(this BaseModifier modifier)
+    public static string GetTmpIcon(this IBaseModifier modifier)
     {
         return modifier.IconTmp ? $"<sprite name=\"{modifier.IconTmp.name}\">" : string.Empty;
     }

@@ -17,7 +17,7 @@ using UnityEngine.UI;
 namespace MiraAPI.Modifiers.ModifierDisplay;
 
 /// <summary>
-/// The code used to display <see cref="BaseModifier"/>s.
+/// The code used to display <see cref="IBaseModifier"/>s.
 /// </summary>
 /// <param name="cppPtr">The pointer to the C++ object.</param>
 [RegisterInIl2Cpp]
@@ -31,7 +31,7 @@ public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
     /// </summary>
     public static ModifierDisplayComponent? Instance { get; private set; }
 
-    private readonly Dictionary<BaseModifier, ModifierUiComponent> _modifiers = [];
+    private readonly Dictionary<IBaseModifier, ModifierUiComponent> _modifiers = [];
 
     private RectTransform _children = null!;
     private GameObject _modTemplate = null!;
@@ -49,7 +49,7 @@ public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
     /// Gets a <see cref="ReadOnlyDictionary{TKey, TValue}"/> of the created <see cref="ModifierUiComponent"/>s.
     /// </summary>
     [HideFromIl2Cpp]
-    public ReadOnlyDictionary<BaseModifier, ModifierUiComponent> Modifiers => new(_modifiers);
+    public ReadOnlyDictionary<IBaseModifier, ModifierUiComponent> Modifiers => new(_modifiers);
 
     /// <summary>
     /// Gets a value indicating whether the modifier display hud is currently open.
@@ -153,7 +153,7 @@ public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
     }
 
     [HideFromIl2Cpp]
-    private ModifierUiComponent CreateForModifier(BaseModifier modifier)
+    private ModifierUiComponent CreateForModifier(IBaseModifier modifier)
     {
         var newMod = Instantiate(_modTemplate, _children.transform);
         newMod.transform.name = modifier.ModifierName.Translate();
@@ -197,7 +197,7 @@ public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
     }
 
     [HideFromIl2Cpp]
-    internal void UpdateModifiersList(List<BaseModifier> modifiers)
+    internal void UpdateModifiersList(List<IBaseModifier> modifiers)
     {
         var filteredModifiers = modifiers.Where(x => !x.HideOnUi && x.GetDescription() != string.Empty).ToList();
         var modifiersToAdd = filteredModifiers.ToList();

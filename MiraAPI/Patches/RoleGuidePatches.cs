@@ -29,7 +29,7 @@ using Object = UnityEngine.Object;
 namespace MiraAPI.Patches;
 
 [HarmonyPatch]
-public static class RoleGuidePatches
+public static partial class RoleGuidePatches
 {
     private const int SettingsTabIndex = 1;
     private const int RolesTabIndex = 2;
@@ -758,7 +758,7 @@ public static class RoleGuidePatches
     {
         if (ModifierEntries.Count == 0)
         {
-            foreach (var modifier in ModifierManager.Modifiers.OfType<GameModifier>())
+            foreach (var modifier in ModifierManager.AllModifiers.OfType<GameModifier>())
             {
                 ModifierEntries.Add(new DetailedPanel(
                     modifier.ModifierName,
@@ -1124,7 +1124,7 @@ public static class RoleGuidePatches
     {
         if (entry.Modifier != null)
         {
-            DisplayAdvancedWiki(MatchInfoGuide.Instance, entry.Modifier);
+            DisplayAdvancedWiki(MatchInfoGuide.Instance, entry.Modifier as IBaseModifier);
         }
         else if (entry.Role != null)
         {
@@ -1787,7 +1787,7 @@ public static class RoleGuidePatches
         }
     }
 
-    public static void DisplayAdvancedWiki(MatchInfoGuide instance, BaseModifier modifier)
+    public static void DisplayAdvancedWiki(MatchInfoGuide instance, IBaseModifier modifier)
     {
         var remaining = _openedAt + instance.transitionOpen.duration - Time.time;
         if (remaining > 0f)
@@ -1920,7 +1920,7 @@ public static class RoleGuidePatches
             modId);
     }
 
-    private static string GetPanelCountText(BaseModifier modifier, int amount, int chance, string modId)
+    private static string GetPanelCountText(IBaseModifier modifier, int amount, int chance, string modId)
     {
         return modifier.GetAmountText(amount, chance, modId);
     }

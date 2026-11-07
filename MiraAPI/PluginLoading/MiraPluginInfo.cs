@@ -46,9 +46,9 @@ public class MiraPluginInfo
     public ConfigFile PluginConfig { get; }
 
     /// <summary>
-    /// Gets a <see cref="IReadOnlyCollection{T}"/> of this <see cref="IMiraPlugin"/>'s <see cref="BaseModifier"/>s. This is not safe for <see cref="BaseModifier"/>s with constructors.
+    /// Gets a <see cref="IReadOnlyCollection{T}"/> of this <see cref="IMiraPlugin"/>'s <see cref="IBaseModifier"/>s. This is not safe for <see cref="IBaseModifier"/>s with constructors.
     /// </summary>
-    public IReadOnlyCollection<BaseModifier> Modifiers { get; private set; } = null!;
+    public IReadOnlyCollection<IBaseModifier> Modifiers { get; private set; } = null!;
 
     /// <summary>
     /// Gets a <see cref="IReadOnlyCollection{T}"/> of this <see cref="IMiraPlugin"/>'s <see cref="AbstractOptionGroup"/>s.
@@ -108,7 +108,7 @@ public class MiraPluginInfo
 
     internal List<OptionPreset> InternalPresets { get; } = [];
     internal List<IModdedOption> InternalOptions { get; } = [];
-    internal List<BaseModifier> InternalModifiers { get; } = [];
+    internal List<IBaseModifier> InternalModifiers { get; } = [];
     internal List<CustomActionButton> InternalButtons { get; } = [];
     internal List<AbstractOptionGroup> InternalOptionGroups { get; } = [];
     internal List<MeetingActionButton> InternalMeetingButtons { get; } = [];

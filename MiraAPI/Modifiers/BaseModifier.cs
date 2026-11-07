@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using Il2CppInterop.Runtime.Attributes;
-using MiraAPI.GameOptions;
 using MiraAPI.PluginLoading;
 using MiraAPI.Roles;
 using MiraAPI.Translation;
@@ -16,31 +15,29 @@ namespace MiraAPI.Modifiers;
 /// <summary>
 /// Base class for all modifiers.
 /// </summary>
-public abstract class BaseModifier : IOptionable
+public abstract class BaseModifier : IBaseModifier
 {
     /// <summary>
     /// Gets the <see cref="PlayerControl"/> that the modifier is attached to.
     /// </summary>
-    public PlayerControl Player { get; internal set; } = null!;
+    public PlayerControl Player => (this as IBaseModifier).Player;
 
     /// <summary>
     /// Gets the <see cref="Modifiers.ModifierComponent"/> that the modifier is attached to.
     /// </summary>
-    public ModifierComponent? ModifierComponent { get; internal set; }
+    public ModifierComponent? ModifierComponent => (this as IBaseModifier).ModifierComponent;
 
     /// <summary>
     /// Gets a value indicating whether the modifier has been initialized.
     /// </summary>
-    public bool Initialized { get; internal set; }
+    public bool Initialized => (this as IBaseModifier).Initialized;
 
     /// <summary>
     /// Gets the unique ID of the modifier.
     /// </summary>
-    public Guid UniqueId { get; internal set; } = Guid.Empty;
+    public Guid UniqueId => (this as IBaseModifier).UniqueId;
 
-    /// <summary>
-    /// Gets the type ID of the modifier.
-    /// </summary>
+    /// <inheritdoc/>
     public uint TypeId => ModifierManager.GetModifierTypeId(GetType()) ?? throw new InvalidOperationException("Modifier is not registered.");
 
     /// <summary>
@@ -61,9 +58,7 @@ public abstract class BaseModifier : IOptionable
     /// </summary>
     public virtual string IdPrefix => GetType().Namespace!;
 
-    /// <summary>
-    /// Gets the modifier name.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual string ModifierName => MiraLocaleManager.Get(ModifierNameLocale);
 
     /// <summary>
@@ -102,14 +97,7 @@ public abstract class BaseModifier : IOptionable
     /// </summary>
     public virtual bool ShowModifierAsUnique => false;
 
-    /// <summary>
-    /// Gets the displayed amount and chance of the modifier. Used in the role guide.
-    /// By default, 0 amount or chance results in a complete 0 amount and chance, so override if necessary.
-    /// </summary>
-    /// <param name="amount">The amount of the modifier.</param>
-    /// <param name="chance">The chance of the modifier.</param>
-    /// <param name="source">The mod source of the modifier.</param>
-    /// <returns>The <see cref="string"/> result.</returns>
+    /// <inheritdoc/>
     public virtual string GetAmountText(int amount, int chance, string source)
     {
         if (amount == 0)
@@ -145,14 +133,7 @@ public abstract class BaseModifier : IOptionable
     /// <returns><see langword="true"/> if the modifier is always displayed, otherwise <see langword="false"/> if it is never displayable, or <see langword="null"/> if it is dictated by amount and chance.</returns>
     public virtual bool? ForceShowModifierOnWiki => false;
 
-    /// <summary>
-    /// Gets the information to display in the wiki.
-    /// </summary>
-    /// <param name="guide">The guide object.</param>
-    /// <param name="titleText">The title text object.</param>
-    /// <param name="titleIcon">The title's icon.</param>
-    /// <param name="parent">The scroller parent.</param>
-    /// <returns>The <see cref="GameObject"/> of the wiki.</returns>
+    /// <inheritdoc/>
     public virtual GameObject GetAdvancedWiki(MatchInfoGuide guide, TextMeshPro titleText, SpriteRenderer titleIcon, Scroller parent)
     {
         var abilities = WikiAbilities;
@@ -174,30 +155,20 @@ public abstract class BaseModifier : IOptionable
     [HideFromIl2Cpp]
     public virtual List<AdvancedWikiAbilityDescription> WikiAbilities => [];
 
-    /// <summary>
-    /// Gets the modifier icon. Useless if <see cref="HideOnUi"/> is <see langword="true"/>.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual LoadableAsset<Sprite>? ModifierIcon => null;
 
-    /// <summary>
-    /// Gets the <see cref="TMP_SpriteAsset"/> for the Modifier Icon.
-    /// </summary>
+    /// <inheritdoc/>
     [HideFromIl2Cpp]
     public virtual TMP_SpriteAsset IconTmp => null!;
 
-    /// <summary>
-    /// Gets a value indicating whether the modifier is hidden on the UI. Will be hidden either way if no description is provided.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual bool HideOnUi => GetDescription() == string.Empty;
 
-    /// <summary>
-    /// Gets a value indicating whether the modifier is shown in the freeplay menu.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual bool ShowInFreeplay => false;
 
-    /// <summary>
-    /// Gets a value indicating the <see cref="Color"/> that should be used for the modifier within freeplay.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual Color FreeplayFileColor => Color.gray;
 
     /// <summary>
@@ -205,75 +176,80 @@ public abstract class BaseModifier : IOptionable
     /// </summary>
     public virtual Color GeneralColor => FreeplayFileColor;
 
-    /// <summary>
-    /// Gets a value indicating whether the modifier is unique. If <see langword="true"/>, the player can only have one instance of this modifier.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual bool Unique => true;
 
-    /// <summary>
-    /// Gets the HUD description for this modifier. Does nothing if <see cref="HideOnUi"/> is <see langword="true"/>. Required to be visible on UI.
-    /// </summary>
-    /// <returns>The description string for the HUD.</returns>
+    /// <inheritdoc/>
+    /// <remarks>
+    /// Internal explicit implementation of interface. Only required to provide a backing field
+    /// for the interface's internal setter and not expose such setter beyond intended.
+    /// </remarks>
+    PlayerControl IBaseModifier.Player { get; set; }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// Internal explicit implementation of interface. Only required to provide a backing field
+    /// for the interface's internal setter and not expose such setter beyond intended.
+    /// </remarks>
+    ModifierComponent? IBaseModifier.ModifierComponent { get; set; }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// Internal explicit implementation of interface. Only required to provide a backing field
+    /// for the interface's internal setter and not expose such setter beyond intended.
+    /// </remarks>
+    bool IBaseModifier.Initialized { get; set; }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// Internal explicit implementation of interface. Only required to provide a backing field
+    /// for the interface's internal setter and not expose such setter beyond intended.
+    /// </remarks>
+    Guid IBaseModifier.UniqueId { get; set; }
+
+    /// <inheritdoc/>
     public virtual string GetDescription()
     {
         return string.Empty;
     }
 
-    /// <summary>
-    /// Called when the modifier is activated.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual void OnActivate()
     {
     }
 
-    /// <summary>
-    /// Called when the modifier is deactivated.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual void OnDeactivate()
     {
     }
 
-    /// <summary>
-    /// Called when the modifier is updated. Attached to <see cref="ModifierComponent"/>'s <see cref="ModifierComponent.Update"/> method.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual void Update()
     {
     }
 
-    /// <summary>
-    /// Called when the modifier is updated. Attached to <see cref="ModifierComponent"/>'s <see cref="ModifierComponent.FixedUpdate"/> method.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual void FixedUpdate()
     {
     }
 
-    /// <summary>
-    /// Called when the player dies.
-    /// </summary>
-    /// <param name="reason">The Death Reason.</param>
+    /// <inheritdoc/>
     public virtual void OnDeath(DeathReason reason)
     {
     }
 
-    /// <summary>
-    /// Called when a meeting starts.
-    /// </summary>
+    /// <inheritdoc/>
     public virtual void OnMeetingStart()
     {
     }
 
-    /// <summary>
-    /// Determines whether the player can vent.
-    /// </summary>
-    /// <returns><see langword="true"/> if the player can vent, <see langword="false"/> otherwise. <see langword="null"/> for no effect.</returns>
+    /// <inheritdoc/>
     public virtual bool? CanVent()
     {
         return null;
     }
 
-    /// <summary>
-    /// Removes this modifier instance from the player.
-    /// </summary>
+    /// <inheritdoc/>
     public void RemoveSelf()
     {
         ModifierComponent?.RemoveModifier(this);

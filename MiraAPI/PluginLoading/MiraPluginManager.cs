@@ -98,7 +98,7 @@ public sealed class MiraPluginManager
             RegisteredPluginsWithOptions = [.. RegisteredPlugins.Where(m => m.MiraPlugin.DisplayOnOptionsMenu)];
             PluginsWithOptionsOrGameModes = [.. RegisteredPlugins.Where(m => m.MiraPlugin.DisplayOnOptionsMenu || m.GameModes.Count > 0)];
 
-            ModifierManager.Modifiers = new ReadOnlyCollection<BaseModifier>(ModifierManager.InternalModifiers);
+            ModifierManager.AllModifiers = new ReadOnlyCollection<IBaseModifier>(ModifierManager.InternalModifiers);
         };
     }
 

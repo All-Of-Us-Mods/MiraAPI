@@ -661,7 +661,7 @@ internal static class GameOptionsMenuPatch
     {
         var groups = MenuState.Instance.CurrentMod.InternalOptionGroups
             .Where(x => x.ParentMenu is MenuCategory.Modifiers ||
-                        x.OptionableType?.IsAssignableTo(typeof(BaseModifier)) == true);
+                        x.OptionableType?.IsAssignableTo(typeof(IBaseModifier)) == true);
 
         foreach (var modGroup in groups)
         {
@@ -684,7 +684,7 @@ internal static class GameOptionsMenuPatch
                 x.OptionableType == null && x.ParentMenu == MenuCategory.Game),
             MenuCategory.Modifiers => mod.InternalOptionGroups.Where(x =>
                 x.ParentMenu is MenuCategory.Modifiers ||
-                x.OptionableType?.IsAssignableTo(typeof(BaseModifier)) == true),
+                x.OptionableType?.IsAssignableTo(typeof(IBaseModifier)) == true),
             MenuCategory.CustomOne => mod.InternalOptionGroups.Where(x => x.ParentMenu == MenuCategory.CustomOne),
             MenuCategory.CustomTwo => mod.InternalOptionGroups.Where(x => x.ParentMenu == MenuCategory.CustomTwo),
             _ => [],

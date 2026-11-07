@@ -133,11 +133,13 @@ public abstract class AbstractOptionGroup<T> : AbstractOptionGroup
         get
         {
             var type = typeof(T);
-            if (typeof(BaseModifier).IsAssignableFrom(type))
+            if (typeof(BaseModifier).IsAssignableFrom(type) ||
+                typeof(IBaseModifier).IsAssignableFrom(type))
             {
                 return MenuCategory.Modifiers;
             }
-            else if (typeof(RoleBehaviour).IsAssignableFrom(type))
+            else if (typeof(RoleBehaviour).IsAssignableFrom(type) ||
+                     typeof(ICustomRole).IsAssignableFrom(type))
             {
                 return MenuCategory.Roles;
             }
@@ -154,9 +156,6 @@ public abstract class AbstractOptionGroup<T> : AbstractOptionGroup
 public abstract class AbstractRoleOptionGroup<T> : AbstractOptionGroup<T>
     where T : ICustomRole
 {
-    /// <inheritdoc />
-    public override Type OptionableType => typeof(T);
-
     /// <inheritdoc />
     public override MenuCategory ParentMenu => MenuCategory.Roles;
 

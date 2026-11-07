@@ -7,7 +7,7 @@ using UnityEngine;
 namespace MiraAPI.Modifiers.ModifierDisplay;
 
 /// <summary>
-/// The code placed on every <see cref="BaseModifier"/> HUD object. Used to handle updating.
+/// The code placed on every <see cref="IBaseModifier"/> HUD object. Used to handle updating.
 /// </summary>
 /// <param name="cppPtr">The pointer to the C++ object.</param>
 [RegisterInIl2Cpp]
@@ -15,10 +15,10 @@ namespace MiraAPI.Modifiers.ModifierDisplay;
 public class ModifierUiComponent(nint cppPtr) : MonoBehaviour(cppPtr)
 {
     /// <summary>
-    /// Gets the <see cref="BaseModifier"/> which this component is for.
+    /// Gets the <see cref="IBaseModifier"/> which this component is for.
     /// </summary>
     [HideFromIl2Cpp]
-    public BaseModifier? Modifier { get; internal set; }
+    public IBaseModifier? Modifier { get; internal set; }
 
     // ReSharper disable InconsistentNaming
     private SpriteRenderer modBg = null!;
