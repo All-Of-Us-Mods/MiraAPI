@@ -18,22 +18,22 @@ public class OptionPreset(string name, MiraPluginInfo plugin, ConfigFile presetC
     /// <summary>
     /// Gets the name of the preset.
     /// </summary>
-    public string Name { get; } = name;
+    public string Name => name;
 
     /// <summary>
     /// Gets the plugin associated with the preset.
     /// </summary>
-    public MiraPluginInfo Plugin { get; } = plugin;
+    public MiraPluginInfo Plugin => plugin;
 
     /// <summary>
     /// Gets the <see cref="ConfigFile"/> of the plugin associated with the preset.
     /// </summary>
-    public ConfigFile PluginConfig { get; } = plugin.PluginConfig;
+    public ConfigFile PluginConfig => plugin.PluginConfig;
 
     /// <summary>
     /// Gets the <see cref="ConfigFile"/> for the preset.
     /// </summary>
-    public ConfigFile PresetConfig { get; } = presetConfig;
+    public ConfigFile PresetConfig => presetConfig;
 
     /// <summary>
     /// Gets or sets the button associated with the preset in the UI.

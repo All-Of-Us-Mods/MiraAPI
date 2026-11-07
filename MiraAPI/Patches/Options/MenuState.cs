@@ -50,7 +50,8 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
 
     private readonly Dictionary<MenuButton, PassiveButton> _smallButtons = [];
     private readonly Dictionary<MenuButton, PassiveButton> _largeButtons = [];
-
+    private Vector3 _gameSettingsButtonOrig;
+    private Vector3 _roleSettingsButtonOrig;
     [HideFromIl2Cpp]
     public Dictionary<MenuCategory, Dictionary<int, GameObject>> Containers { get; } = new()
     {
@@ -121,35 +122,39 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
         var nextButton = Instantiate(Gsm.BackButton, Gsm.BackButton.transform.parent).gameObject;
         nextButton.transform.localPosition = new Vector3(-2.2663f, 1.5272f, -25f);
         nextButton.name = "RightArrowButton";
-        nextButton.transform.FindChild("Inactive").gameObject.GetComponent<SpriteRenderer>().sprite =
+        nextButton.transform.FindChild("Inactive").GetComponent<SpriteRenderer>().sprite =
             MiraAssets.NextButton.LoadAsset();
-        nextButton.transform.FindChild("Active").gameObject.GetComponent<SpriteRenderer>().sprite =
+        nextButton.transform.FindChild("Active").GetComponent<SpriteRenderer>().sprite =
             MiraAssets.NextButtonActive.LoadAsset();
-        nextButton.gameObject.GetComponent<CloseButtonConsoleBehaviour>().DestroyImmediate();
+        nextButton.GetComponent<CloseButtonConsoleBehaviour>().DestroyImmediate();
 
-        var nextPassiveButton = nextButton.gameObject.GetComponent<PassiveButton>();
+        var nextPassiveButton = nextButton.GetComponent<PassiveButton>();
         nextPassiveButton.OnClick = new Button.ButtonClickedEvent();
         nextPassiveButton.OnClick.AddListener((UnityAction)NextMod);
 
         var previousButton = Instantiate(nextButton, Gsm.BackButton.transform.parent).gameObject;
         previousButton.transform.localPosition = new Vector3(-4.4209f, 1.5272f, -25f);
         previousButton.name = "LeftArrowButton";
-        previousButton.gameObject.GetComponent<CloseButtonConsoleBehaviour>().Destroy();
-        previousButton.transform.FindChild("Active").gameObject.GetComponent<SpriteRenderer>().flipX =
-            previousButton.transform.FindChild("Inactive").gameObject.GetComponent<SpriteRenderer>().flipX = true;
+        previousButton.GetComponent<CloseButtonConsoleBehaviour>().Destroy();
+        previousButton.transform.FindChild("Active").GetComponent<SpriteRenderer>().flipX =
+            previousButton.transform.FindChild("Inactive").GetComponent<SpriteRenderer>().flipX = true;
 
-        var prevPassiveButton = previousButton.gameObject.GetComponent<PassiveButton>();
+        var prevPassiveButton = previousButton.GetComponent<PassiveButton>();
         prevPassiveButton.OnClick = new Button.ButtonClickedEvent();
         prevPassiveButton.OnClick.AddListener((UnityAction)PreviousMod);
 
         // Create menu buttons
         _largeButtons[(int)MenuButton.Roles] = Gsm.RoleSettingsButton;
 
+        // cache
+        _gameSettingsButtonOrig = Gsm.GameSettingsButton.transform.localPosition;
+        _roleSettingsButtonOrig = Gsm.RoleSettingsButton.transform.localPosition;
+
         // modifiers button
         var mBtn = Instantiate(Gsm.RoleSettingsButton, Gsm.RoleSettingsButton.transform.parent);
         _largeButtons[MenuButton.Modifiers] = mBtn;
         mBtn.name = "ModifiersButton";
-        mBtn.buttonText.gameObject.GetComponent<TextTranslatorTMP>().Destroy();
+        mBtn.buttonText.GetComponent<TextTranslatorTMP>().Destroy();
         mBtn.buttonText.text = "Modifiers".Translate();
         mBtn.OnClick = new Button.ButtonClickedEvent();
         mBtn.OnClick.AddListener(
@@ -168,7 +173,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
         var c1Btn = Instantiate(mBtn, mBtn.transform.parent);
         _largeButtons[MenuButton.CustomOne] = c1Btn;
         c1Btn.name = "CustomOneButton";
-        c1Btn.buttonText.gameObject.GetComponent<TextTranslatorTMP>().Destroy();
+        c1Btn.buttonText.GetComponent<TextTranslatorTMP>().Destroy();
         c1Btn.OnClick = new Button.ButtonClickedEvent();
         c1Btn.OnClick.AddListener(
             (UnityAction)(() =>
@@ -322,7 +327,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
             // Create game options container
             var gameContainer = Containers[MenuCategory.Game][idx + 1] = Instantiate(
                 Gsm.GameSettingsTab.settingsContainer.gameObject,
-                Gsm.GameSettingsTab.settingsContainer.gameObject.transform.parent);
+                Gsm.GameSettingsTab.settingsContainer.transform.parent);
             gameContainer.name = $"GameSettings_{mod.PluginInfo.Metadata.Name}";
             gameContainer.transform.DestroyChildren();
             gameContainer.SetActive(false);
@@ -340,7 +345,7 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
             {
                 var cont = Containers[i][idx + 1] = Instantiate(
                     Gsm.GameSettingsTab.settingsContainer.gameObject,
-                    Gsm.GameSettingsTab.settingsContainer.gameObject.transform.parent);
+                    Gsm.GameSettingsTab.settingsContainer.transform.parent);
                 cont.name = $"{i}_{mod.PluginInfo.Metadata.Name}";
                 cont.transform.DestroyChildren();
                 cont.SetActive(false);
@@ -408,6 +413,11 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
         {
             btn.gameObject.SetActive(false);
         }
+
+        // The mod options page moves RoleSettingsButton as needed.
+        // But when hasOptions == false, it leaves the button at the GameSettingsButton spot.
+        // So before each re-layout, always put the original button back into the prefab slot first.
+        RestoreButtonLayout();
 
         if (CurrentModIdx == 0)
         {
@@ -530,6 +540,12 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
                 _largeButtons[MenuButton.CustomTwo].gameObject.SetActive(false);
             }
         }
+    }
+
+    private void RestoreButtonLayout()
+    {
+        Gsm.GameSettingsButton.transform.localPosition = _gameSettingsButtonOrig;
+        Gsm.RoleSettingsButton.transform.localPosition = _roleSettingsButtonOrig;
     }
 
     internal void ChangeTabPatch(GameSettingMenu menu, int tabNum, bool previewOnly)

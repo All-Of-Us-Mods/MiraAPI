@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using AmongUs.GameOptions;
 using HarmonyLib;
 using Innersloth.Assets;
@@ -296,7 +297,7 @@ public static class RoleGuidePatches
             if (_titleText)
             {
                 _titleText.transform.localPosition += new Vector3(0.5f, 0);
-                _titleText.transform.GetComponent<TextTranslatorTMP>().Destroy();
+                _titleText.GetComponent<TextTranslatorTMP>().Destroy();
             }
         }
 
@@ -656,7 +657,7 @@ public static class RoleGuidePatches
             _searchBoxTmp.Pipe.transform.localPosition = new Vector3(
                 outputText.transform.localPosition.x -
                 (outputText.rectTransform.sizeDelta.x * outputText.rectTransform.pivot.x),
-                outputText.transform.localPosition.y + _searchBoxTmp.caretYOffset,
+                outputText.transform.localPosition.y + GetCaretYOffset(_searchBoxTmp),
                 -0.3f);
         }
 
@@ -831,6 +832,25 @@ public static class RoleGuidePatches
         button.gameObject.AddComponent<RectTransform>();
     }
 
+    private static float GetCaretYOffset(TextBoxTMP box)
+    {
+        try
+        {
+            var prop = typeof(TextBoxTMP).GetProperty("caretYOffset", BindingFlags.Instance | BindingFlags.Public);
+
+            if (prop == null)
+            {
+                return 0f;
+            }
+
+            return Convert.ToSingle(prop.GetValue(box), CultureInfo.InvariantCulture);
+        }
+        catch
+        {
+            return 0f;
+        }
+    }
+
     private static void SetupSearchButton(PassiveButton button, string objName, Action onClick, Sprite inactive, Sprite hover, Vector3 pos, out SpriteRenderer inactiveSprite, out SpriteRenderer hoverSprite)
     {
         button.name = objName;
@@ -942,13 +962,13 @@ public static class RoleGuidePatches
 
     private sealed class DetailedPanel(string title, string category, string modId, RoleBehaviour? role, GameModifier? modifier, uint typeId)
     {
+        public string Title => title;
+        public string Category => category;
+        public string ModId => modId;
+        public RoleBehaviour? Role => role;
+        public GameModifier? Modifier => modifier;
+        public uint TypeId => typeId;
         public MatchInfoRolePanel? Panel { get; set; }
-        public string Title { get; } = title;
-        public string Category { get; } = category;
-        public string ModId { get; } = modId;
-        public RoleBehaviour? Role { get; } = role;
-        public GameModifier? Modifier { get; } = modifier;
-        public uint TypeId { get; } = typeId;
         public int Amount { get; set; }
         public int Chance { get; set; }
         public float Likelihood { get; set; }
@@ -1565,20 +1585,13 @@ public static class RoleGuidePatches
 
     private static void SetupPanelButton(MatchInfoRolePanel panel, Action onClick)
     {
-        var collider = panel.roleIcon.gameObject.GetComponent<BoxCollider2D>();
-        if (!collider)
-        {
-            collider = panel.roleIcon.gameObject.AddComponent<BoxCollider2D>();
-        }
+        var collider = panel.roleIcon.gameObject.GetOrAddComponent<BoxCollider2D>();
 
         collider.size = new Vector2(0.13f, 0.13f);
         collider.offset = new Vector2(0, 0);
         collider.enabled = true;
-        var passiveButton = panel.roleIcon.gameObject.GetComponent<PassiveButton>();
-        if (!passiveButton)
-        {
-            passiveButton = panel.roleIcon.gameObject.AddComponent<PassiveButton>();
-        }
+
+        var passiveButton = panel.roleIcon.gameObject.GetOrAddComponent<PassiveButton>();
 
         passiveButton.enabled = true;
         passiveButton.ClickSound = HudManager.Instance.MapButton.ClickSound;

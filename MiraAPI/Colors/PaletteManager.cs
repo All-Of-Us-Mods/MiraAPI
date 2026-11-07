@@ -1,7 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using HarmonyLib;
+using MiraAPI.PluginLoading;
+using MiraAPI.Translation;
+using MiraAPI.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.Colors;
@@ -16,9 +20,8 @@ public static class PaletteManager
     /// </summary>
     public static CustomColor[] RegisteredColors => [.. CustomColors];
 
-    internal static readonly List<CustomColor> CustomColors = [];
-    internal static readonly HashSet<StringNames> VariableColorNames = [];
-
+    private static readonly List<CustomColor> CustomColors = [];
+    private static readonly HashSet<StringNames> VariableColorNames = [];
     private static readonly CustomColorBrightness[] ColorBrightnessMap =
     [
         CustomColorBrightness.Darker,  // Red
@@ -43,6 +46,55 @@ public static class PaletteManager
 
     private static int originalLength;
 
+    internal static bool RegisterColors(Type type, MiraPluginInfo miraPlugin)
+    {
+        if (!type.TryGetCustomAttribute<RegisterCustomColorsAttribute>(out var attribute))
+        {
+            return false;
+        }
+
+        if (!type.IsStatic())
+        {
+            Error($"Color class {type.Name} must be static.");
+            return false;
+        }
+
+        foreach (var property in type.GetProperties(MiraPluginManager.DeclaredStaticMembers))
+        {
+            if (!property.PropertyType.IsAssignableTo(typeof(CustomColor)))
+            {
+                continue;
+            }
+
+            if (property.GetValue(null) is not CustomColor color)
+            {
+                Error($"Color property {property.Name} in {type.Name} is not a CustomColor.");
+                continue;
+            }
+
+            if (!string.IsNullOrEmpty(color.RawId) && !string.IsNullOrEmpty(attribute.IdPrefix))
+            {
+                color.Name = MiraLocaleManager.GetOrCreateLocaleString(attribute.IdPrefix + color.RawId);
+            }
+
+            CustomColors.Add(color);
+
+            if (color is VariableColor)
+                VariableColorNames.Add(color.Name);
+        }
+
+        if (!miraPlugin.DebugMode)
+            return true;
+
+        foreach (var field in type.GetFields(MiraPluginManager.DeclaredStaticMembers)
+            .Where(f => !MiraPluginManager.IsAutoPropertyBackingField(f) && f.FieldType.IsAssignableTo(typeof(CustomColor))))
+        {
+            Error($"{field.Name} is a field, not a property. Use properties for colors.");
+        }
+
+        return true;
+    }
+
     internal static void RegisterAllColors()
     {
         originalLength = Palette.PlayerColors.Length;
@@ -50,7 +102,9 @@ public static class PaletteManager
         var colors = CustomColors.Select(x => x.MainColor).ToArray();
         var shadowColors = CustomColors.Select(x => x.ShadowColor).ToArray();
         var stringNames = CustomColors.Select(x => x.Name).ToArray();
+
         var newColorId = originalLength;
+
         foreach (var color in CustomColors)
         {
             color.ColorId = newColorId++;

@@ -162,7 +162,7 @@ public abstract class ModdedOption<T>(string groupPrefix, string title, T defaul
                 entry.Value = _value;
             }
 
-            Rpc<SyncOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, new MiraOptionNetData(true, [GetNetData()]), true);
+            Rpc<SyncGameOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, new MiraOptionNetData(true, [GetNetData()]), true);
         }
 
         if (ShowNotification)

@@ -10,12 +10,12 @@ public readonly struct NetData(uint id, byte[] data)
     /// <summary>
     /// Gets the ID of the data.
     /// </summary>
-    public uint Id { get; } = id;
+    public uint Id => id;
 
     /// <summary>
     /// Gets the byte[] data.
     /// </summary>
-    public byte[] Data { get; } = data;
+    public byte[] Data => data;
 
     /// <summary>
     /// Gets the length of the data in bytes.

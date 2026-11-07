@@ -9,24 +9,19 @@ using System.Runtime.CompilerServices;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
-using HarmonyLib;
 using MiraAPI.Colors;
 using MiraAPI.Events;
 using MiraAPI.GameEnd;
 using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
-using MiraAPI.GameOptions.Attributes;
 using MiraAPI.Hud;
 using MiraAPI.Keybinds;
 using MiraAPI.LocalSettings;
-using MiraAPI.LocalSettings.Attributes;
 using MiraAPI.MeetingAbilities;
 using MiraAPI.Modifiers;
 using MiraAPI.Presets;
 using MiraAPI.Roles;
-using MiraAPI.Translation;
 using MiraAPI.Utilities;
-using Reactor.Networking;
 
 namespace MiraAPI.PluginLoading;
 
@@ -40,10 +35,10 @@ public sealed class MiraPluginManager
     {
     }
 
-    private const BindingFlags DeclaredInstanceMembers = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
-    private const BindingFlags DeclaredStaticMembers = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+    internal const BindingFlags DeclaredInstanceMembers = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+    internal const BindingFlags DeclaredStaticMembers = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
 
-    private readonly Dictionary<Assembly, MiraPluginInfo> _registeredPlugins = [];
+    private readonly Dictionary<string, MiraPluginInfo> _registeredPlugins = [];
 
     internal MiraPluginInfo[] RegisteredPlugins { get; private set; } = [];
     internal MiraPluginInfo[] RegisteredPluginsWithOptions { get; private set; } = [];
@@ -104,7 +99,7 @@ public sealed class MiraPluginManager
 
     private MiraPluginInfo RegisterPlugin(Assembly assembly, IMiraPlugin plugin, PluginInfo pluginInfo, BasePlugin basePlugin, bool isMira)
     {
-        var info = new MiraPluginInfo(plugin, pluginInfo);
+        var info = new MiraPluginInfo(plugin, pluginInfo, assembly);
         var roles = new List<Type>();
 
         var oldConfigSetting = info.PluginConfig.SaveOnConfigSet;
@@ -117,7 +112,7 @@ public sealed class MiraPluginManager
 
         info.InternalOptionGroups.Sort((x, y) => x.GroupPriority.CompareTo(y.GroupPriority));
         QueuedRoleRegistrations.Add(info, roles);
-        _registeredPlugins.Add(assembly, info);
+        _registeredPlugins.Add(pluginInfo.Metadata.GUID, info);
 
         info.SavePublicCollections();
         PresetManager.CreateDefaultPreset(info);
@@ -126,12 +121,13 @@ public sealed class MiraPluginManager
         return info;
     }
 
-    private static bool IsAutoPropertyBackingField(FieldInfo field)
+    internal static bool IsAutoPropertyBackingField(FieldInfo field)
     {
         return field.IsDefined<CompilerGeneratedAttribute>(false) &&
-                field.Name.Contains(">k__BackingField", StringComparison.Ordinal);
+               field.Name.Contains(">k__BackingField", StringComparison.Ordinal);
     }
 
+    [SuppressMessage("Minor Code Smell", "S3626:Jump statements should not be redundant", Justification = "Code consistency.")]
     private static void ProcessAssemblyTypes(Assembly assembly, MiraPluginInfo info, BasePlugin basePlugin, IMiraPlugin plugin, List<Type> roles, bool isMira)
     {
         foreach (var type in assembly.GetTypes())
@@ -141,19 +137,28 @@ public sealed class MiraPluginManager
 
             RegisterEvents(type);
 
-            if (RegisterModifier(type, info))
-                continue;
-
             if (RegisterOptions(type, info))
                 continue;
 
             if (RegisterLocalTabs(type, basePlugin))
                 continue;
 
+            if (RegisterColors(type, info))
+                continue;
+
             if (RegisterRole(type, info, roles))
                 continue;
 
+            if (RegisterModifier(type, info))
+                continue;
+
             if (RegisterButton(type, info))
+                continue;
+
+            if (RegisterKeybinds(type, plugin))
+                continue;
+
+            if (RegisterGameModeAttribute(type, info))
                 continue;
 
             if (RegisterGameOver(type))
@@ -164,37 +169,18 @@ public sealed class MiraPluginManager
 
             if (RegisterTargetedMeetingAbility(type, info))
                 continue;
-
-            if (RegisterGameModeAttribute(type, info))
-                continue;
-
-            if (!RegisterColorClasses(type))
-                RegisterKeybinds(type, plugin);
         }
     }
 
     private static void RegisterEvents(Type type)
     {
-        foreach (var method in AccessTools.GetDeclaredMethods(type))
+        try
         {
-            if (!method.TryGetCustomAttribute<RegisterEventAttribute>(out var eventAttribute))
-                continue;
-
-            if (!method.IsStatic)
-            {
-                Error($"Event method {method.Name} in {type.Name} must be static.");
-                continue;
-            }
-
-            var parameters = method.GetParameters();
-            if (parameters.Length != 1 || !parameters[0].ParameterType.IsSubclassOf(typeof(MiraEvent)))
-            {
-                Error($"Invalid event registration method {method.Name} in {type.Name}");
-                continue;
-            }
-
-            var paramType = parameters[0].ParameterType;
-            MiraEventManager.RegisterEventHandler(paramType, method, eventAttribute.Priority);
+            MiraEventManager.RegisterEvents(type);
+        }
+        catch (Exception e)
+        {
+            Error($"Failed to register events in {type.Name}: {e}");
         }
     }
 
@@ -205,7 +191,7 @@ public sealed class MiraPluginManager
     /// <returns>A <see cref="MiraPluginInfo"/>.</returns>
     public static MiraPluginInfo? GetPluginByGuid(string pluginId)
     {
-        return Instance._registeredPlugins.Values.FirstOrDefault(plugin => plugin.PluginId == pluginId);
+        return Instance._registeredPlugins.GetValueOrDefault(pluginId);
     }
 
     private static bool RegisterGameOver(Type type)
@@ -221,73 +207,11 @@ public sealed class MiraPluginManager
         }
     }
 
-    private static readonly Type OptionType = typeof(IModdedOption);
-    private static readonly Type OptionListType = typeof(IModdedOptionList);
-
     private static bool RegisterOptions(Type type, MiraPluginInfo pluginInfo)
     {
         try
         {
-            if (!type.IsAssignableTo(typeof(AbstractOptionGroup)))
-            {
-                return false;
-            }
-
-            if (!ModdedOptionsManager.RegisterGroup(type, pluginInfo))
-            {
-                return false;
-            }
-
-            foreach (var property in type.GetProperties(DeclaredInstanceMembers))
-            {
-                if (property.IsDefined<MiraIgnoreAttribute>())
-                    continue;
-
-                if (property.GetMethod == null)
-                {
-                    Error($"Non-ignored option property {property.Name} in {type.Name} must at least have a getter.");
-                    continue;
-                }
-
-                var propType = property.PropertyType;
-
-                if (propType.IsAssignableTo(OptionType))
-                {
-                    ModdedOptionsManager.RegisterPropertyOption(type, property, pluginInfo);
-                    continue;
-                }
-
-                if (propType.IsAssignableTo(OptionListType))
-                {
-                    ModdedOptionsManager.RegisterPropertyOptionList(type, property, pluginInfo);
-                    continue;
-                }
-
-                var attributes = property.GetCustomAttributes(false);
-
-                foreach (var attr in attributes)
-                {
-                    if (attr is ModdedOptionAttribute moddedAttr)
-                    {
-                        ModdedOptionsManager.RegisterAttributeOption(type, moddedAttr, property, pluginInfo, propType, attributes);
-                        break;
-                    }
-
-                    if (attr is ModdedOptionListAttribute listAttr)
-                    {
-                        ModdedOptionsManager.RegisterAttributeOptionList(type, listAttr, property, pluginInfo, propType, attributes);
-                        break;
-                    }
-                }
-            }
-
-            foreach (var field in type.GetFields(DeclaredInstanceMembers)
-                .Where(f => !IsAutoPropertyBackingField(f) && (f.FieldType.IsAssignableTo(OptionType) || f.FieldType.IsAssignableTo(OptionListType))))
-            {
-                Error($"{field.Name} is a field, not a property. Use properties for options.");
-            }
-
-            return true;
+            return ModdedOptionsManager.RegisterGroup(type, pluginInfo);
         }
         catch (Exception e)
         {
@@ -301,19 +225,7 @@ public sealed class MiraPluginManager
     {
         try
         {
-            if (!(typeof(RoleBehaviour).IsAssignableFrom(type) && typeof(ICustomRole).IsAssignableFrom(type)))
-            {
-                return false;
-            }
-
-            if (!ModList.GetById(pluginInfo.PluginId).IsRequiredOnAllClients)
-            {
-                Error("Custom roles are only supported on all clients.");
-                return false;
-            }
-
-            roles.Add(type);
-            return true;
+            return CustomRoleManager.RegisterRole(type, pluginInfo, roles);
         }
         catch (Exception e)
         {
@@ -323,46 +235,11 @@ public sealed class MiraPluginManager
         return false;
     }
 
-    private static bool RegisterColorClasses(Type type)
+    private static bool RegisterColors(Type type, MiraPluginInfo miraPlugin)
     {
         try
         {
-            if (type.GetCustomAttribute<RegisterCustomColorsAttribute>() == null)
-            {
-                return false;
-            }
-
-            if (!type.IsStatic())
-            {
-                Error($"Color class {type.Name} must be static.");
-                return false;
-            }
-
-            foreach (var property in type.GetProperties(DeclaredStaticMembers))
-            {
-                if (!property.PropertyType.IsAssignableTo(typeof(CustomColor)))
-                {
-                    continue;
-                }
-
-                if (property.GetValue(null) is not CustomColor color)
-                {
-                    Error($"Color property {property.Name} in {type.Name} is not a CustomColor.");
-                    continue;
-                }
-
-                PaletteManager.CustomColors.Add(color);
-
-                if (color is VariableColor)
-                    PaletteManager.VariableColorNames.Add(color.Name);
-            }
-
-            foreach (var field in type.GetFields(DeclaredStaticMembers).Where(f => !IsAutoPropertyBackingField(f) && f.FieldType.IsAssignableTo(typeof(CustomColor))))
-            {
-                Error($"{field.Name} is a field, not a property. Use properties for colors.");
-            }
-
-            return true;
+            return PaletteManager.RegisterColors(type, miraPlugin);
         }
         catch (Exception e)
         {
@@ -381,8 +258,9 @@ public sealed class MiraPluginManager
         catch (Exception e)
         {
             Error($"Failed to register modifier {type.Name}: {e}");
-            return false;
         }
+
+        return false;
     }
 
     private static bool RegisterButton(Type type, MiraPluginInfo pluginInfo)
@@ -403,8 +281,7 @@ public sealed class MiraPluginManager
     {
         try
         {
-            if (typeof(AbstractGameMode).IsAssignableFrom(type))
-                return CustomGameModeManager.RegisterGameMode(type, pluginInfo);
+            return CustomGameModeManager.RegisterGameMode(type, pluginInfo);
         }
         catch (Exception e)
         {
@@ -418,55 +295,7 @@ public sealed class MiraPluginManager
     {
         try
         {
-            if (!type.IsAssignableTo(typeof(LocalSettingsTab)))
-            {
-                return false;
-            }
-
-            if (!LocalSettingsManager.RegisterTab(type, pluginInfo))
-            {
-                return false;
-            }
-
-            if (!LocalSettingsManager.TypeToTab.TryGetValue(type, out var tabInstance))
-            {
-                return false;
-            }
-
-            foreach (var property in type.GetProperties(DeclaredInstanceMembers))
-            {
-                if (property.IsDefined<LocalSettingsButtonAttribute>() &&
-                    property.PropertyType.IsAssignableTo(typeof(LocalSettingsButton)))
-                {
-                    var button = property.GetValue(tabInstance) as LocalSettingsButton;
-                    button!.Tab = tabInstance;
-                    tabInstance.Buttons.Add(button);
-                    continue;
-                }
-
-                if (!typeof(ConfigEntryBase).IsAssignableFrom(property.PropertyType))
-                {
-                    continue;
-                }
-
-                if (property.GetValue(tabInstance) is not ConfigEntryBase configEntry)
-                {
-                    Error($"Option property {property.Name} in {type.Name} has to be a config entry.");
-                    continue;
-                }
-
-                if (property.TryGetCustomAttribute<LocalSettingAttribute>(out var attribute))
-                {
-                    attribute.CreateSetting(type, configEntry);
-                }
-            }
-
-            foreach (var field in type.GetFields(DeclaredInstanceMembers).Where(f => !IsAutoPropertyBackingField(f) && f.FieldType.IsAssignableTo(typeof(ConfigEntryBase)) && f.IsDefined<LocalSettingAttribute>()))
-            {
-                Error($"{field.Name} is a field, not a property. Use properties for local settings.");
-            }
-
-            return true;
+            return LocalSettingsManager.RegisterLocalTabs(type, pluginInfo);
         }
         catch (Exception e)
         {
@@ -476,47 +305,18 @@ public sealed class MiraPluginManager
         return false;
     }
 
-    private static void RegisterKeybinds(Type type, IMiraPlugin plugin)
+    private static bool RegisterKeybinds(Type type, IMiraPlugin plugin)
     {
         try
         {
-            if (!type.IsDefined<RegisterCustomKeybindsAttribute>())
-            {
-                return;
-            }
-
-            if (!type.IsStatic())
-            {
-                Error($"Keybinds class {type.Name} must be static.");
-                return;
-            }
-
-            foreach (var property in type.GetProperties(DeclaredStaticMembers))
-            {
-                if (property.PropertyType != typeof(MiraKeybind))
-                {
-                    continue;
-                }
-
-                if (property.GetValue(null) is not MiraKeybind keybind)
-                {
-                    Error($"Keybind property {property.Name} in {type.Name} is not a MiraKeybind.");
-                    continue;
-                }
-
-                KeybindManager.Keybinds.Add(keybind);
-                keybind.SourcePluginName = plugin.OptionsTitleText.Translate();
-            }
-
-            foreach (var field in type.GetFields(DeclaredStaticMembers).Where(f => !IsAutoPropertyBackingField(f) && f.FieldType.IsAssignableTo(typeof(MiraKeybind))))
-            {
-                Error($"{field.Name} is a field, not a property. Use properties for keybinds.");
-            }
+            return KeybindManager.RegisterKeybinds(type, plugin);
         }
         catch (Exception e)
         {
             Error($"Failed to register keybind class {type.Name}: {e}");
         }
+
+        return false;
     }
 
     private static bool RegisterMeetingAbility(Type type, MiraPluginInfo info)
@@ -528,8 +328,9 @@ public sealed class MiraPluginManager
         catch (Exception e)
         {
             Error($"Failed to register meeting ability {type.Name}: {e}");
-            return false;
         }
+
+        return false;
     }
 
     private static bool RegisterTargetedMeetingAbility(Type type, MiraPluginInfo info)
@@ -541,7 +342,8 @@ public sealed class MiraPluginManager
         catch (Exception e)
         {
             Error($"Failed to register targeted meeting ability {type.Name}: {e}");
-            return false;
         }
+
+        return false;
     }
 }

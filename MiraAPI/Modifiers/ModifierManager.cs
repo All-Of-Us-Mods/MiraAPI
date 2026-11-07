@@ -72,7 +72,9 @@ public static class ModifierManager
         TypeToIdModifierMap.Add(modifierType, _nextTypeId);
 
         BaseModifier modifier;
-        if (modifierType.GetConstructor(Type.EmptyTypes) != null)
+        var ctor = modifierType.GetConstructor(Type.EmptyTypes);
+
+        if (ctor != null)
         {
             modifier = (BaseModifier)Activator.CreateInstance(modifierType)!;
         }
@@ -90,7 +92,7 @@ public static class ModifierManager
             return true;
         }
 
-        if (modifierType.GetConstructor(Type.EmptyTypes) == null)
+        if (ctor == null)
         {
             Error($"Game Modifier {modifierType.FullName} does not have a parameterless constructor!");
             return false;

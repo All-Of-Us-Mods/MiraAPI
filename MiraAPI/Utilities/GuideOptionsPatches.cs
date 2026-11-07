@@ -29,13 +29,13 @@ internal sealed class GuideOptionPage(
     IReadOnlyList<string> modSearchTerms,
     List<GuideOptionEntry> entries)
 {
-    public AbstractOptionGroup Group { get; } = group;
+    public AbstractOptionGroup Group => group;
 
     public List<AbstractOptionGroup> Groups { get; } = [group];
 
-    public string Title { get; } = title;
+    public string Title => title;
 
-    public LoadableAsset<Sprite> Sprite { get; } = group.Sprite;
+    public LoadableAsset<Sprite> Sprite => group.Sprite;
 
     public int Order { get; set; } = order;
 
@@ -43,13 +43,13 @@ internal sealed class GuideOptionPage(
 
     public uint GroupPriority { get; set; } = groupPriority;
 
-    public int Columns { get; } = columns;
+    public int Columns => columns;
 
-    public string ModAbbreviation { get; } = modAbbreviation;
+    public string ModAbbreviation => modAbbreviation;
 
     public HashSet<string> ModSearchTerms { get; } = new(modSearchTerms, StringComparer.OrdinalIgnoreCase);
 
-    public List<GuideOptionEntry> Entries { get; } = entries;
+    public List<GuideOptionEntry> Entries => entries;
 }
 
 internal static class GuideOptionPages

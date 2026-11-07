@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using MiraAPI.GameModes;
@@ -17,12 +18,13 @@ namespace MiraAPI.PluginLoading;
 /// </summary>
 public class MiraPluginInfo
 {
-    internal MiraPluginInfo(IMiraPlugin miraPlugin, PluginInfo info)
+    internal MiraPluginInfo(IMiraPlugin miraPlugin, PluginInfo info, Assembly assembly)
     {
         MiraPlugin = miraPlugin;
         PluginConfig = miraPlugin.GetConfigFile();
         PluginInfo = info;
         PluginId = info.Metadata.GUID;
+        PluginAssembly = assembly;
     }
 
     /// <summary>
@@ -44,6 +46,16 @@ public class MiraPluginInfo
     /// Gets the plugin's <see cref="ConfigFile"/>.
     /// </summary>
     public ConfigFile PluginConfig { get; }
+
+    /// <summary>
+    /// Gets the plugin's <see cref="Assembly"/>.
+    /// </summary>
+    public Assembly PluginAssembly { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the plugin is in debug mode.
+    /// </summary>
+    public bool DebugMode => MiraPlugin.DebugMode;
 
     /// <summary>
     /// Gets a <see cref="IReadOnlyCollection{T}"/> of this <see cref="IMiraPlugin"/>'s <see cref="BaseModifier"/>s. This is not safe for <see cref="BaseModifier"/>s with constructors.

@@ -164,7 +164,7 @@ internal static class GamePresetsTabPatches
             return;
         }
 
-        var tmpTranslator = presetTab.PresetDescriptionText.gameObject.GetComponent<TextTranslatorTMP>();
+        var tmpTranslator = presetTab.PresetDescriptionText.GetComponent<TextTranslatorTMP>();
         if (tmpTranslator)
         {
             tmpTranslator.Destroy();
@@ -184,7 +184,7 @@ internal static class GamePresetsTabPatches
         {
             saveButton = Object.Instantiate(prefab, presetTab.transform);
             _saveButton = saveButton.gameObject;
-            _saveButton.gameObject.name = "SaveButton";
+            _saveButton.name = "SaveButton";
             _saveButton.transform.localPosition = new Vector3(3.2f, 1.7f, -2);
 
             // set the button text and alignment
@@ -282,7 +282,7 @@ internal static class GamePresetsTabPatches
             _folderButton.name = "OpenFolderButton";
             _folderButton.transform.localPosition = new Vector3(3.55f, 1.1f, -2);
 
-            var folderRend = openFolderButton.transform.FindChild("Sprite").gameObject.GetComponent<SpriteRenderer>();
+            var folderRend = openFolderButton.transform.FindChild("Sprite").GetComponent<SpriteRenderer>();
             folderRend.sprite = MiraAssets.FolderIcon.LoadAsset();
             folderRend.transform.localScale = new Vector3(0.4f, 0.4f, 1);
 

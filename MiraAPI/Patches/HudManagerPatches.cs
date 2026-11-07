@@ -47,9 +47,9 @@ public static class HudManagerPatches
             {
                 if (!aspect.gameObject) continue;
 
-                if (aspect.gameObject.transform.parent.name == "TopRight") continue;
+                if (aspect.transform.parent.name == "TopRight") continue;
 
-                if (aspect.gameObject.name.Contains("TopRight")) continue;
+                if (aspect.name.Contains("TopRight")) continue;
 
                 aspect.gameObject.SetActive(!aspect.isActiveAndEnabled);
                 aspect.DistanceFromEdge *= new Vector2(scaleFactor, scaleFactor);
@@ -62,7 +62,7 @@ public static class HudManagerPatches
             if (!button.gameObject) continue;
 
             button.gameObject.SetActive(!button.isActiveAndEnabled);
-            button.gameObject.transform.localScale *= scaleFactor;
+            button.transform.localScale *= scaleFactor;
             button.gameObject.SetActive(!button.isActiveAndEnabled);
         }
 
@@ -71,12 +71,12 @@ public static class HudManagerPatches
         {
             if (!arrange.gameObject || !arrange.transform) continue;
 
-            if (arrange.gameObject.name.Contains("TopRight")) continue;
+            if (arrange.name.Contains("TopRight")) continue;
 
             arrange.gameObject.SetActive(!arrange.isActiveAndEnabled);
             arrange.CellSize = new Vector2(scaleFactor, scaleFactor);
             arrange.gameObject.SetActive(!arrange.isActiveAndEnabled);
-            if (!arrange.isActiveAndEnabled || arrange.gameObject.transform.childCount == 0) continue;
+            if (!arrange.isActiveAndEnabled || arrange.transform.childCount == 0) continue;
             try
             {
                 arrange.ArrangeChilds();

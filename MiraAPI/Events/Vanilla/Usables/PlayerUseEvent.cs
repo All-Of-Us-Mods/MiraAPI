@@ -9,7 +9,7 @@ public class PlayerUseEvent(IUsable usable) : MiraCancelableEvent
     /// <summary>
     /// Gets the instance of <see cref="IUsable"/> that was used.
     /// </summary>
-    public IUsable Usable { get; } = usable;
+    public IUsable Usable => usable;
 
     /// <summary>
     /// Gets a value indicating whether the <see cref="Usable"/> is a <see cref="Console"/>, <see cref="MapConsole"/>, or <see cref="SystemConsole"/>.

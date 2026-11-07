@@ -59,6 +59,11 @@ public interface IMiraPlugin
     string CustomOptionMenuTwoDescription => "Apply game settings for this mod!";
 
     /// <summary>
+    /// Gets a value indicating whether the plugin is in debug mode.
+    /// </summary>
+    bool DebugMode => false;
+
+    /// <summary>
     /// Gets the <see cref="ConfigFile"/> for the plugin.
     /// </summary>
     /// <returns>The <see cref="ConfigFile"/> for the plugin.</returns>
