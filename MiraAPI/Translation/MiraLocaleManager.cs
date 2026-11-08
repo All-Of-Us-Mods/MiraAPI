@@ -216,9 +216,12 @@ public static class MiraLocaleManager
         Dictionary<string, string> parseList,
         string fallback = "")
     {
-        var text = Locale.GetValueOrDefault(language)?.GetValueOrDefault(key)
-                ?? Locale.GetValueOrDefault(MiraLanguage.English)?.GetValueOrDefault(key)
-                ?? fallback;
+        var text = Locale.GetValueOrDefault(language)?.GetValueOrDefault(key);
+
+        if (language != MiraLanguage.English)
+            text = Locale.GetValueOrDefault(MiraLanguage.English)?.GetValueOrDefault(key);
+
+        text ??= fallback;
 
         foreach (var tmpText in parseList)
         {
