@@ -202,6 +202,15 @@ public static class MiraLocaleManager
         return GetParsed(CurrentLanguage, key, parseList, fallback != string.Empty ? fallback : key);
     }
 
+    /// <inheritdoc cref="GetParsed(MiraLanguage, string, ValueTuple{string, string}[], string)"/>
+    public static string GetParsed(
+        string key,
+        (string, string)[] parseList,
+        string fallback = "")
+    {
+        return GetParsed(CurrentLanguage, key, parseList, fallback != string.Empty ? fallback : key);
+    }
+
     /// <summary>
     /// Translates a key into the current language.
     /// </summary>
@@ -219,13 +228,42 @@ public static class MiraLocaleManager
         var text = Locale.GetValueOrDefault(language)?.GetValueOrDefault(key);
 
         if (language != MiraLanguage.English)
-            text = Locale.GetValueOrDefault(MiraLanguage.English)?.GetValueOrDefault(key);
+            text ??= Locale.GetValueOrDefault(MiraLanguage.English)?.GetValueOrDefault(key);
 
         text ??= fallback;
 
-        foreach (var tmpText in parseList)
+        foreach (var (toReplace, value) in parseList)
         {
-            text = text.Replace(tmpText.Key, tmpText.Value);
+            text = text.Replace(toReplace, value);
+        }
+
+        return text;
+    }
+
+    /// <summary>
+    /// Translates a key into the current language.
+    /// </summary>
+    /// <param name="language">The specific language to prioritize.</param>
+    /// <param name="key">The string id to find.</param>
+    /// <param name="parseList">List of keys to change into other text.</param>
+    /// <param name="fallback">Fallback string to use if no translation is found.</param>
+    /// <returns>A <see cref="string"/> based on the key provided.</returns>
+    public static string GetParsed(
+        MiraLanguage language,
+        string key,
+        (string, string)[] parseList,
+        string fallback = "")
+    {
+        var text = Locale.GetValueOrDefault(language)?.GetValueOrDefault(key);
+
+        if (language != MiraLanguage.English)
+            text ??= Locale.GetValueOrDefault(MiraLanguage.English)?.GetValueOrDefault(key);
+
+        text ??= fallback;
+
+        foreach (var (toReplace, value) in parseList)
+        {
+            text = text.Replace(toReplace, value);
         }
 
         return text;
