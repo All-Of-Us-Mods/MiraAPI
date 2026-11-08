@@ -78,37 +78,8 @@ public static class MiraLocaleManager
     /// <summary>
     /// Gets a dictionary mapping <see cref="MiraLanguage"/> values to their standard language codes.
     /// </summary>
-    public static Dictionary<MiraLanguage, string> LangCultureList { get; } = new()
-    {
-        // Vanilla
-        { MiraLanguage.English, "en-US" },
-        { MiraLanguage.Latam, "es-419" },
-        { MiraLanguage.Brazilian, "pt-BR" },
-        { MiraLanguage.Portuguese, "pt-PT" },
-        { MiraLanguage.Korean, "ko-KR" },
-        { MiraLanguage.Russian, "ru-RU" },
-        { MiraLanguage.Dutch, "nl-NL" },
-        { MiraLanguage.Filipino, "fil-PH" },
-        { MiraLanguage.French, "fr-FR" },
-        { MiraLanguage.German, "de-DE" },
-        { MiraLanguage.Italian, "it-IT" },
-        { MiraLanguage.Japanese, "ja-JP" },
-        { MiraLanguage.Spanish, "es-ES" },
-        { MiraLanguage.SChinese, "zh-CN" },
-        { MiraLanguage.TChinese, "zh-TW" },
-        { MiraLanguage.Irish, "ga-IE" },
-
-        // Custom
-        { MiraLanguage.Polish, "pl-PL" },
-        { MiraLanguage.Turkish, "tr-TR" },
-        { MiraLanguage.Swedish, "sv-SE" },
-        { MiraLanguage.Lithuanian, "lt-LT" },
-        { MiraLanguage.Czech, "cs-CZ" },
-        { MiraLanguage.LChinese, "lzh-CN" },
-        { MiraLanguage.Greek, "el-GR" },
-        { MiraLanguage.Arabic, "arb" },
-        { MiraLanguage.Hebrew, "heb" },
-    };
+    public static Dictionary<MiraLanguage, string> LangCultureList { get; } =
+        LangList.ToDictionary(x => x.Key, x => x.Value.Replace('_', '-'));
 
     /// <summary>
     /// Gets the current language from Among Us settings.
@@ -133,22 +104,20 @@ public static class MiraLocaleManager
     [Obsolete("Pass typeof(YourPlugin).Assembly directly to Register for better performance.")]
     public static void Register(string modGuid)
     {
-        var callingAssembly = Assembly.GetCallingAssembly();
-        LoadInternalStrings(callingAssembly, callingAssembly.GetName().Name!, modGuid);
+        LoadInternalStrings(Assembly.GetCallingAssembly(), modGuid);
     }
 
     /// <inheritdoc cref="Register(string, string, Assembly)"/>
     public static void Register(string modGuid, Assembly assembly)
     {
-        LoadInternalStrings(assembly, assembly.GetName().Name!, modGuid);
+        LoadInternalStrings(assembly, modGuid);
     }
 
     /// <inheritdoc cref="Register(string, string, Assembly)"/>
     [Obsolete("Pass typeof(YourPlugin).Assembly directly to Register for better performance.")]
     public static void Register(string modGuid, string internalName)
     {
-        var callingAssembly = Assembly.GetCallingAssembly();
-        LoadInternalStrings(callingAssembly, internalName, modGuid);
+        LoadInternalStrings(Assembly.GetCallingAssembly(), internalName, modGuid);
     }
 
     /// <summary>
@@ -166,7 +135,7 @@ public static class MiraLocaleManager
     /// <inheritdoc cref="Get(MiraLanguage, string, string)"/>
     public static string Get(string key, string fallback = "")
     {
-        return Get(CurrentLanguage, key, fallback != string.Empty ? fallback : key);
+        return Get(CurrentLanguage, key, string.IsNullOrEmpty(fallback) ? key : fallback);
     }
 
     /// <summary>
@@ -178,19 +147,12 @@ public static class MiraLocaleManager
     /// <returns>A <see cref="string"/> based on the key provided.</returns>
     public static string Get(MiraLanguage language, string key, string fallback = "")
     {
-        if (Locale.TryGetValue(language, out var translations) &&
-            translations.TryGetValue(key, out var translation))
-        {
-            return translation;
-        }
+        var text = Locale.GetValueOrDefault(language)?.GetValueOrDefault(key);
 
-        if (Locale.TryGetValue(MiraLanguage.English, out var translationsEng) &&
-            translationsEng.TryGetValue(key, out var translationEng))
-        {
-            return translationEng;
-        }
+        if (language != MiraLanguage.English)
+            text ??= Locale.GetValueOrDefault(MiraLanguage.English)?.GetValueOrDefault(key);
 
-        return fallback;
+        return text ?? fallback;
     }
 
     /// <inheritdoc cref="GetParsed(MiraLanguage, string, Dictionary{string, string}, string)"/>
@@ -199,7 +161,7 @@ public static class MiraLocaleManager
         Dictionary<string, string> parseList,
         string fallback = "")
     {
-        return GetParsed(CurrentLanguage, key, parseList, fallback != string.Empty ? fallback : key);
+        return GetParsed(CurrentLanguage, key, parseList, string.IsNullOrEmpty(fallback) ? key : fallback);
     }
 
     /// <inheritdoc cref="GetParsed(MiraLanguage, string, ValueTuple{string, string}[], string)"/>
@@ -208,7 +170,7 @@ public static class MiraLocaleManager
         (string, string)[] parseList,
         string fallback = "")
     {
-        return GetParsed(CurrentLanguage, key, parseList, fallback != string.Empty ? fallback : key);
+        return GetParsed(CurrentLanguage, key, parseList, string.IsNullOrEmpty(fallback) ? key : fallback);
     }
 
     /// <summary>
@@ -225,12 +187,7 @@ public static class MiraLocaleManager
         Dictionary<string, string> parseList,
         string fallback = "")
     {
-        var text = Locale.GetValueOrDefault(language)?.GetValueOrDefault(key);
-
-        if (language != MiraLanguage.English)
-            text ??= Locale.GetValueOrDefault(MiraLanguage.English)?.GetValueOrDefault(key);
-
-        text ??= fallback;
+        var text = Get(language, key, fallback);
 
         foreach (var (toReplace, value) in parseList)
         {
@@ -254,12 +211,7 @@ public static class MiraLocaleManager
         (string, string)[] parseList,
         string fallback = "")
     {
-        var text = Locale.GetValueOrDefault(language)?.GetValueOrDefault(key);
-
-        if (language != MiraLanguage.English)
-            text ??= Locale.GetValueOrDefault(MiraLanguage.English)?.GetValueOrDefault(key);
-
-        text ??= fallback;
+        var text = Get(language, key, fallback);
 
         foreach (var (toReplace, value) in parseList)
         {
@@ -353,6 +305,11 @@ public static class MiraLocaleManager
                 Error($"Failed to load external translation {filePath} for mod {modGuid}: {e.Message}");
             }
         }
+    }
+
+    private static void LoadInternalStrings(Assembly assembly, string modGuid)
+    {
+        LoadInternalStrings(assembly, assembly.GetName().Name!, modGuid);
     }
 
     private static void LoadInternalStrings(Assembly assembly, string internalName, string modGuid)
