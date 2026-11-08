@@ -53,12 +53,6 @@ public static class PaletteManager
             return false;
         }
 
-        if (!type.IsStatic())
-        {
-            Error($"Color class {type.Name} must be static.");
-            return false;
-        }
-
         foreach (var property in type.GetProperties(MiraPluginManager.DeclaredStaticMembers))
         {
             if (!property.PropertyType.IsAssignableTo(typeof(CustomColor)))

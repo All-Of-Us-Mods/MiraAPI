@@ -68,8 +68,9 @@ public static class ModifierManager
             return false;
         }
 
-        IdToTypeModifierMap.Add(GetNextTypeId(), modifierType);
-        TypeToIdModifierMap.Add(modifierType, _nextTypeId);
+        var id = GetNextTypeId();
+        IdToTypeModifierMap.Add(id, modifierType);
+        TypeToIdModifierMap.Add(modifierType, id);
 
         BaseModifier modifier;
         var ctor = modifierType.GetConstructor(Type.EmptyTypes);
@@ -105,7 +106,7 @@ public static class ModifierManager
             PrioritiesToIdsMap[priority] = list = [];
         }
 
-        list.Add(_nextTypeId);
+        list.Add(id);
         return true;
     }
 

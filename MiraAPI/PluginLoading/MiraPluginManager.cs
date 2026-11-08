@@ -49,6 +49,16 @@ public sealed class MiraPluginManager
     internal static ConfigFile MiraApiConfig { get; private set; } = null!;
     internal static MiraPluginInfo MiraApiPluginInfo { get; private set; } = null!;
 
+    /// <summary>
+    /// Get a mira plugin by its GUID.
+    /// </summary>
+    /// <param name="pluginId">The plugin GUID.</param>
+    /// <returns>A <see cref="MiraPluginInfo"/>.</returns>
+    public static MiraPluginInfo? GetPluginByGuid(string pluginId)
+    {
+        return Instance._registeredPlugins.GetValueOrDefault(pluginId);
+    }
+
     internal void Initialize(BasePlugin miraApiPlugin, IMiraPlugin apiPlugin)
     {
         CustomGameModeManager.RegisterDefaultMode();
@@ -130,12 +140,17 @@ public sealed class MiraPluginManager
     [SuppressMessage("Minor Code Smell", "S3626:Jump statements should not be redundant", Justification = "Code consistency.")]
     private static void ProcessAssemblyTypes(Assembly assembly, MiraPluginInfo info, BasePlugin basePlugin, IMiraPlugin plugin, List<Type> roles, bool isMira)
     {
+        if (plugin.ForceRegisterEvents)
+        {
+            Warning("For optimisation reasons, MiraAPI no longer automatically searches every type for events. Please use RegisterEventsAttribute moving forward.");
+        }
+
         foreach (var type in assembly.GetTypes())
         {
             if ((isMira && type.IsAbstract) || type.IsDefined<MiraIgnoreAttribute>())
                 continue;
 
-            RegisterEvents(type);
+            RegisterEvents(type, plugin);
 
             if (RegisterOptions(type, info))
                 continue;
@@ -172,26 +187,16 @@ public sealed class MiraPluginManager
         }
     }
 
-    private static void RegisterEvents(Type type)
+    private static void RegisterEvents(Type type, IMiraPlugin miraPlugin)
     {
         try
         {
-            MiraEventManager.RegisterEvents(type);
+            MiraEventManager.RegisterEvents(type, miraPlugin);
         }
         catch (Exception e)
         {
             Error($"Failed to register events in {type.Name}: {e}");
         }
-    }
-
-    /// <summary>
-    /// Get a mira plugin by its GUID.
-    /// </summary>
-    /// <param name="pluginId">The plugin GUID.</param>
-    /// <returns>A <see cref="MiraPluginInfo"/>.</returns>
-    public static MiraPluginInfo? GetPluginByGuid(string pluginId)
-    {
-        return Instance._registeredPlugins.GetValueOrDefault(pluginId);
     }
 
     private static bool RegisterGameOver(Type type)

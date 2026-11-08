@@ -1,6 +1,8 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Linq;
 using BepInEx.Configuration;
+using MiraAPI.Events;
 
 namespace MiraAPI.PluginLoading;
 
@@ -62,6 +64,17 @@ public interface IMiraPlugin
     /// Gets a value indicating whether the plugin is in debug mode.
     /// </summary>
     bool DebugMode => false;
+
+    /// <summary>
+    /// Gets a value indicating whether the plugin relies on the legacy global event scanning system.
+    /// </summary>
+    /// <remarks>
+    /// This property defaults to true to maintain backwards compatibility.
+    /// To upgrade your mod, apply the <see cref="RegisterEventContainerAttribute"/> to any class
+    /// containing events, and then override this property to return <see langword="false"/>.
+    /// </remarks>
+    [Obsolete("Global event scanning is deprecated. Add [RegisterEventContainer] to your event classes and override this property to false.")]
+    bool ForceRegisterEvents => true;
 
     /// <summary>
     /// Gets the <see cref="ConfigFile"/> for the plugin.
