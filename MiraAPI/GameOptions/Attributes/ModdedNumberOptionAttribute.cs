@@ -172,6 +172,6 @@ public class ModdedNumberOptionAttribute(
     /// <inheritdoc />
     int ITypedOption<int>.GetValueUnboxed()
     {
-        return (int)Math.Round(GetValueUnboxed());
+        return (int)MathF.Round(GetValueUnboxed());
     }
 }

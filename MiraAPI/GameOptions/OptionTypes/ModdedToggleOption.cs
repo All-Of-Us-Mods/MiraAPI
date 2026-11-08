@@ -1,4 +1,5 @@
 ﻿using System;
+using AmongUs.GameOptions;
 using MiraAPI.Networking;
 using MiraAPI.Translation;
 using UnityEngine;
@@ -82,13 +83,14 @@ public class ModdedToggleOption : ModdedOption<bool>
     /// <inheritdoc />
     public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, PlayerOption playerOpt, Transform container)
     {
-        var toggleOption = Object.Instantiate(toggleOpt, Vector3.zero, Quaternion.identity, container);
+        var toggleOption = Object.Instantiate(toggleOpt, container);
         toggleOption.name = $"{ParentMod!.OptionsTitleText}.ToggleOption.{Title}";
 
         toggleOption.SetUpFromData(Data, 20);
 
         toggleOption.Title = StringName;
         toggleOption.CheckMark.enabled = Value;
+        toggleOption.boolOptionName = BoolOptionNames.Invalid;
         toggleOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
 
         OptionBehaviour = toggleOption;

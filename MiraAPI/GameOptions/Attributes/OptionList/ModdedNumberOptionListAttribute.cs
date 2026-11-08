@@ -174,6 +174,6 @@ public class ModdedNumberOptionListAttribute(
     /// <inheritdoc />
     int ITypedOptionList<int>.GetValueUnboxed(int idx)
     {
-        return (int)Math.Round(GetValueUnboxed(idx));
+        return (int)MathF.Round(GetValueUnboxed(idx));
     }
 }

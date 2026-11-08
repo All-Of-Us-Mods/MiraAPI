@@ -113,7 +113,6 @@ public class ModdedNumberOption : ModdedOption<float>
         data.Increment = Increment;
         data.ValidRange = new FloatRange(Min, Max);
         data.FormatString = FormatString;
-
         data.ZeroIsInfinity = ZeroInfinity;
         data.SuffixType = (NumberSuffixes)SuffixType;
         data.OptionName = FloatOptionNames.Invalid;
@@ -213,17 +212,10 @@ public class ModdedNumberOption : ModdedOption<float>
         PlayerOption playerOpt,
         Transform container)
     {
-        var numberOption = Object.Instantiate(numberOpt, Vector3.zero, Quaternion.identity, container);
+        var numberOption = Object.Instantiate(numberOpt, container);
         numberOption.name = $"{ParentMod!.OptionsTitleText}.NumberOption.{Title}";
-        var optionComponent = numberOption.gameObject.AddComponent<MiraNumberOptionComponent>();
-        optionComponent.NumberOption = this;
-        optionComponent.DefaultIncrement = Increment;
-        optionComponent.ShiftIncrementToggle = ShiftIncrement;
-        optionComponent.NegativeValue = NegativeWordValue;
-        optionComponent.ZeroValue = ZeroWordValue;
 
         numberOption.SetUpFromData(Data, 20);
-        numberOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
 
         numberOption.Title = StringName;
         numberOption.Value = Value;
@@ -233,6 +225,14 @@ public class ModdedNumberOption : ModdedOption<float>
         numberOption.ZeroIsInfinity = ZeroInfinity;
         numberOption.SuffixType = (NumberSuffixes)SuffixType;
         numberOption.floatOptionName = FloatOptionNames.Invalid;
+        numberOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
+
+        var optionComponent = numberOption.gameObject.AddComponent<MiraNumberOptionComponent>();
+        optionComponent.NumberOption = this;
+        optionComponent.DefaultIncrement = Increment;
+        optionComponent.ShiftIncrementToggle = ShiftIncrement;
+        optionComponent.NegativeValue = NegativeWordValue;
+        optionComponent.ZeroValue = ZeroWordValue;
 
         OptionBehaviour = numberOption;
 
@@ -301,6 +301,6 @@ public class ModdedNumberOption : ModdedOption<float>
     /// <returns>Integer value.</returns>
     public static implicit operator int(ModdedNumberOption option)
     {
-        return (int)Math.Round(option.Value);
+        return (int)MathF.Round(option.Value);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AmongUs.GameOptions;
 using MiraAPI.Networking;
 using MiraAPI.Utilities;
 using UnityEngine;
@@ -33,7 +34,7 @@ public class ModdedPlayerOption : ModdedOption<int>
     /// </summary>
     /// <param name="groupPrefix">The translation ID prefix of the group containing this option.</param>
     /// <param name="title">The title of the option.</param>
-    /// <param name="allowNone">Whether the option includes a none option. If None is selected, value will return -1.</param>
+    /// <param name="allowNone">Whether the option includes a none option. If None is selected, value can return -1.</param>
     public ModdedPlayerOption(string groupPrefix, string title, bool allowNone = true)
         : base(groupPrefix, title, allowNone ? -1 : 0, false)
     {
@@ -53,7 +54,7 @@ public class ModdedPlayerOption : ModdedOption<int>
     /// Initializes a new instance of the <see cref="ModdedPlayerOption"/> class.
     /// </summary>
     /// <param name="title">The title of the option.</param>
-    /// <param name="allowNone">Whether the option includes a none option. If None is selected, value will return -1.</param>
+    /// <param name="allowNone">Whether the option includes a none option. If None is selected, value can return -1.</param>
     public ModdedPlayerOption(string title, bool allowNone = true)
         : this(string.Empty, title, allowNone)
     {
@@ -67,24 +68,26 @@ public class ModdedPlayerOption : ModdedOption<int>
         PlayerOption playerOpt,
         Transform container)
     {
+        Values = GetFilteredPlayers();
+
         var playerOption = Object.Instantiate(playerOpt, container);
         playerOption.name = $"{ParentMod!.OptionsTitleText}.PlayerOption.{Title}";
 
-        Values = GetFilteredPlayers();
-
         playerOption.SetUpFromData(Data, 20);
-        playerOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
 
         playerOption.Title = StringName;
         playerOption.Values = Values.ToIl2CppList();
         playerOption.Value = Value;
         playerOption.playerIndex = Values.FindIndex(p => p.PlayerId == Value);
-
-        OptionBehaviour = playerOption;
-        ModdedOptionsManager.CreatedPlayerOptions.TryAdd(playerOption, this);
+        playerOption.optionName = Int32OptionNames.Invalid;
+        playerOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
 
         playerOption.SetValueText();
         playerOption.AdjustButtonsActiveState();
+
+        playerOpt.gameObject.AddComponent<MiraPlayerOptionComponent>().PlayerOption = this;
+
+        OptionBehaviour = playerOption;
 
         return playerOption;
     }

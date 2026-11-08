@@ -1,4 +1,5 @@
 using System;
+using AmongUs.GameOptions;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -72,16 +73,17 @@ public abstract class ModdedBaseStringOption<T>(string groupPrefix, string title
         stringOption.name = $"{ParentMod!.OptionsTitleText}.{OptionTypeName}.{Title}";
 
         stringOption.SetUpFromData(Data, 20);
+
+        // SetUpFromData method doesn't work correctly so we must set the values manually
+        stringOption.Title = StringName;
+        stringOption.Value = GetIndex(Value);
+        stringOption.Values = StringNameValues;
+        stringOption.stringOptionName = Int32OptionNames.Invalid;
         stringOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
 
         // Changing the button text to make them more distinct from number options
         stringOption.MinusBtn.ChangeButtonText("<");
         stringOption.PlusBtn.ChangeButtonText(">");
-
-        // SetUpFromData method doesn't work correctly so we must set the values manually
-        stringOption.Title = StringName;
-        stringOption.Values = StringNameValues;
-        stringOption.Value = GetIndex(Value);
 
         OptionBehaviour = stringOption;
 
