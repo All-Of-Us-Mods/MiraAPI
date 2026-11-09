@@ -65,7 +65,7 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
     protected static new TMenu Create<TMenu>(PanelButtonOnMouse? onMouseOut = null, PanelButtonOnMouse? onMouseOver = null)
         where TMenu : CustomPaginableMenu, new()
     {
-        TMenu customMenu = CustomPhoneMenu.Create<TMenu>(onMouseOut, onMouseOver);
+        var customMenu = CustomPhoneMenu.Create<TMenu>(onMouseOut, onMouseOver);
 
         var nextButton = Object.Instantiate(customMenu.backButton, customMenu.transform).gameObject;
         nextButton.transform.localPosition = new Vector3(1.85f, -2.185f, customMenu.MenuDepth);

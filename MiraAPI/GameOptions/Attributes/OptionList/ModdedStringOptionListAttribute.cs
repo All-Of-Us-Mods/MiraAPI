@@ -20,9 +20,7 @@ public class ModdedStringOptionListAttribute(
     internal override IModdedOptionList CreateOptionList(IList value, PropertyInfo property)
     {
         return new ModdedOptionList<ModdedStringOption>(value.Count, idx =>
-        {
-            return new ModdedStringOption(Title.Translate(), (string)(value[idx] ?? string.Empty), values);
-        });
+            new ModdedStringOption(Title.Translate(), (string)(value[idx] ?? string.Empty), values));
     }
 
     /// <inheritdoc />

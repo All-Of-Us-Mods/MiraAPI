@@ -195,68 +195,68 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
     /// Gets the scale of the ability buttons.
     /// </summary>
     [LocalSliderSetting(min: 0.5f, max: 1.5f, suffixType: MiraNumberSuffixes.Multiplier, formatString: "0.00", displayValue: true)]
-    public ConfigEntry<float> ButtonUIFactorSlider { get; private set; } = config.Bind("MiraApi.VisualsUi", "MiraApi.ButtonScaleFactor", 0.75f);
+    public ConfigEntry<float> ButtonUIFactorSlider { get; } = config.Bind("MiraApi.VisualsUi", "MiraApi.ButtonScaleFactor", 0.75f);
 
     /// <summary>
     /// Gets the scale of the UI buttons.
     /// </summary>
     [LocalSliderSetting(min: 0.3f, max: 2f, suffixType: MiraNumberSuffixes.Multiplier, formatString: "0.00", displayValue: true)]
-    public ConfigEntry<float> TopRightButtonsFactorSlider { get; private set; } = config.Bind("MiraApi.VisualsUi", "MiraApi.TopRightButtonScaleFactor", 1f);
+    public ConfigEntry<float> TopRightButtonsFactorSlider { get; } = config.Bind("MiraApi.VisualsUi", "MiraApi.TopRightButtonScaleFactor", 1f);
 
     /// <summary>
     /// Gets the fps specified by the player.
     /// </summary>
     [LocalSliderSetting(min: 60f, max: 240f, suffixType: MiraNumberSuffixes.None, formatString: "0", displayValue: true, roundValue: true)]
-    public ConfigEntry<float> SetFpsSlider { get; private set; } = config.Bind("MiraApi.VisualsUi", "Max FPS", 120f);
+    public ConfigEntry<float> SetFpsSlider { get; } = config.Bind("MiraApi.VisualsUi", "Max FPS", 120f);
 
     /// <summary>
     /// Gets whether the modifiers hud should be on the left side of the screen (under roles/task tab). Recommended for streamers.
     /// </summary>
     [LocalToggleSetting]
-    public ConfigEntry<bool> ModifiersHudLeftSide { get; private set; } = config.Bind("MiraApi.VisualsUi", "MiraApi.ShowModifiersHudOnLeftSide", false);
+    public ConfigEntry<bool> ModifiersHudLeftSide { get; } = config.Bind("MiraApi.VisualsUi", "MiraApi.ShowModifiersHudOnLeftSide", false);
 
     /// <summary>
     /// Gets whether to show keybinds on buttons.
     /// </summary>
     [LocalToggleSetting]
-    public ConfigEntry<bool> ShowKeybinds { get; private set; } = config.Bind("MiraApi.VisualsUi", "MiraApi.ShowKeybindsOnButtons", true);
+    public ConfigEntry<bool> ShowKeybinds { get; } = config.Bind("MiraApi.VisualsUi", "MiraApi.ShowKeybindsOnButtons", true);
 
     /// <summary>
     /// Gets the scale of the match info guide.
     /// </summary>
     [LocalSliderSetting(min: 0.5f, max: 1f, suffixType: MiraNumberSuffixes.Multiplier, formatString: "0.00", displayValue: true)]
-    public ConfigEntry<float> MatchInfoGuideScaleFactor { get; private set; } = config.Bind("MiraApi.MatchInfoGuide", "MiraApi.MatchInfoGuideScaleFactor", 1f);
+    public ConfigEntry<float> MatchInfoGuideScaleFactor { get; } = config.Bind("MiraApi.MatchInfoGuide", "MiraApi.MatchInfoGuideScaleFactor", 1f);
 
     /// <summary>
     /// Gets the flag indicating whether the wiki is on the bottom row.
     /// </summary>
     [LocalToggleSetting]
-    public ConfigEntry<bool> WikiOnBottomRow { get; private set; } = config.Bind("MiraApi.MatchInfoGuide", "MiraApi.WikiOnBottomRow", true);
+    public ConfigEntry<bool> WikiOnBottomRow { get; } = config.Bind("MiraApi.MatchInfoGuide", "MiraApi.WikiOnBottomRow", true);
 
     /// <summary>
     /// Gets the flag indicating the position for the wiki's tabs.
     /// </summary>
     [LocalEnumSetting(names: ["MiraApi.WikiTabPosition.LeftSide", "MiraApi.WikiTabPosition.RightSide", "MiraApi.WikiTabPosition.Below"])]
-    public ConfigEntry<MatchInfoTabPos> WikiTabPosition { get; private set; } =
+    public ConfigEntry<MatchInfoTabPos> WikiTabPosition { get; } =
         config.Bind("MiraApi.MatchInfoGuide", "MiraApi.WikiTabPosition", MiraApiPlugin.IsMobile ? MatchInfoTabPos.RightSide : MatchInfoTabPos.LeftSide);
 
     /// <summary>
     /// Gets whether to show the red flash from sabotages.
     /// </summary>
     [LocalToggleSetting]
-    public ConfigEntry<bool> EnableSabotageFlashes { get; private set; } = config.Bind("MiraApi.Accessibility", "MiraApi.EnableSabotageFlashes", true);
+    public ConfigEntry<bool> EnableSabotageFlashes { get; } = config.Bind("MiraApi.Accessibility", "MiraApi.EnableSabotageFlashes", true);
 
     /// <summary>
     /// Gets whether to enable the sabotage sound effects or not.
     /// </summary>
     [LocalToggleSetting]
-    public ConfigEntry<bool> EnableSabotageBlares { get; private set; } = config.Bind("MiraApi.Accessibility", "MiraApi.EnableSabotageBlare", true);
+    public ConfigEntry<bool> EnableSabotageBlares { get; } = config.Bind("MiraApi.Accessibility", "MiraApi.EnableSabotageBlare", true);
 
     /// <summary>
     /// Gets whether variable colors will remain static or not.
     /// </summary>
     [LocalToggleSetting]
-    public ConfigEntry<bool> EnableVariableColors { get; private set; } = config.Bind("MiraApi.Accessibility", "MiraApi.EnableVariableColors", true);
+    public ConfigEntry<bool> EnableVariableColors { get; } = config.Bind("MiraApi.Accessibility", "MiraApi.EnableVariableColors", true);
 }
 
 /// <summary>
