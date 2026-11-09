@@ -962,13 +962,13 @@ public static class RoleGuidePatches
 
     private sealed class DetailedPanel(string title, string category, string modId, RoleBehaviour? role, GameModifier? modifier, uint typeId)
     {
+        public string Title => title;
+        public string Category => category;
+        public string ModId => modId;
+        public RoleBehaviour? Role => role;
+        public GameModifier? Modifier => modifier;
+        public uint TypeId => typeId;
         public MatchInfoRolePanel? Panel { get; set; }
-        public string Title { get; } = title;
-        public string Category { get; } = category;
-        public string ModId { get; } = modId;
-        public RoleBehaviour? Role { get; } = role;
-        public GameModifier? Modifier { get; } = modifier;
-        public uint TypeId { get; } = typeId;
         public int Amount { get; set; }
         public int Chance { get; set; }
         public float Likelihood { get; set; }
@@ -1224,25 +1224,25 @@ public static class RoleGuidePatches
 
     public static IEnumerable<RoleBehaviour> GetActiveRoles()
     {
-        IEnumerable<RoleBehaviour> comparisons = [];
+        var player = PlayerControl.LocalPlayer;
+        var data = player != null ? player.Data : null;
 
-        var curRole = PlayerControl.LocalPlayer.Data.Role;
+        if (player == null || data == null)
+            yield break;
 
-        comparisons = comparisons.AddItem(curRole);
+        var curRole = data.Role;
+        yield return curRole;
 
-        if (PlayerControl.LocalPlayer && PlayerControl.LocalPlayer.Data && PlayerControl.LocalPlayer.Data.IsDead &&
-            !comparisons.Any(x => x.Role == PlayerControl.LocalPlayer.Data.RoleWhenAlive.Value))
+        if (data.IsDead && curRole.Role != data.RoleWhenAlive.Value)
         {
-            comparisons = comparisons.AddItem(RoleManager.Instance.GetRole(PlayerControl.LocalPlayer.Data.RoleWhenAlive.Value));
+            yield return RoleManager.Instance.GetRole(data.RoleWhenAlive.Value);
         }
-
-        return comparisons;
     }
 
     public static List<uint> GetActiveIds()
     {
         var activeModifiers = GetActiveModifiers();
-        List<uint> comparisons = activeModifiers.Select(x => x.TypeId).ToList();
+        var comparisons = activeModifiers.Select(x => x.TypeId).ToList();
         comparisons.AddRange(GetActiveRoles().Select(x => (uint)x.Role));
 
         return comparisons;
@@ -1251,9 +1251,9 @@ public static class RoleGuidePatches
     private static List<DetailedPanel> SortEntries(List<DetailedPanel> entries, string searchText)
     {
         var activeModifiers = PlayerControl.LocalPlayer.GetModifiers<GameModifier>().Select(x => x.TypeId);
-        var roles = GetActiveRoles().Select(x => (uint)x.Role).ToList();
-        List<uint> comparisons = activeModifiers.ToList();
-        comparisons.AddRange(roles);
+        var roles = GetActiveRoles().Select(x => (uint)x.Role).ToHashSet();
+        var comparisons = activeModifiers.ToHashSet();
+        comparisons.UnionWith(roles);
 
         var comparer = new BasicGuideComparer(comparisons);
 
@@ -1262,7 +1262,7 @@ public static class RoleGuidePatches
             .ThenByDescending(p =>
                 p.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
                 p.Category.Contains(searchText, StringComparison.OrdinalIgnoreCase))
-            .ThenBy(x => x.Modifier != null ? x.Modifier.TypeId : (uint)x.Role!.Role, comparer);
+            .ThenBy(x => x.Modifier?.TypeId ?? (uint)x.Role!.Role, comparer);
         return
         [
             .. _sortMethod is SortingMethod.Alphabetical

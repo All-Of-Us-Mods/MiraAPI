@@ -30,11 +30,10 @@ public class PlayerVoteData(nint cppPtr) : MonoBehaviour(cppPtr)
     /// </summary>
     public int VotesRemaining
     {
-        get => _votesRemaining;
-        set => _votesRemaining = Math.Max(0, value);
+        get;
+        set => field = Math.Max(0, value);
     }
-
-    private int _votesRemaining = 1;
+    = 1;
 
     [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity convention.")]
     private void Awake()

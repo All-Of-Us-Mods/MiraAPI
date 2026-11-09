@@ -12,10 +12,10 @@ public class UiButtonPostResetEvent(GameObject topUiRow, GameObject secondUiRow)
     /// <summary>
     /// Gets the <see cref="GameObject"/> parent for the very top UI row.
     /// </summary>
-    public GameObject MainTopUiRow { get; } = topUiRow;
+    public GameObject MainTopUiRow => topUiRow;
 
     /// <summary>
     /// Gets the <see cref="GameObject"/> parent for the second top UI row.
     /// </summary>
-    public GameObject SecondTopUiRow { get; } = secondUiRow;
+    public GameObject SecondTopUiRow => secondUiRow;
 }

@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace MiraAPI.Utilities;
 
@@ -10,22 +8,13 @@ namespace MiraAPI.Utilities;
 /// <param name="activeIds">The collection of currently active IDs.</param>
 public class BasicGuideComparer(IEnumerable<uint> activeIds) : IComparer<uint>
 {
+    private readonly HashSet<uint> _activeIds = activeIds as HashSet<uint> ?? [.. activeIds];
+
     /// <inheritdoc/>
     public int Compare(uint x, uint y)
     {
-        var xActive = activeIds.Contains(x);
-        var yActive = activeIds.Contains(y);
-
-        if (xActive && !yActive)
-        {
-            return -1;
-        }
-
-        if (!xActive && yActive)
-        {
-            return 1;
-        }
-
-        return 0;
+        var xActive = _activeIds.Contains(x);
+        var yActive = _activeIds.Contains(y);
+        return yActive.CompareTo(xActive);
     }
 }

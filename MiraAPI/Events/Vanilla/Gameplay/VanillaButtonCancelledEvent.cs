@@ -13,7 +13,7 @@ public sealed class VanillaButtonCancelledEvent<T>(T button) : MiraEvent
     /// <summary>
     /// Gets the Vanilla <see cref="AbilityButton"/> whose click was cancelled.
     /// </summary>
-    public T Button { get; } = button;
+    public T Button => button;
 }
 
 /// <summary>
@@ -25,5 +25,5 @@ public sealed class VanillaButtonCancelledEvent(AbilityButton button) : MiraEven
     /// <summary>
     /// Gets the Vanilla <see cref="AbilityButton"/> whose click was cancelled.
     /// </summary>
-    public AbilityButton Button { get; } = button;
+    public AbilityButton Button => button;
 }
