@@ -87,6 +87,6 @@ public class OptionPreset(string name, MiraPluginInfo plugin, ConfigFile presetC
     public bool IsOptionInPreset(OptionBehaviour baseOption)
     {
         var selectedOpt = Plugin.InternalOptions.FirstOrDefault(x => x.OptionBehaviour == baseOption);
-        return selectedOpt != null && selectedOpt.ConfigDefinition != null && PresetConfig.ContainsKey(selectedOpt.ConfigDefinition);
+        return selectedOpt?.ConfigDefinition != null && PresetConfig.ContainsKey(selectedOpt.ConfigDefinition);
     }
 }

@@ -15,7 +15,7 @@ public class ModdedPlayerOptionAttribute(
     bool allowNone = true)
     : ModdedOptionAttribute(title)
 {
-    internal override IModdedOption? CreateOption(object? value, PropertyInfo property)
+    internal override IModdedOption CreateOption(object? value, PropertyInfo property)
     {
         var option = new ModdedPlayerOption(Title, allowNone);
         return option;

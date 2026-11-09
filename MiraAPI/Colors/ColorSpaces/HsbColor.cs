@@ -14,6 +14,7 @@ namespace MiraAPI.Colors.ColorSpaces;
 /// <param name="a">The alpha component.</param>
 [Serializable]
 [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:Element should begin with upper-case letter", Justification = "Unity parity.")]
+// ReSharper disable InconsistentNaming (Justification: Read above.)
 public record struct HsbColor(float h, float s, float b, float a = 1f)
 {
     /// <summary>

@@ -435,7 +435,7 @@ public static class ModdedOptionsManager
 
         attribute.SetValue(value);
 
-        if (attribute is ModdedOptionListAttribute listAttribute && value != null)
+        if (attribute is ModdedOptionListAttribute listAttribute && value != null!)
             ListInstanceCache.AddOrUpdate(value, listAttribute);
     }
 

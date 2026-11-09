@@ -18,10 +18,7 @@ public class ModdedPlayerOptionListAttribute(
 {
     internal override IBaseModdedOptionList CreateOptionList(IList value, PropertyInfo property)
     {
-        return new ModdedOptionList<ModdedPlayerOption>(value.Count, idx =>
-        {
-            return new(GetFormattedTitle(idx), allowNone);
-        });
+        return new ModdedOptionList<ModdedPlayerOption>(value.Count, idx => new(GetFormattedTitle(idx), allowNone));
     }
 
     /// <inheritdoc />
@@ -35,7 +32,7 @@ public class ModdedPlayerOptionListAttribute(
             NetworkedPlayerInfo info => info ? opt.Values.IndexOf(info) : (allowNone ? -1 : 0),
             _ => (int)value,
         };
-        opt?.SetValue(final);
+        opt.SetValue(final);
     }
 
     /// <inheritdoc />

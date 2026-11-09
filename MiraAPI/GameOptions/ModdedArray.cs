@@ -284,7 +284,7 @@ public static class ModdedArrayBuilder
     /// <summary>
     /// Creates a new <see cref="ModdedArray{T}"/> from a span of values.
     /// </summary>
-    /// <typeparam name="T">The the type of the values.</typeparam>
+    /// <typeparam name="T">The type of the values.</typeparam>
     /// <param name="values">The values to initialise with.</param>
     /// <returns>The <see cref="ModdedArray{T}"/> instance initialised with the provided values.</returns>
     public static ModdedArray<T> Create<T>(ReadOnlySpan<T> values)
