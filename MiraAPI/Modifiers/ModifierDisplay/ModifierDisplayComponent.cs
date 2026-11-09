@@ -22,7 +22,7 @@ namespace MiraAPI.Modifiers.ModifierDisplay;
 /// <param name="cppPtr">The pointer to the C++ object.</param>
 [RegisterInIl2Cpp]
 [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity Convention.")]
-public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
+public partial class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
 {
     private const int ItemsPerPage = 3;
 
@@ -49,7 +49,7 @@ public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
     /// Gets a <see cref="ReadOnlyDictionary{TKey, TValue}"/> of the created <see cref="ModifierUiComponent"/>s.
     /// </summary>
     [HideFromIl2Cpp]
-    public ReadOnlyDictionary<IBaseModifier, ModifierUiComponent> Modifiers => new(_modifiers);
+    public ReadOnlyDictionary<IBaseModifier, ModifierUiComponent> BaseModifiers => new(_modifiers);
 
     /// <summary>
     /// Gets a value indicating whether the modifier display hud is currently open.
@@ -115,7 +115,7 @@ public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
     /// </summary>
     public void RefreshModifiers()
     {
-        UpdateModifiersList([.. PlayerControl.LocalPlayer.GetModifierComponent().ActiveModifiers]);
+        UpdateModifiersList([.. PlayerControl.LocalPlayer.GetModifierComponent().ActiveBaseModifiers]);
     }
 
     /// <summary>
@@ -139,7 +139,7 @@ public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
 
     internal void DestroyComponent(ModifierUiComponent component)
     {
-        _modifiers.Remove(component.Modifier!);
+        _modifiers.Remove(component.BaseModifier!);
         component.gameObject.Destroy();
         RefreshModifiers();
     }
@@ -158,7 +158,7 @@ public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
         var newMod = Instantiate(_modTemplate, _children.transform);
         newMod.transform.name = modifier.ModifierName.Translate();
         var comp = newMod.AddComponent<ModifierUiComponent>();
-        comp.Modifier = modifier;
+        comp.BaseModifier = modifier;
         return comp;
     }
 

@@ -12,13 +12,13 @@ namespace MiraAPI.Modifiers.ModifierDisplay;
 /// <param name="cppPtr">The pointer to the C++ object.</param>
 [RegisterInIl2Cpp]
 [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity Convention.")]
-public class ModifierUiComponent(nint cppPtr) : MonoBehaviour(cppPtr)
+public partial class ModifierUiComponent(nint cppPtr) : MonoBehaviour(cppPtr)
 {
     /// <summary>
     /// Gets the <see cref="IBaseModifier"/> which this component is for.
     /// </summary>
     [HideFromIl2Cpp]
-    public IBaseModifier? Modifier { get; internal set; }
+    public IBaseModifier? BaseModifier { get; internal set; }
 
     // ReSharper disable InconsistentNaming
     private SpriteRenderer modBg = null!;
@@ -30,7 +30,7 @@ public class ModifierUiComponent(nint cppPtr) : MonoBehaviour(cppPtr)
     // ReSharper restore InconsistentNaming
     private void Awake()
     {
-        if (Modifier == null) return;
+        if (BaseModifier == null) return;
 
         modBg = transform.GetChild(0).GetComponent<SpriteRenderer>();
         desc = modBg.transform.GetChild(0).GetComponent<TextMeshPro>();
@@ -46,22 +46,22 @@ public class ModifierUiComponent(nint cppPtr) : MonoBehaviour(cppPtr)
     // Might not be the best solution, but used to update name/description/icon if updated in the modifier.
     private void FixedUpdate()
     {
-        if (Modifier == null || ModifierDisplayComponent.Instance == null || !ModifierDisplayComponent.Instance.IsOpen) return;
+        if (BaseModifier == null || ModifierDisplayComponent.Instance == null || !ModifierDisplayComponent.Instance.IsOpen) return;
 
-        if (Modifier.HideOnUi || Modifier.GetDescription() == string.Empty)
+        if (BaseModifier.HideOnUi || BaseModifier.GetDescription() == string.Empty)
         {
             ModifierDisplayComponent.Instance.DestroyComponent(this);
             return;
         }
 
-        nameText.text = Modifier.ModifierName;
-        desc.text = Modifier.GetDescription();
+        nameText.text = BaseModifier.ModifierName;
+        desc.text = BaseModifier.GetDescription();
         modBg.gameObject.SetActive(true);
 
-        icon.gameObject.SetActive(Modifier.ModifierIcon != null);
-        if (icon.gameObject && icon.gameObject.activeSelf && Modifier.ModifierIcon != null)
+        icon.gameObject.SetActive(BaseModifier.ModifierIcon != null);
+        if (icon.gameObject && icon.gameObject.activeSelf && BaseModifier.ModifierIcon != null)
         {
-            icon.sprite = Modifier.ModifierIcon?.LoadAsset();
+            icon.sprite = BaseModifier.ModifierIcon?.LoadAsset();
             icon.size = new Vector2(0.7f, 0.7f);
             icon.tileMode = SpriteTileMode.Continuous;
             descRect.localPosition = new Vector3(0.38f, -0.1f, -5);

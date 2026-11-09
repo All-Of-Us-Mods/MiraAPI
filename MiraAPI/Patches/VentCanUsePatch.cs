@@ -31,7 +31,7 @@ internal static class VentCanUsePatch
         var canVent = role is ICustomRole customRole ? customRole.Configuration.CanUseVent || customRole.Configuration.GetsVentData : role.CanVent;
         couldUse = canVent;
 
-        var modifiers = @object.GetModifierComponent().ActiveModifiers;
+        var modifiers = @object.GetModifierComponent().ActiveBaseModifiers;
         if (modifiers.Count > 0)
         {
             switch (canVent)

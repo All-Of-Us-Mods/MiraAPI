@@ -16,7 +16,7 @@ namespace MiraAPI.PluginLoading;
 /// <summary>
 /// Represents an <see cref="IMiraPlugin"/>.
 /// </summary>
-public class MiraPluginInfo
+public partial class MiraPluginInfo
 {
     internal MiraPluginInfo(IMiraPlugin miraPlugin, PluginInfo info, Assembly assembly)
     {
@@ -60,7 +60,7 @@ public class MiraPluginInfo
     /// <summary>
     /// Gets a <see cref="IReadOnlyCollection{T}"/> of this <see cref="IMiraPlugin"/>'s <see cref="IBaseModifier"/>s. This is not safe for <see cref="IBaseModifier"/>s with constructors.
     /// </summary>
-    public IReadOnlyCollection<IBaseModifier> Modifiers { get; private set; } = null!;
+    public IReadOnlyCollection<IBaseModifier> BaseModifiers { get; private set; } = null!;
 
     /// <summary>
     /// Gets a <see cref="IReadOnlyCollection{T}"/> of this <see cref="IMiraPlugin"/>'s <see cref="AbstractOptionGroup"/>s.
@@ -109,7 +109,7 @@ public class MiraPluginInfo
     internal void SavePublicCollections()
     {
         Presets = [.. InternalPresets];
-        Modifiers = [.. InternalModifiers];
+        BaseModifiers = [.. InternalModifiers];
         OptionGroups = [.. InternalOptionGroups];
         Options = [.. InternalOptions];
         Roles = new ReadOnlyDictionary<ushort, RoleBehaviour>(InternalRoles);

@@ -198,7 +198,7 @@ public static partial class ModifierExtensions
     /// <param name="plr">The player you want to clear <see cref="IBaseModifier"/>s for.</param>
     public static void ClearModifiers(this PlayerControl plr)
     {
-        foreach (var mod in plr.GetModifierComponent().ActiveModifiers)
+        foreach (var mod in plr.GetModifierComponent().ActiveBaseModifiers)
         {
             plr.RemoveModifier(mod);
         }
@@ -210,7 +210,7 @@ public static partial class ModifierExtensions
     /// <param name="plr">The player you want to clear <see cref="IBaseModifier"/>s for.</param>
     public static void RpcClearModifiers(this PlayerControl plr)
     {
-        foreach (var mod in plr.GetModifierComponent().ActiveModifiers)
+        foreach (var mod in plr.GetModifierComponent().ActiveBaseModifiers)
         {
             plr.RpcRemoveModifier(mod.UniqueId);
         }

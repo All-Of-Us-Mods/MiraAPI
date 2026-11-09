@@ -25,7 +25,7 @@ public partial class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     /// Gets the active <see cref="IBaseModifier"/>s on the player.
     /// </summary>
     [HideFromIl2Cpp]
-    public ImmutableList<IBaseModifier> ActiveModifiers { get; private set; } = ImmutableList<IBaseModifier>.Empty;
+    public ImmutableList<IBaseModifier> ActiveBaseModifiers { get; private set; } = ImmutableList<IBaseModifier>.Empty;
 
     private readonly List<IBaseModifier> _toRemove = [];
     private readonly List<IBaseModifier> _toAdd = [];
@@ -107,10 +107,10 @@ public partial class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
                 modifierDisplay?.UpdateModifiersList(_modifiers);
             }
 
-            ActiveModifiers = _modifiers.ToImmutableList();
+            ActiveBaseModifiers = _modifiers.ToImmutableList();
         }
 
-        foreach (var modifier in ActiveModifiers)
+        foreach (var modifier in ActiveBaseModifiers)
         {
             try
             {
@@ -141,7 +141,7 @@ public partial class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
 
     private void Update()
     {
-        foreach (var modifier in ActiveModifiers)
+        foreach (var modifier in ActiveBaseModifiers)
         {
             try
             {
@@ -170,7 +170,7 @@ public partial class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     public IEnumerable<T> GetModifiers<T>(Func<T, bool>? predicate = null)
         where T : class, IBaseModifier
     {
-        return ActiveModifiers.OfType<T>().Where(x => predicate == null || predicate(x));
+        return ActiveBaseModifiers.OfType<T>().Where(x => predicate == null || predicate(x));
     }
 
     /// <summary>
@@ -182,7 +182,7 @@ public partial class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     [HideFromIl2Cpp]
     public IEnumerable<IBaseModifier> GetModifiers(Type type, Func<IBaseModifier, bool>? predicate = null)
     {
-        return ActiveModifiers.Where(x => x.GetType() == type && (predicate == null || predicate(x)));
+        return ActiveBaseModifiers.Where(x => x.GetType() == type && (predicate == null || predicate(x)));
     }
 
     /// <summary>
@@ -304,7 +304,7 @@ public partial class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     [HideFromIl2Cpp]
     public IBaseModifier? GetModifier(Guid modifierGuid)
     {
-        return ActiveModifiers.Find(x => x.UniqueId == modifierGuid);
+        return ActiveBaseModifiers.Find(x => x.UniqueId == modifierGuid);
     }
 
     /// <summary>
@@ -327,7 +327,7 @@ public partial class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     [HideFromIl2Cpp]
     public void RemoveModifier(Type type, Func<IBaseModifier, bool>? predicate = null)
     {
-        var modifiers = ActiveModifiers.Where(x => x.GetType() == type && (predicate == null || predicate(x))).ToList();
+        var modifiers = ActiveBaseModifiers.Where(x => x.GetType() == type && (predicate == null || predicate(x))).ToList();
         if (modifiers.Count > 1)
         {
             throw new InvalidOperationException($"Cannot remove modifier {type.Name} because there are multiple instances of that modifier.");
@@ -350,7 +350,7 @@ public partial class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     [HideFromIl2Cpp]
     public void RemoveModifier(IBaseModifier modifier)
     {
-        if (!ActiveModifiers.Contains(modifier))
+        if (!ActiveBaseModifiers.Contains(modifier))
         {
             Error($"Cannot remove modifier {modifier.ModifierName} because it is not active on this player.");
             return;
@@ -426,7 +426,7 @@ public partial class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     [HideFromIl2Cpp]
     public bool TryRemoveModifier(IBaseModifier modifier)
     {
-        if (!ActiveModifiers.Contains(modifier))
+        if (!ActiveBaseModifiers.Contains(modifier))
         {
             return false;
         }
@@ -489,13 +489,13 @@ public partial class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
         }
 
         var id = modifier.TypeId;
-        if (modifier.Unique && ActiveModifiers.Find(x => x.TypeId == id) != null)
+        if (modifier.Unique && ActiveBaseModifiers.Find(x => x.TypeId == id) != null)
         {
             Error($"Player already has modifier with id {id}!");
             return null;
         }
 
-        if (ActiveModifiers.Contains(modifier))
+        if (ActiveBaseModifiers.Contains(modifier))
         {
             Error($"Player already has this modifier!");
             return null;
@@ -553,7 +553,7 @@ public partial class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     public bool HasModifier<T>(Func<T, bool>? predicate = null)
         where T : class, IBaseModifier
     {
-        return ActiveModifiers.Exists(x => x is T modifier && (predicate == null || predicate(modifier)));
+        return ActiveBaseModifiers.Exists(x => x is T modifier && (predicate == null || predicate(modifier)));
     }
 
     /// <summary>
@@ -565,7 +565,7 @@ public partial class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     [HideFromIl2Cpp]
     public bool HasModifier(Type type, Func<IBaseModifier, bool>? predicate = null)
     {
-        return ActiveModifiers.Exists(x => x.GetType() == type && (predicate == null || predicate(x)));
+        return ActiveBaseModifiers.Exists(x => x.GetType() == type && (predicate == null || predicate(x)));
     }
 
     /// <summary>
@@ -591,7 +591,7 @@ public partial class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     [HideFromIl2Cpp]
     public bool HasModifier(Guid id)
     {
-        return ActiveModifiers.Exists(x => x.UniqueId == id);
+        return ActiveBaseModifiers.Exists(x => x.UniqueId == id);
     }
 
     /// <summary>
@@ -605,7 +605,7 @@ public partial class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     public bool HasModifier<T>(bool checkInactive, Func<T, bool>? predicate = null)
         where T : class, IBaseModifier
     {
-        return ActiveModifiers.Exists(MatchExpr) || (checkInactive && _toAdd.Exists(MatchExpr));
+        return ActiveBaseModifiers.Exists(MatchExpr) || (checkInactive && _toAdd.Exists(MatchExpr));
         bool MatchExpr(IBaseModifier bm)
         {
             return bm is T modifier && (predicate == null || predicate(modifier));
@@ -622,7 +622,7 @@ public partial class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     [HideFromIl2Cpp]
     public bool HasModifier(Type type, bool checkInactive, Func<IBaseModifier, bool>? predicate = null)
     {
-        return ActiveModifiers.Exists(MatchExpr) || (checkInactive && _toAdd.Exists(MatchExpr));
+        return ActiveBaseModifiers.Exists(MatchExpr) || (checkInactive && _toAdd.Exists(MatchExpr));
         bool MatchExpr(IBaseModifier bm)
         {
             return bm.GetType() == type && (predicate == null || predicate(bm));
@@ -654,7 +654,7 @@ public partial class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     [HideFromIl2Cpp]
     public bool HasModifier(Guid id, bool checkInactive)
     {
-        return ActiveModifiers.Exists(MatchExpr) || (checkInactive && _toAdd.Exists(MatchExpr));
+        return ActiveBaseModifiers.Exists(MatchExpr) || (checkInactive && _toAdd.Exists(MatchExpr));
         bool MatchExpr(IBaseModifier bm)
         {
             return bm.UniqueId == id;

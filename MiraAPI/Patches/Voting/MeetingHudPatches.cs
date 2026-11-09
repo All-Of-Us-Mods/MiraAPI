@@ -92,7 +92,7 @@ internal static class MeetingHudPatches
                 voteData.SetRemainingVotes(0);
             }
 
-            foreach (var modifier in plr.GetModifierComponent().ActiveModifiers)
+            foreach (var modifier in plr.GetModifierComponent().ActiveBaseModifiers)
             {
                 modifier.OnMeetingStart();
             }
