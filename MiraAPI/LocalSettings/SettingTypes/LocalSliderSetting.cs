@@ -108,14 +108,12 @@ public class LocalSliderSetting(
     /// <inheritdoc/>
     protected override string GetValueText()
     {
-        if (DisplayValue)
-        {
-            var value = GetValue();
-            var formatted = Helpers.FormatValue(value, SuffixType, FormatString);
-            var maxFormatted = Helpers.FormatValue(SliderRange.max, SuffixType, FormatString);
-            return $"<font=\"LiberationSans SDF\" material=\"LiberationSans SDF - Chat Message Masked\">{Name.Translate()}: <b>{formatted} / {maxFormatted}</font></b>";
-        }
+        if (!DisplayValue)
+            return $"<font=\"LiberationSans SDF\" material=\"LiberationSans SDF - Chat Message Masked\">{Name.Translate()}</font></b>";
 
-        return $"<font=\"LiberationSans SDF\" material=\"LiberationSans SDF - Chat Message Masked\">{Name.Translate()}</font></b>";
+        var value = GetValue();
+        var formatted = Helpers.FormatValue(value, SuffixType, FormatString);
+        var maxFormatted = Helpers.FormatValue(SliderRange.max, SuffixType, FormatString);
+        return $"<font=\"LiberationSans SDF\" material=\"LiberationSans SDF - Chat Message Masked\">{Name.Translate()}: <b>{formatted} / {maxFormatted}</font></b>";
     }
 }

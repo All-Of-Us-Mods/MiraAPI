@@ -15,7 +15,7 @@ public class ModdedStringOptionAttribute(
     string[] values)
     : ModdedOptionAttribute(title)
 {
-    internal override IModdedOption? CreateOption(object? value, PropertyInfo property)
+    internal override IModdedOption CreateOption(object? value, PropertyInfo property)
     {
         var option = new ModdedStringOption(Title, (string)(value ?? string.Empty), values);
         return option;

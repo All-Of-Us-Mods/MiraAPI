@@ -273,7 +273,7 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
     /// The static getter <see cref="MethodInfo"/> used to push the target instance onto the evaluation stack for instance methods,
     /// or <see langword="null"/> if <paramref name="method"/> is static.
     /// </param>
-    /// <param name="returnType">The return <see cref="Type"/> of the generated delegate (or <see cref="void"/> for actions).</param>
+    /// <param name="returnType">The return <see cref="Type"/> of the generated delegate (or <see cref="Void"/> for actions).</param>
     /// <param name="paramTypes">The parameter types accepted by the generated delegate.</param>
     /// <param name="delegateType">The concrete delegate <see cref="Type"/> to create (e.g., <see cref="Func{T, TResult}"/> or <see cref="Action{T}"/>).</param>
     /// <param name="suffix">A descriptive suffix appended to the generated <see cref="DynamicMethod"/> name for debugging and stack traces.</param>
@@ -346,7 +346,7 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
     /// The static getter <see cref="MethodInfo"/> used to push the target instance onto the evaluation stack for instance methods,
     /// or <see langword="null"/> if <paramref name="method"/> is static.
     /// </param>
-    /// <param name="returnType">The return <see cref="Type"/> of the generated delegate (or <see cref="void"/> for actions).</param>
+    /// <param name="returnType">The return <see cref="Type"/> of the generated delegate (or <see cref="Void"/> for actions).</param>
     /// <param name="baseParamTypes">The parameter types accepted by the generated delegate.</param>
     /// <param name="delegateType">The concrete delegate <see cref="Type"/> to create.</param>
     /// <param name="suffix">A descriptive suffix appended to the generated <see cref="DynamicMethod"/> name for debugging and stack traces.</param>

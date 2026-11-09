@@ -10,7 +10,7 @@ namespace MiraAPI.Colors;
 public class RegisterCustomColorsAttribute(string idPrefix) : Attribute
 {
     /// <summary>
-    /// Gets the translation ID prefix for all of the colors within the container type.
+    /// Gets the translation ID prefix for all colors within the container type.
     /// </summary>
     public string IdPrefix => idPrefix;
 
