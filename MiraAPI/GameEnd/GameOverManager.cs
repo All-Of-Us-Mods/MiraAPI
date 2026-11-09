@@ -14,13 +14,7 @@ public static class GameOverManager
 
     private static int nextId = Enum.GetNames<GameOverReason>().Length;
 
-    /// <summary>
-    /// Register a <see cref="CustomGameOver"/>.
-    /// </summary>
-    /// <param name="gameOverType">Type of the <see cref="CustomGameOver"/>.</param>
-    /// <exception cref="ArgumentException">Thrown when the type is not a subclass of <see cref="CustomGameOver"/>, is abstract, or does not have a parameterless constructor.</exception>
-    /// <returns><see langword="true"/> if the game over was registered successfully, <see langword="false"/> otherwise.</returns>
-    public static bool RegisterGameOver(Type gameOverType)
+    internal static bool RegisterGameOver(Type gameOverType)
     {
         if (!typeof(CustomGameOver).IsAssignableFrom(gameOverType))
         {

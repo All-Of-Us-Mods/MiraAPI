@@ -962,13 +962,13 @@ public static class RoleGuidePatches
 
     private sealed class DetailedPanel(string title, string category, string modId, RoleBehaviour? role, GameModifier? modifier, uint typeId)
     {
+        public string Title => title;
+        public string Category => category;
+        public string ModId => modId;
+        public RoleBehaviour? Role => role;
+        public GameModifier? Modifier => modifier;
+        public uint TypeId => typeId;
         public MatchInfoRolePanel? Panel { get; set; }
-        public string Title { get; } = title;
-        public string Category { get; } = category;
-        public string ModId { get; } = modId;
-        public RoleBehaviour? Role { get; } = role;
-        public GameModifier? Modifier { get; } = modifier;
-        public uint TypeId { get; } = typeId;
         public int Amount { get; set; }
         public int Chance { get; set; }
         public float Likelihood { get; set; }

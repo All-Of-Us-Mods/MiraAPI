@@ -13,12 +13,12 @@ namespace MiraAPI.MeetingAbilities;
 public static class MeetingButtonManager
 {
     /// <summary>
-    /// Gets a list if==of all registered <see cref="TargetedMeetingButton"/>.
+    /// Gets a list of all registered <see cref="TargetedMeetingButton"/>.
     /// </summary>
     public static List<TargetedMeetingButton> TargetedButtons { get; internal set; } = [];
 
     /// <summary>
-    /// Gets a list if==of all registered <see cref="MeetingActionButton"/>.
+    /// Gets a list of all registered <see cref="MeetingActionButton"/>.
     /// </summary>
     public static List<MeetingActionButton> UntargetedButtons { get; internal set; } = [];
 

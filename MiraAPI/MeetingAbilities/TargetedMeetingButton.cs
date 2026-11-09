@@ -64,7 +64,7 @@ public abstract class TargetedMeetingButton
     /// <summary>
     /// Gets the <see cref="MeetingButtonUsesMode"/> for this button.
     /// </summary>
-    public virtual MeetingButtonUsesMode UsesMode { get; } = MeetingButtonUsesMode.PerGame;
+    public virtual MeetingButtonUsesMode UsesMode => MeetingButtonUsesMode.PerGame;
 
     /// <summary>
     /// Determines if the button is enabled.

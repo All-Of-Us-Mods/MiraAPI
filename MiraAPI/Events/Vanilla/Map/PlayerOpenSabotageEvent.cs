@@ -9,5 +9,5 @@ public class PlayerOpenSabotageEvent(MapBehaviour mapBehaviour) : MiraCancelable
     /// <summary>
     /// Gets the <see cref="global::MapBehaviour"/>.
     /// </summary>
-    public MapBehaviour MapBehaviour { get; } = mapBehaviour;
+    public MapBehaviour MapBehaviour => mapBehaviour;
 }

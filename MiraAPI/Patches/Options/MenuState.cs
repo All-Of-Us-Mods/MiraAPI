@@ -50,7 +50,8 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
 
     private readonly Dictionary<MenuButton, PassiveButton> _smallButtons = [];
     private readonly Dictionary<MenuButton, PassiveButton> _largeButtons = [];
-
+    private Vector3 _gameSettingsButtonOrig;
+    private Vector3 _roleSettingsButtonOrig;
     [HideFromIl2Cpp]
     public Dictionary<MenuCategory, Dictionary<int, GameObject>> Containers { get; } = new()
     {
@@ -144,6 +145,10 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
 
         // Create menu buttons
         _largeButtons[(int)MenuButton.Roles] = Gsm.RoleSettingsButton;
+
+        // cache
+        _gameSettingsButtonOrig = Gsm.GameSettingsButton.transform.localPosition;
+        _roleSettingsButtonOrig = Gsm.RoleSettingsButton.transform.localPosition;
 
         // modifiers button
         var mBtn = Instantiate(Gsm.RoleSettingsButton, Gsm.RoleSettingsButton.transform.parent);
@@ -409,6 +414,11 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
             btn.gameObject.SetActive(false);
         }
 
+        // The mod options page moves RoleSettingsButton as needed.
+        // But when hasOptions == false, it leaves the button at the GameSettingsButton spot.
+        // So before each re-layout, always put the original button back into the prefab slot first.
+        RestoreButtonLayout();
+
         if (CurrentModIdx == 0)
         {
             Gsm.GameSettingsButton.gameObject.SetActive(true);
@@ -530,6 +540,12 @@ public class MenuState(IntPtr cppPtr) : MonoBehaviour(cppPtr)
                 _largeButtons[MenuButton.CustomTwo].gameObject.SetActive(false);
             }
         }
+    }
+
+    private void RestoreButtonLayout()
+    {
+        Gsm.GameSettingsButton.transform.localPosition = _gameSettingsButtonOrig;
+        Gsm.RoleSettingsButton.transform.localPosition = _roleSettingsButtonOrig;
     }
 
     internal void ChangeTabPatch(GameSettingMenu menu, int tabNum, bool previewOnly)

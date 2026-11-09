@@ -10,5 +10,5 @@ public class StartMeetingEvent(MeetingHud meetingHud) : MiraEvent
     /// <summary>
     /// Gets the <see cref="global::MeetingHud"/> instance.
     /// </summary>
-    public MeetingHud MeetingHud { get; } = meetingHud;
+    public MeetingHud MeetingHud => meetingHud;
 }

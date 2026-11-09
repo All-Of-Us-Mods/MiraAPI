@@ -15,7 +15,7 @@ public class MiraKeybind(string name, KeyboardKeyCode? defaultKeycode, ModifierK
     /// <summary>
     /// Gets name of the keybind.
     /// </summary>
-    public string Name { get; } = name;
+    public string Name => name;
 
     /// <summary>
     /// Gets the default keycode of this keybind.
@@ -37,7 +37,7 @@ public class MiraKeybind(string name, KeyboardKeyCode? defaultKeycode, ModifierK
     /// Gets a value indicating whether this keybind should be checked for conflicts with other exclusive keybinds using the same key.
     /// Active exclusive controller bindings take priority over vanilla actions during gameplay.
     /// </summary>
-    public bool Exclusive { get; } = exclusive;
+    public bool Exclusive => exclusive;
 
     internal string? SourcePluginName { get; set; }
 

@@ -6,6 +6,4 @@ namespace MiraAPI.LocalSettings.Attributes;
 /// Attribute for local setting buttons.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property)]
-public class LocalSettingsButtonAttribute : Attribute
-{
-}
+public class LocalSettingsButtonAttribute : Attribute;

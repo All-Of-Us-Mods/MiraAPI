@@ -10,10 +10,10 @@ public class AfterVoteEvent(PlayerVoteArea playerVoteArea, PlayerControl voter) 
     /// <summary>
     /// Gets the instance of the voter's <see cref="PlayerVoteArea"/>.
     /// </summary>
-    public PlayerVoteArea VoteArea { get; } = playerVoteArea;
+    public PlayerVoteArea VoteArea => playerVoteArea;
 
     /// <summary>
     /// Gets the player who voted.
     /// </summary>
-    public PlayerControl Player { get; } = voter;
+    public PlayerControl Player => voter;
 }
