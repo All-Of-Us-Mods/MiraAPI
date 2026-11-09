@@ -40,8 +40,8 @@ public class ModdedOptionList<T> : IModdedOptionList<T>
     /// <param name="options">The options list.</param>
     public ModdedOptionList(IEnumerable<T> options)
     {
-        Count = options.Count();
         Options = [.. options];
+        Count = Options.Count;
     }
 
     /// <summary>

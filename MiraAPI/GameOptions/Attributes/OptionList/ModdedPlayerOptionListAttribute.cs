@@ -25,10 +25,7 @@ public class ModdedPlayerOptionListAttribute(string? title, bool allowNone = tru
 
     internal override IModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
     {
-        return new ModdedOptionList<ModdedPlayerOption>(list.Count, idx =>
-        {
-            return new(group.GroupPrefix, GetFormattedTitle(idx, property), allowNone);
-        });
+        return new ModdedOptionList<ModdedPlayerOption>(list.Count, idx => new(GetFormattedTitle(idx, property), allowNone));
     }
 
     /// <inheritdoc />
@@ -46,7 +43,7 @@ public class ModdedPlayerOptionListAttribute(string? title, bool allowNone = tru
         if (final == -1 && !allowNone)
             throw new ArgumentException("Cannot assign -1 or null to a ModdedPlayerOption that does not allow none as an option.");
 
-        opt?.SetValue(final);
+        opt.SetValue(final);
     }
 
     /// <inheritdoc />

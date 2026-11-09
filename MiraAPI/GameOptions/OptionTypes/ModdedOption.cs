@@ -34,10 +34,7 @@ public abstract class ModdedOption<T>(string groupPrefix, string title, T defaul
     /// </summary>
     public T Value
     {
-        get
-        {
-            return Getter != null ? Getter(_value) : _value;
-        }
+        get => Getter != null ? Getter(_value) : _value;
         protected set
         {
             value = ModifyValue(value, _value);

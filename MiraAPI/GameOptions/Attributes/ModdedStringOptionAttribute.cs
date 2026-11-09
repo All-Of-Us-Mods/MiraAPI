@@ -22,7 +22,7 @@ public class ModdedStringOptionAttribute(string? title, string[] values)
     {
     }
 
-    internal override IModdedOption? CreateOption(object? value, PropertyInfo property, AbstractOptionGroup group)
+    internal override IModdedOption CreateOption(object? value, PropertyInfo property, AbstractOptionGroup group)
     {
         var opt = new ModdedStringOption(group.GroupPrefix, Title ?? property.Name, value as string ?? string.Empty, values);
         Title = opt.Title;

@@ -30,6 +30,7 @@ public class ModdedToggleOptionListAttribute(string? title, string on, string of
     /// </summary>
     /// <param name="title">The option's title.</param>
     public ModdedToggleOptionListAttribute(string? title)
+        // ReSharper disable once IntroduceOptionalParameters.Global (Justification: Kept for backwards compatibility.)
         : this(title, "On", "Off")
     {
     }

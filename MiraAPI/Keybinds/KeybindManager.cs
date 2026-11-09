@@ -152,7 +152,7 @@ public static class KeybindManager
     public static List<ActionElementMap> GetControllerConflicts(bool enabledOnly = false)
     {
         var conflicts = new List<ActionElementMap>();
-        var actions = Keybinds.Where(x => x.Exclusive && x.RewiredInputAction != null && (!enabledOnly || KeybindUtils.IsControllerActionActive(x.RewiredInputAction.id))).Select(x => x.RewiredInputAction!.id).ToHashSet();
+        var actions = Keybinds.Where(x => x is { Exclusive: true, RewiredInputAction: not null } && (!enabledOnly || KeybindUtils.IsControllerActionActive(x.RewiredInputAction.id))).Select(x => x.RewiredInputAction!.id).ToHashSet();
         var player = ReInput.players.GetPlayer(0);
         for (var i = 0; i < player.controllers.joystickCount; i++)
         {

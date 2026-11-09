@@ -22,7 +22,7 @@ public class ModdedPlayerOptionAttribute(string? title, bool allowNone = true)
     {
     }
 
-    internal override IModdedOption? CreateOption(object? value, PropertyInfo property, AbstractOptionGroup group)
+    internal override IModdedOption CreateOption(object? value, PropertyInfo property, AbstractOptionGroup group)
     {
         var opt = new ModdedPlayerOption(group.GroupPrefix, Title ?? property.Name, allowNone);
         Title = opt.Title;

@@ -25,10 +25,7 @@ public class ModdedStringOptionListAttribute(string? title, string[] values)
 
     internal override IModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
     {
-        return new ModdedOptionList<ModdedStringOption>(list.Count, idx =>
-        {
-            return new ModdedStringOption(group.GroupPrefix, GetFormattedTitle(idx, property), (string)(list[idx] ?? string.Empty), values);
-        });
+        return new ModdedOptionList<ModdedStringOption>(list.Count, idx => new ModdedStringOption(group.GroupPrefix, GetFormattedTitle(idx, property), (string)(list[idx] ?? string.Empty), values));
     }
 
     /// <inheritdoc />
