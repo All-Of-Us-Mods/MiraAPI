@@ -12,10 +12,10 @@ public class MiraEventWrapper(Delegate eventHandler, int priority)
     /// <summary>
     /// Gets the event handler delegate.
     /// </summary>
-    public Delegate EventHandler { get; } = eventHandler;
+    public Delegate EventHandler => eventHandler;
 
     /// <summary>
     /// Gets the priority of the handler. Lower values are called first.
     /// </summary>
-    public int Priority { get; } = priority;
+    public int Priority => priority;
 }

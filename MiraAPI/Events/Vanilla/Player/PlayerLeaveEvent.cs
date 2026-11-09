@@ -12,10 +12,10 @@ public class PlayerLeaveEvent(ClientData data, DisconnectReasons reason) : MiraE
     /// <summary>
     /// Gets the player who left.
     /// </summary>
-    public ClientData ClientData { get; } = data;
+    public ClientData ClientData => data;
 
     /// <summary>
     /// Gets the reason why the player left.
     /// </summary>
-    public DisconnectReasons Reason { get; } = reason;
+    public DisconnectReasons Reason => reason;
 }

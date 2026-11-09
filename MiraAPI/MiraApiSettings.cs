@@ -110,7 +110,7 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
     /// <returns>The coroutine that resizes the UI.</returns>
     public static IEnumerator CoResizeSettingsUI()
     {
-        while (!HudManager.Instance || !MiraHudHelper.UiGrid || !MiraHudHelper.ExtraUiGrid)
+        while (!HudManager.InstanceExists || !MiraHudHelper.UiGrid || !MiraHudHelper.ExtraUiGrid)
         {
             yield return null;
         }

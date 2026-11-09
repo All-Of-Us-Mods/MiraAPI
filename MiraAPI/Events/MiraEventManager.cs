@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using MiraAPI.PluginLoading;
+using MiraAPI.Utilities;
 
 namespace MiraAPI.Events;
 
@@ -152,5 +154,30 @@ public static class MiraEventManager
         }
 
         return true;
+    }
+
+    internal static void RegisterEvents(Type type, IMiraPlugin miraPlugin)
+    {
+        if (!miraPlugin.ForceRegisterEvents && !type.IsDefined<RegisterEventContainerAttribute>())
+        {
+            return;
+        }
+
+        foreach (var method in type.GetMethods(MiraPluginManager.DeclaredStaticMembers))
+        {
+            if (!method.TryGetCustomAttribute<RegisterEventAttribute>(out var eventAttribute))
+                continue;
+
+            var parameters = method.GetParameters();
+
+            if (parameters.Length != 1 || !parameters[0].ParameterType.IsSubclassOf(typeof(MiraEvent)))
+            {
+                Error($"Invalid event registration method {method.Name} in {type.Name}");
+                continue;
+            }
+
+            var paramType = parameters[0].ParameterType;
+            RegisterEventHandler(paramType, method, eventAttribute.Priority);
+        }
     }
 }

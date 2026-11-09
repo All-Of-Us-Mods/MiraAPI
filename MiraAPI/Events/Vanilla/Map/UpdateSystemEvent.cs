@@ -11,15 +11,15 @@ public class UpdateSystemEvent(SystemTypes systemType, PlayerControl player, byt
     /// <summary>
     /// Gets the type of system that will be updated.
     /// </summary>
-    public SystemTypes SystemType { get; } = systemType;
+    public SystemTypes SystemType => systemType;
 
     /// <summary>
     /// Gets the <see cref="PlayerControl"/> that is updating the system.
     /// </summary>
-    public PlayerControl Player { get; } = player;
+    public PlayerControl Player => player;
 
     /// <summary>
     /// Gets the byte amount the system is being updated by.
     /// </summary>
-    public byte Amount { get; } = amount;
+    public byte Amount => amount;
 }

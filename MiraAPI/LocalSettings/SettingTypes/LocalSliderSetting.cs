@@ -41,7 +41,7 @@ public class LocalSliderSetting(
     /// <summary>
     /// Gets a value indicating whether the value should be displayed next to name.
     /// </summary>
-    public bool DisplayValue { get; } = displayValue;
+    public bool DisplayValue => displayValue;
 
     /// <summary>
     /// Gets a format for the text to use to format the number.
@@ -51,7 +51,7 @@ public class LocalSliderSetting(
     /// <summary>
     /// Gets a value indicating whether the value should be rounded.
     /// </summary>
-    public bool RoundValue { get; } = roundValue;
+    public bool RoundValue => roundValue;
 
     /// <summary>
     /// Gets the suffix for the number value.

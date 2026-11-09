@@ -12,15 +12,15 @@ public class ReportBodyEvent(PlayerControl reporter, NetworkedPlayerInfo? target
     /// <summary>
     /// Gets the player that is reporting the body.
     /// </summary>
-    public PlayerControl Reporter { get; } = reporter;
+    public PlayerControl Reporter => reporter;
 
     /// <summary>
     /// Gets the player that is being reported. Will be <see langword="null"/> for emergency meeting.
     /// </summary>
-    public NetworkedPlayerInfo? Target { get; } = target;
+    public NetworkedPlayerInfo? Target => target;
 
     /// <summary>
     /// Gets the <see cref="DeadBody"/> that is being reported. Will be <see langword="null"/> for emergency meeting.
     /// </summary>
-    public DeadBody? Body { get; } = body;
+    public DeadBody? Body => body;
 }

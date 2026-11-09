@@ -22,7 +22,7 @@ public abstract class MultiTargetButton<T> : CustomActionButton
     /// <summary>
     /// Gets the maximum amount of targets the button can have.
     /// </summary>
-    public virtual int MaxTargets { get; } = int.MaxValue;
+    public virtual int MaxTargets => int.MaxValue;
 
     /// <inheritdoc cref="CustomActionButton{T}.IsTargetValid"/>
     public virtual bool IsTargetValid(T target)

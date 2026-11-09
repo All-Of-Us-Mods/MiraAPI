@@ -13,12 +13,12 @@ public class DummyVoteEvent(DummyBehaviour dummy) : MiraCancelableEvent
     /// <summary>
     /// Gets the dummy that needs to vote.
     /// </summary>
-    public DummyBehaviour Dummy { get; } = dummy;
+    public DummyBehaviour Dummy => dummy;
 
     /// <summary>
     /// Gets the instance of the dummy's <see cref="PlayerVoteData"/>.
     /// </summary>
-    public PlayerVoteData VoteData { get; } = dummy.myPlayer.GetVoteData();
+    public PlayerVoteData VoteData => dummy.myPlayer.GetVoteData();
 
     /// <summary>
     /// Gets or sets a value indicating whether the dummy can vote to skip the meeting.

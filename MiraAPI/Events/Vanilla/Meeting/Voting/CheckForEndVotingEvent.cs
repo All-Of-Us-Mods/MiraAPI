@@ -9,7 +9,7 @@ public class CheckForEndVotingEvent(bool isVotingComplete) : MiraCancelableEvent
     /// <summary>
     /// Gets a value indicating whether default voting logic determines that voting is complete.
     /// </summary>
-    public bool IsVotingComplete { get; } = isVotingComplete;
+    public bool IsVotingComplete => isVotingComplete;
 
     /// <summary>
     /// Gets or sets a value indicating whether the voting should be forced to end, regardless of the default logic.

@@ -68,11 +68,14 @@ public static partial class ModifierManager
             return false;
         }
 
-        IdToTypeModifierMap.Add(GetNextTypeId(), modifierType);
-        TypeToIdModifierMap.Add(modifierType, _nextTypeId);
+        var id = GetNextTypeId();
+        IdToTypeModifierMap.Add(id, modifierType);
+        TypeToIdModifierMap.Add(modifierType, id);
 
         IBaseModifier modifier;
-        if (modifierType.GetConstructor(Type.EmptyTypes) != null)
+        var ctor = modifierType.GetConstructor(Type.EmptyTypes);
+
+        if (ctor != null)
         {
             modifier = (IBaseModifier)Activator.CreateInstance(modifierType)!;
         }
@@ -90,7 +93,7 @@ public static partial class ModifierManager
             return true;
         }
 
-        if (modifierType.GetConstructor(Type.EmptyTypes) == null)
+        if (ctor == null)
         {
             Error($"Game Modifier {modifierType.FullName} does not have a parameterless constructor!");
             return false;
@@ -103,7 +106,7 @@ public static partial class ModifierManager
             PrioritiesToIdsMap[priority] = list = [];
         }
 
-        list.Add(_nextTypeId);
+        list.Add(id);
         return true;
     }
 
