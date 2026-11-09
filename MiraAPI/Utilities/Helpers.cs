@@ -897,9 +897,8 @@ public static class Helpers
             return;
         }
 
-        var cachedPrefab = Object.Instantiate(rowPrefab!.gameObject);
+        var cachedPrefab = Object.Instantiate(rowPrefab!.gameObject, null, false);
         cachedPrefab.name = "MiraAPIAdvancedSettingsRowPrefab";
-        cachedPrefab.transform.SetParent(null, false);
         cachedPrefab.transform.localPosition = Vector3.zero;
         cachedPrefab.transform.localRotation = Quaternion.identity;
         cachedPrefab.SetActive(false);
@@ -919,9 +918,7 @@ public static class Helpers
     {
         return CreateAdvancedSettingsPage(
             parent,
-            [.. settings.Select(setting => new AdvancedSettingsRow(setting.Key, setting.Value, null))],
-            2,
-            false);
+            [.. settings.Select(setting => new AdvancedSettingsRow(setting.Key, setting.Value, null))]);
     }
 
     internal static GameObject CreateAdvancedSettingsPage(

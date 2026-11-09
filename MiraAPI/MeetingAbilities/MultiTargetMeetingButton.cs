@@ -56,7 +56,7 @@ public abstract class MultiTargetMeetingButton : TargetedMeetingButton
         }
 
         Timer = Cooldown;
-        UsesLeft -= 1;
+        UsesLeft--;
         OnFinish();
         Targets = [];
     }

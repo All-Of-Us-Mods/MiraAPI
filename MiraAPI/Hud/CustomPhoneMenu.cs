@@ -135,7 +135,7 @@ public abstract class CustomPhoneMenu : ICustomMenu
     /// </summary>
     public List<ShapeshifterPanel> EntryPanels => [.. MenuEntries.Select(e => e.Panel)];
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (Justification: Unity convention.)
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (Justification: Unity fields.)
 #pragma warning disable S1104 // Fields should not have public accessibility (Justification: Read above.)
 #pragma warning disable SA1300 // Element should begin with upper-case letter (Justification: Read above.)
     public Transform transform => Component.transform;
