@@ -17,17 +17,17 @@ public class HandleVoteEvent(PlayerVoteData playerVoteData, byte targetId, bool 
     /// <summary>
     /// Gets the instance of the voter's <see cref="PlayerVoteData"/>.
     /// </summary>
-    public PlayerVoteData VoteData { get; } = playerVoteData;
+    public PlayerVoteData VoteData => playerVoteData;
+
+    /// <summary>
+    /// Gets the player id of the target.
+    /// </summary>
+    public byte TargetId => targetId;
 
     /// <summary>
     /// Gets the player who voted.
     /// </summary>
     public PlayerControl Player { get; } = playerVoteData.Owner;
-
-    /// <summary>
-    /// Gets the player id of the target.
-    /// </summary>
-    public byte TargetId { get; } = targetId;
 
     /// <summary>
     /// Gets the <see cref="NetworkedPlayerInfo"/> of the target.

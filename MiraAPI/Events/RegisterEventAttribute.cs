@@ -13,13 +13,13 @@ public class RegisterEventAttribute(int priority, bool invokeOnSubtype) : Attrib
     /// <summary>
     /// Gets the priority of the event. Lower values are called first.
     /// </summary>
-    public int Priority { get; } = priority;
+    public int Priority => priority;
 
     /// <summary>
     /// Gets a value indicating whether the event handler should also be
     /// triggered by subclasses of the <see cref="MiraEvent"/> type of the handler.
     /// </summary>
-    public bool InvokeOnSubtype { get; } = invokeOnSubtype;
+    public bool InvokeOnSubtype => invokeOnSubtype;
 
     /// <inheritdoc cref="RegisterEventAttribute"/>
     public RegisterEventAttribute(int priority)

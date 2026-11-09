@@ -45,6 +45,7 @@ public static class CustomButtonManager
 
         CustomButtons.Add(button);
         pluginInfo.InternalButtons.Add(button);
+
         typeof(CustomButtonSingleton<>).MakeGenericType(buttonType)
             .GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic)! // Suppression message refers to this
             .SetValue(null, button);

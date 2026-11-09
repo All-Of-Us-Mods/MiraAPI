@@ -333,4 +333,28 @@ public static class MiraEventManager
 
         EventHandlersToLoad.Clear();
     }
+
+    internal static void RegisterEvents(Type type, IMiraPlugin miraPlugin)
+    {
+        if (!miraPlugin.ForceRegisterEvents && !type.IsDefined<RegisterEventContainerAttribute>())
+        {
+            return;
+        }
+
+        foreach (var method in type.GetMethods(MiraPluginManager.DeclaredStaticMembers))
+        {
+            if (!method.TryGetCustomAttribute<RegisterEventAttribute>(out var eventAttribute))
+                continue;
+
+            var parameters = method.GetParameters();
+
+            if (parameters.Length != 1 || !parameters[0].ParameterType.IsSubclassOf(typeof(MiraEvent)))
+            {
+                Error($"Invalid event registration method {method.Name} in {type.Name}");
+                continue;
+            }
+
+            RegisterEventHandler(method, eventAttribute.Priority, eventAttribute.InvokeOnSubtype);
+        }
+    }
 }
