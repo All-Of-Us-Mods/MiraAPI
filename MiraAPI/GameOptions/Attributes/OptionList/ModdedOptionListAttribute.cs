@@ -16,7 +16,7 @@ namespace MiraAPI.GameOptions.Attributes;
 [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
 public abstract class ModdedOptionListAttribute(string title) : PropertyOptionAttribute
 {
-    internal IModdedOptionList? HolderOptionList;
+    internal IBaseModdedOptionList? HolderOptionList;
     internal IList? Value;
     internal Type ValueType;
 
@@ -70,7 +70,7 @@ public abstract class ModdedOptionListAttribute(string title) : PropertyOptionAt
     /// <returns>The value of the option as an object.</returns>
     public abstract object GetValue(int idx);
 
-    internal abstract IModdedOptionList? CreateOptionList(IList value, PropertyInfo property);
+    internal abstract IBaseModdedOptionList? CreateOptionList(IList value, PropertyInfo property);
 
     /// <summary>
     /// Gets the <see cref="Title"/> formatted with the option's index.

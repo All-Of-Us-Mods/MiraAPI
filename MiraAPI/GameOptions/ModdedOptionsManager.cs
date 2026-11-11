@@ -116,7 +116,7 @@ public static class ModdedOptionsManager
                 continue;
             }
 
-            if (property.PropertyType.IsAssignableTo(typeof(IModdedOptionList)))
+            if (property.PropertyType.IsAssignableTo(typeof(IBaseModdedOptionList)))
             {
                 RegisterPropertyOptionList(type, property, pluginInfo);
                 continue;
@@ -136,7 +136,7 @@ public static class ModdedOptionsManager
 
         foreach (var field in type.GetFields(MiraPluginManager.DeclaredInstanceMembers)
             .Where(f => !MiraPluginManager.IsAutoPropertyBackingField(f)
-                && (f.FieldType.IsAssignableTo(typeof(IModdedOption)) || f.FieldType.IsAssignableTo(typeof(IModdedOptionList)))))
+                && (f.FieldType.IsAssignableTo(typeof(IModdedOption)) || f.FieldType.IsAssignableTo(typeof(IBaseModdedOptionList)))))
         {
             Error($"{field.Name} is a field, not a property. Use properties for options.");
         }
@@ -234,7 +234,7 @@ public static class ModdedOptionsManager
             return;
         }
 
-        if (property.GetValue(group) is not IModdedOptionList optionList)
+        if (property.GetValue(group) is not IBaseModdedOptionList optionList)
         {
             Error($"Failed to get option list for {property.Name}");
             return;
@@ -244,7 +244,7 @@ public static class ModdedOptionsManager
 
         for (var i = 0; i < optionList.Count; i++)
         {
-            RegisterOption(optionList[i], group, configName(i), pluginInfo);
+            RegisterOption(optionList.ElementAt(i), group, configName(i), pluginInfo);
         }
     }
 
@@ -341,7 +341,7 @@ public static class ModdedOptionsManager
 
         for (var i = 0; i < optionList.Count; i++)
         {
-            var option = optionList[i];
+            var option = optionList.ElementAt(i);
 
             if (visibilityFactory != null)
                 option.Visible = (Func<bool>)(visibilityFactory(i) ?? DelegateUtilities.AlwaysTrue);
