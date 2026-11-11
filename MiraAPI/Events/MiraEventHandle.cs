@@ -16,18 +16,18 @@ public class MiraEventHandle
     /// <summary>
     /// Gets the priority of the handler. Lower values are called first.
     /// </summary>
-    internal int Priority { get; }
+    public int Priority { get; }
 
     /// <summary>
     /// Gets the event handler delegate.
     /// </summary>
-    internal Delegate EventHandler { get; }
+    public Delegate EventHandler { get; }
 
     /// <summary>
     /// Gets a value indicating whether the event handler should also be
-    /// tirggered by subclasses of <see cref="EventType"/>.
+    /// triggered by subclasses of <see cref="EventType"/>.
     /// </summary>
-    internal bool InvokeOnSubtype { get; }
+    public bool InvokeOnSubtype { get; }
 
     internal MiraEventHandle(Delegate eventHandler, int priority, Type type, bool invokeOnSubtype)
     {

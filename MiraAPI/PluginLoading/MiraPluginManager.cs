@@ -104,7 +104,7 @@ public sealed class MiraPluginManager
             PluginsWithOptionsOrGameModes = [.. RegisteredPlugins.Where(m => m.MiraPlugin.DisplayOnOptionsMenu || m.GameModes.Count > 0)];
 
             ModifierManager.Modifiers = new ReadOnlyCollection<BaseModifier>(ModifierManager.InternalModifiers);
-            MiraEventManager.OnLoadFinilize();
+            MiraEventManager.OnLoadFinalize();
         };
     }
 
@@ -143,7 +143,7 @@ public sealed class MiraPluginManager
     {
         if (plugin.ForceRegisterEvents)
         {
-            Warning("For optimisation reasons, MiraAPI no longer automatically searches every type for events. Please use RegisterEventsAttribute moving forward.");
+            Warning("For optimisation reasons, MiraAPI no longer automatically searches every type for events. Please use RegisterEventContainerAttribute moving forward.");
         }
 
         foreach (var type in assembly.GetTypes())

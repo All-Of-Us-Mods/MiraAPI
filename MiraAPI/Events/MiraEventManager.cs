@@ -27,7 +27,7 @@ public static class MiraEventManager
 
     private static readonly Dictionary<Type, HashSet<Type>> TrackedEventTypes = [];
 
-    private static bool loadFinilized = false;
+    private static bool loadFinalized = false;
 
     /// <summary>
     /// Invoke a <see cref="MiraEvent"/>.
@@ -77,7 +77,7 @@ public static class MiraEventManager
 
     internal static bool RegisterEventType(Type eventType, MiraPluginInfo info)
     {
-        if (!eventType.IsSubclassOf(typeof(MiraEvent)))
+        if (eventType.IsAbstract || !eventType.IsSubclassOf(typeof(MiraEvent)))
         {
             return false;
         }
@@ -243,7 +243,7 @@ public static class MiraEventManager
 
     private static void EventHandlerAdded(Type type, MiraEventHandle eventHandler)
     {
-        if (!loadFinilized)
+        if (!loadFinalized)
         {
             EventHandlersToLoad.TryAdd(type, []);
             EventHandlersToLoad[type].Add(eventHandler);
@@ -277,7 +277,7 @@ public static class MiraEventManager
     /// <returns><see langword="true"/> if the event was unregistered successfully, <see langword="false"/> otherwise.</returns>
     public static bool UnregisterEventHandler(MiraEventHandle eventHandle)
     {
-        if (!loadFinilized)
+        if (!loadFinalized)
         {
             if (!EventHandlersToLoad.TryGetValue(eventHandle.EventType, out var handlersToLoad))
             {
@@ -311,9 +311,9 @@ public static class MiraEventManager
         return removed;
     }
 
-    internal static void OnLoadFinilize()
+    internal static void OnLoadFinalize()
     {
-        loadFinilized = true;
+        loadFinalized = true;
         EventTypes = new ReadOnlyCollection<Type>(InternalEventTypes);
 
         foreach (var eventType in EventTypes)
