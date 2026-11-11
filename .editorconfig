@@ -119,3 +119,6 @@ dotnet_diagnostic.SA1114.severity = none
 
 # SA1143: Conditional expressions must be formatted consistently
 dotnet_diagnostic.SA1143.severity = none
+
+# SA1504: All accessors should be single-line or multi-line
+dotnet_diagnostic.SA1504.severity = none
