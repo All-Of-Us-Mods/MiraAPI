@@ -96,4 +96,10 @@ public class StateMachineWrapper<T>
         _propertyCache[parameterName] = property;
         return (TField)property.GetValue(_stateMachine)!;
     }
+
+    /// <summary>
+    /// Implicitly converts a state machine wrapper into its <typeparamref name="T"/> instance.
+    /// </summary>
+    /// <param name="wrapper">The wrapper.</param>
+    public static implicit operator T(StateMachineWrapper<T> wrapper) => wrapper.Instance;
 }

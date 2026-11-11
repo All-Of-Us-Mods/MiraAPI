@@ -168,9 +168,6 @@ public abstract class AbstractRoleOptionGroup<T> : AbstractOptionGroup<T>
     where T : ICustomRole
 {
     /// <inheritdoc />
-    public override Type OptionableType => typeof(T);
-
-    /// <inheritdoc />
     public override MenuCategory ParentMenu => MenuCategory.Roles;
 
     /// <inheritdoc />

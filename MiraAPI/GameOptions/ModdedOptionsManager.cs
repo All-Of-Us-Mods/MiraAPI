@@ -74,8 +74,11 @@ public static class ModdedOptionsManager
         "Major Code Smell",
         "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields",
         Justification = "Dynamic singleton initialization requires reflection to bypass the private field access modifier because the type is only known at runtime.")]
-    internal static bool RegisterGroup(Type type, MiraPluginInfo pluginInfo)
+    internal static bool RegisterGroup(in MiraPluginManager.RegistrationContext context)
     {
+        var type = context.Type;
+        var pluginInfo = context.PluginInfo;
+
         if (!type.IsAssignableTo(typeof(AbstractOptionGroup)))
         {
             return false;

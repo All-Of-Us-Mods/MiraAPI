@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using BepInEx.Configuration;
-using BepInEx.Unity.IL2CPP;
 using MiraAPI.LocalSettings.Attributes;
 using MiraAPI.PluginLoading;
 using MiraAPI.Utilities;
@@ -24,8 +23,11 @@ public static class LocalSettingsManager
         "Major Code Smell",
         "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields",
         Justification = "Dynamic singleton initialization requires reflection to bypass the private field access modifier because the type is only known at runtime.")]
-    internal static bool RegisterLocalTabs(Type type, BasePlugin pluginInfo)
+    internal static bool RegisterLocalTabs(in MiraPluginManager.RegistrationContext context)
     {
+        var type = context.Type;
+        var basePlugin = context.BasePlugin;
+
         if (!type.IsAssignableTo(typeof(LocalSettingsTab)))
         {
             return false;
@@ -37,7 +39,7 @@ public static class LocalSettingsManager
             return false;
         }
 
-        if (Activator.CreateInstance(type, pluginInfo.Config) is not LocalSettingsTab tabInstance)
+        if (Activator.CreateInstance(type, basePlugin.Config) is not LocalSettingsTab tabInstance)
         {
             return false;
         }
