@@ -23,7 +23,7 @@ public class ModdedStringOptionListAttribute(string? title, string[] values)
     {
     }
 
-    internal override IModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
+    internal override IBaseModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
     {
         return new ModdedOptionList<ModdedStringOption>(list.Count, idx => new ModdedStringOption(group.GroupPrefix, GetFormattedTitle(idx, property), (string)(list[idx] ?? string.Empty), values));
     }
@@ -37,7 +37,7 @@ public class ModdedStringOptionListAttribute(string? title, string[] values)
     /// <inheritdoc />
     public void SetValueUnboxed(int idx, string value)
     {
-        (HolderOptionList?[idx] as ModdedStringOption)?.SetValue(value);
+        (HolderOptionList?.ElementAt(idx) as ModdedStringOption)?.SetValue(value);
     }
 
     /// <inheritdoc />
@@ -49,7 +49,7 @@ public class ModdedStringOptionListAttribute(string? title, string[] values)
     /// <inheritdoc />
     public string GetValueUnboxed(int idx)
     {
-        return HolderOptionList?[idx] is ModdedStringOption opt
+        return HolderOptionList?.ElementAt(idx) is ModdedStringOption opt
             ? opt.Value
             : throw new InvalidOperationException($"HolderOption for option \"{Titles[idx]}\" is not a ModdedStringOption");
     }

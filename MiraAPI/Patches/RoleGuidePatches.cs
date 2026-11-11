@@ -88,6 +88,8 @@ public static class RoleGuidePatches
 
     private static bool IsModifiersTabActive => ActiveGuideTabIndex == ModifiersTabIndex;
 
+    private static readonly PropertyInfo? CaretYOffset = typeof(TextBoxTMP).GetProperty("caretYOffset", BindingFlags.Instance | BindingFlags.Public);
+
     [HarmonyPostfix]
     [HarmonyPriority(Priority.First)]
     [HarmonyPatch(typeof(MatchInfoGuide), nameof(MatchInfoGuide.CreateNormalModeSettings))]
@@ -212,16 +214,6 @@ public static class RoleGuidePatches
     {
         ApplyGuideScale(__instance, LocalSettingsTabSingleton<MiraApiSettings>.Instance.MatchInfoGuideScaleFactor.Value);
         Coroutines.Start(CoPreload(__instance));
-    }
-
-    public static void TriggerPreload(MatchInfoGuide instance)
-    {
-        if (!instance || _populate != null)
-        {
-            return;
-        }
-
-        Coroutines.Start(CoPreload(instance));
     }
 
     private static IEnumerator CoPreload(MatchInfoGuide instance)
@@ -765,8 +757,7 @@ public static class RoleGuidePatches
                     modifier.ModifierCategoryTitle,
                     modifier.ParentMod.MiraPlugin.GetAbbreviatedModName(),
                     null,
-                    modifier,
-                    modifier.TypeId));
+                    modifier));
             }
         }
 
@@ -802,8 +793,7 @@ public static class RoleGuidePatches
                 roleBehaviour.GetCategoryTitle(),
                 modId,
                 roleBehaviour,
-                null,
-                (uint)roleBehaviour.Role));
+                null));
         }
 
         _roleEntriesMode = activeModeType;
@@ -834,16 +824,14 @@ public static class RoleGuidePatches
 
     private static float GetCaretYOffset(TextBoxTMP box)
     {
+        if (CaretYOffset == null)
+        {
+            return 0f;
+        }
+
         try
         {
-            var prop = typeof(TextBoxTMP).GetProperty("caretYOffset", BindingFlags.Instance | BindingFlags.Public);
-
-            if (prop == null)
-            {
-                return 0f;
-            }
-
-            return Convert.ToSingle(prop.GetValue(box), CultureInfo.InvariantCulture);
+            return Convert.ToSingle(CaretYOffset.GetValue(box), CultureInfo.InvariantCulture);
         }
         catch
         {
@@ -960,14 +948,13 @@ public static class RoleGuidePatches
         }
     }
 
-    private sealed class DetailedPanel(string title, string category, string modId, RoleBehaviour? role, GameModifier? modifier, uint typeId)
+    private sealed class DetailedPanel(string title, string category, string modId, RoleBehaviour? role, GameModifier? modifier)
     {
         public string Title => title;
         public string Category => category;
         public string ModId => modId;
         public RoleBehaviour? Role => role;
         public GameModifier? Modifier => modifier;
-        public uint TypeId => typeId;
         public MatchInfoRolePanel? Panel { get; set; }
         public int Amount { get; set; }
         public int Chance { get; set; }
@@ -1004,12 +991,12 @@ public static class RoleGuidePatches
 
     private static void UpdateSpinner()
     {
-        if (_loadingSpinner != null)
-        {
-            _loadingSpinner.gameObject.SetActive(
-                _loading && ActiveGuideTabIndex is RolesTabIndex or ModifiersTabIndex &&
-                !(_wikiScroller && _wikiScroller.gameObject.activeSelf));
-        }
+        if (_loadingSpinner == null)
+            return;
+
+        _loadingSpinner.gameObject.SetActive(
+            _loading && ActiveGuideTabIndex is RolesTabIndex or ModifiersTabIndex &&
+            !(_wikiScroller && _wikiScroller.gameObject.activeSelf));
     }
 
     private static float GetGridScrollBounds(int count)
@@ -1074,14 +1061,16 @@ public static class RoleGuidePatches
         foreach (var item in collection)
         {
             action(item);
-            if (timer.ElapsedMilliseconds > budget)
+            if (timer.ElapsedMilliseconds <= budget)
             {
-                timer.Restart();
-                yield return null;
-                if (!_guide)
-                {
-                    yield break;
-                }
+                continue;
+            }
+
+            timer.Restart();
+            yield return null;
+            if (!_guide)
+            {
+                yield break;
             }
         }
     }
@@ -1188,15 +1177,17 @@ public static class RoleGuidePatches
         {
             ComputeCounts(entry);
             entry.Visible = entry.CanShow && MatchesSearch(entry, searchText);
-            if (entry.Panel)
+            if (!entry.Panel)
             {
-                dynamic entryType = entry.Modifier != null ? entry.Modifier : entry.Role!;
-                var text = GetPanelCountText(entryType, entry.Amount, entry.Chance, entry.ModId);
-                SetPanelCount(entry.Panel!, text);
-                if (!entry.Visible && entry.Panel!.gameObject.activeSelf)
-                {
-                    entry.Panel.gameObject.SetActive(false);
-                }
+                continue;
+            }
+
+            dynamic entryType = entry.Modifier != null ? entry.Modifier : entry.Role!;
+            var text = GetPanelCountText(entryType, entry.Amount, entry.Chance, entry.ModId);
+            SetPanelCount(entry.Panel!, text);
+            if (!entry.Visible && entry.Panel!.gameObject.activeSelf)
+            {
+                entry.Panel.gameObject.SetActive(false);
             }
         }
 
@@ -1244,7 +1235,6 @@ public static class RoleGuidePatches
         var activeModifiers = GetActiveModifiers();
         var comparisons = activeModifiers.Select(x => x.TypeId).ToList();
         comparisons.AddRange(GetActiveRoles().Select(x => (uint)x.Role));
-
         return comparisons;
     }
 
@@ -1450,26 +1440,20 @@ public static class RoleGuidePatches
     {
         if (hover)
         {
-            switch (value)
+            return value switch
             {
-                case SortingFilter.AllRoles:
-                    return MiraAssets.VisibleAllHoverSprite;
-                case SortingFilter.DisabledOnly:
-                    return MiraAssets.VisibleOffHoverSprite;
-                default:
-                    return MiraAssets.VisibleOnHoverSprite;
-            }
+                SortingFilter.AllRoles => MiraAssets.VisibleAllHoverSprite,
+                SortingFilter.DisabledOnly => MiraAssets.VisibleOffHoverSprite,
+                _ => MiraAssets.VisibleOnHoverSprite,
+            };
         }
 
-        switch (value)
+        return value switch
         {
-            case SortingFilter.AllRoles:
-                return MiraAssets.VisibleAllIdleSprite;
-            case SortingFilter.DisabledOnly:
-                return MiraAssets.VisibleOffIdleSprite;
-            default:
-                return MiraAssets.VisibleOnIdleSprite;
-        }
+            SortingFilter.AllRoles => MiraAssets.VisibleAllIdleSprite,
+            SortingFilter.DisabledOnly => MiraAssets.VisibleOffIdleSprite,
+            _ => MiraAssets.VisibleOnIdleSprite,
+        };
     }
 
     public static void SwitchMethod()
@@ -1535,26 +1519,20 @@ public static class RoleGuidePatches
     {
         if (hover)
         {
-            switch (value)
+            return value switch
             {
-                case SortingGroups.Faction:
-                    return MiraAssets.GroupFactionHoverSprite;
-                case SortingGroups.AmountChance:
-                    return MiraAssets.GroupCountHoverSprite;
-                default:
-                    return MiraAssets.GroupNoneHoverSprite;
-            }
+                SortingGroups.Faction => MiraAssets.GroupFactionHoverSprite,
+                SortingGroups.AmountChance => MiraAssets.GroupCountHoverSprite,
+                _ => MiraAssets.GroupNoneHoverSprite,
+            };
         }
 
-        switch (value)
+        return value switch
         {
-            case SortingGroups.Faction:
-                return MiraAssets.GroupFactionIdleSprite;
-            case SortingGroups.AmountChance:
-                return MiraAssets.GroupCountIdleSprite;
-            default:
-                return MiraAssets.GroupNoneIdleSprite;
-        }
+            SortingGroups.Faction => MiraAssets.GroupFactionIdleSprite,
+            SortingGroups.AmountChance => MiraAssets.GroupCountIdleSprite,
+            _ => MiraAssets.GroupNoneIdleSprite,
+        };
     }
 
     private static void CopyTextLayout(TextMeshPro source, TextMeshPro target)
@@ -1597,7 +1575,7 @@ public static class RoleGuidePatches
         passiveButton.ClickSound = HudManager.Instance.MapButton.ClickSound;
         passiveButton.OnMouseOver = new UnityEvent();
         passiveButton.OnMouseOver.AddListener(
-            (UnityAction)(() => { panel.roleIcon.color = new Color32(255, 255, 255, 150); }));
+            (UnityAction)(() => panel.roleIcon.color = new Color32(255, 255, 255, 150)));
         passiveButton.OnMouseOut = new UnityEvent();
         passiveButton.OnMouseOut.AddListener((UnityAction)(() => { panel.roleIcon.color = Color.white; }));
 
@@ -1724,12 +1702,10 @@ public static class RoleGuidePatches
         var roles = GetActiveRoles().Shuffle().ToList();
         foreach (var role in roles)
         {
-            if (role.RoleIconSolid == null)
+            if (role.RoleIconSolid != null)
             {
-                continue;
+                return role.RoleIconSolid;
             }
-
-            return role.RoleIconSolid;
         }
 
         return GetRandomFactionIcon();
@@ -1920,7 +1896,7 @@ public static class RoleGuidePatches
             modId);
     }
 
-    private static string GetPanelCountText(BaseModifier modifier, int amount, int chance, string modId)
+    private static string GetPanelCountText(GameModifier modifier, int amount, int chance, string modId)
     {
         return modifier.GetAmountText(amount, chance, modId);
     }
@@ -2054,12 +2030,10 @@ public static class RoleGuidePatches
 
     private static void EnterSettingsTab()
     {
-        if (!_uiInitialized)
+        if (_uiInitialized)
         {
-            return;
+            RefreshSettingsTab(true);
         }
-
-        RefreshSettingsTab(true);
     }
 
     private static void LeaveSettingsTab()
@@ -2285,16 +2259,19 @@ public static class RoleGuidePatches
 
     private static void UpdateSettingsTitle()
     {
-        if (_titleText && IsSettingsTabActive)
+        if (!_titleText || !IsSettingsTabActive)
         {
-            _titleText.text = GetSettingsTitle();
-            if (_titleIcon)
-            {
-                _titleIcon.sprite = GetSettingsIcon();
-
-                _titleIcon.SetSizeLimit(0.55f);
-            }
+            return;
         }
+
+        _titleText.text = GetSettingsTitle();
+        if (!_titleIcon)
+        {
+            return;
+        }
+
+        _titleIcon.sprite = GetSettingsIcon();
+        _titleIcon.SetSizeLimit(0.55f);
     }
 
     /// <summary>

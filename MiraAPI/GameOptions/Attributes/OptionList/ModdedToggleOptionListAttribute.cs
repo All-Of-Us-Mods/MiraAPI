@@ -43,7 +43,7 @@ public class ModdedToggleOptionListAttribute(string? title, string on, string of
     {
     }
 
-    internal override IModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
+    internal override IBaseModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
     {
         var optList = new ModdedOptionList<ModdedToggleOption>(
             list.Count, idx => new(group.GroupPrefix, GetFormattedTitle(idx, property), (bool)(list[idx] ?? false), on, off));
@@ -59,7 +59,7 @@ public class ModdedToggleOptionListAttribute(string? title, string on, string of
     /// <inheritdoc />
     public void SetValueUnboxed(int idx, bool value)
     {
-        (HolderOptionList?[idx] as ModdedToggleOption)?.SetValue(value);
+        (HolderOptionList?.ElementAt(idx) as ModdedToggleOption)?.SetValue(value);
     }
 
     /// <inheritdoc />
@@ -71,7 +71,7 @@ public class ModdedToggleOptionListAttribute(string? title, string on, string of
     /// <inheritdoc />
     public bool GetValueUnboxed(int idx)
     {
-        return HolderOptionList?[idx] is ModdedToggleOption opt
+        return HolderOptionList?.ElementAt(idx) is ModdedToggleOption opt
             ? opt.Value
             : throw new InvalidOperationException($"Holder option \"{Titles[idx]}\" is not a ModdedToggleOption.");
     }

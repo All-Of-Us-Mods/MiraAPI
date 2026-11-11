@@ -97,7 +97,7 @@ public class ModdedNumberOptionListAttribute(
     {
     }
 
-    internal override IModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
+    internal override IBaseModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
     {
         return new ModdedOptionList<ModdedNumberOption>(list.Count, idx =>
         {
@@ -126,7 +126,7 @@ public class ModdedNumberOptionListAttribute(
     /// <inheritdoc />
     public override void SetValue(int idx, object value)
     {
-        if (HolderOptionList?[idx] is not ModdedNumberOption opt)
+        if (HolderOptionList?.ElementAt(idx) is not ModdedNumberOption opt)
             return;
 
         var final = value switch
@@ -140,19 +140,19 @@ public class ModdedNumberOptionListAttribute(
     /// <inheritdoc />
     public void SetValueUnboxed(int idx, float value)
     {
-        (HolderOptionList?[idx] as ModdedNumberOption)?.SetValue(value);
+        (HolderOptionList?.ElementAt(idx) as ModdedNumberOption)?.SetValue(value);
     }
 
     /// <inheritdoc />
     void ITypedOptionList<int>.SetValueUnboxed(int idx, int value)
     {
-        (HolderOptionList?[idx] as ModdedNumberOption)?.SetValue(value);
+        (HolderOptionList?.ElementAt(idx) as ModdedNumberOption)?.SetValue(value);
     }
 
     /// <inheritdoc />
     public override object GetValue(int idx)
     {
-        if (HolderOptionList?[idx] is not ModdedNumberOption opt)
+        if (HolderOptionList?.ElementAt(idx) is not ModdedNumberOption opt)
             throw new InvalidOperationException($"HolderOption for option \"{Titles[idx]}\" is not a ModdedNumberOption");
 
         var value = opt.Value;
@@ -166,7 +166,7 @@ public class ModdedNumberOptionListAttribute(
     /// <inheritdoc />
     public float GetValueUnboxed(int idx)
     {
-        return HolderOptionList?[idx] is ModdedNumberOption opt
+        return HolderOptionList?.ElementAt(idx) is ModdedNumberOption opt
             ? opt.Value
             : throw new InvalidOperationException($"HolderOption for option \"{Titles[idx]}\" is not a ModdedNumberOption");
     }

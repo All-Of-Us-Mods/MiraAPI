@@ -38,7 +38,7 @@ public static class ModdedOptionsManager
     private static readonly Dictionary<RuntimeTypeHandle, HarmonyMethod> ConcretisedSetters = [];
 
     private static readonly Type OptionType = typeof(IModdedOption);
-    private static readonly Type OptionListType = typeof(IModdedOptionList);
+    private static readonly Type OptionListType = typeof(IBaseModdedOptionList);
 
     internal static readonly Dictionary<Type, List<AbstractOptionGroup>> GameModeOptionGroups = [];
     internal static readonly Dictionary<uint, IModdedOption> ModdedOptions = [];
@@ -151,7 +151,7 @@ public static class ModdedOptionsManager
 
         foreach (var field in type.GetFields(MiraPluginManager.DeclaredInstanceMembers)
             .Where(f => !MiraPluginManager.IsAutoPropertyBackingField(f)
-                && (f.FieldType.IsAssignableTo(typeof(IModdedOption)) || f.FieldType.IsAssignableTo(typeof(IModdedOptionList)))))
+                && (f.FieldType.IsAssignableTo(typeof(IModdedOption)) || f.FieldType.IsAssignableTo(typeof(IBaseModdedOptionList)))))
         {
             Error($"{field.Name} is a field, not a property. Use properties for options.");
         }
@@ -256,7 +256,7 @@ public static class ModdedOptionsManager
         MiraPluginInfo pluginInfo,
         AbstractOptionGroup group)
     {
-        if (property.GetValue(group) is not IModdedOptionList optionList)
+        if (property.GetValue(group) is not IBaseModdedOptionList optionList)
         {
             Error($"Failed to get option list for {property.Name}");
             return;
@@ -266,7 +266,7 @@ public static class ModdedOptionsManager
 
         for (var i = 0; i < optionList.Count; i++)
         {
-            RegisterOption(type, optionList[i], group, configName(i), pluginInfo);
+            RegisterOption(type, optionList.ElementAt(i), group, configName(i), pluginInfo);
         }
     }
 
@@ -345,7 +345,7 @@ public static class ModdedOptionsManager
 
         for (var i = 0; i < optionList.Count; i++)
         {
-            var option = optionList[i];
+            var option = optionList.ElementAt(i);
 
             if (visibilityFactory != null)
                 option.Visible = visibilityFactory(i) as Func<bool> ?? DelegateUtilities.AlwaysTrue;

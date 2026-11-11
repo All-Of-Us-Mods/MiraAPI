@@ -49,7 +49,7 @@ public class ModdedEnumOptionListAttribute(string? title, Type enumType, string 
     {
     }
 
-    internal override IModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
+    internal override IBaseModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
     {
         var optList = new ModdedOptionList<ModdedEnumOption>(
             list.Count, idx => new(group.GroupPrefix, GetFormattedTitle(idx, property), (int)(list[idx] ?? 0), enumType, idPrefix, values));
@@ -59,14 +59,14 @@ public class ModdedEnumOptionListAttribute(string? title, Type enumType, string 
     /// <inheritdoc />
     public override void SetValue(int idx, object value)
     {
-        var opt = HolderOptionList?[idx] as ModdedEnumOption;
+        var opt = HolderOptionList?.ElementAt(idx) as ModdedEnumOption;
         opt?.SetValue((int)value);
     }
 
     /// <inheritdoc />
     public override object GetValue(int idx)
     {
-        return HolderOptionList?[idx] is ModdedEnumOption opt
+        return HolderOptionList?.ElementAt(idx) is ModdedEnumOption opt
             ? Enum.ToObject(enumType, opt.Value)
             : throw new InvalidOperationException($"HolderOption for option \"{Titles[idx]}\" is not a ModdedEnumOption with enum type {enumType.FullName}");
     }
@@ -104,7 +104,7 @@ public class ModdedEnumOptionListAttribute<T>(string? title, string idPrefix, st
     {
     }
 
-    internal override IModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
+    internal override IBaseModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
     {
         var optList = new ModdedOptionList<ModdedEnumOption<T>>(
             list.Count, idx => new(group.GroupPrefix, GetFormattedTitle(idx, property), (T)(list[idx] ?? 0), idPrefix, values));
@@ -120,7 +120,7 @@ public class ModdedEnumOptionListAttribute<T>(string? title, string idPrefix, st
     /// <inheritdoc />
     public void SetValueUnboxed(int idx, T value)
     {
-        (HolderOptionList?[idx] as ModdedEnumOption<T>)?.SetValue(value);
+        (HolderOptionList?.ElementAt(idx) as ModdedEnumOption<T>)?.SetValue(value);
     }
 
     /// <inheritdoc />
@@ -132,7 +132,7 @@ public class ModdedEnumOptionListAttribute<T>(string? title, string idPrefix, st
     /// <inheritdoc />
     public T GetValueUnboxed(int idx)
     {
-        return HolderOptionList?[idx] is ModdedEnumOption<T> opt
+        return HolderOptionList?.ElementAt(idx) is ModdedEnumOption<T> opt
             ? opt.Value
             : throw new InvalidOperationException($"HolderOption for option \"{Titles[idx]}\" is not a ModdedEnumOption<{typeof(T).FullName}>");
     }

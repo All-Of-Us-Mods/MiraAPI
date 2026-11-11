@@ -23,7 +23,7 @@ public class ModdedPlayerOptionListAttribute(string? title, bool allowNone = tru
     {
     }
 
-    internal override IModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
+    internal override IBaseModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
     {
         return new ModdedOptionList<ModdedPlayerOption>(list.Count, idx => new(GetFormattedTitle(idx, property), allowNone));
     }
@@ -31,7 +31,7 @@ public class ModdedPlayerOptionListAttribute(string? title, bool allowNone = tru
     /// <inheritdoc />
     public override void SetValue(int idx, object value)
     {
-        if (HolderOptionList?[idx] is not ModdedPlayerOption opt)
+        if (HolderOptionList?.ElementAt(idx) is not ModdedPlayerOption opt)
             return;
 
         var final = value switch
@@ -52,7 +52,7 @@ public class ModdedPlayerOptionListAttribute(string? title, bool allowNone = tru
         if (!value && !allowNone)
             throw new ArgumentException("Cannot assign null to a ModdedPlayerOption that does not allow none as an option.");
 
-        if (HolderOptionList?[idx] is ModdedPlayerOption opt)
+        if (HolderOptionList?.ElementAt(idx) is ModdedPlayerOption opt)
             opt.SetValue(value ? opt.Values.IndexOf(value!) : -1);
     }
 
@@ -62,13 +62,13 @@ public class ModdedPlayerOptionListAttribute(string? title, bool allowNone = tru
         if (value == -1 && !allowNone)
             throw new ArgumentException("Cannot assign -1 to a ModdedPlayerOption that does not allow none as an option.");
 
-        (HolderOptionList?[idx] as ModdedPlayerOption)?.SetValue(value);
+        (HolderOptionList?.ElementAt(idx) as ModdedPlayerOption)?.SetValue(value);
     }
 
     /// <inheritdoc />
     public override object GetValue(int idx)
     {
-        if (HolderOptionList?[idx] is not ModdedPlayerOption opt)
+        if (HolderOptionList?.ElementAt(idx) is not ModdedPlayerOption opt)
             throw new InvalidOperationException($"HolderOption for option \"{Titles[idx]}\" is not a ModdedPlayerOption");
 
         if (ValueType == typeof(int))
@@ -80,7 +80,7 @@ public class ModdedPlayerOptionListAttribute(string? title, bool allowNone = tru
     /// <inheritdoc />
     public NetworkedPlayerInfo? GetValueUnboxed(int idx)
     {
-        return HolderOptionList?[idx] is ModdedPlayerOption opt
+        return HolderOptionList?.ElementAt(idx) is ModdedPlayerOption opt
             ? opt.GetPlayerValue()
             : throw new InvalidOperationException($"HolderOption for option \"{Titles[idx]}\" is not a ModdedPlayerOption");
     }
@@ -88,7 +88,7 @@ public class ModdedPlayerOptionListAttribute(string? title, bool allowNone = tru
     /// <inheritdoc />
     int ITypedOptionList<int>.GetValueUnboxed(int idx)
     {
-        return HolderOptionList?[idx] is ModdedPlayerOption opt
+        return HolderOptionList?.ElementAt(idx) is ModdedPlayerOption opt
             ? opt.Value
             : throw new InvalidOperationException($"HolderOption for option \"{Titles[idx]}\" is not a ModdedPlayerOption");
     }
