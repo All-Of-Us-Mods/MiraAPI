@@ -70,8 +70,11 @@ public static class ModdedOptionsManager
         "Major Code Smell",
         "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields",
         Justification = "Dynamic singleton initialization requires reflection to bypass the private field access modifier because the type is only known at runtime.")]
-    internal static bool RegisterGroup(Type type, MiraPluginInfo pluginInfo)
+    internal static bool RegisterGroup(in MiraPluginManager.RegistrationContext context)
     {
+        var type = context.Type;
+        var pluginInfo = context.PluginInfo;
+
         if (!type.IsAssignableTo(typeof(AbstractOptionGroup)))
         {
             return false;
@@ -116,7 +119,7 @@ public static class ModdedOptionsManager
                 continue;
             }
 
-            if (property.PropertyType.IsAssignableTo(typeof(IModdedOptionList)))
+            if (property.PropertyType.IsAssignableTo(typeof(IBaseModdedOptionList)))
             {
                 RegisterPropertyOptionList(type, property, pluginInfo);
                 continue;
@@ -136,7 +139,7 @@ public static class ModdedOptionsManager
 
         foreach (var field in type.GetFields(MiraPluginManager.DeclaredInstanceMembers)
             .Where(f => !MiraPluginManager.IsAutoPropertyBackingField(f)
-                && (f.FieldType.IsAssignableTo(typeof(IModdedOption)) || f.FieldType.IsAssignableTo(typeof(IModdedOptionList)))))
+                && (f.FieldType.IsAssignableTo(typeof(IModdedOption)) || f.FieldType.IsAssignableTo(typeof(IBaseModdedOptionList)))))
         {
             Error($"{field.Name} is a field, not a property. Use properties for options.");
         }
@@ -234,7 +237,7 @@ public static class ModdedOptionsManager
             return;
         }
 
-        if (property.GetValue(group) is not IModdedOptionList optionList)
+        if (property.GetValue(group) is not IBaseModdedOptionList optionList)
         {
             Error($"Failed to get option list for {property.Name}");
             return;
@@ -244,7 +247,7 @@ public static class ModdedOptionsManager
 
         for (var i = 0; i < optionList.Count; i++)
         {
-            RegisterOption(optionList[i], group, configName(i), pluginInfo);
+            RegisterOption(optionList.ElementAt(i), group, configName(i), pluginInfo);
         }
     }
 
@@ -341,7 +344,7 @@ public static class ModdedOptionsManager
 
         for (var i = 0; i < optionList.Count; i++)
         {
-            var option = optionList[i];
+            var option = optionList.ElementAt(i);
 
             if (visibilityFactory != null)
                 option.Visible = (Func<bool>)(visibilityFactory(i) ?? DelegateUtilities.AlwaysTrue);

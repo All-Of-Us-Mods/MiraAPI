@@ -22,28 +22,34 @@ public static class MeetingButtonManager
     /// </summary>
     public static List<MeetingActionButton> UntargetedButtons { get; internal set; } = [];
 
-    internal static bool RegisterTargetedMeetingButton(Type type, MiraPluginInfo info)
+    internal static bool RegisterTargetedMeetingButton(in MiraPluginManager.RegistrationContext context)
     {
+        var type = context.Type;
+        var pluginInfo = context.PluginInfo;
+
         if (!typeof(TargetedMeetingButton).IsAssignableFrom(type))
         {
             return false;
         }
 
         var button = (Activator.CreateInstance(type) as TargetedMeetingButton)!;
-        info.InternalTargetedMeetingButtons.Add(button);
+        pluginInfo.InternalTargetedMeetingButtons.Add(button);
         TargetedButtons.Add(button);
         return true;
     }
 
-    internal static bool RegisterMeetingButton(Type type, MiraPluginInfo info)
+    internal static bool RegisterMeetingButton(in MiraPluginManager.RegistrationContext context)
     {
+        var type = context.Type;
+        var pluginInfo = context.PluginInfo;
+
         if (!typeof(MeetingActionButton).IsAssignableFrom(type))
         {
             return false;
         }
 
         var button = (Activator.CreateInstance(type) as MeetingActionButton)!;
-        info.InternalMeetingButtons.Add(button);
+        pluginInfo.InternalMeetingButtons.Add(button);
         UntargetedButtons.Add(button);
         return true;
     }

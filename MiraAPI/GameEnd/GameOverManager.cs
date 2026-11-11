@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using MiraAPI.PluginLoading;
 
 namespace MiraAPI.GameEnd;
 
@@ -14,26 +15,28 @@ public static class GameOverManager
 
     private static int nextId = Enum.GetNames<GameOverReason>().Length;
 
-    internal static bool RegisterGameOver(Type gameOverType)
+    internal static bool RegisterGameOver(in MiraPluginManager.RegistrationContext context)
     {
-        if (!typeof(CustomGameOver).IsAssignableFrom(gameOverType))
+        var type = context.Type;
+
+        if (!typeof(CustomGameOver).IsAssignableFrom(type))
         {
             return false;
         }
 
-        if (gameOverType.IsAbstract)
+        if (type.IsAbstract)
         {
             return false;
         }
 
-        if (gameOverType.GetConstructor(Type.EmptyTypes) == null)
+        if (type.GetConstructor(Type.EmptyTypes) == null)
         {
             Error("The type must have a parameterless constructor.");
             return false;
         }
 
-        GameOverIds.Add(gameOverType, nextId);
-        GameOverTypes.Add(nextId, gameOverType);
+        GameOverIds.Add(type, nextId);
+        GameOverTypes.Add(nextId, type);
         nextId++;
         return true;
     }

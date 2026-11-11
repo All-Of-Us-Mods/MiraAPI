@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using HarmonyLib;
@@ -46,8 +45,11 @@ public static class PaletteManager
 
     private static int originalLength;
 
-    internal static bool RegisterColors(Type type, MiraPluginInfo miraPlugin)
+    internal static bool RegisterColors(in MiraPluginManager.RegistrationContext context)
     {
+        var type = context.Type;
+        var miraPlugin = context.MiraPlugin;
+
         if (!type.TryGetCustomAttribute<RegisterCustomColorsAttribute>(out var attribute))
         {
             return false;

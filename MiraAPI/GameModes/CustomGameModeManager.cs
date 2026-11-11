@@ -19,16 +19,19 @@ public static class CustomGameModeManager
         return ++lastId;
     }
 
-    internal static bool RegisterGameMode(Type gameModeType, MiraPluginInfo pluginInfo)
+    internal static bool RegisterGameMode(in MiraPluginManager.RegistrationContext context)
     {
-        if (!typeof(AbstractGameMode).IsAssignableFrom(gameModeType))
+        var type = context.Type;
+        var pluginInfo = context.PluginInfo;
+
+        if (!typeof(AbstractGameMode).IsAssignableFrom(type))
         {
             return false;
         }
 
-        if (Activator.CreateInstance(gameModeType) is not AbstractGameMode mode)
+        if (Activator.CreateInstance(type) is not AbstractGameMode mode)
         {
-            Error($"Failed to create instance of {gameModeType.Name}");
+            Error($"Failed to create instance of {type.Name}");
             return false;
         }
 

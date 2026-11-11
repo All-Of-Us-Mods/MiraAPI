@@ -78,8 +78,11 @@ public static class KeybindManager
         }
     }
 
-    internal static bool RegisterKeybinds(Type type, IMiraPlugin plugin)
+    internal static bool RegisterKeybinds(in MiraPluginManager.RegistrationContext context)
     {
+        var type = context.Type;
+        var miraPlugin = context.MiraPlugin;
+
         if (!type.IsDefined<RegisterCustomKeybindsAttribute>())
         {
             return false;
@@ -87,7 +90,7 @@ public static class KeybindManager
 
         foreach (var property in type.GetProperties(MiraPluginManager.DeclaredStaticMembers))
         {
-            if (property.PropertyType != typeof(MiraKeybind))
+            if (!property.PropertyType.IsAssignableTo(typeof(MiraKeybind)))
             {
                 continue;
             }
@@ -99,10 +102,10 @@ public static class KeybindManager
             }
 
             Keybinds.Add(keybind);
-            keybind.SourcePluginName = plugin.OptionsTitleText.Translate();
+            keybind.SourcePluginName = miraPlugin.OptionsTitleText.Translate();
         }
 
-        if (!plugin.DebugMode)
+        if (!miraPlugin.DebugMode)
             return true;
 
         foreach (var field in type.GetFields(MiraPluginManager.DeclaredStaticMembers)
