@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using BepInEx.Configuration;
 using MiraAPI.Networking;
 using MiraAPI.PluginLoading;
@@ -166,7 +167,7 @@ public interface IBaseModdedOptionList : IEnumerable
     /// <inheritdoc cref="IReadOnlyCollection{T}.Count"/>
     int Count { get; }
 
-    /// <inheritdoc cref="System.Linq.Enumerable.ElementAt{TSource}(IEnumerable{TSource}, int)"/>
+    /// <inheritdoc cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, int)"/>
     IModdedOption ElementAt(int index);
 }
 
