@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
@@ -141,16 +140,11 @@ public sealed class MiraPluginManager
         _registeredPlugins.Add(pluginInfo.Metadata.GUID, info);
 
         info.SavePublicCollections();
+
         PresetManager.CreateDefaultPreset(info);
         PresetManager.LoadPresets(info);
 
         return info;
-    }
-
-    internal static bool IsAutoPropertyBackingField(FieldInfo field)
-    {
-        return field.IsDefined<CompilerGeneratedAttribute>(false) &&
-               field.Name.Contains(">k__BackingField", StringComparison.Ordinal);
     }
 
     private static void ProcessAssemblyTypes(Assembly assembly, MiraPluginInfo info, BasePlugin basePlugin, IMiraPlugin plugin, List<Type> roles, bool isMira)

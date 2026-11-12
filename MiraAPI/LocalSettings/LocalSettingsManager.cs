@@ -92,7 +92,7 @@ public static class LocalSettingsManager
         }
 
         foreach (var field in type.GetFields(MiraPluginManager.DeclaredInstanceMembers)
-            .Where(f => !MiraPluginManager.IsAutoPropertyBackingField(f)
+            .Where(f => !f.IsAutoPropertyBackingField()
                 && (f.FieldType.IsAssignableTo(typeof(ConfigEntryBase)) || f.FieldType.IsAssignableTo(typeof(LocalSettingsButton)))))
         {
             Error($"{field.Name} is a field, not a property. Use properties for local settings or buttons.");

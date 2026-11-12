@@ -138,7 +138,7 @@ public static class ModdedOptionsManager
         }
 
         foreach (var field in type.GetFields(MiraPluginManager.DeclaredInstanceMembers)
-            .Where(f => !MiraPluginManager.IsAutoPropertyBackingField(f)
+            .Where(f => !f.IsAutoPropertyBackingField()
                 && (f.FieldType.IsAssignableTo(typeof(IModdedOption)) || f.FieldType.IsAssignableTo(typeof(IBaseModdedOptionList)))))
         {
             Error($"{field.Name} is a field, not a property. Use properties for options.");

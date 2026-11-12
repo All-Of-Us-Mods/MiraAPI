@@ -109,7 +109,7 @@ public static class KeybindManager
             return true;
 
         foreach (var field in type.GetFields(MiraPluginManager.DeclaredStaticMembers)
-            .Where(f => !MiraPluginManager.IsAutoPropertyBackingField(f) && f.FieldType.IsAssignableTo(typeof(MiraKeybind))))
+            .Where(f => !f.IsAutoPropertyBackingField() && f.FieldType.IsAssignableTo(typeof(MiraKeybind))))
         {
             Error($"{field.Name} is a field, not a property. Use properties for keybinds.");
         }

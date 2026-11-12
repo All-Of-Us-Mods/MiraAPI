@@ -83,7 +83,7 @@ public static class PaletteManager
             return true;
 
         foreach (var field in type.GetFields(MiraPluginManager.DeclaredStaticMembers)
-            .Where(f => !MiraPluginManager.IsAutoPropertyBackingField(f) && f.FieldType.IsAssignableTo(typeof(CustomColor))))
+            .Where(f => !f.IsAutoPropertyBackingField() && f.FieldType.IsAssignableTo(typeof(CustomColor))))
         {
             Error($"{field.Name} is a field, not a property. Use properties for colors.");
         }
