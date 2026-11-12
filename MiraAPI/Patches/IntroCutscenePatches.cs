@@ -31,7 +31,7 @@ public static class IntroCutscenePatches
     public static void IntroBeginPatch(IntroCutscene __instance)
     {
         var @event = new IntroBeginEvent(__instance);
-        MiraEventManager.InvokeEvent(@event);
+        @event.InvokeEvent();
 
         if (CustomGameModeManager.ActiveMode != null)
         {
@@ -61,7 +61,7 @@ public static class IntroCutscenePatches
 
             Info("IntroCutscene ShowRole reached");
             var @event = new IntroRoleRevealEvent(introCutscene);
-            MiraEventManager.InvokeEvent(@event);
+            @event.InvokeEvent();
         }
     }
 
@@ -135,13 +135,13 @@ public static class IntroCutscenePatches
             Info("IntroCutscene ended");
 
             MeetingButtonManager.OnGameStart();
-            MiraEventManager.InvokeEvent(new IntroEndEvent(introCutscene));
+            new IntroEndEvent(introCutscene).InvokeEvent();
 
             var @event = new BeforeRoundStartEvent(true);
-            MiraEventManager.InvokeEvent(@event);
+            @event.InvokeEvent();
 
             if (@event.IsCancelled) return;
-            MiraEventManager.InvokeEvent(new RoundStartEvent(true));
+            new RoundStartEvent(true).InvokeEvent();
         }
     }
 }

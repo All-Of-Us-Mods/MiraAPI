@@ -17,7 +17,7 @@ internal static class EjectionPatches
     public static void BeginPostfix(ExileController __instance)
     {
         var @event = new EjectionEvent(__instance);
-        MiraEventManager.InvokeEvent(@event);
+        @event.InvokeEvent();
 
         if (!__instance.initData.networkedPlayer || !__instance.initData.networkedPlayer.Role ||
             __instance.initData.networkedPlayer.Role is not ICustomRole role)
@@ -39,12 +39,12 @@ internal static class EjectionPatches
         public static void Postfix()
         {
             var @event = new BeforeRoundStartEvent(false);
-            MiraEventManager.InvokeEvent(@event);
+            @event.InvokeEvent();
 
             if (@event.IsCancelled) return;
 
             var @event2 = new RoundStartEvent(false);
-            MiraEventManager.InvokeEvent(@event2);
+            @event2.InvokeEvent();
         }
     }
 }

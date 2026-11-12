@@ -43,7 +43,7 @@ internal static class DummyBehaviourPatches
         yield return new WaitForSeconds(dummy.voteTime.Next());
 
         var dummyVoteEvent = new DummyVoteEvent(dummy);
-        MiraEventManager.InvokeEvent(dummyVoteEvent);
+        dummyVoteEvent.InvokeEvent();
 
         if (dummyVoteEvent.IsCancelled)
         {

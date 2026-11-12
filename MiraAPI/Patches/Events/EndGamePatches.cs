@@ -13,7 +13,7 @@ internal static class EndGamePatches
         public static bool Prefix(GameOverReason endReason)
         {
             var @event = new BeforeGameEndEvent(endReason);
-            MiraEventManager.InvokeEvent(@event);
+            @event.InvokeEvent();
 
             return !@event.IsCancelled;
         }
@@ -42,7 +42,7 @@ internal static class EndGamePatches
             }
 
             var @event = new GameEndEvent(__instance);
-            MiraEventManager.InvokeEvent(@event);
+            @event.InvokeEvent();
         }
     }
 }

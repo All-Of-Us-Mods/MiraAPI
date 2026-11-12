@@ -7,6 +7,7 @@ namespace MiraAPI.Events;
 /// </summary>
 /// <param name="eventHandler">The action for the event handler.</param>
 /// <param name="priority">The priority of the handler.</param>
+[Obsolete("Use MiraEventHandle instead. This will be removed in a future version.")]
 public class MiraEventWrapper(Delegate eventHandler, int priority)
 {
     /// <summary>
