@@ -63,9 +63,24 @@ public static class Helpers
         var headerAdded = false;
         var options = group.Children;
         var builder = new StringBuilder();
-        var summaryProvider = group as ISummarizedOptions;
-        var hiddenKeys = summaryProvider?.WikiHiddenOptionKeys;
-        var insertedSummary = false;
+        var allHiddenKeys = new HashSet<StringNames>();
+        var summaryGroups = new Dictionary<StringNames, WikiSummaryGroup>();
+
+        if (group is IWikiSummaryProvider provider && provider.SummaryGroups != null)
+        {
+            foreach (var (header, summaryGroup) in provider.SummaryGroups)
+            {
+                summaryGroups[header] = summaryGroup;
+                allHiddenKeys.UnionWith(summaryGroup.HiddenKeys);
+            }
+        }
+        else if (group is ISummarizedOptions summariser && summariser.WikiHiddenOptionKeys?.Count is > 0)
+        {
+            summaryGroups[summariser.WikiHiddenOptionKeys.First()] = new(summariser.WikiHiddenOptionKeys, summariser.GetWikiOptionSummaryLines);
+            allHiddenKeys.UnionWith(summariser.WikiHiddenOptionKeys);
+        }
+
+        allHiddenKeys.UnionWith(summaryGroups.Keys);
 
         void EnsureHeader()
         {
@@ -78,12 +93,14 @@ public static class Helpers
 
         foreach (var option in options)
         {
-            var key = option.StringName;
-            var isHidden = hiddenKeys?.Contains(key) == true;
+            if (!option.Visible())
+                continue;
 
-            if (!insertedSummary && summaryProvider != null && isHidden)
+            var key = option.StringName;
+
+            if (summaryGroups.TryGetValue(key, out var summaryGroup))
             {
-                foreach (var line in summaryProvider.GetWikiOptionSummaryLines())
+                foreach (var line in summaryGroup.SummaryLines())
                 {
                     if (string.IsNullOrWhiteSpace(line))
                         continue;
@@ -91,11 +108,9 @@ public static class Helpers
                     EnsureHeader();
                     builder.AppendLine(line);
                 }
-
-                insertedSummary = true;
             }
 
-            if (isHidden || !option.Visible())
+            if (allHiddenKeys.Contains(key))
                 continue;
 
             EnsureHeader();
