@@ -216,6 +216,16 @@ public static class RoleGuidePatches
         Coroutines.Start(CoPreload(__instance));
     }
 
+    public static void TriggerPreload(MatchInfoGuide instance)
+    {
+        if (!instance || _populate != null)
+        {
+            return;
+        }
+
+        Coroutines.Start(CoPreload(instance));
+    }
+
     private static IEnumerator CoPreload(MatchInfoGuide instance)
     {
         while (instance && (!HudManager.InstanceExists || !GameManager.Instance))
