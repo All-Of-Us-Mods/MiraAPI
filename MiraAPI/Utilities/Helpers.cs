@@ -65,6 +65,7 @@ public static class Helpers
         var builder = new StringBuilder();
         var summaryProvider = group as ISummarizedOptions;
         var hiddenKeys = summaryProvider?.WikiHiddenOptionKeys;
+        var insertedSummary = false;
 
         void EnsureHeader()
         {
@@ -75,23 +76,26 @@ public static class Helpers
             headerAdded = true;
         }
 
-        if (summaryProvider != null)
-        {
-            foreach (var line in summaryProvider.GetWikiOptionSummaryLines())
-            {
-                if (string.IsNullOrWhiteSpace(line))
-                    continue;
-
-                EnsureHeader();
-                builder.AppendLine(line);
-            }
-        }
-
         foreach (var option in options)
         {
             var key = option.StringName;
+            var isHidden = hiddenKeys?.Contains(key) == true;
 
-            if (hiddenKeys?.Contains(key) == true || !option.Visible())
+            if (!insertedSummary && summaryProvider != null && isHidden)
+            {
+                foreach (var line in summaryProvider.GetWikiOptionSummaryLines())
+                {
+                    if (string.IsNullOrWhiteSpace(line))
+                        continue;
+
+                    EnsureHeader();
+                    builder.AppendLine(line);
+                }
+
+                insertedSummary = true;
+            }
+
+            if (isHidden || !option.Visible())
                 continue;
 
             EnsureHeader();
