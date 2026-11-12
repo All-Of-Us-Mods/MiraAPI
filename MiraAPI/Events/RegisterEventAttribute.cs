@@ -23,7 +23,7 @@ public class RegisterEventAttribute(int priority, bool invokeOnSubtype) : Attrib
 
     /// <inheritdoc cref="RegisterEventAttribute"/>
     public RegisterEventAttribute(int priority)
-        : this(priority, true)
+        : this(priority, false)
     {
     }
 
@@ -35,7 +35,7 @@ public class RegisterEventAttribute(int priority, bool invokeOnSubtype) : Attrib
 
     /// <inheritdoc cref="RegisterEventAttribute"/>
     public RegisterEventAttribute()
-        : this(0, true)
+        : this(0, false)
     {
     }
 }

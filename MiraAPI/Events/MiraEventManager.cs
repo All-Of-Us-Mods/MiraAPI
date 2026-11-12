@@ -13,9 +13,9 @@ namespace MiraAPI.Events;
 /// </summary>
 public static class MiraEventManager
 {
-    private static readonly Dictionary<Type, List<MiraEventHandle>> EventHandlersToLoad = [];
-
     private static readonly Dictionary<Type, List<MiraEventHandle>> EventHandlers = [];
+    private static readonly Dictionary<Type, List<MiraEventHandle>> EventHandlersToLoad = [];
+    private static readonly Comparer<MiraEventHandle> EventComparer = Comparer<MiraEventHandle>.Create((a, b) => a.Priority.CompareTo(b.Priority));
 
     /// <summary>
     /// Gets the list of all registered <see cref="MiraEvent"/> types.
@@ -49,16 +49,25 @@ public static class MiraEventManager
     /// <returns>If there was an event handler invoked for this event, return <see langword="true"/>. Otherwise, return <see langword="false"/>.</returns>
     public static bool InvokeEvent(this MiraEvent eventInstance, Type type)
     {
-        if (!EventHandlers.TryGetValue(type.GetTrackedType(), out var handlers))
+        var trackedType = type.GetTrackedType();
+        var callableHandlers = new List<MiraEventHandle>();
+
+        if (EventHandlers.TryGetValue(trackedType, out var handlers))
         {
-            return false;
+            callableHandlers.AddRange(handlers.Where(x => x.IsTriggeredBy(type)));
         }
 
-        var callableHandlers = handlers.Where(x => x.IsTriggeredBy(type)).ToList();
+        if (!loadFinalized && EventHandlersToLoad.TryGetValue(trackedType, out var pendingHandlers))
+        {
+            callableHandlers.AddRange(pendingHandlers.Where(x => x.IsTriggeredBy(type)));
+        }
+
         if (callableHandlers.Count == 0)
         {
             return false;
         }
+
+        callableHandlers.Sort(EventComparer);
 
         foreach (var handler in callableHandlers)
         {
@@ -139,7 +148,7 @@ public static class MiraEventManager
     /// <inheritdoc cref="RegisterEventHandler(Type, MethodInfo, int, bool)"/>
     public static MiraEventHandle RegisterEventHandler(Type type, MethodInfo methodInfo, int priority)
     {
-        return RegisterEventHandler(type, methodInfo, priority, true);
+        return RegisterEventHandler(type, methodInfo, priority, false);
     }
 
     /// <inheritdoc cref="RegisterEventHandler(Type, MethodInfo, int, bool)"/>
@@ -151,7 +160,7 @@ public static class MiraEventManager
     /// <inheritdoc cref="RegisterEventHandler(Type, MethodInfo, int, bool)"/>
     public static MiraEventHandle RegisterEventHandler(Type type, MethodInfo methodInfo)
     {
-        return RegisterEventHandler(type, methodInfo, 0, true);
+        return RegisterEventHandler(type, methodInfo, 0, false);
     }
 
     /// <summary>
@@ -169,7 +178,7 @@ public static class MiraEventManager
     /// <inheritdoc cref="RegisterEventHandler(MethodInfo, int, bool)"/>
     public static MiraEventHandle RegisterEventHandler(MethodInfo methodInfo, int priority)
     {
-        return RegisterEventHandler(methodInfo, priority, true);
+        return RegisterEventHandler(methodInfo, priority, false);
     }
 
     /// <inheritdoc cref="RegisterEventHandler(MethodInfo, int, bool)"/>
@@ -181,7 +190,7 @@ public static class MiraEventManager
     /// <inheritdoc cref="RegisterEventHandler(MethodInfo, int, bool)"/>
     public static MiraEventHandle RegisterEventHandler(MethodInfo methodInfo)
     {
-        return RegisterEventHandler(methodInfo, 0, true);
+        return RegisterEventHandler(methodInfo, 0, false);
     }
 
     /// <summary>
@@ -202,7 +211,7 @@ public static class MiraEventManager
     public static MiraEventHandle RegisterEventHandler<T>(Action<T> handler, int priority)
         where T : MiraEvent
     {
-        return RegisterEventHandler(handler, priority, true);
+        return RegisterEventHandler(handler, priority, false);
     }
 
     /// <inheritdoc cref="RegisterEventHandler{T}(Action{T}, int, bool)"/>
@@ -216,7 +225,7 @@ public static class MiraEventManager
     public static MiraEventHandle RegisterEventHandler<T>(Action<T> handler)
         where T : MiraEvent
     {
-        return RegisterEventHandler(handler, 0, true);
+        return RegisterEventHandler(handler, 0, false);
     }
 
     /// <summary>
@@ -261,8 +270,7 @@ public static class MiraEventManager
         foreach (Type eventType in trackedEvents)
         {
             var handlers = EventHandlers[eventType];
-
-            var index = handlers.BinarySearch(eventHandler, Comparer<MiraEventHandle>.Create((a, b) => a.Priority.CompareTo(b.Priority)));
+            var index = handlers.BinarySearch(eventHandler, EventComparer);
 
             if (index < 0)
             {
@@ -303,12 +311,10 @@ public static class MiraEventManager
         var removed = false;
         foreach (var type in eventTypes)
         {
-            if (!EventHandlers.TryGetValue(type, out var handlers))
+            if (EventHandlers.TryGetValue(type, out var handlers))
             {
-                continue;
+                removed |= handlers.Remove(eventHandle);
             }
-
-            removed |= handlers.Remove(eventHandle);
         }
 
         return removed;
