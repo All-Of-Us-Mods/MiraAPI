@@ -504,6 +504,17 @@ public static class Helpers
         return ignoreSource ? [.. players.Where(plr => plr.PlayerId != source.PlayerId)] : players;
     }
 
+    private static readonly Comparer<PlayerControl, Vector2> PlayerPosComparer = Comparer<PlayerControl, Vector2>.Create((a, b, source) =>
+    {
+        var magnitude2 = (a!.GetTruePosition() - source).sqrMagnitude;
+        var magnitude3 = (b!.GetTruePosition() - source).sqrMagnitude;
+        return magnitude2 > magnitude3
+            ? 1
+            : magnitude2 < magnitude3
+                ? -1
+                : 0;
+    });
+
     /// <summary>
     /// Gets the closest <see cref="PlayerControl"/>s to a specific point.
     /// </summary>
@@ -537,16 +548,7 @@ public static class Helpers
                 Constants.ShipAndObjectsMask))
             select playerControl);
 
-        outputList.Sort((a, b) =>
-        {
-            var magnitude2 = (a.GetTruePosition() - source).magnitude;
-            var magnitude3 = (b.GetTruePosition() - source).magnitude;
-            return magnitude2 > magnitude3
-                ? 1
-                : magnitude2 < magnitude3
-                    ? -1
-                    : 0;
-        });
+        outputList.Sort(PlayerPosComparer, source);
         return outputList;
     }
 

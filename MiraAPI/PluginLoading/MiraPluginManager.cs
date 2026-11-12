@@ -135,7 +135,8 @@ public sealed class MiraPluginManager
         info.PluginConfig.Save();
         info.PluginConfig.SaveOnConfigSet = oldConfigSetting;
 
-        info.InternalOptionGroups.Sort((x, y) => x.GroupPriority.CompareTo(y.GroupPriority));
+        info.InternalOptionGroups.Sort(ModdedOptionsManager.Comparer);
+
         QueuedRoleRegistrations.Add(info, roles);
         _registeredPlugins.Add(pluginInfo.Metadata.GUID, info);
 

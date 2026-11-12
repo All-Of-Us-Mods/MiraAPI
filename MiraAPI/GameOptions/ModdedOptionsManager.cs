@@ -39,6 +39,7 @@ public static class ModdedOptionsManager
     internal static readonly Dictionary<Type, List<AbstractOptionGroup>> GameModeOptionGroups = [];
     internal static readonly Dictionary<uint, IModdedOption> ModdedOptions = [];
     internal static readonly List<AbstractOptionGroup> Groups = [];
+    internal static readonly Comparer<AbstractOptionGroup> Comparer = Comparer<AbstractOptionGroup>.Create((x, y) => x.GroupPriority.CompareTo(y.GroupPriority));
 
     internal static uint NextId => _nextId++;
     private static uint _nextId = 1;
