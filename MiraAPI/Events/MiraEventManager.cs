@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reflection;
 using MiraAPI.PluginLoading;
 using MiraAPI.Utilities;
@@ -11,7 +13,21 @@ namespace MiraAPI.Events;
 /// </summary>
 public static class MiraEventManager
 {
-    private static readonly Dictionary<Type, List<MiraEventWrapper>> EventWrappers = [];
+    private static readonly Dictionary<Type, List<MiraEventHandle>> EventHandlersToLoad = [];
+
+    private static readonly Dictionary<Type, List<MiraEventHandle>> EventHandlers = [];
+
+    /// <summary>
+    /// Gets the list of all registered <see cref="MiraEvent"/> types.
+    /// Generic event types are registered as their generic type definitions.
+    /// </summary>
+    public static IReadOnlyList<Type> EventTypes { get; internal set; } = [];
+
+    internal static List<Type> InternalEventTypes { get; } = [];
+
+    private static readonly Dictionary<Type, HashSet<Type>> TrackedEventTypes = [];
+
+    private static bool loadFinalized = false;
 
     /// <summary>
     /// Invoke a <see cref="MiraEvent"/>.
@@ -22,26 +38,7 @@ public static class MiraEventManager
     public static bool InvokeEvent<T>(this T eventInstance)
         where T : MiraEvent
     {
-        EventWrappers.TryGetValue(typeof(T), out var handlers);
-
-        if (handlers == null || handlers.Count == 0)
-        {
-            return false;
-        }
-
-        foreach (var handler in handlers)
-        {
-            try
-            {
-                ((Action<T>)handler.EventHandler).Invoke(eventInstance);
-            }
-            catch (Exception ex)
-            {
-                Error($"Error invoking event handler for {typeof(T).Name}: {ex}");
-            }
-        }
-
-        return true;
+        return eventInstance.InvokeEvent(typeof(T));
     }
 
     /// <summary>
@@ -52,14 +49,18 @@ public static class MiraEventManager
     /// <returns>If there was an event handler invoked for this event, return <see langword="true"/>. Otherwise, return <see langword="false"/>.</returns>
     public static bool InvokeEvent(this MiraEvent eventInstance, Type type)
     {
-        EventWrappers.TryGetValue(type, out var handlers);
-
-        if (handlers == null || handlers.Count == 0)
+        if (!EventHandlers.TryGetValue(type.GetTrackedType(), out var handlers))
         {
             return false;
         }
 
-        foreach (var handler in handlers)
+        var callableHandlers = handlers.Where(x => x.IsTriggeredBy(type)).ToList();
+        if (callableHandlers.Count == 0)
+        {
+            return false;
+        }
+
+        foreach (var handler in callableHandlers)
         {
             try
             {
@@ -74,35 +75,113 @@ public static class MiraEventManager
         return true;
     }
 
+    internal static bool RegisterEventType(in MiraPluginManager.RegistrationContext context)
+    {
+        var eventType = context.Type;
+        var pluginInfo = context.PluginInfo;
+
+        if (eventType.IsAbstract || !eventType.IsSubclassOf(typeof(MiraEvent)))
+        {
+            return false;
+        }
+
+        AddTypeToTracked(eventType);
+
+        // subtypes are added to their supertypes, regardless of which were added first
+        TrackedEventTypes[eventType].UnionWith(InternalEventTypes.Where(x => x.IsSubclassOfWithGeneric(eventType)));
+        foreach (var supertype in InternalEventTypes.Where(x => eventType.IsSubclassOfWithGeneric(x)))
+        {
+            AddTypeToTracked(supertype, eventType);
+        }
+
+        pluginInfo.InternalEventTypes.Add(eventType);
+        InternalEventTypes.Add(eventType);
+
+        return true;
+    }
+
+    private static void AddTypeToTracked(Type eventType, Type trackedAs = null!)
+    {
+        if (eventType.IsAbstract)
+        {
+            return;
+        }
+
+        if (!TrackedEventTypes.TryGetValue(eventType, out var trackedEvents))
+        {
+            trackedEvents = [];
+            TrackedEventTypes.Add(eventType, trackedEvents);
+        }
+
+        trackedAs ??= eventType;
+        trackedEvents.Add(trackedAs);
+    }
+
     /// <summary>
     /// Register a <see cref="MiraEvent"/> handler.
     /// </summary>
     /// <param name="type">The type of <see cref="MiraEvent"/> event.</param>
     /// <param name="methodInfo">The <see cref="MethodInfo"/> of the event handler.</param>
     /// <param name="priority">The priority of the event handler. Lower values are called first.</param>
+    /// <param name="invokeOnSubtype">Whether the event handler should also be triggered by subclasses of the <see cref="MiraEvent"/> type of the handler.</param>
     /// <returns>A <see cref="MiraEventHandle"/> to use when unregistering the event.</returns>
-    public static MiraEventHandle RegisterEventHandler(Type type, MethodInfo methodInfo, int priority = 0)
+    public static MiraEventHandle RegisterEventHandler(Type type, MethodInfo methodInfo, int priority, bool invokeOnSubtype)
     {
-        if (!type.IsSubclassOf(typeof(MiraEvent)))
+        if (!type.IsAssignableTo(typeof(MiraEvent)))
         {
             throw new InvalidOperationException($"Type must be a subclass of MiraEvent: {type.FullName}");
         }
 
-        EventWrappers.TryAdd(type, []);
-        var handlers = EventWrappers[type];
-
         var @delegate = Delegate.CreateDelegate(typeof(Action<>).MakeGenericType(type), methodInfo);
-        var eventWrapper = new MiraEventWrapper(@delegate, priority);
+        return RegisterEventHandler(type, @delegate, priority, invokeOnSubtype);
+    }
 
-        var index = handlers.BinarySearch(eventWrapper, Comparer<MiraEventWrapper>.Create((a, b) => a.Priority.CompareTo(b.Priority)));
+    /// <inheritdoc cref="RegisterEventHandler(Type, MethodInfo, int, bool)"/>
+    public static MiraEventHandle RegisterEventHandler(Type type, MethodInfo methodInfo, int priority)
+    {
+        return RegisterEventHandler(type, methodInfo, priority, true);
+    }
 
-        if (index < 0)
-        {
-            index = ~index;
-        }
+    /// <inheritdoc cref="RegisterEventHandler(Type, MethodInfo, int, bool)"/>
+    public static MiraEventHandle RegisterEventHandler(Type type, MethodInfo methodInfo, bool invokeOnSubtype)
+    {
+        return RegisterEventHandler(type, methodInfo, 0, invokeOnSubtype);
+    }
 
-        handlers.Insert(index, eventWrapper);
-        return new MiraEventHandle(type, eventWrapper);
+    /// <inheritdoc cref="RegisterEventHandler(Type, MethodInfo, int, bool)"/>
+    public static MiraEventHandle RegisterEventHandler(Type type, MethodInfo methodInfo)
+    {
+        return RegisterEventHandler(type, methodInfo, 0, true);
+    }
+
+    /// <summary>
+    /// Register a <see cref="MiraEvent"/> handler.
+    /// </summary>
+    /// <param name="methodInfo">The <see cref="MethodInfo"/> of the event handler.</param>
+    /// <param name="priority">The priority of the event handler. Lower values are called first.</param>
+    /// <param name="invokeOnSubtype">Whether the event handler should also be triggered by subclasses of the <see cref="MiraEvent"/> type of the handler.</param>
+    /// <returns>A <see cref="MiraEventHandle"/> to use when unregistering the event.</returns>
+    public static MiraEventHandle RegisterEventHandler(MethodInfo methodInfo, int priority, bool invokeOnSubtype)
+    {
+        return RegisterEventHandler(methodInfo.GetParameters()[0].ParameterType, methodInfo, priority, invokeOnSubtype);
+    }
+
+    /// <inheritdoc cref="RegisterEventHandler(MethodInfo, int, bool)"/>
+    public static MiraEventHandle RegisterEventHandler(MethodInfo methodInfo, int priority)
+    {
+        return RegisterEventHandler(methodInfo, priority, true);
+    }
+
+    /// <inheritdoc cref="RegisterEventHandler(MethodInfo, int, bool)"/>
+    public static MiraEventHandle RegisterEventHandler(MethodInfo methodInfo, bool invokeOnSubtype)
+    {
+        return RegisterEventHandler(methodInfo, 0, invokeOnSubtype);
+    }
+
+    /// <inheritdoc cref="RegisterEventHandler(MethodInfo, int, bool)"/>
+    public static MiraEventHandle RegisterEventHandler(MethodInfo methodInfo)
+    {
+        return RegisterEventHandler(methodInfo, 0, true);
     }
 
     /// <summary>
@@ -110,25 +189,88 @@ public static class MiraEventManager
     /// </summary>
     /// <param name="handler">The callback method/handler for the event.</param>
     /// <param name="priority">The priority of the event handler. Lower values are called first.</param>
+    /// <param name="invokeOnSubtype">Whether the event handler should also be triggered by subclasses of the <see cref="MiraEvent"/> type of the handler.</param>
     /// <typeparam name="T">Type of <see cref="MiraEvent"/> event.</typeparam>
     /// <returns>A <see cref="MiraEventHandle"/> to use when unregistering the event.</returns>
-    public static MiraEventHandle RegisterEventHandler<T>(Action<T> handler, int priority = 0)
+    public static MiraEventHandle RegisterEventHandler<T>(Action<T> handler, int priority, bool invokeOnSubtype)
         where T : MiraEvent
     {
-        EventWrappers.TryAdd(typeof(T), []);
+        return RegisterEventHandler(typeof(T), handler, priority, invokeOnSubtype);
+    }
 
-        var handlers = EventWrappers[typeof(T)];
-        var eventWrapper = new MiraEventWrapper(handler, priority);
+    /// <inheritdoc cref="RegisterEventHandler{T}(Action{T}, int, bool)"/>
+    public static MiraEventHandle RegisterEventHandler<T>(Action<T> handler, int priority)
+        where T : MiraEvent
+    {
+        return RegisterEventHandler(handler, priority, true);
+    }
 
-        var index = handlers.BinarySearch(eventWrapper, Comparer<MiraEventWrapper>.Create((a, b) => a.Priority.CompareTo(b.Priority)));
+    /// <inheritdoc cref="RegisterEventHandler{T}(Action{T}, int, bool)"/>
+    public static MiraEventHandle RegisterEventHandler<T>(Action<T> handler, bool invokeOnSubtype)
+        where T : MiraEvent
+    {
+        return RegisterEventHandler(handler, 0, invokeOnSubtype);
+    }
 
-        if (index < 0)
+    /// <inheritdoc cref="RegisterEventHandler{T}(Action{T}, int, bool)"/>
+    public static MiraEventHandle RegisterEventHandler<T>(Action<T> handler)
+        where T : MiraEvent
+    {
+        return RegisterEventHandler(handler, 0, true);
+    }
+
+    /// <summary>
+    /// Register a <see cref="MiraEvent"/> handler.
+    /// </summary>
+    /// <param name="type">The type of <see cref="MiraEvent"/> event.</param>
+    /// <param name="delegate">The <see cref="Delegate"/> method/handler for the event.</param>
+    /// <param name="priority">The priority of the event handler. Lower values are called first.</param>
+    /// <param name="invokeOnSubtype">Whether the event handler should also be triggered by subclasses of the <see cref="MiraEvent"/> type of the handler.</param>
+    /// <returns>A <see cref="MiraEventHandle"/> to use when unregistering the event.</returns>
+    private static MiraEventHandle RegisterEventHandler(Type type, Delegate @delegate, int priority, bool invokeOnSubtype)
+    {
+        var eventHandler = new MiraEventHandle(@delegate, priority, type, invokeOnSubtype);
+        EventHandlerAdded(type, eventHandler);
+        return eventHandler;
+    }
+
+    private static Type GetTrackedType(this Type type)
+    {
+        if (type.IsGenericType)
         {
-            index = ~index;
+            return type.GetGenericTypeDefinition();
         }
 
-        handlers.Insert(index, eventWrapper);
-        return new MiraEventHandle(typeof(T), eventWrapper);
+        return type;
+    }
+
+    private static void EventHandlerAdded(Type type, MiraEventHandle eventHandler)
+    {
+        if (!loadFinalized)
+        {
+            EventHandlersToLoad.TryAdd(type, []);
+            EventHandlersToLoad[type].Add(eventHandler);
+            return;
+        }
+
+        if (!TrackedEventTypes.TryGetValue(type.GetTrackedType(), out var trackedEvents))
+        {
+            return;
+        }
+
+        foreach (Type eventType in trackedEvents)
+        {
+            var handlers = EventHandlers[eventType];
+
+            var index = handlers.BinarySearch(eventHandler, Comparer<MiraEventHandle>.Create((a, b) => a.Priority.CompareTo(b.Priority)));
+
+            if (index < 0)
+            {
+                index = ~index;
+            }
+
+            handlers.Insert(index, eventHandler);
+        }
     }
 
     /// <summary>
@@ -138,22 +280,61 @@ public static class MiraEventManager
     /// <returns><see langword="true"/> if the event was unregistered successfully, <see langword="false"/> otherwise.</returns>
     public static bool UnregisterEventHandler(MiraEventHandle eventHandle)
     {
-        if (!EventWrappers.TryGetValue(eventHandle.EventType, out var handlers))
+        if (!loadFinalized)
+        {
+            if (!EventHandlersToLoad.TryGetValue(eventHandle.EventType, out var handlersToLoad))
+            {
+                return false;
+            }
+
+            if (!handlersToLoad.Remove(eventHandle))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        if (!TrackedEventTypes.TryGetValue(eventHandle.EventType.GetTrackedType(), out var eventTypes))
         {
             return false;
         }
 
-        if (!handlers.Remove(eventHandle.EventWrapper))
+        var removed = false;
+        foreach (var type in eventTypes)
         {
-            return false;
+            if (!EventHandlers.TryGetValue(type, out var handlers))
+            {
+                continue;
+            }
+
+            removed |= handlers.Remove(eventHandle);
         }
 
-        if (handlers.Count == 0)
+        return removed;
+    }
+
+    internal static void OnLoadFinalize()
+    {
+        loadFinalized = true;
+        EventTypes = new ReadOnlyCollection<Type>(InternalEventTypes);
+
+        foreach (var eventType in EventTypes)
         {
-            EventWrappers.Remove(eventHandle.EventType);
+            EventHandlers.Add(eventType, []);
         }
 
-        return true;
+        foreach (var (concreteType, eventHandlers) in EventHandlersToLoad)
+        {
+            foreach (var eventHandler in eventHandlers)
+            {
+                EventHandlerAdded(concreteType, eventHandler);
+            }
+
+            eventHandlers.Clear();
+        }
+
+        EventHandlersToLoad.Clear();
     }
 
     internal static bool RegisterEvents(in MiraPluginManager.RegistrationContext context)
@@ -181,8 +362,7 @@ public static class MiraEventManager
                 continue;
             }
 
-            var paramType = parameters[0].ParameterType;
-            RegisterEventHandler(paramType, method, eventAttribute.Priority);
+            RegisterEventHandler(method, eventAttribute.Priority, eventAttribute.InvokeOnSubtype);
         }
 
         return hasContainerAttribute;

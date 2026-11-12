@@ -55,6 +55,7 @@ public sealed class MiraPluginManager
     private static readonly (string LogContext, TypeRegistrationHandler Handler)[] RegistrationHandlers =
     [
         ("events in", MiraEventManager.RegisterEvents),
+        ("event type", MiraEventManager.RegisterEventType),
         ("options for", ModdedOptionsManager.RegisterGroup),
         ("options for", LocalSettingsManager.RegisterLocalTabs),
         ("color class", PaletteManager.RegisterColors),
@@ -113,6 +114,7 @@ public sealed class MiraPluginManager
             PaletteManager.RegisterAllColors();
             CustomButtonManager.RegisterAllButtons();
             ModifierManager.RegisterAllModifiers();
+            MiraEventManager.OnLoadFinalize();
 
             // Cache all the registered plugins into an array for easy access
             RegisteredPlugins = [.. _registeredPlugins.Values];

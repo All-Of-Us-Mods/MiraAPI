@@ -31,7 +31,7 @@ internal static class AmongUsClientSyncPatch
         var wrapper = new StateMachineWrapper<AmongUsClient>(__instance);
         var clientData = wrapper.GetParameter<ClientData>("clientData");
         var joinEvent = new PlayerJoinEvent(clientData);
-        MiraEventManager.InvokeEvent(joinEvent);
+        joinEvent.InvokeEvent();
 
         if (!AmongUsClient.Instance.AmHost)
         {
@@ -56,6 +56,6 @@ internal static class AmongUsClientSyncPatch2
     public static void PlayerLeftPatch(ClientData data, DisconnectReasons reason)
     {
         var leftEvent = new PlayerLeaveEvent(data, reason);
-        MiraEventManager.InvokeEvent(leftEvent);
+        leftEvent.InvokeEvent();
     }
 }
