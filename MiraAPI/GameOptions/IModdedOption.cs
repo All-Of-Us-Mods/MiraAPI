@@ -101,7 +101,7 @@ public interface IModdedOption
     OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, PlayerOption playerOpt, Transform container);
 
     /// <summary>
-    /// Gets the translated display value of the toggle option.
+    /// Gets the translated display value of the option.
     /// </summary>
     /// <returns>The display value.</returns>
     string GetDisplayValue();

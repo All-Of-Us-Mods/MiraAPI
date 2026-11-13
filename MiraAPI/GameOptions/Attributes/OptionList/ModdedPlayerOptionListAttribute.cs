@@ -25,7 +25,7 @@ public class ModdedPlayerOptionListAttribute(string? title, bool allowNone = tru
 
     internal override IBaseModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
     {
-        return new ModdedOptionList<ModdedPlayerOption>(list.Count, idx => new(GetFormattedTitle(idx, property), allowNone));
+        return new ModdedOptionList<ModdedPlayerOption>(list.Count, idx => new(group.GroupPrefix, GetFormattedTitle(idx, property), allowNone));
     }
 
     /// <inheritdoc />

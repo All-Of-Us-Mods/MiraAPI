@@ -301,6 +301,6 @@ public class ModdedNumberOption : ModdedOption<float>
     /// <returns>Integer value.</returns>
     public static implicit operator int(ModdedNumberOption option)
     {
-        return (int)MathF.Round(option.Value);
+        return (int)MathF.Round(option.Value, MidpointRounding.AwayFromZero);
     }
 }

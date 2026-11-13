@@ -85,7 +85,7 @@ public class ModdedPlayerOption : ModdedOption<int>
         playerOption.SetValueText();
         playerOption.AdjustButtonsActiveState();
 
-        playerOpt.gameObject.AddComponent<MiraPlayerOptionComponent>().PlayerOption = this;
+        playerOption.gameObject.AddComponent<MiraPlayerOptionComponent>().PlayerOption = this;
 
         OptionBehaviour = playerOption;
 

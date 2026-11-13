@@ -39,7 +39,7 @@ public abstract class AbstractOptionGroup
     public abstract string GroupName { get; }
 
     /// <summary>
-    /// Gets the ID prefix used for options in this group (e.g., "Options.Teleporter").
+    /// Gets the ID prefix used for options in this group (e.g., "Options.Teleporter.").
     /// </summary>
     public virtual string GroupPrefix => string.Empty;
 
@@ -53,13 +53,6 @@ public abstract class AbstractOptionGroup
     /// Gets the Optionable type of the group.
     /// </summary>
     public virtual Type? OptionableType => null;
-
-    /// <summary>
-    /// Gets a value indicating whether the group should be shown in the modifiers menu.
-    /// </summary>
-    // Completed: make this not a boolean
-    [Obsolete("Use ParentMenu instead. This will be removed in a future version.", true)]
-    public virtual bool ShowInModifiersMenu => false;
 
     /// <summary>
     /// Gets a value indicating which menu the group is in.
