@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MiraAPI.PluginLoading;
+using MiraAPI.Utilities;
 using MiraAPI.Utilities.Components;
 using UnityEngine;
 
@@ -22,34 +23,30 @@ public static class MeetingButtonManager
     /// </summary>
     public static List<MeetingActionButton> UntargetedButtons { get; internal set; } = [];
 
-    internal static bool RegisterTargetedMeetingButton(in MiraPluginManager.RegistrationContext context)
+    internal static bool RegisterTargetedMeetingButton(Type type, in MiraPluginManager.RegistrationContext context)
     {
-        var type = context.Type;
-        var pluginInfo = context.PluginInfo;
-
         if (!typeof(TargetedMeetingButton).IsAssignableFrom(type))
         {
             return false;
         }
 
         var button = (Activator.CreateInstance(type) as TargetedMeetingButton)!;
-        pluginInfo.InternalTargetedMeetingButtons.Add(button);
+        context.PluginInfo.InternalTargetedMeetingButtons.Add(button);
         TargetedButtons.Add(button);
+
+        Helpers.SetInstance(typeof(TargetedMeetingButtonSingleton<>), type, button);
         return true;
     }
 
-    internal static bool RegisterMeetingButton(in MiraPluginManager.RegistrationContext context)
+    internal static bool RegisterMeetingButton(Type type, in MiraPluginManager.RegistrationContext context)
     {
-        var type = context.Type;
-        var pluginInfo = context.PluginInfo;
-
         if (!typeof(MeetingActionButton).IsAssignableFrom(type))
         {
             return false;
         }
 
         var button = (Activator.CreateInstance(type) as MeetingActionButton)!;
-        pluginInfo.InternalMeetingButtons.Add(button);
+        context.PluginInfo.InternalMeetingButtons.Add(button);
         UntargetedButtons.Add(button);
         return true;
     }

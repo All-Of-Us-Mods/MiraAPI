@@ -29,9 +29,9 @@ namespace MiraAPI.PluginLoading;
 [SuppressMessage("Major Code Smell", "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields", Justification = "Intended behaviour.")]
 public sealed class MiraPluginManager
 {
-    internal delegate bool TypeRegistrationHandler(in RegistrationContext context);
+    internal delegate bool TypeRegistrationHandler(Type type, in RegistrationContext context);
 
-    internal readonly record struct RegistrationContext(Type Type, MiraPluginInfo PluginInfo, IMiraPlugin MiraPlugin, BasePlugin BasePlugin, List<Type> Roles);
+    internal readonly record struct RegistrationContext(MiraPluginInfo PluginInfo, IMiraPlugin MiraPlugin, BasePlugin BasePlugin, List<Type> Roles);
 
     private MiraPluginManager()
     {
@@ -66,6 +66,15 @@ public sealed class MiraPluginManager
         ("game over", GameOverManager.RegisterGameOver),
         ("meeting ability", MeetingButtonManager.RegisterMeetingButton),
         ("targeted meeting ability", MeetingButtonManager.RegisterTargetedMeetingButton),
+    ];
+
+    private static readonly (string LogContext, Action Handler)[] RegistrationFinalisers =
+    [
+        ("color", PaletteManager.RegisterAllColors),
+        ("button", CustomButtonManager.RegisterAllButtons),
+        ("modifier", ModifierManager.RegisterAllModifiers),
+        ("event", MiraEventManager.OnLoadFinalize),
+        ("plugin", Instance.FinaliseLoading),
     ];
 
     /// <summary>
@@ -110,16 +119,26 @@ public sealed class MiraPluginManager
 
         IL2CPPChainloader.Instance.Finished += () =>
         {
-            PaletteManager.RegisterAllColors();
-            CustomButtonManager.RegisterAllButtons();
-            ModifierManager.RegisterAllModifiers();
-            MiraEventManager.OnLoadFinalize();
-
-            // Cache all the registered plugins into an array for easy access
-            RegisteredPlugins = [.. _registeredPlugins.Values];
-            RegisteredPluginsWithOptions = [.. RegisteredPlugins.Where(m => m.MiraPlugin.DisplayOnOptionsMenu)];
-            PluginsWithOptionsOrGameModes = [.. RegisteredPlugins.Where(m => m.MiraPlugin.DisplayOnOptionsMenu || m.GameModes.Count > 0)];
+            foreach (var (logContext, handler) in RegistrationFinalisers)
+            {
+                try
+                {
+                    handler();
+                }
+                catch (Exception e)
+                {
+                    Error($"Failed to finalise {logContext} registry: {e}");
+                }
+            }
         };
+    }
+
+    private void FinaliseLoading()
+    {
+        // Cache all the registered plugins into an array for easy access
+        RegisteredPlugins = [.. _registeredPlugins.Values];
+        RegisteredPluginsWithOptions = [.. RegisteredPlugins.Where(m => m.MiraPlugin.DisplayOnOptionsMenu)];
+        PluginsWithOptionsOrGameModes = [.. RegisteredPlugins.Where(m => m.MiraPlugin.DisplayOnOptionsMenu || m.GameModes.Count > 0)];
     }
 
     private MiraPluginInfo RegisterPlugin(Assembly assembly, IMiraPlugin plugin, PluginInfo pluginInfo, BasePlugin basePlugin, bool isMira)
@@ -155,23 +174,23 @@ public sealed class MiraPluginManager
             Warning("For optimisation reasons, MiraAPI no longer automatically searches every type for events. Please use RegisterEventContainerAttribute moving forward.");
         }
 
+        var context = new RegistrationContext(info, plugin, basePlugin, roles);
+
         foreach (var type in assembly.GetTypes())
         {
             if ((isMira && type.IsAbstract) || type.IsDefined<MiraIgnoreAttribute>())
                 continue;
 
-            var context = new RegistrationContext(type, info, plugin, basePlugin, roles);
-
             foreach (var (logContext, handler) in RegistrationHandlers)
             {
                 try
                 {
-                    if (handler(in context))
+                    if (handler(type, in context))
                         break;
                 }
                 catch (Exception e)
                 {
-                    Error($"Failed to register {logContext} {type.Name}: {e}");
+                    Error($"Failed to register {logContext} in {type.Name}: {e}");
                 }
             }
         }

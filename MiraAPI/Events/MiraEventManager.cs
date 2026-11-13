@@ -84,27 +84,24 @@ public static class MiraEventManager
         return true;
     }
 
-    internal static bool RegisterEventType(in MiraPluginManager.RegistrationContext context)
+    internal static bool RegisterEventType(Type type, in MiraPluginManager.RegistrationContext context)
     {
-        var eventType = context.Type;
-        var pluginInfo = context.PluginInfo;
-
-        if (eventType.IsAbstract || !eventType.IsSubclassOf(typeof(MiraEvent)))
+        if (type.IsAbstract || !type.IsSubclassOf(typeof(MiraEvent)))
         {
             return false;
         }
 
-        AddTypeToTracked(eventType);
+        AddTypeToTracked(type);
 
         // subtypes are added to their supertypes, regardless of which were added first
-        TrackedEventTypes[eventType].UnionWith(InternalEventTypes.Where(x => x.IsSubclassOfWithGeneric(eventType)));
-        foreach (var supertype in InternalEventTypes.Where(x => eventType.IsSubclassOfWithGeneric(x)))
+        TrackedEventTypes[type].UnionWith(InternalEventTypes.Where(x => x.IsSubclassOfWithGeneric(type)));
+        foreach (var supertype in InternalEventTypes.Where(x => type.IsSubclassOfWithGeneric(x)))
         {
-            AddTypeToTracked(supertype, eventType);
+            AddTypeToTracked(supertype, type);
         }
 
-        pluginInfo.InternalEventTypes.Add(eventType);
-        InternalEventTypes.Add(eventType);
+        context.PluginInfo.InternalEventTypes.Add(type);
+        InternalEventTypes.Add(type);
 
         return true;
     }
@@ -343,14 +340,11 @@ public static class MiraEventManager
         EventHandlersToLoad.Clear();
     }
 
-    internal static bool RegisterEvents(in MiraPluginManager.RegistrationContext context)
+    internal static bool RegisterEvents(Type type, in MiraPluginManager.RegistrationContext context)
     {
-        var type = context.Type;
-        var miraPlugin = context.MiraPlugin;
-
         var hasContainerAttribute = type.IsDefined<RegisterEventContainerAttribute>();
 
-        if (!miraPlugin.ForceRegisterEvents && !hasContainerAttribute)
+        if (!context.MiraPlugin.ForceRegisterEvents && !hasContainerAttribute)
         {
             return false;
         }
@@ -368,7 +362,7 @@ public static class MiraEventManager
                 continue;
             }
 
-            RegisterEventHandler(method, eventAttribute.Priority, eventAttribute.InvokeOnSubtype);
+            RegisterEventHandler(parameters[0].ParameterType, method, eventAttribute.Priority, eventAttribute.InvokeOnSubtype);
         }
 
         return hasContainerAttribute;

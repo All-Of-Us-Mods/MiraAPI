@@ -19,11 +19,8 @@ public static class CustomGameModeManager
         return ++lastId;
     }
 
-    internal static bool RegisterGameMode(in MiraPluginManager.RegistrationContext context)
+    internal static bool RegisterGameMode(Type type, in MiraPluginManager.RegistrationContext context)
     {
-        var type = context.Type;
-        var pluginInfo = context.PluginInfo;
-
         if (!typeof(AbstractGameMode).IsAssignableFrom(type))
         {
             return false;
@@ -41,7 +38,7 @@ public static class CustomGameModeManager
         var id = GetNextId();
         mode.ID = id;
         IdToModeMap.Add(id, mode);
-        pluginInfo.GameModes.Add(id, mode);
+        context.PluginInfo.GameModes.Add(id, mode);
         GameModeOption.AddOption(mode);
         return true;
     }

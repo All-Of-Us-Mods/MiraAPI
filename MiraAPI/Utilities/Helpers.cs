@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using HarmonyLib;
@@ -33,6 +34,12 @@ internal readonly record struct AdvancedSettingsRow(string Title, string Value, 
 /// </summary>
 public static class Helpers
 {
+    [SuppressMessage(
+        "Major Code Smell",
+        "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields",
+        Justification = "Dynamic singleton initialization requires reflection to bypass the private field access modifier because the type is only known at runtime.")]
+    private const BindingFlags StaticInstanceFlags = BindingFlags.Static | BindingFlags.NonPublic;
+
     internal const float MatchInfoGuideBaseScale = 1.3f;
     private static readonly Regex TrailingZeroRegex = new(@"\.0+(?!\d)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
     private static NumberOption? _advancedSettingsRowPrefab;
@@ -479,6 +486,17 @@ public static class Helpers
             ];
     }
 
+    private static readonly Comparer<PlayerControl, Vector2> PlayerPosComparer = Comparer<PlayerControl, Vector2>.Create((a, b, source) =>
+    {
+        var magnitude2 = (a!.GetTruePosition() - source).sqrMagnitude;
+        var magnitude3 = (b!.GetTruePosition() - source).sqrMagnitude;
+        return magnitude2 > magnitude3
+            ? 1
+            : magnitude2 < magnitude3
+                ? -1
+                : 0;
+    });
+
     /// <summary>
     /// Gets the closest <see cref="PlayerControl"/>s to a specific <see cref="PlayerControl"/>.
     /// </summary>
@@ -503,17 +521,6 @@ public static class Helpers
 
         return ignoreSource ? [.. players.Where(plr => plr.PlayerId != source.PlayerId)] : players;
     }
-
-    private static readonly Comparer<PlayerControl, Vector2> PlayerPosComparer = Comparer<PlayerControl, Vector2>.Create((a, b, source) =>
-    {
-        var magnitude2 = (a!.GetTruePosition() - source).sqrMagnitude;
-        var magnitude3 = (b!.GetTruePosition() - source).sqrMagnitude;
-        return magnitude2 > magnitude3
-            ? 1
-            : magnitude2 < magnitude3
-                ? -1
-                : 0;
-    });
 
     /// <summary>
     /// Gets the closest <see cref="PlayerControl"/>s to a specific point.
@@ -1299,5 +1306,12 @@ public static class Helpers
         panel.roleDescription.fontMaterial.SetFloat(panel.STENCIL_NAME, 50f);
         panel.roleCount.fontMaterial.SetFloat(panel.STENCIL_NAME, 50f);
         panel.roleIcon.transform.localScale = new Vector3(3.5f, 3.5f, 1f);
+    }
+
+    internal static void SetInstance(Type openGeneric, Type typeParam, object value)
+    {
+        openGeneric.MakeGenericType(typeParam)
+            .GetField("_instance", StaticInstanceFlags)! // Suppression message refers to this
+            .SetValue(null, value);
     }
 }

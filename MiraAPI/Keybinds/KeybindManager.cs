@@ -23,6 +23,15 @@ public static class KeybindManager
     [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
     internal static readonly Dictionary<Type, VanillaKeybind> VanillaKeybinds = [];
 
+    internal static void SetKeybind<T>(int keybindId)
+        where T : ActionButton
+    {
+        var type = typeof(T);
+        var bind = new VanillaKeybind(keybindId);
+        VanillaKeybinds[type] = bind;
+        Helpers.SetInstance(typeof(VanillaKeybinding<>), type, bind);
+    }
+
     internal static void RewiredInit()
     {
         try
@@ -78,15 +87,14 @@ public static class KeybindManager
         }
     }
 
-    internal static bool RegisterKeybinds(in MiraPluginManager.RegistrationContext context)
+    internal static bool RegisterKeybinds(Type type, in MiraPluginManager.RegistrationContext context)
     {
-        var type = context.Type;
-        var miraPlugin = context.MiraPlugin;
-
         if (!type.IsDefined<RegisterCustomKeybindsAttribute>())
         {
             return false;
         }
+
+        var miraPlugin = context.MiraPlugin;
 
         foreach (var property in type.GetProperties(MiraPluginManager.DeclaredStaticMembers))
         {

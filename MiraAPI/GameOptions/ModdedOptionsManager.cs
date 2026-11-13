@@ -67,15 +67,8 @@ public static class ModdedOptionsManager
         notif.SettingsChangeMessageLogic(key, item, playSound);
     }
 
-    [SuppressMessage(
-        "Major Code Smell",
-        "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields",
-        Justification = "Dynamic singleton initialization requires reflection to bypass the private field access modifier because the type is only known at runtime.")]
-    internal static bool RegisterGroup(in MiraPluginManager.RegistrationContext context)
+    internal static bool RegisterGroup(Type type, in MiraPluginManager.RegistrationContext context)
     {
-        var type = context.Type;
-        var pluginInfo = context.PluginInfo;
-
         if (!type.IsAssignableTo(typeof(AbstractOptionGroup)))
         {
             return false;
@@ -104,39 +97,43 @@ public static class ModdedOptionsManager
             }
         }
 
+        var pluginInfo = context.PluginInfo;
+
         pluginInfo.InternalOptionGroups.Add(group);
 
         Groups.Add(group);
         TypeToGroup.Add(type, group);
-        typeof(OptionGroupSingleton<>).MakeGenericType(type)
-            .GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic)!
-            .SetValue(null, group);
+
+        Helpers.SetInstance(typeof(OptionGroupSingleton<>), type, group);
 
         foreach (var property in type.GetProperties(MiraPluginManager.DeclaredInstanceMembers))
         {
             if (property.PropertyType.IsAssignableTo(typeof(IModdedOption)))
             {
-                RegisterPropertyOption(type, property, pluginInfo);
+                RegisterPropertyOption(group, property, pluginInfo);
                 continue;
             }
 
             if (property.PropertyType.IsAssignableTo(typeof(IBaseModdedOptionList)))
             {
-                RegisterPropertyOptionList(type, property, pluginInfo);
+                RegisterPropertyOptionList(group, property, pluginInfo);
                 continue;
             }
 
             if (property.TryGetCustomAttribute<ModdedOptionAttribute>(out var attribute))
             {
-                RegisterAttributeOption(type, attribute, property, pluginInfo);
+                RegisterAttributeOption(group, attribute, property, pluginInfo);
                 continue;
             }
 
             if (property.TryGetCustomAttribute<ModdedOptionListAttribute>(out var listAttr))
             {
-                RegisterAttributeOptionList(type, listAttr, property, pluginInfo);
+                RegisterAttributeOptionList(group, listAttr, property, pluginInfo);
             }
         }
+
+        if (!pluginInfo.DebugMode)
+            return true;
 
         foreach (var field in type.GetFields(MiraPluginManager.DeclaredInstanceMembers)
             .Where(f => !f.IsAutoPropertyBackingField()
@@ -148,14 +145,8 @@ public static class ModdedOptionsManager
         return true;
     }
 
-    private static void RegisterPropertyOption(Type type, PropertyInfo property, MiraPluginInfo pluginInfo)
+    private static void RegisterPropertyOption(AbstractOptionGroup group, PropertyInfo property, MiraPluginInfo pluginInfo)
     {
-        if (!TypeToGroup.TryGetValue(type, out var group))
-        {
-            Error($"Failed to get group for {type.Name}");
-            return;
-        }
-
         if (property.GetValue(group) is not IModdedOption option)
         {
             Error($"Failed to get option for {property.Name}");
@@ -166,7 +157,7 @@ public static class ModdedOptionsManager
     }
 
     private static void RegisterAttributeOption(
-        Type type,
+        AbstractOptionGroup group,
         ModdedOptionAttribute attribute,
         PropertyInfo property,
         MiraPluginInfo pluginInfo)
@@ -174,12 +165,6 @@ public static class ModdedOptionsManager
         if (!OptionAttributes.Add(property))
         {
             Error($"Property {property.Name} already has an attribute registered.");
-            return;
-        }
-
-        if (!TypeToGroup.TryGetValue(type, out var group))
-        {
-            Error($"Failed to get group for {type.Name}");
             return;
         }
 
@@ -230,14 +215,8 @@ public static class ModdedOptionsManager
         RegisterOption(option, group, property.Name, pluginInfo);
     }
 
-    private static void RegisterPropertyOptionList(Type type, PropertyInfo property, MiraPluginInfo pluginInfo)
+    private static void RegisterPropertyOptionList(AbstractOptionGroup group, PropertyInfo property, MiraPluginInfo pluginInfo)
     {
-        if (!TypeToGroup.TryGetValue(type, out var group))
-        {
-            Error($"Failed to get group for {type.Name}");
-            return;
-        }
-
         if (property.GetValue(group) is not IBaseModdedOptionList optionList)
         {
             Error($"Failed to get option list for {property.Name}");
@@ -253,7 +232,7 @@ public static class ModdedOptionsManager
     }
 
     private static void RegisterAttributeOptionList(
-        Type type,
+        AbstractOptionGroup group,
         ModdedOptionListAttribute attribute,
         PropertyInfo property,
         MiraPluginInfo pluginInfo)
@@ -261,12 +240,6 @@ public static class ModdedOptionsManager
         if (!OptionAttributes.Add(property))
         {
             Error($"Property {property.Name} already has an attribute registered.");
-            return;
-        }
-
-        if (!TypeToGroup.TryGetValue(type, out var group))
-        {
-            Error($"Failed to get group for {type.Name}");
             return;
         }
 

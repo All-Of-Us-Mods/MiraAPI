@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 using MiraAPI.Events.Mira;
 using MiraAPI.PluginLoading;
+using MiraAPI.Utilities;
 
 namespace MiraAPI.Hud;
 
@@ -32,29 +31,20 @@ public static class CustomButtonManager
     internal static readonly Dictionary<Type, Type> ButtonEventTypes = [];
     internal static readonly Dictionary<Type, Type> ButtonCancelledEventTypes = [];
 
-    [SuppressMessage(
-        "Major Code Smell",
-        "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields",
-        Justification = "Dynamic singleton initialization requires reflection to bypass the private field access modifier because the type is only known at runtime.")]
-    internal static bool RegisterButton(in MiraPluginManager.RegistrationContext context)
+    internal static bool RegisterButton(Type type, in MiraPluginManager.RegistrationContext context)
     {
-        var type = context.Type;
-        var pluginInfo = context.PluginInfo;
-
         if (!type.IsAssignableTo(typeof(CustomActionButton)) || Activator.CreateInstance(type) is not CustomActionButton button)
         {
             return false;
         }
 
+        context.PluginInfo.InternalButtons.Add(button);
+
         CustomButtons.Add(button);
-        pluginInfo.InternalButtons.Add(button);
-
-        typeof(CustomButtonSingleton<>).MakeGenericType(type)
-            .GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic)! // Suppression message refers to this
-            .SetValue(null, button);
-
         ButtonEventTypes.Add(type, typeof(MiraButtonClickEvent<>).MakeGenericType(type));
         ButtonCancelledEventTypes.Add(type, typeof(MiraButtonCancelledEvent<>).MakeGenericType(type));
+
+        Helpers.SetInstance(typeof(CustomButtonSingleton<>), type, button);
 
         return true;
     }
@@ -62,8 +52,8 @@ public static class CustomButtonManager
     internal static void RegisterAllButtons()
     {
         // Save all buttons into a read-only collection for easy access
-        Buttons = new ReadOnlyCollection<CustomActionButton>(CustomButtonManager.CustomButtons);
-        EventTypes = new ReadOnlyDictionary<Type, Type>(CustomButtonManager.ButtonEventTypes);
-        CancelledEventTypes = new ReadOnlyDictionary<Type, Type>(CustomButtonManager.ButtonCancelledEventTypes);
+        Buttons = new ReadOnlyCollection<CustomActionButton>(CustomButtons);
+        EventTypes = new ReadOnlyDictionary<Type, Type>(ButtonEventTypes);
+        CancelledEventTypes = new ReadOnlyDictionary<Type, Type>(ButtonCancelledEventTypes);
     }
 }
