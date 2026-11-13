@@ -41,6 +41,8 @@ public class ModdedEnumOption : ModdedBaseEnumOption<int>
     public ModdedEnumOption(string groupPrefix, string title, int defaultValue, Type enumType, string idPrefix, string[]? values = null, bool includeInPreset = true)
         : base(groupPrefix, title, defaultValue, includeInPreset)
     {
+        idPrefix = idPrefix.Replace("%type%", enumType.Name);
+
         var rawValues = Enum.GetValues(enumType);
         UnderlyingValues = new int[rawValues.Length];
 
@@ -126,6 +128,7 @@ public class ModdedEnumOption<T> : ModdedBaseEnumOption<T>
     public ModdedEnumOption(string groupPrefix, string title, T defaultValue, string idPrefix, string[]? values = null, bool includeInPreset = true)
         : base(groupPrefix, title, defaultValue, includeInPreset)
     {
+        idPrefix = idPrefix.Replace("%type%", typeof(T).Name);
         UnderlyingValues = Enum.GetValues<T>();
         Values = values ?? Enum.GetNames<T>();
         StringNameValues = [.. Values.Select(x => MiraLocaleManager.GetOrCreateLocaleString($"{idPrefix}{x}"))];
