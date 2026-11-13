@@ -119,24 +119,20 @@ public static class CustomRoleManager
         pluginInfo.PluginConfig.SaveOnConfigSet = oldConfigSetting;
     }
 
-    internal static bool RegisterRole(in MiraPluginManager.RegistrationContext context)
+    internal static bool RegisterRole(Type type, in MiraPluginManager.RegistrationContext context)
     {
-        var type = context.Type;
-        var pluginInfo = context.PluginInfo;
-        var roles = context.Roles;
-
         if (!(typeof(RoleBehaviour).IsAssignableFrom(type) && typeof(ICustomRole).IsAssignableFrom(type)))
         {
             return false;
         }
 
-        if (!ModList.GetById(pluginInfo.PluginId).IsRequiredOnAllClients)
+        if (!ModList.GetById(context.PluginInfo.PluginId).IsRequiredOnAllClients)
         {
             Error("Custom roles are only supported on all clients.");
             return false;
         }
 
-        roles.Add(type);
+        context.Roles.Add(type);
         return true;
     }
 
@@ -215,6 +211,8 @@ public static class CustomRoleManager
         }
 
         CustomRoles.Add(roleId, roleBehaviour);
+
+        Helpers.SetInstance(typeof(CustomRoleSingleton<>), roleType, roleBehaviour);
 
         if (customRole.Configuration.HideSettings)
         {

@@ -119,7 +119,7 @@ public class MiraPluginInfo
         Modifiers = [.. InternalModifiers];
         OptionGroups = [.. InternalOptionGroups];
         Options = [.. InternalOptions];
-        Roles = new ReadOnlyDictionary<ushort, RoleBehaviour>(InternalRoles);
+        Roles = new(InternalRoles);
         Buttons = [.. InternalButtons];
         MeetingButtons = [.. InternalMeetingButtons];
         TargetedMeetingButtons = [.. InternalTargetedMeetingButtons];

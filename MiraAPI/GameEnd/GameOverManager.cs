@@ -15,10 +15,8 @@ public static class GameOverManager
 
     private static int nextId = Enum.GetNames<GameOverReason>().Length;
 
-    internal static bool RegisterGameOver(in MiraPluginManager.RegistrationContext context)
+    internal static bool RegisterGameOver(Type type, in MiraPluginManager.RegistrationContext _)
     {
-        var type = context.Type;
-
         if (!typeof(CustomGameOver).IsAssignableFrom(type))
         {
             return false;

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using HarmonyLib;
@@ -45,11 +46,8 @@ public static class PaletteManager
 
     private static int originalLength;
 
-    internal static bool RegisterColors(in MiraPluginManager.RegistrationContext context)
+    internal static bool RegisterColors(Type type, in MiraPluginManager.RegistrationContext context)
     {
-        var type = context.Type;
-        var miraPlugin = context.MiraPlugin;
-
         if (!type.TryGetCustomAttribute<RegisterCustomColorsAttribute>(out var attribute))
         {
             return false;
@@ -79,11 +77,11 @@ public static class PaletteManager
                 VariableColorNames.Add(color.Name);
         }
 
-        if (!miraPlugin.DebugMode)
+        if (!context.MiraPlugin.DebugMode)
             return true;
 
         foreach (var field in type.GetFields(MiraPluginManager.DeclaredStaticMembers)
-            .Where(f => !MiraPluginManager.IsAutoPropertyBackingField(f) && f.FieldType.IsAssignableTo(typeof(CustomColor))))
+            .Where(f => !f.IsAutoPropertyBackingField() && f.FieldType.IsAssignableTo(typeof(CustomColor))))
         {
             Error($"{field.Name} is a field, not a property. Use properties for colors.");
         }

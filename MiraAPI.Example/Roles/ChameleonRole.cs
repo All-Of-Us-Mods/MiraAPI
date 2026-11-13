@@ -40,7 +40,7 @@ public class ChameleonRole : CrewmateRole, ICustomRole
             return;
         }
 
-        if (Player.MyPhysics.Velocity.magnitude > 0)
+        if (Player.MyPhysics.Velocity.sqrMagnitude > 0)
         {
             var rend = Player.cosmetics.currentBodySprite.BodySprite;
             var tmp = Player.cosmetics.nameText;

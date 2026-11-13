@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reflection;
 using BepInEx.Configuration;
 using MiraAPI.LocalSettings.Attributes;
 using MiraAPI.PluginLoading;
@@ -19,15 +17,8 @@ public static class LocalSettingsManager
     internal static readonly List<LocalSettingsTab> Tabs = [];
     internal static readonly List<LocalSettingsTab> AvailableTabs = [];
 
-    [SuppressMessage(
-        "Major Code Smell",
-        "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields",
-        Justification = "Dynamic singleton initialization requires reflection to bypass the private field access modifier because the type is only known at runtime.")]
-    internal static bool RegisterLocalTabs(in MiraPluginManager.RegistrationContext context)
+    internal static bool RegisterLocalTabs(Type type, in MiraPluginManager.RegistrationContext context)
     {
-        var type = context.Type;
-        var basePlugin = context.BasePlugin;
-
         if (!type.IsAssignableTo(typeof(LocalSettingsTab)))
         {
             return false;
@@ -39,7 +30,7 @@ public static class LocalSettingsManager
             return false;
         }
 
-        if (Activator.CreateInstance(type, basePlugin.Config) is not LocalSettingsTab tabInstance)
+        if (Activator.CreateInstance(type, context.BasePlugin.Config) is not LocalSettingsTab tabInstance)
         {
             return false;
         }
@@ -53,9 +44,7 @@ public static class LocalSettingsManager
 
         TypeToTab.Add(type, tabInstance);
 
-        typeof(LocalSettingsTabSingleton<>).MakeGenericType(type)
-            .GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic)! // Suppression message refers to this
-            .SetValue(null, tabInstance);
+        Helpers.SetInstance(typeof(LocalSettingsTabSingleton<>), type, tabInstance);
 
         foreach (var property in type.GetProperties(MiraPluginManager.DeclaredInstanceMembers))
         {
@@ -91,8 +80,11 @@ public static class LocalSettingsManager
             attribute.CreateSetting(type, configEntry);
         }
 
+        if (!context.MiraPlugin.DebugMode)
+            return true;
+
         foreach (var field in type.GetFields(MiraPluginManager.DeclaredInstanceMembers)
-            .Where(f => !MiraPluginManager.IsAutoPropertyBackingField(f)
+            .Where(f => !f.IsAutoPropertyBackingField()
                 && (f.FieldType.IsAssignableTo(typeof(ConfigEntryBase)) || f.FieldType.IsAssignableTo(typeof(LocalSettingsButton)))))
         {
             Error($"{field.Name} is a field, not a property. Use properties for local settings or buttons.");

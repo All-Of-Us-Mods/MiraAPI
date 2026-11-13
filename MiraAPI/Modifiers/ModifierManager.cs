@@ -67,11 +67,8 @@ public static class ModifierManager
         Modifiers = new ReadOnlyCollection<BaseModifier>(InternalModifiers);
     }
 
-    internal static bool RegisterModifier(in MiraPluginManager.RegistrationContext context)
+    internal static bool RegisterModifier(Type type, in MiraPluginManager.RegistrationContext context)
     {
-        var type = context.Type;
-        var pluginInfo = context.PluginInfo;
-
         if (!typeof(BaseModifier).IsAssignableFrom(type))
         {
             return false;
@@ -94,7 +91,7 @@ public static class ModifierManager
             modifier = (BaseModifier)FormatterServices.GetUninitializedObject(type);
         }
 
-        pluginInfo.InternalModifiers.Add(modifier);
+        context.PluginInfo.InternalModifiers.Add(modifier);
         InternalModifiers.Add(modifier);
 
         if (modifier is not GameModifier gameModifier)

@@ -43,6 +43,7 @@ public static class ModdedOptionsManager
     internal static readonly Dictionary<Type, List<AbstractOptionGroup>> GameModeOptionGroups = [];
     internal static readonly Dictionary<uint, IModdedOption> ModdedOptions = [];
     internal static readonly List<AbstractOptionGroup> Groups = [];
+    internal static readonly Comparer<AbstractOptionGroup> Comparer = Comparer<AbstractOptionGroup>.Create((x, y) => x.GroupPriority.CompareTo(y.GroupPriority));
 
     internal static uint NextId => _nextId++;
     private static uint _nextId = 1;
@@ -70,15 +71,8 @@ public static class ModdedOptionsManager
         notif.SettingsChangeMessageLogic(key, item, playSound);
     }
 
-    [SuppressMessage(
-        "Major Code Smell",
-        "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields",
-        Justification = "Dynamic singleton initialization requires reflection to bypass the private field access modifier because the type is only known at runtime.")]
-    internal static bool RegisterGroup(in MiraPluginManager.RegistrationContext context)
+    internal static bool RegisterGroup(Type type, in MiraPluginManager.RegistrationContext context)
     {
-        var type = context.Type;
-        var pluginInfo = context.PluginInfo;
-
         if (!type.IsAssignableTo(typeof(AbstractOptionGroup)))
         {
             return false;
@@ -107,13 +101,13 @@ public static class ModdedOptionsManager
             }
         }
 
+        var pluginInfo = context.PluginInfo;
+
         pluginInfo.InternalOptionGroups.Add(group);
 
         Groups.Add(group);
 
-        typeof(OptionGroupSingleton<>).MakeGenericType(type)
-            .GetField("_instance", BindingFlags.Static | BindingFlags.NonPublic)! // Suppression refers to this
-            .SetValue(null, group);
+        Helpers.SetInstance(typeof(OptionGroupSingleton<>), type, group);
 
         foreach (var property in type.GetProperties(MiraPluginManager.DeclaredInstanceMembers))
         {
@@ -121,13 +115,13 @@ public static class ModdedOptionsManager
 
             if (propType.IsAssignableTo(OptionType))
             {
-                RegisterPropertyOption(type, property, pluginInfo, group);
+                RegisterPropertyOption(type, group, property, pluginInfo);
                 continue;
             }
 
             if (propType.IsAssignableTo(OptionListType))
             {
-                RegisterPropertyOptionList(type, property, pluginInfo, group);
+                RegisterPropertyOptionList(type, group, property, pluginInfo);
                 continue;
             }
 
@@ -137,13 +131,13 @@ public static class ModdedOptionsManager
             {
                 if (attr is ModdedOptionAttribute moddedAttr)
                 {
-                    RegisterAttributeOption(type, moddedAttr, property, pluginInfo, propType, attributes, group);
+                    RegisterAttributeOption(type, group, moddedAttr, property, pluginInfo, propType, attributes);
                     break;
                 }
 
                 if (attr is ModdedOptionListAttribute listAttr)
                 {
-                    RegisterAttributeOptionList(type, listAttr, property, pluginInfo, propType, attributes, group);
+                    RegisterAttributeOptionList(type, group, listAttr, property, pluginInfo, propType, attributes);
                     break;
                 }
             }
@@ -153,7 +147,7 @@ public static class ModdedOptionsManager
             return true;
 
         foreach (var field in type.GetFields(MiraPluginManager.DeclaredInstanceMembers)
-            .Where(f => !MiraPluginManager.IsAutoPropertyBackingField(f)
+            .Where(f => !f.IsAutoPropertyBackingField()
                 && (f.FieldType.IsAssignableTo(typeof(IModdedOption)) || f.FieldType.IsAssignableTo(typeof(IBaseModdedOptionList)))))
         {
             Error($"{field.Name} is a field, not a property. Use properties for options.");
@@ -188,11 +182,7 @@ public static class ModdedOptionsManager
         lookup[toPatch.MethodHandle] = attribute;
     }
 
-    private static void RegisterPropertyOption(
-        Type type,
-        PropertyInfo property,
-        MiraPluginInfo pluginInfo,
-        AbstractOptionGroup group)
+    private static void RegisterPropertyOption(Type type, AbstractOptionGroup group, PropertyInfo property, MiraPluginInfo pluginInfo)
     {
         if (property.GetValue(group) is not IModdedOption option)
         {
@@ -205,12 +195,12 @@ public static class ModdedOptionsManager
 
     private static void RegisterAttributeOption(
         Type type,
+        AbstractOptionGroup group,
         ModdedOptionAttribute attribute,
         PropertyInfo property,
         MiraPluginInfo pluginInfo,
         Type propType,
-        object[] attributes,
-        AbstractOptionGroup group)
+        object[] attributes)
     {
         if (!OptionAttributes.Add(property))
         {
@@ -253,11 +243,7 @@ public static class ModdedOptionsManager
         RegisterOption(type, option, group, property.Name, pluginInfo);
     }
 
-    private static void RegisterPropertyOptionList(
-        Type type,
-        PropertyInfo property,
-        MiraPluginInfo pluginInfo,
-        AbstractOptionGroup group)
+    private static void RegisterPropertyOptionList(Type type, AbstractOptionGroup group, PropertyInfo property, MiraPluginInfo pluginInfo)
     {
         if (property.GetValue(group) is not IBaseModdedOptionList optionList)
         {
@@ -275,12 +261,12 @@ public static class ModdedOptionsManager
 
     private static void RegisterAttributeOptionList(
         Type type,
+        AbstractOptionGroup group,
         ModdedOptionListAttribute attribute,
         PropertyInfo property,
         MiraPluginInfo pluginInfo,
         Type propType,
-        object[] attributes,
-        AbstractOptionGroup group)
+        object[] attributes)
     {
         if (!OptionAttributes.Add(property))
         {
