@@ -261,7 +261,15 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
     /// <returns>The resolved <see cref="MethodInfo"/> if found; otherwise, <see langword="null"/>.</returns>
     protected MethodInfo? ResolveMethod(AbstractOptionGroup group, PropertyInfo property, out Type type, out MethodInfo? instanceGetter, out bool notFound)
     {
-        return ResolveMember(group, property, out type, out instanceGetter, out notFound) as MethodInfo;
+        var method = ResolveMember(group, property, out type, out instanceGetter, out notFound) as MethodInfo;
+
+        if (method == null)
+            return null;
+
+        if (method.IsGenericMethodDefinition)
+            method = method.MakeGenericMethod(property.PropertyType);
+
+        return method;
     }
 
     /// <summary>
