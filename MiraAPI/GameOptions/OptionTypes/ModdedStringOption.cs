@@ -2,28 +2,36 @@
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using MiraAPI.Networking;
 using MiraAPI.Translation;
-using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.GameOptions.OptionTypes;
 
 /// <summary>
-/// An option for selecting an enum value.
+/// An option for selecting a string value from a predefined list.
 /// </summary>
-public class ModdedStringOption : ModdedOption<string>
+public class ModdedStringOption : ModdedBaseStringOption<string>
 {
-    /// <summary>
-    /// Gets or sets the string values of the option.
-    /// </summary>
-    public string[] Values { get; set; }
+    /// <inheritdoc />
+    protected override string OptionTypeName => "StringOption";
 
     /// <summary>
-    /// Gets or sets the String Name values of the option.
+    /// Initializes a new instance of the <see cref="ModdedStringOption"/> class.
     /// </summary>
-    public StringNames[] StringNameValues { get; set; }
+    /// <param name="groupPrefix">The translation ID prefix of the group containing this option.</param>
+    /// <param name="title">The title of the option.</param>
+    /// <param name="defaultValue">The default value as a string.</param>
+    /// <param name="values">An option list of string values to use.</param>
+    /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
+    public ModdedStringOption(string groupPrefix, string title, string defaultValue, string[] values, bool includeInPreset = true)
+        : base(groupPrefix, title, defaultValue, includeInPreset)
+    {
+        Values = values;
+        UnderlyingValues = values;
+        StringNameValues = [.. values.Select(MiraLocaleManager.GetOrCreateLocaleString)];
+
+        InitializeData(GetIndex(defaultValue));
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ModdedStringOption"/> class.
@@ -33,38 +41,12 @@ public class ModdedStringOption : ModdedOption<string>
     /// <param name="values">An option list of string values to use.</param>
     /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
     public ModdedStringOption(string title, string defaultValue, string[] values, bool includeInPreset = true)
-        : base(title, defaultValue, includeInPreset)
+        : this(string.Empty, title, defaultValue, values, includeInPreset)
     {
-        Values = values;
-        StringNameValues = [.. values.Select(MiraLocaleManager.GetOrCreateLocaleString)];
-
-        var data = ScriptableObject.CreateInstance<StringGameSetting>();
-        data.Title = StringName;
-        data.Type = global::OptionTypes.String;
-        data.Values = StringNameValues;
-        data.Index = GetIndex(Value);
-
-        Data = data;
     }
 
     /// <summary>
-    /// Gets the string's index.
-    /// </summary>
-    /// <param name="value">The option's string value.</param>
-    /// <returns>The option's value in the index.</returns>
-    public int GetIndex(string value)
-    {
-        if (Values.Contains(value))
-        {
-            return Array.IndexOf(Values, value);
-        }
-
-        Info($"Cannot find a valid index for {value}. Returning -1 instead. Values: {string.Join(", ", Values)}");
-        return -1;
-    }
-
-    /// <summary>
-    /// Adds a value to the option.
+    /// Adds a value to the option dynamically.
     /// </summary>
     /// <param name="value">The option's string value.</param>
     /// <param name="index">The additional value's index on the list.</param>
@@ -78,6 +60,8 @@ public class ModdedStringOption : ModdedOption<string>
             var newVals = Values.ToList();
             newVals.Insert(index, value);
             Values = [.. newVals];
+            UnderlyingValues = Values;
+
             var newStrVals = StringNameValues.ToList();
             newStrVals.Insert(index, MiraLocaleManager.GetOrCreateLocaleString(value));
             StringNameValues = [.. newStrVals];
@@ -85,7 +69,6 @@ public class ModdedStringOption : ModdedOption<string>
 
         if (Data == null)
         {
-            Error("Data is null.");
             return;
         }
 
@@ -93,58 +76,20 @@ public class ModdedStringOption : ModdedOption<string>
         data.Values = StringNameValues;
         data.Index = GetIndex(Value);
 
-        Warning("Data is valid");
-
         if (OptionBehaviour == null)
         {
-            Error("OptionBehaviour is null.");
             return;
         }
 
         var strOpt = OptionBehaviour.TryCast<StringOption>();
 
-        Warning("OptionBehaviour is valid");
-
         if (strOpt == null)
         {
-            Error("StringOption is null.");
             return;
         }
 
         strOpt.Values = StringNameValues;
         strOpt.Value = GetIndex(Value);
-        Warning("StringOption is valid");
-    }
-
-    /// <inheritdoc />
-    public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, PlayerOption playerOpt, Transform container)
-    {
-        var stringOption = Object.Instantiate(stringOpt, container);
-        stringOption.name =
-            $"{ParentMod!.OptionsTitleText}.StringOption.{TranslationController.Instance.GetString(StringName)}";
-
-        stringOption.SetUpFromData(Data, 20);
-        stringOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
-
-        // Changing the button text to make them more distinct from number options
-        stringOption.MinusBtn.ChangeButtonText("<");
-        stringOption.PlusBtn.ChangeButtonText(">");
-
-        // SetUpFromData method doesn't work correctly so we must set the values manually
-        stringOption.Title = StringName;
-        stringOption.Values = (Data as StringGameSetting)?.Values ?? new Il2CppStructArray<StringNames>(0);
-        stringOption.Value = GetIndex(Value);
-
-        OptionBehaviour = stringOption;
-        ModdedOptionsManager.CreatedStringOptions.TryAdd(stringOption, this);
-
-        return stringOption;
-    }
-
-    /// <inheritdoc />
-    public override float GetFloatData()
-    {
-        return Array.IndexOf(Values, Value);
     }
 
     /// <inheritdoc />
@@ -157,26 +102,5 @@ public class ModdedStringOption : ModdedOption<string>
     public override void HandleNetData(byte[] data)
     {
         SetValue(Encoding.Unicode.GetString(data));
-    }
-
-    /// <inheritdoc />
-    public override string GetValueFromOptionBehaviour(OptionBehaviour optionBehaviour)
-    {
-        return Values[optionBehaviour.GetInt()];
-    }
-
-    /// <inheritdoc />
-    protected override void OnValueChanged(string newValue)
-    {
-        HudManager.Instance.Notifier.AddSettingsChangeMessage(StringName, Data.GetValueString(GetIndex(newValue)), false);
-        if (!OptionBehaviour)
-        {
-            return;
-        }
-
-        if (OptionBehaviour is StringOption opt)
-        {
-            opt.Value = GetIndex(newValue);
-        }
     }
 }

@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using HarmonyLib;
+using Il2CppInterop.Runtime.InteropTypes;
 using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
 using MiraAPI.Networking;
@@ -203,7 +204,7 @@ public static class Extensions
     /// <returns><see langword="true"/> if the <see langword="float"/> is an integer, <see langword="false"/> otherwise.</returns>
     public static bool IsInteger(this float number)
     {
-        return Mathf.Approximately(number, Mathf.Round(number));
+        return Mathf.Approximately(number, MathF.Round(number));
     }
 
     /// <summary>
@@ -916,6 +917,26 @@ public static class Extensions
     {
         attribute = member.GetCustomAttribute<T>();
         return attribute != null;
+    }
+
+    /// <summary>
+    /// Attempts to cast an IL2CPP object to <typeparamref name="T"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of the value to cast to.</typeparam>
+    /// <param name="obj">The object to cast.</param>
+    /// <param name="result">When the method returns, the casted object if true; null if false.</param>
+    /// <returns>true if the cast was successful; false otherwise.</returns>
+    public static bool TryCast<T>(this Il2CppObjectBase? obj, [NotNullWhen(true)] out T? result)
+        where T : Il2CppObjectBase
+    {
+        if (obj == null)
+        {
+            result = null;
+            return false;
+        }
+
+        result = obj.TryCast<T>();
+        return result != null;
     }
 
     /// <summary>

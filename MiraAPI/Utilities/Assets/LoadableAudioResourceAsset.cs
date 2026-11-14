@@ -27,7 +27,7 @@ public class LoadableAudioResourceAsset : LoadableAsset<AudioClip>
     /// Initializes a new instance of the <see cref="LoadableAudioResourceAsset"/> class with the provided resource path.
     /// </summary>
     /// <param name="path">The path of the wave file.</param>
-    [Obsolete("Pass typeof(YourPlugin).Assembly directly to the constructor for better performance.")]
+    [Obsolete("Pass typeof(YourPlugin).Assembly directly to the constructor for better performance. This will be removed in a future version.")]
     public LoadableAudioResourceAsset(string path)
     {
         _path = path;

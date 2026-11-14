@@ -20,7 +20,7 @@ namespace MiraAPI.GameOptions.Attributes;
 /// <param name="halfIncrements">Whether increments can be split in half (using Shift).</param>
 [AttributeUsage(AttributeTargets.Property)]
 public class ModdedNumberOptionListAttribute(
-    string title,
+    string? title,
     float min,
     float max,
     float increment,
@@ -29,8 +29,32 @@ public class ModdedNumberOptionListAttribute(
     MiraNumberSuffixes suffixType = MiraNumberSuffixes.None,
     string? formatString = null,
     bool halfIncrements = false)
-    : ModdedOptionListAttribute(title)
+    : ModdedOptionListAttribute(title), ITypedOptionList<int>, ITypedOptionList<float>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedNumberOptionListAttribute"/> class.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="increment">The increment.</param>
+    /// <param name="zeroBehavior">Determines what is shown for zero.</param>
+    /// <param name="negativeBehavior">Determines what is shown for negative 1.</param>
+    /// <param name="suffixType">The suffix type.</param>
+    /// <param name="formatString">Optional format string for the option screen.</param>
+    /// <param name="halfIncrements">Whether increments can be split in half (using Shift).</param>
+    public ModdedNumberOptionListAttribute(
+        float min,
+        float max,
+        float increment,
+        string zeroBehavior,
+        string negativeBehavior,
+        MiraNumberSuffixes suffixType = MiraNumberSuffixes.None,
+        string? formatString = null,
+        bool halfIncrements = false)
+        : this(null, min, max, increment, zeroBehavior, negativeBehavior, suffixType, formatString, halfIncrements)
+    {
+    }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ModdedNumberOptionListAttribute"/> class.
     /// </summary>
@@ -42,7 +66,7 @@ public class ModdedNumberOptionListAttribute(
     /// <param name="zeroInfinity">Whether zero is infinity or not.</param>
     /// <param name="formatString">Optional format string for the option screen.</param>
     public ModdedNumberOptionListAttribute(
-        string title,
+        string? title,
         float min,
         float max,
         float increment = 1,
@@ -53,19 +77,40 @@ public class ModdedNumberOptionListAttribute(
     {
     }
 
-    internal override IBaseModdedOptionList CreateOptionList(IList value, PropertyInfo property)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedNumberOptionListAttribute"/> class.
+    /// </summary>
+    /// <param name="min">The minimum value.</param>
+    /// <param name="max">The maximum value.</param>
+    /// <param name="increment">The increment.</param>
+    /// <param name="suffixType">The suffix type.</param>
+    /// <param name="zeroInfinity">Whether zero is infinity or not.</param>
+    /// <param name="formatString">Optional format string for the option screen.</param>
+    public ModdedNumberOptionListAttribute(
+        float min,
+        float max,
+        float increment = 1,
+        MiraNumberSuffixes suffixType = MiraNumberSuffixes.None,
+        string? formatString = null,
+        bool zeroInfinity = false)
+        : this(null, min, max, increment, suffixType, formatString, zeroInfinity)
     {
-        return new ModdedOptionList<ModdedNumberOption>(value.Count, idx =>
+    }
+
+    internal override IBaseModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
+    {
+        return new ModdedOptionList<ModdedNumberOption>(list.Count, idx =>
         {
-            var final = value[idx] switch
+            var final = list[idx] switch
             {
                 null => min + increment,
                 int integer => integer,
-                _ => (float)value[idx]!,
+                _ => (float)list[idx]!,
             };
 
             return new(
-                GetFormattedTitle(idx),
+                group.GroupPrefix,
+                GetFormattedTitle(idx, property),
                 final,
                 min,
                 max,
@@ -93,10 +138,22 @@ public class ModdedNumberOptionListAttribute(
     }
 
     /// <inheritdoc />
+    public void SetValueUnboxed(int idx, float value)
+    {
+        (HolderOptionList?.ElementAt(idx) as ModdedNumberOption)?.SetValue(value);
+    }
+
+    /// <inheritdoc />
+    void ITypedOptionList<int>.SetValueUnboxed(int idx, int value)
+    {
+        (HolderOptionList?.ElementAt(idx) as ModdedNumberOption)?.SetValue(value);
+    }
+
+    /// <inheritdoc />
     public override object GetValue(int idx)
     {
         if (HolderOptionList?.ElementAt(idx) is not ModdedNumberOption opt)
-            throw new InvalidOperationException($"HolderOption for option \"{GetFormattedTitle(idx)}\" is not a ModdedNumberOption");
+            throw new InvalidOperationException($"HolderOption for option \"{Titles[idx]}\" is not a ModdedNumberOption");
 
         var value = opt.Value;
 
@@ -104,5 +161,19 @@ public class ModdedNumberOptionListAttribute(
             return (int)MathF.Round(value);
 
         return value;
+    }
+
+    /// <inheritdoc />
+    public float GetValueUnboxed(int idx)
+    {
+        return HolderOptionList?.ElementAt(idx) is ModdedNumberOption opt
+            ? opt.Value
+            : throw new InvalidOperationException($"HolderOption for option \"{Titles[idx]}\" is not a ModdedNumberOption");
+    }
+
+    /// <inheritdoc />
+    int ITypedOptionList<int>.GetValueUnboxed(int idx)
+    {
+        return (int)MathF.Round(GetValueUnboxed(idx));
     }
 }

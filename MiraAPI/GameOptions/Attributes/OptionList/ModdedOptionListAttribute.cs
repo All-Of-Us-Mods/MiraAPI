@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using MiraAPI.Translation;
 
 namespace MiraAPI.GameOptions.Attributes;
 
@@ -14,19 +14,22 @@ namespace MiraAPI.GameOptions.Attributes;
 [AttributeUsage(AttributeTargets.Property)]
 [SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
 [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
-public abstract class ModdedOptionListAttribute(string title) : PropertyOptionAttribute
+public abstract class ModdedOptionListAttribute(string? title = null) : PropertyOptionAttribute
 {
     internal IBaseModdedOptionList? HolderOptionList;
     internal IList? Value;
     internal Type ValueType;
+    internal string[] Titles;
+
+    private static readonly Regex FormatParams = new(@"\{(\d+)(?::[^}]+)?\}", default, Regex.InfiniteMatchTimeout);
 
     /// <summary>
-    /// Gets the title of the options.
+    /// Gets or sets the title of the options.
     /// If the string contains a format parameter, e.g., <c>{0}</c>, then the option's index will be given to it.
     /// The string cannot contain more than one parameter.
     /// If no parameter is given, the title will simply append the index to the end of it.
     /// </summary>
-    public string Title => title;
+    public string? Title { get; protected set; } = title;
 
     /// <summary>
     /// Sets the value of all the options.
@@ -70,29 +73,33 @@ public abstract class ModdedOptionListAttribute(string title) : PropertyOptionAt
     /// <returns>The value of the option as an object.</returns>
     public abstract object GetValue(int idx);
 
-    internal abstract IBaseModdedOptionList? CreateOptionList(IList value, PropertyInfo property);
+    internal abstract IBaseModdedOptionList? CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group);
 
     /// <summary>
     /// Gets the <see cref="Title"/> formatted with the option's index.
     /// </summary>
     /// <param name="index">The option's index.</param>
+    /// <param name="property">The property info for fallback title.</param>
     /// <returns>The formatted option's title.</returns>
-    [SuppressMessage("Globalization", "CA1305:Specify IFormatProvider", Justification = "I don't even know if this is worth it.")]
-    protected string GetFormattedTitle(int index)
+    protected string GetFormattedTitle(int index, PropertyInfo property)
     {
-        var match = Regex.Match(Title.Translate(), @"\{(\d+)(?::[^}]+)?\}", default, Regex.InfiniteMatchTimeout);
+        var baseTitle = Title ?? property.Name;
+        return Titles[index] = GetFormattedTitle(baseTitle, index, FormatParams.Match(baseTitle));
+    }
 
+    private static string GetFormattedTitle(string baseTitle, int index, Match match)
+    {
         if (!match.Success)
         {
-            return Title + index;
+            return baseTitle + index;
         }
 
         if (match.Value == "{0}" && !match.NextMatch().Success)
         {
-            return string.Format(Title, index);
+            return string.Format(CultureInfo.InvariantCulture, baseTitle, index);
         }
 
-        Error($"ModdedOptionList Title of {Title} cannot contain more than the first parameter for formatting.");
-        return Title + index;
+        Error($"ModdedOptionList Title of {baseTitle} cannot contain more than the first parameter for formatting.");
+        return baseTitle + index;
     }
 }

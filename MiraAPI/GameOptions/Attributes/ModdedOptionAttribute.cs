@@ -13,15 +13,10 @@ namespace MiraAPI.GameOptions.Attributes;
 [AttributeUsage(AttributeTargets.Property)]
 [SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
 [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
-public abstract class ModdedOptionAttribute(string title, Type? roleType = null, Type? modeType = null) : PropertyOptionAttribute
+public abstract class ModdedOptionAttribute(string? title = null, Type? roleType = null, Type? modeType = null) : PropertyOptionAttribute
 {
     internal IModdedOption? HolderOption;
     internal Type ValueType;
-
-    /// <summary>
-    /// Gets the title of the option.
-    /// </summary>
-    public string Title => title;
 
     /// <summary>
     /// Gets the role type of the option.
@@ -33,5 +28,10 @@ public abstract class ModdedOptionAttribute(string title, Type? roleType = null,
     /// </summary>
     protected Type? ModeType => modeType;
 
-    internal abstract IModdedOption? CreateOption(object? value, PropertyInfo property);
+    /// <summary>
+    /// Gets or sets the title of the option.
+    /// </summary>
+    public string? Title { get; protected set; } = title;
+
+    internal abstract IModdedOption? CreateOption(object? value, PropertyInfo property, AbstractOptionGroup group);
 }

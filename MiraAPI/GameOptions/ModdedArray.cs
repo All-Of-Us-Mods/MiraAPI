@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using MiraAPI.GameOptions.Attributes;
 
 namespace MiraAPI.GameOptions;
 
@@ -10,16 +11,22 @@ namespace MiraAPI.GameOptions;
 /// </summary>
 /// <typeparam name="T">The type of the values that the array holds.</typeparam>
 [CollectionBuilder(typeof(ModdedArrayBuilder), nameof(ModdedArrayBuilder.Create))]
-public sealed class ModdedArray<T> : IList<T>, IReadOnlyList<T>, IList
+public sealed class ModdedArray<T> : IList<T>, IReadOnlyList<T>, IList, IModdedArrayBinding
 {
     private readonly T[] items;
     private int version;
+
+    private ModdedOptionListAttribute? listAttribute;
+    private ITypedOptionList<T>? typedAttribute;
 
     /// <inheritdoc/>
     public int Count => items.Length;
 
     /// <inheritdoc/>
-    public bool IsReadOnly => false;
+    bool ICollection<T>.IsReadOnly => true;
+
+    /// <inheritdoc/>
+    bool IList.IsReadOnly => false;
 
     /// <inheritdoc/>
     bool IList.IsFixedSize => true;
@@ -72,17 +79,47 @@ public sealed class ModdedArray<T> : IList<T>, IReadOnlyList<T>, IList
     /// <param name="index">The index of the value.</param>
     public T this[int index]
     {
-        get => ModdedOptionsManager.ListInstanceCache.TryGetValue(this, out var attribute)
-            ? (T)attribute.GetValue(index)
-            : items[index];
+        get
+        {
+            if (listAttribute == null)
+                return items[index];
+
+            return items[index] = typedAttribute != null
+                ? typedAttribute.GetValueUnboxed(index)
+                : (T)listAttribute.GetValue(index);
+        }
         set
         {
-            if (ModdedOptionsManager.ListInstanceCache.TryGetValue(this, out var attribute))
-                attribute.SetValue(index, value!);
-            else
-                items[index] = value;
+            var old = items[index];
 
-            version++;
+            if (listAttribute == null)
+            {
+                if (!EqualityComparer<T>.Default.Equals(old, value))
+                {
+                    items[index] = value;
+                    version++;
+                }
+
+                return;
+            }
+
+            T current;
+
+            if (typedAttribute != null)
+            {
+                typedAttribute.SetValueUnboxed(index, value);
+                current = typedAttribute.GetValueUnboxed(index);
+            }
+            else
+            {
+                listAttribute.SetValue(index, value!);
+                current = (T)listAttribute.GetValue(index);
+            }
+
+            items[index] = current;
+
+            if (!EqualityComparer<T>.Default.Equals(old, current))
+                version++;
         }
     }
 
@@ -96,18 +133,21 @@ public sealed class ModdedArray<T> : IList<T>, IReadOnlyList<T>, IList
     /// <inheritdoc/>
     public bool Contains(T item)
     {
+        Refresh();
         return Array.IndexOf(items, item) >= 0;
     }
 
     /// <inheritdoc/>
     public void CopyTo(T[] array, int arrayIndex)
     {
+        Refresh();
         items.CopyTo(array, arrayIndex);
     }
 
     /// <inheritdoc/>
     public int IndexOf(T item)
     {
+        Refresh();
         return Array.IndexOf(items, item);
     }
 
@@ -117,21 +157,47 @@ public sealed class ModdedArray<T> : IList<T>, IReadOnlyList<T>, IList
         return new(this);
     }
 
+    /// <summary>
+    /// Re-reads every element from its backing option, updating the cached values. Does nothing if the array isn't bound to an option list.
+    /// </summary>
+    public void Refresh()
+    {
+        if (typedAttribute != null)
+        {
+            for (var i = 0; i < items.Length; i++)
+                items[i] = typedAttribute.GetValueUnboxed(i);
+        }
+        else if (listAttribute != null)
+        {
+            for (var i = 0; i < items.Length; i++)
+                items[i] = (T)listAttribute.GetValue(i);
+        }
+    }
+
+    void IModdedArrayBinding.Bind(ModdedOptionListAttribute attribute)
+    {
+        listAttribute = attribute;
+        typedAttribute = attribute as ITypedOptionList<T>;
+    }
+
     /// <inheritdoc/>
     bool IList.Contains(object? value)
     {
+        Refresh();
         return ((IList)items).Contains(value);
     }
 
     /// <inheritdoc/>
     int IList.IndexOf(object? value)
     {
+        Refresh();
         return ((IList)items).IndexOf(value);
     }
 
     /// <inheritdoc/>
     void ICollection.CopyTo(Array array, int index)
     {
+        Refresh();
         items.CopyTo(array, index);
     }
 
@@ -178,31 +244,31 @@ public sealed class ModdedArray<T> : IList<T>, IReadOnlyList<T>, IList
     }
 
     /// <inheritdoc/>
-    public void Insert(int index, T item)
+    void IList<T>.Insert(int index, T item)
     {
         throw new NotSupportedException("ModdedArray is of a fixed size.");
     }
 
     /// <inheritdoc/>
-    public void RemoveAt(int index)
+    void IList<T>.RemoveAt(int index)
     {
         throw new NotSupportedException("ModdedArray is of a fixed size.");
     }
 
     /// <inheritdoc/>
-    public void Add(T item)
+    void ICollection<T>.Add(T item)
     {
         throw new NotSupportedException("ModdedArray is of a fixed size.");
     }
 
     /// <inheritdoc/>
-    public void Clear()
+    void ICollection<T>.Clear()
     {
         throw new NotSupportedException("ModdedArray is of a fixed size.");
     }
 
     /// <inheritdoc/>
-    public bool Remove(T item)
+    bool ICollection<T>.Remove(T item)
     {
         throw new NotSupportedException("ModdedArray is of a fixed size.");
     }
@@ -291,4 +357,9 @@ public static class ModdedArrayBuilder
     {
         return new(values);
     }
+}
+
+internal interface IModdedArrayBinding
+{
+    void Bind(ModdedOptionListAttribute attribute);
 }

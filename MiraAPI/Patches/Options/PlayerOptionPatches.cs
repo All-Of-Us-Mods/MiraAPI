@@ -22,7 +22,9 @@ public static class PlayerOptionPatches
             return true;
         }
 
-        if (!ModdedOptionsManager.CreatedPlayerOptions.TryGetValue(__instance, out var moddedPlrOpt)) return false;
+        if (!__instance.TryGetComponent<MiraPlayerOptionComponent>(out var component)) return false;
+
+        var moddedPlrOpt = component.PlayerOption;
 
         var filteredPlayers = moddedPlrOpt.GetFilteredPlayers();
         if (filteredPlayers.Count != __instance.Values.Count)
@@ -45,7 +47,7 @@ public static class PlayerOptionPatches
     [HarmonyPatch(nameof(PlayerOption.UpdatePlayerIndex))]
     public static bool UpdatePlayerIndexPatch(PlayerOption __instance, int index)
     {
-        if (!__instance.IsCustom() || ModdedOptionsManager.CreatedPlayerOptions[__instance].AllowNone)
+        if (!__instance.IsCustom() || !__instance.TryGetComponent<MiraPlayerOptionComponent>(out var component) || component.PlayerOption.AllowNone)
         {
             return true;
         }
