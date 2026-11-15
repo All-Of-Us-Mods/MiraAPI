@@ -83,7 +83,7 @@ public abstract class ModdedOptionListAttribute(string? title = null) : Property
     /// <returns>The formatted option's title.</returns>
     protected string GetFormattedTitle(int index, PropertyInfo property)
     {
-        var baseTitle = Title ?? property.Name;
+        var baseTitle = Title ??= property.Name;
         return Titles[index] = GetFormattedTitle(baseTitle, index, FormatParams.Match(baseTitle));
     }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using AmongUs.GameOptions;
+using BepInEx.Configuration;
 using MiraAPI.Networking;
 using MiraAPI.Utilities;
 using UnityEngine;
@@ -292,6 +293,12 @@ public class ModdedNumberOption : ModdedOption<float>
     protected override float ModifyValue(float newValue, float oldValue)
     {
         return Math.Clamp(newValue, Min, Max);
+    }
+
+    /// <inheritdoc />
+    protected internal override ConfigDescription? CreateDescription()
+    {
+        return new(string.Empty, new AcceptableValueRange<float>(Min, Max));
     }
 
     /// <summary>

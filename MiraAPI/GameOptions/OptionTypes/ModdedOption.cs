@@ -92,7 +92,7 @@ public abstract class ModdedOption<T>(string groupPrefix, string title, T defaul
             if (field != null || value == null) return;
             field = value;
 
-            var entry = field.GetConfigFile().Bind(ConfigDefinition, DefaultValue);
+            var entry = field.GetConfigFile().Bind(ConfigDefinition, DefaultValue, CreateDescription());
             Value = entry.Value;
         }
     }
@@ -260,6 +260,13 @@ public abstract class ModdedOption<T>(string groupPrefix, string title, T defaul
     protected virtual T ModifyValue(T newValue, T oldValue)
     {
         return newValue;
+    }
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (Justification: Internal code.)
+    protected internal virtual ConfigDescription? CreateDescription()
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+    {
+        return null;
     }
 
     /// <summary>

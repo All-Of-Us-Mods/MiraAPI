@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using BepInEx.Configuration;
 using MiraAPI.Networking;
 using MiraAPI.Translation;
 
@@ -102,5 +103,11 @@ public class ModdedStringOption : ModdedBaseStringOption<string>
     public override void HandleNetData(byte[] data)
     {
         SetValue(Encoding.Unicode.GetString(data));
+    }
+
+    /// <inheritdoc />
+    protected internal override ConfigDescription? CreateDescription()
+    {
+        return new(string.Empty, new AcceptableValueList<string>(UnderlyingValues));
     }
 }

@@ -2,8 +2,10 @@
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using BepInEx.Configuration;
 using MiraAPI.Networking;
 using MiraAPI.Translation;
+using MiraAPI.Utilities;
 
 namespace MiraAPI.GameOptions.OptionTypes;
 
@@ -107,6 +109,12 @@ public class ModdedEnumOption : ModdedBaseEnumOption<int>
     {
         SetValue(BitConverter.ToInt32(data));
     }
+
+    /// <inheritdoc />
+    protected internal override ConfigDescription? CreateDescription()
+    {
+        return new(string.Empty, new AcceptableValueList<int>(UnderlyingValues));
+    }
 }
 
 /// <summary>
@@ -186,5 +194,11 @@ public class ModdedEnumOption<T> : ModdedBaseEnumOption<T>
     public override void HandleNetData(byte[] data)
     {
         SetValue(Unsafe.ReadUnaligned<T>(ref data[0]));
+    }
+
+    /// <inheritdoc />
+    protected internal override ConfigDescription? CreateDescription()
+    {
+        return new(string.Empty, new AcceptableEnumValues<T>(UnderlyingValues));
     }
 }
