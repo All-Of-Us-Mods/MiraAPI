@@ -218,7 +218,7 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
             flags |= BindingFlags.NonPublic;
         }
 
-        var member = type.GetMember(MemberName, flags).FirstOrDefault();
+        var member = type.GetMember(MemberName, flags).OrderBy(GetGenericArgsLength).FirstOrDefault();
         notFound = true;
 
         if (member == null)
@@ -237,7 +237,7 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
         }
         else
         {
-            var method = (member as PropertyInfo)?.GetGetMethod(true) ?? member as MethodInfo;
+            var method = (member as PropertyInfo)?.GetGetMethod(true) ?? (member as MethodInfo);
             isStatic = method is { IsStatic: true };
         }
 
@@ -267,9 +267,27 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
             return null;
 
         if (method.IsGenericMethodDefinition)
-            method = method.MakeGenericMethod(property.PropertyType);
+        {
+            if (method.GetGenericArguments().Length == 1)
+            {
+                method = method.MakeGenericMethod(property.PropertyType);
+            }
+            else
+            {
+                Error($"Found method {method.Name}, but it has too many generic parameters, and is therefore invalid.");
+                return null;
+            }
+        }
 
         return method;
+    }
+
+    private static int GetGenericArgsLength(MemberInfo member)
+    {
+        if (member is not MethodInfo method)
+            return -1;
+
+        return method.IsGenericMethodDefinition ? method.GetGenericArguments().Length : 0;
     }
 
     /// <summary>
