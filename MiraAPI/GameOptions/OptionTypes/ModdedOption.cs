@@ -193,7 +193,7 @@ public abstract class ModdedOption<T>(string groupPrefix, string title, T defaul
     /// <inheritdoc />
     public void Bind(ConfigFile config)
     {
-        config.Bind(ConfigDefinition, DefaultValue);
+        config.Bind(ConfigDefinition, DefaultValue, CreateDescription());
     }
 
     /// <inheritdoc />
