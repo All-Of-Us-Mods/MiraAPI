@@ -277,7 +277,7 @@ public static class ModdedOptionsManager
         if (!propType.IsGenericType || propType.GetGenericTypeDefinition() != typeof(ModdedArray<>))
         {
             var typeName = propType.IsGenericType ? propType.GetGenericArguments()[0].Name : "T";
-            Error($"Please use ModdedArray<{typeName}> for modded option lists.");
+            Error($"Please use ModdedArray<{typeName}> for modded option lists: {property.Name}");
             return;
         }
 
