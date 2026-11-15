@@ -47,6 +47,7 @@ public abstract class ModdedBaseStringOption<T>(string groupPrefix, string title
         data.Type = global::OptionTypes.String;
         data.Values = StringNameValues;
         data.Index = defaultIndex;
+        data.OptionName = Int32OptionNames.Invalid;
 
         Data = data;
     }

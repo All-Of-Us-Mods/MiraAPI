@@ -156,7 +156,7 @@ public class ModdedNumberOptionAttribute(
         var value = opt.Value;
 
         if (ValueType == typeof(int))
-            return (int)MathF.Round(value);
+            return (int)MathF.Round(value, MidpointRounding.AwayFromZero);
 
         return value;
     }
@@ -172,6 +172,6 @@ public class ModdedNumberOptionAttribute(
     /// <inheritdoc />
     int ITypedOption<int>.GetValueUnboxed()
     {
-        return (int)MathF.Round(GetValueUnboxed());
+        return (int)MathF.Round(GetValueUnboxed(), MidpointRounding.AwayFromZero);
     }
 }

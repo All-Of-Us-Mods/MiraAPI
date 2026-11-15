@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using MiraAPI.GameOptions;
 using MiraAPI.Roles;
+using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using UnityEngine;
 
@@ -184,5 +185,46 @@ public static class OptionsPatches
     [HarmonyPatch(typeof(StringOption), nameof(StringOption.UpdateValue))]
     [HarmonyPatch(typeof(NumberOption), nameof(NumberOption.UpdateValue))]
     [HarmonyPatch(typeof(PlayerOption), nameof(PlayerOption.UpdateValue))]
+    [HarmonyPatch(typeof(ToggleOption), nameof(ToggleOption.UpdateValue))]
     public static bool UpdateValuePrefix(OptionBehaviour __instance) => !__instance.IsCustom();
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(StringOption), nameof(StringOption.Initialize))]
+    public static bool StringInit(StringOption __instance)
+    {
+        if (!__instance.IsCustom())
+        {
+            return true;
+        }
+
+        __instance.TitleText.text = TranslationController.Instance.GetString(__instance.Title).Translate();
+        __instance.ValueText.text = TranslationController.Instance.GetString(__instance.Values[__instance.Value]);
+        return false;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(ToggleOption), nameof(ToggleOption.Initialize))]
+    public static bool ToggleInit(ToggleOption __instance)
+    {
+        if (!__instance.IsCustom())
+        {
+            return true;
+        }
+
+        __instance.TitleText.text = TranslationController.Instance.GetString(__instance.Title).Translate();
+        return false;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(NumberOption), nameof(NumberOption.Initialize))]
+    public static bool NumberInit(NumberOption __instance)
+    {
+        if (!__instance.IsCustom())
+        {
+            return true;
+        }
+
+        __instance.TitleText.text = TranslationController.Instance.GetString(__instance.Title).Translate();
+        return false;
+    }
 }

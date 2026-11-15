@@ -40,6 +40,7 @@ public class ModdedToggleOption : ModdedOption<bool>
         var data = ScriptableObject.CreateInstance<CheckboxGameSetting>();
         data.Title = StringName;
         data.Type = global::OptionTypes.Checkbox;
+        data.OptionName = BoolOptionNames.Invalid;
 
         Data = data;
     }

@@ -204,7 +204,7 @@ public static class Extensions
     /// <returns><see langword="true"/> if the <see langword="float"/> is an integer, <see langword="false"/> otherwise.</returns>
     public static bool IsInteger(this float number)
     {
-        return Mathf.Approximately(number, MathF.Round(number));
+        return Mathf.Approximately(number, MathF.Round(number, MidpointRounding.AwayFromZero));
     }
 
     /// <summary>

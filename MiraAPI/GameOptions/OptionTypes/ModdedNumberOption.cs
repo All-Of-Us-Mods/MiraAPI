@@ -55,6 +55,11 @@ public class ModdedNumberOption : ModdedOption<float>
     public bool ShiftIncrement { get; }
 
     /// <summary>
+    /// Gets a value indicating whether the option is an int option.
+    /// </summary>
+    public bool IsInt { get; }
+
+    /// <summary>
     /// Gets a value indicating whether zero is infinity.
     /// </summary>
     public bool ZeroInfinity => ZeroWordValue == "∞";
@@ -98,27 +103,45 @@ public class ModdedNumberOption : ModdedOption<float>
         ZeroWordValue = zeroBehavior;
         ShiftIncrement = halfIncrements;
         NegativeWordValue = negativeBehavior;
-        FormatString = formatString ??
-                       (defaultValue.IsInteger() &&
-                        Increment.IsInteger() &&
-                        Value.IsInteger() &&
-                        Min.IsInteger() &&
-                        Max.IsInteger() ? "0" : "0.0");
+        IsInt = defaultValue.IsInteger() &&
+                Increment.IsInteger() &&
+                Value.IsInteger() &&
+                Min.IsInteger() &&
+                Max.IsInteger();
+        FormatString = formatString ?? (IsInt ? "0" : "0.0");
 
         Value = Mathf.Clamp(defaultValue, min, max);
 
-        var data = ScriptableObject.CreateInstance<FloatGameSetting>();
-        data.Type = global::OptionTypes.Float;
-        data.Title = StringName;
-        data.Value = Value;
-        data.Increment = Increment;
-        data.ValidRange = new FloatRange(Min, Max);
-        data.FormatString = FormatString;
-        data.ZeroIsInfinity = ZeroInfinity;
-        data.SuffixType = (NumberSuffixes)SuffixType;
-        data.OptionName = FloatOptionNames.Invalid;
+        if (IsInt)
+        {
+            var data = ScriptableObject.CreateInstance<IntGameSetting>();
+            data.Type = global::OptionTypes.Int;
+            data.Title = StringName;
+            data.Value = (int)Value;
+            data.Increment = (int)Increment;
+            data.ValidRange = new IntRange((int)Min, (int)Max);
+            data.FormatString = FormatString;
+            data.ZeroIsInfinity = ZeroInfinity;
+            data.SuffixType = (NumberSuffixes)SuffixType;
+            data.OptionName = Int32OptionNames.Invalid;
 
-        Data = data;
+            Data = data;
+        }
+        else
+        {
+            var data = ScriptableObject.CreateInstance<FloatGameSetting>();
+            data.Type = global::OptionTypes.Float;
+            data.Title = StringName;
+            data.Value = Value;
+            data.Increment = Increment;
+            data.ValidRange = new FloatRange(Min, Max);
+            data.FormatString = FormatString;
+            data.ZeroIsInfinity = ZeroInfinity;
+            data.SuffixType = (NumberSuffixes)SuffixType;
+            data.OptionName = FloatOptionNames.Invalid;
+
+            Data = data;
+        }
     }
 
     /// <summary>
@@ -225,6 +248,7 @@ public class ModdedNumberOption : ModdedOption<float>
         numberOption.FormatString = FormatString;
         numberOption.ZeroIsInfinity = ZeroInfinity;
         numberOption.SuffixType = (NumberSuffixes)SuffixType;
+        numberOption.intOptionName = Int32OptionNames.Invalid;
         numberOption.floatOptionName = FloatOptionNames.Invalid;
         numberOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
 

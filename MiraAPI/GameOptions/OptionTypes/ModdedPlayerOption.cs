@@ -46,6 +46,7 @@ public class ModdedPlayerOption : ModdedOption<int>
         var data = ScriptableObject.CreateInstance<PlayerSelectionGameSetting>();
         data.Title = StringName;
         data.Type = global::OptionTypes.Player;
+        data.OptionName = Int32OptionNames.Invalid;
 
         Data = data;
     }
