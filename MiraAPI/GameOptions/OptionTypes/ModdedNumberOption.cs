@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using AmongUs.GameOptions;
 using BepInEx.Configuration;
 using MiraAPI.Networking;
 using MiraAPI.Utilities;
@@ -123,7 +122,6 @@ public class ModdedNumberOption : ModdedOption<float>
             data.FormatString = FormatString;
             data.ZeroIsInfinity = ZeroInfinity;
             data.SuffixType = (NumberSuffixes)SuffixType;
-            data.OptionName = Int32OptionNames.Invalid;
 
             Data = data;
         }
@@ -138,7 +136,6 @@ public class ModdedNumberOption : ModdedOption<float>
             data.FormatString = FormatString;
             data.ZeroIsInfinity = ZeroInfinity;
             data.SuffixType = (NumberSuffixes)SuffixType;
-            data.OptionName = FloatOptionNames.Invalid;
 
             Data = data;
         }
@@ -241,6 +238,7 @@ public class ModdedNumberOption : ModdedOption<float>
 
         numberOption.SetUpFromData(Data, 20);
 
+        // SetUpFromData method doesn't work correctly so we must set the values manually
         numberOption.Title = StringName;
         numberOption.Value = Value;
         numberOption.Increment = Increment;
@@ -248,8 +246,6 @@ public class ModdedNumberOption : ModdedOption<float>
         numberOption.FormatString = FormatString;
         numberOption.ZeroIsInfinity = ZeroInfinity;
         numberOption.SuffixType = (NumberSuffixes)SuffixType;
-        numberOption.intOptionName = Int32OptionNames.Invalid;
-        numberOption.floatOptionName = FloatOptionNames.Invalid;
         numberOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
 
         var optionComponent = numberOption.gameObject.AddComponent<MiraNumberOptionComponent>();

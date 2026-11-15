@@ -51,6 +51,7 @@ public class ModdedStringOption : ModdedBaseStringOption<string>
     /// </summary>
     /// <param name="value">The option's string value.</param>
     /// <param name="index">The additional value's index on the list.</param>
+    [Obsolete("Use the Setter feature of modded options to simulate conditional values. This wil be removed in a future version.")]
     public void RegisterExtraValue(string value, int index = -1)
     {
         if (!Values.Contains(value))

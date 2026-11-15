@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AmongUs.GameOptions;
 using MiraAPI.Networking;
 using MiraAPI.Utilities;
 using UnityEngine;
@@ -46,7 +45,6 @@ public class ModdedPlayerOption : ModdedOption<int>
         var data = ScriptableObject.CreateInstance<PlayerSelectionGameSetting>();
         data.Title = StringName;
         data.Type = global::OptionTypes.Player;
-        data.OptionName = Int32OptionNames.Invalid;
 
         Data = data;
     }
@@ -76,11 +74,11 @@ public class ModdedPlayerOption : ModdedOption<int>
 
         playerOption.SetUpFromData(Data, 20);
 
+        // SetUpFromData method doesn't work correctly so we must set the values manually
         playerOption.Title = StringName;
         playerOption.Values = Values.ToIl2CppList();
         playerOption.Value = Value;
         playerOption.playerIndex = Values.FindIndex(p => p.PlayerId == Value);
-        playerOption.optionName = Int32OptionNames.Invalid;
         playerOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
 
         playerOption.SetValueText();

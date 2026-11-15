@@ -1,5 +1,4 @@
 using System;
-using AmongUs.GameOptions;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -47,7 +46,6 @@ public abstract class ModdedBaseStringOption<T>(string groupPrefix, string title
         data.Type = global::OptionTypes.String;
         data.Values = StringNameValues;
         data.Index = defaultIndex;
-        data.OptionName = Int32OptionNames.Invalid;
 
         Data = data;
     }
@@ -79,7 +77,6 @@ public abstract class ModdedBaseStringOption<T>(string groupPrefix, string title
         stringOption.Title = StringName;
         stringOption.Value = GetIndex(Value);
         stringOption.Values = StringNameValues;
-        stringOption.stringOptionName = Int32OptionNames.Invalid;
         stringOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
 
         // Changing the button text to make them more distinct from number options

@@ -1,5 +1,4 @@
 ﻿using System;
-using AmongUs.GameOptions;
 using MiraAPI.Networking;
 using MiraAPI.Translation;
 using UnityEngine;
@@ -40,7 +39,6 @@ public class ModdedToggleOption : ModdedOption<bool>
         var data = ScriptableObject.CreateInstance<CheckboxGameSetting>();
         data.Title = StringName;
         data.Type = global::OptionTypes.Checkbox;
-        data.OptionName = BoolOptionNames.Invalid;
 
         Data = data;
     }
@@ -89,9 +87,9 @@ public class ModdedToggleOption : ModdedOption<bool>
 
         toggleOption.SetUpFromData(Data, 20);
 
+        // SetUpFromData method doesn't work correctly so we must set the values manually
         toggleOption.Title = StringName;
         toggleOption.CheckMark.enabled = Value;
-        toggleOption.boolOptionName = BoolOptionNames.Invalid;
         toggleOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
 
         OptionBehaviour = toggleOption;
