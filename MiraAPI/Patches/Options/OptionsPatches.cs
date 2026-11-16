@@ -225,6 +225,7 @@ public static class OptionsPatches
         }
 
         __instance.TitleText.text = TranslationController.Instance.GetString(__instance.Title).Translate();
+        __instance.ValueText.text = Helpers.FormatValue(__instance.Value, (MiraNumberSuffixes)__instance.SuffixType, __instance.FormatString);
         return false;
     }
 }

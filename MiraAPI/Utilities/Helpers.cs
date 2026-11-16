@@ -613,14 +613,7 @@ public static class Helpers
     public static string FormatValue(float value, MiraNumberSuffixes suffix = MiraNumberSuffixes.None, string formatString = "0.0")
     {
         var part = value.ToString(formatString, NumberFormatInfo.InvariantInfo);
-        return suffix switch
-        {
-            MiraNumberSuffixes.Percent => part + "%",
-            MiraNumberSuffixes.Multiplier => part + "x",
-            MiraNumberSuffixes.Distance => part + MiraApiPlugin.DistanceSuffix.Value,
-            MiraNumberSuffixes.Seconds => TranslationController.Instance.GetString(StringNames.GameSecondsAbbrev, part),
-            _ => part,
-        };
+        return part + GetSuffix(suffix);
     }
 
     /// <summary>

@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.Linq;
+﻿using System.Linq;
 using HarmonyLib;
 using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.OptionTypes;
@@ -46,15 +45,7 @@ public static class SettingPatches
             }
             else
             {
-                var part = value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo);
-                result = suffix switch
-                {
-                    MiraNumberSuffixes.Multiplier => part + "x",
-                    MiraNumberSuffixes.Percent => part + "%",
-                    MiraNumberSuffixes.Distance => part + MiraApiPlugin.DistanceSuffix.Value,
-                    MiraNumberSuffixes.Seconds => TranslationController.Instance.GetString(StringNames.GameSecondsAbbrev, part),
-                    _ => part,
-                };
+                result = Helpers.FormatValue(value, suffix, __instance.FormatString);
             }
         }
         else if (__instance.ZeroIsInfinity && Mathf.Abs(value) < 0.0001f)
@@ -63,15 +54,7 @@ public static class SettingPatches
         }
         else
         {
-            var part = value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo);
-            result = suffix switch
-            {
-                MiraNumberSuffixes.Multiplier => part + "x",
-                MiraNumberSuffixes.Percent => part + "%",
-                MiraNumberSuffixes.Distance => part + MiraApiPlugin.DistanceSuffix.Value,
-                MiraNumberSuffixes.Seconds => TranslationController.Instance.GetString(StringNames.GameSecondsAbbrev, part),
-                _ => part,
-            };
+            result = Helpers.FormatValue(value, suffix, __instance.FormatString);
         }
 
         __result = result;
