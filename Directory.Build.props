@@ -10,7 +10,7 @@
 
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 
-        <VersionPrefix>0.6.0</VersionPrefix>
+        <VersionPrefix>0.6.1</VersionPrefix>
         <VersionSuffix>dev</VersionSuffix>
 
         <Authors>All Of Us, XtraCube, Angxl</Authors>
