@@ -49,11 +49,11 @@ public static class SettingPatches
                 var part = value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo);
                 result = suffix switch
                 {
-                    MiraNumberSuffixes.None => part,
                     MiraNumberSuffixes.Multiplier => part + "x",
                     MiraNumberSuffixes.Percent => part + "%",
                     MiraNumberSuffixes.Distance => part + MiraApiPlugin.DistanceSuffix.Value,
-                    _ => TranslationController.Instance.GetString(StringNames.GameSecondsAbbrev, part),
+                    MiraNumberSuffixes.Seconds => TranslationController.Instance.GetString(StringNames.GameSecondsAbbrev, part),
+                    _ => part,
                 };
             }
         }
@@ -66,11 +66,11 @@ public static class SettingPatches
             var part = value.ToString(__instance.FormatString, NumberFormatInfo.InvariantInfo);
             result = suffix switch
             {
-                MiraNumberSuffixes.None => part,
                 MiraNumberSuffixes.Multiplier => part + "x",
                 MiraNumberSuffixes.Percent => part + "%",
                 MiraNumberSuffixes.Distance => part + MiraApiPlugin.DistanceSuffix.Value,
-                _ => TranslationController.Instance.GetString(StringNames.GameSecondsAbbrev, part),
+                MiraNumberSuffixes.Seconds => TranslationController.Instance.GetString(StringNames.GameSecondsAbbrev, part),
+                _ => part,
             };
         }
 

@@ -574,7 +574,6 @@ public static class Helpers
     {
         return suffix switch
         {
-            MiraNumberSuffixes.None => string.Empty,
             MiraNumberSuffixes.Multiplier => "x",
             MiraNumberSuffixes.Seconds => "s",
             MiraNumberSuffixes.Percent => "%",
@@ -616,11 +615,11 @@ public static class Helpers
         var part = value.ToString(formatString, NumberFormatInfo.InvariantInfo);
         return suffix switch
         {
-            MiraNumberSuffixes.None => part,
             MiraNumberSuffixes.Percent => part + "%",
             MiraNumberSuffixes.Multiplier => part + "x",
             MiraNumberSuffixes.Distance => part + MiraApiPlugin.DistanceSuffix.Value,
-            _ => TranslationController.Instance.GetString(StringNames.GameSecondsAbbrev, part),
+            MiraNumberSuffixes.Seconds => TranslationController.Instance.GetString(StringNames.GameSecondsAbbrev, part),
+            _ => part,
         };
     }
 
