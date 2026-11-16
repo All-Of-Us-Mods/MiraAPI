@@ -9,5 +9,5 @@ public class CloseDoorsEvent(SystemTypes room) : MiraCancelableEvent
     /// <summary>
     /// Gets the room that the doors were closed in.
     /// </summary>
-    public SystemTypes Room { get; } = room;
+    public SystemTypes Room => room;
 }

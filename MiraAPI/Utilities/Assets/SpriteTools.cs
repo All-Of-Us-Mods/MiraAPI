@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Reactor.Utilities.Extensions;
 using UnityEngine;
@@ -10,6 +11,9 @@ namespace MiraAPI.Utilities.Assets;
 /// </summary>
 public static class SpriteTools
 {
+    private static readonly Dictionary<(Assembly Assembly, string ResourcePath), Texture2D> TextureCache = [];
+    private static readonly Dictionary<(Assembly Assembly, string ResourcePath, float PixelsPerUnit), Sprite> SpriteCache = [];
+
     /// <summary>
     /// Loads and returns a texture from a resource path using the specified <see cref="Assembly"/>.
     /// </summary>
@@ -19,11 +23,16 @@ public static class SpriteTools
     /// <exception cref="ArgumentException">Thrown when the resource cannot be found in the specified <see cref="Assembly"/>.</exception>
     public static Texture2D LoadTextureFromResourcePath(string resourcePath, Assembly assembly)
     {
+        if (TextureCache.TryGetValue((assembly, resourcePath), out var cachedTexture) && cachedTexture != null)
+        {
+            return cachedTexture;
+        }
+
         var tex = new Texture2D(1, 1, TextureFormat.ARGB32, false)
         {
             wrapMode = TextureWrapMode.Clamp,
         };
-        var myStream = assembly.GetManifestResourceStream(resourcePath);
+        using var myStream = assembly.GetManifestResourceStream(resourcePath);
         if (myStream != null)
         {
             var buttonTexture = myStream.ReadFully();
@@ -35,6 +44,7 @@ public static class SpriteTools
         }
 
         tex.name = resourcePath;
+        TextureCache[(assembly, resourcePath)] = tex;
         return tex;
     }
 
@@ -47,6 +57,11 @@ public static class SpriteTools
     /// <returns>A <see cref="Sprite"/> object created from the texture loaded from the specified resource path.</returns>
     public static Sprite LoadSpriteFromPath(string resourcePath, Assembly assembly, float pixelsPerUnit)
     {
+        if (SpriteCache.TryGetValue((assembly, resourcePath, pixelsPerUnit), out var cachedSprite) && cachedSprite != null)
+        {
+            return cachedSprite;
+        }
+
         var tex = LoadTextureFromResourcePath(resourcePath, assembly);
         var sprite = Sprite.Create(
             tex,
@@ -56,6 +71,7 @@ public static class SpriteTools
             0,
             SpriteMeshType.FullRect);
         sprite.name = resourcePath;
+        SpriteCache[(assembly, resourcePath, pixelsPerUnit)] = sprite;
         return sprite;
     }
 }

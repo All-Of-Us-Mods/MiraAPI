@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MiraAPI.PluginLoading;
+using MiraAPI.Utilities;
 using MiraAPI.Utilities.Components;
 using UnityEngine;
 
@@ -13,16 +14,16 @@ namespace MiraAPI.MeetingAbilities;
 public static class MeetingButtonManager
 {
     /// <summary>
-    /// Gets a list if==of all registered <see cref="TargetedMeetingButton"/>.
+    /// Gets a list of all registered <see cref="TargetedMeetingButton"/>.
     /// </summary>
     public static List<TargetedMeetingButton> TargetedButtons { get; internal set; } = [];
 
     /// <summary>
-    /// Gets a list if==of all registered <see cref="MeetingActionButton"/>.
+    /// Gets a list of all registered <see cref="MeetingActionButton"/>.
     /// </summary>
     public static List<MeetingActionButton> UntargetedButtons { get; internal set; } = [];
 
-    internal static bool RegisterTargetedMeetingButton(Type type, MiraPluginInfo info)
+    internal static bool RegisterTargetedMeetingButton(Type type, in MiraPluginManager.RegistrationContext context)
     {
         if (!typeof(TargetedMeetingButton).IsAssignableFrom(type))
         {
@@ -30,12 +31,14 @@ public static class MeetingButtonManager
         }
 
         var button = (Activator.CreateInstance(type) as TargetedMeetingButton)!;
-        info.InternalTargetedMeetingButtons.Add(button);
+        context.PluginInfo.InternalTargetedMeetingButtons.Add(button);
         TargetedButtons.Add(button);
+
+        Helpers.SetInstance(typeof(TargetedMeetingButtonSingleton<>), type, button);
         return true;
     }
 
-    internal static bool RegisterMeetingButton(Type type, MiraPluginInfo info)
+    internal static bool RegisterMeetingButton(Type type, in MiraPluginManager.RegistrationContext context)
     {
         if (!typeof(MeetingActionButton).IsAssignableFrom(type))
         {
@@ -43,7 +46,7 @@ public static class MeetingButtonManager
         }
 
         var button = (Activator.CreateInstance(type) as MeetingActionButton)!;
-        info.InternalMeetingButtons.Add(button);
+        context.PluginInfo.InternalMeetingButtons.Add(button);
         UntargetedButtons.Add(button);
         return true;
     }

@@ -19,12 +19,15 @@ public partial class ExamplePlugin : BasePlugin, IMiraPlugin
 {
     public ExamplePlugin()
     {
-        MiraLocaleManager.Register("mira.example");
+        MiraLocaleManager.Register("mira.example", typeof(ExamplePlugin).Assembly);
     }
 
     public Harmony Harmony { get; } = new(Id);
     public string OptionsTitleText { get; } = "Mira API\nExample Mod";
     public string CustomOptionMenuNameTwo { get; } = "Example Options";
+
+    /// <inheritdoc />
+    public bool ForceRegisterEvents => false;
 
     public ConfigFile GetConfigFile()
     {

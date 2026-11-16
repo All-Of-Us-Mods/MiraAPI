@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using HarmonyLib;
 using MiraAPI.GameOptions;
 using MiraAPI.Utilities;
@@ -9,6 +10,8 @@ namespace MiraAPI.Patches.Options;
 [HarmonyPatch(typeof(PlayerOption))]
 public static class PlayerOptionPatches
 {
+    private static readonly Comparer<NetworkedPlayerInfo> Comparer = Comparer<NetworkedPlayerInfo>.Create((a, b) => a.PlayerId.CompareTo(b.PlayerId));
+
     // Updates the list of players according to the filter.
     [HarmonyPrefix]
     [HarmonyPatch(nameof(PlayerOption.FixedUpdate))]
@@ -19,12 +22,14 @@ public static class PlayerOptionPatches
             return true;
         }
 
-        if (!ModdedOptionsManager.CreatedPlayerOptions.TryGetValue(__instance, out var moddedPlrOpt)) return false;
+        if (!__instance.TryGetComponent<MiraPlayerOptionComponent>(out var component)) return false;
+
+        var moddedPlrOpt = component.PlayerOption;
 
         var filteredPlayers = moddedPlrOpt.GetFilteredPlayers();
         if (filteredPlayers.Count != __instance.Values.Count)
         {
-            filteredPlayers.Sort((a, b) => a.PlayerId.CompareTo(b.PlayerId));
+            filteredPlayers.Sort(Comparer);
 
             moddedPlrOpt.Values = filteredPlayers;
             __instance.Values = filteredPlayers.ToIl2CppList();
@@ -42,7 +47,7 @@ public static class PlayerOptionPatches
     [HarmonyPatch(nameof(PlayerOption.UpdatePlayerIndex))]
     public static bool UpdatePlayerIndexPatch(PlayerOption __instance, int index)
     {
-        if (!__instance.IsCustom() || ModdedOptionsManager.CreatedPlayerOptions[__instance].AllowNone)
+        if (!__instance.IsCustom() || !__instance.TryGetComponent<MiraPlayerOptionComponent>(out var component) || component.PlayerOption.AllowNone)
         {
             return true;
         }

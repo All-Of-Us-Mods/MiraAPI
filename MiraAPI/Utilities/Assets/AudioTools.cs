@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Resources;
@@ -13,6 +14,8 @@ namespace MiraAPI.Utilities.Assets;
 /// </summary>
 public static class AudioTools
 {
+    private static readonly Dictionary<(Assembly Assembly, string Path), AudioClip> AudioClipCache = [];
+
     /// <summary>
     /// Loads and returns an audio clip from a resource path using the specified <see cref="Assembly"/>.
     /// </summary>
@@ -23,6 +26,11 @@ public static class AudioTools
     /// <exception cref="MissingManifestResourceException">Stream failed to load. Check if the name of your asset was correct.</exception>
     public static AudioClip LoadAudioFromResources(string resourcePath, Assembly assembly)
     {
+        if (AudioClipCache.TryGetValue((assembly, resourcePath), out var cachedClip) && cachedClip != null)
+        {
+            return cachedClip;
+        }
+
         using var assetStream = assembly.GetManifestResourceStream(resourcePath)
             ?? throw new MissingManifestResourceException($"Stream failed to load. Check if the asset name is correct: {resourcePath}");
 
@@ -93,6 +101,7 @@ public static class AudioTools
         var audioClip = AudioClip.Create(resourcePath, samples.Length / channels, channels, sampleRate, false);
         audioClip.SetData(samples, 0);
 
+        AudioClipCache[(assembly, resourcePath)] = audioClip;
         return audioClip;
     }
 

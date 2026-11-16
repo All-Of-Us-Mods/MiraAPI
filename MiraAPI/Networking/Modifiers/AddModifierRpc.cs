@@ -57,7 +57,7 @@ public class AddModifierRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<Mir
     }
 
     /// <inheritdoc />
-    public override void Handle(PlayerControl player, ModifierData data)
+    public override void Handle(PlayerControl innerNetObject, ModifierData data)
     {
         var type = ModifierManager.GetModifierType(data.TypeId) ?? throw new InvalidOperationException($"Modifier type not found for ID {data.TypeId}.");
         var modifier = data.Args.Length > 0
@@ -65,6 +65,6 @@ public class AddModifierRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<Mir
             : Activator.CreateInstance(type) as BaseModifier
                 ?? throw new InvalidOperationException($"Cannot add modifier {type.Name} because it is not a valid modifier.");
         modifier.UniqueId = data.UniqueId;
-        player.AddModifier(modifier);
+        innerNetObject.AddModifier(modifier);
     }
 }

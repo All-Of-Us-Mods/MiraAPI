@@ -9,5 +9,5 @@ public class BeforeGameEndEvent(GameOverReason reason) : MiraCancelableEvent
     /// <summary>
     /// Gets the reason for the game end.
     /// </summary>
-    public GameOverReason Reason { get; } = reason;
+    public GameOverReason Reason => reason;
 }

@@ -16,6 +16,7 @@ namespace MiraAPI.Modifiers;
 /// <summary>
 /// The component for handling <see cref="BaseModifier"/>s.
 /// </summary>
+/// <param name="cppPtr">The pointer to the C++ object.</param>
 [RegisterInIl2Cpp]
 [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity Convention.")]
 public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
@@ -27,19 +28,16 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
     public ImmutableList<BaseModifier> ActiveModifiers { get; private set; } = ImmutableList<BaseModifier>.Empty;
 
     private readonly List<BaseModifier> _toRemove = [];
-
     private readonly List<BaseModifier> _toAdd = [];
+    private readonly List<BaseModifier> _modifiers = [];
 
-    private ModifierDisplayComponent? ModifierDisplay { get; set; }
-
-    [HideFromIl2Cpp]
-    private List<BaseModifier> Modifiers { get; set; } = [];
+    private ModifierDisplayComponent? modifierDisplay;
 
     private PlayerControl _player = null!;
 
     internal void ClearModifiers()
     {
-        _toRemove.AddRange(Modifiers);
+        _toRemove.AddRange(_modifiers);
     }
 
     private void Awake()
@@ -54,15 +52,13 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
 
         ModifierExtensions.ModifierComponents.Add(_player, this);
 
-        Modifiers = [];
-
         if (!_player.AmOwner)
         {
             return;
         }
 
-        ModifierDisplay = ModifierDisplayComponent.CreateDisplay();
-        ModifierDisplay?.UpdateModifiersList(Modifiers);
+        modifierDisplay = ModifierDisplayComponent.CreateDisplay();
+        modifierDisplay?.UpdateModifiersList(_modifiers);
     }
 
     private void FixedUpdate()
@@ -77,17 +73,17 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
             }
             catch (Exception e)
             {
-                Error($"Error while deactivating modifier {modifier.ModifierName}: {e.ToString()}");
+                Error($"Error while deactivating modifier {modifier.ModifierName}: {e}");
             }
 
-            Modifiers.Remove(modifier);
+            _modifiers.Remove(modifier);
         }
 
         var added = _toAdd.Count > 0;
         foreach (var modifier in _toAdd.ToArray())
         {
             _toAdd.Remove(modifier);
-            Modifiers.Add(modifier);
+            _modifiers.Add(modifier);
             modifier.Initialized = true;
             try
             {
@@ -95,7 +91,7 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
             }
             catch (Exception e)
             {
-                Error($"Error while activating modifier {modifier.ModifierName}: {e.ToString()}");
+                Error($"Error while activating modifier {modifier.ModifierName}: {e}");
             }
 
             if (modifier is TimedModifier { AutoStart: true } timer)
@@ -108,10 +104,10 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
         {
             if (_player.AmOwner && HudManager.InstanceExists)
             {
-                ModifierDisplay?.UpdateModifiersList(Modifiers);
+                modifierDisplay?.UpdateModifiersList(_modifiers);
             }
 
-            ActiveModifiers = Modifiers.ToImmutableList();
+            ActiveModifiers = _modifiers.ToImmutableList();
         }
 
         foreach (var modifier in ActiveModifiers)
@@ -122,11 +118,11 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
             }
             catch (Exception e)
             {
-                Error($"Error while (fixed) updating modifier {modifier.ModifierName}: {e.ToString()}");
+                Error($"Error while (fixed) updating modifier {modifier.ModifierName}: {e}");
             }
         }
 
-        if (_player.AmOwner && ModifierDisplay && HudManager.InstanceExists)
+        if (_player.AmOwner && modifierDisplay && HudManager.InstanceExists)
         {
             var taskPanelOpen = HudManager.Instance.TaskPanel.open;
             var roleTabOpen = HudManagerPatches.RoleTab != null && HudManagerPatches.RoleTab.open;
@@ -134,11 +130,11 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
 
             if (leftSideHud && (taskPanelOpen || roleTabOpen))
             {
-                ModifierDisplay!.gameObject.SetActive(false);
+                modifierDisplay!.gameObject.SetActive(false);
             }
             else
             {
-                ModifierDisplay!.gameObject.SetActive(MeetingHud.Instance || HudManager.Instance.TaskPanel.isActiveAndEnabled);
+                modifierDisplay!.gameObject.SetActive(MeetingHud.Instance || HudManager.Instance.TaskPanel.isActiveAndEnabled);
             }
         }
     }
@@ -153,7 +149,7 @@ public class ModifierComponent(IntPtr cppPtr) : MonoBehaviour(cppPtr)
             }
             catch (Exception e)
             {
-                Error($"Error while updating modifier {modifier.ModifierName}: {e.ToString()}");
+                Error($"Error while updating modifier {modifier.ModifierName}: {e}");
             }
         }
     }

@@ -1,14 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
-using MiraAPI.GameOptions.OptionTypes;
 using MiraAPI.PluginLoading;
 using MiraAPI.Translation;
 using MiraAPI.Utilities.Assets;
-using Reactor.Utilities;
 using UnityEngine;
 
 namespace MiraAPI.Utilities;
@@ -32,13 +29,13 @@ internal sealed class GuideOptionPage(
     IReadOnlyList<string> modSearchTerms,
     List<GuideOptionEntry> entries)
 {
-    public AbstractOptionGroup Group { get; } = group;
+    public AbstractOptionGroup Group => group;
 
     public List<AbstractOptionGroup> Groups { get; } = [group];
 
-    public string Title { get; } = title;
+    public string Title => title;
 
-    public LoadableAsset<Sprite> Sprite { get; } = group.Sprite;
+    public LoadableAsset<Sprite> Sprite => group.Sprite;
 
     public int Order { get; set; } = order;
 
@@ -46,20 +43,18 @@ internal sealed class GuideOptionPage(
 
     public uint GroupPriority { get; set; } = groupPriority;
 
-    public int Columns { get; } = columns;
+    public int Columns => columns;
 
-    public string ModAbbreviation { get; } = modAbbreviation;
+    public string ModAbbreviation => modAbbreviation;
 
     public HashSet<string> ModSearchTerms { get; } = new(modSearchTerms, StringComparer.OrdinalIgnoreCase);
 
-    public List<GuideOptionEntry> Entries { get; } = entries;
+    public List<GuideOptionEntry> Entries => entries;
 }
 
 internal static class GuideOptionPages
 {
-    private static readonly Regex TrailingZeroRegex = new(@"\.0+(?!\d)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
-
-    public static List<GuideOptionPage> BuildPages(Func<bool, string> formatBool)
+    public static List<GuideOptionPage> BuildPages()
     {
         var pages = new List<GuideOptionPage>();
         var combinedPages = new Dictionary<string, GuideOptionPage>(StringComparer.OrdinalIgnoreCase);
@@ -95,58 +90,62 @@ internal static class GuideOptionPages
                     item.Group,
                     groupName,
                     item.ModAbbreviation,
-                    modSearchTerms,
-                    formatBool);
+                    modSearchTerms);
                 if (entry != null)
                 {
                     entries.Add(entry);
                 }
             }
 
-            if (entries.Count > 0)
+            if (entries.Count <= 0)
             {
-                var pageKey = item.Group.MatchInfoGuidePageKey?.Trim();
-                var combinedKey = string.IsNullOrEmpty(pageKey) ? null : $"{item.Plugin.PluginId}\0{pageKey}";
-                if (combinedKey != null && combinedPages.TryGetValue(combinedKey, out var combinedPage))
+                continue;
+            }
+
+            var pageKey = item.Group.MatchInfoGuidePageKey?.Trim();
+            var combinedKey = string.IsNullOrEmpty(pageKey) ? null : $"{item.Plugin.PluginId}\0{pageKey}";
+            if (combinedKey != null && combinedPages.TryGetValue(combinedKey, out var combinedPage))
+            {
+                combinedPage.Groups.Add(item.Group);
+                combinedPage.Entries.AddRange(entries);
+                combinedPage.ModSearchTerms.UnionWith(modSearchTerms);
+                combinedPage.Order = Math.Min(combinedPage.Order, item.Group.MatchInfoGuidePageOrder);
+                combinedPage.MenuOrder = Math.Min(
+                    combinedPage.MenuOrder,
+                    GetMenuOrder(item.Group.ParentMenu));
+                combinedPage.GroupPriority = Math.Min(
+                    combinedPage.GroupPriority,
+                    item.Group.GroupPriority);
+            }
+            else
+            {
+                var page = new GuideOptionPage(
+                    item.Group,
+                    item.Group.MatchInfoGuidePageTitle,
+                    item.Group.MatchInfoGuidePageOrder,
+                    GetMenuOrder(item.Group.ParentMenu),
+                    item.Group.GroupPriority,
+                    Mathf.Clamp(item.Group.MatchInfoGuidePageColumns, 1, 6),
+                    item.ModAbbreviation,
+                    modSearchTerms,
+                    entries);
+                pages.Add(page);
+                if (combinedKey != null)
                 {
-                    combinedPage.Groups.Add(item.Group);
-                    combinedPage.Entries.AddRange(entries);
-                    combinedPage.ModSearchTerms.UnionWith(modSearchTerms);
-                    combinedPage.Order = Math.Min(combinedPage.Order, item.Group.MatchInfoGuidePageOrder);
-                    combinedPage.MenuOrder = Math.Min(
-                        combinedPage.MenuOrder,
-                        GetMenuOrder(item.Group.ParentMenu));
-                    combinedPage.GroupPriority = Math.Min(
-                        combinedPage.GroupPriority,
-                        item.Group.GroupPriority);
-                }
-                else
-                {
-                    var page = new GuideOptionPage(
-                        item.Group,
-                        item.Group.MatchInfoGuidePageTitle,
-                        item.Group.MatchInfoGuidePageOrder,
-                        GetMenuOrder(item.Group.ParentMenu),
-                        item.Group.GroupPriority,
-                        Mathf.Clamp(item.Group.MatchInfoGuidePageColumns, 1, 6),
-                        item.ModAbbreviation,
-                        modSearchTerms,
-                        entries);
-                    pages.Add(page);
-                    if (combinedKey != null)
-                    {
-                        combinedPages.Add(combinedKey, page);
-                    }
+                    combinedPages.Add(combinedKey, page);
                 }
             }
         }
 
-        return [.. pages
-            .OrderBy(page => page.MenuOrder)
-            .ThenBy(page => page.GroupPriority)
-            .ThenBy(page => page.Order)
-            .ThenBy(page => page.Group.GroupName, StringComparer.OrdinalIgnoreCase)
-            .ThenBy(page => page.ModAbbreviation, StringComparer.OrdinalIgnoreCase)];
+        return
+        [
+            .. pages
+                .OrderBy(page => page.MenuOrder)
+                .ThenBy(page => page.GroupPriority)
+                .ThenBy(page => page.Order)
+                .ThenBy(page => page.Group.GroupName, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(page => page.ModAbbreviation, StringComparer.OrdinalIgnoreCase),
+        ];
     }
 
     private static int GetMenuOrder(MenuCategory menu)
@@ -183,12 +182,15 @@ internal static class GuideOptionPages
             return [.. matchingModPages.SelectMany(page => page.Entries)];
         }
 
-        return [.. pageList
-            .SelectMany(page => page.Entries
+        return
+        [
+            .. pageList
+                .SelectMany(page => page.Entries
                 .Select(entry => (Entry: entry, Rank: Rank(entry, query, cmp)))
                 .Where(result => result.Rank < int.MaxValue)
                 .OrderBy(result => result.Rank)
-                .Select(result => result.Entry))];
+                .Select(result => result.Entry)),
+        ];
     }
 
     private static string[] GetModSearchTerms(MiraPluginInfo plugin, AbstractOptionGroup group)
@@ -269,7 +271,7 @@ internal static class GuideOptionPages
         }
         catch (Exception e)
         {
-            Logger<MiraApiPlugin>.Warning($"GroupVisible threw for {group.GetType().Name}: {e.Message}");
+            Warning($"GroupVisible threw for {group.GetType().Name}: {e.Message}");
             return false;
         }
     }
@@ -282,7 +284,7 @@ internal static class GuideOptionPages
         }
         catch (Exception e)
         {
-            Logger<MiraApiPlugin>.Warning($"Visible threw for option '{option.Title}': {e.Message}");
+            Warning($"Visible threw for option '{option.Title}': {e.Message}");
             return false;
         }
     }
@@ -292,51 +294,18 @@ internal static class GuideOptionPages
         AbstractOptionGroup group,
         string groupName,
         string modAbbreviation,
-        IReadOnlyList<string> modSearchTerms,
-        Func<bool, string> formatBool)
+        IReadOnlyList<string> modSearchTerms)
     {
         try
         {
             var title = TranslationController.Instance.GetString(option.StringName);
-            var value = FormatValue(option, formatBool);
+            var value = option.GetDisplayValue();
             return new GuideOptionEntry(title, value, group, groupName, modAbbreviation, modSearchTerms);
         }
         catch (Exception e)
         {
-            Logger<MiraApiPlugin>.Warning($"Could not format option '{option.Title}' for the guide: {e.Message}");
+            Warning($"Could not format option '{option.Title}' for the guide: {e.Message}");
             return null;
-        }
-    }
-
-    private static string FormatValue(IModdedOption option, Func<bool, string> formatBool)
-    {
-        switch (option)
-        {
-            case ModdedToggleOption toggle:
-                return formatBool(toggle.Value);
-
-            case ModdedEnumOption enumOption:
-                return MiraLocaleManager.Get(
-                    enumOption.Values[enumOption.Value],
-                    enumOption.Values[enumOption.Value]);
-
-            case ModdedNumberOption number:
-                if (number is { NegativeWordValue: not "#", Value: -1 })
-                {
-                    return number.NegativeWordValue;
-                }
-
-                if (number is { ZeroWordValue: not "#", Value: 0 })
-                {
-                    return number.ZeroWordValue;
-                }
-
-                return TrailingZeroRegex.Replace(number.Data.GetValueString(number.Value), string.Empty);
-
-            default:
-                return option.Data.Type == OptionTypes.Checkbox
-                    ? formatBool(Math.Abs(option.GetFloatData() - 1f) < 0.0001f)
-                    : option.Data.GetValueString(option.GetFloatData());
         }
     }
 }

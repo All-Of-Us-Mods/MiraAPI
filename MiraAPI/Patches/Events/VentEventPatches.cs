@@ -29,7 +29,7 @@ public static class VentEventPatches
         var vent = ShipStatus.Instance.AllVents.FirstOrDefault(v => v.Id == ventId);
 
         var @event = new EnterVentEvent(pc, vent);
-        MiraEventManager.InvokeEvent(@event);
+        @event.InvokeEvent();
 
         if (pc.AmOwner)
         {
@@ -47,7 +47,7 @@ public static class VentEventPatches
         var vent = ShipStatus.Instance.AllVents.First(v => v.Id == ventId);
 
         var @event = new ExitVentEvent(pc, vent);
-        MiraEventManager.InvokeEvent(@event);
+        @event.InvokeEvent();
 
         if (pc.AmOwner)
         {

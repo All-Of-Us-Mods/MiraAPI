@@ -40,8 +40,8 @@ public class ModdedOptionList<T> : IModdedOptionList<T>
     /// <param name="options">The options list.</param>
     public ModdedOptionList(IEnumerable<T> options)
     {
-        Count = options.Count();
         Options = [.. options];
+        Count = Options.Count;
     }
 
     /// <summary>
@@ -62,13 +62,4 @@ public class ModdedOptionList<T> : IModdedOptionList<T>
     {
         return Options.GetEnumerator();
     }
-
-    /// <inheritdoc cref="IEnumerable{T}.GetEnumerator"/>
-    IEnumerator<IModdedOption> IEnumerable<IModdedOption>.GetEnumerator()
-    {
-        return ((IEnumerable<IModdedOption>)Options).GetEnumerator();
-    }
-
-    /// <inheritdoc cref="IReadOnlyList{T}.this"/>
-    IModdedOption IReadOnlyList<IModdedOption>.this[int index] => this[index];
 }

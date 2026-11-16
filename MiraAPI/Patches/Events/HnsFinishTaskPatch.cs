@@ -12,6 +12,6 @@ public static class HnsFinishTaskPatch
     public static void FinishTaskPostfix(HideAndSeekManager __instance, PlayerTask task)
     {
         var completeTaskEvent = new CompleteHnsTaskEvent(__instance, task.Owner, task);
-        MiraEventManager.InvokeEvent(completeTaskEvent);
+        completeTaskEvent.InvokeEvent();
     }
 }

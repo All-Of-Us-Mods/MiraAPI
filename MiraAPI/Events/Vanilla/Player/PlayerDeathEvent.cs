@@ -11,15 +11,15 @@ public class PlayerDeathEvent(PlayerControl player, DeathReason reason, DeadBody
     /// <summary>
     /// Gets the player who died.
     /// </summary>
-    public PlayerControl Player { get; } = player;
+    public PlayerControl Player => player;
 
     /// <summary>
     /// Gets the reason the player died.
     /// </summary>
-    public DeathReason DeathReason { get; } = reason;
+    public DeathReason DeathReason => reason;
 
     /// <summary>
     /// Gets the <see cref="global::DeadBody"/> associated with the player, if any.
     /// </summary>
-    public DeadBody? DeadBody { get; } = deadBody;
+    public DeadBody? DeadBody => deadBody;
 }

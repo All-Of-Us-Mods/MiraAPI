@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using BepInEx.Configuration;
 using HarmonyLib;
 using MiraAPI.Patches.LocalSettings;
@@ -16,6 +17,7 @@ namespace MiraAPI.LocalSettings;
 /// <summary>
 /// Represents a local settings tab. Gets a button by default.
 /// </summary>
+/// <param name="config">The config file that this settings tab wraps around.</param>
 public abstract class LocalSettingsTab(ConfigFile config)
 {
     /// <summary>
@@ -73,7 +75,8 @@ public abstract class LocalSettingsTab(ConfigFile config)
     /// </summary>
     protected int TabIndex => LocalSettingsManager.Tabs.IndexOf(this) + 10;
 
-    private Scroller? Scroller { get; set; }
+    private Scroller? scroller;
+    private float maxScroll;
 
     /// <summary>
     /// Invoked when an option value is changed.
@@ -106,6 +109,17 @@ public abstract class LocalSettingsTab(ConfigFile config)
         }
     }
 
+    internal void RefreshScrollBounds()
+    {
+        if (scroller == null)
+        {
+            return;
+        }
+
+        scroller.SetBounds(new FloatRange(0, maxScroll), new FloatRange(0, 0));
+        scroller.ScrollToTop();
+    }
+
     /// <summary>
     /// Creates the tab <see cref="GameObject"/> and it's content.
     /// </summary>
@@ -113,45 +127,52 @@ public abstract class LocalSettingsTab(ConfigFile config)
     /// <returns>The created tab <see cref="GameObject"/>.</returns>
     public virtual GameObject CreateTab(OptionsMenuBehaviour instance)
     {
-        var tab = Object.Instantiate(instance.transform.FindChild("GeneralTab").gameObject, instance.transform);
+        var genTab = instance.transform.FindChild("GeneralTab");
+        var tab = Object.Instantiate(genTab.gameObject, instance.transform);
         tab.name = $"{TabName}Tab";
         tab.transform.DestroyChildren();
         tab.gameObject.SetActive(false);
 
-        if (Scroller == null)
+        if (scroller == null || scroller.transform.parent != tab.transform)
         {
-            Scroller = Helpers.CreateScroller(tab.transform, OptionsMenuPatches.MaskCollider);
+            scroller = Helpers.CreateScroller(tab.transform, OptionsMenuPatches.MaskCollider);
         }
+
+        Labels.Clear();
 
         if (TabButton != null)
         {
             TabButton.Content = tab.gameObject;
         }
 
-        var generalLabel = instance.transform.FindChild("GeneralTab").FindChild("ControlGroup")
-            .FindChild("ControlText_TMP").gameObject;
-        var toggle = instance.transform.FindChild("GeneralTab").FindChild("ChatGroup").FindChild("CensorChatButton").GetComponent<ToggleButtonBehaviour>();
-        var slider = instance.transform.FindChild("GeneralTab").FindChild("SoundGroup").FindChild("SFXSlider").GetComponent<SlideBar>();
-
         Dictionary<string, List<ILocalSetting>> entriesByGroup = [];
+
         foreach (var entry in Settings)
         {
             var group = entry.ConfigEntry.Definition.Section;
-            if (!entriesByGroup.ContainsKey(group))
-                entriesByGroup.Add(group, []);
 
-            entriesByGroup[group].Add(entry);
+            if (!entriesByGroup.TryGetValue(group, out var list))
+            {
+                list = [];
+                entriesByGroup[group] = list;
+            }
+
+            list.Add(entry);
         }
 
-        float contentOffset = 0;
+        var contentOffset = 0f;
         var contentOrder = 1;
         var contentIndex = 1;
+
+        var generalLabel = genTab.FindChild("ControlGroup").FindChild("ControlText_TMP").gameObject;
+        var toggle = genTab.FindChild("ChatGroup").FindChild("CensorChatButton").GetComponent<ToggleButtonBehaviour>();
+        var slider = genTab.FindChild("SoundGroup").FindChild("SFXSlider").GetComponent<SlideBar>();
 
         foreach (var pair in entriesByGroup)
         {
             if (ShouldCreateLabels)
             {
-                CreateLabel(generalLabel, Scroller.Inner, pair.Key, ref contentOffset);
+                CreateLabel(generalLabel, scroller.Inner, pair.Key, ref contentOffset);
                 contentOrder = 1;
                 contentIndex = 1;
             }
@@ -161,25 +182,12 @@ public abstract class LocalSettingsTab(ConfigFile config)
                 var obj = setting.CreateOption(
                     toggle,
                     slider,
-                    Scroller.Inner,
+                    scroller.Inner,
                     ref contentOffset,
                     ref contentOrder,
                     contentIndex == pair.Value.Count);
 
-                obj!.GetComponentsInChildren<SpriteRenderer>(true).Do(x =>
-                {
-                    x.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-                    x.sortingOrder = 150;
-                    x.sortingLayerName = "Default";
-                });
-
-                obj.GetComponentsInChildren<MeshRenderer>(true).Do(x =>
-                {
-                    x.sortingOrder = 151;
-                    x.sortingLayerName = "Default";
-                });
-
-                obj.GetComponentsInChildren<PassiveButton>().Do(x => { x.ClickMask = OptionsMenuPatches.MaskCollider; });
+                AdjustComponents(obj!);
 
                 contentIndex++;
             }
@@ -189,35 +197,45 @@ public abstract class LocalSettingsTab(ConfigFile config)
 
         contentIndex = 1;
         contentOrder = 1;
+
         foreach (var button in Buttons)
         {
             var obj = button.CreateButton(
                 toggle,
-                Scroller.Inner,
+                scroller.Inner,
                 ref contentOffset,
                 ref contentOrder,
                 contentIndex == Buttons.Count);
 
-            obj.GetComponentsInChildren<SpriteRenderer>(true).Do(x =>
-            {
-                x.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-                x.sortingOrder = 150;
-                x.sortingLayerName = "Default";
-            });
-
-            obj.GetComponentsInChildren<MeshRenderer>(true).Do(x =>
-            {
-                x.sortingOrder = 151;
-                x.sortingLayerName = "Default";
-            });
-
-            obj.GetComponentsInChildren<PassiveButton>().Do(x => { x.ClickMask = OptionsMenuPatches.MaskCollider; });
+            AdjustComponents(obj);
 
             contentIndex++;
         }
 
-        Scroller.SetBounds(new FloatRange(0, (Settings.Count + Buttons.Count) * 0.5f - 5f), new FloatRange(0, 0));
+        const float visibleHeight = 5f;
+        const float extraPadding = 0.25f;
+        var itemRange = (Settings.Count + Buttons.Count) * 0.5f - visibleHeight;
+        var offsetRange = contentOffset - visibleHeight + extraPadding;
+        maxScroll = Mathf.Max(0f, itemRange, offsetRange);
         return tab;
+    }
+
+    private static void AdjustComponents(GameObject obj)
+    {
+        obj.GetComponentsInChildren<SpriteRenderer>(true).Do(x =>
+        {
+            x.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            x.sortingOrder = 150;
+            x.sortingLayerName = "Default";
+        });
+
+        obj.GetComponentsInChildren<MeshRenderer>(true).Do(x =>
+        {
+            x.sortingOrder = 151;
+            x.sortingLayerName = "Default";
+        });
+
+        obj.GetComponentsInChildren<PassiveButton>(true).Do(x => x.ClickMask = OptionsMenuPatches.MaskCollider);
     }
 
     /// <summary>
@@ -263,7 +281,7 @@ public abstract class LocalSettingsTab(ConfigFile config)
 
         var tabIndex = tabIdx; // Local copies of the tab variables so we can use them in the lambdas
         var tabOffset = offset;
-        tabButton.OnClick.AddListener((UnityAction)(() => { instance.OpenTabGroup(tabIndex + 10); }));
+        tabButton.OnClick.AddListener((UnityAction)(() => instance.OpenTabGroup(tabIndex + 10)));
         tabButton.OnMouseOver.AddListener((UnityAction)(() =>
         {
             tabButton.transform.localPosition = new Vector3(3.55f, 2.1f - tabOffset, 5.5f);
@@ -278,12 +296,13 @@ public abstract class LocalSettingsTab(ConfigFile config)
         {
             if (!tabButtonObject.Content.gameObject.activeSelf)
             {
-                // tabButtonObject.Button.color = TabColor;
-                // tabButtonObject.Rollover.OutColor = TabColor;
+                tabButtonObject.Button.color = TabAppearance.TabColor;
+                tabButtonObject.Rollover.OutColor = TabAppearance.TabColor;
             }
 
             tabButton.transform.localPosition = new Vector3(2.4f, 2.1f - tabOffset, 5.5f);
             tabButtonText.alignment = TextAlignmentOptions.Right;
+
             if (tabButtonRend != null)
             {
                 tabButtonRend.gameObject.SetActive(true);
@@ -319,8 +338,25 @@ public abstract class LocalSettingsTab(ConfigFile config)
 
     internal static string GetShortName(string name)
     {
-        var shortName = string.Empty;
-        name.Split(' ').Do(x => shortName += x[0]);
-        return shortName;
+        if (string.IsNullOrEmpty(name))
+            return string.Empty;
+
+        var sb = new StringBuilder();
+        var nextIsWord = true;
+
+        foreach (char c in name)
+        {
+            if (c == ' ')
+            {
+                nextIsWord = true;
+            }
+            else if (nextIsWord)
+            {
+                sb.Append(c);
+                nextIsWord = false;
+            }
+        }
+
+        return sb.ToString();
     }
 }

@@ -14,33 +14,33 @@ public class AfterMurderEvent(PlayerControl source, PlayerControl target, Player
     /// <summary>
     /// Gets the <see cref="PlayerControl"/> that killed the <see cref="Target"/>.
     /// </summary>
-    public PlayerControl Source { get; } = source;
+    public PlayerControl Source => source;
 
     /// <summary>
     /// Gets the <see cref="PlayerControl"/> that was killed.
     /// </summary>
-    public PlayerControl Target { get; } = target;
+    public PlayerControl Target => target;
 
     /// <summary>
     /// Gets the <see cref="PlayerControl"/> that was framed, if any.
     /// </summary>
-    public PlayerControl? Framed { get; } = framed;
+    public PlayerControl? Framed => framed;
 
     /// <summary>
     /// Gets a value indicating whether the murder was done indirectly.
     /// This is commonly used to prevent the <see cref="Source"/> <see cref="PlayerControl"/> from being killed.
     /// </summary>
-    public bool IsIndirectAttack { get; } = isIndirect;
+    public bool IsIndirectAttack => isIndirect;
 
     /// <summary>
     /// Gets a value indicating whether the murder was able to bypass protective roles or general defense, such as <see cref="GuardianAngelRole"/>.
     /// </summary>
-    public bool IgnoreDefense { get; } = ignoreDefense;
+    public bool IgnoreDefense => ignoreDefense;
 
     /// <summary>
     /// Gets the <see cref="Target"/>'s <see cref="DeadBody"/>, if it exists.
     /// </summary>
-    public DeadBody? DeadBody { get; } = deadBody;
+    public DeadBody? DeadBody => deadBody;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AfterMurderEvent"/> class.

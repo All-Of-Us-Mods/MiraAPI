@@ -71,8 +71,6 @@ Outlive the timer or eliminate the crew.</string>
     <string name="MiraApi.Wiki.PreviousPage">Previous</string>
     <string name="MiraApi.Wiki.NextPage">Next</string>
     <string name="MiraApi.Wiki.NoResultsFound">No Results Found</string>
-    <string name="On">On</string>
-    <string name="Off">Off</string>
     <string name="Enabled">Enabled</string>
     <string name="Disabled">Disabled</string>
     <string name="Active">Active</string>

@@ -11,15 +11,15 @@ public class CompleteHnsTaskEvent(HideAndSeekManager hnsManager, PlayerControl p
     /// <summary>
     /// Gets the instance of the <see cref="PlayerControl"/>.
     /// </summary>
-    public PlayerControl Player { get; } = player;
+    public PlayerControl Player => player;
 
     /// <summary>
     /// Gets the instance of the <see cref="PlayerTask"/> that the player completed.
     /// </summary>
-    public PlayerTask Task { get; } = task;
+    public PlayerTask Task => task;
 
     /// <summary>
     /// Gets the instance of the <see cref="HideAndSeekManager"/> attached to the game.
     /// </summary>
-    public HideAndSeekManager HnsManager { get; } = hnsManager;
+    public HideAndSeekManager HnsManager => hnsManager;
 }

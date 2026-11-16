@@ -9,5 +9,5 @@ public class EjectionEvent(ExileController controller) : MiraEvent
     /// <summary>
     /// Gets the <see cref="global::ExileController"/> instance.
     /// </summary>
-    public ExileController ExileController { get; } = controller;
+    public ExileController ExileController => controller;
 }

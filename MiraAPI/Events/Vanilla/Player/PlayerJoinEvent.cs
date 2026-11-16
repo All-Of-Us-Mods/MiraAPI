@@ -11,5 +11,5 @@ public class PlayerJoinEvent(ClientData data) : MiraEvent
     /// <summary>
     /// Gets the player who joined.
     /// </summary>
-    public ClientData ClientData { get; } = data;
+    public ClientData ClientData => data;
 }

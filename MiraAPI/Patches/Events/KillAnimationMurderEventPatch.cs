@@ -30,6 +30,6 @@ public static class KillAnimationMurderEventPatch
         var target = wrapper.GetParameter<PlayerControl>("target");
 
         var afterMurderEvent = new AfterMurderEvent(source, target, Helpers.GetBodyById(target.PlayerId));
-        MiraEventManager.InvokeEvent(afterMurderEvent);
+        afterMurderEvent.InvokeEvent();
     }
 }

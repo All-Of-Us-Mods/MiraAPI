@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using BepInEx.Configuration;
 using MiraAPI.Networking;
 using MiraAPI.PluginLoading;
@@ -78,6 +80,11 @@ public interface IModdedOption
     bool IncludeInPreset { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the option should show a notification, toggled on by an overall option synchronization.
+    /// </summary>
+    public bool ShowNotification { get; set; }
+
+    /// <summary>
     /// Gets or sets the <see cref="BepInEx.Configuration.ConfigDefinition"/> for the option, used for BepInEx configuration.
     /// </summary>
     ConfigDefinition? ConfigDefinition { get; set; }
@@ -92,6 +99,12 @@ public interface IModdedOption
     /// <param name="container">The <see cref="Transform"/> container for the option.</param>
     /// <returns>The created <see cref="global::OptionBehaviour"/> object.</returns>
     OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, PlayerOption playerOpt, Transform container);
+
+    /// <summary>
+    /// Gets the translated display value of the option.
+    /// </summary>
+    /// <returns>The display value.</returns>
+    string GetDisplayValue();
 
     /// <summary>
     /// Gets the value as a <see langword="float"/>.
@@ -138,9 +151,11 @@ public interface IModdedOption
 }
 
 /// <summary>
-/// Interface for list of modded options.
+/// Base interface for list of modded options.
+/// <para/>
+/// Do not implement directly, implement <see cref="IModdedOptionList"/> or <see cref="IModdedOptionList{T}"/> instead.
 /// </summary>
-public interface IModdedOptionList : IReadOnlyList<IModdedOption>
+public interface IBaseModdedOptionList : IEnumerable
 {
     /// <summary>
     /// Gets the function to name the keys of the individual options in the configuration file.
@@ -148,18 +163,34 @@ public interface IModdedOptionList : IReadOnlyList<IModdedOption>
     /// Return <see langword="null"/> to use the default of the property's name with its index appended.
     /// </summary>
     Func<int, string>? ConfigName { get; init; }
+
+    /// <inheritdoc cref="IReadOnlyCollection{T}.Count"/>
+    int Count { get; }
+
+    /// <inheritdoc cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, int)"/>
+    IModdedOption ElementAt(int index);
+}
+
+/// <summary>
+/// Interface for list of modded options.
+/// </summary>
+public interface IModdedOptionList : IBaseModdedOptionList, IReadOnlyList<IModdedOption>
+{
+    IModdedOption IBaseModdedOptionList.ElementAt(int index)
+    {
+        return this[index];
+    }
 }
 
 /// <summary>
 /// Interface for list of <typeparamref name="T"/> options.
 /// </summary>
 /// <typeparam name="T">The type of <see cref="IModdedOption"/>.</typeparam>
-public interface IModdedOptionList<out T> : IModdedOptionList
+public interface IModdedOptionList<out T> : IBaseModdedOptionList, IReadOnlyList<T>
     where T : IModdedOption
 {
-    /// <inheritdoc cref="IReadOnlyList{T}.this[int]"/>
-    new T this[int index] { get; }
-
-    /// <inheritdoc cref="IEnumerable{T}.GetEnumerator"/>
-    new IEnumerator<T> GetEnumerator();
+    IModdedOption IBaseModdedOptionList.ElementAt(int index)
+    {
+        return this[index];
+    }
 }

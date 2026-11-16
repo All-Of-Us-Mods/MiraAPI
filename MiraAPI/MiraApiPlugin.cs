@@ -8,7 +8,6 @@ using MiraAPI.Patches;
 using MiraAPI.Patches.Roles;
 using MiraAPI.PluginLoading;
 using MiraAPI.Translation;
-using MiraAPI.VanillaEvents;
 using Reactor;
 using Reactor.Localization;
 using Reactor.Networking;
@@ -41,6 +40,12 @@ public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
     /// <inheritdoc />
     public bool DisplayOnOptionsMenu => false;
 
+    /// <inheritdoc />
+    public bool DebugMode => IsDevBuild;
+
+    /// <inheritdoc />
+    public bool ForceRegisterEvents => false;
+
     /// <summary>
     /// Gets a value indicating whether the current device is running Starlight (on mobile).
     /// </summary>
@@ -61,7 +66,6 @@ public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
     /// </summary>
     public static bool IsDevBuild => Version.Contains("ci", StringComparison.OrdinalIgnoreCase) || Version.Contains("dev", StringComparison.OrdinalIgnoreCase);
 
-    private static MiraPluginManager? PluginManager { get; set; }
     internal Harmony Harmony { get; } = new(Id);
 
     internal static ConfigEntry<SortingGroups> WikiSortingGroup { get; private set; }
@@ -94,15 +98,12 @@ public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
             "Dictates the unit of distance used in numeric option displays representing a distance.");
         Harmony.PatchAll();
         RoleOptionsCollectionPatch.PatchRoleMethods(Harmony);
-        UiResetEvents.Initialize();
-        JudgeEvents.Initialize();
 
         ReactorCredits.Register("Mira API", Version, IsDevBuild, ReactorCredits.AlwaysShow);
 
-        PluginManager = new MiraPluginManager();
-        PluginManager.Initialize(this, this);
+        MiraPluginManager.Instance.Initialize(this, this);
 
-        MiraLocaleManager.Register("mira.api");
+        MiraLocaleManager.Register("mira.api", typeof(MiraApiPlugin).Assembly);
         LocalizationManager.Register(new MiraLocalizationProvider());
 
         IL2CPPChainloader.Instance.Finished +=

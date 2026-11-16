@@ -14,6 +14,7 @@ using Reactor.Utilities;
 
 namespace MiraAPI.Example;
 
+[RegisterEventContainer]
 public static class ExampleEventHandlers
 {
     public static void Initialize()
@@ -31,7 +32,7 @@ public static class ExampleEventHandlers
 
         MiraEventManager.RegisterEventHandler<CompleteTaskEvent>(@event =>
         {
-            Logger<ExamplePlugin>.Info($"{@event.Player.Data.PlayerName} completed {@event.Task.TaskType.ToString()}");
+            Logger<ExamplePlugin>.Info($"{@event.Player.Data.PlayerName} completed {@event.Task.TaskType}");
         });
 
         // You can also unregister event handlers using the handle returned from RegisterEventHandler.
@@ -89,7 +90,7 @@ public static class ExampleEventHandlers
     [RegisterEvent]
     public static void UpdateSystemEventHandler(UpdateSystemEvent @event)
     {
-        Logger<ExamplePlugin>.Error(@event.SystemType.ToString());
+        Logger<ExamplePlugin>.Error(@event.SystemType);
     }
 
     // Example event handler

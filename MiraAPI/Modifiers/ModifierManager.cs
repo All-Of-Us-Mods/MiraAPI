@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.Serialization;
 using MiraAPI.Modifiers.Types;
@@ -25,7 +26,7 @@ public static class ModifierManager
     /// <summary>
     /// Gets the list of all registered <see cref="BaseModifier"/>s.
     /// </summary>
-    public static IReadOnlyList<BaseModifier> Modifiers { get; internal set; } = [];
+    public static IReadOnlyList<BaseModifier> Modifiers { get; private set; } = [];
 
     internal static List<BaseModifier> InternalModifiers { get; } = [];
 
@@ -61,28 +62,36 @@ public static class ModifierManager
         return !TypeToIdModifierMap.TryGetValue(type, out var id) ? null : id;
     }
 
-    internal static bool RegisterModifier(Type modifierType, MiraPluginInfo info)
+    internal static void RegisterAllModifiers()
     {
-        if (!typeof(BaseModifier).IsAssignableFrom(modifierType))
+        Modifiers = new ReadOnlyCollection<BaseModifier>(InternalModifiers);
+    }
+
+    internal static bool RegisterModifier(Type type, in MiraPluginManager.RegistrationContext context)
+    {
+        if (!typeof(BaseModifier).IsAssignableFrom(type))
         {
             return false;
         }
 
-        IdToTypeModifierMap.Add(GetNextTypeId(), modifierType);
-        TypeToIdModifierMap.Add(modifierType, _nextTypeId);
+        var id = GetNextTypeId();
+        IdToTypeModifierMap.Add(id, type);
+        TypeToIdModifierMap.Add(type, id);
 
         BaseModifier modifier;
-        if (modifierType.GetConstructor(Type.EmptyTypes) != null)
+        var ctor = type.GetConstructor(Type.EmptyTypes);
+
+        if (ctor != null)
         {
-            modifier = (BaseModifier)Activator.CreateInstance(modifierType)!;
+            modifier = (BaseModifier)Activator.CreateInstance(type)!;
         }
         else
         {
             // this is probably terrible but its good enough for now.
-            modifier = (BaseModifier)FormatterServices.GetUninitializedObject(modifierType);
+            modifier = (BaseModifier)FormatterServices.GetUninitializedObject(type);
         }
 
-        info.InternalModifiers.Add(modifier);
+        context.PluginInfo.InternalModifiers.Add(modifier);
         InternalModifiers.Add(modifier);
 
         if (modifier is not GameModifier gameModifier)
@@ -90,9 +99,9 @@ public static class ModifierManager
             return true;
         }
 
-        if (modifierType.GetConstructor(Type.EmptyTypes) == null)
+        if (ctor == null)
         {
-            Error($"Game Modifier {modifierType.FullName} does not have a parameterless constructor!");
+            Error($"Game Modifier {type.FullName} does not have a parameterless constructor!");
             return false;
         }
 
@@ -103,7 +112,7 @@ public static class ModifierManager
             PrioritiesToIdsMap[priority] = list = [];
         }
 
-        list.Add(_nextTypeId);
+        list.Add(id);
         return true;
     }
 

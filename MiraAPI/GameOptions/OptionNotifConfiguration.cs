@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using Il2CppInterop.Runtime.Attributes;
 using TMPro;
 using UnityEngine;
 
@@ -49,6 +48,5 @@ public record struct OptionNotifConfiguration
     /// <summary>
     /// Gets or sets the <see cref="Color"/> for the text on the options pop-up.
     /// </summary>
-    [HideFromIl2Cpp]
     public Color PopUpTextColor { get; set; }
 }

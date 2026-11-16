@@ -2,11 +2,12 @@ using System;
 using Reactor.Utilities.Attributes;
 using UnityEngine;
 
-namespace MiraAPI.Utilities;
+namespace MiraAPI.Utilities.Components;
 
 /// <summary>
 /// A spinning ring used to indicate that content is loading.
 /// </summary>
+/// <param name="cppPtr">The pointer to the C++ object.</param>
 [RegisterInIl2Cpp]
 public class LoadingRing(IntPtr cppPtr) : MonoBehaviour(cppPtr)
 {

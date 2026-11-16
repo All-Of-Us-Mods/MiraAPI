@@ -12,10 +12,10 @@ public class SetRoleEvent(PlayerControl player, RoleTypes role) : MiraEvent
     /// <summary>
     /// Gets the <see cref="PlayerControl"/> whose role was changed.
     /// </summary>
-    public PlayerControl Player { get; } = player;
+    public PlayerControl Player => player;
 
     /// <summary>
     /// Gets the role that the player was set to.
     /// </summary>
-    public RoleTypes Role { get; } = role;
+    public RoleTypes Role => role;
 }

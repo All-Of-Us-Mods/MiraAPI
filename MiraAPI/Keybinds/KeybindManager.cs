@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Il2CppInterop.Runtime.Attributes;
+using MiraAPI.PluginLoading;
+using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using Rewired;
 
@@ -17,8 +19,18 @@ public static class KeybindManager
     /// </summary>
     public static List<MiraKeybind> Keybinds { get; } = [];
 
-    [HideFromIl2Cpp]
-    internal static Dictionary<Type, VanillaKeybind> VanillaKeybinds { get; set; } = [];
+    [SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
+    [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
+    internal static readonly Dictionary<Type, VanillaKeybind> VanillaKeybinds = [];
+
+    internal static void SetKeybind<T>(int keybindId)
+        where T : ActionButton
+    {
+        var type = typeof(T);
+        var bind = new VanillaKeybind(keybindId);
+        VanillaKeybinds[type] = bind;
+        Helpers.SetInstance(typeof(VanillaKeybinding<>), type, bind);
+    }
 
     internal static void RewiredInit()
     {
@@ -75,6 +87,44 @@ public static class KeybindManager
         }
     }
 
+    internal static bool RegisterKeybinds(Type type, in MiraPluginManager.RegistrationContext context)
+    {
+        if (!type.IsDefined<RegisterCustomKeybindsAttribute>())
+        {
+            return false;
+        }
+
+        var miraPlugin = context.MiraPlugin;
+
+        foreach (var property in type.GetProperties(MiraPluginManager.DeclaredStaticMembers))
+        {
+            if (!property.PropertyType.IsAssignableTo(typeof(MiraKeybind)))
+            {
+                continue;
+            }
+
+            if (property.GetValue(null) is not MiraKeybind keybind)
+            {
+                Error($"Keybind property {property.Name} in {type.Name} is not a MiraKeybind.");
+                continue;
+            }
+
+            Keybinds.Add(keybind);
+            keybind.SourcePluginName = miraPlugin.OptionsTitleText.Translate();
+        }
+
+        if (!miraPlugin.DebugMode)
+            return true;
+
+        foreach (var field in type.GetFields(MiraPluginManager.DeclaredStaticMembers)
+            .Where(f => !f.IsAutoPropertyBackingField() && f.FieldType.IsAssignableTo(typeof(MiraKeybind))))
+        {
+            Error($"{field.Name} is a field, not a property. Use properties for keybinds.");
+        }
+
+        return true;
+    }
+
     /// <summary>
     /// Returns all conflicts where <see cref="MiraKeybind"/>s use the same key.
     /// </summary>
@@ -88,16 +138,18 @@ public static class KeybindManager
             if (key == KeyboardKeyCode.None) continue;
 
             var all = GetKeybindsForKey(key, true);
-            if (all.Length > 1)
+            if (all.Length <= 1)
             {
-                if (!conflicts.TryGetValue(key, out var group))
-                {
-                    group = [];
-                    conflicts.Add(key, group);
-                }
-
-                if (!group.Contains(keybind)) group.Add(keybind);
+                continue;
             }
+
+            if (!conflicts.TryGetValue(key, out var group))
+            {
+                group = [];
+                conflicts.Add(key, group);
+            }
+
+            if (!group.Contains(keybind)) group.Add(keybind);
         }
 
         return conflicts;
@@ -111,7 +163,7 @@ public static class KeybindManager
     public static List<ActionElementMap> GetControllerConflicts(bool enabledOnly = false)
     {
         var conflicts = new List<ActionElementMap>();
-        var actions = Keybinds.Where(x => x.Exclusive && x.RewiredInputAction != null && (!enabledOnly || KeybindUtils.IsControllerActionActive(x.RewiredInputAction.id))).Select(x => x.RewiredInputAction!.id).ToHashSet();
+        var actions = Keybinds.Where(x => x is { Exclusive: true, RewiredInputAction: not null } && (!enabledOnly || KeybindUtils.IsControllerActionActive(x.RewiredInputAction.id))).Select(x => x.RewiredInputAction!.id).ToHashSet();
         var player = ReInput.players.GetPlayer(0);
         for (var i = 0; i < player.controllers.joystickCount; i++)
         {

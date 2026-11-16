@@ -20,26 +20,24 @@ namespace MiraAPI.LocalSettings.SettingTypes;
 /// <param name="name">The name of the setting.</param>
 /// <param name="description">The description of the setting.</param>
 /// <param name="values">The optional values array to replace the <see langword="enum"/> names.</param>
-public class LocalEnumSetting(
-    Type tab,
-    ConfigEntryBase configEntry,
-    Type enumType,
-    string? name = null,
-    string? description = null,
-    string[]? values = null) : LocalSettingBase<int>(tab, configEntry, name, description)
+public class LocalEnumSetting(Type tab, ConfigEntryBase configEntry, Type enumType, string? name = null, string? description = null, string[]? values = null)
+    : LocalSettingBase<int>(tab, configEntry, name, description)
 {
     /// <summary>
     /// Gets the <see cref="Enum"/> type of the setting.
     /// </summary>
-    public Type EnumType { get; } = enumType;
+    public Type EnumType => enumType;
 
     /// <summary>
     /// Gets the <see langword="enum"/> values.
     /// </summary>
-    public string[] Values { get; } = values ?? [.. Enum
-        .GetValues(configEntry.SettingType)
-        .Cast<Enum>()
-        .Select(x => x.ToDisplayString())];
+    public string[] Values { get; } = values ??
+    [
+        .. Enum
+            .GetValues(configEntry.SettingType)
+            .Cast<Enum>()
+            .Select(x => x.ToDisplayString()),
+    ];
 
     private SpriteRenderer _highlight;
     private TextMeshPro _btnText;
@@ -59,7 +57,7 @@ public class LocalEnumSetting(
         var highlight = button.transform.FindChild("ButtonHighlight")?.GetComponent<SpriteRenderer>();
         if (highlight != null)
         {
-            this._highlight = highlight;
+            _highlight = highlight;
             highlight.color = Tab!.TabAppearance.EnumHoverColor;
             highlight.gameObject.SetActive(false);
         }

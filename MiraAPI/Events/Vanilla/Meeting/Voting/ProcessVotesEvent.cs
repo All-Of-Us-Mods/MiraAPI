@@ -12,7 +12,7 @@ namespace MiraAPI.Events.Vanilla.Meeting.Voting;
 /// <param name="exiledPlayer">The player to be exiled. Will be <see langword="null"/> if no player is to be exiled.</param>
 public class ProcessVotesEvent(List<CustomVote> votes, NetworkedPlayerInfo? exiledPlayer = null) : MiraEvent
 {
-    private readonly List<CustomVote> originalVotes = [.. votes];
+    private readonly CustomVote[] originalVotes = [.. votes];
 
     /// <summary>
     /// Gets a value indicating whether the exiled player has been modified by the event.
@@ -27,7 +27,7 @@ public class ProcessVotesEvent(List<CustomVote> votes, NetworkedPlayerInfo? exil
     /// <summary>
     /// Gets the list of <see cref="CustomVote"/>s that are being processed.
     /// </summary>
-    public List<CustomVote> Votes { get; } = votes;
+    public List<CustomVote> Votes => votes;
 
     /// <summary>
     /// Gets or sets a value indicating whether an overruling was done. Normally set by judge but can be overwritten.
@@ -48,6 +48,9 @@ public class ProcessVotesEvent(List<CustomVote> votes, NetworkedPlayerInfo? exil
         get;
         set
         {
+            if (field == value)
+                return;
+
             field = value;
             ExiledPlayerModified = true;
         }

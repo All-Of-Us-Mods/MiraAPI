@@ -15,7 +15,7 @@ internal static class TaskPanelPatch
     [HarmonyPatch(nameof(TaskPanelBehaviour.Update))]
     public static bool UpdatePrefix(TaskPanelBehaviour __instance)
     {
-        if (__instance.gameObject.name != "RolePanel")
+        if (__instance.name != "RolePanel")
         {
             return true;
         }

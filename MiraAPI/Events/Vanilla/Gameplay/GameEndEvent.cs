@@ -9,5 +9,5 @@ public class GameEndEvent(EndGameManager manager) : MiraEvent
     /// <summary>
     /// Gets the <see cref="global::EndGameManager"/> instance.
     /// </summary>
-    public EndGameManager EndGameManager { get; } = manager;
+    public EndGameManager EndGameManager => manager;
 }

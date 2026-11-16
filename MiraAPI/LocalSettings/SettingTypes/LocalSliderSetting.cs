@@ -18,10 +18,10 @@ namespace MiraAPI.LocalSettings.SettingTypes;
 /// <param name="name">The name of the setting.</param>
 /// <param name="description">The description of the setting.</param>
 /// <param name="sliderRange">The value range.</param>
+/// <param name="displayValue">Should display the value next to the name.</param>
 /// <param name="suffixType">The suffix used for formatting.</param>
 /// <param name="formatString">The format string used for formatting.</param>
 /// <param name="roundValue">Should the value be rounded.</param>
-/// <param name="displayValue">Should display the value next to the name.</param>
 public class LocalSliderSetting(
     Type tab,
     ConfigEntryBase configEntry,
@@ -41,7 +41,7 @@ public class LocalSliderSetting(
     /// <summary>
     /// Gets a value indicating whether the value should be displayed next to name.
     /// </summary>
-    public bool DisplayValue { get; } = displayValue;
+    public bool DisplayValue => displayValue;
 
     /// <summary>
     /// Gets a format for the text to use to format the number.
@@ -51,7 +51,7 @@ public class LocalSliderSetting(
     /// <summary>
     /// Gets a value indicating whether the value should be rounded.
     /// </summary>
-    public bool RoundValue { get; } = roundValue;
+    public bool RoundValue => roundValue;
 
     /// <summary>
     /// Gets the suffix for the number value.
@@ -108,14 +108,12 @@ public class LocalSliderSetting(
     /// <inheritdoc/>
     protected override string GetValueText()
     {
-        if (DisplayValue)
-        {
-            var value = GetValue();
-            var formatted = Helpers.FormatValue(value, SuffixType, FormatString);
-            var maxFormatted = Helpers.FormatValue(SliderRange.max, SuffixType, FormatString);
-            return $"<font=\"LiberationSans SDF\" material=\"LiberationSans SDF - Chat Message Masked\">{Name.Translate()}: <b>{formatted} / {maxFormatted}</font></b>";
-        }
+        if (!DisplayValue)
+            return $"<font=\"LiberationSans SDF\" material=\"LiberationSans SDF - Chat Message Masked\">{Name.Translate()}</font></b>";
 
-        return $"<font=\"LiberationSans SDF\" material=\"LiberationSans SDF - Chat Message Masked\">{Name.Translate()}</font></b>";
+        var value = GetValue();
+        var formatted = Helpers.FormatValue(value, SuffixType, FormatString);
+        var maxFormatted = Helpers.FormatValue(SliderRange.max, SuffixType, FormatString);
+        return $"<font=\"LiberationSans SDF\" material=\"LiberationSans SDF - Chat Message Masked\">{Name.Translate()}: <b>{formatted} / {maxFormatted}</font></b>";
     }
 }

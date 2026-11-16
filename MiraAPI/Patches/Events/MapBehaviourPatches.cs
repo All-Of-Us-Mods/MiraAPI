@@ -15,7 +15,7 @@ public static class MapBehaviourPatches
     public static bool MapShowSabotagePatch(MapBehaviour __instance)
     {
         var @event = new PlayerOpenSabotageEvent(__instance);
-        MiraEventManager.InvokeEvent(@event);
+        @event.InvokeEvent();
         return !@event.IsCancelled;
     }
 }

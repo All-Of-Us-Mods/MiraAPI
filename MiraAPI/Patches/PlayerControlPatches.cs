@@ -22,12 +22,12 @@ internal static class PlayerControlPatches
     [HarmonyPatch(nameof(PlayerControl.Start))]
     public static void PlayerControlStartPostfix(PlayerControl __instance)
     {
-        if (__instance.gameObject.TryGetComponent<ModifierComponent>(out var modifierComp))
+        if (__instance.TryGetComponent<ModifierComponent>(out var modifierComp))
         {
             modifierComp.DestroyImmediate();
         }
 
-        if (__instance.gameObject.TryGetComponent<PlayerVoteData>(out var voteComp))
+        if (__instance.TryGetComponent<PlayerVoteData>(out var voteComp))
         {
             voteComp.DestroyImmediate();
         }
@@ -41,7 +41,7 @@ internal static class PlayerControlPatches
     public static void PlayerControlDiePostfix(PlayerControl __instance, DeathReason reason)
     {
         var deathEvent = new PlayerDeathEvent(__instance, reason, Helpers.GetBodyById(__instance.PlayerId));
-        MiraEventManager.InvokeEvent(deathEvent);
+        deathEvent.InvokeEvent();
 
         var modifiersComponent = __instance.GetComponent<ModifierComponent>();
 
@@ -59,7 +59,7 @@ internal static class PlayerControlPatches
         if (playerTask != null)
         {
             var completeTaskEvent = new CompleteTaskEvent(__instance, playerTask);
-            MiraEventManager.InvokeEvent(completeTaskEvent);
+            completeTaskEvent.InvokeEvent();
         }
     }
 
@@ -102,7 +102,7 @@ internal static class PlayerControlPatches
         }
 
         var beforeMurderEvent = new BeforeMurderEvent(__instance, target);
-        MiraEventManager.InvokeEvent(beforeMurderEvent);
+        beforeMurderEvent.InvokeEvent();
 
         if (beforeMurderEvent.IsCancelled)
         {

@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using AmongUs.Data;
 using HarmonyLib;
@@ -42,7 +41,7 @@ internal static class PlayerTabPatch
 }
 
 [HarmonyPatch(typeof(ChatNotification), nameof(ChatNotification.Update))]
-internal static class ChatNotifRainbowPatch
+internal static class ChatNotifVariablePatch
 {
     private static readonly Regex RichTags = new(@"<[^>]*>", default, Regex.InfiniteMatchTimeout);
 
@@ -60,14 +59,13 @@ internal static class ChatNotifRainbowPatch
         var str = color.ToHtmlStringRGBA();
         var nameText = __instance.playerNameText;
         nameText.text = "<color=#" + str + ">" + RichTags.Replace(nameText.text, string.Empty);
-        nameText.outlineColor = color.GetShadowColor(0.5f);
+        nameText.outlineColor = color.DarkenAbsolute(0.5f);
     }
 }
 
 [HarmonyPatch(typeof(HostInfoPanel), nameof(HostInfoPanel.Update))]
-internal static class RainbowLobbyInfoPanePatch
+internal static class VariableLobbyInfoPanePatch
 {
-    [SuppressMessage("Style", "IDE0045:Convert to conditional expression", Justification = "Operator becomes too large.")]
     public static void Postfix(HostInfoPanel __instance)
     {
         if (!__instance.gameObject.activeInHierarchy)

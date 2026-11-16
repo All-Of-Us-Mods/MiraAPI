@@ -85,7 +85,7 @@ public static class CustomMurderRpc
         var murderResultFlags = didSucceed ? MurderResultFlags.Succeeded : MurderResultFlags.FailedError;
 
         var beforeMurderEvent = new BeforeMurderEvent(source, target, inMeeting);
-        MiraEventManager.InvokeEvent(beforeMurderEvent);
+        beforeMurderEvent.InvokeEvent();
         var defenseFlag = beforeMurderEvent.IgnoreDefense;
         var indirectFlag = beforeMurderEvent.IsIndirectAttack;
         var isMeetingActive = MeetingHud.Instance != null || ExileController.Instance != null;
@@ -227,7 +227,7 @@ public static class CustomMurderRpc
         var murderResultFlags = didSucceed ? MurderResultFlags.Succeeded : MurderResultFlags.FailedError;
 
         var beforeMurderEvent = new BeforeMurderEvent(source, target, isIndirect, ignoreDefense, inMeeting);
-        MiraEventManager.InvokeEvent(beforeMurderEvent);
+        beforeMurderEvent.InvokeEvent();
         var defenseFlag = beforeMurderEvent.IgnoreDefense;
         var indirectFlag = beforeMurderEvent.IsIndirectAttack;
         var isMeetingActive = MeetingHud.Instance != null || ExileController.Instance != null;
@@ -357,7 +357,7 @@ public static class CustomMurderRpc
         var murderResultFlags = didSucceed ? MurderResultFlags.Succeeded : MurderResultFlags.FailedError;
 
         var beforeMurderEvent = new BeforeMurderEvent(source, target, framed, isIndirect, ignoreDefense, inMeeting);
-        MiraEventManager.InvokeEvent(beforeMurderEvent);
+        beforeMurderEvent.InvokeEvent();
         var defenseFlag = beforeMurderEvent.IgnoreDefense;
         var indirectFlag = beforeMurderEvent.IsIndirectAttack;
         var isMeetingActive = MeetingHud.Instance != null || ExileController.Instance != null;
@@ -571,7 +571,7 @@ public static class CustomMurderRpc
                 }
                 catch (Exception e)
                 {
-                    Error($"Error with kill animation: {e.ToString()}");
+                    Error($"Error with kill animation: {e}");
                 }
             }
 
@@ -705,7 +705,7 @@ public static class CustomMurderRpc
                 }
                 catch (Exception e)
                 {
-                    Error($"Error with kill animation: {e.ToString()}");
+                    Error($"Error with kill animation: {e}");
                 }
             }
 
@@ -821,7 +821,7 @@ public static class CustomMurderRpc
         }
 
         var afterMurderEvent = framed != null ? new AfterMurderEvent(source, target, framed, deadBody, isIndirect, ignoreDefense) : new AfterMurderEvent(source, target, deadBody, isIndirect, ignoreDefense);
-        MiraEventManager.InvokeEvent(afterMurderEvent);
+        afterMurderEvent.InvokeEvent();
 
         if (!isParticipant)
         {

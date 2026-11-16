@@ -52,7 +52,7 @@ public static class SettingPatches
                     MiraNumberSuffixes.None => part,
                     MiraNumberSuffixes.Multiplier => part + "x",
                     MiraNumberSuffixes.Percent => part + "%",
-                    MiraNumberSuffixes.Distance => string.Concat(part, " ", MiraApiPlugin.DistanceSuffix.Value),
+                    MiraNumberSuffixes.Distance => part + MiraApiPlugin.DistanceSuffix.Value,
                     _ => TranslationController.Instance.GetString(StringNames.GameSecondsAbbrev, part),
                 };
             }
@@ -69,7 +69,7 @@ public static class SettingPatches
                 MiraNumberSuffixes.None => part,
                 MiraNumberSuffixes.Multiplier => part + "x",
                 MiraNumberSuffixes.Percent => part + "%",
-                MiraNumberSuffixes.Distance => string.Concat(part, " ", MiraApiPlugin.DistanceSuffix.Value),
+                MiraNumberSuffixes.Distance => part + MiraApiPlugin.DistanceSuffix.Value,
                 _ => TranslationController.Instance.GetString(StringNames.GameSecondsAbbrev, part),
             };
         }

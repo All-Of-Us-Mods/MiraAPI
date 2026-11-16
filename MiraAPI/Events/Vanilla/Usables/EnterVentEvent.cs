@@ -10,10 +10,10 @@ public class EnterVentEvent(PlayerControl player, Vent? vent) : MiraCancelableEv
     /// <summary>
     /// Gets the <see cref="PlayerControl"/> that is entering the <see cref="Vent"/>.
     /// </summary>
-    public PlayerControl Player { get; } = player;
+    public PlayerControl Player => player;
 
     /// <summary>
     /// Gets the <see cref="global::Vent"/> that the <see cref="Player"/> is entering.
     /// </summary>
-    public Vent? Vent { get; } = vent;
+    public Vent? Vent => vent;
 }

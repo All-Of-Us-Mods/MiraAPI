@@ -10,6 +10,7 @@ using MiraAPI.PluginLoading;
 using MiraAPI.Translation;
 using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
+using Reactor.Networking;
 using Reactor.Networking.Rpc;
 using Reactor.Utilities.Extensions;
 using TMPro;
@@ -38,7 +39,7 @@ public static class CustomRoleManager
     /// <summary>
     /// Gets the array of all roles from vanilla <see cref="RoleManager"/>.
     /// </summary>
-    public static RoleBehaviour[] AllRoles => RoleManager.Instance.AllRoles.ToArray();
+    public static RoleBehaviour[] AllRoles => RoleManager.InstanceExists ? RoleManager.Instance.AllRoles.ToArray() : [];
 
     /// <summary>
     /// Gets the <see cref="IReadOnlyList{T}"/> of custom roles as <see cref="RoleBehaviour"/> objects.
@@ -118,6 +119,23 @@ public static class CustomRoleManager
         pluginInfo.PluginConfig.SaveOnConfigSet = oldConfigSetting;
     }
 
+    internal static bool RegisterRole(Type type, in MiraPluginManager.RegistrationContext context)
+    {
+        if (!(typeof(RoleBehaviour).IsAssignableFrom(type) && typeof(ICustomRole).IsAssignableFrom(type)))
+        {
+            return false;
+        }
+
+        if (!ModList.GetById(context.PluginInfo.PluginId).IsRequiredOnAllClients)
+        {
+            Error("Custom roles are only supported on all clients.");
+            return false;
+        }
+
+        context.Roles.Add(type);
+        return true;
+    }
+
     private static RoleBehaviour? RegisterRole(Type roleType, MiraPluginInfo parentMod)
     {
         if (!(typeof(RoleBehaviour).IsAssignableFrom(roleType) && typeof(ICustomRole).IsAssignableFrom(roleType)))
@@ -126,7 +144,7 @@ public static class CustomRoleManager
             return null;
         }
 
-        var roleBehaviour = (RoleBehaviour)new GameObject(roleType.Name).DontDestroy().AddComponent(Il2CppType.From(roleType));
+        var roleBehaviour = new GameObject(roleType.Name).DontDestroy().AddComponent(Il2CppType.From(roleType)).Cast<RoleBehaviour>();
 
         if (roleBehaviour is not ICustomRole customRole)
         {
@@ -194,14 +212,10 @@ public static class CustomRoleManager
 
         CustomRoles.Add(roleId, roleBehaviour);
 
-        if (customRole.Configuration.HideSettings)
-        {
-            return roleBehaviour;
-        }
+        Helpers.SetInstance(typeof(CustomRoleSingleton<>), roleType, roleBehaviour);
 
-        var config = parentMod.PluginConfig;
-        config.Bind(customRole.NumConfigDefinition, Mathf.Clamp(customRole.Configuration.DefaultRoleCount, 0, customRole.Configuration.MaxRoleCount));
-        config.Bind(customRole.ChanceConfigDefinition, Mathf.Clamp(customRole.Configuration.DefaultChance, 0, 100));
+        if (!customRole.Configuration.HideSettings)
+            customRole.BindConfig(parentMod.PluginConfig);
 
         return roleBehaviour;
     }
@@ -239,7 +253,7 @@ public static class CustomRoleManager
 
     internal static TaskPanelBehaviour CreateRoleTab(ICustomRole role)
     {
-        var ogPanel = HudManager.Instance.TaskStuff.transform.FindChild("TaskPanel").gameObject.GetComponent<TaskPanelBehaviour>();
+        var ogPanel = HudManager.Instance.TaskStuff.transform.FindChild("TaskPanel").GetComponent<TaskPanelBehaviour>();
         var clonePanel = Object.Instantiate(ogPanel.gameObject, ogPanel.transform.parent);
         clonePanel.name = "RolePanel";
 
@@ -257,8 +271,8 @@ public static class CustomRoleManager
 
     internal static void UpdateRoleTab(TaskPanelBehaviour panel, ICustomRole role)
     {
-        var tabText = panel.tab.gameObject.GetComponentInChildren<TextMeshPro>();
-        var ogPanel = HudManager.Instance.TaskStuff.transform.FindChild("TaskPanel").gameObject.GetComponent<TaskPanelBehaviour>();
+        var tabText = panel.tab.GetComponentInChildren<TextMeshPro>();
+        var ogPanel = HudManager.Instance.TaskStuff.transform.FindChild("TaskPanel").GetComponent<TaskPanelBehaviour>();
         if (tabText.text != role.RoleName)
         {
             tabText.text = role.RoleName;
@@ -278,13 +292,13 @@ public static class CustomRoleManager
             .Select(x => ((ICustomRole)x).GetNetData())
             .ChunkNetData(1000);
 
-        while (data.Count > 0)
+        while (data.TryDequeue(out var netData))
         {
-            Rpc<SyncRoleOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, data.Dequeue());
+            Rpc<SyncRoleOptionsRpc>.Instance.SendTo(PlayerControl.LocalPlayer, targetId, new MiraOptionNetData(false, netData));
         }
     }
 
-    internal static void HandleSyncRoleOptions(NetData[] data)
+    internal static void HandleSyncRoleOptions(bool showNotifs, NetData[] data)
     {
         // necessary to disable then re-enable this setting
         // we don't know how other plugins handle their configs
@@ -312,7 +326,10 @@ public static class CustomRoleManager
             var num = BitConverter.ToInt32(netData.Data, 0);
             var chance = BitConverter.ToInt32(netData.Data, 4);
 
-            HudManager.Instance.Notifier.AddRoleSettingsChangeMessage(role.StringName, num, chance, role.TeamType, false);
+            if (showNotifs)
+            {
+                HudManager.Instance.Notifier.AddRoleSettingsChangeMessage(role.StringName, num, chance, role.TeamType, false);
+            }
 
             try
             {

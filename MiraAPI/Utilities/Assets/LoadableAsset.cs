@@ -26,9 +26,9 @@ public abstract class LoadableAsset<T>
     /// Converts the <see cref="LoadableAsset{T}"/> into its <typeparamref name="T"/> by loading the asset.
     /// </summary>
     /// <param name="loadable">The <see cref="LoadableAsset{T}"/> to get the asset from.</param>
-    public static implicit operator T(LoadableAsset<T> loadable)
+    public static implicit operator T(LoadableAsset<T>? loadable)
     {
-        return loadable.LoadAsset();
+        return loadable?.LoadAsset()!;
     }
 
     /// <summary>
@@ -37,7 +37,7 @@ public abstract class LoadableAsset<T>
     /// <returns>True if the asset was unloaded, false otherwise.</returns>
     public virtual bool UnloadAsset()
     {
-        if (LoadedAsset == null || !LoadedAsset)
+        if (LoadedAsset == null)
         {
             return false;
         }

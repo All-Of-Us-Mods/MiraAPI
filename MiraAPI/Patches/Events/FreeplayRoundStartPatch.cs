@@ -19,6 +19,6 @@ public static class FreeplayRoundStartPatch
     {
         if (__result) return;
         MeetingButtonManager.OnGameStart();
-        MiraEventManager.InvokeEvent(new RoundStartEvent(true));
+        new RoundStartEvent(true).InvokeEvent();
     }
 }

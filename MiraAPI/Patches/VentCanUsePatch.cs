@@ -17,7 +17,7 @@ internal static class VentCanUsePatch
     public static void Postfix(Vent __instance, ref float __result, [HarmonyArgument(0)] NetworkedPlayerInfo pc, [HarmonyArgument(1)] ref bool canUse, [HarmonyArgument(2)] ref bool couldUse)
     {
         var @event = new PlayerCanUseEvent(__instance.Cast<IUsable>());
-        MiraEventManager.InvokeEvent(@event);
+        @event.InvokeEvent();
 
         if (@event.IsCancelled)
         {

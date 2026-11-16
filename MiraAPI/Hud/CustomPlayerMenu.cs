@@ -89,6 +89,22 @@ public class CustomPlayerMenu : CustomMultiSelectMenu<PlayerControl>
     {
         var flag = PlayerControl.LocalPlayer.Data.Role.NameColor == entry.Data.Role.NameColor;
         panel.SetPlayer(i, entry.Data, (Il2CppSystem.Action)onClick);
+        var outfit = entry.Data.DefaultOutfit;
+
+        if (entry.Data.IsDead)
+        {
+            var currentOutfit = entry.CurrentOutfit;
+
+            if (!string.IsNullOrEmpty(currentOutfit.SkinId))
+            {
+                outfit = currentOutfit;
+            }
+        }
+
+        panel.PlayerIcon.cosmetics.SetSkin(outfit.SkinId, outfit.ColorId);
+        panel.PlayerIcon.cosmetics.SetHat(outfit.HatId, outfit.ColorId);
+        panel.PlayerIcon.cosmetics.SetVisor(outfit.VisorId, outfit.ColorId);
+
         panel.NameText.color = flag ? entry.Data.Role.NameColor : Color.white;
     }
 }

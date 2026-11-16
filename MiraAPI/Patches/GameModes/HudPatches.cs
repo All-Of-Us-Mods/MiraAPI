@@ -34,8 +34,8 @@ internal static class HudPatches
         yield return new WaitUntil((Il2CppSystem.Func<bool>)(() => GameManager.Instance != null));
         if (GameManager.Instance.IsHideAndSeek())
             yield return null;
-        var infoPane = instance.gameObject.transform.FindChild("LobbyInfoPane");
-        var aspect = infoPane.gameObject.transform.Find("AspectSize");
+        var infoPane = instance.transform.FindChild("LobbyInfoPane");
+        var aspect = infoPane.transform.Find("AspectSize");
         var modeLabel = aspect!.Find("ModeLabel");
         var modeValue = aspect.Find("ModeValue");
         var modelText = modeLabel!.Find("Text_TMP").gameObject;

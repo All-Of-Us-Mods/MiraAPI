@@ -10,10 +10,10 @@ public class CompleteTaskEvent(PlayerControl player, PlayerTask task) : MiraEven
     /// <summary>
     /// Gets the instance of the <see cref="PlayerControl"/>.
     /// </summary>
-    public PlayerControl Player { get; } = player;
+    public PlayerControl Player => player;
 
     /// <summary>
     /// Gets the instance of the <see cref="PlayerTask"/> that the player completed.
     /// </summary>
-    public PlayerTask Task { get; } = task;
+    public PlayerTask Task => task;
 }

@@ -10,10 +10,10 @@ public class ExitVentEvent(PlayerControl player, Vent? vent) : MiraCancelableEve
     /// <summary>
     /// Gets the <see cref="PlayerControl"/> that is exiting the <see cref="Vent"/>.
     /// </summary>
-    public PlayerControl Player { get; } = player;
+    public PlayerControl Player => player;
 
     /// <summary>
     /// Gets the <see cref="global::Vent"/> that the <see cref="Player"/> is exiting.
     /// </summary>
-    public Vent? Vent { get; } = vent;
+    public Vent? Vent => vent;
 }

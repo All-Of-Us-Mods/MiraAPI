@@ -6,7 +6,7 @@ using MiraAPI.Utilities;
 namespace MiraAPI.HnsReimplemented.Options;
 
 /// <summary>
-/// Gets or sets the crewmate options for Hide and Seek.
+/// Crewmate options for Hide and Seek.
 /// </summary>
 // ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated via Activator.CreateInstance.)
 public class HnsCrewmateOptions : AbstractOptionGroup<HideAndSeekMode>
@@ -15,9 +15,9 @@ public class HnsCrewmateOptions : AbstractOptionGroup<HideAndSeekMode>
     public override string GroupName => "Crewmates";
 
     /// <summary>
-    /// Gets or sets the player speed.
+    /// Gets the player speed.
     /// </summary>
-    public ModdedNumberOption PlayerSpeed { get; set; } = new(
+    public ModdedNumberOption PlayerSpeed { get; } = new(
         "Player Speed",
         1f,
         0.5f,
@@ -29,9 +29,9 @@ public class HnsCrewmateOptions : AbstractOptionGroup<HideAndSeekMode>
         "0.00");
 
     /// <summary>
-    /// Gets or sets the hiding time.
+    /// Gets the hiding time.
     /// </summary>
-    public ModdedNumberOption HidingTime { get; set; } = new(
+    public ModdedNumberOption HidingTime { get; } = new(
         "Hiding Time",
         200,
         160,
@@ -42,9 +42,9 @@ public class HnsCrewmateOptions : AbstractOptionGroup<HideAndSeekMode>
         MiraNumberSuffixes.Seconds);
 
     /// <summary>
-    /// Gets or sets the limits of a crewmate's vision.
+    /// Gets the limits of a crewmate's vision.
     /// </summary>
-    public ModdedNumberOption CrewmateVision { get; set; } = new(
+    public ModdedNumberOption CrewmateVision { get; } = new(
         "Crewmate Vision",
         0.6f,
         0.25f,
@@ -56,16 +56,16 @@ public class HnsCrewmateOptions : AbstractOptionGroup<HideAndSeekMode>
         "0.00");
 
     /// <summary>
-    /// Gets or sets a flag that toggles flashlight vision.
+    /// Gets a flag that toggles flashlight vision.
     /// </summary>
-    public ModdedToggleOption FlashlightMode { get; set; } = new(
+    public ModdedToggleOption FlashlightMode { get; } = new(
         "Flashlight Mode",
         true);
 
     /// <summary>
-    /// Gets or sets the range of a crewmate's flashlight.
+    /// Gets the range of a crewmate's flashlight.
     /// </summary>
-    public ModdedNumberOption CrewmateFlashlightSize { get; set; } = new(
+    public ModdedNumberOption CrewmateFlashlightSize { get; } = new(
         "Crewmate Flashlight Size",
         0.35f,
         0.1f,
@@ -79,9 +79,9 @@ public class HnsCrewmateOptions : AbstractOptionGroup<HideAndSeekMode>
     };
 
     /// <summary>
-    /// Gets or sets the maximum number of times a crewmate can vent.
+    /// Gets the maximum number of times a crewmate can vent.
     /// </summary>
-    public ModdedNumberOption MaxVentUses { get; set; } = new(
+    public ModdedNumberOption MaxVentUses { get; } = new(
         "Max Vent Uses",
         1,
         0,
@@ -92,9 +92,9 @@ public class HnsCrewmateOptions : AbstractOptionGroup<HideAndSeekMode>
         MiraNumberSuffixes.None);
 
     /// <summary>
-    /// Gets or sets the maximum amount of time a crewmate can spend inside a vent.
+    /// Gets the maximum amount of time a crewmate can spend inside a vent.
     /// </summary>
-    public ModdedNumberOption MaxTimeInVent { get; set; } = new(
+    public ModdedNumberOption MaxTimeInVent { get; } = new(
         "Max Time in Vent",
         3,
         1,
@@ -108,9 +108,9 @@ public class HnsCrewmateOptions : AbstractOptionGroup<HideAndSeekMode>
     };
 
     /// <summary>
-    /// Gets or sets the visibility of player names.
+    /// Gets the visibility of player names.
     /// </summary>
-    public ModdedToggleOption ShowNames { get; set; } = new(
+    public ModdedToggleOption ShowNames { get; } = new(
         "Show Names",
         false);
 }

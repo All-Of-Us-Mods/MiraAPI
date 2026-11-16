@@ -10,5 +10,5 @@ public class RoundStartEvent(bool triggeredByIntro) : MiraEvent
     /// <summary>
     /// Gets a value indicating whether the event was triggered by the <see cref="IntroCutscene"/> or <see cref="ExileController"/>.
     /// </summary>
-    public bool TriggeredByIntro { get; } = triggeredByIntro;
+    public bool TriggeredByIntro => triggeredByIntro;
 }

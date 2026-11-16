@@ -20,7 +20,7 @@ public sealed class ModdedOptionVisibilityAttribute(string? memberName = null, T
 
     internal Func<bool>? GetVisibility(AbstractOptionGroup group, PropertyInfo property)
     {
-        if (ResolveMember(group, property, out Type type, out var instanceGetter, out var notFound) is not { } member)
+        if (ResolveMember(group, property, out var type, out var instanceGetter, out var notFound) is not { } member)
         {
             if (notFound)
                 Error($"Member {MemberName} does not exist in {type.FullName}");

@@ -6,7 +6,7 @@ using MiraAPI.Utilities;
 namespace MiraAPI.HnsReimplemented.Options;
 
 /// <summary>
-/// Gets or sets the task options for Hide and Seek.
+/// Task options for Hide and Seek.
 /// </summary>
 // ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated via Activator.CreateInstance.)
 public class HnsTaskOptions : AbstractOptionGroup<HideAndSeekMode>
@@ -15,9 +15,9 @@ public class HnsTaskOptions : AbstractOptionGroup<HideAndSeekMode>
     public override string GroupName => "Tasks";
 
     /// <summary>
-    /// Gets or sets the umber of common tasks.
+    /// Gets the umber of common tasks.
     /// </summary>
-    public ModdedNumberOption CommonTasks { get; set; } = new(
+    public ModdedNumberOption CommonTasks { get; } = new(
         "# Common Tasks",
         1,
         0,
@@ -28,9 +28,9 @@ public class HnsTaskOptions : AbstractOptionGroup<HideAndSeekMode>
         MiraNumberSuffixes.None);
 
     /// <summary>
-    /// Gets or sets the number of long tasks.
+    /// Gets the number of long tasks.
     /// </summary>
-    public ModdedNumberOption LongTasks { get; set; } = new(
+    public ModdedNumberOption LongTasks { get; } = new(
         "# Long Tasks",
         1,
         0,
@@ -41,9 +41,9 @@ public class HnsTaskOptions : AbstractOptionGroup<HideAndSeekMode>
         MiraNumberSuffixes.None);
 
     /// <summary>
-    /// Gets or sets the number of short tasks.
+    /// Gets the number of short tasks.
     /// </summary>
-    public ModdedNumberOption ShortTasks { get; set; } = new(
+    public ModdedNumberOption ShortTasks { get; } = new(
         "# Short Tasks",
         2,
         0,

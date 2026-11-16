@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using AmongUs.GameOptions;
 using HarmonyLib;
 using MiraAPI.Roles;
@@ -12,24 +12,14 @@ namespace MiraAPI.Patches.Roles;
 /// </summary>
 public static class RoleOptionsCollectionPatch
 {
-    internal static Assembly BaseAssembly { get; private set; }
-    internal static Type[] BaseTypes { get; private set; }
-    internal static Type CollectionsType { get; private set; }
     public static void PatchRoleMethods(Harmony harmony)
     {
-        var assembly = Array.Find(
-            AppDomain.CurrentDomain.GetAssemblies(),
-            ass => ass.GetName().Name == "Assembly-CSharp");
-
-        if (assembly == null)
-            return;
-
-        var compatType = typeof(RoleOptionsCollectionPatch);
-        BaseAssembly = assembly;
-        BaseTypes = AccessTools.GetTypesFromAssembly(assembly);
-        var collections = BaseTypes.Where(x => x.Name.Contains("RoleOptionsCollectionV")).ToArray();
-        var pairings = new System.Collections.Generic.Dictionary<int, Type>();
+        var baseAssembly = typeof(RoleBehaviour).Assembly;
+        var baseTypes = AccessTools.GetTypesFromAssembly(baseAssembly);
+        var collections = baseTypes.Where(x => x.Name.Contains("RoleOptionsCollectionV")).ToArray();
+        var pairings = new Dictionary<int, Type>();
         var newestId = 0;
+
         foreach (var collection in collections)
         {
             var remainder = collection.Name.Replace("RoleOptionsCollectionV", string.Empty);
@@ -45,22 +35,26 @@ public static class RoleOptionsCollectionPatch
             }
         }
 
+        Type? collectionsType = null;
+
         if (pairings.TryGetValue(newestId, out var typeToGet))
         {
-            CollectionsType = typeToGet;
+            collectionsType = typeToGet;
         }
 
-        var anyRolesEnabledMethod = AccessTools.Method(CollectionsType, "AnyRolesEnabled");
+        var compatType = typeof(RoleOptionsCollectionPatch);
+
+        var anyRolesEnabledMethod = AccessTools.Method(collectionsType, "AnyRolesEnabled");
         harmony.Patch(
             anyRolesEnabledMethod,
             new HarmonyMethod(AccessTools.Method(compatType, nameof(AnyRolesEnabledPrefix))));
 
-        var chancePerGameMethod = AccessTools.Method(CollectionsType, "GetChancePerGame");
+        var chancePerGameMethod = AccessTools.Method(collectionsType, "GetChancePerGame");
         harmony.Patch(
             chancePerGameMethod,
             new HarmonyMethod(AccessTools.Method(compatType, nameof(GetChancePrefix))));
 
-        var numPerGameMethod = AccessTools.Method(CollectionsType, "GetNumPerGame");
+        var numPerGameMethod = AccessTools.Method(collectionsType, "GetNumPerGame");
         harmony.Patch(
             numPerGameMethod,
             new HarmonyMethod(AccessTools.Method(compatType, nameof(GetNumPrefix))));

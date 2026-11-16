@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using MiraAPI.Patches.Stubs;
+using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using UnityEngine;
 using UnityEngine.Events;
@@ -29,12 +30,7 @@ public abstract class CustomMultiSelectMenu<TEntry> : CustomPhoneMenu<CustomMult
     private Color? activeColor;
     private Color? hoverSelectColor;
     private Color? hoverDeselectColor;
-
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-    [SuppressMessage("Minor Code Smell", "S1104:Fields should not have public accessibility", Justification = "Unity convention.")]
-    public UiElement confirmButton;
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
-
+    private UiElement confirmButton;
     private Action<List<TEntry>>? onSelection;
 
     /// <summary>
@@ -87,7 +83,7 @@ public abstract class CustomMultiSelectMenu<TEntry> : CustomPhoneMenu<CustomMult
     }
 
     /// <summary>
-    /// Setup the given <paramref name="panel"/> once created, given its index, entry, and onClick action.
+    /// Set up the given <paramref name="panel"/> once created, given its index, entry, and onClick action.
     /// </summary>
     /// <param name="panel">The panel to configure.</param>
     /// <param name="i">The <paramref name="panel"/>'s index.</param>
@@ -100,22 +96,24 @@ public abstract class CustomMultiSelectMenu<TEntry> : CustomPhoneMenu<CustomMult
     /// </summary>
     /// <param name="entries">All entries to give the custom menu.</param>
     /// <param name="onClick">Function called when all selections are made/confirmed.</param>
-    /// <param name="totalSelections">The number of selections required.</param>
-    /// <param name="shouldConfirm">Whether the entire selection should be confirmed manually.</param>
-    /// <param name="canRepeat">If the same entry can be selected multiple times, else unselect entry on click.</param>
-    protected void Begin(IEnumerable<TEntry> entries, Action<List<TEntry>?> onClick, int totalSelections, bool shouldConfirm, bool canRepeat = false)
+    /// <param name="totSelections">The number of selections required.</param>
+    /// <param name="confirm">Whether the entire selection should be confirmed manually.</param>
+    /// <param name="repeat">If the same entry can be selected multiple times, else unselect entry on click.</param>
+    protected void Begin(IEnumerable<TEntry> entries, Action<List<TEntry>?> onClick, int totSelections, bool confirm, bool repeat = false)
     {
         MinigameStubs.Begin(Component, null);
+        MeetingVoteAreaVisibility.HideNameplates(Component);
 
-        this.totalSelections = totalSelections;
-        this.shouldConfirm = shouldConfirm;
-        this.canRepeat = canRepeat;
-        this.onSelection = onClick;
+        totalSelections = totSelections;
+        shouldConfirm = confirm;
+        canRepeat = repeat;
+        onSelection = onClick;
 
         var back = backButton.GetComponent<PassiveButton>();
         back.OnClick.AddListener((UnityAction)(() =>
         {
             selectedEntries.Clear();
+            MeetingVoteAreaVisibility.Restore(Component);
             onClick(null);
         }));
 
@@ -140,10 +138,10 @@ public abstract class CustomMultiSelectMenu<TEntry> : CustomPhoneMenu<CustomMult
     /// </summary>
     /// <param name="entries">All entries to give the custom menu.</param>
     /// <param name="onClick">Function called when the selection is made.</param>
-    /// <param name="shouldConfirm">Whether the set of both selections should be confirmed manually.</param>
-    protected void Begin(IEnumerable<TEntry> entries, Action<TEntry?> onClick, bool shouldConfirm)
+    /// <param name="confirm">Whether the set of both selections should be confirmed manually.</param>
+    protected void Begin(IEnumerable<TEntry> entries, Action<TEntry?> onClick, bool confirm)
     {
-        Begin(entries, list => onClick(list?[0]), 1, shouldConfirm);
+        Begin(entries, list => onClick(list?[0]), 1, confirm);
     }
 
     /// <summary>
@@ -151,11 +149,11 @@ public abstract class CustomMultiSelectMenu<TEntry> : CustomPhoneMenu<CustomMult
     /// </summary>
     /// <param name="entries">All entries to give the custom menu.</param>
     /// <param name="onClick">Function called when both selections are made.</param>
-    /// <param name="shouldConfirm">Whether the set of both selections should be confirmed manually.</param>
-    /// <param name="canRepeat">If the same entry can be selected both times, else unselect entry on click.</param>
-    protected void Begin(IEnumerable<TEntry> entries, Action<TEntry?, TEntry?> onClick, bool shouldConfirm, bool canRepeat = false)
+    /// <param name="confirm">Whether the set of both selections should be confirmed manually.</param>
+    /// <param name="repeat">If the same entry can be selected both times, else unselect entry on click.</param>
+    protected void Begin(IEnumerable<TEntry> entries, Action<TEntry?, TEntry?> onClick, bool confirm, bool repeat = false)
     {
-        Begin(entries, list => onClick(list?[0], list?[1]), 2, shouldConfirm, canRepeat);
+        Begin(entries, list => onClick(list?[0], list?[1]), 2, confirm, repeat);
     }
 
     private void OnEntryClick(TEntry entry)
@@ -177,6 +175,7 @@ public abstract class CustomMultiSelectMenu<TEntry> : CustomPhoneMenu<CustomMult
         }
 
         selectedEntries.Add(menuEntry);
+        MeetingVoteAreaVisibility.Restore(Component);
 
         // Add choice to list of selections
         if (selectedEntries.Count <= totalSelections)

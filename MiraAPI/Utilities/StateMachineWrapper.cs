@@ -21,13 +21,12 @@ public class StateMachineWrapper<T>
     private readonly PropertyInfo _stateProperty;
     private readonly PropertyInfo _currentProperty;
     private readonly Dictionary<string, PropertyInfo> _propertyCache;
-
-    private T? _parentInstance;
+    private readonly Type _type;
 
     /// <summary>
     /// Gets the instance of the <typeparamref name="T"/>.
     /// </summary>
-    public T Instance => _parentInstance ??= (T)_thisProperty.GetValue(_stateMachine)!;
+    public T Instance => field ??= (T)_thisProperty.GetValue(_stateMachine)!;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StateMachineWrapper{T}"/> class.
@@ -37,14 +36,14 @@ public class StateMachineWrapper<T>
     {
         _stateMachine = stateMachine;
 
-        var type = _stateMachine.GetType();
-        _thisProperty = AccessTools.Property(type, "__4__this");
-        _stateProperty = AccessTools.Property(type, "__1__state");
-        _currentProperty = AccessTools.Property(type, "__2__current");
+        _type = _stateMachine.GetType();
+        _thisProperty = AccessTools.Property(_type, "__4__this");
+        _stateProperty = AccessTools.Property(_type, "__1__state");
+        _currentProperty = AccessTools.Property(_type, "__2__current");
 
         if (_thisProperty == null || _stateProperty == null || _currentProperty == null)
         {
-            throw new MissingMemberException($"Could not find required properties in type '{type}'.");
+            throw new MissingMemberException($"Could not find required properties in type '{_type}'.");
         }
 
         _propertyCache = [];
@@ -91,10 +90,16 @@ public class StateMachineWrapper<T>
             return (TField)property.GetValue(_stateMachine)!;
         }
 
-        property = AccessTools.Property(_stateMachine.GetType(), parameterName)
-                   ?? throw new MissingFieldException($"Could not find parameter '{parameterName}' in state machine of type '{_stateMachine.GetType()}'.");
+        property = AccessTools.Property(_type, parameterName)
+                   ?? throw new MissingFieldException($"Could not find parameter '{parameterName}' in state machine of type '{_type.Name}'.");
 
         _propertyCache[parameterName] = property;
         return (TField)property.GetValue(_stateMachine)!;
     }
+
+    /// <summary>
+    /// Implicitly converts a state machine wrapper into its <typeparamref name="T"/> instance.
+    /// </summary>
+    /// <param name="wrapper">The wrapper.</param>
+    public static implicit operator T(StateMachineWrapper<T> wrapper) => wrapper.Instance;
 }

@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using BepInEx.Unity.IL2CPP.Utils.Collections;
 using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using MiraAPI.LocalSettings;
@@ -12,21 +15,14 @@ using UnityEngine.UI;
 namespace MiraAPI.Patches.LocalSettings;
 
 [HarmonyPatch(typeof(OptionsMenuBehaviour))]
+[SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]
+[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
 public static class OptionsMenuPatches
 {
     private static readonly Dictionary<int, List<GameObject>> TabButtons = [];
     private static int _currentPage = 1;
 
-    internal static OptionsMenuBehaviour? Instance { get; private set; }
-
-    [SuppressMessage(
-        "Critical Code Smell",
-        "S2223:Non-constant static fields should not be visible",
-        Justification = "Internal behaviour that does not need property-level validation.")]
-    [SuppressMessage(
-        "StyleCop.CSharp.MaintainabilityRules",
-        "SA1401:Fields should be private",
-        Justification = "Read above.")]
+    internal static OptionsMenuBehaviour? Instance;
     internal static BoxCollider2D MaskCollider = null!;
 
     private static SpriteRenderer? background;
@@ -77,7 +73,7 @@ public static class OptionsMenuPatches
 
         _currentPage = 1;
         TabButtons.Clear();
-        float yOffset = 0;
+        var yOffset = 0f;
         var i = 0;
         var tabIdx = 0;
         var page = 1;
@@ -151,9 +147,9 @@ public static class OptionsMenuPatches
                 UpdatePages();
             }));
         button.OnMouseOver = new UnityEvent();
-        button.OnMouseOver.AddListener((UnityAction)(() => rollover.DoMouseOver()));
+        button.OnMouseOver.AddListener((Action)rollover.DoMouseOver);
         button.OnMouseOut = new UnityEvent();
-        button.OnMouseOut.AddListener((UnityAction)(() => rollover.DoMouseOut()));
+        button.OnMouseOut.AddListener((Action)rollover.DoMouseOut);
     }
 
     private static void ChangePage(int increase)
@@ -181,13 +177,15 @@ public static class OptionsMenuPatches
         LocalSettingsManager.AvailableTabs.ForEach(CustomClose); // Close all mod tabs
 
         // Tabs with index 10 and above are the mod settings tabs
-        if (index >= 10)
+        if (index < 10)
         {
-            CustomOpen(LocalSettingsManager.AvailableTabs[index - 10]);
-            return false;
+            return true;
         }
 
-        return true;
+        var tab = LocalSettingsManager.AvailableTabs[index - 10];
+        CustomOpen(tab);
+        __instance.StartCoroutine(RefreshScrollBoundsAfterOpen(__instance, tab).WrapToIl2Cpp());
+        return false;
     }
 
     /// <summary>
@@ -214,14 +212,17 @@ public static class OptionsMenuPatches
 
     private static void CustomOpen(LocalSettingsTab tab)
     {
-        if (tab.TabButton?.Button)
-            tab.TabButton!.Button.color = tab.TabAppearance.TabButtonHoverColor;
+        if (tab.TabButton)
+        {
+            if (tab.TabButton!.Button)
+                tab.TabButton.Button.color = tab.TabAppearance.TabButtonHoverColor;
 
-        if (tab.TabButton?.Rollover)
-            tab.TabButton!.Rollover.OutColor = tab.TabAppearance.TabButtonHoverColor;
+            if (tab.TabButton.Rollover)
+                tab.TabButton.Rollover.OutColor = tab.TabAppearance.TabButtonHoverColor;
 
-        if (tab.TabButton?.Content)
-            tab.TabButton!.Content.SetActive(true);
+            if (tab.TabButton.Content)
+                tab.TabButton.Content.SetActive(true);
+        }
 
         if (background != null)
             background.color = tab.TabAppearance.TabColor;
@@ -229,16 +230,29 @@ public static class OptionsMenuPatches
         tab.Open();
     }
 
+    private static IEnumerator RefreshScrollBoundsAfterOpen(OptionsMenuBehaviour menu, LocalSettingsTab tab)
+    {
+        yield return new WaitForEndOfFrame();
+
+        if (menu && tab.TabButton && tab.TabButton!.Content && tab.TabButton.Content.activeInHierarchy)
+        {
+            tab.RefreshScrollBounds();
+        }
+    }
+
     private static void CustomClose(LocalSettingsTab tab)
     {
-        if (tab.TabButton?.Button)
-            tab.TabButton!.Button.color = tab.TabAppearance.TabButtonColor;
+        if (tab.TabButton)
+        {
+            if (tab.TabButton!.Button)
+                tab.TabButton.Button.color = tab.TabAppearance.TabButtonColor;
 
-        if (tab.TabButton?.Rollover)
-            tab.TabButton!.Rollover.OutColor = tab.TabAppearance.TabButtonColor;
+            if (tab.TabButton.Rollover)
+                tab.TabButton.Rollover.OutColor = tab.TabAppearance.TabButtonColor;
 
-        if (tab.TabButton?.Content)
-            tab.TabButton!.Content.SetActive(false);
+            if (tab.TabButton.Content)
+                tab.TabButton.Content.SetActive(false);
+        }
 
         if (background != null)
             background.color = Color.white;

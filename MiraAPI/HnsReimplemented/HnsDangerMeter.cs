@@ -103,14 +103,14 @@ public sealed class HnsDangerMeter(nint cppPtr) : MonoBehaviour(cppPtr)
     private void UpdateDangerMusic()
     {
         var localPlayer = PlayerControl.LocalPlayer;
-        if (localPlayer != null && localPlayer.Data != null && localPlayer.Data.IsDead)
+        if (localPlayer == null || localPlayer.Data == null || !localPlayer.Data.IsDead)
         {
-            HnsMusicHandler.Instance.SetTaskState(false);
-            HnsMusicHandler.Instance.ResetMusic();
+            HnsMusicHandler.Instance.SetMusicValues(dangerLevel1, dangerLevel2);
             return;
         }
 
-        HnsMusicHandler.Instance.SetMusicValues(dangerLevel1, dangerLevel2);
+        HnsMusicHandler.Instance.SetTaskState(false);
+        HnsMusicHandler.Instance.ResetMusic();
     }
 
     private void UpdateDangerMeter()

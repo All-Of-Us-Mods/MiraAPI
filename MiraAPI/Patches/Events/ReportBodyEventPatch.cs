@@ -15,7 +15,7 @@ public static class ReportBodyEventPatch
         var body = target != null ? Helpers.GetBodyById(target.PlayerId) : null;
 
         var @event = new ReportBodyEvent(source, target, body);
-        MiraEventManager.InvokeEvent(@event);
+        @event.InvokeEvent();
         return !@event.IsCancelled;
     }
 

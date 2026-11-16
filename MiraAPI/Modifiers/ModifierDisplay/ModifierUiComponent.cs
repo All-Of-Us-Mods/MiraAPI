@@ -9,6 +9,7 @@ namespace MiraAPI.Modifiers.ModifierDisplay;
 /// <summary>
 /// The code placed on every <see cref="BaseModifier"/> HUD object. Used to handle updating.
 /// </summary>
+/// <param name="cppPtr">The pointer to the C++ object.</param>
 [RegisterInIl2Cpp]
 [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity Convention.")]
 public class ModifierUiComponent(nint cppPtr) : MonoBehaviour(cppPtr)
@@ -36,7 +37,7 @@ public class ModifierUiComponent(nint cppPtr) : MonoBehaviour(cppPtr)
         icon = modBg.transform.GetChild(1).GetComponent<SpriteRenderer>();
         var nameBg = transform.GetChild(1);
         nameText = nameBg.GetChild(0).GetComponent<TextMeshPro>();
-        descRect = desc.gameObject.GetComponent<RectTransform>();
+        descRect = desc.GetComponent<RectTransform>();
 
         nameText.font = desc.font = HudManager.Instance.TaskPanel.taskText.font;
         nameText.fontMaterial = desc.fontMaterial = HudManager.Instance.TaskPanel.taskText.fontMaterial;

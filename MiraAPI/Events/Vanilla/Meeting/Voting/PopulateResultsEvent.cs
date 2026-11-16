@@ -15,5 +15,5 @@ public class PopulateResultsEvent(List<CustomVote> votes) : MiraCancelableEvent
     /// <summary>
     /// Gets a list of networked <see cref="CustomVote"/>s.
     /// </summary>
-    public List<CustomVote> Votes { get; } = votes;
+    public List<CustomVote> Votes => votes;
 }

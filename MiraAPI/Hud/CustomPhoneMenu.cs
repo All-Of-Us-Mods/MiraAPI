@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using AmongUs.GameOptions;
+using MiraAPI.Utilities;
 using MiraAPI.Utilities.Assets;
 using Reactor.Utilities.Attributes;
 using Reactor.Utilities.Extensions;
@@ -15,12 +16,14 @@ namespace MiraAPI.Hud;
 /// <summary>
 /// Component registered in Il2Cpp domain to handle Unity events for custom menus.
 /// </summary>
+/// <param name="cppPtr">The pointer to the C++ object.</param>
 [RegisterInIl2Cpp]
 public class CustomPhoneMenuComponent(IntPtr cppPtr) : Minigame(cppPtr)
 {
     [SuppressMessage("Style", "IDE0051:Remove unused private members", Justification = "Unity convention.")]
     private void OnDisable()
     {
+        MeetingVoteAreaVisibility.Restore(this);
         if (ControllerManager.Instance)
         {
             ControllerManager.Instance.CloseOverlayMenu(name);
@@ -132,7 +135,7 @@ public abstract class CustomPhoneMenu : ICustomMenu
     /// </summary>
     public List<ShapeshifterPanel> EntryPanels => [.. MenuEntries.Select(e => e.Panel)];
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (Justification: Unity convention.)
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (Justification: Unity fields.)
 #pragma warning disable S1104 // Fields should not have public accessibility (Justification: Read above.)
 #pragma warning disable SA1300 // Element should begin with upper-case letter (Justification: Read above.)
     public Transform transform => Component.transform;
@@ -257,7 +260,7 @@ public abstract class CustomPhoneMenu : ICustomMenu
             MenuEntries.Add(menuEntry);
 
             var button = shapeshifterPanel.Button;
-            var nameplate = shapeshifterPanel.gameObject.transform.FindChild("Nameplate");
+            var nameplate = shapeshifterPanel.transform.FindChild("Nameplate");
             var highlight = nameplate.FindChild("Highlight").GetComponent<SpriteRenderer>();
             var icon = highlight.transform.GetChild(0).GetComponent<SpriteRenderer>();
 
@@ -314,7 +317,7 @@ public abstract class CustomPhoneMenu : ICustomMenu
     {
         ShapeshifterPanel panel = menuEntry.Panel;
 
-        var nameplate = panel.gameObject.transform.FindChild("Nameplate");
+        var nameplate = panel.transform.FindChild("Nameplate");
         var highlight = nameplate.FindChild("Highlight").GetComponent<SpriteRenderer>();
         var icon = highlight.transform.GetChild(0).GetComponent<SpriteRenderer>();
         if (sprite != null)
