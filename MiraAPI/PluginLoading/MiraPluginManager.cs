@@ -95,7 +95,7 @@ public sealed class MiraPluginManager
         if (IL2CPPChainloader.Instance.Plugins.TryGetValue(MiraApiPlugin.Id, out var newPlugin))
         {
             var registrationTimer = Stopwatch.StartNew();
-            var info = RegisterPlugin(typeof(MiraPluginManager).Assembly, apiPlugin, newPlugin, miraApiPlugin, true);
+            var info = RegisterPlugin(typeof(MiraPluginManager).Assembly, apiPlugin, newPlugin, miraApiPlugin);
 
             MiraApiConfig = info.PluginConfig;
             MiraApiPluginInfo = info;
@@ -112,7 +112,7 @@ public sealed class MiraPluginManager
             }
 
             var registrationTimer = Stopwatch.StartNew();
-            RegisterPlugin(assembly, miraPlugin, pluginInfo, plugin, false);
+            RegisterPlugin(assembly, miraPlugin, pluginInfo, plugin);
             registrationTimer.Stop();
             Info($"Registered mod {pluginInfo.Metadata.Name} with Mira API in {registrationTimer.ElapsedMilliseconds}ms.");
         };
@@ -141,7 +141,7 @@ public sealed class MiraPluginManager
         PluginsWithOptionsOrGameModes = [.. RegisteredPlugins.Where(m => m.MiraPlugin.DisplayOnOptionsMenu || m.GameModes.Count > 0)];
     }
 
-    private MiraPluginInfo RegisterPlugin(Assembly assembly, IMiraPlugin plugin, PluginInfo pluginInfo, BasePlugin basePlugin, bool isMira)
+    private MiraPluginInfo RegisterPlugin(Assembly assembly, IMiraPlugin plugin, PluginInfo pluginInfo, BasePlugin basePlugin)
     {
         var info = new MiraPluginInfo(plugin, pluginInfo, assembly);
         var roles = new List<Type>();
@@ -149,7 +149,7 @@ public sealed class MiraPluginManager
         var oldConfigSetting = info.PluginConfig.SaveOnConfigSet;
         info.PluginConfig.SaveOnConfigSet = false;
 
-        ProcessAssemblyTypes(assembly, info, basePlugin, plugin, roles, isMira);
+        ProcessAssemblyTypes(assembly, info, basePlugin, plugin, roles);
 
         info.PluginConfig.Save();
         info.PluginConfig.SaveOnConfigSet = oldConfigSetting;
@@ -167,7 +167,7 @@ public sealed class MiraPluginManager
         return info;
     }
 
-    private static void ProcessAssemblyTypes(Assembly assembly, MiraPluginInfo info, BasePlugin basePlugin, IMiraPlugin plugin, List<Type> roles, bool isMira)
+    private static void ProcessAssemblyTypes(Assembly assembly, MiraPluginInfo info, BasePlugin basePlugin, IMiraPlugin plugin, List<Type> roles)
     {
         if (plugin.ForceRegisterEvents)
         {
@@ -178,7 +178,7 @@ public sealed class MiraPluginManager
 
         foreach (var type in assembly.GetTypes())
         {
-            if ((isMira && type.IsAbstract) || type.IsDefined<MiraIgnoreAttribute>())
+            if (type.IsDefined<MiraIgnoreAttribute>())
                 continue;
 
             foreach (var (logContext, handler) in RegistrationHandlers)
