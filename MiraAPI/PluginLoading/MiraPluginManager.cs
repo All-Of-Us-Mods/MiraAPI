@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using BepInEx;
-using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
 using MiraAPI.Colors;
@@ -46,11 +45,9 @@ public sealed class MiraPluginManager
     internal MiraPluginInfo[] RegisteredPlugins { get; private set; } = [];
     internal MiraPluginInfo[] RegisteredPluginsWithOptions { get; private set; } = [];
     internal MiraPluginInfo[] PluginsWithOptionsOrGameModes { get; private set; } = [];
-
     internal Dictionary<MiraPluginInfo, List<Type>> QueuedRoleRegistrations { get; } = [];
+
     internal static MiraPluginManager Instance { get; } = new();
-    internal static ConfigFile MiraApiConfig { get; private set; } = null!;
-    internal static MiraPluginInfo MiraApiPluginInfo { get; private set; } = null!;
 
     private static readonly (string LogContext, TypeRegistrationHandler Handler)[] RegistrationHandlers =
     [
@@ -95,27 +92,15 @@ public sealed class MiraPluginManager
 
         if (IL2CPPChainloader.Instance.Plugins.TryGetValue(MiraApiPlugin.Id, out var newPlugin))
         {
-            var registrationTimer = Stopwatch.StartNew();
-            var info = RegisterPlugin(typeof(MiraPluginManager).Assembly, apiPlugin, newPlugin, miraApiPlugin);
-
-            MiraApiConfig = info.PluginConfig;
-            MiraApiPluginInfo = info;
-
-            registrationTimer.Stop();
-            Info($"Registered Mira API as mod in {registrationTimer.ElapsedMilliseconds}ms.");
+            RegisterPlugin(typeof(MiraPluginManager).Assembly, apiPlugin, newPlugin, miraApiPlugin);
         }
 
         IL2CPPChainloader.Instance.PluginLoad += (pluginInfo, assembly, plugin) =>
         {
-            if (plugin is not IMiraPlugin miraPlugin || pluginInfo.Metadata.GUID == MiraApiPlugin.Id)
+            if (plugin is IMiraPlugin miraPlugin && pluginInfo.Metadata.GUID != MiraApiPlugin.Id)
             {
-                return;
+                RegisterPlugin(assembly, miraPlugin, pluginInfo, plugin);
             }
-
-            var registrationTimer = Stopwatch.StartNew();
-            RegisterPlugin(assembly, miraPlugin, pluginInfo, plugin);
-            registrationTimer.Stop();
-            Info($"Registered mod {pluginInfo.Metadata.Name} with Mira API in {registrationTimer.ElapsedMilliseconds}ms.");
         };
 
         IL2CPPChainloader.Instance.Finished += () =>
@@ -142,8 +127,9 @@ public sealed class MiraPluginManager
         PluginsWithOptionsOrGameModes = [.. RegisteredPlugins.Where(m => m.MiraPlugin.DisplayOnOptionsMenu || m.GameModes.Count > 0)];
     }
 
-    private MiraPluginInfo RegisterPlugin(Assembly assembly, IMiraPlugin plugin, PluginInfo pluginInfo, BasePlugin basePlugin)
+    private void RegisterPlugin(Assembly assembly, IMiraPlugin plugin, PluginInfo pluginInfo, BasePlugin basePlugin)
     {
+        var registrationTimer = Stopwatch.StartNew();
         var info = new MiraPluginInfo(plugin, pluginInfo, assembly);
         var roles = new List<Type>();
 
@@ -165,7 +151,9 @@ public sealed class MiraPluginManager
         PresetManager.CreateDefaultPreset(info);
         PresetManager.LoadPresets(info);
 
-        return info;
+        registrationTimer.Stop();
+
+        Info($"Registered mod {pluginInfo.Metadata.Name} in {registrationTimer.ElapsedMilliseconds}ms.");
     }
 
     private static void ProcessAssemblyTypes(Assembly assembly, MiraPluginInfo info, BasePlugin basePlugin, IMiraPlugin plugin, List<Type> roles)

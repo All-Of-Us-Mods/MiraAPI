@@ -35,7 +35,7 @@ public static class Helpers
         "Major Code Smell",
         "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields",
         Justification = "Dynamic singleton initialization requires reflection to bypass the private field access modifier because the type is only known at runtime.")]
-    private const BindingFlags StaticInstanceFlags = BindingFlags.Static | BindingFlags.NonPublic;
+    private const BindingFlags StaticInstanceFlags = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
 
     internal const float MatchInfoGuideBaseScale = 1.3f;
     private static NumberOption? _advancedSettingsRowPrefab;

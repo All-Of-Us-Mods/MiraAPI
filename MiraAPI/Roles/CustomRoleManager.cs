@@ -203,7 +203,7 @@ public static class CustomRoleManager
         }
 
         var useTaskHint = customRole.Configuration.RoleHintType is RoleHintType.TaskHint;
-        var overridesTaskText = customRole.GetType().GetMethod("SpawnTaskHeader")?.DeclaringType == customRole.GetType();
+        var overridesTaskText = roleType.GetMethod("SpawnTaskHeader")?.DeclaringType == roleType;
 
         if (useTaskHint && !overridesTaskText)
         {
