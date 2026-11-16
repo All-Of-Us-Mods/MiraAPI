@@ -7,6 +7,7 @@ using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
+using HarmonyLib;
 using MiraAPI.Colors;
 using MiraAPI.Events;
 using MiraAPI.GameEnd;
@@ -176,7 +177,7 @@ public sealed class MiraPluginManager
 
         var context = new RegistrationContext(info, plugin, basePlugin, roles);
 
-        foreach (var type in assembly.GetTypes())
+        foreach (var type in AccessTools.GetTypesFromAssembly(assembly))
         {
             if (type.IsDefined<MiraIgnoreAttribute>())
                 continue;
