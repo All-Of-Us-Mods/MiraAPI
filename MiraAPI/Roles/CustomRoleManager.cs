@@ -214,14 +214,8 @@ public static class CustomRoleManager
 
         Helpers.SetInstance(typeof(CustomRoleSingleton<>), roleType, roleBehaviour);
 
-        if (customRole.Configuration.HideSettings)
-        {
-            return roleBehaviour;
-        }
-
-        var config = parentMod.PluginConfig;
-        config.Bind(customRole.NumConfigDefinition, Mathf.Clamp(customRole.Configuration.DefaultRoleCount, 0, customRole.Configuration.MaxRoleCount));
-        config.Bind(customRole.ChanceConfigDefinition, Mathf.Clamp(customRole.Configuration.DefaultChance, 0, 100));
+        if (!customRole.Configuration.HideSettings)
+            customRole.BindConfig(parentMod.PluginConfig);
 
         return roleBehaviour;
     }

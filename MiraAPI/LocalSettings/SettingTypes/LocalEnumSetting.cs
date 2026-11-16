@@ -20,13 +20,8 @@ namespace MiraAPI.LocalSettings.SettingTypes;
 /// <param name="name">The name of the setting.</param>
 /// <param name="description">The description of the setting.</param>
 /// <param name="values">The optional values array to replace the <see langword="enum"/> names.</param>
-public class LocalEnumSetting(
-    Type tab,
-    ConfigEntryBase configEntry,
-    Type enumType,
-    string? name = null,
-    string? description = null,
-    string[]? values = null) : LocalSettingBase<int>(tab, configEntry, name, description)
+public class LocalEnumSetting(Type tab, ConfigEntryBase configEntry, Type enumType, string? name = null, string? description = null, string[]? values = null)
+    : LocalSettingBase<int>(tab, configEntry, name, description)
 {
     /// <summary>
     /// Gets the <see cref="Enum"/> type of the setting.
@@ -62,7 +57,7 @@ public class LocalEnumSetting(
         var highlight = button.transform.FindChild("ButtonHighlight")?.GetComponent<SpriteRenderer>();
         if (highlight != null)
         {
-            this._highlight = highlight;
+            _highlight = highlight;
             highlight.color = Tab!.TabAppearance.EnumHoverColor;
             highlight.gameObject.SetActive(false);
         }

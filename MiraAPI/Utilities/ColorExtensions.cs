@@ -18,7 +18,7 @@ public static class ColorExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static byte ToByte(this float @float)
     {
-        return (byte)MathF.Round(@float * 255f);
+        return (byte)MathF.Round(@float * 255f, MidpointRounding.AwayFromZero);
     }
 
     /// <summary>

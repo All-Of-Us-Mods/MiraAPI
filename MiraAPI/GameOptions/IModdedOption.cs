@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using BepInEx.Configuration;
 using MiraAPI.Networking;
 using MiraAPI.PluginLoading;
@@ -100,6 +101,12 @@ public interface IModdedOption
     OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, PlayerOption playerOpt, Transform container);
 
     /// <summary>
+    /// Gets the translated display value of the option.
+    /// </summary>
+    /// <returns>The display value.</returns>
+    string GetDisplayValue();
+
+    /// <summary>
     /// Gets the value as a <see langword="float"/>.
     /// </summary>
     /// <returns>The value of the option as a <see langword="float"/>.</returns>
@@ -160,7 +167,7 @@ public interface IBaseModdedOptionList : IEnumerable
     /// <inheritdoc cref="IReadOnlyCollection{T}.Count"/>
     int Count { get; }
 
-    /// <inheritdoc cref="System.Linq.Enumerable.ElementAt{TSource}(IEnumerable{TSource}, int)"/>
+    /// <inheritdoc cref="Enumerable.ElementAt{TSource}(IEnumerable{TSource}, int)"/>
     IModdedOption ElementAt(int index);
 }
 

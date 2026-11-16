@@ -7,12 +7,10 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 using HarmonyLib;
 using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using MiraAPI.GameOptions;
-using MiraAPI.GameOptions.OptionTypes;
 using MiraAPI.Modifiers;
 using MiraAPI.Roles;
 using MiraAPI.Translation;
@@ -21,7 +19,6 @@ using Rewired;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using MethodBase = System.Reflection.MethodBase;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
@@ -41,7 +38,6 @@ public static class Helpers
     private const BindingFlags StaticInstanceFlags = BindingFlags.Static | BindingFlags.NonPublic;
 
     internal const float MatchInfoGuideBaseScale = 1.3f;
-    private static readonly Regex TrailingZeroRegex = new(@"\.0+(?!\d)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
     private static NumberOption? _advancedSettingsRowPrefab;
 
     /// <summary>
@@ -64,111 +60,73 @@ public static class Helpers
     public static string GetOptionsText(Type classType)
     {
         var group = ModdedOptionsManager.Groups.FirstOrDefault(x => x.OptionableType == classType);
-        var options = group?.Children;
-        var summaryProvider = group as ISummarizedOptions;
-        var hiddenKeys = summaryProvider?.WikiHiddenOptionKeys;
 
-        if (options == null)
+        if (group == null)
         {
             return string.Empty;
         }
 
-        var lines = new List<string>();
-        var insertedSummary = false;
+        var headerAdded = false;
+        var options = group.Children;
+        var builder = new StringBuilder();
+        var allHiddenKeys = new HashSet<StringNames>();
+        var summaryGroups = new Dictionary<StringNames, WikiSummaryGroup>();
+
+        if (group is IWikiSummaryProvider provider && provider.SummaryGroups != null)
+        {
+            foreach (var (header, summaryGroup) in provider.SummaryGroups)
+            {
+                summaryGroups[header] = summaryGroup;
+                allHiddenKeys.UnionWith(summaryGroup.HiddenKeys);
+            }
+        }
+        else if (group is ISummarizedOptions summariser && summariser.WikiHiddenOptionKeys?.Count is > 0)
+        {
+            summaryGroups[summariser.WikiHiddenOptionKeys.First()] = new(summariser.WikiHiddenOptionKeys, summariser.GetWikiOptionSummaryLines);
+            allHiddenKeys.UnionWith(summariser.WikiHiddenOptionKeys);
+        }
+
+        allHiddenKeys.UnionWith(summaryGroups.Keys);
+
+        void EnsureHeader()
+        {
+            if (headerAdded)
+                return;
+
+            builder.AppendLine(MiraApiPlugin.Culture, $"\n<size=50%> \n</size><b><color=#29D7B5>{MiraLocaleManager.Get("Options")}</color></b>");
+            headerAdded = true;
+        }
+
         foreach (var option in options)
         {
-            StringNames? key = option switch
-            {
-                ModdedToggleOption t => t.StringName,
-                ModdedEnumOption e => e.StringName,
-                ModdedNumberOption n => n.StringName,
-                _ => null,
-            };
-
-            if (!insertedSummary && summaryProvider != null && hiddenKeys != null &&
-                key.HasValue && hiddenKeys.Contains(key.Value))
-            {
-                foreach (var line in summaryProvider.GetWikiOptionSummaryLines())
-                {
-                    if (!string.IsNullOrWhiteSpace(line))
-                    {
-                        lines.Add(line);
-                    }
-                }
-
-                insertedSummary = true;
-            }
-
             if (!option.Visible())
-            {
                 continue;
-            }
 
-            if (key.HasValue && hiddenKeys?.Contains(key.Value) == true)
-            {
-                continue;
-            }
+            var key = option.StringName;
 
-            switch (option)
+            if (summaryGroups.TryGetValue(key, out var summaryGroup))
             {
-                case ModdedToggleOption toggleOption:
-                    lines.Add(
-                        TranslationController.Instance.GetString(toggleOption.StringName) + ": " +
-                        toggleOption.Value);
-                    break;
-                /*case ModdedMultiSelectOption<Enum> enumOption:
-                    if (!enumOption.Visible())
-                    {
+                foreach (var line in summaryGroup.SummaryLines())
+                {
+                    if (string.IsNullOrWhiteSpace(line))
                         continue;
-                    }
 
-                    builder.AppendLine(enumOption.Title + ": " + enumOption.Values[enumOption.Value]);
-                    break;*/
-                case ModdedEnumOption enumOption:
-                    lines.Add(
-                        TranslationController.Instance.GetString(enumOption.StringName) + ": " +
-                        MiraLocaleManager.Get(
-                            enumOption.Values[enumOption.Value],
-                            enumOption.Values[enumOption.Value]));
-                    break;
-                case ModdedNumberOption numberOption:
-                    var optionStr = TrailingZeroRegex.Replace(
-                        numberOption.Data.GetValueString(numberOption.Value),
-                        string.Empty);
-
-                    var title = TranslationController.Instance.GetString(numberOption.StringName);
-                    if (numberOption is { NegativeWordValue: not "#", Value: -1 })
-                    {
-                        lines.Add(title + $": {numberOption.NegativeWordValue}");
-                    }
-                    else if (numberOption is { ZeroWordValue: not "#", Value: 0 })
-                    {
-                        lines.Add(title + $": {numberOption.ZeroWordValue}");
-                    }
-                    else
-                    {
-                        lines.Add(title + ": " + optionStr);
-                    }
-
-                    break;
+                    EnsureHeader();
+                    builder.AppendLine(line);
+                }
             }
+
+            if (allHiddenKeys.Contains(key))
+                continue;
+
+            EnsureHeader();
+
+            builder.Append(TranslationController.Instance.GetString(key))
+                .Append(": ")
+                .AppendLine(option.GetDisplayValue());
         }
 
-        if (lines.Count == 0)
-        {
-            return string.Empty;
-        }
-
-        var builder = new StringBuilder();
-        builder.AppendLine(
-            MiraApiPlugin.Culture,
-            $"\n<size=50%> \n</size><b><color=#29D7B5>{MiraLocaleManager.Get("Options")}</color></b>");
-        foreach (var line in lines)
-        {
-            builder.AppendLine(line);
-        }
-
-        return builder.ToString();
+        return builder.Length == 0 ? string.Empty : builder.ToString();
     }
 
     /// <summary>
@@ -250,12 +208,9 @@ public static class Helpers
     /// <param name="amount">How much you want to divide by.</param>
     public static void DivideSize(GameObject obj, float amount)
     {
-        foreach (var collider in obj.GetComponentsInChildren<Collider2D>(true))
+        foreach (var col in obj.GetComponentsInChildren<BoxCollider2D>(true))
         {
-            if (collider.TryCast<BoxCollider2D>() is { } col)
-            {
-                col.size = new Vector2(col.size.x / amount, col.size.y);
-            }
+            col.size = new Vector2(col.size.x / amount, col.size.y);
         }
 
         foreach (var rend in obj.GetComponentsInChildren<SpriteRenderer>(true))

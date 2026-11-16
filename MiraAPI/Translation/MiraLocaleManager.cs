@@ -101,7 +101,7 @@ public static class MiraLocaleManager
     }
 
     /// <inheritdoc cref="Register(string, string, Assembly)"/>
-    [Obsolete("Pass typeof(YourPlugin).Assembly directly to Register for better performance.")]
+    [Obsolete("Pass typeof(YourPlugin).Assembly directly to Register for better performance. This will be removed in a future version.")]
     public static void Register(string modGuid)
     {
         LoadInternalStrings(Assembly.GetCallingAssembly(), modGuid);
@@ -114,7 +114,7 @@ public static class MiraLocaleManager
     }
 
     /// <inheritdoc cref="Register(string, string, Assembly)"/>
-    [Obsolete("Pass typeof(YourPlugin).Assembly directly to Register for better performance.")]
+    [Obsolete("Pass typeof(YourPlugin).Assembly directly to Register for better performance. This will be removed in a future version.")]
     public static void Register(string modGuid, string internalName)
     {
         LoadInternalStrings(Assembly.GetCallingAssembly(), internalName, modGuid);

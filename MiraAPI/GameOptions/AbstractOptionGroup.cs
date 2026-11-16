@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Il2CppInterop.Runtime.Attributes;
 using MiraAPI.Modifiers;
@@ -19,15 +18,30 @@ public abstract class AbstractOptionGroup
 {
     internal List<IModdedOption> Options { get; } = [];
 
+    private readonly ReadOnlyCollection<IModdedOption> children;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AbstractOptionGroup"/> class.
+    /// </summary>
+    protected AbstractOptionGroup()
+    {
+        children = new(Options);
+    }
+
     /// <summary>
     /// Gets a list of the options which are a part of this group.
     /// </summary>
-    public ReadOnlyCollection<IModdedOption> Children => new(Options);
+    public ReadOnlyCollection<IModdedOption> Children => children;
 
     /// <summary>
     /// Gets the name of the group. Visible in options menu.
     /// </summary>
     public abstract string GroupName { get; }
+
+    /// <summary>
+    /// Gets the ID prefix used for options in this group (e.g., "Options.Teleporter.").
+    /// </summary>
+    public virtual string GroupPrefix => string.Empty;
 
     /// <summary>
     /// Gets the sprite of the group that is displayed in the match info guide.
@@ -39,14 +53,6 @@ public abstract class AbstractOptionGroup
     /// Gets the Optionable type of the group.
     /// </summary>
     public virtual Type? OptionableType => null;
-
-    /// <summary>
-    /// Gets a value indicating whether the group should be shown in the modifiers menu.
-    /// </summary>
-    // Completed: make this not a boolean
-    [Obsolete("Use ParentMenu instead.", true)]
-    [SuppressMessage("Info Code Smell", "S1133:Deprecated code should be removed", Justification = "Retained.")]
-    public virtual bool ShowInModifiersMenu => false;
 
     /// <summary>
     /// Gets a value indicating which menu the group is in.

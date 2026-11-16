@@ -375,12 +375,7 @@ internal static class GameOptionsMenuPatch
 
         foreach (var mode in CustomGameModeManager.IdToModeMap.Values)
         {
-            var filteredGroups =
-                ModdedOptionsManager.GameModeOptionGroups
-                    .Where(x => x.Key == mode.GetType())
-                    .Select(y => y.Value)
-                    .SelectMany(y => y)
-                    .ToList();
+            var filteredGroups = ModdedOptionsManager.GameModeOptionGroups.GetValueOrDefault(mode.GetType(), []);
             GameModeGroups.Add(mode, [.. filteredGroups]);
 
             var optionBehaviours = new List<OptionBehaviour>();

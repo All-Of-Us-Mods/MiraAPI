@@ -11,37 +11,64 @@ namespace MiraAPI.GameOptions.Attributes;
 /// <param name="on">What the option displays when toggled on.</param>
 /// <param name="off">What the option displays when toggled off.</param>
 [AttributeUsage(AttributeTargets.Property)]
-public class ModdedToggleOptionAttribute(
-    string title,
-    string on,
-    string off)
-    : ModdedOptionAttribute(title)
+public class ModdedToggleOptionAttribute(string? title, string on, string off)
+    : ModdedOptionAttribute(title), ITypedOption<bool>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ModdedToggleOptionAttribute"/> class.
     /// </summary>
+    /// <param name="on">What the option displays when toggled on.</param>
+    /// <param name="off">What the option displays when toggled off.</param>
+    public ModdedToggleOptionAttribute(string on, string off)
+        : this(null, on, off)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedToggleOptionAttribute"/> class.
+    /// </summary>
     /// <param name="title">The option title.</param>
-    public ModdedToggleOptionAttribute(string title)
+    public ModdedToggleOptionAttribute(string? title)
         // ReSharper disable once IntroduceOptionalParameters.Global (Justification: Kept for backwards compatibility.)
         : this(title, "On", "Off")
     {
     }
 
-    internal override IModdedOption CreateOption(object? value, PropertyInfo property)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedToggleOptionAttribute"/> class.
+    /// </summary>
+    public ModdedToggleOptionAttribute()
+        : this(null, "On", "Off")
     {
-        var toggleOpt = new ModdedToggleOption(Title, (bool)(value ?? false), on, off);
-        return toggleOpt;
+    }
+
+    internal override IModdedOption CreateOption(object? value, PropertyInfo property, AbstractOptionGroup group)
+    {
+        var opt = new ModdedToggleOption(group.GroupPrefix, Title ?? property.Name, (bool)(value ?? false), on, off);
+        Title = opt.Title;
+        return opt;
     }
 
     /// <inheritdoc />
     public override void SetValue(object value)
     {
-        var opt = HolderOption as ModdedToggleOption;
-        opt?.SetValue((bool)value);
+        SetValueUnboxed((bool)value);
+    }
+
+    /// <inheritdoc />
+    public void SetValueUnboxed(bool value)
+    {
+        (HolderOption as ModdedToggleOption)?.SetValue(value);
     }
 
     /// <inheritdoc />
     public override object GetValue()
+    {
+        return GetValueUnboxed();
+    }
+
+    /// <inheritdoc />
+    public bool GetValueUnboxed()
     {
         return HolderOption is ModdedToggleOption opt
             ? opt.Value
