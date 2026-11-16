@@ -19,7 +19,7 @@ public static class LocalSettingsManager
 
     internal static bool RegisterLocalTabs(Type type, in MiraPluginManager.RegistrationContext context)
     {
-        if (!type.IsAssignableTo(typeof(LocalSettingsTab)))
+        if (type.IsAbstract || !type.IsAssignableTo(typeof(LocalSettingsTab)))
         {
             return false;
         }

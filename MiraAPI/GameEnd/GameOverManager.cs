@@ -17,12 +17,7 @@ public static class GameOverManager
 
     internal static bool RegisterGameOver(Type type, in MiraPluginManager.RegistrationContext _)
     {
-        if (!typeof(CustomGameOver).IsAssignableFrom(type))
-        {
-            return false;
-        }
-
-        if (type.IsAbstract)
+        if (type.IsAbstract || !typeof(CustomGameOver).IsAssignableFrom(type))
         {
             return false;
         }

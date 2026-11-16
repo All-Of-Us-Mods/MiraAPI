@@ -69,7 +69,7 @@ public static class ModifierManager
 
     internal static bool RegisterModifier(Type type, in MiraPluginManager.RegistrationContext context)
     {
-        if (!typeof(BaseModifier).IsAssignableFrom(type))
+        if (type.IsAbstract || !typeof(BaseModifier).IsAssignableFrom(type))
         {
             return false;
         }

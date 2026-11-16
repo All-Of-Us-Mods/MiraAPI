@@ -33,7 +33,7 @@ public static class CustomButtonManager
 
     internal static bool RegisterButton(Type type, in MiraPluginManager.RegistrationContext context)
     {
-        if (!type.IsAssignableTo(typeof(CustomActionButton)) || Activator.CreateInstance(type) is not CustomActionButton button)
+        if (type.IsAbstract || !type.IsAssignableTo(typeof(CustomActionButton)) || Activator.CreateInstance(type) is not CustomActionButton button)
         {
             return false;
         }

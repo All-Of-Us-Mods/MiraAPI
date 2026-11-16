@@ -25,7 +25,7 @@ public static class MeetingButtonManager
 
     internal static bool RegisterTargetedMeetingButton(Type type, in MiraPluginManager.RegistrationContext context)
     {
-        if (!typeof(TargetedMeetingButton).IsAssignableFrom(type))
+        if (type.IsAbstract || !typeof(TargetedMeetingButton).IsAssignableFrom(type))
         {
             return false;
         }
@@ -40,7 +40,7 @@ public static class MeetingButtonManager
 
     internal static bool RegisterMeetingButton(Type type, in MiraPluginManager.RegistrationContext context)
     {
-        if (!typeof(MeetingActionButton).IsAssignableFrom(type))
+        if (type.IsAbstract || !typeof(MeetingActionButton).IsAssignableFrom(type))
         {
             return false;
         }

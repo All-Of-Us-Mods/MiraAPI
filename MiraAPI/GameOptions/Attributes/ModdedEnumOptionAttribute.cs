@@ -58,8 +58,7 @@ public class ModdedEnumOptionAttribute(string? title, Type enumType, string idPr
     /// <inheritdoc />
     public override void SetValue(object value)
     {
-        var opt = HolderOption as ModdedEnumOption;
-        opt?.SetValue((int)value);
+        (HolderOption as ModdedEnumOption)?.SetValue((int)value);
     }
 
     /// <inheritdoc />

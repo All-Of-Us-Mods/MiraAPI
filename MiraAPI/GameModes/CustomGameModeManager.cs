@@ -21,7 +21,7 @@ public static class CustomGameModeManager
 
     internal static bool RegisterGameMode(Type type, in MiraPluginManager.RegistrationContext context)
     {
-        if (!typeof(AbstractGameMode).IsAssignableFrom(type))
+        if (type.IsAbstract || !typeof(AbstractGameMode).IsAssignableFrom(type))
         {
             return false;
         }

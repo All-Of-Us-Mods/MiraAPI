@@ -121,7 +121,7 @@ public static class CustomRoleManager
 
     internal static bool RegisterRole(Type type, in MiraPluginManager.RegistrationContext context)
     {
-        if (!(typeof(RoleBehaviour).IsAssignableFrom(type) && typeof(ICustomRole).IsAssignableFrom(type)))
+        if (type.IsAbstract || !(typeof(RoleBehaviour).IsAssignableFrom(type) && typeof(ICustomRole).IsAssignableFrom(type)))
         {
             return false;
         }

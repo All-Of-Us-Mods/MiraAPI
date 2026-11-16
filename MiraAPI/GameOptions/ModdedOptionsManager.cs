@@ -73,7 +73,7 @@ public static class ModdedOptionsManager
 
     internal static bool RegisterGroup(Type type, in MiraPluginManager.RegistrationContext context)
     {
-        if (!type.IsAssignableTo(typeof(AbstractOptionGroup)))
+        if (type.IsAbstract || !type.IsAssignableTo(typeof(AbstractOptionGroup)))
         {
             return false;
         }
