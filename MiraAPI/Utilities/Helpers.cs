@@ -574,10 +574,10 @@ public static class Helpers
     {
         return suffix switch
         {
-            MiraNumberSuffixes.Multiplier => "x",
-            MiraNumberSuffixes.Seconds => "s",
             MiraNumberSuffixes.Percent => "%",
-            MiraNumberSuffixes.Distance => MiraApiPlugin.DistanceSuffix.Value,
+            MiraNumberSuffixes.Multiplier => "x",
+            MiraNumberSuffixes.Distance => MiraLocaleManager.Get("MiraApi.AbbreviatedDistance"),
+            MiraNumberSuffixes.Seconds => TranslationController.Instance.GetString(StringNames.AbbreviatedSecond, string.Empty),
             _ => string.Empty,
         };
     }

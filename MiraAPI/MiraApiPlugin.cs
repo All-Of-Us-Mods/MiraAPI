@@ -71,7 +71,6 @@ public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
     internal static ConfigEntry<SortingGroups> WikiSortingGroup { get; private set; }
     internal static ConfigEntry<SortingMethod> WikiSortingMethod { get; private set; }
     internal static ConfigEntry<SortingFilter> WikiSortingFilter { get; private set; }
-    internal static ConfigEntry<string> DistanceSuffix { get; private set; }
 
     /// <inheritdoc />
     public override void Load()
@@ -91,11 +90,6 @@ public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
             "WikiSortingFilter",
             SortingFilter.AllRoles,
             "Determines what roles / modifiers are displayed at once.");
-        DistanceSuffix = Config.Bind(
-            "Display",
-            "Distance",
-            "unit(s)",
-            "Dictates the unit of distance used in numeric option displays representing a distance.");
         Harmony.PatchAll();
         RoleOptionsCollectionPatch.PatchRoleMethods(Harmony);
 

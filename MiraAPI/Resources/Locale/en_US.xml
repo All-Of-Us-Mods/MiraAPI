@@ -77,4 +77,5 @@ Outlive the timer or eliminate the crew.</string>
     <string name="Inactive">Inactive</string>
     <string name="Activated">Activated</string>
     <string name="Deactivated">Deactivated</string>
+    <string name="MiraApi.AbbreviatedDistance">m</string>
 </resources>
