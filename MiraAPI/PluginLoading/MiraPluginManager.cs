@@ -167,7 +167,7 @@ public sealed class MiraPluginManager
 
         foreach (var type in AccessTools.GetTypesFromAssembly(assembly))
         {
-            if (type.IsDefined<MiraIgnoreAttribute>())
+            if (type.IsDefined<MiraIgnoreAttribute>() || type.IsDefined<HarmonyAttribute>())
                 continue;
 
             foreach (var (logContext, handler) in RegistrationHandlers)
