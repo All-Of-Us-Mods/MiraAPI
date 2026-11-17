@@ -27,38 +27,7 @@ public static class SettingPatches
         ref string __result,
         [HarmonyArgument(0)] float value)
     {
-        string result;
-        var suffix = (MiraNumberSuffixes)__instance.SuffixType;
-
-        var custom =
-            ModdedOptionsManager.ModdedOptions.Values.FirstOrDefault(opt =>
-                opt.OptionBehaviour != null && opt.OptionBehaviour.Data == __instance);
-        if (custom is ModdedNumberOption moddedNumberOption)
-        {
-            if (moddedNumberOption.NegativeWordValue != "#" && (int)value == -1)
-            {
-                result = $"<b>{moddedNumberOption.NegativeWordValue}</b>";
-            }
-            else if (moddedNumberOption.ZeroWordValue != "#" && Mathf.Abs(value) < 0.0001f)
-            {
-                result = $"<b>{moddedNumberOption.ZeroWordValue}</b>";
-            }
-            else
-            {
-                result = Helpers.FormatValue(value, suffix, __instance.FormatString);
-            }
-        }
-        else if (__instance.ZeroIsInfinity && Mathf.Abs(value) < 0.0001f)
-        {
-            result = "<b>∞</b>";
-        }
-        else
-        {
-            result = Helpers.FormatValue(value, suffix, __instance.FormatString);
-        }
-
-        __result = result;
-        return false;
+        return SetResult(ref __result, value, (MiraNumberSuffixes)__instance.SuffixType, __instance.FormatString, __instance.ZeroIsInfinity, __instance);
     }
 
     /// <summary>
@@ -75,37 +44,37 @@ public static class SettingPatches
         ref string __result,
         [HarmonyArgument(0)] float value)
     {
-        string result;
-        var suffix = (MiraNumberSuffixes)__instance.SuffixType;
+        return SetResult(ref __result, value, (MiraNumberSuffixes)__instance.SuffixType, __instance.FormatString, __instance.ZeroIsInfinity, __instance);
+    }
 
-        var custom =
-            ModdedOptionsManager.ModdedOptions.Values.FirstOrDefault(opt =>
-                opt.OptionBehaviour != null && opt.OptionBehaviour.Data == __instance);
+    private static bool SetResult(ref string __result, float value, MiraNumberSuffixes suffix, string formatString, bool zeroIsInfinity, BaseGameSetting setting)
+    {
+        var custom = ModdedOptionsManager.ModdedOptions.Values.FirstOrDefault(opt => opt.Data == setting);
+
         if (custom is ModdedNumberOption moddedNumberOption)
         {
             if (moddedNumberOption.NegativeWordValue != "#" && (int)value == -1)
             {
-                result = $"<b>{moddedNumberOption.NegativeWordValue}</b>";
+                __result = $"<b>{moddedNumberOption.NegativeWordValue}</b>";
             }
             else if (moddedNumberOption.ZeroWordValue != "#" && Mathf.Abs(value) < 0.0001f)
             {
-                result = $"<b>{moddedNumberOption.ZeroWordValue}</b>";
+                __result = $"<b>{moddedNumberOption.ZeroWordValue}</b>";
             }
             else
             {
-                result = Helpers.FormatValue(value, suffix, __instance.FormatString);
+                __result = Helpers.FormatValue(value, suffix, formatString);
             }
         }
-        else if (__instance.ZeroIsInfinity && Mathf.Abs(value) < 0.0001f)
+        else if (zeroIsInfinity && Mathf.Abs(value) < 0.0001f)
         {
-            result = "<b>∞</b>";
+            __result = "<b>∞</b>";
         }
         else
         {
-            result = Helpers.FormatValue(value, suffix, __instance.FormatString);
+            __result = Helpers.FormatValue(value, suffix, formatString);
         }
 
-        __result = result;
         return false;
     }
 }
