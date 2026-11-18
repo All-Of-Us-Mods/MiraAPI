@@ -262,9 +262,11 @@ public abstract class ModdedOption<T>(string groupPrefix, string title, T defaul
         return newValue;
     }
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (Justification: Internal code.)
-    protected internal virtual ConfigDescription? CreateDescription()
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+    /// <summary>
+    /// Creates a <see cref="ConfigDescription"/> instance for the option's backing config.
+    /// </summary>
+    /// <returns>The option's config description, or null if there is none.</returns>
+    protected virtual ConfigDescription? CreateDescription()
     {
         return null;
     }

@@ -59,15 +59,6 @@ public sealed class ModdedArray<T> : IList<T>, IReadOnlyList<T>, IList, IModdedA
     /// Initializes a new instance of the <see cref="ModdedArray{T}"/> class with initial values.
     /// </summary>
     /// <param name="span">The initial span of values to initialise with.</param>
-    public ModdedArray(Span<T> span)
-    {
-        items = [.. span];
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedArray{T}"/> class with initial values.
-    /// </summary>
-    /// <param name="span">The initial span of values to initialise with.</param>
     public ModdedArray(ReadOnlySpan<T> span)
     {
         items = [.. span];
@@ -178,6 +169,7 @@ public sealed class ModdedArray<T> : IList<T>, IReadOnlyList<T>, IList, IModdedA
     {
         listAttribute = attribute;
         typedAttribute = attribute as ITypedOptionList<T>;
+        Refresh();
     }
 
     /// <inheritdoc/>

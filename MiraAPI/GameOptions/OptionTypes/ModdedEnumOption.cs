@@ -111,7 +111,7 @@ public class ModdedEnumOption : ModdedBaseEnumOption<int>
     }
 
     /// <inheritdoc />
-    protected internal override ConfigDescription? CreateDescription()
+    protected override ConfigDescription? CreateDescription()
     {
         return new(string.Empty, new AcceptableValueList<int>(UnderlyingValues));
     }
@@ -197,7 +197,7 @@ public class ModdedEnumOption<T> : ModdedBaseEnumOption<T>
     }
 
     /// <inheritdoc />
-    protected internal override ConfigDescription? CreateDescription()
+    protected override ConfigDescription? CreateDescription()
     {
         return new(string.Empty, new AcceptableEnumValues<T>(UnderlyingValues));
     }

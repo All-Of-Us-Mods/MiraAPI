@@ -67,7 +67,11 @@ public class ModdedPlayerOption : ModdedOption<int>
         PlayerOption playerOpt,
         Transform container)
     {
+        var oldPlayer = GetPlayerValue();
         Values = GetFilteredPlayers();
+
+        var newIndex = oldPlayer ? Values.IndexOf(oldPlayer!) : -1;
+        Value = newIndex >= 0 ? newIndex : (AllowNone ? -1 : 0);
 
         var playerOption = Object.Instantiate(playerOpt, container);
         playerOption.name = $"{ParentMod!.OptionsTitleText}.PlayerOption.{Title}";
@@ -78,7 +82,7 @@ public class ModdedPlayerOption : ModdedOption<int>
         playerOption.Title = StringName;
         playerOption.Values = Values.ToIl2CppList();
         playerOption.Value = Value;
-        playerOption.playerIndex = Values.FindIndex(p => p.PlayerId == Value);
+        playerOption.playerIndex = Value;
         playerOption.OnValueChanged = (Action<OptionBehaviour>)ValueChanged;
 
         playerOption.SetValueText();
@@ -153,8 +157,8 @@ public class ModdedPlayerOption : ModdedOption<int>
     public override string GetDisplayValue()
     {
         var player = GetPlayerValue();
-        return !player
-            ? TranslationController.Instance.GetString(StringNames.None)
-            : player!.PlayerName;
+        return player
+            ? player!.PlayerName
+            : TranslationController.Instance.GetString(StringNames.None);
     }
 }

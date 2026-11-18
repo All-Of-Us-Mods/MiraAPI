@@ -81,25 +81,21 @@ public record struct CustomRoleConfiguration
     /// <summary>
     /// Gets or sets the <see cref="Sprite"/> used for the Role Options menu screenshot.
     /// </summary>
-    [HideFromIl2Cpp]
     public LoadableAsset<Sprite>? OptionsScreenshot { get; set; } = null;
 
     /// <summary>
     /// Gets or sets the <see cref="Sprite"/> used for the Role Icon.
     /// </summary>
-    [HideFromIl2Cpp]
     public LoadableAsset<Sprite>? Icon { get; set; } = null;
 
     /// <summary>
     /// Gets or sets the <see cref="TMP_SpriteAsset"/> for the Role Icon.
     /// </summary>
-    [HideFromIl2Cpp]
     public TMP_SpriteAsset IconTmp { get; set; }
 
     /// <summary>
     /// Gets or sets the Intro sound for the Role.
     /// </summary>
-    [HideFromIl2Cpp]
     public LoadableAsset<AudioClip>? IntroSound { get; set; } = null;
 
     /// <summary>

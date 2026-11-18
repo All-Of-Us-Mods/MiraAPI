@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Il2CppInterop.Runtime.Attributes;
 using MiraAPI.Modifiers;
 using MiraAPI.Roles;
 using MiraAPI.Utilities;
@@ -46,7 +45,6 @@ public abstract class AbstractOptionGroup
     /// <summary>
     /// Gets the sprite of the group that is displayed in the match info guide.
     /// </summary>
-    [HideFromIl2Cpp]
     public virtual LoadableAsset<Sprite> Sprite => MiraAssets.IconSettings;
 
     /// <summary>

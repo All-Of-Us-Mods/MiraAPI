@@ -397,8 +397,16 @@ public static class ModdedOptionsManager
                 continue;
             }
 
-            option.ShowNotification = showNotifs;
-            option.HandleNetData(netData.Data);
+            try
+            {
+                option.ShowNotification = showNotifs;
+                option.HandleNetData(netData.Data);
+            }
+            catch (Exception e)
+            {
+                option.ShowNotification = true;
+                Error(e);
+            }
         }
 
         foreach (var plugin in MiraPluginManager.Instance.RegisteredPlugins)

@@ -60,7 +60,7 @@ public abstract class ModdedBaseStringOption<T>(string groupPrefix, string title
         var index = Array.IndexOf(UnderlyingValues, value);
 
         if (index == -1)
-            Info($"Cannot find a valid index for {value}. Returning -1 instead. Values: {string.Join(", ", Values)}");
+            Warning($"Cannot find a valid index for {value}. Returning -1 instead. Values: {string.Join(", ", Values)}");
 
         return index;
     }
@@ -120,6 +120,7 @@ public abstract class ModdedBaseStringOption<T>(string groupPrefix, string title
         if ((uint)index < (uint)UnderlyingValues.Length)
             return UnderlyingValues[index];
 
+        Warning($"Received an index {index} when there wasn't enough values (Length: {UnderlyingValues.Length})");
         return UnderlyingValues.Length > 0 ? UnderlyingValues[0] : default!;
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using BepInEx.Configuration;
@@ -54,6 +53,8 @@ public class ModdedStringOption : ModdedBaseStringOption<string>
     [Obsolete("Use the Setter feature of modded options to simulate conditional values. This wil be removed in a future version.")]
     public void RegisterExtraValue(string value, int index = -1)
     {
+        Warning("Use the Setter feature of modded options to simulate conditional values.");
+
         if (!Values.Contains(value))
         {
             if (index <= -1)
@@ -97,7 +98,7 @@ public class ModdedStringOption : ModdedBaseStringOption<string>
     /// <inheritdoc />
     public override NetData GetNetData()
     {
-        return new NetData(Id, Encoding.Unicode.GetBytes(Convert.ToString(Value, NumberFormatInfo.InvariantInfo)));
+        return new NetData(Id, Encoding.Unicode.GetBytes(Value));
     }
 
     /// <inheritdoc />
@@ -107,7 +108,7 @@ public class ModdedStringOption : ModdedBaseStringOption<string>
     }
 
     /// <inheritdoc />
-    protected internal override ConfigDescription? CreateDescription()
+    protected override ConfigDescription? CreateDescription()
     {
         return new(string.Empty, new AcceptableValueList<string>(UnderlyingValues));
     }

@@ -171,7 +171,6 @@ public abstract class BaseModifier : IOptionable
     /// <summary>
     /// Gets the list of abilities or other similar information to display below the text of a modifier's wiki page.
     /// </summary>
-    [HideFromIl2Cpp]
     public virtual List<AdvancedWikiAbilityDescription> WikiAbilities => [];
 
     /// <summary>
@@ -182,7 +181,6 @@ public abstract class BaseModifier : IOptionable
     /// <summary>
     /// Gets the <see cref="TMP_SpriteAsset"/> for the Modifier Icon.
     /// </summary>
-    [HideFromIl2Cpp]
     public virtual TMP_SpriteAsset IconTmp => null!;
 
     /// <summary>

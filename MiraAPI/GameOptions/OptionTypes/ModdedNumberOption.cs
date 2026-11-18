@@ -93,7 +93,7 @@ public class ModdedNumberOption : ModdedOption<float>
         string? formatString = null,
         bool halfIncrements = false,
         bool includeInPreset = true)
-        : base(groupPrefix, title, defaultValue, includeInPreset)
+        : base(groupPrefix, title, Math.Clamp(defaultValue, min, max), includeInPreset)
     {
         Min = min;
         Max = max;
@@ -102,14 +102,11 @@ public class ModdedNumberOption : ModdedOption<float>
         ZeroWordValue = zeroBehavior;
         ShiftIncrement = halfIncrements;
         NegativeWordValue = negativeBehavior;
-        IsInt = defaultValue.IsInteger() &&
+        IsInt = DefaultValue.IsInteger() &&
                 Increment.IsInteger() &&
-                Value.IsInteger() &&
                 Min.IsInteger() &&
                 Max.IsInteger();
         FormatString = formatString ?? (IsInt ? "0" : "0.0");
-
-        Value = Mathf.Clamp(defaultValue, min, max);
 
         if (IsInt)
         {
@@ -297,7 +294,7 @@ public class ModdedNumberOption : ModdedOption<float>
     /// <inheritdoc />
     public override float GetValueFromOptionBehaviour(OptionBehaviour optionBehaviour)
     {
-        return Mathf.Clamp(optionBehaviour.GetFloat(), Min, Max);
+        return Math.Clamp(optionBehaviour.GetFloat(), Min, Max);
     }
 
     /// <inheritdoc />
@@ -316,7 +313,7 @@ public class ModdedNumberOption : ModdedOption<float>
     }
 
     /// <inheritdoc />
-    protected internal override ConfigDescription? CreateDescription()
+    protected override ConfigDescription? CreateDescription()
     {
         return new(string.Empty, new AcceptableValueRange<float>(Min, Max));
     }
