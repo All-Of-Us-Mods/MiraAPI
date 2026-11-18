@@ -186,11 +186,11 @@ public interface ICustomRole : IOptionable
     /// <summary>
     /// Binds the configuration options for this role to the provided ConfigFile.
     /// </summary>
-    /// <param name="config">The ConfigFile to bind the options to.</param>
+    /// <param name="config">The <see cref="ConfigFile"/> to bind the options to.</param>
     void BindConfig(ConfigFile config)
     {
-        config.Bind(NumConfigDefinition, Configuration.DefaultRoleCount);
-        config.Bind(ChanceConfigDefinition, Configuration.DefaultChance);
+        config.Bind(NumConfigDefinition, Configuration.DefaultRoleCount, new ConfigDescription(string.Empty, new SafeAcceptableValueRange<int>(0, Configuration.MaxRoleCount)));
+        config.Bind(ChanceConfigDefinition, Configuration.DefaultChance, new ConfigDescription(string.Empty, new SafeAcceptableValueRange<int>(0, 100)));
     }
 
     /// <summary>

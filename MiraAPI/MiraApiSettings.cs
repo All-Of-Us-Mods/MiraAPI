@@ -195,19 +195,22 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
     /// Gets the scale of the ability buttons.
     /// </summary>
     [LocalSliderSetting(min: 0.5f, max: 1.5f, suffixType: MiraNumberSuffixes.Multiplier, formatString: "0.00", displayValue: true)]
-    public ConfigEntry<float> ButtonUIFactorSlider { get; } = config.Bind("MiraApi.VisualsUi", "MiraApi.ButtonScaleFactor", 0.75f);
+    public ConfigEntry<float> ButtonUIFactorSlider { get; } =
+        config.Bind("MiraApi.VisualsUi", "MiraApi.ButtonScaleFactor", 0.75f, new ConfigDescription(string.Empty, new SafeAcceptableValueRange<float>(0.5f, 1.5f)));
 
     /// <summary>
     /// Gets the scale of the UI buttons.
     /// </summary>
     [LocalSliderSetting(min: 0.3f, max: 2f, suffixType: MiraNumberSuffixes.Multiplier, formatString: "0.00", displayValue: true)]
-    public ConfigEntry<float> TopRightButtonsFactorSlider { get; } = config.Bind("MiraApi.VisualsUi", "MiraApi.TopRightButtonScaleFactor", 1f);
+    public ConfigEntry<float> TopRightButtonsFactorSlider { get; } =
+        config.Bind("MiraApi.VisualsUi", "MiraApi.TopRightButtonScaleFactor", 1f, new ConfigDescription(string.Empty, new SafeAcceptableValueRange<float>(0.3f, 2f)));
 
     /// <summary>
     /// Gets the fps specified by the player.
     /// </summary>
     [LocalSliderSetting(min: 60f, max: 240f, suffixType: MiraNumberSuffixes.None, formatString: "0", displayValue: true, roundValue: true)]
-    public ConfigEntry<float> SetFpsSlider { get; } = config.Bind("MiraApi.VisualsUi", "Max FPS", 120f);
+    public ConfigEntry<float> SetFpsSlider { get; } =
+        config.Bind("MiraApi.VisualsUi", "MiraApi.MaxFps", 120f, new ConfigDescription(string.Empty, new SafeAcceptableValueRange<float>(60f, 240f)));
 
     /// <summary>
     /// Gets whether the modifiers hud should be on the left side of the screen (under roles/task tab). Recommended for streamers.
@@ -225,7 +228,8 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
     /// Gets the scale of the match info guide.
     /// </summary>
     [LocalSliderSetting(min: 0.5f, max: 1f, suffixType: MiraNumberSuffixes.Multiplier, formatString: "0.00", displayValue: true)]
-    public ConfigEntry<float> MatchInfoGuideScaleFactor { get; } = config.Bind("MiraApi.MatchInfoGuide", "MiraApi.MatchInfoGuideScaleFactor", 1f);
+    public ConfigEntry<float> MatchInfoGuideScaleFactor { get; } =
+        config.Bind("MiraApi.MatchInfoGuide", "MiraApi.MatchInfoGuideScaleFactor", 1f, new ConfigDescription(string.Empty, new SafeAcceptableValueRange<float>(0.5f, 1f)));
 
     /// <summary>
     /// Gets the flag indicating whether the wiki is on the bottom row.

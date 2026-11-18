@@ -315,7 +315,7 @@ public class ModdedNumberOption : ModdedOption<float>
     /// <inheritdoc />
     protected override ConfigDescription? CreateDescription()
     {
-        return new(string.Empty, new AcceptableValueRange<float>(Min, Max));
+        return new(string.Empty, new SafeAcceptableValueRange<float>(Min, Max));
     }
 
     /// <summary>
