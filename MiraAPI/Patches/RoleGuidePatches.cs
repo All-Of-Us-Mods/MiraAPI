@@ -228,12 +228,19 @@ public static class RoleGuidePatches
 
     private static IEnumerator CoPreload(MatchInfoGuide instance)
     {
-        while (instance && (!HudManager.InstanceExists || !GameManager.Instance))
+        var counter = 0;
+        while (!instance || !HudManager.InstanceExists || !GameManager.Instance)
         {
-            yield return null;
+            counter++;
+            if (counter > 10)
+            {
+                yield break;
+            }
+
+            yield return new WaitForSeconds(1);
         }
 
-        if (!instance || GameManager.Instance.TryCast<NormalGameManager>() == null)
+        if (GameManager.Instance.TryCast<NormalGameManager>() == null)
         {
             yield break;
         }
