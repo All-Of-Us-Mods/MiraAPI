@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MiraAPI.Utilities;
@@ -8,7 +9,7 @@ namespace MiraAPI.Utilities;
 /// </summary>
 public static class ShaderID
 {
-    private static readonly Dictionary<string, int> Cache = [];
+    private static readonly Dictionary<string, int> Cache = new(StringComparer.Ordinal);
 
     /// <summary>
     /// Retrieves the cached shader property ID for the specified name. If it is not cached, it registers and caches the ID before returning it.

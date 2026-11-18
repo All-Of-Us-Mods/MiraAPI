@@ -145,7 +145,7 @@ public abstract class LocalSettingsTab(ConfigFile config)
             TabButton.Content = tab.gameObject;
         }
 
-        Dictionary<string, List<ILocalSetting>> entriesByGroup = [];
+        Dictionary<string, List<ILocalSetting>> entriesByGroup = new(StringComparer.Ordinal);
 
         foreach (var entry in Settings)
         {

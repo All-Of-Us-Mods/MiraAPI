@@ -40,7 +40,7 @@ public sealed class MiraPluginManager
     internal const BindingFlags DeclaredInstanceMembers = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
     internal const BindingFlags DeclaredStaticMembers = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
 
-    private readonly Dictionary<string, MiraPluginInfo> _registeredPlugins = [];
+    private readonly Dictionary<string, MiraPluginInfo> _registeredPlugins = new(StringComparer.Ordinal);
 
     internal MiraPluginInfo[] RegisteredPlugins { get; private set; } = [];
     internal MiraPluginInfo[] RegisteredPluginsWithOptions { get; private set; } = [];

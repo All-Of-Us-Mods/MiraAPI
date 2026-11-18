@@ -46,7 +46,7 @@ public class StateMachineWrapper<T>
             throw new MissingMemberException($"Could not find required properties in type '{_type}'.");
         }
 
-        _propertyCache = [];
+        _propertyCache = new(StringComparer.Ordinal);
     }
 
     /// <summary>

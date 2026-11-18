@@ -24,8 +24,6 @@ public static class MiraLocaleManager
     private const string RefPrefix = "@ref:";
     private const int MaxDepth = 10;
 
-    private static readonly Dictionary<string, StringNames> VanillaKeyMap = [];
-
     // Language, XML Name, then Value
 
     /// <summary>
@@ -41,8 +39,10 @@ public static class MiraLocaleManager
     /// <summary>
     /// Gets a dictionary mapping registered string keys to their corresponding <see cref="StringNames"/> enum values.
     /// </summary>
-    public static readonly Dictionary<string, StringNames> RegisteredStringNames = [];
+    public static readonly Dictionary<string, StringNames> RegisteredStringNames = new(StringComparer.Ordinal);
     internal static readonly Dictionary<StringNames, string> StringNamesLookup = [];
+
+    private static readonly Dictionary<string, StringNames> VanillaKeyMap = new(StringComparer.Ordinal);
 
     /// <summary>
     /// Gets a dictionary mapping <see cref="MiraLanguage"/> values to their standard language codes.
@@ -79,7 +79,7 @@ public static class MiraLocaleManager
         { MiraLanguage.Hebrew, "heb" },
     };
     private static readonly Dictionary<string, MiraLanguage> ReverseLangLookup =
-        LangList.ToDictionary(x => x.Value, x => x.Key);
+        LangList.ToDictionary(x => x.Value, x => x.Key, StringComparer.Ordinal);
 
     /// <summary>
     /// Gets a dictionary mapping <see cref="MiraLanguage"/> values to their standard language codes.
@@ -284,6 +284,11 @@ public static class MiraLocaleManager
             return stringName;
         }
 
+        if (VanillaKeyMap.TryGetValue(name, out stringName))
+        {
+            return stringName;
+        }
+
         var newString = CustomStringName.CreateAndRegister(name);
         RegisteredStringNames.Add(name, newString);
         StringNamesLookup.Add(newString, name);
@@ -324,7 +329,7 @@ public static class MiraLocaleManager
 
             try
             {
-                Locale.TryAdd(lang, []);
+                Locale.TryAdd(lang, new(StringComparer.Ordinal));
                 using var fileStream = File.OpenRead(filePath);
                 ParseXmlFile(fileStream, lang, false);
             }
@@ -360,7 +365,7 @@ public static class MiraLocaleManager
 
             try
             {
-                Locale.TryAdd(lang, []);
+                Locale.TryAdd(lang, new(StringComparer.Ordinal));
                 ParseXmlFile(resourceStream, lang, true);
                 atLeastOneLoaded = true;
             }
@@ -406,7 +411,7 @@ public static class MiraLocaleManager
         var dict = Locale[language];
         var total = 0;
 
-        var pendingRefs = new Dictionary<string, string>();
+        var pendingRefs = new Dictionary<string, string>(StringComparer.Ordinal);
 
         try
         {

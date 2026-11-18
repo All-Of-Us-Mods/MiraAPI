@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Reactor.Utilities.Extensions;
@@ -11,7 +12,7 @@ namespace MiraAPI.Utilities.Assets;
 /// </summary>
 public static class TmpSpriteUtils
 {
-    private static readonly Dictionary<string, TMP_SpriteAsset> LoadedSprites = [];
+    private static readonly Dictionary<string, TMP_SpriteAsset> LoadedSprites = new(StringComparer.Ordinal);
     private static Shader _spriteShader;
 
     [SuppressMessage("Critical Code Smell", "S2223:Non-constant static fields should not be visible", Justification = "Internal behaviour that does not need property-level validation.")]

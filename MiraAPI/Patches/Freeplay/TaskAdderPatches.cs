@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -24,7 +25,7 @@ namespace MiraAPI.Patches.Freeplay;
 [HarmonyPatch(typeof(TaskAdderGame))]
 public static class TaskAdderPatches
 {
-    private static readonly Dictionary<string, TaskFolder> Folders = [];
+    private static readonly Dictionary<string, TaskFolder> Folders = new(StringComparer.Ordinal);
     private static Scroller _scroller = null!;
 
     public static string CrewmateName => TranslationController.Instance.GetString(StringNames.Crewmate);
