@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml;
 using AmongUs.Data;
+using BepInEx;
 using MiraAPI.Utilities;
 using Reactor.Localization.Utilities;
 using UnityEngine;
@@ -16,9 +18,13 @@ namespace MiraAPI.Translation;
 /// </summary>
 public static class MiraLocaleManager
 {
+    private const string StringNamesPrefix = "StringNames";
     private const string LangDirectory = "mira_languages";
+    private const string VanillaPrefix = "@vanilla:";
     private const string RefPrefix = "@ref:";
     private const int MaxDepth = 10;
+
+    private static readonly Dictionary<string, StringNames> VanillaKeyMap = [];
 
     // Language, XML Name, then Value
 
@@ -147,6 +153,9 @@ public static class MiraLocaleManager
     /// <returns>A <see cref="string"/> based on the key provided.</returns>
     public static string Get(MiraLanguage language, string key, string fallback = "")
     {
+        if (VanillaKeyMap.TryGetValue(key, out var stringName) && TranslationController.InstanceExists)
+            return TranslationController.Instance.GetString(stringName);
+
         var text = Locale.GetValueOrDefault(language)?.GetValueOrDefault(key);
 
         if (language != MiraLanguage.English)
@@ -173,14 +182,7 @@ public static class MiraLocaleManager
         return GetParsed(CurrentLanguage, key, parseList, string.IsNullOrEmpty(fallback) ? key : fallback);
     }
 
-    /// <summary>
-    /// Translates a key into the current language.
-    /// </summary>
-    /// <param name="language">The specific language to prioritize.</param>
-    /// <param name="key">The string id to find.</param>
-    /// <param name="parseList">List of keys to change into other text.</param>
-    /// <param name="fallback">Fallback string to use if no translation is found.</param>
-    /// <returns>A <see cref="string"/> based on the key provided.</returns>
+    /// <inheritdoc cref="GetParsed(MiraLanguage, string, ValueTuple{string, string}[], string)"/>
     public static string GetParsed(
         MiraLanguage language,
         string key,
@@ -219,6 +221,32 @@ public static class MiraLocaleManager
         }
 
         return text;
+    }
+
+    /// <inheritdoc cref="GetParsed(MiraLanguage, string, ValueTuple{string, string}[], string)"/>
+    public static string GetParsed(
+        MiraLanguage language,
+        string key,
+        string fallback,
+        params object[] parseList)
+    {
+        var text = Get(language, key, fallback);
+
+        if (parseList == null || parseList.Length == 0)
+        {
+            return text;
+        }
+
+        return string.Format(CultureInfo.InvariantCulture, text, parseList);
+    }
+
+    /// <inheritdoc cref="GetParsed(MiraLanguage, string, ValueTuple{string, string}[], string)"/>
+    public static string GetParsed(
+        MiraLanguage language,
+        string key,
+        params object[] parseList)
+    {
+        return GetParsed(language, key, string.Empty, parseList);
     }
 
     /// <summary>
@@ -267,9 +295,9 @@ public static class MiraLocaleManager
     /// </summary>
     public static void LoadExternalLocale()
     {
-        CheckExternalDirectory("mira.api", BepInEx.Paths.PluginPath);
-        CheckExternalDirectory("mira.api", BepInEx.Paths.BepInExRootPath);
-        CheckExternalDirectory("mira.api", BepInEx.Paths.GameRootPath);
+        CheckExternalDirectory("mira.api", Paths.PluginPath);
+        CheckExternalDirectory("mira.api", Paths.BepInExRootPath);
+        CheckExternalDirectory("mira.api", Paths.GameRootPath);
         foreach (var mod in RegisteredModIds)
         {
             CheckExternalDirectory(mod, GetModLangDir(mod));
@@ -399,6 +427,23 @@ public static class MiraLocaleManager
                 if (value.StartsWith(RefPrefix, StringComparison.Ordinal))
                 {
                     pendingRefs[name] = value[RefPrefix.Length..];
+                }
+                else if (value.StartsWith(VanillaPrefix, StringComparison.Ordinal))
+                {
+                    var enumString = value[VanillaPrefix.Length..];
+
+                    if (enumString.StartsWith(StringNamesPrefix, StringComparison.Ordinal))
+                        enumString = enumString[StringNamesPrefix.Length..];
+
+                    if (Enum.TryParse<StringNames>(enumString, true, out var stringName))
+                    {
+                        VanillaKeyMap[name] = stringName;
+                        total++;
+                    }
+                    else
+                    {
+                        Error($"Failed to parse vanilla StringNames enum: {enumString}");
+                    }
                 }
                 else
                 {
