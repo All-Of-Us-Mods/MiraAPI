@@ -162,7 +162,9 @@ public abstract class ModdedOption<T>(string groupPrefix, string title, T defaul
             Rpc<SyncGameOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, new MiraOptionNetData(true, [GetNetData()]), true);
         }
 
-        ShowNotif();
+        if (ShowNotification && HudManager.InstanceExists)
+            ShowNotif();
+
         OnValueChanged(_value);
         ShowNotification = true;
     }
@@ -266,9 +268,6 @@ public abstract class ModdedOption<T>(string groupPrefix, string title, T defaul
     /// </summary>
     protected virtual void ShowNotif()
     {
-        if (!ShowNotification || !HudManager.InstanceExists)
-            return;
-
         ModdedOptionsManager.AddSettingsChangeMessage(
             HudManager.Instance.Notifier,
             StringName,
