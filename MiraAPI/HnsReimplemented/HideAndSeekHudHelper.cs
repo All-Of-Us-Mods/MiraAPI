@@ -69,7 +69,7 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
         var item = Helpers.GetAlivePlayers().Count(x => !x.Data.Role.IsImpostor);
         return !player.inVent && player.Data != null && player.Data.Role != null &&
                ((!player.inVent && player.Data.Role.IsImpostor && IsFinalCountdown &&
-                 OptionGroupSingleton<HnsFinalHideOptions>.Instance.FinalHideSeekMap.Value) ||
+                 OptionGroupSingleton<HnsFinalHideOptions>.Instance.FinalHideSeekMap) ||
                 (player.Data.Role.IsImpostor &&
                  item <=
                  (GameData.Instance.PlayerCount - 1) / 3));
@@ -95,8 +95,8 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
     /// <returns>The match duration in seconds.</returns>
     public static float GetTotalRoundTime()
     {
-        var escapeTime = OptionGroupSingleton<HnsCrewmateOptions>.Instance.HidingTime.Value;
-        var finalCountdownTime = OptionGroupSingleton<HnsFinalHideOptions>.Instance.FinalHideTime.Value;
+        var escapeTime = OptionGroupSingleton<HnsCrewmateOptions>.Instance.HidingTime;
+        var finalCountdownTime = OptionGroupSingleton<HnsFinalHideOptions>.Instance.FinalHideTime;
         return escapeTime + finalCountdownTime;
     }
 
@@ -120,9 +120,9 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
 
     private void Start()
     {
-        totalHideTime = OptionGroupSingleton<HnsCrewmateOptions>.Instance.HidingTime.Value;
+        totalHideTime = OptionGroupSingleton<HnsCrewmateOptions>.Instance.HidingTime;
         currentHideTime = totalHideTime;
-        totalFinalHideTime = OptionGroupSingleton<HnsFinalHideOptions>.Instance.FinalHideTime.Value;
+        totalFinalHideTime = OptionGroupSingleton<HnsFinalHideOptions>.Instance.FinalHideTime;
         currentFinalHideTime = totalFinalHideTime;
         if (timerBar != null)
         {

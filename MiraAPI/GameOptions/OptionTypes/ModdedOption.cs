@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using BepInEx.Configuration;
 using MiraAPI.Networking;
 using MiraAPI.PluginLoading;
@@ -14,20 +15,16 @@ namespace MiraAPI.GameOptions.OptionTypes;
 /// Represents a modded option.
 /// </summary>
 /// <typeparam name="T">The value type.</typeparam>
-/// <param name="groupPrefix">The translation ID prefix of the group containing this option.</param>
-/// <param name="title">The option title.</param>
-/// <param name="defaultValue">The default value.</param>
-/// <param name="includeInPreset">Whether to include the option in the preset.</param>
-public abstract class ModdedOption<T>(string groupPrefix, string title, T defaultValue, bool includeInPreset = true) : IModdedOption
+public abstract class ModdedOption<T> : IModdedOption
 {
     /// <inheritdoc />
     public uint Id { get; } = ModdedOptionsManager.NextId;
 
     /// <inheritdoc />
-    public string Title { get; set; } = groupPrefix + title;
+    public string Title { get; set; }
 
     /// <inheritdoc />
-    public StringNames StringName { get; } = MiraLocaleManager.GetOrCreateLocaleString(groupPrefix + title);
+    public StringNames StringName { get; }
 
     /// <summary>
     /// Gets or sets the value of the option.
@@ -46,18 +43,23 @@ public abstract class ModdedOption<T>(string groupPrefix, string title, T defaul
         }
     }
 
-    private T _value = defaultValue;
+    /// <summary>
+    /// The backing value field. Use only for raw and quick comparisons, otherwise use <see cref="Value"/>.
+    /// </summary>
+    [SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Useful for raw checks that do not need modifications upon read or write.")]
+    [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Read above.")]
+    protected T _value;
 
     /// <summary>
     /// Gets the default value of the option.
     /// </summary>
-    public T DefaultValue { get; } = defaultValue;
+    public T DefaultValue { get; }
 
     /// <inheritdoc />
     public Func<bool> Visible { get; set; } = DelegateUtilities.AlwaysTrue;
 
     /// <inheritdoc />
-    public bool IncludeInPreset { get; set; } = includeInPreset;
+    public bool IncludeInPreset { get; set; }
 
     /// <inheritdoc />
     public bool ShowNotification { get; set; } = true;
@@ -120,6 +122,23 @@ public abstract class ModdedOption<T>(string groupPrefix, string title, T defaul
 
     /// <inheritdoc />
     public virtual OptionNotifConfiguration Configuration => new(ParentGroup);
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModdedOption{T}"/> class.
+    /// </summary>
+    /// <param name="groupPrefix">The translation ID prefix of the group containing this option.</param>
+    /// <param name="title">The option title.</param>
+    /// <param name="defaultValue">The default value.</param>
+    /// <param name="includeInPreset">Whether to include the option in the preset.</param>
+    protected ModdedOption(string groupPrefix, string title, T defaultValue, bool includeInPreset = true)
+    {
+        var translationId = groupPrefix + title;
+
+        Title = translationId;
+        StringName = MiraLocaleManager.GetOrCreateLocaleString(translationId);
+        DefaultValue = _value = defaultValue;
+        IncludeInPreset = includeInPreset;
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ModdedOption{T}"/> class.

@@ -98,7 +98,7 @@ public class ModdedStringOption : ModdedBaseStringOption<string>
     /// <inheritdoc />
     public override NetData GetNetData()
     {
-        return new NetData(Id, Encoding.Unicode.GetBytes(Value));
+        return new NetData(Id, Encoding.Unicode.GetBytes(_value));
     }
 
     /// <inheritdoc />

@@ -129,7 +129,7 @@ public class ModdedPlayerOption : ModdedOption<int>
     /// <inheritdoc />
     public override NetData GetNetData()
     {
-        return new NetData(Id, BitConverter.GetBytes(Value));
+        return new NetData(Id, BitConverter.GetBytes(_value));
     }
 
     /// <inheritdoc />

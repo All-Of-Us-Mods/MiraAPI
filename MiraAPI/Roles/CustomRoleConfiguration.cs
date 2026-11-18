@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using AmongUs.GameOptions;
-using Il2CppInterop.Runtime.Attributes;
 using MiraAPI.GameModes;
 using MiraAPI.Patches.Freeplay;
 using MiraAPI.Utilities.Assets;

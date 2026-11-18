@@ -1,5 +1,6 @@
 ﻿using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
+using MiraAPI.GameOptions.Attributes;
 using MiraAPI.GameOptions.OptionTypes;
 using MiraAPI.Utilities;
 
@@ -9,108 +10,67 @@ namespace MiraAPI.HnsReimplemented.Options;
 /// Crewmate options for Hide and Seek.
 /// </summary>
 // ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated via Activator.CreateInstance.)
+[SearchPrivate]
 public class HnsCrewmateOptions : AbstractOptionGroup<HideAndSeekMode>
 {
     /// <inheritdoc />
-    public override string GroupName => "Crewmates";
+    public override string GroupName => "MiraApi.Option.Group.HnsCrewmate";
+
+    /// <inheritdoc />
+    public override string GroupPrefix => "MiraApi.HnsCrewmate.Option.";
 
     /// <summary>
     /// Gets the player speed.
     /// </summary>
-    public ModdedNumberOption PlayerSpeed { get; } = new(
-        "Player Speed",
-        1f,
-        0.5f,
-        3f,
-        0.25f,
-        "#",
-        "#",
-        MiraNumberSuffixes.Multiplier,
-        "0.00");
+    [ModdedNumberOption(0.5f, 3f, 0.25f, "#", "#", MiraNumberSuffixes.Multiplier, "0.00")]
+    public float PlayerSpeed { get; } = 1f;
 
     /// <summary>
     /// Gets the hiding time.
     /// </summary>
-    public ModdedNumberOption HidingTime { get; } = new(
-        "Hiding Time",
-        200,
-        160,
-        300,
-        20,
-        "#",
-        "#",
-        MiraNumberSuffixes.Seconds);
+    [ModdedNumberOption(160, 300, 20, "#", "#", MiraNumberSuffixes.Seconds)]
+    public float HidingTime { get; } = 200f;
 
     /// <summary>
     /// Gets the limits of a crewmate's vision.
     /// </summary>
-    public ModdedNumberOption CrewmateVision { get; } = new(
-        "Crewmate Vision",
-        0.6f,
-        0.25f,
-        1,
-        0.05f,
-        "#",
-        "#",
-        MiraNumberSuffixes.Multiplier,
-        "0.00");
+    [ModdedNumberOption(0.25f, 1, 0.05f, "#", "#", MiraNumberSuffixes.Multiplier, "0.00")]
+    public float CrewmateVision { get; } = 0.6f;
 
     /// <summary>
-    /// Gets a flag that toggles flashlight vision.
+    /// Gets a value indicating whether flashlight vision is turned on or not.
     /// </summary>
-    public ModdedToggleOption FlashlightMode { get; } = new(
-        "Flashlight Mode",
-        true);
+    [ModdedToggleOption]
+    public bool FlashlightMode { get; } = true;
 
     /// <summary>
     /// Gets the range of a crewmate's flashlight.
     /// </summary>
-    public ModdedNumberOption CrewmateFlashlightSize { get; } = new(
-        "Crewmate Flashlight Size",
-        0.35f,
-        0.1f,
-        0.5f,
-        0.05f,
-        "#",
-        "#",
-        MiraNumberSuffixes.Multiplier)
-    {
-        Visible = () => OptionGroupSingleton<HnsCrewmateOptions>.Instance.FlashlightMode.Value,
-    };
+    [ModdedNumberOption(0.1f, 0.5f, 0.05f, "#", "#", MiraNumberSuffixes.Multiplier)]
+    [ModdedOptionVisibility(nameof(FlashlightMode))]
+    public float CrewmateFlashlightSize { get; } = 0.35f;
 
     /// <summary>
     /// Gets the maximum number of times a crewmate can vent.
     /// </summary>
-    public ModdedNumberOption MaxVentUses { get; } = new(
-        "Max Vent Uses",
-        1,
-        0,
-        5,
-        1,
-        "#",
-        "#",
-        MiraNumberSuffixes.None);
+    [ModdedNumberOption(0, 5, 1, "#", "#", MiraNumberSuffixes.None)]
+    public int MaxVentUses { get; } = 1;
 
     /// <summary>
     /// Gets the maximum amount of time a crewmate can spend inside a vent.
     /// </summary>
-    public ModdedNumberOption MaxTimeInVent { get; } = new(
-        "Max Time in Vent",
-        3,
-        1,
-        10,
-        1,
-        "#",
-        "#",
-        MiraNumberSuffixes.Seconds)
-    {
-        Visible = () => (int)OptionGroupSingleton<HnsCrewmateOptions>.Instance.MaxVentUses.Value > 0,
-    };
+    [ModdedNumberOption(1, 10, 1, "#", "#", MiraNumberSuffixes.Seconds)]
+    [ModdedOptionVisibility(nameof(LimitedVentUses))]
+    public float MaxTimeInVent { get; } = 3f;
 
     /// <summary>
-    /// Gets the visibility of player names.
+    /// Gets a value indicating whether player names are visible.
     /// </summary>
-    public ModdedToggleOption ShowNames { get; } = new(
-        "Show Names",
-        false);
+    [ModdedToggleOption]
+    public bool ShowNames { get; } = false;
+
+    private bool LimitedVentUses()
+    {
+        return MaxVentUses > 0;
+    }
 }

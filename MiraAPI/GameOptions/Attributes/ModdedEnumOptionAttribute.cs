@@ -65,7 +65,7 @@ public class ModdedEnumOptionAttribute(string? title, Type enumType, string idPr
     public override object GetValue()
     {
         return HolderOption is ModdedEnumOption opt
-            ? Enum.ToObject(enumType, opt.Value)
+            ? Enum.ToObject(enumType, opt.UnderlyingValues[opt.Value])
             : throw new InvalidOperationException($"HolderOption for option \"{Title}\" is not a ModdedEnumOption with enum type {enumType.FullName}");
     }
 }

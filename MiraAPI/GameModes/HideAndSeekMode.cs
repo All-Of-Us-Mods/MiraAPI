@@ -73,7 +73,7 @@ public class HideAndSeekMode : AbstractGameMode
 
     private static int ImpostorPlayerID()
     {
-        return OptionGroupSingleton<HnsImpostorOptions>.Instance.SelectedSeeker.Value;
+        return OptionGroupSingleton<HnsImpostorOptions>.Instance.SelectedSeeker;
     }
 
     private static bool HasImpostorPlayerID()

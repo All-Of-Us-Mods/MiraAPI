@@ -101,7 +101,7 @@ public class ModdedEnumOption : ModdedBaseEnumOption<int>
     /// <inheritdoc />
     public override NetData GetNetData()
     {
-        return new(Id, BitConverter.GetBytes(Value));
+        return new(Id, BitConverter.GetBytes(_value));
     }
 
     /// <inheritdoc />
@@ -186,7 +186,7 @@ public class ModdedEnumOption<T> : ModdedBaseEnumOption<T>
     public override NetData GetNetData()
     {
         var buffer = new byte[Unsafe.SizeOf<T>()];
-        Unsafe.WriteUnaligned(ref buffer[0], Value);
+        Unsafe.WriteUnaligned(ref buffer[0], _value);
         return new(Id, buffer);
     }
 

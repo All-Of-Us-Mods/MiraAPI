@@ -26,11 +26,9 @@
     <string name="MiraApi.CustomOptionMenuDescription">Apply game settings for this mod!</string>
     <string name="MiraApi.Gamemode">Gamemode</string>
     <string name="MiraApi.Gamemode.Classic">Classic</string>
-    <string name="MiraApi.Gamemode.Classic.Description">The classic Among Us experience!
-Find the Impostors or deceive the Crew.</string>
+    <string name="MiraApi.Gamemode.Classic.Description">The classic Among Us experience![nl]Find the Impostors or deceive the Crew.</string>
     <string name="MiraApi.Gamemode.HideAndSeek">Hide n Seek</string>
-    <string name="MiraApi.Gamemode.HideAndSeek.Description">You can run, but you can't hide!
-Outlive the timer or eliminate the crew.</string>
+    <string name="MiraApi.Gamemode.HideAndSeek.Description">You can run, but you can't hide![nl]Outlive the timer or eliminate the crew.</string>
     <string name="MiraApi.GameSetting.Global.ClickToClose">Click to close</string>
     <string name="MiraApi.GameSetting.Global.ClickToOpen">Click to open</string>
     <string name="MiraApi.GameSetting.Preset.Hint">Select or create a options preset for this game</string>
@@ -78,4 +76,31 @@ Outlive the timer or eliminate the crew.</string>
     <string name="Activated">Activated</string>
     <string name="Deactivated">Deactivated</string>
     <string name="MiraApi.AbbreviatedDistance">unit(s)</string>
+
+    <string name="MiraApi.Option.Group.HnsCrewmate">Crewmates</string>
+    <string name="MiraApi.HnsCrewmate.Option.PlayerSpeed">Player Speed</string>
+    <string name="MiraApi.HnsCrewmate.Option.HidingTime">Hiding Time</string>
+    <string name="MiraApi.HnsCrewmate.Option.CrewmateVision">Crewmate Vision</string>
+    <string name="MiraApi.HnsCrewmate.Option.FlashlightMode">Flashlight Mode</string>
+    <string name="MiraApi.HnsCrewmate.Option.CrewmateFlashlightSize">Crewmate Flashlight Size</string>
+    <string name="MiraApi.HnsCrewmate.Option.MaxVentUses">Max Vent Uses</string>
+    <string name="MiraApi.HnsCrewmate.Option.MaxTimeInVent">Max Time In Vent</string>
+    <string name="MiraApi.HnsCrewmate.Option.ShowNames">Show Names</string>
+
+    <string name="MiraApi.Option.Group.HnsFinalHide">Final Hide</string>
+    <string name="MiraApi.HnsFinalHide.Option.FinalHideTime">Hiding Time</string>
+    <string name="MiraApi.HnsFinalHide.Option.FinalHideImpostorSpeed">Final Hide Impostor Speed</string>
+    <string name="MiraApi.HnsFinalHide.Option.FinalHidePings">Final Hide Pings</string>
+    <string name="MiraApi.HnsFinalHide.Option.PingInterval">Ping Interval</string>
+    <string name="MiraApi.HnsFinalHide.Option.FinalHideSeekMap">Final Hide Seek Map</string>
+
+    <string name="MiraApi.Option.Group.HnsImpostor">Impostors</string>
+    <string name="MiraApi.HnsImpostor.Option.SelectedSeeker">Forced Impostor</string>
+    <string name="MiraApi.HnsImpostor.Option.ImpostorVision">Impostor Vision</string>
+    <string name="MiraApi.HnsImpostor.Option.ImpostorFlashlightSize">Impostor Flashlight Size</string>
+
+    <string name="MiraApi.Option.Group.HnsTask">Tasks</string>
+    <string name="MiraApi.HnsTask.Option.CommonTasks"># Common Tasks</string>
+    <string name="MiraApi.HnsTask.Option.LongTasks"># Long Tasks</string>
+    <string name="MiraApi.HnsTask.Option.ShortTasks"># Short Tasks</string>
 </resources>

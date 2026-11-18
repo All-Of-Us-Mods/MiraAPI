@@ -145,7 +145,7 @@ public sealed class HnsMusicHandler(nint cppPtr) : MonoBehaviour(cppPtr)
     public void StartMusicWithIntro()
     {
         if (!PlayerControl.LocalPlayer.Data.Role.IsImpostor) return;
-        var clip = OptionGroupSingleton<HnsCrewmateOptions>.Instance.HidingTime.Value <= 180f
+        var clip = OptionGroupSingleton<HnsCrewmateOptions>.Instance.HidingTime <= 180f
             ? musicCollection.ImpostorShortMusic
             : musicCollection.ImpostorLongMusic;
         if (AprilFoolsMode.ShouldHorseAround())

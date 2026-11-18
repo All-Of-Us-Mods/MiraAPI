@@ -1,5 +1,6 @@
 ﻿using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
+using MiraAPI.GameOptions.Attributes;
 using MiraAPI.GameOptions.OptionTypes;
 using MiraAPI.Utilities;
 
@@ -9,44 +10,36 @@ namespace MiraAPI.HnsReimplemented.Options;
 /// Seeker settings on Hide and Seek.
 /// </summary>
 // ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated via Activator.CreateInstance.)
+[SearchPrivate]
 public class HnsImpostorOptions : AbstractOptionGroup<HideAndSeekMode>
 {
     /// <inheritdoc />
-    public override string GroupName => "Impostors";
+    public override string GroupName => "MiraApi.Option.Group.HnsImpostor";
+
+    /// <inheritdoc />
+    public override string GroupPrefix => "MiraApi.HnsImpostor.Option.";
 
     /// <summary>
     /// Gets the player who will be the seeker.
     /// </summary>
-    public ModdedPlayerOption SelectedSeeker { get; } = new(
-        "Forced Impostor");
+    [ModdedPlayerOption]
+    public int SelectedSeeker { get; } = 0;
 
     /// <summary>
     /// Gets the range of a seeker's vision.
     /// </summary>
-    public ModdedNumberOption ImpostorVision { get; } = new(
-        "Impostor Vision",
-        0.6f,
-        0.25f,
-        1,
-        0.05f,
-        "#",
-        "#",
-        MiraNumberSuffixes.Multiplier,
-        "0.00");
+    [ModdedNumberOption(0.25f, 1f, 0.05f, "#", "#", MiraNumberSuffixes.Multiplier, "0.00")]
+    public float ImpostorVision { get; } = 0.6f;
 
     /// <summary>
     /// Gets the range of a seeker's flashlight.
     /// </summary>
-    public ModdedNumberOption ImpostorFlashlightSize { get; } = new(
-        "Impostor Flashlight Size",
-        0.35f,
-        0.1f,
-        0.5f,
-        0.05f,
-        "#",
-        "#",
-        MiraNumberSuffixes.Multiplier)
+    [ModdedNumberOption(0.1f, 0.5f, 0.05f, "#", "#", MiraNumberSuffixes.Multiplier)]
+    [ModdedOptionVisibility(nameof(IsFlashlightModeEnabled))]
+    public float ImpostorFlashlightSize { get; } = 0.35f;
+
+    private static bool IsFlashlightModeEnabled()
     {
-        Visible = () => OptionGroupSingleton<HnsCrewmateOptions>.Instance.FlashlightMode.Value,
-    };
+        return OptionGroupSingleton<HnsCrewmateOptions>.Instance.FlashlightMode;
+    }
 }

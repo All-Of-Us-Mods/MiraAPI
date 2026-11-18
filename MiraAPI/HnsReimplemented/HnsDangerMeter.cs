@@ -137,7 +137,7 @@ public sealed class HnsDangerMeter(nint cppPtr) : MonoBehaviour(cppPtr)
 
         impostors = [.. Helpers.GetAlivePlayers().Where(x => x.Data.Role.IsImpostor)];
 
-        var baseSpeed = OptionGroupSingleton<HnsCrewmateOptions>.Instance.PlayerSpeed.Value;
+        var baseSpeed = OptionGroupSingleton<HnsCrewmateOptions>.Instance.PlayerSpeed;
         scaryMusicDistance = 55f * baseSpeed;
         veryScaryMusicDistance = 15f * baseSpeed;
         if (scaryMusicDistance >= veryScaryMusicDistance) return;

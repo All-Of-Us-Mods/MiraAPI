@@ -1,5 +1,6 @@
 ﻿using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
+using MiraAPI.GameOptions.Attributes;
 using MiraAPI.GameOptions.OptionTypes;
 using MiraAPI.Utilities;
 
@@ -9,47 +10,30 @@ namespace MiraAPI.HnsReimplemented.Options;
 /// Task options for Hide and Seek.
 /// </summary>
 // ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated via Activator.CreateInstance.)
+[SearchPrivate]
 public class HnsTaskOptions : AbstractOptionGroup<HideAndSeekMode>
 {
     /// <inheritdoc />
-    public override string GroupName => "Tasks";
+    public override string GroupName => "MiraApi.Option.Group.HnsTask";
+
+    /// <inheritdoc />
+    public override string GroupPrefix => "MiraApi.HnsTask.Option.";
 
     /// <summary>
-    /// Gets the umber of common tasks.
+    /// Gets the number of common tasks.
     /// </summary>
-    public ModdedNumberOption CommonTasks { get; } = new(
-        "# Common Tasks",
-        1,
-        0,
-        4,
-        1,
-        "#",
-        "#",
-        MiraNumberSuffixes.None);
+    [ModdedNumberOption(0, 4, 1, "#", "#", MiraNumberSuffixes.None)]
+    public int CommonTasks { get; } = 1;
 
     /// <summary>
     /// Gets the number of long tasks.
     /// </summary>
-    public ModdedNumberOption LongTasks { get; } = new(
-        "# Long Tasks",
-        1,
-        0,
-        4,
-        1,
-        "#",
-        "#",
-        MiraNumberSuffixes.None);
+    [ModdedNumberOption(0, 4, 1, "#", "#", MiraNumberSuffixes.None)]
+    public int LongTasks { get; } = 1;
 
     /// <summary>
     /// Gets the number of short tasks.
     /// </summary>
-    public ModdedNumberOption ShortTasks { get; } = new(
-        "# Short Tasks",
-        2,
-        0,
-        8,
-        1,
-        "#",
-        "#",
-        MiraNumberSuffixes.None);
+    [ModdedNumberOption(0, 8, 1, "#", "#", MiraNumberSuffixes.None)]
+    public int ShortTasks { get; } = 2;
 }
