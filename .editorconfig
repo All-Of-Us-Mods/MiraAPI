@@ -125,3 +125,6 @@ dotnet_diagnostic.SA1504.severity = none
 
 # S2386: Mutable fields should not be "public static"
 dotnet_diagnostic.S2386.severity = none
+
+# S3887: Mutable, non-private fields should not be "readonly"
+dotnet_diagnostic.S3887.severity = none
