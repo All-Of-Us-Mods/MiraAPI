@@ -189,8 +189,8 @@ public interface ICustomRole : IOptionable
     /// <param name="config">The ConfigFile to bind the options to.</param>
     void BindConfig(ConfigFile config)
     {
-        config.Bind(NumConfigDefinition, Configuration.DefaultRoleCount, new ConfigDescription(string.Empty, new AcceptableValueRange<int>(0, Configuration.MaxRoleCount)));
-        config.Bind(ChanceConfigDefinition, Configuration.DefaultChance, new ConfigDescription(string.Empty, new AcceptableValueRange<int>(0, 100)));
+        config.Bind(NumConfigDefinition, Configuration.DefaultRoleCount);
+        config.Bind(ChanceConfigDefinition, Configuration.DefaultChance);
     }
 
     /// <summary>
