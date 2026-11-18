@@ -162,17 +162,7 @@ public abstract class ModdedOption<T>(string groupPrefix, string title, T defaul
             Rpc<SyncGameOptionsRpc>.Instance.Send(PlayerControl.LocalPlayer, new MiraOptionNetData(true, [GetNetData()]), true);
         }
 
-        if (ShowNotification)
-        {
-            ModdedOptionsManager.AddSettingsChangeMessage(
-                HudManager.Instance.Notifier,
-                StringName,
-                GetDisplayValue(),
-                Configuration.PopUpTextColor,
-                Configuration.PopUpIconTmp,
-                false);
-        }
-
+        ShowNotif();
         OnValueChanged(_value);
         ShowNotification = true;
     }
@@ -269,6 +259,23 @@ public abstract class ModdedOption<T>(string groupPrefix, string title, T defaul
     protected virtual ConfigDescription? CreateDescription()
     {
         return null;
+    }
+
+    /// <summary>
+    /// Pops the notification modifier.
+    /// </summary>
+    protected virtual void ShowNotif()
+    {
+        if (!ShowNotification || !HudManager.InstanceExists)
+            return;
+
+        ModdedOptionsManager.AddSettingsChangeMessage(
+            HudManager.Instance.Notifier,
+            StringName,
+            GetDisplayValue(),
+            Configuration.PopUpTextColor,
+            Configuration.PopUpIconTmp,
+            false);
     }
 
     /// <summary>
