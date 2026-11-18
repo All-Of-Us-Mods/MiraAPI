@@ -28,15 +28,8 @@ public sealed class SafeAcceptableValueRange<T> : AcceptableValueBase
     public SafeAcceptableValueRange(T min, T max)
         : base(typeof(T))
     {
-        if (min is null)
-        {
-            throw new ArgumentNullException(nameof(min));
-        }
-
-        if (max is null)
-        {
-            throw new ArgumentNullException(nameof(max));
-        }
+        ArgumentNullException.ThrowIfNull(min);
+        ArgumentNullException.ThrowIfNull(max);
 
         if (min.CompareTo(max) > 0)
         {
@@ -59,7 +52,7 @@ public sealed class SafeAcceptableValueRange<T> : AcceptableValueBase
         if (val.CompareTo(Min) <= 0)
             return Min;
 
-        if (val.CompareTo(Max) >= 0)
+        if (val.CompareTo(Max) > 0)
             return Max;
 
         return val;
