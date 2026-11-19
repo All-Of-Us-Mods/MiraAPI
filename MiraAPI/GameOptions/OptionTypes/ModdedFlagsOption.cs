@@ -277,4 +277,14 @@ public class ModdedFlagsOption<T> : ModdedOption<T>, IFlagsOption
         value = Convert.ToInt32(newValue, NumberFormatInfo.InvariantInfo) & All;
         return (T)Enum.ToObject(typeof(T), value);
     }
+
+    /// <summary>
+    /// Implicitly converts the option to an <see langword="int"/>.
+    /// </summary>
+    /// <param name="option">The option.</param>
+    /// <returns>Integer value.</returns>
+    public static implicit operator int(ModdedFlagsOption<T> option)
+    {
+        return option.value;
+    }
 }

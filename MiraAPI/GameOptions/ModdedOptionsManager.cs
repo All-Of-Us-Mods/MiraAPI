@@ -23,6 +23,7 @@ namespace MiraAPI.GameOptions;
 /// </summary>
 public static class ModdedOptionsManager
 {
+    private static readonly Dictionary<(Type Holder, string Property), IBaseModdedOptionList> PropertyToOptionListMap = [];
     private static readonly Dictionary<(Type Holder, string Property), IModdedOption> PropertyToOptionMap = [];
     private static readonly Dictionary<RuntimeMethodHandle, PropertyOptionAttribute> GetterLookup = [];
     private static readonly Dictionary<RuntimeMethodHandle, PropertyOptionAttribute> SetterLookup = [];
@@ -257,6 +258,8 @@ public static class ModdedOptionsManager
         {
             RegisterOption(type, optionList.ElementAt(i), group, configName(i), pluginInfo);
         }
+
+        PropertyToOptionListMap.Add((type, property.Name), optionList);
     }
 
     private static void RegisterAttributeOptionList(
@@ -350,6 +353,8 @@ public static class ModdedOptionsManager
 
             RegisterOption(type, option, group, property.Name + (i + 1), pluginInfo);
         }
+
+        PropertyToOptionListMap.Add((type, property.Name), optionList);
     }
 
     private static void RegisterOption(
@@ -424,7 +429,8 @@ public static class ModdedOptionsManager
     }
 
     /// <summary>
-    /// Gets a <see cref="StringNames"/> value associated to the option of the provided property name that is found in <typeparamref name="T"/>.
+    /// Gets a <see cref="StringNames"/> value associated to the option of the provided property name that is found in <typeparamref name="T"/>.<br/>
+    /// Use only for attribute options. Explicitly defined options should be used as they are.
     /// </summary>
     /// <typeparam name="T">The container option type.</typeparam>
     /// <param name="propertyName">The name of the property that defines the option.</param>
@@ -432,13 +438,49 @@ public static class ModdedOptionsManager
     public static StringNames GetStringName<T>(string propertyName)
         where T : AbstractOptionGroup
     {
-        var type = typeof(T);
+        return GetOption<T, IModdedOption>(propertyName)?.StringName ?? StringNames.None;
+    }
+
+    /// <summary>
+    /// Gets a <see cref="IModdedOption"/> associated to the provided property name that is found in <typeparamref name="TGroup"/>.<br/>
+    /// Use only for attribute options. Explicitly defined options should be used as they are.
+    /// </summary>
+    /// <typeparam name="TGroup">The container option type.</typeparam>
+    /// <typeparam name="TOption">The option type.</typeparam>
+    /// <param name="propertyName">The name of the property that defines the option.</param>
+    /// <returns>The option, if found.</returns>
+    public static TOption? GetOption<TGroup, TOption>(string propertyName)
+        where TGroup : AbstractOptionGroup
+        where TOption : IModdedOption
+    {
+        var type = typeof(TGroup);
 
         if (PropertyToOptionMap.TryGetValue((type, propertyName), out var option))
-            return option.StringName;
+            return (TOption)option;
 
         Error($"Could not find an option with the property name {propertyName} in {type.Name}");
-        return StringNames.None;
+        return default;
+    }
+
+    /// <summary>
+    /// Gets a <see cref="IBaseModdedOptionList"/> associated to the provided property name that is found in <typeparamref name="TGroup"/>.<br/>
+    /// Use only for attribute lists. Explicitly defined lists should be used as they are.
+    /// </summary>
+    /// <typeparam name="TGroup">The container option type.</typeparam>
+    /// <typeparam name="TList">The option list type.</typeparam>
+    /// <param name="propertyName">The name of the property that defines the option list.</param>
+    /// <returns>The option list, if found.</returns>
+    public static TList? GetOptionList<TGroup, TList>(string propertyName)
+        where TGroup : AbstractOptionGroup
+        where TList : IBaseModdedOptionList
+    {
+        var type = typeof(TGroup);
+
+        if (PropertyToOptionListMap.TryGetValue((type, propertyName), out var optionList))
+            return (TList)optionList;
+
+        Error($"Could not find an option list with the property name {propertyName} in {type.Name}");
+        return default;
     }
 
     /// <summary>

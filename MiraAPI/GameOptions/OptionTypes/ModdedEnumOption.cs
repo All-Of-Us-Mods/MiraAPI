@@ -4,7 +4,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using BepInEx.Configuration;
 using MiraAPI.Networking;
-using MiraAPI.Translation;
 using MiraAPI.Utilities;
 
 namespace MiraAPI.GameOptions.OptionTypes;

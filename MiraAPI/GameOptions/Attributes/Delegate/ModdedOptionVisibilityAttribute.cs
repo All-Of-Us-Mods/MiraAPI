@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using MiraAPI.GameOptions.OptionTypes;
+using MiraAPI.Utilities;
 
 namespace MiraAPI.GameOptions.Attributes;
 
@@ -81,12 +82,14 @@ public sealed class ModdedOptionVisibilityAttribute(string? memberName = null, T
                 return null;
             }
 
+            if (field.IsLiteral)
+                return (bool)field.GetRawConstantValue()! ? DelegateUtilities.AlwaysTrue : DelegateUtilities.AlwaysFalse;
+
             var dynamicMethod = new DynamicMethod($"GetVisibility_{type.Name}_{field.Name}", typeof(bool), Type.EmptyTypes, type, true);
             var il = dynamicMethod.GetILGenerator();
 
             if (instanceGetter != null)
             {
-                il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Call, instanceGetter);
                 il.Emit(OpCodes.Ldfld, field);
             }
@@ -225,12 +228,17 @@ public sealed class ModdedOptionVisibilityAttribute(string? memberName = null, T
                 return null;
             }
 
+            if (field.IsLiteral)
+            {
+                var constant = (bool)field.GetRawConstantValue()! ? DelegateUtilities.AlwaysTrue : DelegateUtilities.AlwaysFalse;
+                return _ => constant;
+            }
+
             var dynamicMethod = new DynamicMethod($"GetListVisibility_{type.Name}_{field.Name}", typeof(bool), [typeof(int)], type, true);
             var il = dynamicMethod.GetILGenerator();
 
             if (instanceGetter != null)
             {
-                il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Call, instanceGetter);
                 il.Emit(OpCodes.Ldfld, field);
             }

@@ -17,7 +17,7 @@ namespace MiraAPI.GameOptions.Attributes;
 [AttributeUsage(AttributeTargets.Property)]
 public abstract class ModdedOptionMemberAttribute(string? memberName, Type? holderType, string defaultSuffix) : Attribute
 {
-    private static readonly Dictionary<MethodInfo, Delegate> DelegateCache = [];
+    private static readonly Dictionary<(MethodInfo, Type), Delegate> DelegateCache = [];
 
     /// <summary>
     /// A helper class to bind a specific list index to a dynamically compiled delegate.
@@ -218,7 +218,10 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
             flags |= BindingFlags.NonPublic;
         }
 
-        var member = type.GetMember(MemberName, flags).OrderBy(GetGenericArgsLength).FirstOrDefault();
+        var member = type.GetMember(MemberName, flags)
+            .OrderBy(GetGenericArgsLength)
+            .ThenBy(GetArgsLength)
+            .FirstOrDefault();
         notFound = true;
 
         if (member == null)
@@ -290,6 +293,14 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
         return method.IsGenericMethodDefinition ? method.GetGenericArguments().Length : 0;
     }
 
+    private static int GetArgsLength(MemberInfo member)
+    {
+        if (member is not MethodInfo method)
+            return -1;
+
+        return method.GetParameters().Length;
+    }
+
     /// <summary>
     /// Compiles a <see cref="DynamicMethod"/> using IL generation to invoke the resolved static or instance <paramref name="method"/>.
     /// </summary>
@@ -317,7 +328,7 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
         bool forwardParameters = true,
         Action<ILGenerator>? postProcessCall = null)
     {
-        if (postProcessCall == null && DelegateCache.TryGetValue(method, out var cachedDelegate))
+        if (postProcessCall == null && DelegateCache.TryGetValue((method, delegateType), out var cachedDelegate))
             return cachedDelegate;
 
         var dm = new DynamicMethod($"{ownerType.Name}_{method.Name}_{suffix}", returnType, paramTypes, ownerType, true);
@@ -356,7 +367,7 @@ public abstract class ModdedOptionMemberAttribute(string? memberName, Type? hold
         var compiledDelegate = dm.CreateDelegate(delegateType);
 
         if (postProcessCall == null)
-            DelegateCache[method] = compiledDelegate;
+            DelegateCache[(method, delegateType)] = compiledDelegate;
 
         return compiledDelegate;
     }
