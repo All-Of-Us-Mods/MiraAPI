@@ -76,6 +76,9 @@
     <string name="Activated">Activated</string>
     <string name="Deactivated">Deactivated</string>
     <string name="MiraApi.AbbreviatedDistance">unit(s)</string>
+    <string name="All">All</string>
+    <string name="None">None</string>
+    <string name="MiraApi.Compound">{0} + {1}</string>
 
     <string name="MiraApi.Option.Group.HnsCrewmate">Crewmates</string>
     <string name="MiraApi.HnsCrewmate.Option.PlayerSpeed">Player Speed</string>

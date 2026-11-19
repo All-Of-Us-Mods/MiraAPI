@@ -249,6 +249,23 @@ public static class MiraLocaleManager
         return GetParsed(language, key, string.Empty, parseList);
     }
 
+    /// <inheritdoc cref="GetParsed(MiraLanguage, string, ValueTuple{string, string}[], string)"/>
+    public static string GetParsed(
+        string key,
+        string fallback,
+        params object[] parseList)
+    {
+        return GetParsed(CurrentLanguage, key, fallback, parseList);
+    }
+
+    /// <inheritdoc cref="GetParsed(MiraLanguage, string, ValueTuple{string, string}[], string)"/>
+    public static string GetParsed(
+        string key,
+        params object[] parseList)
+    {
+        return GetParsed(CurrentLanguage, key, string.Empty, parseList);
+    }
+
     /// <summary>
     /// Builds a formatted translation ID string using a mod ID, a specific ID part, and a suffix.
     /// </summary>
