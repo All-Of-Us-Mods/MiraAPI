@@ -98,13 +98,13 @@ public class ModdedStringOption : ModdedBaseStringOption<string>
     /// <inheritdoc />
     public override NetData GetNetData()
     {
-        return new NetData(Id, Encoding.Unicode.GetBytes(_value));
+        return new NetData(Id, BitConverter.GetBytes(GetIndex(_value)));
     }
 
     /// <inheritdoc />
     public override void HandleNetData(byte[] data)
     {
-        SetValue(Encoding.Unicode.GetString(data));
+        SetValue(UnderlyingValues[BitConverter.ToInt32(data)]);
     }
 
     /// <inheritdoc />

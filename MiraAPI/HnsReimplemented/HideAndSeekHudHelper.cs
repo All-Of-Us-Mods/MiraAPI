@@ -244,7 +244,7 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
             {
                 playerControl.ClearTasks();
                 PlayerTask.GetOrCreateTask<ImportantTextTask>(playerControl).Text =
-                    DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.HideActionButton);
+                    TranslationController.Instance.GetString(StringNames.HideActionButton);
             }
         }
 
@@ -259,7 +259,7 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
 
         timerBar.StartFinalHide();
         SoundManager.Instance.PlaySound(finalHideAlertSfx, false);
-        DestroyableSingleton<HudManager>.Instance.SetAlertOverlay(true);
+        HudManager.Instance.SetAlertOverlay(true);
     }
 
     private void AdjustEscapeTimer(float timeDeduction, bool forceDirty)

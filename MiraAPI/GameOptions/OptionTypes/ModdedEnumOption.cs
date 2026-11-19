@@ -124,6 +124,8 @@ public class ModdedEnumOption : ModdedBaseEnumOption<int>
 public class ModdedEnumOption<T> : ModdedBaseEnumOption<T>
     where T : struct, Enum
 {
+    private const string ObsoleteMsg = "This constructor is deprecated. Please use the equivalent constructor that includes the 'T[]? allowedValues' parameter. This will be removed in a future version.";
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ModdedEnumOption{T}"/> class.
     /// </summary>
@@ -131,54 +133,103 @@ public class ModdedEnumOption<T> : ModdedBaseEnumOption<T>
     /// <param name="title">The title of the option.</param>
     /// <param name="defaultValue">The default value as an <see langword="int"/>.</param>
     /// <param name="idPrefix">The common translation ID prefix of all enum values.</param>
-    /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
+    /// <param name="allowedValues">An option array of enum values to filter down what values can actually be used.</param>
+    /// <param name="values">An optional array of string values to use in place of the <see langword="enum"/> name.</param>
     /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
-    public ModdedEnumOption(string groupPrefix, string title, T defaultValue, string idPrefix, string[]? values = null, bool includeInPreset = true)
+    public ModdedEnumOption(string groupPrefix, string title, T defaultValue, string idPrefix, T[]? allowedValues = null, string[]? values = null, bool includeInPreset = true)
         : base(groupPrefix, title, defaultValue, includeInPreset)
     {
         idPrefix = idPrefix.Replace("%type%", typeof(T).Name);
-        UnderlyingValues = Enum.GetValues<T>();
-        Values = values ?? Enum.GetNames<T>();
+
+        UnderlyingValues = allowedValues ?? Enum.GetValues<T>();
+
+        if (Array.IndexOf(UnderlyingValues, defaultValue) == -1)
+        {
+            throw new ArgumentException($"The defaultValue '{defaultValue}' is not present in the allowed enum values.", nameof(defaultValue));
+        }
+
+        if (values != null && values.Length != UnderlyingValues.Length)
+        {
+            throw new ArgumentException($"The number of custom values ({values.Length}) must exactly match the number of allowed enum values ({UnderlyingValues.Length}).", nameof(values));
+        }
+
+        Values = values ?? [.. UnderlyingValues.Select(v => v.ToString())];
         StringNameValues = [.. Values.Select(x => MiraLocaleManager.GetOrCreateLocaleString($"{idPrefix}{x}"))];
 
         InitializeData(GetIndex(defaultValue));
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedEnumOption{T}"/> class.
-    /// </summary>
-    /// <param name="groupPrefix">The translation ID prefix of the group containing this option.</param>
-    /// <param name="title">The title of the option.</param>
-    /// <param name="defaultValue">The default value as an <see langword="int"/>.</param>
-    /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
-    /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
-    public ModdedEnumOption(string groupPrefix, string title, T defaultValue, string[]? values = null, bool includeInPreset = true)
-        : this(groupPrefix, title, defaultValue, string.Empty, values, includeInPreset)
+    /// <inheritdoc cref="ModdedEnumOption{T}(string, string, T, string, T[], string[], bool)"/>
+    public ModdedEnumOption(string groupPrefix, string title, T defaultValue, T[]? allowedValues = null, string[]? values = null, bool includeInPreset = true)
+        : this(groupPrefix, title, defaultValue, string.Empty, allowedValues, values, includeInPreset)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedEnumOption{T}"/> class.
-    /// </summary>
-    /// <param name="title">The title of the option.</param>
-    /// <param name="defaultValue">The default value as an <see langword="int"/>.</param>
-    /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
-    /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
-    public ModdedEnumOption(string title, T defaultValue, string[]? values = null, bool includeInPreset = true)
-        : this(string.Empty, title, defaultValue, values, includeInPreset)
+    /// <inheritdoc cref="ModdedEnumOption{T}(string, string, T, string, T[], string[], bool)"/>
+    public ModdedEnumOption(string title, T defaultValue, T[]? allowedValues = null, string[]? values = null, bool includeInPreset = true)
+        : this(string.Empty, title, defaultValue, string.Empty, allowedValues, values, includeInPreset)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedEnumOption{T}"/> class.
-    /// </summary>
-    /// <param name="title">The title of the option.</param>
-    /// <param name="defaultValue">The default value as an <see langword="int"/>.</param>
-    /// <param name="idPrefix">The common translation ID prefix of all enum values.</param>
-    /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
-    /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
-    public ModdedEnumOption(string title, T defaultValue, string idPrefix, string[]? values = null, bool includeInPreset = true)
-        : this(string.Empty, title, defaultValue, idPrefix, values, includeInPreset)
+    /// <inheritdoc cref="ModdedEnumOption{T}(string, string, T, string, T[], string[], bool)"/>
+    public ModdedEnumOption(string title, T defaultValue, string idPrefix, T[]? allowedValues = null, string[]? values = null, bool includeInPreset = true)
+        : this(string.Empty, title, defaultValue, idPrefix, allowedValues, values, includeInPreset)
+    {
+    }
+
+    /// <inheritdoc cref="ModdedEnumOption{T}(string, string, T, string, T[], string[], bool)"/>
+    [Obsolete(ObsoleteMsg)]
+    public ModdedEnumOption(string groupPrefix, string title, T defaultValue, string idPrefix, string[] values, bool includeInPreset)
+        : this(groupPrefix, title, defaultValue, idPrefix, null, values, includeInPreset)
+    {
+    }
+
+    /// <inheritdoc cref="ModdedEnumOption{T}(string, string, T, string, T[], string[], bool)"/>
+    [Obsolete(ObsoleteMsg)]
+    public ModdedEnumOption(string groupPrefix, string title, T defaultValue, string idPrefix, string[] values)
+        : this(groupPrefix, title, defaultValue, idPrefix, null, values, true)
+    {
+    }
+
+    /// <inheritdoc cref="ModdedEnumOption{T}(string, string, T, string, T[], string[], bool)"/>
+    [Obsolete(ObsoleteMsg)]
+    public ModdedEnumOption(string groupPrefix, string title, T defaultValue, string[] values, bool includeInPreset)
+        : this(groupPrefix, title, defaultValue, string.Empty, null, values, includeInPreset)
+    {
+    }
+
+    /// <inheritdoc cref="ModdedEnumOption{T}(string, string, T, string, T[], string[], bool)"/>
+    [Obsolete(ObsoleteMsg)]
+    public ModdedEnumOption(string groupPrefix, string title, T defaultValue, string[] values)
+        : this(groupPrefix, title, defaultValue, string.Empty, null, values, true)
+    {
+    }
+
+    /// <inheritdoc cref="ModdedEnumOption{T}(string, string, T, string, T[], string[], bool)"/>
+    [Obsolete(ObsoleteMsg)]
+    public ModdedEnumOption(string title, T defaultValue, string[] values, bool includeInPreset)
+        : this(string.Empty, title, defaultValue, string.Empty, null, values, includeInPreset)
+    {
+    }
+
+    /// <inheritdoc cref="ModdedEnumOption{T}(string, string, T, string, T[], string[], bool)"/>
+    [Obsolete(ObsoleteMsg)]
+    public ModdedEnumOption(string title, T defaultValue, string[] values)
+        : this(string.Empty, title, defaultValue, string.Empty, null, values, true)
+    {
+    }
+
+    /// <inheritdoc cref="ModdedEnumOption{T}(string, string, T, string, T[], string[], bool)"/>
+    [Obsolete(ObsoleteMsg)]
+    public ModdedEnumOption(string title, T defaultValue, string idPrefix, string[] values, bool includeInPreset)
+        : this(string.Empty, title, defaultValue, idPrefix, null, values, includeInPreset)
+    {
+    }
+
+    /// <inheritdoc cref="ModdedEnumOption{T}(string, string, T, string, T[], string[], bool)"/>
+    [Obsolete(ObsoleteMsg)]
+    public ModdedEnumOption(string title, T defaultValue, string idPrefix, string[] values)
+        : this(string.Empty, title, defaultValue, idPrefix, null, values, true)
     {
     }
 

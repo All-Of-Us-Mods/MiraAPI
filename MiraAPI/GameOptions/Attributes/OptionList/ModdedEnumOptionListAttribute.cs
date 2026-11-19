@@ -78,36 +78,60 @@ public class ModdedEnumOptionListAttribute(string? title, Type enumType, string 
 /// <typeparam name="T">The enum type.</typeparam>
 /// <param name="title">The option's title.</param>
 /// <param name="idPrefix">The common translation ID prefix of all enum values.</param>
-/// <param name="values">The option's possible values.</param>
+/// <param name="allowedValues">An option array of enum values to filter down what values can actually be used.</param>
+/// <param name="values">An optional array of string values to use in place of the <see langword="enum"/> name.</param>
 [AttributeUsage(AttributeTargets.Property)]
-public class ModdedEnumOptionListAttribute<T>(string? title, string idPrefix, string[]? values = null)
+public class ModdedEnumOptionListAttribute<T>(string? title, string idPrefix, T[]? allowedValues = null, string[]? values = null)
     : ModdedOptionListAttribute(title), ITypedOptionList<T>
     where T : struct, Enum
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedEnumOptionListAttribute{T}"/> class.
-    /// </summary>
-    /// <param name="title">The option's title.</param>
-    /// <param name="values">The option's possible values.</param>
-    public ModdedEnumOptionListAttribute(string? title, string[]? values = null)
-        : this(title, string.Empty, values)
+    private const string ObsoleteMsg = "This constructor is deprecated. Please use the equivalent constructor that includes the 'T[]? allowedValues' parameter. This will be removed in a future version.";
+
+    /// <inheritdoc cref="ModdedEnumOptionListAttribute{T}(string, string, T[], string[])"/>
+    public ModdedEnumOptionListAttribute(string? title, T[]? allowedValues = null, string[]? values = null)
+        : this(title, string.Empty, allowedValues, values)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedEnumOptionListAttribute{T}"/> class.
-    /// </summary>
-    /// <param name="values">The option's possible values.</param>
-    /// <param name="idPrefix">The common translation ID prefix of all enum values.</param>
-    public ModdedEnumOptionListAttribute(string[]? values = null, string idPrefix = "")
-        : this(null, idPrefix, values)
+    /// <inheritdoc cref="ModdedEnumOptionListAttribute{T}(string, string, T[], string[])"/>
+    public ModdedEnumOptionListAttribute(T[]? allowedValues = null, string[]? values = null, string idPrefix = "")
+        : this(null, idPrefix, allowedValues, values)
     {
     }
 
+    /// <inheritdoc cref="ModdedEnumOptionListAttribute{T}(string, string, T[], string[])"/>
+    [Obsolete(ObsoleteMsg)]
+    public ModdedEnumOptionListAttribute(string? title, string idPrefix, string[] values)
+        : this(title, idPrefix, null, values)
+    {
+    }
+
+    /// <inheritdoc cref="ModdedEnumOptionListAttribute{T}(string, string, T[], string[])"/>
+    [Obsolete(ObsoleteMsg)]
+    public ModdedEnumOptionListAttribute(string? title, string[] values)
+        : this(title, string.Empty, null, values)
+    {
+    }
+
+    /// <inheritdoc cref="ModdedEnumOptionListAttribute{T}(string, string, T[], string[])"/>
+    [Obsolete(ObsoleteMsg)]
+    public ModdedEnumOptionListAttribute(string[] values, string idPrefix)
+        : this(null, idPrefix, null, values)
+    {
+    }
+
+    /// <inheritdoc cref="ModdedEnumOptionListAttribute{T}(string, string, T[], string[])"/>
+    [Obsolete(ObsoleteMsg)]
+    public ModdedEnumOptionListAttribute(string[] values)
+        : this(null, string.Empty, null, values)
+    {
+    }
+
+    /// <inheritdoc />
     internal override IBaseModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
     {
         var optList = new ModdedOptionList<ModdedEnumOption<T>>(
-            list.Count, idx => new(group.GroupPrefix, GetFormattedTitle(idx, property), (T)(list[idx] ?? 0), idPrefix, values));
+            list.Count, idx => new(group.GroupPrefix, GetFormattedTitle(idx, property), (T)(list[idx] ?? 0), idPrefix, allowedValues, values));
         return optList;
     }
 
