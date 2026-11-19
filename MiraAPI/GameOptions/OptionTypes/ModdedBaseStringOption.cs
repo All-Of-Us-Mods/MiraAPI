@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using MiraAPI.Translation;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -41,6 +43,8 @@ public abstract class ModdedBaseStringOption<T>(string groupPrefix, string title
     /// <param name="defaultIndex">The default index to assign.</param>
     protected void InitializeData(int defaultIndex)
     {
+        StringNameValues = [.. Values.Select(MiraLocaleManager.GetOrCreateLocaleString)];
+
         var data = ScriptableObject.CreateInstance<StringGameSetting>();
         data.Title = StringName;
         data.Type = global::OptionTypes.String;

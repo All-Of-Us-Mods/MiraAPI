@@ -27,7 +27,6 @@ public class ModdedStringOption : ModdedBaseStringOption<string>
     {
         Values = values;
         UnderlyingValues = values;
-        StringNameValues = [.. values.Select(MiraLocaleManager.GetOrCreateLocaleString)];
 
         InitializeData(GetIndex(defaultValue));
     }

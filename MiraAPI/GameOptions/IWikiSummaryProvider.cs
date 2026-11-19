@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace MiraAPI.GameOptions;
 
 /// <summary>
-/// A holder option for a summary and option string names that are hidden behind it.
+/// A grouped data container that holds the options that need to be hidden and the summary produced from hiding them.
 /// </summary>
 /// <param name="hiddenKeys">The <see cref="StringNames"/> of the options being hidden.</param>
 /// <param name="summaryLines">A delegate that produces the summary to replace the default text of the options being hidden.</param>

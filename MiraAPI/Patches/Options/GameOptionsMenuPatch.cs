@@ -6,6 +6,7 @@ using BepInEx.Unity.IL2CPP.Utils.Collections;
 using HarmonyLib;
 using MiraAPI.GameModes;
 using MiraAPI.GameOptions;
+using MiraAPI.GameOptions.Components;
 using MiraAPI.Modifiers;
 using MiraAPI.Presets;
 using MiraAPI.Translation;
@@ -31,6 +32,29 @@ internal static class GameOptionsMenuPatch
     private static readonly Dictionary<AbstractGameMode, List<CategoryHeaderMasked>> GameModeHeaders = [];
     private static TextMeshPro _gamemodeDescription = null!;
     private static SpriteRenderer _modIcon = null!;
+
+    public static FlagsOption CreateOption(StringOption stringOption, Transform container)
+    {
+        var baseOption = Object.Instantiate(stringOption, container).DontUnload().DontDestroy();
+
+        var optionGO = baseOption.gameObject;
+        var titleText = baseOption.TitleText;
+        var valueText = baseOption.ValueText;
+        var button = baseOption.PlusBtn;
+
+        baseOption.MinusBtn.gameObject.Destroy();
+        baseOption.Destroy();
+
+        var flagsOption = optionGO.AddComponent<FlagsOption>();
+        flagsOption.TitleText = titleText;
+        flagsOption.ValueText = valueText;
+        flagsOption.Button = button;
+        flagsOption.buttons = new PassiveButton[] { button };
+
+        button.OnClick = new();
+
+        return flagsOption;
+    }
 
     [HarmonyPrefix]
     [HarmonyPatch(nameof(GameOptionsMenu.Initialize))]
@@ -590,7 +614,7 @@ internal static class GameOptionsMenuPatch
                 continue;
             }
 
-            if (!opt.Visible.Invoke())
+            if (!opt.Visible())
             {
                 newOpt.gameObject.SetActive(false);
                 continue;

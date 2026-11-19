@@ -46,21 +46,27 @@ public class ModdedEnumOption : ModdedBaseEnumOption<int>
         if (!enumType.IsEnum)
             throw new ArgumentException($"The type {enumType.Name} is not an Enum.", nameof(enumType));
 
-        idPrefix = idPrefix.Replace("%type%", enumType.Name);
-
         var rawValues = Enum.GetValues(enumType);
-        UnderlyingValues = new int[rawValues.Length];
+        var underlyingValues = new int[rawValues.Length];
 
         for (var i = 0; i < rawValues.Length; i++)
-            UnderlyingValues[i] = Convert.ToInt32(rawValues.GetValue(i), NumberFormatInfo.InvariantInfo);
+            underlyingValues[i] = Convert.ToInt32(rawValues.GetValue(i), NumberFormatInfo.InvariantInfo);
+
+        UnderlyingValues = [.. underlyingValues.Distinct()];
 
         if (values != null && values.Length != UnderlyingValues.Length)
         {
             throw new ArgumentException($"The number of custom values ({values.Length}) must exactly match the number of enum values ({UnderlyingValues.Length}) in {enumType.Name}.", nameof(values));
         }
 
-        Values = values ?? Enum.GetNames(enumType);
-        StringNameValues = [.. Values.Select(x => MiraLocaleManager.GetOrCreateLocaleString($"{idPrefix}{x}"))];
+        if (Array.IndexOf(UnderlyingValues, defaultValue) == -1)
+        {
+            throw new ArgumentException($"The defaultValue '{defaultValue}' is not present in the allowed enum values.", nameof(defaultValue));
+        }
+
+        idPrefix = idPrefix.Replace("%type%", enumType.Name);
+
+        Values = [.. (values ?? rawValues.Cast<object>()).Select(x => idPrefix + x)];
 
         InitializeData(GetIndex(defaultValue));
     }
@@ -147,22 +153,21 @@ public class ModdedEnumOption<T> : ModdedBaseEnumOption<T>
     public ModdedEnumOption(string groupPrefix, string title, T defaultValue, string idPrefix, T[]? allowedValues = null, string[]? values = null, bool includeInPreset = true)
         : base(groupPrefix, title, defaultValue, includeInPreset)
     {
-        idPrefix = idPrefix.Replace("%type%", typeof(T).Name);
+        UnderlyingValues = [.. (allowedValues ?? Enum.GetValues<T>()).Distinct()];
 
-        UnderlyingValues = allowedValues ?? Enum.GetValues<T>();
+        if (values != null && values.Length != UnderlyingValues.Length)
+        {
+            throw new ArgumentException($"The number of custom values ({values.Length}) must exactly match the number of enum values ({UnderlyingValues.Length}) in {typeof(T).Name}.", nameof(values));
+        }
 
         if (Array.IndexOf(UnderlyingValues, defaultValue) == -1)
         {
             throw new ArgumentException($"The defaultValue '{defaultValue}' is not present in the allowed enum values.", nameof(defaultValue));
         }
 
-        if (values != null && values.Length != UnderlyingValues.Length)
-        {
-            throw new ArgumentException($"The number of custom values ({values.Length}) must exactly match the number of allowed enum values ({UnderlyingValues.Length}).", nameof(values));
-        }
+        idPrefix = idPrefix.Replace("%type%", typeof(T).Name);
 
-        Values = values ?? [.. UnderlyingValues.Select(v => v.ToString())];
-        StringNameValues = [.. Values.Select(x => MiraLocaleManager.GetOrCreateLocaleString($"{idPrefix}{x}"))];
+        Values = [.. (values ?? UnderlyingValues.Cast<object>()).Select(x => idPrefix + x)];
 
         InitializeData(GetIndex(defaultValue));
     }

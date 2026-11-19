@@ -61,6 +61,6 @@ public sealed class AcceptableEnumValues<T> : AcceptableValueBase
     /// <inheritdoc/>
     public override string ToDescriptionString()
     {
-        return "# Acceptable values: " + string.Join(", ", AcceptableValues.Select(x => x.ToString()));
+        return "# Acceptable values: " + string.Join(", ", AcceptableValues);
     }
 }
