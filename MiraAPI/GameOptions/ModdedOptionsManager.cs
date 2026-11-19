@@ -23,6 +23,7 @@ namespace MiraAPI.GameOptions;
 /// </summary>
 public static class ModdedOptionsManager
 {
+    private static readonly Dictionary<(Type Holder, string Property), IModdedOption> PropertyToOptionMap = [];
     private static readonly Dictionary<RuntimeMethodHandle, PropertyOptionAttribute> GetterLookup = [];
     private static readonly Dictionary<RuntimeMethodHandle, PropertyOptionAttribute> SetterLookup = [];
     private static readonly HashSet<PropertyInfo> OptionAttributes = [];
@@ -147,8 +148,7 @@ public static class ModdedOptionsManager
             return true;
 
         foreach (var field in type.GetFields(MiraPluginManager.DeclaredInstanceMembers)
-            .Where(f => !f.IsAutoPropertyBackingField()
-                && (f.FieldType.IsAssignableTo(typeof(IModdedOption)) || f.FieldType.IsAssignableTo(typeof(IBaseModdedOptionList)))))
+            .Where(f => !f.IsAutoPropertyBackingField() && (f.FieldType.IsAssignableTo(OptionType) || f.FieldType.IsAssignableTo(OptionListType))))
         {
             Error($"{field.Name} is a field, not a property. Use properties for options.");
         }
@@ -218,8 +218,8 @@ public static class ModdedOptionsManager
 
         PatchProperty(property, propType, attribute);
 
-        attribute.HolderOption = option;
         attribute.ValueType = propType;
+        attribute.HolderOption = option;
 
         foreach (var attr in attributes)
         {
@@ -305,9 +305,9 @@ public static class ModdedOptionsManager
 
         var valueType = propType.GetGenericArguments()[0];
 
-        attribute.HolderOptionList = optionList;
         attribute.Value = list;
         attribute.ValueType = valueType;
+        attribute.HolderOptionList = optionList;
 
         ((IModdedArrayBinding)propertyVal).Bind(attribute);
 
@@ -364,8 +364,10 @@ public static class ModdedOptionsManager
         option.ParentMod = pluginInfo.MiraPlugin;
 
         pluginInfo.InternalOptions.Add(option);
-        ModdedOptions.Add(option.Id, option);
         group.Options.Add(option);
+
+        ModdedOptions.Add(option.Id, option);
+        PropertyToOptionMap.Add((type, propertyName), option);
     }
 
     internal static void SyncAllOptions(int targetId = -1)
@@ -422,6 +424,24 @@ public static class ModdedOptionsManager
     }
 
     /// <summary>
+    /// Gets a <see cref="StringNames"/> value associated to the option of the provided property name that is found in <typeparamref name="T"/>.
+    /// </summary>
+    /// <typeparam name="T">The container option type.</typeparam>
+    /// <param name="propertyName">The name of the property that defines the option.</param>
+    /// <returns>The option's string name, or StringNames.None if not found.</returns>
+    public static StringNames GetStringName<T>(string propertyName)
+        where T : AbstractOptionGroup
+    {
+        var type = typeof(T);
+
+        if (PropertyToOptionMap.TryGetValue((type, propertyName), out var option))
+            return option.StringName;
+
+        Error($"Could not find an option with the property name {propertyName} in {type.Name}");
+        return StringNames.None;
+    }
+
+    /// <summary>
     /// Patches the setter of a property to update the value of the option.
     /// </summary>
     /// <param name="__originalMethod">The original setter method.</param>
@@ -468,7 +488,7 @@ public static class ModdedOptionsManager
     /// <param name="__originalMethod">The original getter method.</param>
     /// <param name="__result">The result of the property getter.</param>
     /// <returns><see langword="false"/> so the original getter gets skipped.</returns>
-    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony naming convention")]
+    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony naming convention.")]
     [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Read above.")]
     [Obsolete("Use PropertyGetterPatch<T> instead. This will be removed in a future version.", true)]
     public static bool PropertyGetterPatch(MethodBase __originalMethod, ref object __result)
@@ -487,7 +507,7 @@ public static class ModdedOptionsManager
     /// <param name="__originalMethod">The original getter method.</param>
     /// <param name="__result">The result of the property getter.</param>
     /// <returns><see langword="false"/> so the original getter gets skipped.</returns>
-    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony naming convention")]
+    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony naming convention.")]
     [SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Read above.")]
     public static bool PropertyGetterPatch<T>(MethodBase __originalMethod, ref T __result)
     {

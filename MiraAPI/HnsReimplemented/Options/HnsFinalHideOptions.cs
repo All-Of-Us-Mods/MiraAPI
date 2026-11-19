@@ -40,7 +40,7 @@ public class HnsFinalHideOptions : AbstractOptionGroup<HideAndSeekMode>
     /// <summary>
     /// Gets the interval between each ping.
     /// </summary>
-    [ModdedNumberOption(3f, 10f, 5f, "#", "#", MiraNumberSuffixes.Seconds)]
+    [ModdedNumberOption(3f, 10f, 1f, "#", "#", MiraNumberSuffixes.Seconds)]
     [ModdedOptionVisibility(nameof(FinalHidePings))]
     public float PingInterval { get; } = 6f;
 
