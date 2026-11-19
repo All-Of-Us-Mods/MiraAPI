@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
 using BepInEx.Configuration;
 using MiraAPI.Networking;
 using MiraAPI.Translation;

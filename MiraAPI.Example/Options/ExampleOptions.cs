@@ -34,10 +34,10 @@ public class ExampleOptions : AbstractOptionGroup
     [ModdedOptionGetter(nameof(GetApi))] // Can also automatically resolve to {Option Name}Getter
     [ModdedOptionSetter(nameof(SetApi))] // Can also automatically resolve to {Option Name}Setter
     [ModdedOptionChanged(nameof(ApiChanged))] // Can also automatically resolve to {Option Name}Changed
-    [ModdedEnumOption<Api>("options.exampleOptions1.bestApi", ["Mira API", "Mitochondria", "Reactor"])]
+    [ModdedEnumOption<Api>("options.exampleOptions1.bestApi")] // Not specifying strings will automatically build translation ids based on the defined enum values
     public Api BestApi { get; set; } = Api.MiraAPI;
 
-    [ModdedEnumOptionList<ValueState>("Value State {0}", ["None", "Primary", "Secondary"])]
+    [ModdedEnumOptionList<ValueState>("Value State {0}", [ValueState.None, ValueState.Primary, ValueState.Secondary])] // You can even filter out specific values!
     public ModdedArray<ValueState> ValueStates { get; set; } = [ValueState.Primary, ValueState.Secondary, ValueState.None, ValueState.None, ValueState.None];
 
     [ModdedPlayerOption("options.exampleOptions1.players")]
@@ -81,4 +81,5 @@ public enum ValueState
     None,
     Primary,
     Secondary,
+    Tertiary,
 }
