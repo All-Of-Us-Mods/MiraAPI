@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
@@ -266,7 +267,7 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
     {
         var num = currentHideTime;
         currentHideTime -= timeDeduction;
-        currentHideTime = Mathf.Max(currentHideTime, 0f);
+        currentHideTime = Math.Max(currentHideTime, 0f);
         if (currentHideTime <= 10f && beepCoroutine == null)
         {
             beepCoroutine = StartCoroutine(BeepAlmostEverySecond().WrapToIl2Cpp());
@@ -308,7 +309,7 @@ public sealed class HideAndSeekHudHelper(nint cppPtr) : MonoBehaviour(cppPtr)
     private void AdjustFinalEscapeTimer(float timeDeduction)
     {
         currentFinalHideTime -= timeDeduction;
-        currentFinalHideTime = Mathf.Max(currentFinalHideTime, 0f);
+        currentFinalHideTime = Math.Max(currentFinalHideTime, 0f);
         timerBar.UpdateTimer(currentFinalHideTime, totalFinalHideTime);
         if (secondsSinceLastSetDirty > 1f)
         {

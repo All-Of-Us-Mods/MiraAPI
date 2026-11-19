@@ -516,8 +516,8 @@ public class HideAndSeekMode : AbstractGameMode
         instance.closedPosition = new Vector3(xPos, yPos, instance.closedPosition.z);
         instance.openPosition = new Vector3(instance.openPosition.x, yPos, instance.openPosition.z);
         instance.timer = instance.open
-            ? Mathf.Min(1f, instance.timer + (Time.deltaTime / instance.animationTimeSeconds))
-            : Mathf.Max(0f, instance.timer - (Time.deltaTime / instance.animationTimeSeconds));
+            ? Math.Min(1f, instance.timer + (Time.deltaTime / instance.animationTimeSeconds))
+            : Math.Max(0f, instance.timer - (Time.deltaTime / instance.animationTimeSeconds));
 
         Vector3 relativePos = new(
             Mathf.SmoothStep(instance.closedPosition.x, instance.openPosition.x, instance.timer),

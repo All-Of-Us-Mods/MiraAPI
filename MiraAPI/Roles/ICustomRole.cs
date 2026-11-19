@@ -231,7 +231,7 @@ public interface ICustomRole : IOptionable
         return !Configuration.CanModifyChance
             ? Configuration.DefaultChance
             : ParentMod.PluginConfig.TryGetEntry(ChanceConfigDefinition, out ConfigEntry<int> entry)
-                ? Mathf.Clamp(entry.Value, 0, 100)
+                ? Math.Clamp(entry.Value, 0, 100)
                 : null;
     }
 
@@ -242,7 +242,7 @@ public interface ICustomRole : IOptionable
     int? GetCount()
     {
         return ParentMod.PluginConfig.TryGetEntry(NumConfigDefinition, out ConfigEntry<int> entry)
-            ? Mathf.Clamp(entry.Value, 0, Configuration.MaxRoleCount)
+            ? Math.Clamp(entry.Value, 0, Configuration.MaxRoleCount)
             : null;
     }
 
@@ -260,7 +260,7 @@ public interface ICustomRole : IOptionable
 
         if (ParentMod.PluginConfig.TryGetEntry(ChanceConfigDefinition, out ConfigEntry<int> entry))
         {
-            entry.Value = Mathf.Clamp(chance, 0, 100);
+            entry.Value = Math.Clamp(chance, 0, 100);
             return;
         }
 
@@ -275,7 +275,7 @@ public interface ICustomRole : IOptionable
     {
         if (ParentMod.PluginConfig.TryGetEntry(NumConfigDefinition, out ConfigEntry<int> entry))
         {
-            entry.Value = Mathf.Clamp(count, 0, Configuration.MaxRoleCount);
+            entry.Value = Math.Clamp(count, 0, Configuration.MaxRoleCount);
             return;
         }
 

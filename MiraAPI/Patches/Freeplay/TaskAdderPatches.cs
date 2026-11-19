@@ -238,7 +238,7 @@ public static class TaskAdderPatches
         item.transform.SetParent(instance.TaskParent);
         item.transform.localPosition = new Vector3(xCursor, yCursor, 0f);
         item.transform.localScale = Vector3.one;
-        maxHeight = Mathf.Max(maxHeight, item.Text.bounds.size.y + 1.3f);
+        maxHeight = Math.Max(maxHeight, item.Text.bounds.size.y + 1.3f);
         xCursor += instance.fileWidth;
         if (xCursor > instance.lineWidth)
         {
@@ -289,7 +289,7 @@ public static class TaskAdderPatches
             taskFolder2.Parent = __instance;
             taskFolder2.transform.localPosition = new Vector3(num, num2, 0f);
             taskFolder2.transform.localScale = Vector3.one;
-            num3 = Mathf.Max(num3, taskFolder2.Text.bounds.size.y + 1.1f);
+            num3 = Math.Max(num3, taskFolder2.Text.bounds.size.y + 1.1f);
             num += __instance.folderWidth;
             if (num > __instance.lineWidth)
             {

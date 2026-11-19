@@ -125,7 +125,7 @@ internal static class GuideOptionPages
                     item.Group.MatchInfoGuidePageOrder,
                     GetMenuOrder(item.Group.ParentMenu),
                     item.Group.GroupPriority,
-                    Mathf.Clamp(item.Group.MatchInfoGuidePageColumns, 1, 6),
+                    Math.Clamp(item.Group.MatchInfoGuidePageColumns, 1, 6),
                     item.ModAbbreviation,
                     modSearchTerms,
                     entries);

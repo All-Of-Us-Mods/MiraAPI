@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using System;
+using HarmonyLib;
 using UnityEngine;
 
 namespace MiraAPI.Patches.Roles;
@@ -52,8 +53,8 @@ internal static class TaskPanelPatch
         __instance.closedPosition = closePosition;
 
         __instance.timer = __instance.open
-            ? Mathf.Min(1f, __instance.timer + Time.deltaTime / __instance.animationTimeSeconds)
-            : Mathf.Max(0f, __instance.timer - Time.deltaTime / __instance.animationTimeSeconds);
+            ? Math.Min(1f, __instance.timer + Time.deltaTime / __instance.animationTimeSeconds)
+            : Math.Max(0f, __instance.timer - Time.deltaTime / __instance.animationTimeSeconds);
 
         var relativePos = new Vector3(
             Mathf.SmoothStep(__instance.closedPosition.x, __instance.openPosition.x, __instance.timer),

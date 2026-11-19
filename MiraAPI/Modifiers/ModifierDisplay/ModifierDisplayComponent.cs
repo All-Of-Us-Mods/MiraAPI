@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -165,7 +166,7 @@ public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
     private void UpdatePage()
     {
         var totalPages = Mathf.CeilToInt((float)_modifiers.Count / ItemsPerPage);
-        _currentPage = Mathf.Clamp(_currentPage, 0, Mathf.Max(0, totalPages - 1));
+        _currentPage = Math.Clamp(_currentPage, 0, Math.Max(0, totalPages - 1));
 
         if (_modifiers.Count <= ItemsPerPage)
         {
@@ -177,7 +178,7 @@ public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
         _pagination.gameObject.SetActive(true);
         if (_pageText != null)
         {
-            _pageText.text = $"{MiraLocaleManager.Get("MiraApi.ModifierDisplay.Page", "Page")} {_currentPage + 1}/{Mathf.Max(totalPages, 1)}";
+            _pageText.text = $"{MiraLocaleManager.Get("MiraApi.ModifierDisplay.Page", "Page")} {_currentPage + 1}/{Math.Max(totalPages, 1)}";
         }
 
         _nextButton.gameObject.SetActive(true);
@@ -185,7 +186,7 @@ public class ModifierDisplayComponent(nint cppPtr) : MonoBehaviour(cppPtr)
 
         _modifiers.Do(x => x.Value.gameObject.SetActive(false));
         var start = _currentPage * ItemsPerPage;
-        var end = Mathf.Min(start + ItemsPerPage, _modifiers.Count);
+        var end = Math.Min(start + ItemsPerPage, _modifiers.Count);
         var modifiers = _modifiers.ToArray();
 
         for (var i = start; i < end; i++)

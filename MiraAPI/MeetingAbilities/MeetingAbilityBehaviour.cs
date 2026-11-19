@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Il2CppInterop.Runtime.Attributes;
@@ -125,7 +126,7 @@ public class MeetingAbilityBehaviour : MonoBehaviour
     /// <param name="maxTimer">The maximum timer.</param>
     public void SetFillUp(float timer, float maxTimer)
     {
-        var percentCool = Mathf.Clamp(timer / maxTimer, 0.001f, 1f);
+        var percentCool = Math.Clamp(timer / maxTimer, 0.001f, 1f);
         if (percentCool <= 0) percentCool = 1f;
         Renderer.material.SetFloat(ShaderID.Percent, percentCool);
     }

@@ -93,7 +93,7 @@ internal static class GameOptionsMenuPatch
             _gamemodeDescription.transform.localPosition = new Vector3(0.3f, 0, -0.01f);
             _gamemodeDescription.horizontalAlignment = HorizontalAlignmentOptions.Left;
             var texture = icon.LoadAsset().texture;
-            var scale = Mathf.Min(128f / texture.width, 128f / texture.height);
+            var scale = Math.Min(128f / texture.width, 128f / texture.height);
 
             var newSprite = Sprite.Create(
                 texture,

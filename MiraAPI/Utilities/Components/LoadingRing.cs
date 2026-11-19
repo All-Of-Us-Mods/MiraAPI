@@ -72,10 +72,10 @@ public class LoadingRing(IntPtr cppPtr) : MonoBehaviour(cppPtr)
             {
                 var dx = x + 0.5f - (size / 2f);
                 var dy = y + 0.5f - (size / 2f);
-                var radius = Mathf.Sqrt((dx * dx) + (dy * dy));
-                var ring = Mathf.Clamp01(radius - innerRadius) * Mathf.Clamp01(outerRadius - radius);
-                var angle = (Mathf.Atan2(dy, dx) + Mathf.PI) / (2f * Mathf.PI);
-                pixels[(y * size) + x] = new Color(1f, 1f, 1f, ring * Mathf.Lerp(1f, 0.1f, angle));
+                var radius = MathF.Sqrt((dx * dx) + (dy * dy));
+                var ring = MathUtilities.Clamp01(radius - innerRadius) * MathUtilities.Clamp01(outerRadius - radius);
+                var angle = (MathF.Atan2(dy, dx) + MathF.PI) / (2f * MathF.PI);
+                pixels[(y * size) + x] = new Color(1f, 1f, 1f, ring * MathUtilities.Lerp(1f, 0.1f, angle));
             }
         }
 

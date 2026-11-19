@@ -688,8 +688,6 @@ public static class RoleSettingMenuPatches
 
         var roleOptionSetting = Object.Instantiate(
             __instance.roleOptionSettingOrigin,
-            Vector3.zero,
-            Quaternion.identity,
             __instance.RoleChancesSettings.transform);
         roleOptionSetting.transform.localPosition = new Vector3(-0.1f, scrollerNum, -2f);
 
@@ -743,7 +741,7 @@ public static class RoleSettingMenuPatches
             passiveButton.interactableColor = btnRend.color = customRole.OptionsMenuColor.FindAlternateColor();
             passiveButton.interactableHoveredColor = Color.white;
 
-            passiveButton.OnClick.AddListener((UnityAction)(() => { ChangeTab(role, __instance); }));
+            passiveButton.OnClick.AddListener((UnityAction)(() => ChangeTab(role, __instance)));
         }
 
         if (customRole.Configuration is { MaxRoleCount: 0 })

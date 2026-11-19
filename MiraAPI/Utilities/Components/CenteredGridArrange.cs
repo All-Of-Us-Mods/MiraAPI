@@ -76,7 +76,7 @@ public class CenteredGridArrange(IntPtr iPtr) : MonoBehaviour(iPtr)
         {
             var row = index / MaxColumns;
             var rowStartIndex = row * MaxColumns;
-            var itemsInRow = Mathf.Min(MaxColumns, cells.Count - rowStartIndex);
+            var itemsInRow = Math.Min(MaxColumns, cells.Count - rowStartIndex);
             var col = index - rowStartIndex;
 
             var rowWidth = (itemsInRow - 1) * CellSize.x;

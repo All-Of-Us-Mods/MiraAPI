@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using MiraAPI.GameOptions;
 using MiraAPI.Utilities;
-using UnityEngine;
 
 namespace MiraAPI.Patches.Options;
 
@@ -52,7 +52,7 @@ public static class PlayerOptionPatches
             return true;
         }
 
-        var newIndex = Mathf.Clamp(index, 0, __instance.Values.Count - 1);
+        var newIndex = Math.Clamp(index, 0, __instance.Values.Count - 1);
         __instance.playerIndex = newIndex;
         __instance.Value = __instance.Values[newIndex].PlayerId;
         return false;

@@ -88,8 +88,8 @@ public class LocalSliderSetting(
         newSlider.OnValueChange.AddListener((UnityAction)(() =>
         {
             SetValue(RoundValue
-                ? Mathf.Round(Mathf.Lerp(SliderRange.min, SliderRange.max, newSlider.Value))
-                : Mathf.Lerp(SliderRange.min, SliderRange.max, newSlider.Value));
+                ? MathF.Round(MathUtilities.Lerp(SliderRange.min, SliderRange.max, newSlider.Value))
+                : MathUtilities.Lerp(SliderRange.min, SliderRange.max, newSlider.Value));
 
             newSlider.Title.text = GetValueText();
         }));

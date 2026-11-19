@@ -1,9 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using HarmonyLib;
 using MiraAPI.GameOptions;
 using MiraAPI.GameOptions.OptionTypes;
 using MiraAPI.Utilities;
-using UnityEngine;
 
 namespace MiraAPI.Patches.Options;
 
@@ -57,7 +57,7 @@ public static class SettingPatches
             {
                 __result = $"<b>{moddedNumberOption.NegativeWordValue}</b>";
             }
-            else if (moddedNumberOption.ZeroWordValue != "#" && Mathf.Abs(value) < 0.0001f)
+            else if (moddedNumberOption.ZeroWordValue != "#" && Math.Abs(value) < 0.0001f)
             {
                 __result = $"<b>{moddedNumberOption.ZeroWordValue}</b>";
             }
@@ -66,7 +66,7 @@ public static class SettingPatches
                 __result = Helpers.FormatValue(value, suffix, formatString);
             }
         }
-        else if (zeroIsInfinity && Mathf.Abs(value) < 0.0001f)
+        else if (zeroIsInfinity && Math.Abs(value) < 0.0001f)
         {
             __result = "<b>∞</b>";
         }

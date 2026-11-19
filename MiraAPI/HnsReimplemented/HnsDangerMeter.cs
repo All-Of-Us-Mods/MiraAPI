@@ -91,9 +91,9 @@ public sealed class HnsDangerMeter(nint cppPtr) : MonoBehaviour(cppPtr)
                 }
             }
 
-            dangerLevel1 = Mathf.Clamp01(
+            dangerLevel1 = MathUtilities.Clamp01(
                 (scaryMusicDistance - num) / (scaryMusicDistance - veryScaryMusicDistance));
-            dangerLevel2 = Mathf.Clamp01((veryScaryMusicDistance - num) / veryScaryMusicDistance);
+            dangerLevel2 = MathUtilities.Clamp01((veryScaryMusicDistance - num) / veryScaryMusicDistance);
         }
 
         UpdateDangerMeter();

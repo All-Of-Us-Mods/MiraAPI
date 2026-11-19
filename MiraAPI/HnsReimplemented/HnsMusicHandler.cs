@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using Amongus.GameModes.HideAndSeek;
 using MiraAPI.GameOptions;
 using MiraAPI.HnsReimplemented.Options;
+using MiraAPI.Utilities;
 using Reactor.Utilities.Attributes;
 using UnityEngine;
 
@@ -178,19 +179,19 @@ public sealed class HnsMusicHandler(nint cppPtr) : MonoBehaviour(cppPtr)
             SyncMusic();
         }
 
-        normalSource.volume = Mathf.Lerp(
+        normalSource.volume = MathUtilities.Lerp(
             normalSource.volume,
             normalVolume,
             Time.fixedDeltaTime * musicLerpSpeed);
-        taskSource.volume = Mathf.Lerp(
+        taskSource.volume = MathUtilities.Lerp(
             taskSource.volume,
             taskVolume,
             Time.fixedDeltaTime * musicLerpSpeed);
-        dangerLevel1Source.volume = Mathf.Lerp(
+        dangerLevel1Source.volume = MathUtilities.Lerp(
             dangerLevel1Source.volume,
             dangerLevel1Volume,
             Time.fixedDeltaTime * musicLerpSpeed);
-        dangerLevel2Source.volume = Mathf.Lerp(
+        dangerLevel2Source.volume = MathUtilities.Lerp(
             dangerLevel2Source.volume,
             dangerLevel2Volume,
             Time.fixedDeltaTime * musicLerpSpeed);

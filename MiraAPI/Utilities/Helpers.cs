@@ -284,7 +284,7 @@ public static class Helpers
         where T : MonoBehaviour
     {
         T? closest = null;
-        var closestDistanceSqr = Mathf.Infinity;
+        var closestDistanceSqr = float.PositiveInfinity;
 
         foreach (var obj in objectList)
         {
@@ -805,8 +805,8 @@ public static class Helpers
         obj.transform.localPosition = new Vector3(0f, 0.5f, 0f);
         var scrollHeight = variableTextSizing
             ? desc.textBounds.size.y - 2.5f + maxTextSize + 0.475f
-            : desc.textBounds.size.y - 2.5f + Mathf.Ceil(num / 2f) * 1.45f;
-        parent.SetYBoundsMax(Mathf.Clamp(scrollHeight, 0f, 999f));
+            : desc.textBounds.size.y - 2.5f + MathF.Ceiling(num / 2f) * 1.45f;
+        parent.SetYBoundsMax(Math.Clamp(scrollHeight, 0f, 999f));
         return obj;
     }
 
@@ -888,7 +888,7 @@ public static class Helpers
         const float groupHeaderContentGap = 0.05f;
         const int contentSortingOrder = 151;
 
-        columns = Mathf.Clamp(columns, 1, 6);
+        columns = Math.Clamp(columns, 1, 6);
         var inner = parent.Inner;
         var layout = inner.GetComponent<GridLayoutGroup>();
         if (layout)
@@ -896,11 +896,11 @@ public static class Helpers
             layout.enabled = false;
         }
 
-        var columnGap = layout ? Mathf.Clamp(layout.spacing.x, 0.1f, 0.6f) : 0.3f;
+        var columnGap = layout ? Math.Clamp(layout.spacing.x, 0.1f, 0.6f) : 0.3f;
         const int baseColumnCount = 2;
-        var baseColumnWidth = layout ? Mathf.Clamp(layout.cellSize.x, 2f, 3.2f) : 2.7f;
+        var baseColumnWidth = layout ? Math.Clamp(layout.cellSize.x, 2f, 3.2f) : 2.7f;
         var availableWidth = baseColumnWidth * baseColumnCount + columnGap * (baseColumnCount - 1);
-        var columnWidth = Mathf.Clamp(
+        var columnWidth = Math.Clamp(
             (availableWidth - (columns - 1) * columnGap) / columns,
             1f,
             3.2f);
@@ -971,7 +971,7 @@ public static class Helpers
                 var group = groupedSettings[i].Key;
                 var band = i / columns;
                 groupColumns[group] = i % columns;
-                bandHeights[band] = Mathf.Max(
+                bandHeights[band] = Math.Max(
                     bandHeights[band],
                     rowPitch * (groupedSettings[i].Count() + 1) + groupHeaderContentGap + 0.25f);
             }
@@ -979,7 +979,7 @@ public static class Helpers
             var bandOffset = 0f;
             for (var band = 0; band < bandCount; band++)
             {
-                for (var i = band * columns; i < Mathf.Min((band + 1) * columns, groupedSettings.Count); i++)
+                for (var i = band * columns; i < Math.Min((band + 1) * columns, groupedSettings.Count); i++)
                 {
                     groupTopOffsets[groupedSettings[i].Key] = bandOffset;
                     groupRows[groupedSettings[i].Key] = 0;
@@ -1209,7 +1209,7 @@ public static class Helpers
         {
             if (renderer.enabled && renderer.gameObject.activeInHierarchy)
             {
-                contentBottom = Mathf.Min(
+                contentBottom = Math.Min(
                     contentBottom,
                     inner.InverseTransformPoint(renderer.bounds.min).y);
             }
@@ -1225,7 +1225,7 @@ public static class Helpers
         var scrollRange = contentOverflow > 0.05f
             ? contentOverflow + 0.05f
             : 0f;
-        parent.SetYBoundsMax(Mathf.Clamp(scrollRange, 0f, 999f));
+        parent.SetYBoundsMax(Math.Clamp(scrollRange, 0f, 999f));
         return page;
     }
 

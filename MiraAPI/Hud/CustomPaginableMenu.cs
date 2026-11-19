@@ -121,7 +121,7 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
 
     private static int GetTotalPages(int itemCount)
     {
-        return Mathf.Max(1, Mathf.CeilToInt(itemCount / (float)ItemsPerPage));
+        return Math.Max(1, Mathf.CeilToInt(itemCount / (float)ItemsPerPage));
     }
 
     private void RefreshControllerOverlay(CppCollections.List<UiElement> list)
@@ -170,7 +170,7 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
         var filtered = GetFilteredEntries();
         noResultsText?.gameObject.SetActive(filtered.Count == 0 && !string.IsNullOrWhiteSpace(searchText));
         var totalPages = GetTotalPages(filtered.Count);
-        currentPage = Mathf.Clamp(currentPage, 0, totalPages - 1);
+        currentPage = Math.Clamp(currentPage, 0, totalPages - 1);
 
         var list = filtered.Skip(currentPage * ItemsPerPage).Take(ItemsPerPage).ToList();
         var list2 = new CppCollections.List<UiElement>();

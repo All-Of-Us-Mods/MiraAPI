@@ -89,7 +89,7 @@ public static class Extensions
     /// <param name="format">The format string to use for the timer text.</param>
     public static void SetCooldownFormat(this ActionButton? button, float timer, float maxTimer, string format = "0")
     {
-        var num = Mathf.Clamp(timer / maxTimer, 0f, 1f);
+        var num = Math.Clamp(timer / maxTimer, 0f, 1f);
         button!.isCoolingDown = num > 0f;
         button.SetCooldownFill(num);
         if (button.isCoolingDown)
@@ -111,7 +111,7 @@ public static class Extensions
     /// <param name="format">The format string to use for the timer text.</param>
     public static void SetFillUpFormat(this ActionButton button, float timer, float maxTimer, string format = "0")
     {
-        var num = Mathf.Clamp(timer / maxTimer, 0f, 1f);
+        var num = Math.Clamp(timer / maxTimer, 0f, 1f);
         button.isCoolingDown = num > 0f;
         if (button.isCoolingDown && timer < 3f)
         {

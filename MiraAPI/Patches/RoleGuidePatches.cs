@@ -147,7 +147,7 @@ public static class RoleGuidePatches
         }
 
         var targetSize = Helpers.MatchInfoGuideBaseScale *
-                         Mathf.Clamp(scaleFactor, MinGuideScaleFactor, MaxGuideScaleFactor);
+                         Math.Clamp(scaleFactor, MinGuideScaleFactor, MaxGuideScaleFactor);
         instance.transitionOpen.targetSize = targetSize;
         if (instance.MatchInfoParent.activeSelf)
         {
@@ -1018,7 +1018,7 @@ public static class RoleGuidePatches
 
     private static float GetGridScrollBounds(int count)
     {
-        return Mathf.Clamp(Mathf.Ceil(count / 2f) * 1.3f - 1.5f, 0f, 999f);
+        return Math.Clamp(MathF.Ceiling(count / 2f) * 1.3f - 1.5f, 0f, 999f);
     }
 
     private static void StartPopulate(float delay = 0f)

@@ -297,7 +297,7 @@ public abstract class CustomActionButton
     /// <param name="time">The time you want to set to.</param>
     public virtual void SetTimer(float time)
     {
-        Timer = Mathf.Clamp(time, -1, float.MaxValue);
+        Timer = Math.Clamp(time, -1, float.MaxValue);
     }
 
     /// <summary>
@@ -333,7 +333,7 @@ public abstract class CustomActionButton
     /// <param name="amount">The amount you want to set to.</param>
     public virtual void SetUses(int amount)
     {
-        UsesLeft = Mathf.Clamp(amount, 0, int.MaxValue);
+        UsesLeft = Math.Clamp(amount, 0, int.MaxValue);
         Button?.SetUsesRemaining(UsesLeft);
 
         if (Button != null) Button.usesRemainingSprite.color = UsesLeft == 0 ? Color.red : Color.white;

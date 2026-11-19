@@ -115,7 +115,7 @@ public abstract class TargetedMeetingButton
     public virtual void UpdateHandler()
     {
         Timer -= Time.deltaTime;
-        Timer = Mathf.Clamp(Timer, 0, int.MaxValue);
+        Timer = System.Math.Clamp(Timer, 0, int.MaxValue);
         FixedUpdate();
     }
 
