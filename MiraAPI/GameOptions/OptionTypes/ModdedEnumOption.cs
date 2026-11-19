@@ -43,6 +43,9 @@ public class ModdedEnumOption : ModdedBaseEnumOption<int>
     public ModdedEnumOption(string groupPrefix, string title, int defaultValue, Type enumType, string idPrefix, string[]? values = null, bool includeInPreset = true)
         : base(groupPrefix, title, defaultValue, includeInPreset)
     {
+        if (!enumType.IsEnum)
+            throw new ArgumentException($"The type {enumType.Name} is not an Enum.", nameof(enumType));
+
         idPrefix = idPrefix.Replace("%type%", enumType.Name);
 
         var rawValues = Enum.GetValues(enumType);
@@ -50,6 +53,11 @@ public class ModdedEnumOption : ModdedBaseEnumOption<int>
 
         for (var i = 0; i < rawValues.Length; i++)
             UnderlyingValues[i] = Convert.ToInt32(rawValues.GetValue(i), NumberFormatInfo.InvariantInfo);
+
+        if (values != null && values.Length != UnderlyingValues.Length)
+        {
+            throw new ArgumentException($"The number of custom values ({values.Length}) must exactly match the number of enum values ({UnderlyingValues.Length}) in {enumType.Name}.", nameof(values));
+        }
 
         Values = values ?? Enum.GetNames(enumType);
         StringNameValues = [.. Values.Select(x => MiraLocaleManager.GetOrCreateLocaleString($"{idPrefix}{x}"))];
