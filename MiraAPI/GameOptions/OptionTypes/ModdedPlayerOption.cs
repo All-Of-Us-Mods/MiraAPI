@@ -49,11 +49,7 @@ public class ModdedPlayerOption : ModdedOption<int>
         Data = data;
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedPlayerOption"/> class.
-    /// </summary>
-    /// <param name="title">The title of the option.</param>
-    /// <param name="allowNone">Whether the option includes a none option. If None is selected, value can return -1.</param>
+    /// <inheritdoc cref="ModdedPlayerOption(string, string, bool)"/>
     public ModdedPlayerOption(string title, bool allowNone = true)
         : this(string.Empty, title, allowNone)
     {

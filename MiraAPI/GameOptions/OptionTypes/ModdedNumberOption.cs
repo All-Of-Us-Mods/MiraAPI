@@ -138,20 +138,10 @@ public class ModdedNumberOption : ModdedOption<float>
         }
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedNumberOption"/> class.
-    /// </summary>
-    /// <param name="groupPrefix">The translation ID prefix of the group containing this option.</param>
-    /// <param name="title">The title of the option.</param>
-    /// <param name="defaultValue">The default value as a float.</param>
-    /// <param name="min">The minimum value.</param>
-    /// <param name="max">The maximum value.</param>
-    /// <param name="increment">The increment.</param>
-    /// <param name="suffixType">The suffix type.</param>
-    /// <param name="formatString">Optional format string for the option screen.</param>
+    /// <inheritdoc cref="ModdedNumberOption(string, string, float, float, float, float, string, string, MiraNumberSuffixes, string, bool, bool)"/>
     /// <param name="zeroInfinity">Whether zero is infinity or not.</param>
-    /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
     public ModdedNumberOption(
+#pragma warning disable CS1573 // Parameter has no matching param tag in the XML comment (but other parameters do) (Justification: Inherited.)
         string groupPrefix,
         string title,
         float defaultValue,
@@ -162,24 +152,12 @@ public class ModdedNumberOption : ModdedOption<float>
         string? formatString = null,
         bool zeroInfinity = false,
         bool includeInPreset = true)
+#pragma warning restore CS1573 // Parameter has no matching param tag in the XML comment (but other parameters do)
         : this(groupPrefix, title, defaultValue, min, max, increment, zeroInfinity ? "∞" : "#", "#", suffixType, formatString, increment == 1f, includeInPreset)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedNumberOption"/> class.
-    /// </summary>
-    /// <param name="title">The title of the option.</param>
-    /// <param name="defaultValue">The default value as a float.</param>
-    /// <param name="min">The minimum value.</param>
-    /// <param name="max">The maximum value.</param>
-    /// <param name="increment">The increment.</param>
-    /// <param name="zeroBehavior">Determines what is shown for zero.</param>
-    /// <param name="negativeBehavior">Determines what is shown for negative 1.</param>
-    /// <param name="suffixType">The suffix type.</param>
-    /// <param name="formatString">Optional format string for the option screen.</param>
-    /// <param name="halfIncrements">Whether increments can be split in half.</param>
-    /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
+    /// <inheritdoc cref="ModdedNumberOption(string, string, float, float, float, float, string, string, MiraNumberSuffixes, string, bool, bool)"/>
     public ModdedNumberOption(
         string title,
         float defaultValue,
@@ -196,18 +174,7 @@ public class ModdedNumberOption : ModdedOption<float>
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedNumberOption"/> class.
-    /// </summary>
-    /// <param name="title">The title of the option.</param>
-    /// <param name="defaultValue">The default value as a float.</param>
-    /// <param name="min">The minimum value.</param>
-    /// <param name="max">The maximum value.</param>
-    /// <param name="increment">The increment.</param>
-    /// <param name="suffixType">The suffix type.</param>
-    /// <param name="formatString">Optional format string for the option screen.</param>
-    /// <param name="zeroInfinity">Whether zero is infinity or not.</param>
-    /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
+    /// <inheritdoc cref="ModdedNumberOption(string, string, float, float, float, float, MiraNumberSuffixes, string, bool, bool)"/>
     public ModdedNumberOption(
         string title,
         float defaultValue,

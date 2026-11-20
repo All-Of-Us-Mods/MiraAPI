@@ -43,37 +43,19 @@ public class ModdedToggleOption : ModdedOption<bool>
         Data = data;
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedToggleOption"/> class.
-    /// </summary>
-    /// <param name="groupPrefix">The translation ID prefix of the group containing this option.</param>
-    /// <param name="title">The option title.</param>
-    /// <param name="defaultValue">The default value.</param>
-    /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
+    /// <inheritdoc cref="ModdedToggleOption(string, string, bool, string, string, bool)"/>
     public ModdedToggleOption(string groupPrefix, string title, bool defaultValue, bool includeInPreset = true)
         : this(groupPrefix, title, defaultValue, "On", "Off", includeInPreset)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedToggleOption"/> class.
-    /// </summary>
-    /// <param name="title">The option title.</param>
-    /// <param name="defaultValue">The default value.</param>
-    /// <param name="on">What the option displays when toggled on.</param>
-    /// <param name="off">What the option displays when toggled off.</param>
-    /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
+    /// <inheritdoc cref="ModdedToggleOption(string, string, bool, string, string, bool)"/>
     public ModdedToggleOption(string title, bool defaultValue, string on, string off, bool includeInPreset = true)
         : this(string.Empty, title, defaultValue, on, off, includeInPreset)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedToggleOption"/> class.
-    /// </summary>
-    /// <param name="title">The option title.</param>
-    /// <param name="defaultValue">The default value.</param>
-    /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
+    /// <inheritdoc cref="ModdedToggleOption(string, string, bool, string, string, bool)"/>
     public ModdedToggleOption(string title, bool defaultValue, bool includeInPreset = true)
         : this(string.Empty, title, defaultValue, includeInPreset)
     {

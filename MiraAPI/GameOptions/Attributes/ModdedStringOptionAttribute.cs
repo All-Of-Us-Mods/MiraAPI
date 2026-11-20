@@ -13,10 +13,7 @@ namespace MiraAPI.GameOptions.Attributes;
 public class ModdedStringOptionAttribute(string? title, string[] values)
     : ModdedOptionAttribute(title), ITypedOption<string>
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedStringOptionAttribute"/> class.
-    /// </summary>
-    /// <param name="values">An option list of string value.</param>
+    /// <inheritdoc cref="ModdedStringOptionAttribute(string, string[])"/>
     public ModdedStringOptionAttribute(string[] values)
         : this(null, values)
     {

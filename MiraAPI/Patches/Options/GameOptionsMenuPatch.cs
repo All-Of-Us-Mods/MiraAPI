@@ -51,6 +51,7 @@ internal static class GameOptionsMenuPatch
         flagsOption.Button = button;
         flagsOption.buttons = new PassiveButton[] { button };
 
+        button.OnClick.RemoveAllListeners();
         button.OnClick = new();
 
         return flagsOption;

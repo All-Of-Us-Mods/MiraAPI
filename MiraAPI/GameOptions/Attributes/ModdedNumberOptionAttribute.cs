@@ -30,17 +30,7 @@ public class ModdedNumberOptionAttribute(
     bool halfIncrements = false)
     : ModdedOptionAttribute(title), ITypedOption<int>, ITypedOption<float>
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedNumberOptionAttribute"/> class.
-    /// </summary>
-    /// <param name="min">The minimum value.</param>
-    /// <param name="max">The maximum value.</param>
-    /// <param name="increment">The increment.</param>
-    /// <param name="zeroBehavior">Determines what is shown for zero.</param>
-    /// <param name="negativeBehavior">Determines what is shown for negative 1.</param>
-    /// <param name="suffixType">The suffix type.</param>
-    /// <param name="formatString">Optional format string for the option screen.</param>
-    /// <param name="halfIncrements">Whether increments can be split in half (using Shift).</param>
+    /// <inheritdoc cref="ModdedNumberOptionAttribute(string, float, float, float, string, string, MiraNumberSuffixes, string, bool)"/>
     public ModdedNumberOptionAttribute(
         float min,
         float max,
@@ -54,17 +44,10 @@ public class ModdedNumberOptionAttribute(
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedNumberOptionAttribute"/> class.
-    /// </summary>
-    /// <param name="title">The title of the option.</param>
-    /// <param name="min">The minimum value.</param>
-    /// <param name="max">The maximum value.</param>
-    /// <param name="increment">The increment.</param>
-    /// <param name="suffixType">The suffix type.</param>
+    /// <inheritdoc cref="ModdedNumberOptionAttribute(string, float, float, float, string, string, MiraNumberSuffixes, string, bool)"/>
     /// <param name="zeroInfinity">Whether zero is infinity or not.</param>
-    /// <param name="formatString">Optional format string for the option screen.</param>
     public ModdedNumberOptionAttribute(
+#pragma warning disable CS1573 // Parameter has no matching param tag in the XML comment (but other parameters do) (Justification: Inherited.)
         string? title,
         float min,
         float max,
@@ -72,19 +55,12 @@ public class ModdedNumberOptionAttribute(
         MiraNumberSuffixes suffixType = MiraNumberSuffixes.None,
         string? formatString = null,
         bool zeroInfinity = false)
+#pragma warning restore CS1573 // Parameter has no matching param tag in the XML comment (but other parameters do)
         : this(title, min, max, increment, zeroInfinity ? "∞" : "#", "#", suffixType, formatString, increment == 1f)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedNumberOptionAttribute"/> class.
-    /// </summary>
-    /// <param name="min">The minimum value.</param>
-    /// <param name="max">The maximum value.</param>
-    /// <param name="increment">The increment.</param>
-    /// <param name="suffixType">The suffix type.</param>
-    /// <param name="zeroInfinity">Whether zero is infinity or not.</param>
-    /// <param name="formatString">Optional format string for the option screen.</param>
+    /// <inheritdoc cref="ModdedNumberOptionAttribute(string, float, float, float, MiraNumberSuffixes, string, bool)"/>
     public ModdedNumberOptionAttribute(
         float min,
         float max,

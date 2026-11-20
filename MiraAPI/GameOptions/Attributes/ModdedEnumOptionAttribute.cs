@@ -16,33 +16,19 @@ namespace MiraAPI.GameOptions.Attributes;
 public class ModdedEnumOptionAttribute(string? title, Type enumType, string idPrefix, string[]? values = null)
     : ModdedOptionAttribute(title)
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedEnumOptionAttribute"/> class.
-    /// </summary>
-    /// <param name="title">The title of the option.</param>
-    /// <param name="enumType">The <see cref="Enum"/> type.</param>
-    /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
+    /// <inheritdoc cref="ModdedEnumOptionAttribute(string, Type, string, string[])"/>
     public ModdedEnumOptionAttribute(string? title, Type enumType, string[]? values = null)
         : this(title, enumType, string.Empty, values)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedEnumOptionAttribute"/> class.
-    /// </summary>
-    /// <param name="enumType">The <see cref="Enum"/> type.</param>
-    /// <param name="idPrefix">The common translation ID prefix of all enum values.</param>
-    /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
+    /// <inheritdoc cref="ModdedEnumOptionAttribute(string, Type, string, string[])"/>
     public ModdedEnumOptionAttribute(Type enumType, string idPrefix, string[]? values = null)
         : this(null, enumType, idPrefix, values)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedEnumOptionAttribute"/> class.
-    /// </summary>
-    /// <param name="enumType">The <see cref="Enum"/> type.</param>
-    /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
+    /// <inheritdoc cref="ModdedEnumOptionAttribute(string, Type, string, string[])"/>
     public ModdedEnumOptionAttribute(Type enumType, string[]? values = null)
         : this(null, enumType, string.Empty, values)
     {

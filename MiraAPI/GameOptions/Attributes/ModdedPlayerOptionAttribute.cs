@@ -13,10 +13,7 @@ namespace MiraAPI.GameOptions.Attributes;
 public class ModdedPlayerOptionAttribute(string? title, bool allowNone = true)
     : ModdedOptionAttribute(title), ITypedOption<int>, ITypedOption<NetworkedPlayerInfo?>
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedPlayerOptionAttribute"/> class.
-    /// </summary>
-    /// <param name="allowNone">Whether the option includes a none option. If None is selected, value will return -1.</param>
+    /// <inheritdoc cref="ModdedPlayerOptionAttribute(string, bool)"/>
     public ModdedPlayerOptionAttribute(bool allowNone = true)
         : this(null, allowNone)
     {

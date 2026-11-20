@@ -70,42 +70,19 @@ public class ModdedEnumOption : ModdedBaseEnumOption<int>
         InitializeData(GetIndex(defaultValue));
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedEnumOption"/> class.
-    /// </summary>
-    /// <param name="groupPrefix">The translation ID prefix of the group containing this option.</param>
-    /// <param name="title">The title of the option.</param>
-    /// <param name="defaultValue">The default value as an int.</param>
-    /// <param name="enumType">The <see cref="Enum"/> type.</param>
-    /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
-    /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
+    /// <inheritdoc cref="ModdedEnumOption(string, string, int, Type, string, string[], bool)"/>
     public ModdedEnumOption(string groupPrefix, string title, int defaultValue, Type enumType, string[]? values = null, bool includeInPreset = true)
         : this(groupPrefix, title, defaultValue, enumType, string.Empty, values, includeInPreset)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedEnumOption"/> class.
-    /// </summary>
-    /// <param name="title">The title of the option.</param>
-    /// <param name="defaultValue">The default value as an int.</param>
-    /// <param name="enumType">The <see cref="Enum"/> type.</param>
-    /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
-    /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
+    /// <inheritdoc cref="ModdedEnumOption(string, string, int, Type, string, string[], bool)"/>
     public ModdedEnumOption(string title, int defaultValue, Type enumType, string[]? values = null, bool includeInPreset = true)
         : this(string.Empty, title, defaultValue, enumType, values, includeInPreset)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedEnumOption"/> class.
-    /// </summary>
-    /// <param name="title">The title of the option.</param>
-    /// <param name="defaultValue">The default value as an int.</param>
-    /// <param name="enumType">The <see cref="Enum"/> type.</param>
-    /// <param name="idPrefix">The common translation ID prefix of all enum values.</param>
-    /// <param name="values">An option list of string values to use in place of the <see langword="enum"/> name.</param>
-    /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
+    /// <inheritdoc cref="ModdedEnumOption(string, string, int, Type, string, string[], bool)"/>
     public ModdedEnumOption(string title, int defaultValue, Type enumType, string idPrefix, string[]? values = null, bool includeInPreset = true)
         : this(string.Empty, title, defaultValue, enumType, idPrefix, values, includeInPreset)
     {
@@ -144,7 +121,7 @@ public class ModdedEnumOption<T> : ModdedBaseEnumOption<T>
     /// </summary>
     /// <param name="groupPrefix">The translation ID prefix of the group containing this option.</param>
     /// <param name="title">The title of the option.</param>
-    /// <param name="defaultValue">The default value as an <see langword="int"/>.</param>
+    /// <param name="defaultValue">The default value.</param>
     /// <param name="idPrefix">The common translation ID prefix of all enum values.</param>
     /// <param name="allowedValues">An option array of enum values to filter down what values can actually be used.</param>
     /// <param name="values">An optional array of string values to use in place of the <see langword="enum"/> name.</param>

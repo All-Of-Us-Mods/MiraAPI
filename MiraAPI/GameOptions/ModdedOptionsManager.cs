@@ -312,8 +312,6 @@ public static class ModdedOptionsManager
         attribute.ValueType = valueType;
         attribute.HolderOptionList = optionList;
 
-        ((IModdedArrayBinding)propertyVal).Bind(attribute);
-
         Func<int, Delegate?>? visibilityFactory = null, getterFactory = null, setterFactory = null, changedFactory = null;
 
         foreach (var attr in attributes)
@@ -353,6 +351,8 @@ public static class ModdedOptionsManager
 
             RegisterOption(type, option, group, property.Name + (i + 1), pluginInfo);
         }
+
+        ((IModdedArrayBinding)propertyVal).Bind(attribute);
 
         PropertyToOptionListMap.Add((type, property.Name), optionList);
     }
@@ -458,7 +458,7 @@ public static class ModdedOptionsManager
         if (PropertyToOptionMap.TryGetValue((type, propertyName), out var option))
             return (TOption)option;
 
-        Error($"Could not find an option with the property name {propertyName} in {type.Name}");
+        Error($"Could not find an option with property name {propertyName} in {type.Name}");
         return default;
     }
 
@@ -479,7 +479,7 @@ public static class ModdedOptionsManager
         if (PropertyToOptionListMap.TryGetValue((type, propertyName), out var optionList))
             return (TList)optionList;
 
-        Error($"Could not find an option list with the property name {propertyName} in {type.Name}");
+        Error($"Could not find an option list with property name {propertyName} in {type.Name}");
         return default;
     }
 

@@ -9,15 +9,12 @@ namespace MiraAPI.GameOptions.Attributes;
 /// Attribute for creating a list of player options.
 /// </summary>
 /// <param name="title">The option title.</param>
-/// <param name="allowNone">Whether the option includes a none option. If None is selected, value will return -1.</param>
+/// <param name="allowNone">Whether the option includes a none option. If None is selected, value can return -1.</param>
 [AttributeUsage(AttributeTargets.Property)]
 public class ModdedPlayerOptionListAttribute(string? title, bool allowNone = true)
     : ModdedOptionListAttribute(title), ITypedOptionList<int>, ITypedOptionList<NetworkedPlayerInfo?>
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedPlayerOptionListAttribute"/> class.
-    /// </summary>
-    /// <param name="allowNone">Whether the option includes a none option. If None is selected, value will return -1.</param>
+    /// <inheritdoc cref="ModdedPlayerOptionListAttribute(string, bool)"/>
     public ModdedPlayerOptionListAttribute(bool allowNone = true)
         : this(null, allowNone)
     {

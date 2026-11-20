@@ -31,13 +31,7 @@ public class ModdedStringOption : ModdedBaseStringOption<string>
         InitializeData(GetIndex(defaultValue));
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedStringOption"/> class.
-    /// </summary>
-    /// <param name="title">The title of the option.</param>
-    /// <param name="defaultValue">The default value as a string.</param>
-    /// <param name="values">An option list of string values to use.</param>
-    /// <param name="includeInPreset">Whether to include this option in the preset or not.</param>
+    /// <inheritdoc cref="ModdedStringOption(string, string, string, string[], bool)"/>
     public ModdedStringOption(string title, string defaultValue, string[] values, bool includeInPreset = true)
         : this(string.Empty, title, defaultValue, values, includeInPreset)
     {

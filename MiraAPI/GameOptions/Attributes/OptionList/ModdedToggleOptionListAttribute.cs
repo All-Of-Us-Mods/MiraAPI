@@ -15,29 +15,20 @@ namespace MiraAPI.GameOptions.Attributes;
 public class ModdedToggleOptionListAttribute(string? title, string on, string off)
     : ModdedOptionListAttribute(title), ITypedOptionList<bool>
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedToggleOptionListAttribute"/> class.
-    /// </summary>
-    /// <param name="on">What the option displays when toggled on.</param>
-    /// <param name="off">What the option displays when toggled off.</param>
+    /// <inheritdoc cref="ModdedToggleOptionListAttribute(string, string, string)"/>
     public ModdedToggleOptionListAttribute(string on, string off)
         : this(null, on, off)
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedToggleOptionListAttribute"/> class.
-    /// </summary>
-    /// <param name="title">The option's title.</param>
+    /// <inheritdoc cref="ModdedToggleOptionListAttribute(string, string, string)"/>
     public ModdedToggleOptionListAttribute(string? title)
         // ReSharper disable once IntroduceOptionalParameters.Global (Justification: Kept for backwards compatibility.)
         : this(title, "On", "Off")
     {
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ModdedToggleOptionListAttribute"/> class.
-    /// </summary>
+    /// <inheritdoc cref="ModdedToggleOptionListAttribute(string, string, string)"/>
     public ModdedToggleOptionListAttribute()
         : this(null, "On", "Off")
     {
