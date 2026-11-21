@@ -68,12 +68,13 @@ public class ModdedFlagsOption<T> : ModdedOption<T>, IFlagsOption
     /// </summary>
     public T[] AllowedValues { get; }
 
+    /// <inheritdoc/>
+    int IFlagsOption.Value => value;
+
     private readonly string allTranslationId;
     private readonly string noneTranslationId;
 
     private int value;
-
-    int IFlagsOption.Value => value;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ModdedFlagsOption{T}"/> class.
@@ -95,9 +96,7 @@ public class ModdedFlagsOption<T> : ModdedOption<T>, IFlagsOption
         if (!enumType.IsDefined<FlagsAttribute>(false))
             throw new ArgumentException($"{enumType.Name} does not have [Flags], and therefore cannot be used for multi-select options.");
 
-        if (allowedValues == null)
-            allowedValues = Enum.GetValues<T>();
-
+        allowedValues ??= Enum.GetValues<T>();
         allowedValues = [.. allowedValues.Distinct()];
 
         var tuples = allowedValues
@@ -133,10 +132,10 @@ public class ModdedFlagsOption<T> : ModdedOption<T>, IFlagsOption
         All = all;
         Flags = [.. tuples.Select(x => x.Bit)];
         AllowedValues = [.. tuples.Select(x => x.Val)];
-        Values = values ?? [.. tuples.Select(x => x.Val.ToString())];
         AllName = MiraLocaleManager.GetOrCreateLocaleString(allTranslationId);
         NoneName = MiraLocaleManager.GetOrCreateLocaleString(noneTranslationId);
-        StringNameValues = [.. Values.Select(x => MiraLocaleManager.GetOrCreateLocaleString(idPrefix + x))];
+        Values = [.. (values ?? AllowedValues.Cast<object>()).Select(x => idPrefix + x)];
+        StringNameValues = [.. Values.Select(MiraLocaleManager.GetOrCreateLocaleString)];
 
         var data = ScriptableObject.CreateInstance<FlagsGameSetting>();
         data.Type = global::OptionTypes.MultipleChoice; // How nice of Innersloth to provide us with a pre-defined enum value
@@ -166,7 +165,7 @@ public class ModdedFlagsOption<T> : ModdedOption<T>, IFlagsOption
     {
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, PlayerOption playerOpt, Transform container)
     {
         var multiSelectOption = GameOptionsMenuPatch.CreateOption(stringOpt, container);
@@ -182,13 +181,13 @@ public class ModdedFlagsOption<T> : ModdedOption<T>, IFlagsOption
         return multiSelectOption;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override float GetFloatData()
     {
         return value;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override NetData GetNetData()
     {
         var buffer = new byte[Unsafe.SizeOf<T>()];
@@ -196,13 +195,13 @@ public class ModdedFlagsOption<T> : ModdedOption<T>, IFlagsOption
         return new(Id, buffer);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void HandleNetData(byte[] data)
     {
         SetValue(Unsafe.ReadUnaligned<T>(ref data[0]));
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override string GetDisplayValue()
     {
         if (value == 0)
@@ -250,13 +249,13 @@ public class ModdedFlagsOption<T> : ModdedOption<T>, IFlagsOption
         return "MiraApi.Compound".Translate(firstNameString, activeCount - 1);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override T GetValueFromOptionBehaviour(OptionBehaviour optionBehaviour)
     {
         return (T)Enum.ToObject(typeof(T), optionBehaviour.GetInt());
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     protected override void OnValueChanged(T newValue)
     {
         if (OptionBehaviour && OptionBehaviour is FlagsOption opt)
@@ -265,13 +264,13 @@ public class ModdedFlagsOption<T> : ModdedOption<T>, IFlagsOption
         }
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     protected override ConfigDescription? CreateDescription()
     {
         return new(string.Empty, new AcceptableFlagValues<T>(AllowedValues));
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     protected override T ModifyValue(T newValue, T oldValue)
     {
         value = Convert.ToInt32(newValue, NumberFormatInfo.InvariantInfo) & All;

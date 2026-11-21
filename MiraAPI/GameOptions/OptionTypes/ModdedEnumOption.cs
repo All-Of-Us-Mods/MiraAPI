@@ -65,7 +65,7 @@ public class ModdedEnumOption : ModdedBaseEnumOption<int>
 
         idPrefix = idPrefix.Replace("%type%", enumType.Name);
 
-        Values = [.. (values ?? rawValues.Cast<object>()).Select(x => idPrefix + x)];
+        Values = [.. (values ?? UnderlyingValues.Select(x => Enum.ToObject(enumType, x))).Select(x => idPrefix + x)];
 
         InitializeData(GetIndex(defaultValue));
     }
