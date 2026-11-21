@@ -116,7 +116,7 @@ public static class PresetManager
         {
             if (btn != null)
             {
-                Object.DestroyImmediate(btn);
+                UObject.DestroyImmediate(btn);
             }
         }
 

@@ -34,7 +34,7 @@ internal static class GameOptionsMenuPatch
 
     public static FlagsOption CreateOption(StringOption stringOption, Transform container)
     {
-        var baseOption = Object.Instantiate(stringOption, container).DontUnload().DontDestroy();
+        var baseOption = UObject.Instantiate(stringOption, container).DontUnload().DontDestroy();
 
         var optionGO = baseOption.gameObject;
         var titleText = baseOption.TitleText;
