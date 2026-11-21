@@ -15,7 +15,6 @@ using Reactor.Networking.Rpc;
 using Reactor.Utilities.Extensions;
 using TMPro;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.Roles;
 
@@ -254,7 +253,7 @@ public static class CustomRoleManager
     internal static TaskPanelBehaviour CreateRoleTab(ICustomRole role)
     {
         var ogPanel = HudManager.Instance.TaskStuff.transform.FindChild("TaskPanel").GetComponent<TaskPanelBehaviour>();
-        var clonePanel = Object.Instantiate(ogPanel.gameObject, ogPanel.transform.parent);
+        var clonePanel = UObject.Instantiate(ogPanel.gameObject, ogPanel.transform.parent);
         clonePanel.name = "RolePanel";
 
         var newPanel = clonePanel.GetComponent<TaskPanelBehaviour>();

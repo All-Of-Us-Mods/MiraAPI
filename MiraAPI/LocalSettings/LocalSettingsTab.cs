@@ -10,7 +10,6 @@ using Reactor.Utilities.Extensions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.LocalSettings;
 
@@ -128,7 +127,7 @@ public abstract class LocalSettingsTab(ConfigFile config)
     public virtual GameObject CreateTab(OptionsMenuBehaviour instance)
     {
         var genTab = instance.transform.FindChild("GeneralTab");
-        var tab = Object.Instantiate(genTab.gameObject, instance.transform);
+        var tab = UObject.Instantiate(genTab.gameObject, instance.transform);
         tab.name = $"{TabName}Tab";
         tab.transform.DestroyChildren();
         tab.gameObject.SetActive(false);
@@ -247,7 +246,7 @@ public abstract class LocalSettingsTab(ConfigFile config)
     /// <returns>The created button <see cref="GameObject"/>.</returns>
     public virtual GameObject CreateTabButton(OptionsMenuBehaviour instance, ref int tabIdx, ref float offset)
     {
-        var tabButtonObject = Object.Instantiate(instance.Tabs[0], instance.transform);
+        var tabButtonObject = UObject.Instantiate(instance.Tabs[0], instance.transform);
         tabButtonObject.name = $"{TabName} Button";
         tabButtonObject.transform.localPosition = new Vector3(2.4f, 2.1f - offset, 5.5f);
         tabButtonObject.transform.localScale = new Vector3(1.25f, 1.25f, 1);
@@ -319,7 +318,7 @@ public abstract class LocalSettingsTab(ConfigFile config)
 
     private void CreateLabel(GameObject template, Transform parent, string text, ref float offset)
     {
-        var label = Object.Instantiate(template, parent);
+        var label = UObject.Instantiate(template, parent);
         label.transform.localPosition = new Vector3(0, 1.85f - offset);
         label.GetComponent<TextTranslatorTMP>().Destroy();
         label.name = text;

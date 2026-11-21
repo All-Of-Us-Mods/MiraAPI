@@ -404,7 +404,7 @@ public class HideAndSeekMode : AbstractGameMode
         ShipStatus.Instance.StartSFX();
         HnsMusicHandler.Instance.OnGameStart();
         HnsDangerMeter.Instance.OnGameStart();
-        UnityEngine.Object.Destroy(introCutscene.gameObject);
+        UObject.Destroy(introCutscene.gameObject);
     }
 
     /// <inheritdoc/>
@@ -536,7 +536,7 @@ public class HideAndSeekMode : AbstractGameMode
         HudManager.Instance.NotifyOfDeath();
         var popup = GameManagerCreator.Instance.HideAndSeekManagerPrefab.DeathPopupPrefab;
         deadPlayerCount++;
-        var item = UnityEngine.Object.Instantiate(popup, HudManager.Instance.transform.parent);
+        var item = UObject.Instantiate(popup, HudManager.Instance.transform.parent);
         item.Show(player, deadPlayerCount);
     }
 }

@@ -16,7 +16,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.Patches.Options;
 
@@ -257,14 +256,14 @@ internal static class GameOptionsMenuPatch
 
         var num = 0.713f;
 
-        var gmCategory = Object.Instantiate(instance.categoryHeaderOrigin, container);
+        var gmCategory = UObject.Instantiate(instance.categoryHeaderOrigin, container);
         gmCategory.SetHeader(GameModeOption.CustomName, 20);
         gmCategory.transform.localScale = Vector3.one * 0.63f;
         gmCategory.transform.localPosition = new Vector3(-0.903f, num, -2f);
 
         num -= 0.63f;
 
-        GameModeOption.OptionBehaviour = Object.Instantiate(instance.stringOptionOrigin, container);
+        GameModeOption.OptionBehaviour = UObject.Instantiate(instance.stringOptionOrigin, container);
         GameModeOption.OptionBehaviour.transform.localPosition = new Vector3(0.952f, num, -2f);
         GameModeOption.OptionBehaviour.SetClickMask(instance.ButtonClickMask);
 
@@ -296,7 +295,7 @@ internal static class GameOptionsMenuPatch
             layer = container.gameObject.layer,
         }.transform;
 
-        var gamemodeBg = Object.Instantiate(GameModeOption.OptionBehaviour.transform.GetChild(0).gameObject, modeInfoHolder);
+        var gamemodeBg = UObject.Instantiate(GameModeOption.OptionBehaviour.transform.GetChild(0).gameObject, modeInfoHolder);
         gamemodeBg.transform.localPosition = Vector3.zero;
         gamemodeBg.transform.localScale = new Vector3(1.35f, 0.85f, 1);
         gamemodeBg.name = "Background";
@@ -315,7 +314,7 @@ internal static class GameOptionsMenuPatch
         _modIcon.sprite = MiraAssets.BlankSprite.LoadAsset();
         _modIcon.material = gamemodeBg.GetComponent<SpriteRenderer>().material;
 
-        var gamemodeTextObj = Object.Instantiate(GameModeOption.OptionBehaviour.transform.GetChild(1).gameObject, modeInfoHolder);
+        var gamemodeTextObj = UObject.Instantiate(GameModeOption.OptionBehaviour.transform.GetChild(1).gameObject, modeInfoHolder);
         gamemodeTextObj.transform.localPosition = new Vector3(0.3f, 0, -0.01f);
         gamemodeTextObj.transform.localScale = new Vector3(2.12f, 2.12f, 1);
         _gamemodeDescription = gamemodeTextObj.GetComponentInChildren<TextMeshPro>();
@@ -327,7 +326,7 @@ internal static class GameOptionsMenuPatch
         additionalVanillaScrollNum = 0f;
         foreach (var rulesCategory in GameManager.Instance.GameSettingsList.AllCategories)
         {
-            var categoryHeaderMasked = Object.Instantiate(instance.categoryHeaderOrigin, container);
+            var categoryHeaderMasked = UObject.Instantiate(instance.categoryHeaderOrigin, container);
             categoryHeaderMasked.SetHeader(rulesCategory.CategoryName, 20);
             categoryHeaderMasked.transform.localScale = Vector3.one * 0.63f;
             categoryHeaderMasked.transform.localPosition = new Vector3(-0.903f, num, -2f);
@@ -338,10 +337,10 @@ internal static class GameOptionsMenuPatch
             {
                 OptionBehaviour? optionBehaviour = baseGameSetting.Type switch
                 {
-                    OptionTypes.Checkbox => Object.Instantiate(instance.checkboxOrigin, container),
-                    OptionTypes.String => Object.Instantiate(instance.stringOptionOrigin, container),
-                    OptionTypes.Float or OptionTypes.Int => Object.Instantiate(instance.numberOptionOrigin, container),
-                    OptionTypes.Player => Object.Instantiate(instance.playerOptionOrigin, container),
+                    OptionTypes.Checkbox => UObject.Instantiate(instance.checkboxOrigin, container),
+                    OptionTypes.String => UObject.Instantiate(instance.stringOptionOrigin, container),
+                    OptionTypes.Float or OptionTypes.Int => UObject.Instantiate(instance.numberOptionOrigin, container),
+                    OptionTypes.Player => UObject.Instantiate(instance.playerOptionOrigin, container),
                     _ => null,
                 };
 
@@ -462,7 +461,7 @@ internal static class GameOptionsMenuPatch
 
     private static void CreateGroup(GameOptionsMenu menu, AbstractOptionGroup group, Transform container, ref float num, ref List<OptionBehaviour> optionBehaviours, ref List<CategoryHeaderMasked> categoryHeaders)
     {
-        var categoryHeaderMasked = Object.Instantiate(menu.categoryHeaderOrigin, container);
+        var categoryHeaderMasked = UObject.Instantiate(menu.categoryHeaderOrigin, container);
         categoryHeaderMasked.transform.localPosition = new Vector3(-0.903f, num + 1, -2f);
         categoryHeaderMasked.transform.localScale = Vector3.one * 0.63f;
         categoryHeaders.Add(categoryHeaderMasked);
@@ -707,7 +706,7 @@ internal static class GameOptionsMenuPatch
         group.Ready = false;
         if (group.Header == null || !group.Header)
         {
-            var categoryHeaderMasked = Object.Instantiate(
+            var categoryHeaderMasked = UObject.Instantiate(
                 menu.categoryHeaderOrigin,
                 Vector3.zero,
                 Quaternion.identity,
@@ -731,7 +730,7 @@ internal static class GameOptionsMenuPatch
 
             categoryHeaderMasked.gameObject.SetActive(false);
 
-            var newText = Object.Instantiate(categoryHeaderMasked.Title, categoryHeaderMasked.transform);
+            var newText = UObject.Instantiate(categoryHeaderMasked.Title, categoryHeaderMasked.transform);
             newText.text = $"<size=70%>({"MiraApi.GameSetting.Global.ClickToClose".Translate()})</size>";
             newText.transform.localPosition = new Vector3(2.6249f, -0.165f, 0f);
             newText.GetComponent<TextTranslatorTMP>().Destroy();

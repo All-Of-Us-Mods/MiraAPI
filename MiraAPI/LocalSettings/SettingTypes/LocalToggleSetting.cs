@@ -5,7 +5,6 @@ using MiraAPI.Utilities;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.LocalSettings.SettingTypes;
 
@@ -28,7 +27,7 @@ public class LocalToggleSetting(
     /// <inheritdoc />
     public override GameObject CreateOption(ToggleButtonBehaviour toggle, SlideBar slider, Transform parent, ref float offset, ref int order, bool last)
     {
-        var toggleObject = Object.Instantiate(toggle, parent).GetComponent<ToggleButtonBehaviour>();
+        var toggleObject = UObject.Instantiate(toggle, parent).GetComponent<ToggleButtonBehaviour>();
         _toggle = toggleObject;
         var tmp = toggleObject.transform.FindChild("Text_TMP").GetComponent<TextMeshPro>();
         var passiveButton = toggleObject.GetComponent<PassiveButton>();

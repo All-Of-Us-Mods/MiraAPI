@@ -14,7 +14,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.Patches.Options;
 
@@ -92,7 +91,7 @@ internal static class GamePresetsTabPatches
                     continue;
                 }
 
-                var button = Object.Instantiate(prefab, presetHolder.transform);
+                var button = UObject.Instantiate(prefab, presetHolder.transform);
                 button.buttonText.text = preset.Name;
                 if (button.buttonText.TryGetComponent<TextTranslatorTMP>(out var tmp))
                 {
@@ -173,7 +172,7 @@ internal static class GamePresetsTabPatches
         if (!_newDivider)
         {
             var oldDiv = presetTab.transform.FindChild("DividerImage");
-            _newDivider = Object.Instantiate(oldDiv.gameObject, oldDiv.transform.parent);
+            _newDivider = UObject.Instantiate(oldDiv.gameObject, oldDiv.transform.parent);
             _newDivider.transform.localPosition = new Vector3(1.85f, 0.13f, 0f);
             _newDivider.transform.localScale = new Vector3(1.13f, 1, 1);
             _newDivider.transform.localRotation = Quaternion.Euler(new Vector3(0, 0, 90));
@@ -182,7 +181,7 @@ internal static class GamePresetsTabPatches
         PassiveButton saveButton;
         if (!_saveButton)
         {
-            saveButton = Object.Instantiate(prefab, presetTab.transform);
+            saveButton = UObject.Instantiate(prefab, presetTab.transform);
             _saveButton = saveButton.gameObject;
             _saveButton.name = "SaveButton";
             _saveButton.transform.localPosition = new Vector3(3.2f, 1.7f, -2);
@@ -252,7 +251,7 @@ internal static class GamePresetsTabPatches
         PassiveButton refreshButton;
         if (!_refreshButton)
         {
-            refreshButton = Object.Instantiate(saveButton, presetTab.transform);
+            refreshButton = UObject.Instantiate(saveButton, presetTab.transform);
             _refreshButton = refreshButton.gameObject;
             _refreshButton.name = "RefreshButton";
             _refreshButton.transform.localPosition = new Vector3(2.85f, 1.1f, -2);
@@ -277,7 +276,7 @@ internal static class GamePresetsTabPatches
 
         if (!_folderButton)
         {
-            var openFolderButton = Object.Instantiate(refreshButton, presetTab.transform);
+            var openFolderButton = UObject.Instantiate(refreshButton, presetTab.transform);
             _folderButton = openFolderButton.gameObject;
             _folderButton.name = "OpenFolderButton";
             _folderButton.transform.localPosition = new Vector3(3.55f, 1.1f, -2);

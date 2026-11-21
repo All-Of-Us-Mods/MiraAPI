@@ -27,7 +27,7 @@ public static class ScrollingColorsPatch
 
         if (__instance.scroller == null)
         {
-            var newScroller = Object.Instantiate(tab.scroller, __instance.transform, true);
+            var newScroller = UObject.Instantiate(tab.scroller, __instance.transform, true);
             newScroller.Inner.transform.DestroyChildren();
 
             var maskObj = new GameObject

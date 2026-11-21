@@ -4,7 +4,6 @@ using MiraAPI.Utilities.Assets;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.MeetingAbilities;
 
@@ -117,7 +116,7 @@ public abstract class MeetingActionButton
         Timer = AmongUsClient.Instance?.NetworkMode == NetworkModes.FreePlay ? 0 : InitialCooldown;
         TimerPaused = false;
 
-        Button = Object.Instantiate(MeetingHud.Instance.MeetingAbilityButton, parent);
+        Button = UObject.Instantiate(MeetingHud.Instance.MeetingAbilityButton, parent);
         Button.name = Name + "Button";
         Button.OverrideText(Name.ToUpperInvariant());
 

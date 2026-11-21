@@ -9,7 +9,7 @@ namespace MiraAPI.Utilities.Assets;
 /// <param name="uid">The guid of the asset.</param>
 /// <typeparam name="T">The type of the asset to be loaded.</typeparam>
 public class LoadableAddressableAsset<T>(string uid) : LoadableAsset<T>
-    where T : UnityEngine.Object
+    where T : UObject
 {
     private readonly Action<LoadableAddressableAsset<T>>? _gcAction;
 

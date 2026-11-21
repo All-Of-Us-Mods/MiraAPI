@@ -9,7 +9,6 @@ using Reactor.Utilities.Attributes;
 using Reactor.Utilities.Extensions;
 using UnityEngine;
 using UnityEngine.Events;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.Hud;
 
@@ -196,7 +195,7 @@ public abstract class CustomPhoneMenu : ICustomMenu
         var shapeShifterRole = RoleManager.Instance.GetRole(RoleTypes.Shapeshifter);
 
         var ogMenu = shapeShifterRole.TryCast<ShapeshifterRole>()!.ShapeshifterMenu;
-        var newMenu = Object.Instantiate(ogMenu);
+        var newMenu = UObject.Instantiate(ogMenu);
         var component = newMenu.gameObject.AddComponent<CustomPhoneMenuComponent>();
         var customMenu = new TMenu
         {
@@ -251,7 +250,7 @@ public abstract class CustomPhoneMenu : ICustomMenu
             var index = currentEntries + i;
             var entry = list[i];
 
-            var shapeshifterPanel = Object.Instantiate(panelPrefab, transform);
+            var shapeshifterPanel = UObject.Instantiate(panelPrefab, transform);
             shapeshifterPanel.transform.localPosition = new Vector3(0f, 0f, -1f);
             entryPanelConfig(shapeshifterPanel, index, entry);
 

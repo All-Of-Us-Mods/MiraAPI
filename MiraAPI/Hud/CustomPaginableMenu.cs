@@ -13,7 +13,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.Hud;
 
@@ -67,7 +66,7 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
     {
         var customMenu = CustomPhoneMenu.Create<TMenu>(onMouseOut, onMouseOver);
 
-        var nextButton = Object.Instantiate(customMenu.backButton, customMenu.transform).gameObject;
+        var nextButton = UObject.Instantiate(customMenu.backButton, customMenu.transform).gameObject;
         nextButton.transform.localPosition = new Vector3(1.85f, -2.185f, customMenu.MenuDepth);
         nextButton.transform.localScale = new Vector3(0.65f, 0.65f, 1);
         nextButton.name = "RightArrowButton";
@@ -78,7 +77,7 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
         passiveButton.OnClick = new Button.ButtonClickedEvent();
         passiveButton.OnClick.AddListener((UnityAction)customMenu.NextPage);
 
-        var backButton = Object.Instantiate(nextButton, customMenu.transform).gameObject;
+        var backButton = UObject.Instantiate(nextButton, customMenu.transform).gameObject;
         backButton.transform.localPosition = new Vector3(-1.85f, -2.185f, customMenu.MenuDepth);
         backButton.name = "LeftArrowButton";
         backButton.GetComponent<CloseButtonConsoleBehaviour>().Destroy();
@@ -208,7 +207,7 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
         }
 
         var searchRoot = PrefabTextbox.transform.parent != null ? PrefabTextbox.transform.parent.gameObject : PrefabTextbox.gameObject;
-        var searchObj = Object.Instantiate(searchRoot, transform);
+        var searchObj = UObject.Instantiate(searchRoot, transform);
         searchObj.name = $"{Name}SearchBar";
 
         foreach (var aspect in searchObj.GetComponentsInChildren<AspectPosition>(true))
@@ -278,7 +277,7 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
             }
         }));
 
-        var label = Object.Instantiate(HudManager.Instance?.TaskPanel.taskText, transform);
+        var label = UObject.Instantiate(HudManager.Instance?.TaskPanel.taskText, transform);
         if (label != null)
         {
             label.name = $"{Name}SearchLabel";
@@ -295,7 +294,7 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
             }
         }
 
-        noResultsText = Object.Instantiate(HudManager.Instance?.TaskPanel.taskText, transform);
+        noResultsText = UObject.Instantiate(HudManager.Instance?.TaskPanel.taskText, transform);
         if (noResultsText != null)
         {
             noResultsText.name = $"{Name}NoResultsText";
@@ -313,7 +312,7 @@ public abstract class CustomPaginableMenu : CustomPhoneMenu<CustomPaginableMenu.
         var clearButtonX = searchBounds.max.x + 0.2f;
         var clearButtonY = searchBounds.center.y;
 
-        var clearObj = Object.Instantiate(backButton.gameObject, transform);
+        var clearObj = UObject.Instantiate(backButton.gameObject, transform);
         clearObj.name = "ClearSearchButton";
         clearObj.transform.localScale = new Vector3(0.35f, 0.35f, 1f);
         clearObj.transform.localPosition = new Vector3(clearButtonX, clearButtonY, -1f);

@@ -4,7 +4,6 @@ using System.Linq;
 using MiraAPI.Networking;
 using MiraAPI.Utilities;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.GameOptions.OptionTypes;
 
@@ -73,7 +72,7 @@ public class ModdedPlayerOption : ModdedOption<int>
         var newIndex = oldPlayer ? Values.IndexOf(oldPlayer!) : -1;
         Value = newIndex >= 0 ? newIndex : (AllowNone ? -1 : 0);
 
-        var playerOption = Object.Instantiate(playerOpt, container);
+        var playerOption = UObject.Instantiate(playerOpt, container);
         playerOption.name = $"{ParentMod!.OptionsTitleText}.PlayerOption.{Title}";
 
         playerOption.SetUpFromData(Data, 20);

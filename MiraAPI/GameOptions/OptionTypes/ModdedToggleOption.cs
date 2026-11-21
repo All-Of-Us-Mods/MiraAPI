@@ -2,7 +2,6 @@
 using MiraAPI.Networking;
 using MiraAPI.Translation;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.GameOptions.OptionTypes;
 
@@ -82,7 +81,7 @@ public class ModdedToggleOption : ModdedOption<bool>
     /// <inheritdoc />
     public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, PlayerOption playerOpt, Transform container)
     {
-        var toggleOption = Object.Instantiate(toggleOpt, container);
+        var toggleOption = UObject.Instantiate(toggleOpt, container);
         toggleOption.name = $"{ParentMod!.OptionsTitleText}.ToggleOption.{Title}";
 
         toggleOption.SetUpFromData(Data, 20);
