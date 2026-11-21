@@ -17,13 +17,13 @@ namespace MiraAPI.GameOptions.OptionTypes;
 /// <typeparam name="T">The value type.</typeparam>
 public abstract class ModdedOption<T> : IModdedOption
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public uint Id { get; } = ModdedOptionsManager.NextId;
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public string Title { get; set; }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public StringNames StringName { get; }
 
     /// <summary>
@@ -55,16 +55,16 @@ public abstract class ModdedOption<T> : IModdedOption
     /// </summary>
     public T DefaultValue { get; }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public Func<bool> Visible { get; set; } = DelegateUtilities.AlwaysTrue;
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public bool IncludeInPreset { get; set; }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public bool ShowNotification { get; set; } = true;
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public BaseGameSetting Data { get; protected set; } = null!;
 
     /// <inheritdoc cref="IModdedOption.Getter"/>
@@ -76,16 +76,16 @@ public abstract class ModdedOption<T> : IModdedOption
     /// <inheritdoc cref="IModdedOption.ChangedEvent"/>
     public Action<T>? ChangedEvent { get; set; }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public OptionBehaviour? OptionBehaviour { get; protected set; }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public ConfigDefinition? ConfigDefinition { get; set; }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public AbstractOptionGroup ParentGroup { get; set; }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public IMiraPlugin? ParentMod
     {
         get;
@@ -99,28 +99,28 @@ public abstract class ModdedOption<T> : IModdedOption
         }
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     Delegate? IModdedOption.Getter
     {
         get => Getter;
         set => Getter = value as Func<T, T>;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     Delegate? IModdedOption.Setter
     {
         get => Setter;
         set => Setter = value as Func<T, T, T>;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     Delegate? IModdedOption.ChangedEvent
     {
         get => ChangedEvent;
         set => ChangedEvent = value as Action<T>;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public virtual OptionNotifConfiguration Configuration => new(ParentGroup);
 
     /// <summary>
@@ -188,7 +188,7 @@ public abstract class ModdedOption<T> : IModdedOption
         ShowNotification = true;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public void SaveToPreset(ConfigFile presetConfig, bool saveDefault = false)
     {
         if (ConfigDefinition is null)
@@ -201,13 +201,13 @@ public abstract class ModdedOption<T> : IModdedOption
         presetConfig[ConfigDefinition].BoxedValue = saveDefault ? DefaultValue : Value;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public void Bind(ConfigFile config)
     {
         config.Bind(ConfigDefinition, DefaultValue, CreateDescription());
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public void LoadFromPreset(ConfigFile presetConfig)
     {
         if (presetConfig.TryGetEntry(ConfigDefinition, out ConfigEntry<T> entry))
@@ -220,19 +220,19 @@ public abstract class ModdedOption<T> : IModdedOption
         }
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public Type GetValueType()
     {
         return typeof(T);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public abstract float GetFloatData();
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public abstract NetData GetNetData();
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public abstract void HandleNetData(byte[] data);
 
     /// <summary>
@@ -248,7 +248,7 @@ public abstract class ModdedOption<T> : IModdedOption
     /// <returns>The value.</returns>
     public abstract T GetValueFromOptionBehaviour(OptionBehaviour optionBehaviour);
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public abstract OptionBehaviour CreateOption(
         ToggleOption toggleOpt,
         NumberOption numberOpt,
@@ -256,7 +256,7 @@ public abstract class ModdedOption<T> : IModdedOption
         PlayerOption playerOpt,
         Transform container);
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public virtual string GetDisplayValue()
     {
         return Data.GetValueString(GetFloatData());

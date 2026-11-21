@@ -41,25 +41,25 @@ public class ModdedToggleOptionListAttribute(string? title, string on, string of
         return optList;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void SetValue(int idx, object value)
     {
         SetValueUnboxed(idx, (bool)value);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public void SetValueUnboxed(int idx, bool value)
     {
         (HolderOptionList?.ElementAt(idx) as ModdedToggleOption)?.SetValue(value);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override object GetValue(int idx)
     {
         return GetValueUnboxed(idx);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public bool GetValueUnboxed(int idx)
     {
         return HolderOptionList?.ElementAt(idx) is ModdedToggleOption opt

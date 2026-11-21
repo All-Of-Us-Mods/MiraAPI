@@ -18,10 +18,10 @@ namespace MiraAPI.Networking.Modifiers;
 public class AddModifierRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<MiraApiPlugin, ModifierData>(plugin, id)
 #pragma warning restore SA1515 // Single-line comment should be preceded by blank line
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override RpcLocalHandling LocalHandling => RpcLocalHandling.Before;
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void Write(MessageWriter writer, ModifierData data)
     {
         writer.WritePacked(data.TypeId);
@@ -34,7 +34,7 @@ public class AddModifierRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<Mir
         }
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override ModifierData Read(MessageReader reader)
     {
         var modId = reader.ReadPackedUInt32();
@@ -56,7 +56,7 @@ public class AddModifierRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<Mir
         return new ModifierData(modId, guid, objects);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void Handle(PlayerControl innerNetObject, ModifierData data)
     {
         var type = ModifierManager.GetModifierType(data.TypeId) ?? throw new InvalidOperationException($"Modifier type not found for ID {data.TypeId}.");

@@ -18,10 +18,10 @@ namespace MiraAPI;
 /// <param name="config">The config file that the tab wraps around.</param>
 public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override string TabName => "MiraApi";
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override LocalSettingTabAppearance TabAppearance => new()
     {
         TabButtonHoverColor = MiraApiPlugin.MiraColor,
@@ -39,7 +39,7 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
     /// </summary>
     public static float OldUiButtonScaleFactor { get; set; }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void Open()
     {
         base.Open();
@@ -47,7 +47,7 @@ public class MiraApiSettings(ConfigFile config) : LocalSettingsTab(config)
         OldUiButtonScaleFactor = TopRightButtonsFactorSlider.Value;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void OnOptionChanged(ConfigEntryBase configEntry)
     {
         base.OnOptionChanged(configEntry);

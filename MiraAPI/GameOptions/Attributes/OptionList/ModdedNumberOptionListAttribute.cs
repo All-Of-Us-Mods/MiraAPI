@@ -99,7 +99,7 @@ public class ModdedNumberOptionListAttribute(
         });
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void SetValue(int idx, object value)
     {
         if (HolderOptionList?.ElementAt(idx) is not ModdedNumberOption opt)
@@ -113,19 +113,19 @@ public class ModdedNumberOptionListAttribute(
         opt.SetValue(final);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public void SetValueUnboxed(int idx, float value)
     {
         (HolderOptionList?.ElementAt(idx) as ModdedNumberOption)?.SetValue(value);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     void ITypedOptionList<int>.SetValueUnboxed(int idx, int value)
     {
         (HolderOptionList?.ElementAt(idx) as ModdedNumberOption)?.SetValue(value);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override object GetValue(int idx)
     {
         if (HolderOptionList?.ElementAt(idx) is not ModdedNumberOption opt)
@@ -139,7 +139,7 @@ public class ModdedNumberOptionListAttribute(
         return value;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public float GetValueUnboxed(int idx)
     {
         return HolderOptionList?.ElementAt(idx) is ModdedNumberOption opt
@@ -147,7 +147,7 @@ public class ModdedNumberOptionListAttribute(
             : throw new InvalidOperationException($"HolderOption for option \"{Titles[idx]}\" is not a ModdedNumberOption");
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     int ITypedOptionList<int>.GetValueUnboxed(int idx)
     {
         return (int)MathF.Round(GetValueUnboxed(idx), MidpointRounding.AwayFromZero);

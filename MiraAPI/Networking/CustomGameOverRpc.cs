@@ -10,17 +10,18 @@ namespace MiraAPI.Networking;
 /// <summary>
 /// Custom Game Over RPC.
 /// </summary>
-/// <inheritdoc />
+/// <param name="plugin">Mira plugin.</param>
+/// <param name="id">RPC ID.</param>
 [RegisterCustomRpc((uint)MiraRpc.CustomGameOver)]
 #pragma warning disable SA1515 // Single-line comment should be preceded by blank line (Justification: ReSharper suppression.)
 // ReSharper disable once ClassNeverInstantiated.Global (Justification: Instantiated by Reactor.)
 public class CustomGameOverRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<MiraApiPlugin, GameOverData>(plugin, id)
 #pragma warning restore SA1515 // Single-line comment should be preceded by blank line
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override RpcLocalHandling LocalHandling => RpcLocalHandling.After;
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void Write(MessageWriter writer, GameOverData data)
     {
         writer.WritePacked(data.Reason);
@@ -31,7 +32,7 @@ public class CustomGameOverRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<
         }
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override GameOverData Read(MessageReader reader)
     {
         var reason = reader.ReadPackedInt32();
@@ -45,7 +46,7 @@ public class CustomGameOverRpc(MiraApiPlugin plugin, uint id) : PlayerCustomRpc<
         return new GameOverData(reason, data);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void Handle(PlayerControl innerNetObject, GameOverData data)
     {
         if (GameOverManager.TryGetGameOver(data.Reason, out var gameOver))

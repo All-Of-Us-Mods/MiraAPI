@@ -25,25 +25,25 @@ public class ModdedStringOptionListAttribute(string? title, string[] values)
         return new ModdedOptionList<ModdedStringOption>(list.Count, idx => new ModdedStringOption(group.GroupPrefix, GetFormattedTitle(idx, property), (string)(list[idx] ?? string.Empty), values));
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void SetValue(int idx, object value)
     {
         SetValueUnboxed(idx, (string)value);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public void SetValueUnboxed(int idx, string value)
     {
         (HolderOptionList?.ElementAt(idx) as ModdedStringOption)?.SetValue(value);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override object GetValue(int idx)
     {
         return GetValueUnboxed(idx);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public string GetValueUnboxed(int idx)
     {
         return HolderOptionList?.ElementAt(idx) is ModdedStringOption opt

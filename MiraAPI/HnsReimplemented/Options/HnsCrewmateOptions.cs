@@ -13,10 +13,10 @@ namespace MiraAPI.HnsReimplemented.Options;
 [SearchPrivate]
 public class HnsCrewmateOptions : AbstractOptionGroup<HideAndSeekMode>
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override string GroupName => "MiraApi.Option.Group.HnsCrewmate";
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override string GroupPrefix => "MiraApi.HnsCrewmate.Option.";
 
     /// <summary>

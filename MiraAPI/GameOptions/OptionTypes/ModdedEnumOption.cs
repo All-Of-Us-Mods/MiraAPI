@@ -19,7 +19,7 @@ namespace MiraAPI.GameOptions.OptionTypes;
 public abstract class ModdedBaseEnumOption<T>(string groupPrefix, string title, T defaultValue, bool includeInPreset = true)
     : ModdedBaseStringOption<T>(groupPrefix, title, defaultValue, includeInPreset)
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     protected override string OptionTypeName => "EnumOption";
 }
 
@@ -88,19 +88,19 @@ public class ModdedEnumOption : ModdedBaseEnumOption<int>
     {
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override NetData GetNetData()
     {
         return new(Id, BitConverter.GetBytes(_value));
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void HandleNetData(byte[] data)
     {
         SetValue(BitConverter.ToInt32(data));
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     protected override ConfigDescription? CreateDescription()
     {
         return new(string.Empty, new AcceptableValueList<int>(UnderlyingValues));
@@ -222,7 +222,7 @@ public class ModdedEnumOption<T> : ModdedBaseEnumOption<T>
     {
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override NetData GetNetData()
     {
         var buffer = new byte[Unsafe.SizeOf<T>()];
@@ -230,13 +230,13 @@ public class ModdedEnumOption<T> : ModdedBaseEnumOption<T>
         return new(Id, buffer);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void HandleNetData(byte[] data)
     {
         SetValue(Unsafe.ReadUnaligned<T>(ref data[0]));
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     protected override ConfigDescription? CreateDescription()
     {
         return new(string.Empty, new AcceptableEnumValues<T>(UnderlyingValues));

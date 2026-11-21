@@ -128,10 +128,10 @@ public abstract class AbstractOptionGroup
 public abstract class AbstractOptionGroup<T> : AbstractOptionGroup
     where T : IOptionable
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override Type OptionableType => typeof(T);
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override MenuCategory ParentMenu
     {
         get
@@ -158,10 +158,10 @@ public abstract class AbstractOptionGroup<T> : AbstractOptionGroup
 public abstract class AbstractRoleOptionGroup<T> : AbstractOptionGroup<T>
     where T : ICustomRole
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override MenuCategory ParentMenu => MenuCategory.Roles;
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override OptionNotifConfiguration Configuration
     {
         get

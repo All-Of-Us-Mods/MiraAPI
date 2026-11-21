@@ -97,7 +97,7 @@ public class ModdedNumberOptionAttribute(
         return opt;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void SetValue(object value)
     {
         if (HolderOption is not ModdedNumberOption opt)
@@ -111,19 +111,19 @@ public class ModdedNumberOptionAttribute(
         opt.SetValue(final);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public void SetValueUnboxed(float value)
     {
         (HolderOption as ModdedNumberOption)?.SetValue(value);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     void ITypedOption<int>.SetValueUnboxed(int value)
     {
         (HolderOption as ModdedNumberOption)?.SetValue(value);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override object GetValue()
     {
         if (HolderOption is not ModdedNumberOption opt)
@@ -137,7 +137,7 @@ public class ModdedNumberOptionAttribute(
         return value;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public float GetValueUnboxed()
     {
         return HolderOption is ModdedNumberOption opt
@@ -145,7 +145,7 @@ public class ModdedNumberOptionAttribute(
             : throw new InvalidOperationException($"HolderOption for option \"{Title}\" is not a ModdedNumberOption");
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     int ITypedOption<int>.GetValueUnboxed()
     {
         return (int)MathF.Round(GetValueUnboxed(), MidpointRounding.AwayFromZero);

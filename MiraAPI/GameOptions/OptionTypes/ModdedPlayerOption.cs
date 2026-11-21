@@ -55,7 +55,7 @@ public class ModdedPlayerOption : ModdedOption<int>
     {
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override OptionBehaviour CreateOption(
         ToggleOption toggleOpt,
         NumberOption numberOpt,
@@ -116,31 +116,31 @@ public class ModdedPlayerOption : ModdedOption<int>
         return (uint)Value >= (uint)Values.Count ? null : Values[Value];
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override float GetFloatData()
     {
         return Value;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override NetData GetNetData()
     {
         return new NetData(Id, BitConverter.GetBytes(_value));
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void HandleNetData(byte[] data)
     {
         SetValue(BitConverter.ToInt32(data));
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override int GetValueFromOptionBehaviour(OptionBehaviour optionBehaviour)
     {
         return optionBehaviour.GetInt();
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     protected override void OnValueChanged(int newValue)
     {
         if (OptionBehaviour && OptionBehaviour is PlayerOption opt)
@@ -149,7 +149,7 @@ public class ModdedPlayerOption : ModdedOption<int>
         }
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override string GetDisplayValue()
     {
         var player = GetPlayerValue();

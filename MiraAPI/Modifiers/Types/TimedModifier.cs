@@ -42,7 +42,7 @@ public abstract class TimedModifier : BaseModifier
     /// </summary>
     public float TimeRemaining { get; protected set; }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override bool HideOnUi => !TimerActive;
 
     /// <summary>

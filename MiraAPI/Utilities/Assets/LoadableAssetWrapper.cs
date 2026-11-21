@@ -18,7 +18,7 @@ public class LoadableAssetWrapper<T> : LoadableAsset<T>
         LoadedAsset = asset.DontDestroy();
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override T LoadAsset()
     {
         return LoadedAsset ?? throw new System.InvalidOperationException("The asset could not be loaded!");

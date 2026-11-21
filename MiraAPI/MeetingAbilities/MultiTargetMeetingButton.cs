@@ -26,7 +26,7 @@ public abstract class MultiTargetMeetingButton : TargetedMeetingButton
     /// </summary>
     public Dictionary<PlayerVoteArea, MeetingAbilityBehaviour> Targets { get; set; } = [];
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void ClickHandler(MeetingAbilityBehaviour button, PlayerVoteArea playerVoteArea)
     {
         if (UsesLeft <= 0 && LimitedUses) return;
@@ -82,7 +82,7 @@ public abstract class MultiTargetMeetingButton : TargetedMeetingButton
     /// </summary>
     public abstract void OnFinish();
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override MeetingAbilityBehaviour CreateButton(PlayerVoteArea playerVoteArea)
     {
         Targets = [];

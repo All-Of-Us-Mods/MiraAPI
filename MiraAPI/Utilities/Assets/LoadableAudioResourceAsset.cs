@@ -34,7 +34,7 @@ public class LoadableAudioResourceAsset : LoadableAsset<AudioClip>
         _assembly = Assembly.GetCallingAssembly();
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override AudioClip LoadAsset()
     {
         if (!LoadedAsset)

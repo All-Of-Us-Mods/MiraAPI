@@ -54,7 +54,7 @@ public class LocalNumberSetting(
     private SpriteRenderer _highlight;
     private TextMeshPro _btnText;
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override GameObject CreateOption(ToggleButtonBehaviour toggle, SlideBar slider, Transform parent, ref float offset, ref int order, bool last)
     {
         var button = Object.Instantiate(toggle, parent).GetComponent<PassiveButton>();

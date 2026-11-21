@@ -39,7 +39,7 @@ public class LoadableResourceAsset : LoadableAsset<Sprite>
         _assembly = Assembly.GetCallingAssembly();
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override Sprite LoadAsset()
     {
         if (!LoadedAsset)

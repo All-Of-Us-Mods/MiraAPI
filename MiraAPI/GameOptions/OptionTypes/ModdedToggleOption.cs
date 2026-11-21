@@ -61,7 +61,7 @@ public class ModdedToggleOption : ModdedOption<bool>
     {
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, PlayerOption playerOpt, Transform container)
     {
         var toggleOption = Object.Instantiate(toggleOpt, container);
@@ -79,7 +79,7 @@ public class ModdedToggleOption : ModdedOption<bool>
         return toggleOption;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override string GetDisplayValue()
     {
         return Value
@@ -91,31 +91,31 @@ public class ModdedToggleOption : ModdedOption<bool>
                 : OffValue.Translate());
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override float GetFloatData()
     {
         return Value ? 1 : 0;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override NetData GetNetData()
     {
         return new NetData(Id, BitConverter.GetBytes(_value));
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void HandleNetData(byte[] data)
     {
         SetValue(BitConverter.ToBoolean(data));
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override bool GetValueFromOptionBehaviour(OptionBehaviour optionBehaviour)
     {
         return optionBehaviour.GetBool();
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     protected override void OnValueChanged(bool newValue)
     {
         if (OptionBehaviour && OptionBehaviour is ToggleOption toggleOpt)

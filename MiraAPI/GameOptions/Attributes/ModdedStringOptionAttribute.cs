@@ -26,13 +26,13 @@ public class ModdedStringOptionAttribute(string? title, string[] values)
         return opt;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override object GetValue()
     {
         return GetValueUnboxed();
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public string GetValueUnboxed()
     {
         return HolderOption is ModdedStringOption opt
@@ -40,13 +40,13 @@ public class ModdedStringOptionAttribute(string? title, string[] values)
             : throw new InvalidOperationException($"Holder option for {Title} is not a ModdedStringOption.");
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void SetValue(object value)
     {
         SetValueUnboxed((string)value);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public void SetValueUnboxed(string value)
     {
         (HolderOption as ModdedStringOption)?.SetValue(value);

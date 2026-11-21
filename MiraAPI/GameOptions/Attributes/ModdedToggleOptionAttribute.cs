@@ -40,25 +40,25 @@ public class ModdedToggleOptionAttribute(string? title, string on, string off)
         return opt;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void SetValue(object value)
     {
         SetValueUnboxed((bool)value);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public void SetValueUnboxed(bool value)
     {
         (HolderOption as ModdedToggleOption)?.SetValue(value);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override object GetValue()
     {
         return GetValueUnboxed();
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public bool GetValueUnboxed()
     {
         return HolderOption is ModdedToggleOption opt

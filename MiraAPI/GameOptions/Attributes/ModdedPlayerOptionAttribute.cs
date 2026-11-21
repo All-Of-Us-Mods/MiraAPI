@@ -26,7 +26,7 @@ public class ModdedPlayerOptionAttribute(string? title, bool allowNone = true)
         return opt;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override object GetValue()
     {
         if (HolderOption is not ModdedPlayerOption opt)
@@ -38,7 +38,7 @@ public class ModdedPlayerOptionAttribute(string? title, bool allowNone = true)
         return opt.GetPlayerValue()!;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public NetworkedPlayerInfo? GetValueUnboxed()
     {
         return HolderOption is ModdedPlayerOption opt
@@ -46,7 +46,7 @@ public class ModdedPlayerOptionAttribute(string? title, bool allowNone = true)
             : throw new InvalidOperationException($"Holder option for {Title} is not a ModdedPlayerOption.");
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     int ITypedOption<int>.GetValueUnboxed()
     {
         return HolderOption is ModdedPlayerOption opt
@@ -54,7 +54,7 @@ public class ModdedPlayerOptionAttribute(string? title, bool allowNone = true)
             : throw new InvalidOperationException($"Holder option for {Title} is not a ModdedPlayerOption.");
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void SetValue(object value)
     {
         if (HolderOption is not ModdedPlayerOption opt)
@@ -72,7 +72,7 @@ public class ModdedPlayerOptionAttribute(string? title, bool allowNone = true)
         opt?.SetValue(final);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public void SetValueUnboxed(NetworkedPlayerInfo? value)
     {
         if (!value && !allowNone)
@@ -82,7 +82,7 @@ public class ModdedPlayerOptionAttribute(string? title, bool allowNone = true)
             opt.SetValue(value ? opt.Values.IndexOf(value!) : -1);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     void ITypedOption<int>.SetValueUnboxed(int value)
     {
         if (value == -1 && !allowNone)

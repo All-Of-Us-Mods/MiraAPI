@@ -11,7 +11,7 @@ namespace MiraAPI.GameOptions.OptionTypes;
 /// </summary>
 public class ModdedStringOption : ModdedBaseStringOption<string>
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     protected override string OptionTypeName => "StringOption";
 
     /// <summary>
@@ -87,19 +87,19 @@ public class ModdedStringOption : ModdedBaseStringOption<string>
         strOpt.Value = GetIndex(Value);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override NetData GetNetData()
     {
         return new NetData(Id, BitConverter.GetBytes(GetIndex(_value)));
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void HandleNetData(byte[] data)
     {
         SetValue(UnderlyingValues[BitConverter.ToInt32(data)]);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     protected override ConfigDescription? CreateDescription()
     {
         return new(string.Empty, new AcceptableValueList<string>(UnderlyingValues));

@@ -34,16 +34,16 @@ public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
     /// </summary>
     public static CultureInfo Culture { get; internal set; } = new("en-US");
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public string OptionsTitleText => "MiraAPI";
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public bool DisplayOnOptionsMenu => false;
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public bool DebugMode => IsDevBuild;
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public bool ForceRegisterEvents => false;
 
     /// <summary>
@@ -72,7 +72,7 @@ public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
     internal static ConfigEntry<SortingMethod> WikiSortingMethod { get; private set; }
     internal static ConfigEntry<SortingFilter> WikiSortingFilter { get; private set; }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void Load()
     {
         WikiSortingGroup = Config.Bind(
@@ -105,7 +105,7 @@ public partial class MiraApiPlugin : BasePlugin, IMiraPlugin
                 .Initialize; // Initialise AFTER the mods are loaded to ensure maximum parity (no need for the soft dependency either then)
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public ConfigFile GetConfigFile()
     {
         return Config;

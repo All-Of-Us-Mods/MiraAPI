@@ -13,10 +13,10 @@ namespace MiraAPI.HnsReimplemented.Options;
 [SearchPrivate]
 public class HnsTaskOptions : AbstractOptionGroup<HideAndSeekMode>
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override string GroupName => "MiraApi.Option.Group.HnsTask";
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override string GroupPrefix => "MiraApi.HnsTask.Option.";
 
     /// <summary>

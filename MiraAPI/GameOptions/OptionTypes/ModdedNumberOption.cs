@@ -189,7 +189,7 @@ public class ModdedNumberOption : ModdedOption<float>
     {
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override OptionBehaviour CreateOption(
         ToggleOption toggleOpt,
         NumberOption numberOpt,
@@ -224,7 +224,7 @@ public class ModdedNumberOption : ModdedOption<float>
         return numberOption;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override string GetDisplayValue()
     {
         if (this is { NegativeWordValue: not "#", Value: -1 })
@@ -240,31 +240,31 @@ public class ModdedNumberOption : ModdedOption<float>
         return TrailingZeroRegex.Replace(Data.GetValueString(Value), string.Empty);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override float GetFloatData()
     {
         return Value;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override NetData GetNetData()
     {
         return new NetData(Id, BitConverter.GetBytes(_value));
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void HandleNetData(byte[] data)
     {
         SetValue(BitConverter.ToSingle(data));
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override float GetValueFromOptionBehaviour(OptionBehaviour optionBehaviour)
     {
         return Math.Clamp(optionBehaviour.GetFloat(), Min, Max);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     protected override void OnValueChanged(float newValue)
     {
         if (OptionBehaviour && OptionBehaviour is NumberOption opt)
@@ -273,13 +273,13 @@ public class ModdedNumberOption : ModdedOption<float>
         }
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     protected override float ModifyValue(float newValue, float oldValue)
     {
         return Math.Clamp(newValue, Min, Max);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     protected override ConfigDescription? CreateDescription()
     {
         return new(string.Empty, new SafeAcceptableValueRange<float>(Min, Max));

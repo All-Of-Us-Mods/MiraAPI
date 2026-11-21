@@ -69,7 +69,7 @@ public abstract class ModdedBaseStringOption<T>(string groupPrefix, string title
         return index;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, PlayerOption playerOpt, Transform container)
     {
         var stringOption = Object.Instantiate(stringOpt, container);
@@ -92,7 +92,7 @@ public abstract class ModdedBaseStringOption<T>(string groupPrefix, string title
         return stringOption;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     protected override void OnValueChanged(T newValue)
     {
         if (OptionBehaviour && OptionBehaviour is StringOption opt)
@@ -101,7 +101,7 @@ public abstract class ModdedBaseStringOption<T>(string groupPrefix, string title
         }
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override string GetDisplayValue()
     {
         var index = GetIndex(Value);
@@ -110,13 +110,13 @@ public abstract class ModdedBaseStringOption<T>(string groupPrefix, string title
             : Value!.ToString()!;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override float GetFloatData()
     {
         return GetIndex(Value);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override T GetValueFromOptionBehaviour(OptionBehaviour optionBehaviour)
     {
         var index = optionBehaviour.GetInt();

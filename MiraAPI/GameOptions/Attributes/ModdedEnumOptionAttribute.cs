@@ -41,13 +41,13 @@ public class ModdedEnumOptionAttribute(string? title, Type enumType, string idPr
         return opt;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void SetValue(object value)
     {
         (HolderOption as ModdedEnumOption)?.SetValue((int)value);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override object GetValue()
     {
         return HolderOption is ModdedEnumOption opt
@@ -111,7 +111,7 @@ public class ModdedEnumOptionAttribute<T>(string? title, string idPrefix, T[]? a
     {
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     internal override IModdedOption CreateOption(object? value, PropertyInfo property, AbstractOptionGroup group)
     {
         var opt = new ModdedEnumOption<T>(group.GroupPrefix, Title ?? property.Name, (T)(value ?? 0), idPrefix, allowedValues, values);
@@ -119,25 +119,25 @@ public class ModdedEnumOptionAttribute<T>(string? title, string idPrefix, T[]? a
         return opt;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void SetValue(object value)
     {
         SetValueUnboxed((T)value);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public void SetValueUnboxed(T value)
     {
         (HolderOption as ModdedEnumOption<T>)?.SetValue(value);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override object GetValue()
     {
         return GetValueUnboxed();
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public T GetValueUnboxed()
     {
         return HolderOption is ModdedEnumOption<T> opt

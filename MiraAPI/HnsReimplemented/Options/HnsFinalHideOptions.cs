@@ -13,10 +13,10 @@ namespace MiraAPI.HnsReimplemented.Options;
 [SearchPrivate]
 public class HnsFinalHideOptions : AbstractOptionGroup<HideAndSeekMode>
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override string GroupName => "MiraApi.Option.Group.HnsFinalHide";
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override string GroupPrefix => "MiraApi.HnsFinalHide.Option.";
 
     /// <summary>

@@ -545,7 +545,7 @@ public abstract class CustomActionButton<T> : CustomActionButton
     /// <param name="active">Should the outline be active.</param>
     public abstract void SetOutline(bool active);
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override bool CanUse()
     {
         var newTarget = GetTarget();
@@ -557,7 +557,7 @@ public abstract class CustomActionButton<T> : CustomActionButton
         return base.CanUse() && Target != null;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override bool CanClick()
     {
         return base.CanClick() && Target != null;

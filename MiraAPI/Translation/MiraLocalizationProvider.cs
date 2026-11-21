@@ -12,12 +12,12 @@ namespace MiraAPI.Translation;
 /// </summary>
 public class MiraLocalizationProvider : LocalizationProvider
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override int Priority => ReactorPriority.Normal;
     private static LocalizationProvider? _reactorProvider;
     private static bool _loadedStrings;
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override bool TryGetText(StringNames stringName, out string? result)
     {
         if (MiraLocaleManager.StringNamesLookup.TryGetValue(stringName, out var key))
@@ -30,7 +30,7 @@ public class MiraLocalizationProvider : LocalizationProvider
         return false;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override bool TryGetTextFormatted(StringNames stringName, Il2CppReferenceArray<Il2CppSystem.Object> parts, out string? result)
     {
         if (!TryGetText(stringName, out result)) return false;
@@ -39,7 +39,7 @@ public class MiraLocalizationProvider : LocalizationProvider
         return true;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void OnLanguageChanged(SupportedLangs newLanguage)
     {
         _reactorProvider ??= LocalizationManager.Providers.First(x => x is HardCodedLocalizationProvider);

@@ -60,7 +60,7 @@ public class LocalSliderSetting(
 
     private SlideBar _slider;
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override GameObject CreateOption(ToggleButtonBehaviour toggle, SlideBar slider, Transform parent, ref float offset, ref int order, bool last)
     {
         var newSlider = Object.Instantiate(slider, parent).GetComponent<SlideBar>();

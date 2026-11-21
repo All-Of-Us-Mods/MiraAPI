@@ -11,20 +11,13 @@ namespace MiraAPI.Networking;
 [MessageConverter]
 public class GuidConverter : MessageConverter<Guid>
 {
-    /// <summary>
-    /// Writes a <see cref="Guid"/> to the writer.
-    /// </summary>
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void Write(MessageWriter writer, Guid value)
     {
         writer.WriteBytesAndSize(value.ToByteArray());
     }
 
-    /// <summary>
-    /// Reads a <see cref="Guid"/> from the reader.
-    /// </summary>
-    /// <inheritdoc />
-    /// <returns>A <see cref="Guid"/> object.</returns>
+    /// <inheritdoc/>
     public override Guid Read(MessageReader reader, Type objectType)
     {
         return new Guid(reader.ReadBytesAndSize());

@@ -25,8 +25,6 @@ public partial class ExamplePlugin : BasePlugin, IMiraPlugin
     public Harmony Harmony { get; } = new(Id);
     public string OptionsTitleText { get; } = "Mira API\nExample Mod";
     public string CustomOptionMenuNameTwo { get; } = "Example Options";
-
-    /// <inheritdoc />
     public bool ForceRegisterEvents => false;
 
     public ConfigFile GetConfigFile()

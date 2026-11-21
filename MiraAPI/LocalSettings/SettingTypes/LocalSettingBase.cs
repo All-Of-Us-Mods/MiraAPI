@@ -6,20 +6,23 @@ using UnityEngine;
 
 namespace MiraAPI.LocalSettings.SettingTypes;
 
-/// <inheritdoc />
+/// <summary>
+/// The base class for all local settings.
+/// </summary>
+/// <typeparam name="T">The type of the value.</typeparam>
 [MiraIgnore]
 public abstract class LocalSettingBase<T> : ILocalSetting
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public string Name { get; }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public string Description { get; }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public GameObject? Setting { get; } = null!;
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public ConfigEntryBase ConfigEntry { get; }
 
     /// <summary>

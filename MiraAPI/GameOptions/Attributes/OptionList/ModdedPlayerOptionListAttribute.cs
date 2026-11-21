@@ -25,7 +25,7 @@ public class ModdedPlayerOptionListAttribute(string? title, bool allowNone = tru
         return new ModdedOptionList<ModdedPlayerOption>(list.Count, idx => new(group.GroupPrefix, GetFormattedTitle(idx, property), allowNone));
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void SetValue(int idx, object value)
     {
         if (HolderOptionList?.ElementAt(idx) is not ModdedPlayerOption opt)
@@ -43,7 +43,7 @@ public class ModdedPlayerOptionListAttribute(string? title, bool allowNone = tru
         opt.SetValue(final);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public void SetValueUnboxed(int idx, NetworkedPlayerInfo? value)
     {
         if (!value && !allowNone)
@@ -53,7 +53,7 @@ public class ModdedPlayerOptionListAttribute(string? title, bool allowNone = tru
             opt.SetValue(value ? opt.Values.IndexOf(value!) : -1);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public void SetValueUnboxed(int idx, int value)
     {
         if (value == -1 && !allowNone)
@@ -62,7 +62,7 @@ public class ModdedPlayerOptionListAttribute(string? title, bool allowNone = tru
         (HolderOptionList?.ElementAt(idx) as ModdedPlayerOption)?.SetValue(value);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override object GetValue(int idx)
     {
         if (HolderOptionList?.ElementAt(idx) is not ModdedPlayerOption opt)
@@ -74,7 +74,7 @@ public class ModdedPlayerOptionListAttribute(string? title, bool allowNone = tru
         return opt.GetPlayerValue()!;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public NetworkedPlayerInfo? GetValueUnboxed(int idx)
     {
         return HolderOptionList?.ElementAt(idx) is ModdedPlayerOption opt
@@ -82,7 +82,7 @@ public class ModdedPlayerOptionListAttribute(string? title, bool allowNone = tru
             : throw new InvalidOperationException($"HolderOption for option \"{Titles[idx]}\" is not a ModdedPlayerOption");
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     int ITypedOptionList<int>.GetValueUnboxed(int idx)
     {
         return HolderOptionList?.ElementAt(idx) is ModdedPlayerOption opt

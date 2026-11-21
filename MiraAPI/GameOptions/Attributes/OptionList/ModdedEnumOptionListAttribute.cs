@@ -42,14 +42,14 @@ public class ModdedEnumOptionListAttribute(string? title, Type enumType, string 
         return optList;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void SetValue(int idx, object value)
     {
         var opt = HolderOptionList?.ElementAt(idx) as ModdedEnumOption;
         opt?.SetValue((int)value);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override object GetValue(int idx)
     {
         return HolderOptionList?.ElementAt(idx) is ModdedEnumOption opt
@@ -113,7 +113,7 @@ public class ModdedEnumOptionListAttribute<T>(string? title, string idPrefix, T[
     {
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     internal override IBaseModdedOptionList CreateOptionList(IList list, PropertyInfo property, AbstractOptionGroup group)
     {
         var optList = new ModdedOptionList<ModdedEnumOption<T>>(
@@ -121,25 +121,25 @@ public class ModdedEnumOptionListAttribute<T>(string? title, string idPrefix, T[
         return optList;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void SetValue(int idx, object value)
     {
         SetValueUnboxed(idx, (T)value);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public void SetValueUnboxed(int idx, T value)
     {
         (HolderOptionList?.ElementAt(idx) as ModdedEnumOption<T>)?.SetValue(value);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override object GetValue(int idx)
     {
         return GetValueUnboxed(idx);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public T GetValueUnboxed(int idx)
     {
         return HolderOptionList?.ElementAt(idx) is ModdedEnumOption<T> opt
