@@ -7,6 +7,7 @@ namespace MiraAPI.Utilities.Assets;
 /// <inheritdoc />
 /// </summary>
 /// <inheritdoc cref="LoadableAsset{T}"/>
+[Obsolete("Use LoadableAssetWrapper<T> instead. This will be removed in a future version.")]
 public class PreloadedAsset<T>(T asset) : LoadableAsset<T>
     where T : UObject
 {

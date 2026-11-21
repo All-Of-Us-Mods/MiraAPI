@@ -1,4 +1,5 @@
-﻿using Reactor.Utilities.Extensions;
+﻿using System;
+using Reactor.Utilities.Extensions;
 
 namespace MiraAPI.Utilities.Assets;
 
@@ -21,6 +22,6 @@ public class LoadableAssetWrapper<T> : LoadableAsset<T>
     /// <inheritdoc />
     public override T LoadAsset()
     {
-        return LoadedAsset ?? throw new System.InvalidOperationException("The asset could not be loaded!");
+        return LoadedAsset ?? throw new InvalidOperationException("The asset could not be loaded!");
     }
 }
