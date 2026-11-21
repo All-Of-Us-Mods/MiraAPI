@@ -4,7 +4,6 @@ using BepInEx.Configuration;
 using MiraAPI.Networking;
 using MiraAPI.Utilities;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.GameOptions.OptionTypes;
 
@@ -197,7 +196,7 @@ public class ModdedNumberOption : ModdedOption<float>
         PlayerOption playerOpt,
         Transform container)
     {
-        var numberOption = Object.Instantiate(numberOpt, container);
+        var numberOption = UObject.Instantiate(numberOpt, container);
         numberOption.name = $"{ParentMod!.OptionsTitleText}.NumberOption.{Title}";
 
         numberOption.SetUpFromData(Data, 20);

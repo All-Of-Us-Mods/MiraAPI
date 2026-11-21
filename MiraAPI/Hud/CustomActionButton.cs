@@ -13,7 +13,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.Hud;
 
@@ -146,11 +145,11 @@ public abstract class CustomActionButton
         EffectActive = false;
         TimerPaused = false;
 
-        Button = Object.Instantiate(HudManager.Instance.AbilityButton, parent);
+        Button = UObject.Instantiate(HudManager.Instance.AbilityButton, parent);
         Button.name = Name + "Button";
         Button.OverrideText(Name.Translate().ToUpperInvariant());
-        Object.Destroy(Button.glyph.GetComponent<SpriteRenderer>());
-        Object.Destroy(Button.glyph.GetComponent<Image>());
+        UObject.Destroy(Button.glyph.GetComponent<SpriteRenderer>());
+        UObject.Destroy(Button.glyph.GetComponent<Image>());
 
         Button.graphic.sprite = Sprite.LoadAsset();
 

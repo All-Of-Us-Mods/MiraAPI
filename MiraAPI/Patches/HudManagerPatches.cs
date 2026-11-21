@@ -10,7 +10,6 @@ using Reactor.Utilities.Extensions;
 using Rewired;
 using TMPro;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.Patches;
 
@@ -152,7 +151,7 @@ public static class HudManagerPatches
 
         if (BottomRight == null) BottomRight = Buttons.Find("BottomRight");
 
-        if (BottomLeft == null) BottomLeft = Object.Instantiate(BottomRight.gameObject, Buttons);
+        if (BottomLeft == null) BottomLeft = UObject.Instantiate(BottomRight.gameObject, Buttons);
 
         foreach (var t in BottomLeft.GetComponentsInChildren<ActionButton>(true)) t.gameObject.Destroy();
 
@@ -165,7 +164,7 @@ public static class HudManagerPatches
 
         if (Constants.GetPlatformType() is Platforms.Android or Platforms.IPhone)
         {
-            var fakeButton = Object.Instantiate(__instance.AbilityButton, BottomLeft.transform);
+            var fakeButton = UObject.Instantiate(__instance.AbilityButton, BottomLeft.transform);
             foreach (var renderer in fakeButton.GetComponentsInChildren<Renderer>()) renderer.enabled = false;
 
             fakeButton.buttonLabelText.Destroy();

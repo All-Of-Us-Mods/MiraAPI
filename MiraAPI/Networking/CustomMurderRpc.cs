@@ -12,7 +12,6 @@ using MiraAPI.Utilities;
 using Reactor.Networking.Attributes;
 using Reactor.Networking.Rpc;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.Networking;
 
@@ -771,7 +770,7 @@ public static class CustomMurderRpc
 
         if (createDeadBody)
         {
-            deadBody = Object.Instantiate(GameManager.Instance.GetDeadBody(source.Data.Role));
+            deadBody = UObject.Instantiate(GameManager.Instance.GetDeadBody(source.Data.Role));
             deadBody.enabled = false;
             deadBody.ParentId = target.PlayerId;
             deadBody.bodyRenderers.ToList().ForEach(target.SetPlayerMaterialColors);

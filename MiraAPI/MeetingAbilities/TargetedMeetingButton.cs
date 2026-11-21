@@ -88,7 +88,7 @@ public abstract class TargetedMeetingButton
     {
         if (MeetingHud.Instance == null) return null!;
 
-        var btn = Object.Instantiate(MeetingHud.Instance.PlayerButtonPrefab.ConfirmButton).GetComponent<PassiveButton>();
+        var btn = UObject.Instantiate(MeetingHud.Instance.PlayerButtonPrefab.ConfirmButton).GetComponent<PassiveButton>();
         btn.name = Name + "Button";
 
         var spriteRenderer = btn.GetComponent<SpriteRenderer>();

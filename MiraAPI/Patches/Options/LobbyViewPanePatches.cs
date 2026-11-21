@@ -15,7 +15,6 @@ using Reactor.Utilities.Extensions;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.Patches.Options;
 
@@ -71,7 +70,7 @@ public static class LobbyViewPanePatches
         __instance.gameModeText.GetComponent<TextTranslatorTMP>().Destroy();
 
         // create modifiers button
-        modifiersTabButton = Object.Instantiate(__instance.rolesTabButton, __instance.rolesTabButton.transform.parent);
+        modifiersTabButton = UObject.Instantiate(__instance.rolesTabButton, __instance.rolesTabButton.transform.parent);
         modifiersTabButton.buttonText.GetComponent<TextTranslatorTMP>().Destroy();
         modifiersTabButton.name = "ModifiersTabButton";
         var pos = modifiersTabButton.transform.localPosition;
@@ -87,7 +86,7 @@ public static class LobbyViewPanePatches
         modifiersTabButton.gameObject.SetActive(selectedModIdx != 0);
 
         // Create the next button
-        var nextButton = Object.Instantiate(__instance.BackButton, __instance.BackButton.transform.parent).gameObject;
+        var nextButton = UObject.Instantiate(__instance.BackButton, __instance.BackButton.transform.parent).gameObject;
         nextButton.GetComponent<BoxCollider2D>().size = new Vector2(0.2f, 0.3f);
         nextButton.transform.localPosition = new Vector3(-5.4f, 2.4f, -2f);
         nextButton.transform.localScale = new Vector3(3, 3, 2);
@@ -116,7 +115,7 @@ public static class LobbyViewPanePatches
             }));
 
         // Create the back button
-        var backButton = Object.Instantiate(nextButton, __instance.BackButton.transform.parent).gameObject;
+        var backButton = UObject.Instantiate(nextButton, __instance.BackButton.transform.parent).gameObject;
         backButton.transform.localPosition = new Vector3(-6.3f, 2.4f, -2f);
         backButton.name = "LeftArrowButton";
         backButton.transform.FindChild("Normal").gameObject.GetComponentInChildren<SpriteRenderer>().flipX
@@ -223,7 +222,7 @@ public static class LobbyViewPanePatches
             var num = 0.95f;
             var num2 = -6.53f;
             var categoryHeaderMasked =
-                Object.Instantiate(__instance.categoryHeaderOrigin, __instance.settingsContainer);
+                UObject.Instantiate(__instance.categoryHeaderOrigin, __instance.settingsContainer);
             categoryHeaderMasked.SetHeader(StringNames.RoleQuotaLabel, 61);
             categoryHeaderMasked.transform.localScale = Vector3.one;
             categoryHeaderMasked.transform.localPosition = new Vector3(-9.77f, 1.26f, -2f);
@@ -232,7 +231,7 @@ public static class LobbyViewPanePatches
             for (var i = 0; i < 2; i++)
             {
                 var categoryHeaderRoleVariant =
-                    Object.Instantiate(__instance.categoryHeaderRoleOrigin, __instance.settingsContainer);
+                    UObject.Instantiate(__instance.categoryHeaderRoleOrigin, __instance.settingsContainer);
                 categoryHeaderRoleVariant.SetHeader(
                     (i == 0) ? StringNames.CrewmateRolesHeader : StringNames.ImpostorRolesHeader,
                     61);
@@ -256,7 +255,7 @@ public static class LobbyViewPanePatches
                             .GetNumPerGame(roleBehaviour.Role);
                     var flag = numPerGame == 0;
                     var viewSettingsInfoPanelRoleVariant =
-                        Object.Instantiate(
+                        UObject.Instantiate(
                             __instance.infoPanelRoleOrigin,
                             __instance.settingsContainer);
                     viewSettingsInfoPanelRoleVariant.transform.localScale = Vector3.one;
@@ -289,7 +288,7 @@ public static class LobbyViewPanePatches
             if (list.Count > 0)
             {
                 var categoryHeaderMasked2 =
-                    Object.Instantiate(__instance.categoryHeaderOrigin, __instance.settingsContainer);
+                    UObject.Instantiate(__instance.categoryHeaderOrigin, __instance.settingsContainer);
                 categoryHeaderMasked2.SetHeader(StringNames.RoleSettingsLabel, 61);
                 categoryHeaderMasked2.transform.localScale = Vector3.one;
                 categoryHeaderMasked2.transform.localPosition = new Vector3(-9.77f, num, -2f);
@@ -314,7 +313,7 @@ public static class LobbyViewPanePatches
                     }
 
                     var advancedRoleViewPanel =
-                        Object.Instantiate(__instance.advancedRolePanelOrigin, __instance.settingsContainer);
+                        UObject.Instantiate(__instance.advancedRolePanelOrigin, __instance.settingsContainer);
                     advancedRoleViewPanel.transform.localScale = Vector3.one;
                     advancedRoleViewPanel.transform.localPosition = new Vector3(num4, num, -2f);
                     var num5 = advancedRoleViewPanel.SetUp(list[k], 0.85f, 61);
@@ -349,7 +348,7 @@ public static class LobbyViewPanePatches
 
         foreach (var group in groupArray)
         {
-            var categoryHeaderMasked = Object.Instantiate(
+            var categoryHeaderMasked = UObject.Instantiate(
                 menu.categoryHeaderOrigin,
                 menu.settingsContainer,
                 true);
@@ -370,7 +369,7 @@ public static class LobbyViewPanePatches
                     continue;
                 }
 
-                var viewSettingsInfoPanel = Object.Instantiate(
+                var viewSettingsInfoPanel = UObject.Instantiate(
                     menu.infoPanelOrigin,
                     menu.settingsContainer,
                     true);
@@ -432,7 +431,7 @@ public static class LobbyViewPanePatches
         var num = 0.95f;
         const float num2 = -6.53f;
         var categoryHeaderMasked =
-            Object.Instantiate(instance.categoryHeaderOrigin, instance.settingsContainer, true);
+            UObject.Instantiate(instance.categoryHeaderOrigin, instance.settingsContainer, true);
         categoryHeaderMasked.SetHeader(StringNames.RoleQuotaLabel, 61);
         categoryHeaderMasked.transform.localScale = Vector3.one;
         categoryHeaderMasked.transform.localPosition = new Vector3(-9.77f, 1.26f, -2f);
@@ -459,7 +458,7 @@ public static class LobbyViewPanePatches
 
             var name = MiraLocaleManager.GetOrCreateLocaleString(group.Name);
 
-            var categoryHeaderRoleVariant = Object.Instantiate(instance.categoryHeaderRoleOrigin, instance.settingsContainer, true);
+            var categoryHeaderRoleVariant = UObject.Instantiate(instance.categoryHeaderRoleOrigin, instance.settingsContainer, true);
             categoryHeaderRoleVariant.SetHeader(name, 61);
 
             if (name is not (StringNames.CrewmateRolesHeader or StringNames.ImpostorRolesHeader))
@@ -493,7 +492,7 @@ public static class LobbyViewPanePatches
                     GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetNumPerGame(roleBehaviour.Role);
 
                 var viewSettingsInfoPanelRoleVariant =
-                    Object.Instantiate(
+                    UObject.Instantiate(
                         instance.infoPanelRoleOrigin,
                         instance.settingsContainer,
                         true);
@@ -534,7 +533,7 @@ public static class LobbyViewPanePatches
         if (list.Count > 0)
         {
             var categoryHeaderMasked2 =
-                Object.Instantiate(instance.categoryHeaderOrigin, instance.settingsContainer, true);
+                UObject.Instantiate(instance.categoryHeaderOrigin, instance.settingsContainer, true);
             categoryHeaderMasked2.SetHeader(StringNames.RoleSettingsLabel, 61);
             categoryHeaderMasked2.transform.localScale = Vector3.one;
             categoryHeaderMasked2.transform.localPosition = new Vector3(-9.77f, num, -2f);
@@ -559,7 +558,7 @@ public static class LobbyViewPanePatches
                 }
 
                 var advancedRoleViewPanel =
-                    Object.Instantiate(instance.advancedRolePanelOrigin, instance.settingsContainer, true);
+                    UObject.Instantiate(instance.advancedRolePanelOrigin, instance.settingsContainer, true);
                 advancedRoleViewPanel.transform.localScale = Vector3.one;
                 advancedRoleViewPanel.transform.localPosition = new Vector3(num4, num, -2f);
                 var num5 = SetUpAdvancedRoleViewPanel(advancedRoleViewPanel, list[k], 0.59f, 61);
@@ -648,7 +647,7 @@ public static class LobbyViewPanePatches
         {
             var option = filteredOptions[i];
             var baseGameSetting = option.Data;
-            var viewSettingsInfoPanel = Object.Instantiate(viewPanel.infoPanelOrigin, viewPanel.transform, true);
+            var viewSettingsInfoPanel = UObject.Instantiate(viewPanel.infoPanelOrigin, viewPanel.transform, true);
             viewSettingsInfoPanel.transform.localScale = Vector3.one;
             viewSettingsInfoPanel.transform.localPosition = new Vector3(viewPanel.xPosStart, num, -2f);
 

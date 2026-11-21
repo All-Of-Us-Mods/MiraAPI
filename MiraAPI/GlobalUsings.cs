@@ -1,3 +1,4 @@
 global using static Reactor.Utilities.Logger<MiraAPI.MiraApiPlugin>;
 global using CppCollections = Il2CppSystem.Collections.Generic;
 global using CppIEnumerator = Il2CppSystem.Collections.IEnumerator;
+global using UObject = UnityEngine.Object;

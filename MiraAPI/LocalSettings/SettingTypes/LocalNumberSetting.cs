@@ -6,7 +6,6 @@ using Reactor.Utilities.Extensions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.LocalSettings.SettingTypes;
 
@@ -57,7 +56,7 @@ public class LocalNumberSetting(
     /// <inheritdoc/>
     public override GameObject CreateOption(ToggleButtonBehaviour toggle, SlideBar slider, Transform parent, ref float offset, ref int order, bool last)
     {
-        var button = Object.Instantiate(toggle, parent).GetComponent<PassiveButton>();
+        var button = UObject.Instantiate(toggle, parent).GetComponent<PassiveButton>();
         var tmp = button.transform.FindChild("Text_TMP").GetComponent<TextMeshPro>();
         _btnText = tmp;
         var rollover = button.GetComponent<ButtonRolloverHandler>();

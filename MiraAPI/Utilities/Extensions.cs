@@ -322,7 +322,7 @@ public static class Extensions
                 foreach (var mat in renderer.materials)
                 {
                     if (mat != null)
-                        UnityEngine.Object.Destroy(mat);
+                        UObject.Destroy(mat);
                 }
             }
             catch
@@ -340,7 +340,7 @@ public static class Extensions
             {
                 var mesh = filter.mesh;
                 if (mesh != null)
-                    UnityEngine.Object.Destroy(mesh);
+                    UObject.Destroy(mesh);
             }
             catch
             {
@@ -348,7 +348,7 @@ public static class Extensions
             }
         }
 
-        UnityEngine.Object.Destroy(go);
+        UObject.Destroy(go);
         yield return null;
     }
 

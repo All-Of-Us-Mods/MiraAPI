@@ -6,7 +6,6 @@ using MiraAPI.Events.Vanilla.Gameplay;
 using MiraAPI.GameModes;
 using MiraAPI.Modifiers;
 using MiraAPI.Roles;
-using UnityEngine;
 
 namespace MiraAPI.Patches.Roles;
 
@@ -34,10 +33,10 @@ public static class RoleManagerPatches
         if (data.Role)
         {
             data.Role.Deinitialize(targetPlayer);
-            Object.Destroy(data.Role.gameObject);
+            UObject.Destroy(data.Role.gameObject);
         }
 
-        var roleBehaviour = Object.Instantiate(__instance.AllRoles.ToArray().First(r => r.Role == roleType), data.transform);
+        var roleBehaviour = UObject.Instantiate(__instance.AllRoles.ToArray().First(r => r.Role == roleType), data.transform);
         roleBehaviour.Initialize(targetPlayer);
         targetPlayer.Data.Role = roleBehaviour;
         targetPlayer.Data.RoleType = roleType;

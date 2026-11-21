@@ -25,7 +25,7 @@ public static class DetectiveNotesMinigamePatch
         {
             if (role.TeamType != RoleTeamTypes.Impostor || role.Role == RoleTypes.ImpostorGhost || customRoles.Contains(role))
                 continue;
-            var gameObject = Object.Instantiate(__instance.impostorTypePrefab, __instance.impostorTypeParent);
+            var gameObject = UObject.Instantiate(__instance.impostorTypePrefab, __instance.impostorTypeParent);
             __instance.impostorButton.Add(gameObject);
             gameObject.GetComponent<DetectiveImpostorType>().Initialize(__instance, role);
             __instance.ImpostorIconControllerSelectables.Add(gameObject.GetComponent<PassiveButton>());

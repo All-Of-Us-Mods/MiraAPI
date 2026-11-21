@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using MiraAPI.Translation;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.GameOptions.OptionTypes;
 
@@ -72,7 +71,7 @@ public abstract class ModdedBaseStringOption<T>(string groupPrefix, string title
     /// <inheritdoc/>
     public override OptionBehaviour CreateOption(ToggleOption toggleOpt, NumberOption numberOpt, StringOption stringOpt, PlayerOption playerOpt, Transform container)
     {
-        var stringOption = Object.Instantiate(stringOpt, container);
+        var stringOption = UObject.Instantiate(stringOpt, container);
         stringOption.name = $"{ParentMod!.OptionsTitleText}.{OptionTypeName}.{Title}";
 
         stringOption.SetUpFromData(Data, 20);

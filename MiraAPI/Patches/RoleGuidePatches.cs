@@ -24,7 +24,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.Patches;
 
@@ -480,7 +479,7 @@ public static class RoleGuidePatches
         tabContainerRend.transform.localPosition = Vector3.zero;
         tabContainerRend.gameObject.layer = 5;
 
-        var sortingOrderButton = Object.Instantiate(
+        var sortingOrderButton = UObject.Instantiate(
             HudManager.Instance.SettingsButton,
             searchComponentContainer.transform);
         sortingOrderButton.gameObject.SetActive(true);
@@ -495,7 +494,7 @@ public static class RoleGuidePatches
             out _searchSortingOrderIdle,
             out _searchSortingOrderHover);
 
-        var sortingGroupButton = Object.Instantiate(
+        var sortingGroupButton = UObject.Instantiate(
             sortingOrderButton,
             searchComponentContainer.transform);
         sortingGroupButton.gameObject.SetActive(true);
@@ -510,7 +509,7 @@ public static class RoleGuidePatches
             out _searchSortingGroupIdle,
             out _searchSortingGroupHover);
 
-        var sortingFilterButton = Object.Instantiate(
+        var sortingFilterButton = UObject.Instantiate(
             sortingOrderButton,
             searchComponentContainer.transform);
         sortingFilterButton.gameObject.SetActive(true);
@@ -531,11 +530,11 @@ public static class RoleGuidePatches
         instance.MatchInfoRoleMaskArea.material.SetInt(PlayerMaterial.MaskLayer, 50);
         instance.matchInfoSettingsMaskArea.material.SetInt(PlayerMaterial.MaskLayer, 50);
 
-        var modifiersTab = Object.Instantiate(
+        var modifiersTab = UObject.Instantiate(
             instance.settingsTabs[RolesTabIndex],
             instance.settingsTabs[RolesTabIndex].transform.parent);
         modifiersTab.name = "ModifiersPanel";
-        _modifierNoResultsMessage = Object.Instantiate(
+        _modifierNoResultsMessage = UObject.Instantiate(
             instance.rolesEnabledMessage,
             modifiersTab.transform,
             true);
@@ -550,7 +549,7 @@ public static class RoleGuidePatches
         instance.settingsTabs.Add(modifiersTab);
         InitializeSettingsPanel(instance);
 
-        var wikiTab = Object.Instantiate(
+        var wikiTab = UObject.Instantiate(
             instance.settingsTabs[RolesTabIndex],
             instance.settingsTabs[RolesTabIndex].transform.parent);
         wikiTab.name = "WikiPanels";
@@ -573,7 +572,7 @@ public static class RoleGuidePatches
         _loadingSpinner = LoadingRing.Create(spinnerParent, spinnerPos, 0.6f);
         _loadingSpinner.GetComponent<SpriteRenderer>().color = MiraAssets.AcceptedTeal;
 
-        var searchIconButton = Object.Instantiate(
+        var searchIconButton = UObject.Instantiate(
             sortingOrderButton,
             sortingOrderButton.transform.parent);
         searchIconButton.gameObject.SetActive(true);
@@ -587,7 +586,7 @@ public static class RoleGuidePatches
             out _searchIconIdle,
             out _searchIconHover);
 
-        var searchBox = Object.Instantiate(
+        var searchBox = UObject.Instantiate(
             instance.TabButtons[2].gameObject,
             searchComponentContainer.transform);
         var searchButton = searchBox.GetComponent<MatchInfoGuideTabButton>();
@@ -615,7 +614,7 @@ public static class RoleGuidePatches
         var button = searchBox.AddComponent<PassiveButton>();
         button.OnUp = true;
         var template = HudManager.Instance.Chat.freeChatField.textArea;
-        _searchBoxTmp = Object.Instantiate(template, searchBox.transform);
+        _searchBoxTmp = UObject.Instantiate(template, searchBox.transform);
         _searchBoxTmp.gameObject.SetActive(true);
         _searchBoxTmp.name = "SearchField";
         _searchBoxTmp.transform.localPosition = Vector3.zero;
@@ -722,7 +721,7 @@ public static class RoleGuidePatches
         rolesButton.OnClick = new Button.ButtonClickedEvent();
         rolesButton.OnClick.AddListener((Action)(() => OpenRolesTab()));
 
-        var modifiersButton = Object.Instantiate(
+        var modifiersButton = UObject.Instantiate(
             instance.TabButtons[2],
             instance.TabButtons[2].transform.parent);
         SetupTabButton(
@@ -735,7 +734,7 @@ public static class RoleGuidePatches
         modifiersButton.OnClick.AddListener((Action)(() => OpenModifiersTab()));
         instance.TabButtons.Add(modifiersButton);
 
-        var orderSortingTmp = Object.Instantiate(
+        var orderSortingTmp = UObject.Instantiate(
             _titleText,
             sortingOrderButton.transform);
         orderSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.OrderLabel");
@@ -744,13 +743,13 @@ public static class RoleGuidePatches
         orderSortingTmp.horizontalAlignment = HorizontalAlignmentOptions.Center;
         orderSortingTmp.transform.localPosition = new Vector3(-0.65f, 0.4f, 0);
 
-        groupSortingTmp = Object.Instantiate(
+        groupSortingTmp = UObject.Instantiate(
             orderSortingTmp,
             sortingGroupButton.transform);
         groupSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.GroupingLabel");
         groupSortingTmp.transform.localPosition = new Vector3(-0.65f, 0.4f, 0);
 
-        filterSortingTmp = Object.Instantiate(
+        filterSortingTmp = UObject.Instantiate(
             orderSortingTmp,
             sortingFilterButton.transform);
         filterSortingTmp.text = MiraLocaleManager.Get("MiraApi.Wiki.FilterLabel");
@@ -914,7 +913,7 @@ public static class RoleGuidePatches
         {
             var panelNames = string.Join(", ", UntrackedRolePanelDiagnostics.Take(10));
             var additionalCount = UntrackedRolePanelDiagnostics.Count - 10;
-            Logger<MiraApiPlugin>.Warning(
+            Warning(
                 $"Removed or blocked {UntrackedRolePanelDiagnostics.Count} untracked Match Info role panel(s) in " +
                 $"{CustomGameModeManager.ActiveMode?.GetType().Name ?? "vanilla"} mode: {panelNames}" +
                 (additionalCount > 0 ? $", and {additionalCount} more" : string.Empty));
@@ -1111,7 +1110,7 @@ public static class RoleGuidePatches
             return;
         }
 
-        var panel = Object.Instantiate(_guide.MatchInfoRolePanelPrefab, parent);
+        var panel = UObject.Instantiate(_guide.MatchInfoRolePanelPrefab, parent);
         if (entry.Modifier != null)
         {
             panel.SetModifierPanel(entry.Modifier, entry.Amount, entry.Chance);
@@ -2028,7 +2027,7 @@ public static class RoleGuidePatches
     private static void InitializeSettingsPanel(MatchInfoGuide instance)
     {
         var rolesTab = instance.settingsTabs[RolesTabIndex];
-        var settingsTab = Object.Instantiate(rolesTab, rolesTab.transform.parent);
+        var settingsTab = UObject.Instantiate(rolesTab, rolesTab.transform.parent);
         settingsTab.name = "SettingsOptionsPanel";
         settingsTab.transform.FindChild("MaskArea")?.transform.localPosition = new Vector3(-0.0184f, 0.15f, -0.1f);
         settingsTab.transform.GetAllChildren()
@@ -2036,7 +2035,7 @@ public static class RoleGuidePatches
         _settingsScroller = settingsTab.GetComponent<Scroller>();
         settingsTab.SetActive(false);
 
-        _settingsNoResults = Object.Instantiate(
+        _settingsNoResults = UObject.Instantiate(
             instance.rolesEnabledMessage,
             settingsTab.transform,
             true);

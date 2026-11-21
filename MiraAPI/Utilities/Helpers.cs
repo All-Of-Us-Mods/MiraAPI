@@ -15,11 +15,11 @@ using MiraAPI.Modifiers;
 using MiraAPI.Roles;
 using MiraAPI.Translation;
 using MiraAPI.Utilities.Assets;
+using Reactor.Utilities.Extensions;
 using Rewired;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
 namespace MiraAPI.Utilities;
@@ -140,7 +140,7 @@ public static class Helpers
 
     internal static GameObject CreateKeybindIcon(GameObject button, KeyboardKeyCode keyCode, Vector3 localPos)
     {
-        var keybindIcon = Object.Instantiate(HudManager.Instance.AbilityButton.usesRemainingSprite.gameObject, button.transform);
+        var keybindIcon = UObject.Instantiate(HudManager.Instance.AbilityButton.usesRemainingSprite.gameObject, button.transform);
         keybindIcon.GetComponent<SpriteRenderer>().sprite = MiraAssets.KeybindButton.LoadAsset();
         keybindIcon.GetComponentInChildren<TextMeshPro>().text = keyCode.ToString();
         keybindIcon.name = "KeybindIcon";
@@ -264,8 +264,8 @@ public static class Helpers
     /// <returns>The created <see cref="ArrowBehaviour"/>.</returns>
     public static ArrowBehaviour CreateArrow(Transform parent, Color color)
     {
-        var prefab = Object.FindObjectOfType<ArrowBehaviour>(true);
-        var arrow = Object.Instantiate(prefab, parent);
+        var prefab = UObject.FindObjectOfType<ArrowBehaviour>(true);
+        var arrow = UObject.Instantiate(prefab, parent);
         arrow.image = arrow.GetComponent<SpriteRenderer>();
         arrow.image.color = color;
         arrow.gameObject.layer = 5;
@@ -327,7 +327,7 @@ public static class Helpers
     public static LobbyNotificationMessage CreateAndShowNotification(string text, Color color, Vector3 localPos, AudioClip? clip = null, Sprite? spr = null)
     {
         var popper = HudManager.Instance.Notifier;
-        var newMessage = Object.Instantiate(popper.notificationMessageOrigin, popper.transform);
+        var newMessage = UObject.Instantiate(popper.notificationMessageOrigin, popper.transform);
         newMessage.transform.localPosition = localPos;
         newMessage.SetUp(text, spr ?? null, color, new Action(() => popper.OnMessageDestroy(newMessage)));
         popper.lastMessageKey = -1;
@@ -562,7 +562,7 @@ public static class Helpers
     /// <returns>A <see cref="DeadBody"/> or <see langword="null"/> if it's not found.</returns>
     public static DeadBody? GetBodyById(byte id)
     {
-        return Object.FindObjectsOfType<DeadBody>().FirstOrDefault(body => body.ParentId == id);
+        return UObject.FindObjectsOfType<DeadBody>().FirstOrDefault(body => body.ParentId == id);
     }
 
     /// <summary>
@@ -721,7 +721,7 @@ public static class Helpers
         titleTmp.text = title;
         titleIcon.sprite = icon;
         titleIcon.SetSizeLimit(0.55f);
-        descriptionTmp = Object.Instantiate(guide.MatchInfoRolePanelPrefab.roleCount, obj.transform);
+        descriptionTmp = UObject.Instantiate(guide.MatchInfoRolePanelPrefab.roleCount, obj.transform);
         descriptionTmp.fontSizeMin = descriptionTmp.fontSizeMax = descriptionTmp.fontSize = 2f;
         var sourceTmp = HudManager.Instance.TaskPanel.taskText;
         descriptionTmp.font = sourceTmp.font;
@@ -775,7 +775,7 @@ public static class Helpers
         var maxTextSize = 0f;
         if (abilities.Count != 0)
         {
-            var grid = Object.Instantiate(parent.Inner, obj.transform);
+            var grid = UObject.Instantiate(parent.Inner, obj.transform);
             var layoutGroup = grid.GetComponent<GridLayoutGroup>();
             layoutGroup.startAxis = GridLayoutGroup.Axis.Vertical;
             layoutGroup.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
@@ -784,7 +784,7 @@ public static class Helpers
             foreach (var ability in abilities)
             {
                 num++;
-                var panel = Object.Instantiate(guide.MatchInfoRolePanelPrefab, grid);
+                var panel = UObject.Instantiate(guide.MatchInfoRolePanelPrefab, grid);
                 SetupAbilityPanel(panel, ability, variableTextSizing);
                 if (variableTextSizing)
                 {
@@ -853,12 +853,12 @@ public static class Helpers
             return;
         }
 
-        var cachedPrefab = Object.Instantiate(rowPrefab!.gameObject, null, false);
+        var cachedPrefab = UObject.Instantiate(rowPrefab!.gameObject, null, false);
         cachedPrefab.name = "MiraAPIAdvancedSettingsRowPrefab";
         cachedPrefab.transform.localPosition = Vector3.zero;
         cachedPrefab.transform.localRotation = Quaternion.identity;
         cachedPrefab.SetActive(false);
-        Object.DontDestroyOnLoad(cachedPrefab);
+        cachedPrefab.DontDestroyOnLoad();
         _advancedSettingsRowPrefab = cachedPrefab.GetComponent<NumberOption>();
     }
 
@@ -1041,7 +1041,7 @@ public static class Helpers
                     var headerWidth = groupsAsColumns
                         ? columnWidth / groupHeaderScale
                         : (columns * columnWidth + (columns - 1) * columnGap) / groupHeaderScale;
-                    var header = Object.Instantiate(headerSource!, page.transform, false);
+                    var header = UObject.Instantiate(headerSource!, page.transform, false);
                     header.transform.localScale = Vector3.one * groupHeaderScale;
                     if (groupsAsColumns)
                     {
@@ -1068,7 +1068,7 @@ public static class Helpers
                         var titleTranslator = header.Title.GetComponent<TextTranslatorTMP>();
                         if (titleTranslator)
                         {
-                            Object.Destroy(titleTranslator);
+                            UObject.Destroy(titleTranslator);
                         }
 
                         header.Title.text = group.GroupName.Translate();
@@ -1132,7 +1132,7 @@ public static class Helpers
                 ? contentTop - groupTopOffsets[rowGroup] -
                   (rowPitch * (groupRows[rowGroup] + 1)) - groupHeaderContentGap - (rowHeight / 2f)
                 : contentTop - (rowHeight / 2f) - (rowIndex * rowPitch) - groupSpacing;
-            var row = Object.Instantiate(rowPrefab, page.transform);
+            var row = UObject.Instantiate(rowPrefab, page.transform);
             row.enabled = false;
             row.PlusBtn.gameObject.SetActive(false);
             row.MinusBtn.gameObject.SetActive(false);
@@ -1160,7 +1160,7 @@ public static class Helpers
                 if (text.TryGetComponent<TextTranslatorTMP>(out var translator))
                 {
                     translator.enabled = false;
-                    Object.Destroy(translator);
+                    UObject.Destroy(translator);
                 }
 
                 text.fontMaterial.SetFloat(ShaderID.StencilComp, 3f);

@@ -20,7 +20,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using static UnityEngine.UI.Button;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.Patches.Options;
 
@@ -94,12 +93,12 @@ public static class RoleSettingMenuPatches
             var headers = roleMenu.scrollBar.Inner.GetComponentsInChildren<CategoryHeaderMasked>(true);
             foreach (var child in roleOptionSettings)
             {
-                Object.Destroy(child.gameObject);
+                UObject.Destroy(child.gameObject);
             }
 
             foreach (var child in headers)
             {
-                Object.Destroy(child.gameObject);
+                UObject.Destroy(child.gameObject);
             }
 
             yield return null;
@@ -148,7 +147,7 @@ public static class RoleSettingMenuPatches
                     }
                 }
 
-                var categoryHeaderEditRole = Object.Instantiate(
+                var categoryHeaderEditRole = UObject.Instantiate(
                     roleMenu.categoryHeaderEditRoleOrigin,
                     Vector3.zero,
                     Quaternion.identity,
@@ -164,7 +163,7 @@ public static class RoleSettingMenuPatches
                 }
 
                 num -= 0.22f;
-                var categoryHeaderEditRole2 = Object.Instantiate(
+                var categoryHeaderEditRole2 = UObject.Instantiate(
                     roleMenu.categoryHeaderEditRoleOrigin,
                     Vector3.zero,
                     Quaternion.identity,
@@ -189,12 +188,12 @@ public static class RoleSettingMenuPatches
                 var headers = roleMenu.scrollBar.Inner.GetComponentsInChildren<CategoryHeaderMasked>(false);
                 foreach (var child in roleOptionSettings)
                 {
-                    Object.Destroy(child.gameObject);
+                    UObject.Destroy(child.gameObject);
                 }
 
                 foreach (var child in headers)
                 {
-                    Object.Destroy(child.gameObject);
+                    UObject.Destroy(child.gameObject);
                 }
 
                 yield return null;
@@ -232,7 +231,7 @@ public static class RoleSettingMenuPatches
 
                         var name = MiraLocaleManager.GetOrCreateLocaleString(group.Name);
 
-                        var categoryHeaderMasked = Object.Instantiate(
+                        var categoryHeaderMasked = UObject.Instantiate(
                             template,
                             Vector3.zero,
                             Quaternion.identity,
@@ -240,7 +239,7 @@ public static class RoleSettingMenuPatches
 
                         categoryHeaderMasked.SetHeader(name, 20);
 
-                        var quotaInst = Object.Instantiate(quotaThing, categoryHeaderMasked.transform);
+                        var quotaInst = UObject.Instantiate(quotaThing, categoryHeaderMasked.transform);
                         quotaInst.transform.localScale = new Vector3(1.3f, 1.3f, 1.3f);
                         quotaInst.transform.localPosition = new Vector3(0.7f, -0.82f, 0);
 
@@ -306,7 +305,7 @@ public static class RoleSettingMenuPatches
                         var label = RoleGroupHidden[group]
                             ? $"({"MiraApi.GameSetting.Global.ClickToOpen".Translate()})"
                             : $"({"MiraApi.GameSetting.Global.ClickToClose".Translate()})";
-                        var newText = Object.Instantiate(categoryHeaderMasked.Title, categoryHeaderMasked.transform);
+                        var newText = UObject.Instantiate(categoryHeaderMasked.Title, categoryHeaderMasked.transform);
                         newText.text = $"<size=70%>{label}</size>";
                         newText.transform.localPosition = new Vector3(2.6249f, -0.165f, 0f);
                         newText.GetComponent<TextTranslatorTMP>().Destroy();
@@ -353,7 +352,7 @@ public static class RoleSettingMenuPatches
                                 foreach (var child in roleMenu.RoleChancesSettings.transform)
                                 {
                                     var transform = child.Cast<Transform>();
-                                    Object.Destroy(transform.gameObject);
+                                    UObject.Destroy(transform.gameObject);
                                 }
 
                                 roleMenu.OpenChancesTab();
@@ -686,7 +685,7 @@ public static class RoleSettingMenuPatches
             return null;
         }
 
-        var roleOptionSetting = Object.Instantiate(
+        var roleOptionSetting = UObject.Instantiate(
             __instance.roleOptionSettingOrigin,
             __instance.RoleChancesSettings.transform);
         roleOptionSetting.transform.localPosition = new Vector3(-0.1f, scrollerNum, -2f);
@@ -727,7 +726,7 @@ public static class RoleSettingMenuPatches
         if (MenuState.Instance.CurrentMod.InternalOptionGroups
                 .Exists(x => x.GroupVisible() && x.OptionableType == role.GetType() && x.Options.Any(y => y.Visible())))
         {
-            var newButton = Object.Instantiate(roleOptionSetting.buttons[0], roleOptionSetting.transform);
+            var newButton = UObject.Instantiate(roleOptionSetting.buttons[0], roleOptionSetting.transform);
             newButton.name = "ConfigButton";
             newButton.transform.localPosition = new Vector3(0.4473f, -0.3f, -2f);
             newButton.transform.FindChild("Text_TMP").gameObject.Destroy();

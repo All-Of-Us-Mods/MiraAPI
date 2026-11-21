@@ -18,7 +18,6 @@ using Reactor.Utilities.Extensions;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.Patches.Freeplay;
 
@@ -134,11 +133,11 @@ public static class TaskAdderPatches
             }
 
             var crewFolder = folders["Crewmates"] =
-                Object.Instantiate(__instance.RootFolderPrefab, __instance.transform);
+                UObject.Instantiate(__instance.RootFolderPrefab, __instance.transform);
             crewFolder.gameObject.SetActive(false);
             crewFolder.SetFolderColor(TaskFolder.FolderColor.Blue);
             var impFolder = folders["Impostors"] =
-                Object.Instantiate(__instance.RootFolderPrefab, __instance.transform);
+                UObject.Instantiate(__instance.RootFolderPrefab, __instance.transform);
             impFolder.gameObject.SetActive(false);
             impFolder.SetFolderColor(TaskFolder.FolderColor.Red);
             crewFolder.FolderName = CrewmateName;
@@ -190,7 +189,7 @@ public static class TaskAdderPatches
 
             if (!folders.TryGetValue(systemType, out var taskFolder3))
             {
-                taskFolder3 = folders[systemType] = Object.Instantiate(__instance.RootFolderPrefab, __instance.transform);
+                taskFolder3 = folders[systemType] = UObject.Instantiate(__instance.RootFolderPrefab, __instance.transform);
                 taskFolder3.SetFolderColor(TaskFolder.FolderColor.Tan);
                 taskFolder3.gameObject.SetActive(false);
                 taskFolder3.FolderName = systemTypes == SystemTypes.UpperEngine
@@ -208,7 +207,7 @@ public static class TaskAdderPatches
 
     private static TaskFolder CreateFolder(this TaskAdderGame instance, string name, TaskFolder parent, int idx = -1, Color? color = null)
     {
-        var folder = Object.Instantiate(instance.RootFolderPrefab, instance.transform);
+        var folder = UObject.Instantiate(instance.RootFolderPrefab, instance.transform);
         folder.gameObject.SetActive(false);
         folder.FolderName = name;
         folder.SetCustomColor(color ?? new Color(0.937f, 0.811f, 0.592f));
@@ -284,7 +283,7 @@ public static class TaskAdderPatches
         var num3 = 0f;
         foreach (var t in taskFolder.SubFolders)
         {
-            var taskFolder2 = Object.Instantiate(t, __instance.TaskParent);
+            var taskFolder2 = UObject.Instantiate(t, __instance.TaskParent);
             taskFolder2.gameObject.SetActive(true);
             taskFolder2.Parent = __instance;
             taskFolder2.transform.localPosition = new Vector3(num, num2, 0f);
@@ -311,7 +310,7 @@ public static class TaskAdderPatches
             .ToArray();
         foreach (var task in list)
         {
-            var taskAddButton = Object.Instantiate(__instance.TaskPrefab);
+            var taskAddButton = UObject.Instantiate(__instance.TaskPrefab);
             taskAddButton.MyTask = task;
             switch (task.TaskType)
             {
@@ -348,7 +347,7 @@ public static class TaskAdderPatches
             .ToArray();
         foreach (var role in roleChildren)
         {
-            var roleAddButton = Object.Instantiate(__instance.RoleButton);
+            var roleAddButton = UObject.Instantiate(__instance.RoleButton);
             roleAddButton.SafePositionWorld = __instance.SafePositionWorld;
             roleAddButton.Text.text = role.GetRoleName();
             roleAddButton.Role = role;
@@ -402,7 +401,7 @@ public static class TaskAdderPatches
                         continue;
                     }
 
-                    var roleAddButton = Object.Instantiate(__instance.RoleButton);
+                    var roleAddButton = UObject.Instantiate(__instance.RoleButton);
                     roleAddButton.MyTask = null;
                     roleAddButton.SafePositionWorld = __instance.SafePositionWorld;
                     roleAddButton.Text.text = roleBehaviour.GetRoleName();
@@ -447,7 +446,7 @@ public static class TaskAdderPatches
                         continue;
                     }
 
-                    var taskAddButton = Object.Instantiate(__instance.RoleButton);
+                    var taskAddButton = UObject.Instantiate(__instance.RoleButton);
                     taskAddButton.name = modifier.TypeId.ToString(NumberFormatInfo.InvariantInfo);
                     taskAddButton.role = null;
                     taskAddButton.MyTask = null;

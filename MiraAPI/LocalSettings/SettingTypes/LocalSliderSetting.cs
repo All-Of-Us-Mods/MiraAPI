@@ -6,7 +6,6 @@ using Reactor.Utilities.Extensions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
-using Object = UnityEngine.Object;
 
 namespace MiraAPI.LocalSettings.SettingTypes;
 
@@ -63,7 +62,7 @@ public class LocalSliderSetting(
     /// <inheritdoc/>
     public override GameObject CreateOption(ToggleButtonBehaviour toggle, SlideBar slider, Transform parent, ref float offset, ref int order, bool last)
     {
-        var newSlider = Object.Instantiate(slider, parent).GetComponent<SlideBar>();
+        var newSlider = UObject.Instantiate(slider, parent).GetComponent<SlideBar>();
         _slider = newSlider;
         var rollover = newSlider.GetComponent<ButtonRolloverHandler>();
         newSlider.Title = newSlider.transform.FindChild("Text_TMP").GetComponent<TextMeshPro>(); // Why the hell slider has a title property that is not even assigned???
